@@ -20,5 +20,5 @@ clone:
 
 pipelines:
   pull-requests:
-    develop:
+    'develop':
       - step: *build-step
