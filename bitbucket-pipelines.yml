@@ -62,8 +62,8 @@ definitions:
           - export DATABASE_URL=postgres://waseet:darkNight@localhost:5432/waseet
           - npx prisma validate
           - npx prisma migrate deploy
-          - npx prisma generate
-          - npx prisma db seed
+          # - npx prisma generate
+          # - npx prisma db seed
     - step: &security-checks
         name: Security Checks
         runs-on:
@@ -93,11 +93,11 @@ clone:
 pipelines:
   pull-requests:
     '**':
-      # - step: *code-lint
-      # - step: *unit-test
-      # - step: *e2e-test
-      # - step: *owasp-dependency-check
-      # - step: *build
+      - step: *code-lint
+      - step: *unit-test
+      - step: *e2e-test
+      - step: *owasp-dependency-check
+      - step: *build
       - step: *validate-db
       - step: *security-checks
       - step: *sonar-analysis
