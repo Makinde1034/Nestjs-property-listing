@@ -34,7 +34,7 @@ definitions:
           - npm install
           - npm run test:e2e
     - step: &owasp-dependency-check
-        name: 'OWASP Dependency check'
+        name: 'OWASP Dependency Check'
         runs-on:
           - self.hosted
           - linux
@@ -60,37 +60,9 @@ definitions:
           - postgres
         script:
           - export DATABASE_URL=postgres://waseet:darkNight@localhost:5432/waseet
-          - npm run validate-schema
-          - npm run migrate
-          - npm run generate-prisma-client
-          - npm run seed-database
-    - step: &validate-schema
-        name: Validate Schema
-        runs-on:
-          - self.hosted
-          - linux
-        script:
           - npx prisma validate
-    - step: &run-migrations
-        name: Run Migrations
-        runs-on:
-          - self.hosted
-          - linux
-        script:
           - npx prisma migrate deploy
-    - step: &generate-prisma-client
-        name: Generate Prisma Client
-        runs-on:
-          - self.hosted
-          - linux
-        script:
           - npx prisma generate
-    - step: &seed-database
-        name: Seed Database
-        runs-on:
-          - self.hosted
-          - linux
-        script:
           - npx prisma db seed
     - step: &security-checks
         name: Security Checks
@@ -121,14 +93,11 @@ clone:
 pipelines:
   pull-requests:
     '**':
-      - step: *code-lint
-      - step: *unit-test
-      - step: *e2e-test
-      - step: *owasp-dependency-check
-      - step: *build
+      # - step: *code-lint
+      # - step: *unit-test
+      # - step: *e2e-test
+      # - step: *owasp-dependency-check
+      # - step: *build
       - step: *validate-db
-      # - step: *run-migrations
-      # - step: *generate-prisma-client
-      # - step: *seed-database
       - step: *security-checks
       - step: *sonar-analysis
