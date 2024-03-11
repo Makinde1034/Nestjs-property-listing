@@ -2,17 +2,87 @@ image: maven:3.3.9
 
 definitions:
   steps:
+    - step: &code-lint
+        name: Linting
+        runs-on:
+          - self.hosted #Runner Label
+          - linux #Runner Label
+        script:
+          - npm install
+          - npm run lint
+    - step: &unit-test
+        name: Unit and Integration Testing
+        runs-on:
+          - self.hosted
+          - linux
+        script:
+          - npm install
+          - npm run test:cov
+    - step: &e2e-test
+        name: End to End Testing
+        runs-on:
+          - self.hosted
+          - linux
+        script:
+          - npm install
+          - npm run test
+    - step: &build
+        name: Build
+        runs-on:
+          - self.hosted
+          - linux
+        script:
+          - npm install
+          - npm run build
+    - step: &validate-schema
+        name: Validate Prisma Schema
+        runs-on:
+          - self.hosted
+          - linux
+        script:
+          - npx prisma validate
+    - step: &run-migrations
+        name: Run Prisma Migrations
+        runs-on:
+          - self.hosted
+          - linux
+        script:
+          - npx prisma migrate deploy
+    - step: &generate-prisma-client
+        name: Generate Prisma Client
+        runs-on:
+          - self.hosted
+          - linux
+        script:
+          - npx prisma generate
+    - step: &seed-database
+        name: Seed Database
+        runs-on:
+          - self.hosted
+          - linux
+        script:
+          - npx prisma db seed
+    - step: &security-checks
+        name: Security Checks
+        runs-on:
+          - self.hosted
+          - linux
+        script:
+          - npm install
+          - npm audit
     - step: &sonar-analysis
         name: SonarQube analysis
-        runs-on: 
-        - self.hosted #Runner Label
-        - linux #Runner Label
+        runs-on:
+          - self.hosted
+          - linux
         script:
           - pipe: sonarsource/sonarqube-scan:2.0.1
             variables:
               SONAR_HOST_URL: ${SONAR_HOST_URL} # Get the value from the repository/workspace variable.
               SONAR_TOKEN: ${SONAR_TOKEN} # Get the value from the repository/workspace variable. You shouldn't set secret in clear text here.
+
   caches:
+    npm: ~/.npm
     sonar: ~/.sonar
 
 clone:
@@ -21,4 +91,13 @@ clone:
 pipelines:
   pull-requests:
     '**':
+      - step: *code-lint
+      - step: *unit-test
+      - step: *e2e-test
+      - step: *build
+      - step: *validate-schema
+      - step: *run-migrations
+      - step: *generate-prisma-client
+      - step: *seed-database
+      - step: *security-checks
       - step: *sonar-analysis
