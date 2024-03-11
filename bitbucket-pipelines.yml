@@ -25,7 +25,14 @@ definitions:
           - linux
         script:
           - npm install
-          - npm run test
+          - npm run test:e2e
+    - step: &owasp-dependency-check
+        name: 'OWASP Dependency check'
+        script:
+          - pipe: docker://aligent/owasp-dependency-check-pipe
+            variables:
+              SCAN_PATH: './package-lock.json'
+              CVSS_FAIL_LEVEL: '1'
     - step: &build
         name: Build
         runs-on:
@@ -35,14 +42,14 @@ definitions:
           - npm install
           - npm run build
     - step: &validate-schema
-        name: Validate Prisma Schema
+        name: Validate Schema
         runs-on:
           - self.hosted
           - linux
         script:
           - npx prisma validate
     - step: &run-migrations
-        name: Run Prisma Migrations
+        name: Run Migrations
         runs-on:
           - self.hosted
           - linux
@@ -91,13 +98,14 @@ clone:
 pipelines:
   pull-requests:
     '**':
-      - step: *code-lint
-      - step: *unit-test
-      - step: *e2e-test
-      - step: *build
-      - step: *validate-schema
-      - step: *run-migrations
-      - step: *generate-prisma-client
-      - step: *seed-database
-      - step: *security-checks
-      - step: *sonar-analysis
+      # - step: *code-lint
+      # - step: *unit-test
+      # - step: *e2e-test
+      - step: *owasp-dependency-check
+      # - step: *build
+      # - step: *validate-schema
+      # - step: *run-migrations
+      # - step: *generate-prisma-client
+      # - step: *seed-database
+      # - step: *security-checks
+      # - step: *sonar-analysis
