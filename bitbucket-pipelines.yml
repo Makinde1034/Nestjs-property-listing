@@ -1,6 +1,13 @@
 image: node:latest
 
 definitions:
+  services:
+    postgres:
+      image: postgres:latest
+      environment:
+        POSTGRES_DB: 'waseet'
+        POSTGRES_USER: 'waseet'
+        POSTGRES_PASSWORD: 'darkNight'
   steps:
     - step: &code-lint
         name: Linting
@@ -28,6 +35,9 @@ definitions:
           - npm run test:e2e
     - step: &owasp-dependency-check
         name: 'OWASP Dependency check'
+        runs-on:
+          - self.hosted
+          - linux
         script:
           - pipe: docker://aligent/owasp-dependency-check-pipe
             variables:
@@ -41,6 +51,19 @@ definitions:
         script:
           - npm install
           - npm run build
+    - step: &validate-db
+        name: 'Validate DB Schema'
+        runs-on:
+          - self.hosted
+          - linux
+        services:
+          - postgres
+        script:
+          - export DATABASE_URL=postgres://waseet:darkNight@localhost:5432/waseet
+          - npm run validate-schema
+          - npm run migrate
+          - npm run generate-prisma-client
+          - npm run seed-database
     - step: &validate-schema
         name: Validate Schema
         runs-on:
@@ -98,14 +121,14 @@ clone:
 pipelines:
   pull-requests:
     '**':
-      # - step: *code-lint
-      # - step: *unit-test
-      # - step: *e2e-test
+      - step: *code-lint
+      - step: *unit-test
+      - step: *e2e-test
       - step: *owasp-dependency-check
-      # - step: *build
-      # - step: *validate-schema
+      - step: *build
+      - step: *validate-db
       # - step: *run-migrations
       # - step: *generate-prisma-client
       # - step: *seed-database
-      # - step: *security-checks
-      # - step: *sonar-analysis
+      - step: *security-checks
+      - step: *sonar-analysis
