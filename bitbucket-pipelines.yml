@@ -19,6 +19,6 @@ clone:
   depth: full
 
 pipelines:
-  branches:
-    '{develop}':
+  pull-requests:
+    develop:
       - step: *build-step
