@@ -2,7 +2,7 @@ image: maven:3.3.9
 
 definitions:
   steps:
-    - step: &build-step
+    - step: &sonar-analysis
         name: SonarQube analysis
         runs-on: 
         - self.hosted #Runner Label
@@ -21,4 +21,4 @@ clone:
 pipelines:
   pull-requests:
     '{develop}':
-      - step: *build-step
+      - step: *sonar-analysis
