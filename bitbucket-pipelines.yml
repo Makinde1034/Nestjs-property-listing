@@ -20,5 +20,5 @@ clone:
 
 pipelines:
   pull-requests:
-    '**':
+    main:
       - step: *sonar-analysis
