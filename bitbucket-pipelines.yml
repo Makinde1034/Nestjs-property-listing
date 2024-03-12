@@ -1,18 +1,90 @@
-image: maven:3.3.9
+image: node:latest
 
 definitions:
+  services:
+    postgres:
+      image: postgres:latest
+      environment:
+        POSTGRES_DB: 'waseet'
+        POSTGRES_USER: 'waseet'
+        POSTGRES_PASSWORD: 'darkNight'
   steps:
-    - step: &build-step
+    - step: &code-lint
+        name: Linting
+        runs-on:
+          - self.hosted #Runner Label
+          - linux #Runner Label
+        script:
+          - npm install
+          - npm run lint
+    - step: &unit-test
+        name: Unit and Integration Testing
+        runs-on:
+          - self.hosted
+          - linux
+        script:
+          - npm install
+          - npm run test:cov
+    - step: &e2e-test
+        name: End to End Testing
+        runs-on:
+          - self.hosted
+          - linux
+        script:
+          - npm install
+          - npm run test:e2e
+    - step: &owasp-dependency-check
+        name: 'OWASP Dependency Check'
+        runs-on:
+          - self.hosted
+          - linux
+        script:
+          - pipe: docker://aligent/owasp-dependency-check-pipe
+            variables:
+              SCAN_PATH: './package-lock.json'
+              CVSS_FAIL_LEVEL: '1'
+    - step: &build
+        name: Build
+        runs-on:
+          - self.hosted
+          - linux
+        script:
+          - npm install
+          - npm run build
+    - step: &validate-db
+        name: 'Validate DB Schema'
+        runs-on:
+          - self.hosted
+          - linux
+        services:
+          - postgres
+        script:
+          - export DATABASE_URL=postgres://waseet:darkNight@localhost:5432/waseet
+          - npx prisma validate
+          - npx prisma migrate deploy
+          # - npx prisma generate
+          # - npx prisma db seed
+    - step: &security-checks
+        name: Security Checks
+        runs-on:
+          - self.hosted
+          - linux
+        script:
+          - npm install
+          - npm audit
+    - step: &sonar-analysis
         name: SonarQube analysis
-        runs-on: 
-        - self.hosted #Runner Label
-        - linux #Runner Label
+        runs-on:
+          - self.hosted
+          - linux
         script:
           - pipe: sonarsource/sonarqube-scan:2.0.1
             variables:
               SONAR_HOST_URL: ${SONAR_HOST_URL} # Get the value from the repository/workspace variable.
               SONAR_TOKEN: ${SONAR_TOKEN} # Get the value from the repository/workspace variable. You shouldn't set secret in clear text here.
+
   caches:
+    npm: ~/.npm
     sonar: ~/.sonar
 
 clone:
@@ -20,5 +92,12 @@ clone:
 
 pipelines:
   pull-requests:
-    '{develop}':
-      - step: *build-step
+    '**':
+      - step: *code-lint
+      - step: *unit-test
+      - step: *e2e-test
+      - step: *owasp-dependency-check
+      - step: *build
+      - step: *validate-db
+      - step: *security-checks
+      - step: *sonar-analysis
