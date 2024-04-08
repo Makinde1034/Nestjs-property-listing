@@ -20,7 +20,7 @@ definitions:
         caches:
           - npm
         script:
-          - npm npm ci
+          - npm ci
           - npm run lint
     - step: &unit-test
         name: Unit and Integration Testing
@@ -130,14 +130,13 @@ pipelines:
         - step: *code-lint
         - step: *unit-test
         - step: *build
-        - step: *security-checks
         - step: *sonar-analysis
-          
       - parallel:
         - step: *e2e-test
         - step: *validate-db
-          
-      - step: *owasp-dependency-check
+      - parallel:
+        - step: *security-checks
+        - step: *owasp-dependency-check
         
   branches:
     develop:
