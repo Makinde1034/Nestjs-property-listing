@@ -8,30 +8,41 @@ definitions:
         POSTGRES_DB: 'waseet'
         POSTGRES_USER: 'waseet'
         POSTGRES_PASSWORD: 'darkNight'
+  caches:
+    npm: node_modules
+    sonar: ~/.sonar
   steps:
     - step: &code-lint
         name: Linting
         runs-on:
           - self.hosted #Runner Label
           - linux #Runner Label
+        caches:
+          - npm
         script:
-          - npm install
+          - npm ci
           - npm run lint
     - step: &unit-test
         name: Unit and Integration Testing
         runs-on:
           - self.hosted
           - linux
+        caches:
+          - npm
         script:
-          - npm install
+          - npm ci
           - npm run test:cov
     - step: &e2e-test
         name: End to End Testing
         runs-on:
           - self.hosted
           - linux
+        services:
+          - postgres
+        caches:
+          - npm
         script:
-          - npm install
+          - npm ci
           - npm run test:e2e
     - step: &owasp-dependency-check
         name: 'OWASP Dependency Check'
@@ -48,8 +59,10 @@ definitions:
         runs-on:
           - self.hosted
           - linux
+        caches:
+          - npm
         script:
-          - npm install
+          - npm ci
           - npm run build
     - step: &validate-db
         name: 'Validate DB Schema'
@@ -69,8 +82,10 @@ definitions:
         runs-on:
           - self.hosted
           - linux
+        caches:
+          - npm
         script:
-          - npm install
+          - npm ci
           - npm audit
     - step: &sonar-analysis
         name: SonarQube analysis
@@ -80,12 +95,30 @@ definitions:
         script:
           - pipe: sonarsource/sonarqube-scan:2.0.1
             variables:
-              SONAR_HOST_URL: ${SONAR_HOST_URL} # Get the value from the repository/workspace variable.
-              SONAR_TOKEN: ${SONAR_TOKEN} # Get the value from the repository/workspace variable. You shouldn't set secret in clear text here.
+              SONAR_HOST_URL: ${SONAR_HOST_URL}
+              SONAR_TOKEN: ${SONAR_TOKEN}
+    - step: &push-to-dockerhub
+          name: Build and Push to Docker Hub
+          runs-on:
+          - self.hosted
+          - linux
+          services:
+            - docker
+          script:
+            - echo $DOCKERHUB_PASSWORD | docker login --username $DOCKERHUB_USERNAME --password-stdin
+            - docker build -f Dockerfile.stage -t $DOCKERHUB_USERNAME/$DOCKERHUB_REPO:$BITBUCKET_COMMIT .
+            - docker push $DOCKERHUB_USERNAME/$DOCKERHUB_REPO:$BITBUCKET_COMMIT
+    - step: &deploy-to-test
+        name: Deploy to CapRover
+        deployment: test
+        runs-on:
+          - self.hosted
+          - linux
+        image: caprover/cli-caprover:v2.1.1
+        script:
+          - docker run caprover/cli-caprover:v2.1.1 caprover deploy --caproverUrl ${{ secrets.CAPROVER_URL }} --caproverPassword ${{ secrets.CAPROVER_PASSWORD }} --caproverApp ${{ secrets.CAPROVER_APP }} --imageName "$DOCKERHUB_USERNAME/$DOCKERHUB_REPO:$BITBUCKET_COMMIT"
 
-  caches:
-    npm: ~/.npm
-    sonar: ~/.sonar
+  
 
 clone:
   depth: full
@@ -93,11 +126,22 @@ clone:
 pipelines:
   pull-requests:
     '**':
-      - step: *code-lint
-      - step: *unit-test
-      - step: *e2e-test
-      - step: *owasp-dependency-check
-      - step: *build
-      - step: *validate-db
-      - step: *security-checks
-      - step: *sonar-analysis
+      - parallel:
+        - step: *code-lint
+        - step: *unit-test
+        - step: *build
+        - step: *sonar-analysis
+      - parallel:
+        - step: *e2e-test
+        - step: *validate-db
+      - parallel:
+        - step: *security-checks
+        - step: *owasp-dependency-check
+        
+  branches:
+    develop:
+      - step: *push-to-dockerhub
+      - step: *deploy-to-test
+
+options:
+  size: 2x
