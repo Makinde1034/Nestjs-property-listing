@@ -46,6 +46,7 @@
     "@nestjs/platform-express": "^10.0.0",
     "@prisma/client": "^5.10.2",
     "aws-sdk": "^2.1574.0",
+    "nestjs-i18n": "^10.4.5",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1"
   },
