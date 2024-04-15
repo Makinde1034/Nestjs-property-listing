@@ -34,4 +34,4 @@ COPY --from=builder /usr/src/app/dist ./dist
 EXPOSE 3000
 
 # Run the application
-CMD ["npm", "run", "start:dev"]
+CMD ["npm", "run", "start:prod"]
