@@ -17,7 +17,7 @@ COPY . .
 RUN npm run build
 
 # Stage 2: Setup production environment
-FROM node:18-alpine
+FROM node:18-alpine as production
 
 WORKDIR /usr/src/app
 
@@ -34,4 +34,4 @@ COPY --from=builder /usr/src/app/dist ./dist
 EXPOSE 3000
 
 # Run the application
-CMD ["npm", "start:prod"]
+CMD ["npm", "run", "start:prod"]

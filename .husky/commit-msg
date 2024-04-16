@@ -1,0 +1,8 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo '🏗️👷 Linting commit message'
+
+npx --no -- commitlint --edit $1 
+
+echo '✅ You win this time... I am committing this now. ✅'

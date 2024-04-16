@@ -1,0 +1,13 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo '🏗️👷 Styling, testing and building your project before committing'
+
+npx lint-staged ||
+(
+        echo '🤢🤮 Your styling looks gross. 🤮🤢 
+        Try running `npm run format`'
+        false
+)
+
+echo '✅ You win this time... I am committing this now. ✅'
