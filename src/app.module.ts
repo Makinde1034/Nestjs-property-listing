@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { AcceptLanguageResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
 import * as path from 'path';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { formatError } from './common/utils/format-error';
+import { AppResolver } from './modules/app/app.resolver';
 
 @Module({
   imports: [
@@ -21,8 +23,14 @@ import * as path from 'path';
         AcceptLanguageResolver,
       ],
     }),
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      autoSchemaFile: 'src/schema.gql',
+      formatError: (err) => formatError(err),
+      fieldResolverEnhancers: ['interceptors'],
+    }),
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [AppResolver],
 })
 export class AppModule {}

@@ -1,3 +1,9 @@
 {
-    "APP_NAME": "Waseem"
+    "APP_NAME": "Waseet",
+    "error": {
+        "server_error": "Internal server error"
+    },
+    "app": {
+        "hello": "Hello From Waseet API"
+    }
 }
