@@ -14,7 +14,27 @@ services:
     ports:
       - ${PORT}:3000 # <host port> : <container port>
     networks:
-      - internal
+      - app-network
+  #
+  # Postgres DB
+  #
+  postgres:
+    image: postgres:14.1-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=waseet_db
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    volumes:
+      - db:/var/lib/postgresql/data
+    command: -p ${POSTGRES_PORT}
+    networks:
+      - app-network
+
+volumes:
+  db:
 
 networks:
-  internal:
+  app-network:
+    driver: bridge

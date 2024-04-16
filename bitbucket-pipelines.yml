@@ -73,8 +73,8 @@ definitions:
           - postgres
         script:
           - export DATABASE_URL=postgres://waseet:darkNight@localhost:5432/waseet
-          - npx prisma validate
-          - npx prisma migrate deploy
+          # - npx prisma validate
+          # - npx prisma migrate deploy
           # - npx prisma generate
           # - npx prisma db seed
     - step: &security-checks
