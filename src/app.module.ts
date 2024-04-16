@@ -1,17 +1,22 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AcceptLanguageResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
 import * as path from 'path';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { formatError } from './common/utils/format-error';
 import { AppResolver } from './modules/app/app.resolver';
+import configuration from './config/configuration';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
+      envFilePath: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
+      load: configuration,
       isGlobal: true,
     }),
+
     I18nModule.forRoot({
       fallbackLanguage: 'en',
       loaderOptions: {
@@ -28,6 +33,13 @@ import { AppResolver } from './modules/app/app.resolver';
       autoSchemaFile: 'src/schema.gql',
       formatError: (err) => formatError(err),
       fieldResolverEnhancers: ['interceptors'],
+    }),
+    TypeOrmModule.forRootAsync({
+      useFactory: (configService: ConfigService) =>
+        configService.get<TypeOrmModuleOptions>('db.postgres', {
+          type: 'postgres',
+        }),
+      inject: [ConfigService],
     }),
   ],
   controllers: [],
