@@ -1,7 +1,9 @@
 {
     "APP_NAME": "Waseet",
     "error": {
-        "server_error": "Internal server error"
+        "server_error": "Internal server error",
+        "RESOURCE_NOT_FOUND": "{name} not Found",
+        "EXISTING_RESOURCE": "{name} already exist"
     },
     "app": {
         "hello": "Hello From Waseet API"

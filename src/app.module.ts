@@ -8,6 +8,9 @@ import { formatError } from './common/utils/format-error';
 import { AppResolver } from './modules/app/app.resolver';
 import configuration from './config/configuration';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { AuthModule } from './modules/auth/auth.module';
+import { UserModule } from './modules/user/user.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -41,6 +44,9 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
         }),
       inject: [ConfigService],
     }),
+    AuthModule,
+    UserModule,
+    EventEmitterModule.forRoot(),
   ],
   controllers: [],
   providers: [AppResolver],

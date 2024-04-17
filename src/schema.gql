@@ -34,3 +34,23 @@ scalar DateTime
 type Query {
   app: String!
 }
+
+type Mutation {
+  register(RegisterInput: RegisterInput!): User!
+}
+
+input RegisterInput {
+  userType: String!
+  firstName: String!
+  lastName: String!
+  email: String!
+  phone: String!
+  password: String!
+  company: companyInput
+}
+
+input companyInput {
+  name: String!
+  vatNumber: String!
+  crNumber: String!
+}

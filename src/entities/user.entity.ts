@@ -1,4 +1,6 @@
 import {
+  BeforeInsert,
+  BeforeUpdate,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
@@ -10,6 +12,7 @@ import BaseEntity from './base.entity';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { UserProfileType } from '../common/types';
 import { Company } from './company.entity';
+import * as bcrypt from 'bcrypt';
 
 @Entity()
 @ObjectType()
@@ -64,4 +67,17 @@ export class User extends BaseEntity {
   @Field()
   @DeleteDateColumn()
   deletedAt: Date;
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  async hashPassword() {
+    // Ignore if password already hashed (when updating)
+    if (this.password?.startsWith('$2b$')) {
+      return;
+    }
+    if (this.password) {
+      const salt = await bcrypt.genSalt();
+      this.password = await bcrypt.hash(this.password, salt);
+    }
+  }
 }
