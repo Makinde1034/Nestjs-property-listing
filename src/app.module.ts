@@ -11,6 +11,7 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { MailModule } from './modules/mail/mail.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     AuthModule,
     UserModule,
     EventEmitterModule.forRoot(),
+    MailModule,
   ],
   controllers: [],
   providers: [AppResolver],
