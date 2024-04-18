@@ -54,6 +54,16 @@ export class UserService {
   ): Promise<User> {
     return this.usersRepository.findOne({ where: userData });
   }
+  /**
+   * Find user
+   *
+   * @async
+   * @param {string} id
+   * @returns {Promise<User>}
+   */
+  async findUserById(id: string): Promise<User> {
+    return await this.usersRepository.findById(id);
+  }
 
   /**
    * Generate user confirmation code

@@ -23,10 +23,12 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, Response> {
     next: CallHandler,
   ): Observable<Response> {
     return next.handle().pipe(
-      map((res) => ({
-        status: true,
-        ...res,
-      })),
+      map((res) => {
+        return {
+          status: true,
+          ...res,
+        };
+      }),
     );
   }
 }

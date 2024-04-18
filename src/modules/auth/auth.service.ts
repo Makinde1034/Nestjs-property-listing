@@ -3,17 +3,28 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { UserService } from '../user/user.service';
-import { RegisterEventDto, RegisterInput } from './dtos';
+import {
+  RegisterEventDto,
+  RegisterInput,
+  LoginInput,
+  LoginResponse,
+  AuthRegisterConfirmDto,
+  TokenType,
+} from './dtos';
 import { User } from 'src/entities';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { RegisterEventAction } from 'src/common/enums';
 import { MailService } from '../mail/mail.service';
 import { ConfigService } from '@nestjs/config';
 import { AppInfo } from 'src/common/utils/AppInfo';
-import { AuthRegisterConfirmDto } from './dtos/RegisterConfirm';
 import { I18nService } from 'nestjs-i18n';
+import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { JWTPayload } from 'src/common/interface';
+import { AppStrings } from 'src/common/messages/app.strings';
 
 @Injectable()
 export class AuthService {
@@ -24,6 +35,7 @@ export class AuthService {
     private readonly mailService: MailService,
     private readonly configService: ConfigService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly jwtService: JwtService,
   ) {
     this.frontEndUrl = this.configService.get('FRONT_END_URL');
   }
@@ -132,5 +144,95 @@ export class AuthService {
     throw new BadRequestException(
       this.i18n.t('messages.register.WRONG_CONFIRM_CODE'),
     );
+  }
+
+  /**
+   * Login user
+   *
+   * @async
+   * @param {LoginInput} loginDto
+   * @returns {Promise<LoginResponse>}
+   */
+  async login(loginDto: LoginInput): Promise<LoginResponse> {
+    const { username, password } = loginDto;
+    // Validate the user credentials
+    const user = await this.validateUserCredentials(username, password);
+    // throw unauthorized error if the creedential is invalid
+    if (!user) {
+      throw new UnauthorizedException(AppStrings.INCORRECT_CREDENTIALS);
+    }
+    // Return the user and the access tokens
+    return {
+      user,
+      token: await this.issueTokens(user),
+    };
+  }
+
+  /**
+   * Validate user password
+   *
+   * @async
+   * @param {string} username
+   * @param {string} password
+   * @returns {Promise<User | null>}
+   */
+  async validateUserCredentials(
+    username: string,
+    password: string,
+  ): Promise<User | null> {
+    // find the user by the email
+    const user = await this.userService.findByEmailOrPhone(username);
+
+    // Return null if user is not found
+    if (!user) {
+      return null;
+    }
+
+    // Compare the saved hashed password to the hash of the incoming password
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    // return user if password match
+    if (isMatch) {
+      return user;
+    }
+    // return null if password do not match
+    return null;
+  }
+
+  /**
+   * Get JWT token
+   *
+   * @async
+   * @param {User} user
+   * @returns {TokenType}
+   */
+  async issueTokens(user: User): Promise<TokenType> {
+    // JWT payload to identify the user
+    const payload: JWTPayload = {
+      username: user.email,
+      sub: user.id,
+    };
+
+    // Generate JWT tokens for access and refresh tokens
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(payload, {
+        secret: this.configService.get<string>('JWT_USER_ACCESS_SECRET'),
+        expiresIn: this.configService.get<string>(
+          'JWT_USER_ACCESS_TOKEN_EXPIRY',
+        ),
+      }),
+      this.jwtService.signAsync(payload, {
+        secret: this.configService.get<string>('JWT_USER_REFERSH_SECRET'),
+        expiresIn: this.configService.get<string>(
+          'JWT_USER_REFRESH_TOKEN_EXPIRY',
+        ),
+      }),
+    ]);
+
+    // Return the tokens
+    return {
+      accessToken: `Bearer ${accessToken}`,
+      refreshToken: `Bearer ${refreshToken}`,
+    };
   }
 }

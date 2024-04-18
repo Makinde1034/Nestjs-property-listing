@@ -1,8 +1,13 @@
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { AuthService } from './auth.service';
-import { RegisterInput } from './dtos';
+import {
+  RegisterInput,
+  AuthRegisterConfirmDto,
+  LoginInput,
+  LoginResponse,
+} from './dtos';
 import { User } from 'src/entities';
-import { AuthRegisterConfirmDto } from './dtos/RegisterConfirm';
+import { Throttle } from '@nestjs/throttler';
 
 @Resolver()
 export class AuthResolver {
@@ -34,5 +39,20 @@ export class AuthResolver {
     @Args('RegisterConfirmInput') inputDto: AuthRegisterConfirmDto,
   ): Promise<string> {
     return await this.authService.registerConfirm(inputDto);
+  }
+
+  /**
+   * Login User with Password
+   *
+   * @async
+   * @param {LoginInput} loginInput
+   * @returns {Promise<LoginResponse>}
+   */
+  @Mutation(() => LoginResponse, { name: 'login' })
+  @Throttle({ default: { limit: 2, ttl: 60000 } })
+  async login(
+    @Args('LoginInput') loginInput: LoginInput,
+  ): Promise<LoginResponse> {
+    return await this.authService.login(loginInput);
   }
 }
