@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { I18nMiddleware } from 'nestjs-i18n';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
+import { ResponseInterceptor } from './common/interceptors/response.transformer';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -26,7 +27,10 @@ async function bootstrap() {
     }),
   );
 
-  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+  app.useGlobalInterceptors(
+    new ResponseInterceptor(),
+    new ClassSerializerInterceptor(app.get(Reflector)),
+  );
 
   await app.listen(PORT, HOST);
 }

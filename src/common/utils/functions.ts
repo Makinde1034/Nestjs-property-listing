@@ -1,0 +1,9 @@
+import * as crypto from 'crypto';
+import * as randomstring from 'randomstring';
+
+export const generateRandomToken = (count?: number): string =>
+  randomstring.generate(count);
+
+export const generatereference = () => {
+  return crypto.randomInt(10000000, 99999999);
+};
