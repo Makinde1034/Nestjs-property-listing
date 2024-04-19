@@ -49,6 +49,8 @@ type Mutation {
   register(RegisterInput: RegisterInput!): User!
   registerConfirm(RegisterConfirmInput: AuthRegisterConfirmDto!): String!
   login(LoginInput: LoginInput!): LoginResponse!
+  biometricRegister(RegisterInput: BiometricRegister!): String!
+  biometricLogin(LoginInput: BiometricLogin!): String!
 }
 
 input RegisterInput {
@@ -75,4 +77,14 @@ input AuthRegisterConfirmDto {
 input LoginInput {
   username: String!
   password: String!
+}
+
+input BiometricRegister {
+  publicKey: String!
+  userId: String!
+}
+
+input BiometricLogin {
+  signature: String!
+  payload: String!
 }

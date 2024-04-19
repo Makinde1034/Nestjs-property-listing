@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UserConfirmationRepository, UserRepository } from './repositories';
 import { TokenConfirmation, User } from 'src/entities';
-import { FindOptionsWhere, LessThan } from 'typeorm';
+import { DeepPartial, FindOptionsWhere, LessThan } from 'typeorm';
 import { PostgresError } from 'pg-error-enum';
 import { addHours, isPast } from 'date-fns';
 import { generateRandomToken } from 'src/common/utils/functions';
@@ -180,7 +180,7 @@ export class UserService {
    * @param {string} id
    * @returns {Promise<User>}
    */
-  async setAsConfirmed(id: string): Promise<User> {
-    return this.usersRepository.update(id, { verifiedAt: new Date() });
+  async updateUser(id: string, data: DeepPartial<User>): Promise<User> {
+    return this.usersRepository.update(id, data);
   }
 }

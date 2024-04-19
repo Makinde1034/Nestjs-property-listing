@@ -5,6 +5,8 @@ import {
   AuthRegisterConfirmDto,
   LoginInput,
   LoginResponse,
+  BiometricLogin,
+  BiometricRegister,
 } from './dtos';
 import { User } from 'src/entities';
 import { Throttle } from '@nestjs/throttler';
@@ -54,5 +56,35 @@ export class AuthResolver {
     @Args('LoginInput') loginInput: LoginInput,
   ): Promise<LoginResponse> {
     return await this.authService.login(loginInput);
+  }
+
+  /**
+   * Register biometric key
+   *
+   * @async
+   * @param {LoginInput} inputDto
+   * @returns {Promise<LoginResponse>}
+   */
+  @Mutation(() => String, { name: 'biometricRegister' })
+  @Throttle({ default: { limit: 2, ttl: 60000 } })
+  async biometricRegister(
+    @Args('RegisterInput') inputDto: BiometricRegister,
+  ): Promise<LoginResponse> {
+    return await this.authService.biometricRegister(inputDto);
+  }
+
+  /**
+   * Login using biometric method
+   *
+   * @async
+   * @param {LoginInput} loginInput
+   * @returns {Promise<LoginResponse>}
+   */
+  @Mutation(() => String, { name: 'biometricLogin' })
+  @Throttle({ default: { limit: 2, ttl: 60000 } })
+  async biometricLogin(
+    @Args('LoginInput') loginInput: BiometricLogin,
+  ): Promise<LoginResponse> {
+    return await this.authService.biometricLogin(loginInput);
   }
 }

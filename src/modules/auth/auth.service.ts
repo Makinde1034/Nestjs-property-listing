@@ -4,6 +4,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { UserService } from '../user/user.service';
@@ -14,6 +15,8 @@ import {
   LoginResponse,
   AuthRegisterConfirmDto,
   TokenType,
+  BiometricLogin,
+  BiometricRegister,
 } from './dtos';
 import { User } from 'src/entities';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -23,6 +26,7 @@ import { ConfigService } from '@nestjs/config';
 import { AppInfo } from 'src/common/utils/AppInfo';
 import { I18nService } from 'nestjs-i18n';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { JwtService } from '@nestjs/jwt';
 import { JWTPayload } from 'src/common/interface';
 import { AppStrings } from 'src/common/messages/app.strings';
@@ -136,7 +140,7 @@ export class AuthService {
         );
       }
       if (this.userService.validateUserConfirmation(userConfirmation, token)) {
-        await this.userService.setAsConfirmed(user.id);
+        await this.userService.updateUser(user.id, { verifiedAt: new Date() });
         return this.i18n.translate(
           'messages.register.ACCOUNT_CONFIRMED_SUCCESSFULLY',
         ) as string;
@@ -233,6 +237,69 @@ export class AuthService {
     return {
       accessToken: `Bearer ${accessToken}`,
       refreshToken: `Bearer ${refreshToken}`,
+    };
+  }
+
+  /**
+   * Biometric Login
+   *
+   * @async
+   * @param {BiometricRegister} inputDto
+   * @returns {Promise<LoginResponse>}
+   */
+  async biometricRegister(inputDto: BiometricRegister): Promise<LoginResponse> {
+    const { userId, publicKey } = inputDto;
+
+    const user = await this.userService.findUserById(userId);
+    if (!user) {
+      throw new NotFoundException(
+        'Something went wrong during your Face ID authentication.',
+      );
+    }
+
+    await this.userService.updateUser(userId, { biometricKey: publicKey });
+
+    // Return the user and the access tokens
+    return {
+      user,
+      token: await this.issueTokens(user),
+    };
+  }
+
+  /**
+   * Biometric Login
+   *
+   * @async
+   * @param {BiometricLogin} loginDto
+   * @returns {Promise<LoginResponse>}
+   */
+  async biometricLogin(loginDto: BiometricLogin): Promise<LoginResponse> {
+    const { signature, payload } = loginDto;
+    const userId = payload.split('__')[0];
+    const user = await this.userService.findUserById(userId);
+    if (!user) {
+      throw new NotFoundException(
+        'Something went wrong during your Face ID authentication.',
+      );
+    }
+    // this is the public key that was saved earlier
+    const { biometricKey } = user;
+    const verifier = crypto.createVerify('RSA-SHA256');
+    verifier.update(payload);
+    const isVerified = verifier.verify(
+      `-----BEGIN PUBLIC KEY-----\n${biometricKey}\n-----END PUBLIC KEY-----`,
+      signature,
+      'base64',
+    );
+    if (!isVerified) {
+      throw new UnauthorizedException(
+        'Unfortunetely we could not verify your Face ID authentication',
+      );
+    }
+    // Return the user and the access tokens
+    return {
+      user,
+      token: await this.issueTokens(user),
     };
   }
 }

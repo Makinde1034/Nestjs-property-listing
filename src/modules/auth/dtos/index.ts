@@ -4,3 +4,4 @@ export * from './RegisterConfirm';
 export * from './LoginInput';
 export * from './LoginResponse';
 export * from './Token';
+export * from './BiometricRegister';
