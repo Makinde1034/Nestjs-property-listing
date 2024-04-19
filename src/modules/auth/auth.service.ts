@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -157,9 +158,12 @@ export class AuthService {
     const { username, password } = loginDto;
     // Validate the user credentials
     const user = await this.validateUserCredentials(username, password);
-    // throw unauthorized error if the creedential is invalid
+    // throw unauthorized error if the credential is invalid
     if (!user) {
       throw new UnauthorizedException(AppStrings.INCORRECT_CREDENTIALS);
+    } else if (!user.verifiedAt) {
+      // throw Forbidden error if the user is not verified
+      throw new ForbiddenException(AppStrings.UNCONFIRMED_ACCOUNT);
     }
     // Return the user and the access tokens
     return {
@@ -216,16 +220,12 @@ export class AuthService {
     // Generate JWT tokens for access and refresh tokens
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
-        secret: this.configService.get<string>('JWT_USER_ACCESS_SECRET'),
-        expiresIn: this.configService.get<string>(
-          'JWT_USER_ACCESS_TOKEN_EXPIRY',
-        ),
+        secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
+        expiresIn: this.configService.get<string>('JWT_ACCESS_TTL'),
       }),
       this.jwtService.signAsync(payload, {
-        secret: this.configService.get<string>('JWT_USER_REFERSH_SECRET'),
-        expiresIn: this.configService.get<string>(
-          'JWT_USER_REFRESH_TOKEN_EXPIRY',
-        ),
+        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+        expiresIn: this.configService.get<string>('JWT_REFRESH_TTL'),
       }),
     ]);
 
