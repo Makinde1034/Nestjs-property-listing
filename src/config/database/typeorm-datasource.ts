@@ -8,10 +8,13 @@ import { config } from 'dotenv';
 
 config({ path: process.env.NODE_ENV === 'test' ? '.env.test' : '.env' });
 
-const AppDataSource = new DataSource({
+const connectionSource = {
   ...typeOrmPostgresOptions,
   url: process.env.DATABASE_URL,
-} as DataSourceOptions);
+  seeds: ['dist/**/*.seeder{.ts,.js}'],
+};
+
+const AppDataSource = new DataSource(connectionSource as DataSourceOptions);
 
 AppDataSource.initialize()
   .then(() => {

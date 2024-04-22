@@ -137,7 +137,7 @@ export class AuthService {
         await this.userService.removeUserConfirmation(userConfirmation.id);
         return this.i18n.translate(
           'messages.register.ACCOUNT_CONFIRMED_SUCCESSFULLY',
-        ) as string;
+        );
       }
     }
     throw new BadRequestException(
