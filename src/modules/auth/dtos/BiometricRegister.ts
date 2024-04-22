@@ -2,19 +2,27 @@ import { Field, InputType } from '@nestjs/graphql';
 import { IsNotEmpty, IsString } from 'class-validator';
 
 @InputType()
-export class companyInput {
+export class BiometricRegister {
   @Field()
   @IsNotEmpty()
   @IsString()
-  name: string;
+  publicKey: string;
 
   @Field()
   @IsNotEmpty()
   @IsString()
-  vatNumber: string;
+  userId: string;
+}
+
+@InputType()
+export class BiometricLogin {
+  @Field()
+  @IsNotEmpty()
+  @IsString()
+  signature: string;
 
   @Field()
   @IsNotEmpty()
   @IsString()
-  crNumber: string;
+  payload: string;
 }

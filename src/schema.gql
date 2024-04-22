@@ -31,6 +31,20 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type TokenType {
+  accessToken: String!
+  refreshToken: String!
+}
+
+type LoginResponse {
+  user: User!
+  token: TokenType!
+}
+
+type SuccessResponse {
+  message: String!
+}
+
 type Query {
   app: String!
 }
@@ -38,6 +52,11 @@ type Query {
 type Mutation {
   register(RegisterInput: RegisterInput!): User!
   registerConfirm(RegisterConfirmInput: AuthRegisterConfirmDto!): String!
+  login(LoginInput: LoginInput!): LoginResponse!
+  biometricRegister(RegisterInput: BiometricRegister!): String!
+  biometricLogin(LoginInput: BiometricLogin!): String!
+  resetPasswordRequest(RequestInput: PasswordResetRequestDto!): SuccessResponse!
+  resetPassword(ResetInput: PasswordResetDto!): SuccessResponse!
 }
 
 input RegisterInput {
@@ -59,4 +78,29 @@ input companyInput {
 input AuthRegisterConfirmDto {
   email: String!
   token: String!
+}
+
+input LoginInput {
+  username: String!
+  password: String!
+}
+
+input BiometricRegister {
+  publicKey: String!
+  userId: String!
+}
+
+input BiometricLogin {
+  signature: String!
+  payload: String!
+}
+
+input PasswordResetRequestDto {
+  email: String!
+}
+
+input PasswordResetDto {
+  token: String!
+  email: String!
+  password: String!
 }
