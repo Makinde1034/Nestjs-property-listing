@@ -12,6 +12,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MailModule } from './modules/mail/mail.module';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { MailModule } from './modules/mail/mail.module';
       autoSchemaFile: 'src/schema.gql',
       formatError: (err) => formatError(err),
       fieldResolverEnhancers: ['interceptors'],
+      context: ({ req, res }) => ({ req, res }),
     }),
     TypeOrmModule.forRootAsync({
       useFactory: (configService: ConfigService) =>
@@ -49,6 +51,7 @@ import { MailModule } from './modules/mail/mail.module';
     UserModule,
     EventEmitterModule.forRoot(),
     MailModule,
+    ThrottlerModule.forRoot(),
   ],
   controllers: [],
   providers: [AppResolver],
