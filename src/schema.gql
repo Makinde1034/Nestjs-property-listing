@@ -37,6 +37,7 @@ type Query {
 
 type Mutation {
   register(RegisterInput: RegisterInput!): User!
+  registerConfirm(RegisterConfirmInput: AuthRegisterConfirmDto!): String!
 }
 
 input RegisterInput {
@@ -53,4 +54,9 @@ input companyInput {
   name: String!
   vatNumber: String!
   crNumber: String!
+}
+
+input AuthRegisterConfirmDto {
+  email: String!
+  token: String!
 }

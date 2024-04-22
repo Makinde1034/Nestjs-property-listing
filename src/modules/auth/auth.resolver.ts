@@ -2,6 +2,7 @@ import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { AuthService } from './auth.service';
 import { RegisterInput } from './dtos';
 import { User } from 'src/entities';
+import { AuthRegisterConfirmDto } from './dtos/RegisterConfirm';
 
 @Resolver()
 export class AuthResolver {
@@ -19,5 +20,19 @@ export class AuthResolver {
     @Args('RegisterInput') inputDto: RegisterInput,
   ): Promise<User> {
     return await this.authService.register(inputDto);
+  }
+
+  /**
+   * Register User confirmation
+   *
+   * @async
+   * @param {AuthRegisterConfirmDto} inputDto
+   * @returns {Promise<string>}
+   */
+  @Mutation(() => String, { name: 'registerConfirm' })
+  async registerConfirm(
+    @Args('RegisterConfirmInput') inputDto: AuthRegisterConfirmDto,
+  ): Promise<string> {
+    return await this.authService.registerConfirm(inputDto);
   }
 }

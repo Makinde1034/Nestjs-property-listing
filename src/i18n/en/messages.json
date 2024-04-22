@@ -7,5 +7,10 @@
     },
     "app": {
         "hello": "Hello From Waseet API"
+    },
+    "register": {
+        "ACCOUNT_ALREADY_CONFIRMED": "Account already confirmed",
+        "WRONG_CONFIRM_CODE": "Wrong Confirmation token",
+        "ACCOUNT_CONFIRMED_SUCCESSFULLY": "Account confirmed successfully"
     }
 }
