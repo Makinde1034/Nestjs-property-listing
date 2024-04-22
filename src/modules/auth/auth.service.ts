@@ -11,7 +11,6 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { RegisterEventAction } from 'src/common/enums';
 import { MailService } from '../mail/mail.service';
 import { ConfigService } from '@nestjs/config';
-import { AppInfo } from 'src/common/utils/AppInfo';
 import { AuthRegisterConfirmDto } from './dtos/RegisterConfirm';
 import { I18nService } from 'nestjs-i18n';
 
@@ -83,18 +82,9 @@ export class AuthService {
     const { email } = user;
     const { token } = await this.userService.generateUserConfirmation(user);
 
-    const link = `${this.frontEndUrl}/email_verification/${email}/${token}`;
-    const emailMessage = {
-      to: email,
-      from: AppInfo.NO_REPLY_EMAIL_ADDRESS, // Use the email address or domain you verified above,
-      templateId: AppInfo.EMAIL_VERIFICATION_TEMPLATE,
-      dynamicTemplateData: {
-        action_link: link,
-        app_name: AppInfo.APP_NAME,
-      },
-    };
+    const link = `${this.frontEndUrl}/email_verification?email=${email}&token=${token}`;
 
-    await this.mailService.sendEmail(emailMessage);
+    await this.mailService.sendUserConfirmation(user, link);
   }
 
   /**
