@@ -1,11 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { MailerService } from '@nestjs-modules/mailer';
 import * as SendGrid from '@sendgrid/mail';
+import { User } from 'src/entities';
 
 @Injectable()
 export class MailService {
   private readonly logger = new Logger(MailService.name);
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly mailerService: MailerService,
+  ) {
     SendGrid.setApiKey(configService.get('SENDGRID_API_KEY'));
   }
 
@@ -22,5 +27,26 @@ export class MailService {
     } catch (error) {
       this.logger.debug(error);
     }
+  }
+
+  /**
+   * Send Email Confirmation
+   * @async
+   * @param {User} user
+   * @param {string} link
+   * @returns {Promise<void>}
+   */
+  async sendUserConfirmation(user: User, link: string): Promise<void> {
+    await this.mailerService.sendMail({
+      to: user.email,
+      // from: '"Support Team" <support@example.com>', // override default from
+      subject: 'Welcome to Waseet App! Confirm your Email',
+      template: './confirmation', // `.hbs` extension is appended automatically
+      context: {
+        // ✏️ filling curly brackets with content
+        name: `${user.firstName} ${user.lastName}`,
+        url: link,
+      },
+    });
   }
 }
