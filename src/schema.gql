@@ -41,6 +41,10 @@ type LoginResponse {
   token: TokenType!
 }
 
+type SuccessResponse {
+  message: String!
+}
+
 type Query {
   app: String!
 }
@@ -51,6 +55,8 @@ type Mutation {
   login(LoginInput: LoginInput!): LoginResponse!
   biometricRegister(RegisterInput: BiometricRegister!): String!
   biometricLogin(LoginInput: BiometricLogin!): String!
+  resetPasswordRequest(RequestInput: PasswordResetRequestDto!): SuccessResponse!
+  resetPassword(ResetInput: PasswordResetDto!): SuccessResponse!
 }
 
 input RegisterInput {
@@ -87,4 +93,14 @@ input BiometricRegister {
 input BiometricLogin {
   signature: String!
   payload: String!
+}
+
+input PasswordResetRequestDto {
+  email: String!
+}
+
+input PasswordResetDto {
+  token: String!
+  email: String!
+  password: String!
 }

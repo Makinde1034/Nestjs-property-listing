@@ -23,4 +23,19 @@ export class AuthEventHandler {
       new Date(),
     );
   }
+
+  @OnEvent(RegisterEventAction.SEND_PASSWORD_RESET, { async: true })
+  async handleResetPasswordEvent(payload: RegisterEventDto) {
+    this.logger.debug(
+      `Started Handling ${RegisterEventAction.SEND_PASSWORD_RESET} event.`,
+      new Date(),
+    );
+    const { user } = payload;
+    await this.authService.generateAndSendPasswordResetToken(user);
+
+    this.logger.debug(
+      `Finished Handling ${RegisterEventAction.SEND_PASSWORD_RESET}`,
+      new Date(),
+    );
+  }
 }

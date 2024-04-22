@@ -17,6 +17,8 @@ import {
   TokenType,
   BiometricLogin,
   BiometricRegister,
+  PasswordResetDto,
+  PasswordResetRequestDto,
 } from './dtos';
 import { User } from 'src/entities';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -29,6 +31,7 @@ import * as crypto from 'crypto';
 import { JwtService } from '@nestjs/jwt';
 import { JWTPayload } from 'src/common/interface';
 import { AppStrings } from 'src/common/messages/app.strings';
+import { SuccessResponse } from 'src/common/response';
 
 @Injectable()
 export class AuthService {
@@ -99,7 +102,7 @@ export class AuthService {
     const { email } = user;
     const { token } = await this.userService.generateUserConfirmation(user);
 
-    const link = `${this.frontEndUrl}/email_verification?email=${email}&token=${token}`;
+    const link = `${this.frontEndUrl}/email-confirmation?email=${email}&token=${token}`;
 
     await this.mailService.sendUserConfirmation(user, link);
   }
@@ -131,6 +134,7 @@ export class AuthService {
       }
       if (this.userService.validateUserConfirmation(userConfirmation, token)) {
         await this.userService.updateUser(user.id, { verifiedAt: new Date() });
+        await this.userService.removeUserConfirmation(userConfirmation.id);
         return this.i18n.translate(
           'messages.register.ACCOUNT_CONFIRMED_SUCCESSFULLY',
         ) as string;
@@ -290,6 +294,78 @@ export class AuthService {
     return {
       user,
       token: await this.issueTokens(user),
+    };
+  }
+
+  /**
+   * Request password reset
+   *
+   * @async
+   * @param {PasswordResetRequestDto} phone
+   * @returns {Promise<SuccessResponse>}
+   */
+  async requestPasswordReset({
+    email,
+  }: PasswordResetRequestDto): Promise<SuccessResponse> {
+    const user = await this.userService.findByEmailOrPhone(email);
+    if (!user) {
+      // Review: We shouldn't return any information that tell user not found for security
+      throw new NotFoundException(AppStrings.USER_NOT_FOUND);
+    }
+
+    // send Phone OTP Event
+    this.eventEmitter.emit(
+      RegisterEventAction.SEND_PASSWORD_RESET,
+      new RegisterEventDto(user),
+    );
+
+    return {
+      message: AppStrings.PASSWORD_RESET_SENT,
+    };
+  }
+
+  /**
+   * Send reset password email
+   *
+   * @async
+   * @param {User} user
+   * @returns {Promise<void>}
+   */
+  async generateAndSendPasswordResetToken(user: User): Promise<void> {
+    const { email } = user;
+    const { token } = await this.userService.generateUserConfirmation(user);
+
+    const link = `${this.frontEndUrl}/reset-password?email=${email}&token=${token}`;
+
+    await this.mailService.sendPasswordResetEmail(user, link);
+  }
+
+  /**
+   * Reset Password
+   *
+   * @async
+   * @param {PasswordResetDto} passwordResetDto
+   * @returns {Promise<SuccessResponse>}
+   */
+  async passwordReset(
+    passwordResetDto: PasswordResetDto,
+  ): Promise<SuccessResponse> {
+    const { token, email } = passwordResetDto;
+    const userConfirmation = await this.userService.findTokenConfirmation(
+      email,
+      token,
+    );
+    if (!userConfirmation) {
+      throw new BadRequestException(AppStrings.WRONG_CONFIRM_CODE);
+    }
+    const { user } = userConfirmation;
+    await this.userService.updateUser(user.id, {
+      password: passwordResetDto.password,
+    });
+
+    await this.userService.removeUserConfirmation(userConfirmation.id);
+    return {
+      message: AppStrings.PASSWORD_RESET_SUCCEEDED,
     };
   }
 }

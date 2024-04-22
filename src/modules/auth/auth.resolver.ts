@@ -7,9 +7,12 @@ import {
   LoginResponse,
   BiometricLogin,
   BiometricRegister,
+  PasswordResetRequestDto,
+  PasswordResetDto,
 } from './dtos';
 import { User } from 'src/entities';
 import { Throttle } from '@nestjs/throttler';
+import { SuccessResponse } from 'src/common/response';
 
 @Resolver()
 export class AuthResolver {
@@ -86,5 +89,35 @@ export class AuthResolver {
     @Args('LoginInput') loginInput: BiometricLogin,
   ): Promise<LoginResponse> {
     return await this.authService.biometricLogin(loginInput);
+  }
+
+  /**
+   * Request Password Reset
+   *
+   * @async
+   * @param {PasswordResetRequestDto} ResetInput
+   * @returns {Promise<SuccessResponse>}
+   */
+  @Mutation(() => SuccessResponse)
+  @Throttle({ default: { limit: 1, ttl: 60000 } })
+  async resetPasswordRequest(
+    @Args('RequestInput') RequestInput: PasswordResetRequestDto,
+  ): Promise<SuccessResponse> {
+    return await this.authService.requestPasswordReset(RequestInput);
+  }
+
+  /**
+   * Reset Password
+   *
+   * @async
+   * @param {PasswordResetDto} ResetInput
+   * @returns {Promise<SuccessResponse>}
+   */
+  @Mutation(() => SuccessResponse)
+  @Throttle({ default: { limit: 1, ttl: 60000 } })
+  async resetPassword(
+    @Args('ResetInput') ResetInput: PasswordResetDto,
+  ): Promise<SuccessResponse> {
+    return await this.authService.passwordReset(ResetInput);
   }
 }

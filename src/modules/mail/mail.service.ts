@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
 import * as SendGrid from '@sendgrid/mail';
 import { User } from 'src/entities';
+import { AppInfo } from 'src/common/utils/AppInfo';
 
 @Injectable()
 export class MailService {
@@ -47,6 +48,33 @@ export class MailService {
           // ✏️ filling curly brackets with content
           name: `${user.firstName} ${user.lastName}`,
           url: link,
+        },
+      });
+      this.logger.debug('Email Sent');
+    } catch (error) {
+      this.logger.debug(error);
+    }
+  }
+
+  /**
+   * Send Email Confirmation
+   * @async
+   * @param {User} user
+   * @param {string} link
+   * @returns {Promise<void>}
+   */
+  async sendPasswordResetEmail(user: User, link: string): Promise<void> {
+    try {
+      await this.mailerService.sendMail({
+        to: user.email,
+        // from: '"Support Team" <support@example.com>', // override default from
+        subject: 'Reset Your Password',
+        template: './password-reset', // `.hbs` extension is appended automatically
+        context: {
+          // ✏️ filling curly brackets with content
+          name: `${user.firstName} ${user.lastName}`,
+          url: link,
+          app: AppInfo.APP_NAME,
         },
       });
       this.logger.debug('Email Sent');
