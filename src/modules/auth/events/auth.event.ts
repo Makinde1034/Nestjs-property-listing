@@ -5,8 +5,8 @@ import { RegisterEventAction } from 'src/common/enums';
 import { RegisterEventDto } from '../dtos';
 
 @Injectable()
-export class KycEventHandler {
-  private logger = new Logger(KycEventHandler.name);
+export class AuthEventHandler {
+  private logger = new Logger(AuthEventHandler.name);
   constructor(private readonly authService: AuthService) {}
 
   @OnEvent(RegisterEventAction.USER_CREATED, { async: true })

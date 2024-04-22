@@ -3,10 +3,10 @@ import { AuthResolver } from './auth.resolver';
 import { AuthService } from './auth.service';
 import { UserModule } from '../user/user.module';
 import { MailModule } from '../mail/mail.module';
-import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
+import { AuthEventHandler } from './events/auth.event';
 
 @Module({
   imports: [
@@ -22,7 +22,6 @@ import { PassportModule } from '@nestjs/passport';
       inject: [ConfigService],
     }),
   ],
-  providers: [AuthResolver, AuthService],
-  controllers: [AuthController],
+  providers: [AuthResolver, AuthService, AuthEventHandler],
 })
 export class AuthModule {}
