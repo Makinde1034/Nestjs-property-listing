@@ -1,1 +1,1 @@
-export type UserProfileType = 'individual' | 'company';
+export type UserProfileType = 'individual' | 'company' | 'admin';
