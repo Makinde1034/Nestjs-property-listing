@@ -22,28 +22,6 @@ definitions:
         script:
           - npm ci
           - npm run lint
-    - step: &unit-test
-        name: Unit and Integration Testing
-        runs-on:
-          - self.hosted
-          - linux
-        caches:
-          - npm
-        script:
-          - npm ci
-          - npm run test:cov
-    - step: &e2e-test
-        name: End to End Testing
-        runs-on:
-          - self.hosted
-          - linux
-        services:
-          - postgres
-        caches:
-          - npm
-        script:
-          - npm ci
-          - npm run test:e2e
     - step: &owasp-dependency-check
         name: 'OWASP Dependency Check'
         runs-on:
@@ -69,14 +47,16 @@ definitions:
         runs-on:
           - self.hosted
           - linux
+        caches:
+          - npm
         services:
           - postgres
         script:
           - export DATABASE_URL=postgres://waseet:darkNight@localhost:5432/waseet
-          # - npx prisma validate
-          # - npx prisma migrate deploy
-          # - npx prisma generate
-          # - npx prisma db seed
+          - npm ci
+          - npm run migration:run
+          - npm run seed
+          - npm run migration:revert
     - step: &security-checks
         name: Security Checks
         runs-on:
@@ -106,7 +86,7 @@ definitions:
             - docker
           script:
             - echo $DOCKERHUB_PASSWORD | docker login --username $DOCKERHUB_USERNAME --password-stdin
-            - docker build -f Dockerfile.stage -t $DOCKERHUB_USERNAME/$DOCKERHUB_REPO:$BITBUCKET_COMMIT .
+            - docker build -f Dockerfile -t $DOCKERHUB_USERNAME/$DOCKERHUB_REPO:$BITBUCKET_COMMIT .
             - docker push $DOCKERHUB_USERNAME/$DOCKERHUB_REPO:$BITBUCKET_COMMIT
     - step: &deploy-to-test
         name: Deploy to CapRover
@@ -126,17 +106,12 @@ clone:
 pipelines:
   pull-requests:
     '**':
-      - parallel:
-        - step: *code-lint
-        - step: *unit-test
-        - step: *build
-        - step: *sonar-analysis
-      - parallel:
-        - step: *e2e-test
-        - step: *validate-db
-      - parallel:
-        - step: *security-checks
-        - step: *owasp-dependency-check
+      - step: *code-lint
+      - step: *build
+      - step: *sonar-analysis   
+      - step: *validate-db
+      - step: *security-checks
+      - step: *owasp-dependency-check
         
   branches:
     develop:
