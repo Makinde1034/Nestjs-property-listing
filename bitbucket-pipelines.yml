@@ -55,7 +55,7 @@ definitions:
           - export DATABASE_URL=postgres://waseet:darkNight@localhost:5432/waseet
           - npm ci
           - npm run migration:run
-        #  - npm run seed
+          - npm run seed
           - npm run migration:revert
     - step: &security-checks
         name: Security Checks
