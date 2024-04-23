@@ -56,7 +56,7 @@ definitions:
           - npm ci
           - npm run migration:run
         #  - npm run seed
-          - migration:revert
+          - npm run migration:revert
     - step: &security-checks
         name: Security Checks
         runs-on:
