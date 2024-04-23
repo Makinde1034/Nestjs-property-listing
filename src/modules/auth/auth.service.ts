@@ -1,9 +1,15 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import {
   BadRequestException,
   ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
+  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -36,6 +42,7 @@ import { SuccessResponse } from 'src/common/response';
 @Injectable()
 export class AuthService {
   private readonly frontEndUrl: string;
+  private logger = new Logger(AuthService.name);
   constructor(
     private readonly userService: UserService,
     private readonly i18n: I18nService,
@@ -56,7 +63,7 @@ export class AuthService {
    */
   async register(inputDto: RegisterInput): Promise<User> {
     try {
-      // check for user with same email or phone
+      // Check for user with same email or phone
       const existingUser = await this.userService.findUser([
         { email: inputDto.email },
         { phone: inputDto.phone },
@@ -67,7 +74,7 @@ export class AuthService {
         throw new HttpException('User Already Exist', HttpStatus.CONFLICT);
       }
 
-      // create user
+      // Create user
       const data = {
         ...inputDto,
       } as Partial<User>;
@@ -78,7 +85,7 @@ export class AuthService {
       );
       return newUser;
     } catch (error) {
-      console.log({ error });
+      this.logger.log({ error });
     }
   }
 
@@ -156,11 +163,11 @@ export class AuthService {
     const { username, password } = loginDto;
     // Validate the user credentials
     const user = await this.validateUserCredentials(username, password);
-    // throw unauthorized error if the credential is invalid
+    // Throw unauthorized error if the credential is invalid
     if (!user) {
       throw new UnauthorizedException(AppStrings.INCORRECT_CREDENTIALS);
     } else if (!user.verifiedAt) {
-      // throw Forbidden error if the user is not verified
+      // Throw Forbidden error if the user is not verified
       throw new ForbiddenException(AppStrings.UNCONFIRMED_ACCOUNT);
     }
     // Return the user and the access tokens
@@ -182,7 +189,7 @@ export class AuthService {
     username: string,
     password: string,
   ): Promise<User | null> {
-    // find the user by the email
+    // Find the user by the email
     const user = await this.userService.findByEmailOrPhone(username);
 
     // Return null if user is not found
@@ -193,11 +200,11 @@ export class AuthService {
     // Compare the saved hashed password to the hash of the incoming password
     const isMatch = await bcrypt.compare(password, user.password);
 
-    // return user if password match
+    // Return user if password match
     if (isMatch) {
       return user;
     }
-    // return null if password do not match
+    // Return null if password do not match
     return null;
   }
 
@@ -276,7 +283,7 @@ export class AuthService {
         'Something went wrong during your Face ID authentication.',
       );
     }
-    // this is the public key that was saved earlier
+    // This is the public key that was saved earlier
     const { biometricKey } = user;
     const verifier = crypto.createVerify('RSA-SHA256');
     verifier.update(payload);
@@ -313,7 +320,7 @@ export class AuthService {
       throw new NotFoundException(AppStrings.USER_NOT_FOUND);
     }
 
-    // send Phone OTP Event
+    // Send Phone OTP Event
     this.eventEmitter.emit(
       RegisterEventAction.SEND_PASSWORD_RESET,
       new RegisterEventDto(user),

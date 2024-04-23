@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { ILike, Repository } from 'typeorm';
 import QueryDTO from '../dto/query.dto';
 import { parseObjectValues, stringToJson } from '../../../common/utils/helper';
@@ -24,7 +29,6 @@ export default abstract class BaseRepository<T> extends Repository<T> {
       }
       return stringToJson(data);
     } catch (exception) {
-      console.log('error', data);
       return data;
     }
   }
@@ -35,7 +39,7 @@ export default abstract class BaseRepository<T> extends Repository<T> {
    */
   private addPopulation(populate) {
     const populateData = {};
-    // if sort is a string, convert into an array
+    // If sort is a string, convert into an array
     if (typeof populate === 'string') {
       populate = this.safeParse(populate)
         .toString()
@@ -43,7 +47,7 @@ export default abstract class BaseRepository<T> extends Repository<T> {
         .split(' ');
     }
 
-    // if sort is an Array, run formatter on the converted data too
+    // If sort is an Array, run formatter on the converted data too
     if (Array.isArray(populate)) {
       populate.forEach((el) => {
         populateData[`${el.trim()}`] = true;
@@ -59,7 +63,7 @@ export default abstract class BaseRepository<T> extends Repository<T> {
   private addOrderBy(sort) {
     let sortData = sort;
     const orderBy = {};
-    // if sort is a string, convert into an array
+    // If sort is a string, convert into an array
     if (typeof sortData === 'string') {
       sortData = this.safeParse(sortData)
         .toString()
@@ -67,7 +71,7 @@ export default abstract class BaseRepository<T> extends Repository<T> {
         .split(' ');
     }
 
-    // if sort is an Array, run formatter on the converted data too
+    // If sort is an Array, run formatter on the converted data too
     if (Array.isArray(sortData)) {
       sortData.forEach((el) => {
         orderBy[`${el[0].match(/\w/) ? el : el.slice(1)}`] =
@@ -85,7 +89,7 @@ export default abstract class BaseRepository<T> extends Repository<T> {
    */
   private addSearchQuery(search: string, searchFields: string[]) {
     const query = [];
-    // if search and searchFields does not exist, return an empty object
+    // If search and searchFields does not exist, return an empty object
     if (!search || !searchFields) {
       return query;
     }
@@ -112,7 +116,7 @@ export default abstract class BaseRepository<T> extends Repository<T> {
     const query = this.safeParse(queryObject);
     const queryBuilder: any = {};
 
-    // get the search query
+    // Get the search query
     const searchQuery = this.addSearchQuery(query.search, query.searchFields);
 
     queryBuilder.select = this.safeParse(query.fields);
@@ -123,14 +127,14 @@ export default abstract class BaseRepository<T> extends Repository<T> {
     queryBuilder.order = this.addOrderBy(query.sort);
     queryBuilder.withDeleted = query.withDeleted;
 
-    // add the search query to the query builder
+    // Add the search query to the query builder
     searchQuery &&
       (queryBuilder.where = queryBuilder.where.concat(searchQuery));
     return queryBuilder;
   }
 
   async countSome(query: Partial<QueryDTO>) {
-    // try {
+    // Try {
     const formattedQuery = this.formatQuery(query);
     return await this.count(formattedQuery);
   }

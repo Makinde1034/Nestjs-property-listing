@@ -1,10 +1,16 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { Injectable } from '@nestjs/common';
 import { UserConfirmationRepository, UserRepository } from './repositories';
-import { TokenConfirmation, User } from 'src/entities';
+import type { TokenConfirmation, User } from 'src/entities';
 import { DeepPartial, FindOptionsWhere, LessThan } from 'typeorm';
 import { PostgresError } from 'pg-error-enum';
 import { addHours, isPast } from 'date-fns';
 import { generateRandomToken } from 'src/common/utils/functions';
+import { ProfileInput } from './dtos';
 
 @Injectable()
 export class UserService {
@@ -21,12 +27,8 @@ export class UserService {
    * @returns {Promise<User>}
    */
   async createUser(userData: Partial<User>): Promise<User> {
-    try {
-      const user = await this.usersRepository.create(userData);
-      return user;
-    } catch (error) {
-      console.log(error);
-    }
+    const user = await this.usersRepository.create(userData);
+    return user;
   }
 
   /**
@@ -37,7 +39,7 @@ export class UserService {
    * @returns {(Promise<User | null>)}
    */
   async findByEmailOrPhone(username: string): Promise<User | null> {
-    return this.usersRepository.findOne({
+    return await this.usersRepository.findOne({
       where: [{ email: username }, { phone: username }],
     });
   }
@@ -52,7 +54,7 @@ export class UserService {
   async findUser(
     userData: FindOptionsWhere<User> | FindOptionsWhere<User>[],
   ): Promise<User> {
-    return this.usersRepository.findOne({ where: userData });
+    return await this.usersRepository.findOne({ where: userData });
   }
   /**
    * Find user
@@ -108,7 +110,7 @@ export class UserService {
   async findExistingUserConfirmation(
     email: string,
   ): Promise<TokenConfirmation> {
-    return this.tokenRepository.findOne({
+    return await this.tokenRepository.findOne({
       relations: { user: true },
       where: { user: { email }, expiredAt: LessThan(new Date()) },
       order: { createdAt: 'DESC' },
@@ -167,20 +169,36 @@ export class UserService {
     email: string,
     token: string,
   ): Promise<TokenConfirmation> {
-    return this.tokenRepository.findOne({
+    return await this.tokenRepository.findOne({
       relations: { user: true },
       where: { user: { email }, token },
     });
   }
 
   /**
-   * Set user as confirmed
+   * Update user entity
    *
    * @async
    * @param {string} id
    * @returns {Promise<User>}
    */
   async updateUser(id: string, data: DeepPartial<User>): Promise<User> {
-    return this.usersRepository.update(id, data);
+    return await this.usersRepository.update(id, data);
+  }
+
+  /**
+   * Update User Profile
+   *
+   * @async
+   * @param {User} user
+   * @param {ProfileInput} data
+   * @returns {Promise<User>}
+   */
+  async updateProfile(user: User, data: ProfileInput): Promise<User> {
+    const updateData = {
+      ...data,
+    } as Partial<User>;
+    const update = await this.usersRepository.update(user.id, updateData);
+    return update;
   }
 }

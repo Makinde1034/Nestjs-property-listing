@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { Module } from '@nestjs/common';
 import { AuthResolver } from './auth.resolver';
 import { AuthService } from './auth.service';
@@ -7,6 +12,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
 import { AuthEventHandler } from './events/auth.event';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   imports: [
@@ -22,6 +28,6 @@ import { AuthEventHandler } from './events/auth.event';
       inject: [ConfigService],
     }),
   ],
-  providers: [AuthResolver, AuthService, AuthEventHandler],
+  providers: [AuthResolver, AuthService, AuthEventHandler, JwtStrategy],
 })
 export class AuthModule {}
