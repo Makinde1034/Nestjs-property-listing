@@ -3,20 +3,23 @@
  * For license. See license.txt
  */
 
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { UserConfirmationRepository, UserRepository } from './repositories';
 import type { TokenConfirmation, User } from 'src/entities';
 import { DeepPartial, FindOptionsWhere, LessThan } from 'typeorm';
 import { PostgresError } from 'pg-error-enum';
 import { addHours, isPast } from 'date-fns';
 import { generateRandomToken } from 'src/common/utils/functions';
-import { ProfileInput } from './dtos';
+import { ImageResponse, ProfileInput } from './dtos';
+import { StorageService } from '../storage/storage.service';
+import { AppStrings } from 'src/common/messages/app.strings';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly usersRepository: UserRepository,
     private readonly tokenRepository: UserConfirmationRepository,
+    private readonly storageService: StorageService,
   ) {}
 
   /**
@@ -200,5 +203,29 @@ export class UserService {
     } as Partial<User>;
     const update = await this.usersRepository.update(user.id, updateData);
     return update;
+  }
+
+  /**
+   * Update User's Profile picture
+   *
+   * @async
+   * @param {User} user
+   * @param {Express.Multer.File} image
+   * @returns {Promise<ImageResponse>}
+   */
+  async updateProfilePicture(
+    user: User,
+    image: Express.Multer.File,
+  ): Promise<ImageResponse> {
+    if (!image) {
+      throw new BadRequestException(AppStrings.NO_IMAGE_SELECTED);
+    }
+    // Upload profile image
+    const imageurl = await this.storageService.upload(image);
+    await this.usersRepository.update(user.id, {
+      profilePhoto: imageurl,
+    });
+
+    return { url: imageurl };
   }
 }

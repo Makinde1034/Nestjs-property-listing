@@ -4,3 +4,4 @@
  */
 
 export * from './ProfileInput';
+export * from './ImageResponse';

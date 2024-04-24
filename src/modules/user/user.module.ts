@@ -9,6 +9,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TokenConfirmation, User } from '../../entities';
 import { UserConfirmationRepository, UserRepository } from './repositories';
 import { UserResolver } from './user.resolver';
+import { UserController } from './user.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, TokenConfirmation])],
@@ -19,5 +20,6 @@ import { UserResolver } from './user.resolver';
     UserResolver,
   ],
   exports: [UserService, UserRepository],
+  controllers: [UserController],
 })
 export class UserModule {}
