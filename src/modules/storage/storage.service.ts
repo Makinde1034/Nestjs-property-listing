@@ -17,13 +17,10 @@ export class StorageService {
   constructor() {
     this.storage = new Storage({
       projectId: StorageConfig.projectId,
-      credentials: {
-        client_email: StorageConfig.client_email,
-        private_key: StorageConfig.private_key,
-      },
+      keyFilename: StorageConfig.keyFileName,
     });
 
-    this.bucket = StorageConfig.mediaBucket;
+    this.bucket = StorageConfig.bucketName;
   }
 
   /**
@@ -47,7 +44,7 @@ export class StorageService {
       });
       stream.end(fileData.buffer);
     });
-    return `${StorageConfig.baseUrl}/${StorageConfig.mediaBucket}/${name}`;
+    return `${StorageConfig.baseUrl}/${this.bucket}/${name}`;
   }
 
   async delete(path: string) {
