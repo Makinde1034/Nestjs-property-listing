@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { AppStrings } from '../messages/app.strings';
 /**
@@ -9,7 +14,7 @@ import { AppStrings } from '../messages/app.strings';
 export const timeDifferenceInMillSecs = (
   date2: string | Date,
   date1: string | Date,
-) => {
+): number => {
   try {
     return new Date(date2).getTime() - new Date(date1).getTime();
   } catch (err) {

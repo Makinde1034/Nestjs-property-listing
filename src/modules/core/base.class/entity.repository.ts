@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import {
   BadRequestException,
   Injectable,
@@ -24,7 +29,7 @@ export abstract class EntityRepository<T extends BaseEntity> {
 
   constructor(
     private readonly baseRepository: Repository<T>,
-    // private readonly i18n: I18nService,
+    // Private readonly i18n: I18nService,
   ) {
     this.entityName = baseRepository.metadata.targetName;
   }
@@ -37,7 +42,7 @@ export abstract class EntityRepository<T extends BaseEntity> {
    * @returns {Promise<T>}
    */
   async findById(id: string, relations?: string[]): Promise<T> {
-    return this.baseRepository.findOne({
+    return await this.baseRepository.findOne({
       where: { id },
       relations,
     } as FindOneOptions<T>);
@@ -66,7 +71,7 @@ export abstract class EntityRepository<T extends BaseEntity> {
    * @returns {Promise<T>}
    */
   async findOne(options: FindOneOptions<T>): Promise<T> {
-    return this.baseRepository.findOne(options);
+    return await this.baseRepository.findOne(options);
   }
 
   /**
@@ -103,8 +108,6 @@ export abstract class EntityRepository<T extends BaseEntity> {
       const item = this.baseRepository.create(data);
       return await this.baseRepository.save(item);
     } catch (error: any) {
-      console.log(error);
-
       if (error.driverError?.code === PostgresError.UNIQUE_VIOLATION) {
         throw new BadRequestException(
           `${this.entityName.toUpperCase()} already exist`,

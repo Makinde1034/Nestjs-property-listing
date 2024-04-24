@@ -1,23 +1,28 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { GraphQLFormattedError } from 'graphql';
 import { OriginalError } from '../interface';
 
 export const formatError = (
   error: GraphQLFormattedError,
 ): GraphQLFormattedError => {
-  const originalError = error.extensions?.originalError as OriginalError;
+  const originalError = error.extensions.originalError as OriginalError;
 
   if (!originalError) {
     return {
       message: error.message,
       extensions: {
-        code: error.extensions?.code,
+        code: error.extensions.code,
       },
     };
   }
   return {
-    message: originalError?.message as string,
+    message: originalError.message as string,
     extensions: {
-      code: error.extensions?.code,
+      code: error.extensions.code,
     },
   };
 };

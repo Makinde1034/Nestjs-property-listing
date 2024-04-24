@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { Field, InputType } from '@nestjs/graphql';
 import {
   IsEmail,
@@ -11,7 +16,7 @@ import {
 } from 'class-validator';
 import { UserProfileTypeEnum } from 'src/common/enums';
 import { UserProfileType } from 'src/common/types';
-import { companyInput } from './CompanyInput';
+import { CompanyInput } from './CompanyInput';
 import { Type } from 'class-transformer';
 
 @InputType()
@@ -54,9 +59,9 @@ export class RegisterInput {
   })
   password: string;
 
-  @Field(() => companyInput, { nullable: true })
+  @Field(() => CompanyInput, { nullable: true })
   @ValidateNested()
-  @Type(() => companyInput)
+  @Type(() => CompanyInput)
   @ValidateIf((o) => o.userType === UserProfileTypeEnum.COMPANY)
-  company: companyInput;
+  company: CompanyInput;
 }

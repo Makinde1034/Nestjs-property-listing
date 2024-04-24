@@ -1,11 +1,17 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 export const AppStrings = {
   USER_DISABLED: 'Account disabled. Please contact support',
   UNCONFIRMED_ACCOUNT: 'UNCONFIRMED_ACCOUNT',
   INCORRECT_CREDENTIALS: 'INCORRECT_CREDENTIALS',
   INVALID_QUERY: 'Invalid query, kindly check your query',
   UNSUPPORTED_ACTION: ' Unsupported action ',
-  FIELD_NOT_EXIST: (field) => `Invalid query, ${field} doesn't exist`,
-  WRONG_DATA_FOR_FIELD: (field) =>
+  FIELD_NOT_EXIST: (field: string): string =>
+    `Invalid query, ${field} doesn't exist`,
+  WRONG_DATA_FOR_FIELD: (field: string): string =>
     `Invalid query, ${field} entry in query is wrong`,
   WRONG_CONFIRM_CODE: 'WRONG_CONFIRM_CODE',
   CONFIRMATION_SENT: 'CONFIRMATION_SENT',

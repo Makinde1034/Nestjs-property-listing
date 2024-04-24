@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
@@ -24,7 +29,7 @@ export class MailService {
   async sendEmail(data: SendGrid.MailDataRequired): Promise<void> {
     try {
       await SendGrid.send(data);
-      this.logger.log(`E-Mail sent to ${data.to}`);
+      this.logger.log('E-Mail sent Successfully');
     } catch (error) {
       this.logger.debug(error);
     }
@@ -41,7 +46,7 @@ export class MailService {
     try {
       await this.mailerService.sendMail({
         to: user.email,
-        // from: '"Support Team" <support@example.com>', // override default from
+        // From: '"Support Team" <support@example.com>', // override default from
         subject: 'Welcome to Waseet App! Confirm your Email',
         template: './confirmation', // `.hbs` extension is appended automatically
         context: {
@@ -50,7 +55,7 @@ export class MailService {
           url: link,
         },
       });
-      this.logger.debug('Email Sent');
+      this.logger.log('E-Mail sent Successfully');
     } catch (error) {
       this.logger.debug(error);
     }
@@ -67,7 +72,7 @@ export class MailService {
     try {
       await this.mailerService.sendMail({
         to: user.email,
-        // from: '"Support Team" <support@example.com>', // override default from
+        // From: '"Support Team" <support@example.com>', // override default from
         subject: 'Reset Your Password',
         template: './password-reset', // `.hbs` extension is appended automatically
         context: {

@@ -3,5 +3,4 @@
  * For license. See license.txt
  */
 
-export * from './original-error.interface';
-export * from './jwt.payload.interface';
+export * from './ProfileInput';

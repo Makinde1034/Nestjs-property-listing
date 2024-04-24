@@ -3,7 +3,8 @@
  * For license. See license.txt
  */
 
-export enum UserProfileTypeEnum {
-  INDIVIDUAL = 'individual',
-  COMPANY = 'company',
+export enum MaritalStatus {
+  SINGLE = 'single',
+  MARRIED = 'married',
+  DIVORCED = 'divorced',
 }

@@ -3,5 +3,7 @@
  * For license. See license.txt
  */
 
-export * from './original-error.interface';
-export * from './jwt.payload.interface';
+export enum Gender {
+  MALE = 'male',
+  FEMALE = 'female',
+}

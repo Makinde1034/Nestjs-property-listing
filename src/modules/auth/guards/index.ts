@@ -3,5 +3,5 @@
  * For license. See license.txt
  */
 
-export * from './original-error.interface';
-export * from './jwt.payload.interface';
+export * from './access-token.guard';
+export * from './gql-throttler.guard';

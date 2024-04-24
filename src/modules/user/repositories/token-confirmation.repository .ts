@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { Injectable } from '@nestjs/common';
 import { TokenConfirmation } from '../../../entities';
 import { EntityRepository } from '../../core/base.class/entity.repository';

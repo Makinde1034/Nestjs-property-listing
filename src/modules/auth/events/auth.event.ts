@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { Injectable, Logger } from '@nestjs/common';
 import { AuthService } from '../auth.service';
 import { OnEvent } from '@nestjs/event-emitter';

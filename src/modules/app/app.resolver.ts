@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { Query, Resolver } from '@nestjs/graphql';
 import { I18n, I18nContext } from 'nestjs-i18n';
 
