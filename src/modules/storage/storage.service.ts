@@ -31,7 +31,7 @@ export class StorageService {
    * @returns {Promise<string>}
    */
   async upload(fileData: Express.Multer.File): Promise<string> {
-    await new Promise(() => {
+    await new Promise(async () => {
       const name = this.getFileName(fileData.filename);
       const file = this.storage.bucket(this.bucket).file(name);
       const stream = file.createWriteStream();
@@ -43,6 +43,7 @@ export class StorageService {
         return error;
       });
       stream.end(fileData.buffer);
+      await file.save(fileData.buffer);
     });
     return `${StorageConfig.baseUrl}/${this.bucket}/${name}`;
   }
