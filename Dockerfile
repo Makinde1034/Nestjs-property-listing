@@ -25,7 +25,8 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Install only production dependencies
-RUN npm install --only=production
+# Set the prepare scripts to empty to not run husky in production
+RUN npm set-script prepare '' && npm install --production
 
 # Copy built assets from the builder stage
 COPY --from=builder /usr/src/app/dist ./dist
