@@ -9,6 +9,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import * as SendGrid from '@sendgrid/mail';
 import { User } from 'src/entities';
 import { AppInfo } from 'src/common/utils/AppInfo';
+import { EmailNotificationPayload } from 'src/common/interface';
 
 @Injectable()
 export class MailService {
@@ -80,6 +81,38 @@ export class MailService {
           name: `${user.firstName} ${user.lastName}`,
           url: link,
           app: AppInfo.APP_NAME,
+        },
+      });
+      this.logger.debug('Email Sent');
+    } catch (error) {
+      this.logger.debug(error);
+    }
+  }
+
+  /**
+   * Send Email Notification
+   * @async
+   * @param {User} user
+   * @param {EmailNotificationPayload} data
+   * @returns {Promise<void>}
+   */
+  async sendEmailNotification(
+    user: User,
+    data: EmailNotificationPayload,
+  ): Promise<void> {
+    const { message, title } = data;
+    try {
+      await this.mailerService.sendMail({
+        to: user.email,
+        // From: '"Support Team" <support@example.com>', // override default from
+        subject: title,
+        template: './notification', // `.hbs` extension is appended automatically
+        context: {
+          // ✏️ filling curly brackets with content
+          name: `${user.firstName} ${user.lastName}`,
+          message,
+          app: AppInfo.APP_NAME,
+          title,
         },
       });
       this.logger.debug('Email Sent');

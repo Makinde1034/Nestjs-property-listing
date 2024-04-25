@@ -8,3 +8,4 @@ export * from './user.entity';
 export * from './company.entity';
 export * from './token-confirmation.entity';
 export * from './identity.entity';
+export * from './notification.entity';

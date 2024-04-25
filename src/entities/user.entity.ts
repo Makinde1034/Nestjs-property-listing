@@ -106,6 +106,8 @@ export class User extends BaseEntity {
   @DeleteDateColumn()
   deletedAt: Date;
 
+  notificationToken: string;
+
   @BeforeInsert()
   @BeforeUpdate()
   async hashPassword() {
