@@ -47,6 +47,18 @@ type User {
   deletedAt: DateTime!
 }
 
+type Notification {
+  id: ID!
+  title: String!
+  message: String!
+  read: Boolean
+  type: String
+  expiredAt: DateTime
+  recipient: User!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type TokenType {
   accessToken: String!
   refreshToken: String!
@@ -64,6 +76,7 @@ type SuccessResponse {
 type Query {
   app: String!
   user: User!
+  listNotifications: [Notification!]!
 }
 
 type Mutation {
@@ -74,7 +87,8 @@ type Mutation {
   biometricLogin(LoginInput: BiometricLogin!): String!
   resetPasswordRequest(RequestInput: PasswordResetRequestDto!): SuccessResponse!
   resetPassword(ResetInput: PasswordResetDto!): SuccessResponse!
-  updateProfile(ProfileInput: ProfileInput!): User!
+  updateProfile(id: String!): Notification!
+  sendNotification(RequestInput: NotificationInput!): String!
 }
 
 input RegisterInput {
@@ -123,22 +137,11 @@ input PasswordResetDto {
   password: String!
 }
 
-input ProfileInput {
-  firstName: String!
-  lastName: String!
-  gender: String!
-  maritalStatus: String!
-  occupation: String!
-  language: String!
-  dateOfBirth: DateTime!
-  email: String!
-  phone: String!
-  nationalIdentity: IdentityInput
-}
-
-input IdentityInput {
-  nationality: String!
-  type: String!
-  identityNumber: String!
-  dateOfExpiry: DateTime!
+input NotificationInput {
+  title: String!
+  message: String!
+  isEmail: Boolean!
+  isPushNotifcation: Boolean!
+  recipients: [String!]!
+  deepLink: String
 }

@@ -18,6 +18,8 @@ import { UserModule } from './modules/user/user.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MailModule } from './modules/mail/mail.module';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { StorageModule } from './modules/storage/storage.module';
+import { NotificationModule } from './modules/notification/notification.module';
 
 @Module({
   imports: [
@@ -57,6 +59,8 @@ import { ThrottlerModule } from '@nestjs/throttler';
     EventEmitterModule.forRoot(),
     MailModule,
     ThrottlerModule.forRoot(),
+    StorageModule,
+    NotificationModule,
   ],
   controllers: [],
   providers: [AppResolver],

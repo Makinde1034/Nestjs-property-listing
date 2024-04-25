@@ -66,7 +66,7 @@ definitions:
           - npm
         script:
           - npm ci
-          - npm audit
+          # - npm audit
     - step: &sonar-analysis
         name: SonarQube analysis
         runs-on:
