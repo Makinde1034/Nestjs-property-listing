@@ -4,21 +4,21 @@
  */
 
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { ListingTypeService } from './listing-type.service';
 import { UseGuards } from '@nestjs/common';
-import { AccessTokenGuard } from '../auth/guards';
+import { AccessTokenGuard } from '../../auth/guards';
 import {
   AttributeSetInput,
   AttributeDeleteInput,
   AttributeInput,
   AttributeSetUpdateInput,
   AttributeUpdateInput,
-} from './dtos';
-import { Attribute, AttributeSet } from '../../entities';
+} from '../dtos';
+import { Attribute, AttributeSet } from '../../../entities';
+import { AttributeService } from '../services';
 
 @Resolver()
-export class ListingTypeResolver {
-  constructor(private readonly listingTypeService: ListingTypeService) {}
+export class AttributeResolver {
+  constructor(private readonly attributeService: AttributeService) {}
 
   /**
    * Fetch Attributes
@@ -29,7 +29,7 @@ export class ListingTypeResolver {
   @Query(() => [Attribute])
   @UseGuards(AccessTokenGuard)
   async fetchAttributes(): Promise<Attribute[]> {
-    return await this.listingTypeService.findAllAttributes();
+    return await this.attributeService.findAllAttributes();
   }
 
   /**
@@ -44,7 +44,7 @@ export class ListingTypeResolver {
   async createAttribute(
     @Args('RequestInput') RequestInput: AttributeInput,
   ): Promise<Attribute> {
-    return await this.listingTypeService.createAttribute(RequestInput);
+    return await this.attributeService.createAttribute(RequestInput);
   }
 
   /**
@@ -59,7 +59,7 @@ export class ListingTypeResolver {
   async updateAttribute(
     @Args('RequestInput') RequestInput: AttributeUpdateInput,
   ): Promise<Attribute> {
-    return await this.listingTypeService.updateAttribute(RequestInput);
+    return await this.attributeService.updateAttribute(RequestInput);
   }
 
   /**
@@ -74,7 +74,7 @@ export class ListingTypeResolver {
   async deleteAttribute(
     @Args('RequestInput') RequestInput: AttributeDeleteInput,
   ): Promise<string> {
-    return await this.listingTypeService.deleteAttribute(RequestInput);
+    return await this.attributeService.deleteAttribute(RequestInput);
   }
 
   /**
@@ -86,7 +86,7 @@ export class ListingTypeResolver {
   @Query(() => [AttributeSet])
   @UseGuards(AccessTokenGuard)
   async fetchAttributeSets(): Promise<AttributeSet[]> {
-    return await this.listingTypeService.findAllAttributeSets();
+    return await this.attributeService.findAllAttributeSets();
   }
 
   /**
@@ -101,7 +101,7 @@ export class ListingTypeResolver {
   async createAttributeSet(
     @Args('RequestInput') RequestInput: AttributeSetInput,
   ): Promise<AttributeSet> {
-    return await this.listingTypeService.createAttributeSet(RequestInput);
+    return await this.attributeService.createAttributeSet(RequestInput);
   }
 
   /**
@@ -116,7 +116,7 @@ export class ListingTypeResolver {
   async updateAttributeSet(
     @Args('RequestInput') RequestInput: AttributeSetUpdateInput,
   ): Promise<AttributeSet> {
-    return await this.listingTypeService.updateAttributeSet(RequestInput);
+    return await this.attributeService.updateAttributeSet(RequestInput);
   }
 
   /**
@@ -131,6 +131,6 @@ export class ListingTypeResolver {
   async deleteAttributeSet(
     @Args('RequestInput') RequestInput: AttributeDeleteInput,
   ): Promise<string> {
-    return await this.listingTypeService.deleteAttributeSet(RequestInput);
+    return await this.attributeService.deleteAttributeSet(RequestInput);
   }
 }

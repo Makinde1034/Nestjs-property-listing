@@ -4,8 +4,8 @@
  */
 
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { AttributeSetRepository } from './repositories/attribute-set.repository';
-import { AttributeRepository } from './repositories';
+import { AttributeSetRepository } from '../repositories/attribute-set.repository';
+import { AttributeRepository } from '../repositories';
 import { Attribute, AttributeSet } from 'src/entities';
 import {
   AttributeInput,
@@ -13,12 +13,12 @@ import {
   AttributeSetUpdateInput,
   AttributeUpdateInput,
   AttributeDeleteInput,
-} from './dtos';
+} from '../dtos';
 import { In } from 'typeorm';
 import { AppStrings } from 'src/common/messages/app.strings';
 
 @Injectable()
-export class ListingTypeService {
+export class AttributeService {
   constructor(
     private readonly attributeRepository: AttributeRepository,
     private readonly attributeSetRepository: AttributeSetRepository,

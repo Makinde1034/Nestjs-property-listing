@@ -31,5 +31,6 @@ export class HttpExceptionFilter implements GqlExceptionFilter {
     };
 
     ctx.res.status(status).json(response);
+    return;
   }
 }

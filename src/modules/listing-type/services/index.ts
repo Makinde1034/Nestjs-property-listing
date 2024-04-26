@@ -3,5 +3,5 @@
  * For license. See license.txt
  */
 
-export * from './AttributeInput';
-export * from './ListingTypeInput';
+export * from './listing-type.service';
+export * from './attribute.service';

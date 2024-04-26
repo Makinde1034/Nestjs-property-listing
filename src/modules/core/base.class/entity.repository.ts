@@ -110,7 +110,8 @@ export abstract class EntityRepository<T extends BaseEntity> {
     } catch (error: any) {
       if (error.driverError?.code === PostgresError.UNIQUE_VIOLATION) {
         throw new BadRequestException(
-          `${this.entityName.toUpperCase()} already exist`,
+          // `${this.entityName.toUpperCase()} already exist`,
+          'Error Here',
         );
       }
       throw error;
