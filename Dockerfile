@@ -8,7 +8,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm install --production=false
 
 # Copy the rest of the application code
 COPY . .
@@ -25,7 +25,6 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Install only production dependencies
-# Set the prepare scripts to empty to not run husky in production
 RUN npm install --omit=dev
 
 # Copy built assets from the builder stage
