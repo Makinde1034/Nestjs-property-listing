@@ -20,6 +20,7 @@ import { MailModule } from './modules/mail/mail.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { StorageModule } from './modules/storage/storage.module';
 import { NotificationModule } from './modules/notification/notification.module';
+import { ListingTypeModule } from './modules/listing-type/listing-type.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { NotificationModule } from './modules/notification/notification.module';
     ThrottlerModule.forRoot(),
     StorageModule,
     NotificationModule,
+    ListingTypeModule,
   ],
   controllers: [],
   providers: [AppResolver],

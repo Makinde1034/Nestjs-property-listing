@@ -3,4 +3,4 @@
  * For license. See license.txt
  */
 
-export * from './NotificationInput';
+export * from './AttributeInput';

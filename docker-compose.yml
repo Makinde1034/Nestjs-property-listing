@@ -4,17 +4,19 @@ services:
   backend:
     build:
       context: .
-      target: builder
+      target: production
     volumes:
       - .:/usr/src/app
       - ./node_modules:/usr/src/app/node_modules
-    command: sh -c "npm install &&  npm run migration:run && npm run seed && npm run start:dev"
+    command: sh -c "npm install &&  npm run migration:run && npm run start:dev"
     env_file:
       - .env
     ports:
       - ${PORT}:3000 # <host port> : <container port>
     networks:
       - app-network
+    depends_on:
+      - postgres
   #
   # Postgres DB
   #
@@ -29,6 +31,7 @@ services:
     volumes:
       - db:/var/lib/postgresql/data
     command: -p ${POSTGRES_PORT}
+    restart: always
     networks:
       - app-network
 
