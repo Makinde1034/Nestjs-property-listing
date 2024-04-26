@@ -59,6 +59,30 @@ type Notification {
   updatedAt: DateTime!
 }
 
+type AttributeSet {
+  id: ID!
+  name: String!
+  attributes: [Attribute!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Attribute {
+  id: ID!
+  name: String!
+  type: String!
+  icon: String
+  dropDownOptions: [String!]
+  isRequired: Boolean!
+  showInSummary: Boolean!
+  hiddenToBuyers: Boolean!
+  showInComparison: Boolean!
+  showInFilters: Boolean!
+  attributeSets: [AttributeSet!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type TokenType {
   accessToken: String!
   refreshToken: String!
@@ -77,6 +101,8 @@ type Query {
   app: String!
   user: User!
   listNotifications: [Notification!]!
+  fetchAttributes: [Attribute!]!
+  fetchAttributeSets: [AttributeSet!]!
 }
 
 type Mutation {
@@ -89,6 +115,12 @@ type Mutation {
   resetPassword(ResetInput: PasswordResetDto!): SuccessResponse!
   updateProfile(id: String!): Notification!
   sendNotification(RequestInput: NotificationInput!): String!
+  createAttribute(RequestInput: AttributeInput!): Attribute!
+  updateAttribute(RequestInput: AttributeUpdateInput!): Attribute!
+  deleteAttribute(RequestInput: AttributeDeleteInput!): String!
+  createAttributeSet(RequestInput: AttributeSetInput!): AttributeSet!
+  updateAttributeSet(RequestInput: AttributeSetUpdateInput!): AttributeSet!
+  deleteAttributeSet(RequestInput: AttributeDeleteInput!): String!
 }
 
 input RegisterInput {
@@ -144,4 +176,42 @@ input NotificationInput {
   isPushNotifcation: Boolean!
   recipients: [String!]!
   deepLink: String
+}
+
+input AttributeInput {
+  name: String!
+  type: String!
+  isRequired: Boolean!
+  showInSummary: Boolean!
+  hiddenToBuyers: Boolean!
+  showInComparison: Boolean!
+  showInFilters: Boolean!
+  dropDownOptions: [String!]
+}
+
+input AttributeUpdateInput {
+  name: String!
+  type: String!
+  isRequired: Boolean!
+  showInSummary: Boolean!
+  hiddenToBuyers: Boolean!
+  showInComparison: Boolean!
+  showInFilters: Boolean!
+  dropDownOptions: [String!]
+  id: String!
+}
+
+input AttributeDeleteInput {
+  id: String!
+}
+
+input AttributeSetInput {
+  name: String!
+  attributes: [String!]!
+}
+
+input AttributeSetUpdateInput {
+  name: String!
+  attributes: [String!]!
+  id: String!
 }

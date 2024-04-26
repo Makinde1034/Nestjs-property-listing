@@ -9,3 +9,5 @@ export * from './company.entity';
 export * from './token-confirmation.entity';
 export * from './identity.entity';
 export * from './notification.entity';
+export * from './attribute.entity';
+export * from './attribute-set.entity';
