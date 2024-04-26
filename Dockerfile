@@ -19,6 +19,8 @@ RUN npm run build
 # Stage 2: Setup production environment
 FROM node:18-alpine as production
 
+ENV NODE_ENV=production
+
 WORKDIR /usr/src/app
 
 # Copy package.json and package-lock.json
