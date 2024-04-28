@@ -1,39 +1,22 @@
-# Stage 1: Build the application
-FROM node:18-alpine as builder
+# Base image
+FROM node:18
 
-# Set working directory
+# Create app directory
 WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json
+# A wildcard is used to ensure both package.json AND package-lock.json are copied
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install --production=false
+# Install app dependencies
+RUN npm install
 
-# Copy the rest of the application code
+# Bundle app source
 COPY . .
 
-# Build the application
+# Creates a "dist" folder with the production build
 RUN npm run build
-
-# Stage 2: Setup production environment
-FROM node:18-alpine as production
-
-ENV NODE_ENV=production
-
-WORKDIR /usr/src/app
-
-# Copy package.json and package-lock.json
-COPY package*.json ./
-
-# Install only production dependencies
-RUN npm install --omit=dev
-
-# Copy built assets from the builder stage
-COPY --from=builder /usr/src/app/dist ./dist
 
 # Expose the port the app runs on
 EXPOSE 3000
-
 # Run the application
 CMD ["npm", "run", "start:prod"]
