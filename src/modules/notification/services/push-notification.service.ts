@@ -5,13 +5,15 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import * as firebase from 'firebase-admin';
-import * as path from 'path';
 import { PushNotificationPayload } from 'src/common/interface';
+import StorageConfig from 'src/config/serviceAccount/storage-config';
 
 firebase.initializeApp({
-  credential: firebase.credential.cert(
-    path.join(__dirname, '..', '..', '..', '..', 'firebase.json'),
-  ),
+  credential: firebase.credential.cert({
+    projectId: StorageConfig.projectId,
+    clientEmail: StorageConfig.clientEmail,
+    privateKey: StorageConfig.privateKey,
+  }),
 });
 
 @Injectable()
@@ -22,7 +24,7 @@ export class PushNotificationService {
    * Update User Profile
    *
    * @async
-   * @param {PushNotificationPayload[]} pushNotifications
+   * @param {PushNotificationPayload} notification
    * @returns {Promise<void>}
    */
   async sendPushNotification(

@@ -5,7 +5,7 @@
 
 import { Storage, UploadResponse } from '@google-cloud/storage';
 import { Injectable, Logger } from '@nestjs/common';
-import StorageConfig from './storage-config';
+import StorageConfig from '../../config/serviceAccount/storage-config';
 import { generatereference } from 'src/common/utils/functions';
 
 @Injectable()
@@ -13,11 +13,17 @@ export class StorageService {
   private readonly logger = new Logger(StorageService.name);
   private storage: Storage;
   private bucket: string;
-
+  // KeyFilename: StorageConfig.keyFileName,
   constructor() {
     this.storage = new Storage({
       projectId: StorageConfig.projectId,
-      keyFilename: StorageConfig.keyFileName,
+      scopes: 'https://www.googleapis.com/auth/cloud-platform',
+      credentials: {
+        client_email: StorageConfig.clientEmail,
+        private_key: StorageConfig.privateKey,
+        client_id: StorageConfig.clientID,
+        private_key_id: StorageConfig.privateKeyId,
+      },
     });
 
     this.bucket = StorageConfig.bucketName;
