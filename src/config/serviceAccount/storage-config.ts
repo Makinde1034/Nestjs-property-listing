@@ -3,6 +3,10 @@
  * For license. See license.txt
  */
 
+import { config } from 'dotenv';
+
+config();
+
 const StorageConfig = {
   projectId: process.env.GC_PROJECT_ID,
   bucketName: process.env.GC_BUCKET_NAME,

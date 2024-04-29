@@ -13,7 +13,7 @@ export class StorageService {
   private readonly logger = new Logger(StorageService.name);
   private storage: Storage;
   private bucket: string;
-  // KeyFilename: StorageConfig.keyFileName,
+
   constructor() {
     this.storage = new Storage({
       projectId: StorageConfig.projectId,
