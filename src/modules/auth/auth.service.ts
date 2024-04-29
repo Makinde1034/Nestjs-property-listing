@@ -86,6 +86,7 @@ export class AuthService {
       return newUser;
     } catch (error) {
       this.logger.log({ error });
+      throw new BadRequestException(error);
     }
   }
 

@@ -4,19 +4,26 @@
  */
 
 import { Module } from '@nestjs/common';
-import { ListingTypeResolver } from './listing-type.resolver';
-import { ListingTypeService } from './listing-type.service';
+import { ListingTypeResolver, AttributeResolver } from './resolvers';
+import { ListingTypeService, AttributeService } from './services';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Attribute, AttributeSet } from 'src/entities';
-import { AttributeRepository, AttributeSetRepository } from './repositories';
+import { Attribute, AttributeSet, ListingType } from 'src/entities';
+import {
+  AttributeRepository,
+  AttributeSetRepository,
+  ListingTypeRepository,
+} from './repositories';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Attribute, AttributeSet])],
+  imports: [TypeOrmModule.forFeature([Attribute, AttributeSet, ListingType])],
   providers: [
     ListingTypeResolver,
     ListingTypeService,
+    AttributeResolver,
+    AttributeService,
     AttributeRepository,
     AttributeSetRepository,
+    ListingTypeRepository,
   ],
 })
 export class ListingTypeModule {}

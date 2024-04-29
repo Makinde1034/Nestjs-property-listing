@@ -11,3 +11,4 @@ export * from './identity.entity';
 export * from './notification.entity';
 export * from './attribute.entity';
 export * from './attribute-set.entity';
+export * from './listing-type.entity';

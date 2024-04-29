@@ -13,27 +13,26 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
-import { Attribute } from './attribute.entity';
-import { ListingType } from './listing-type.entity';
+import { AttributeSet } from './attribute-set.entity';
 
 @Entity()
 @ObjectType()
-export class AttributeSet extends BaseEntity {
+export class ListingType extends BaseEntity {
   @Column()
   @Field()
   name: string;
 
-  @Field(() => [Attribute])
-  @ManyToMany(() => Attribute, (attribute) => attribute.attributeSets, {
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  icon: string;
+
+  @Field(() => [AttributeSet])
+  @ManyToMany(() => AttributeSet, (attribute) => attribute.listingTypes, {
     cascade: true,
     eager: true,
   })
-  @JoinTable({ name: 'attributes_attribute_set' })
-  attributes: Attribute[];
-
-  @Field(() => [ListingType])
-  @ManyToMany(() => ListingType, (listing) => listing.attributeSets)
-  listingTypes: ListingType[];
+  @JoinTable({ name: 'listing_types_attribute_sets' })
+  attributeSets: AttributeSet[];
 
   @Field()
   @CreateDateColumn()

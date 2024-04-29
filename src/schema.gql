@@ -59,10 +59,20 @@ type Notification {
   updatedAt: DateTime!
 }
 
+type ListingType {
+  id: ID!
+  name: String!
+  icon: String
+  attributeSets: [AttributeSet!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type AttributeSet {
   id: ID!
   name: String!
   attributes: [Attribute!]!
+  listingTypes: [ListingType!]!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -101,6 +111,7 @@ type Query {
   app: String!
   user: User!
   listNotifications: [Notification!]!
+  fetchListingTypes: [ListingType!]!
   fetchAttributes: [Attribute!]!
   fetchAttributeSets: [AttributeSet!]!
 }
@@ -115,6 +126,9 @@ type Mutation {
   resetPassword(ResetInput: PasswordResetDto!): SuccessResponse!
   updateProfile(id: String!): Notification!
   sendNotification(RequestInput: NotificationInput!): String!
+  createListingType(RequestInput: ListingTypeInput!): ListingType!
+  updateListingType(RequestInput: ListingTypeUpdateInput!): ListingType!
+  deleteListingType(RequestInput: ListingTypeDeleteInput!): String!
   createAttribute(RequestInput: AttributeInput!): Attribute!
   updateAttribute(RequestInput: AttributeUpdateInput!): Attribute!
   deleteAttribute(RequestInput: AttributeDeleteInput!): String!
@@ -176,6 +190,21 @@ input NotificationInput {
   isPushNotifcation: Boolean!
   recipients: [String!]!
   deepLink: String
+}
+
+input ListingTypeInput {
+  name: String!
+  attributeSets: [String!]!
+}
+
+input ListingTypeUpdateInput {
+  name: String!
+  attributeSets: [String!]!
+  id: String!
+}
+
+input ListingTypeDeleteInput {
+  id: String!
 }
 
 input AttributeInput {

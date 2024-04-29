@@ -5,7 +5,7 @@
 
 import { Storage, UploadResponse } from '@google-cloud/storage';
 import { Injectable, Logger } from '@nestjs/common';
-import StorageConfig from './storage-config';
+import StorageConfig from '../../config/serviceAccount/storage-config';
 import { generatereference } from 'src/common/utils/functions';
 
 @Injectable()
@@ -17,7 +17,13 @@ export class StorageService {
   constructor() {
     this.storage = new Storage({
       projectId: StorageConfig.projectId,
-      keyFilename: StorageConfig.keyFileName,
+      scopes: 'https://www.googleapis.com/auth/cloud-platform',
+      credentials: {
+        client_email: StorageConfig.clientEmail,
+        private_key: StorageConfig.privateKey,
+        client_id: StorageConfig.clientID,
+        private_key_id: StorageConfig.privateKeyId,
+      },
     });
 
     this.bucket = StorageConfig.bucketName;
@@ -31,21 +37,20 @@ export class StorageService {
    * @returns {Promise<string>}
    */
   async upload(fileData: Express.Multer.File): Promise<string> {
-    await new Promise(async () => {
-      const name = this.getFileName(fileData.filename);
+    return await new Promise((resolve, reject) => {
+      const name = this.getFileName(fileData.originalname);
       const file = this.storage.bucket(this.bucket).file(name);
       const stream = file.createWriteStream();
       stream.on('finish', () => {
         this.logger.log('stream Finished');
+        resolve(`${StorageConfig.baseUrl}/${this.bucket}/${name}`);
       });
       stream.on('error', (error) => {
         this.logger.error('stream error', error);
-        return error;
+        reject(error);
       });
       stream.end(fileData.buffer);
-      await file.save(fileData.buffer);
     });
-    return `${StorageConfig.baseUrl}/${this.bucket}/${name}`;
   }
 
   async delete(path: string) {

@@ -47,6 +47,7 @@ import { ListingTypeModule } from './modules/listing-type/listing-type.module';
       formatError: (err) => formatError(err),
       fieldResolverEnhancers: ['interceptors'],
       context: ({ req, res }) => ({ req, res }),
+      playground: true,
     }),
     TypeOrmModule.forRootAsync({
       useFactory: (configService: ConfigService) =>
