@@ -8,7 +8,6 @@ import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { I18nMiddleware } from 'nestjs-i18n';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
-import { HttpExceptionFilter } from './common/exceptions/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -32,7 +31,6 @@ async function bootstrap() {
     }),
   );
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
-  app.useGlobalFilters(new HttpExceptionFilter());
 
   await app.listen(PORT, HOST);
 }
