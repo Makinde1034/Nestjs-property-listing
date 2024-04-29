@@ -94,9 +94,12 @@ definitions:
         runs-on:
           - self.hosted
           - linux
+        services:
+          - docker
         image: caprover/cli-caprover:v2.1.1
         script:
-          - docker run caprover/cli-caprover:v2.1.1 caprover deploy --caproverUrl ${{ secrets.CAPROVER_URL }} --caproverPassword ${{ secrets.CAPROVER_PASSWORD }} --caproverApp ${{ secrets.CAPROVER_APP }} --imageName "$DOCKERHUB_USERNAME/$DOCKERHUB_REPO:$BITBUCKET_COMMIT"
+          - docker run caprover/cli-caprover:v2.1.1 caprover deploy --caproverUrl $CAPROVER_URL  --caproverPassword $CAPROVER_PASSWORD --caproverApp $CAPROVER_APP --imageName "$DOCKERHUB_USERNAME/$DOCKERHUB_REPO:$BITBUCKET_COMMIT"
+
 
   
 
