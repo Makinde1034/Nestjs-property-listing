@@ -156,11 +156,12 @@ type SuccessResponse {
 type Query {
   app: String!
   user: User!
-  fetchAttributeSets: [AttributeSet!]!
+  fetchPermissions: [Permission!]!
   fetchRoles: [Role!]!
   listNotifications: [Notification!]!
   fetchListingTypes: [ListingType!]!
   fetchAttributes: [Attribute!]!
+  fetchAttributeSets: [AttributeSet!]!
 }
 
 type Mutation {

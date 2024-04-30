@@ -23,7 +23,7 @@ export class RoleResolver {
    */
   @Query(() => [Permission])
   @UseGuards(AccessTokenGuard)
-  async fetchAttributeSets(): Promise<Permission[]> {
+  async fetchPermissions(): Promise<Permission[]> {
     return await this.roleService.findAllPermissions();
   }
 
