@@ -10,6 +10,8 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   OneToOne,
   UpdateDateColumn,
 } from 'typeorm';
@@ -20,6 +22,8 @@ import { Company } from './company.entity';
 import * as bcrypt from 'bcrypt';
 import { Gender, MaritalStatus } from 'src/common/enums';
 import { NationalIdentity } from './identity.entity';
+import { Exclude } from 'class-transformer';
+import { Role } from './role.entity';
 
 @Entity()
 @ObjectType()
@@ -93,6 +97,12 @@ export class User extends BaseEntity {
     eager: true,
   })
   nationalIdentity?: NationalIdentity;
+
+  @Exclude()
+  @Field(() => Role)
+  @ManyToOne('Role', { eager: true })
+  @JoinColumn()
+  role: Role;
 
   @Field()
   @CreateDateColumn()

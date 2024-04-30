@@ -24,6 +24,23 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type Permission {
+  id: ID!
+  name: String!
+  slug: String!
+  permissionGroup: String!
+  visible: Boolean!
+}
+
+type Role {
+  id: ID!
+  name: String!
+  slug: String!
+  permissions: [Permission!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type User {
   id: ID!
   userType: String!
@@ -42,6 +59,7 @@ type User {
   biometricKey: String
   company: Company
   nationalIdentity: NationalIdentity
+  role: Role!
   createdAt: DateTime!
   updatedAt: DateTime!
   deletedAt: DateTime!
@@ -110,10 +128,11 @@ type SuccessResponse {
 type Query {
   app: String!
   user: User!
+  fetchAttributeSets: [AttributeSet!]!
+  fetchRoles: [Role!]!
   listNotifications: [Notification!]!
   fetchListingTypes: [ListingType!]!
   fetchAttributes: [Attribute!]!
-  fetchAttributeSets: [AttributeSet!]!
 }
 
 type Mutation {
@@ -125,6 +144,9 @@ type Mutation {
   resetPasswordRequest(RequestInput: PasswordResetRequestDto!): SuccessResponse!
   resetPassword(ResetInput: PasswordResetDto!): SuccessResponse!
   updateProfile(id: String!): Notification!
+  createRole(RequestInput: RoleInputDto!): Role!
+  updateRole(RequestInput: RoleUpdateInputDto!): Role!
+  deleteRole(RequestInput: RoleIdInputDto!): String!
   sendNotification(RequestInput: NotificationInput!): String!
   createListingType(RequestInput: ListingTypeInput!): ListingType!
   updateListingType(RequestInput: ListingTypeUpdateInput!): ListingType!
@@ -181,6 +203,21 @@ input PasswordResetDto {
   token: String!
   email: String!
   password: String!
+}
+
+input RoleInputDto {
+  name: String!
+  permissions: [Float!]!
+}
+
+input RoleUpdateInputDto {
+  roleId: Float!
+  name: String!
+  permissions: [Float!]!
+}
+
+input RoleIdInputDto {
+  roleId: Float!
 }
 
 input NotificationInput {

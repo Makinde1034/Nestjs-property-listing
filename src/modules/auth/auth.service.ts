@@ -13,7 +13,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UserService } from '../user/user.service';
+import { UserService } from '../user/services/user.service';
 import {
   RegisterEventDto,
   RegisterInput,

@@ -3,6 +3,5 @@
  * For license. See license.txt
  */
 
-export * from './ProfileInput';
-export * from './ImageResponse';
-export * from './RoleInput';
+export * from './user.resolver';
+export * from './role.resolver';

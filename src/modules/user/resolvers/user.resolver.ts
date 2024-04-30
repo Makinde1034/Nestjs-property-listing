@@ -5,10 +5,10 @@
 
 import { UseGuards } from '@nestjs/common';
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { AccessTokenGuard } from '../auth/guards';
+import { AccessTokenGuard } from '../../auth/guards';
 import { User } from 'src/entities';
-import { UserService } from './user.service';
-import { ProfileInput } from './dtos';
+import { UserService } from '../services/user.service';
+import { ProfileInput } from '../dtos';
 
 @Resolver()
 export class UserResolver {

@@ -6,3 +6,4 @@
 export * from './access-token.guard';
 export * from './gql-throttler.guard';
 export * from './rest-api-token.guard';
+export * from './permission.guard';

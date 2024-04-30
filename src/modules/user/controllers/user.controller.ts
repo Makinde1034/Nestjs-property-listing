@@ -12,9 +12,9 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { RestAccessTokenGuard } from '../auth/guards';
-import { UserService } from './user.service';
-import { ImageDataResponse } from './dtos';
+import { RestAccessTokenGuard } from '../../auth/guards';
+import { UserService } from '../services/user.service';
+import { ImageDataResponse } from '../dtos';
 
 @Controller('api/user')
 export class UserController {

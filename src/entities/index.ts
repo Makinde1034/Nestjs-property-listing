@@ -12,3 +12,5 @@ export * from './notification.entity';
 export * from './attribute.entity';
 export * from './attribute-set.entity';
 export * from './listing-type.entity';
+export * from './role.entity';
+export * from './permission.entity';
