@@ -271,6 +271,7 @@ export class UserService {
       roles,
       password,
       employeeId: `${generateOtp}`,
+      userType: 'staff',
     };
     const staff = await this.staffRepository.create(staffData);
     this.eventEmitter.emit(
