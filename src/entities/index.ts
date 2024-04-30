@@ -14,3 +14,4 @@ export * from './attribute-set.entity';
 export * from './listing-type.entity';
 export * from './role.entity';
 export * from './permission.entity';
+export * from './staff.entity';

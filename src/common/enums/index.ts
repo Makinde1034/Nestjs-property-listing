@@ -9,3 +9,4 @@ export * from './gender.enum';
 export * from './marital-status.enum';
 export * from './notification.enum';
 export * from './attribute.enum';
+export * from './user-status.enum';

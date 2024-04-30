@@ -10,9 +10,8 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinColumn,
-  ManyToOne,
   OneToOne,
+  TableInheritance,
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
@@ -20,13 +19,14 @@ import { Field, ObjectType } from '@nestjs/graphql';
 import { UserProfileType } from '../common/types';
 import { Company } from './company.entity';
 import * as bcrypt from 'bcrypt';
-import { Gender, MaritalStatus } from 'src/common/enums';
+import { Gender, MaritalStatus, UserStatus } from 'src/common/enums';
 import { NationalIdentity } from './identity.entity';
-import { Exclude } from 'class-transformer';
-import { Role } from './role.entity';
 
 @Entity()
 @ObjectType()
+@TableInheritance({
+  column: { type: 'varchar', name: 'userType', select: true },
+})
 export class User extends BaseEntity {
   @Column()
   @Field()
@@ -39,6 +39,10 @@ export class User extends BaseEntity {
   @Column()
   @Field()
   lastName: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  middleName: string;
 
   @Column({ unique: true })
   @Field()
@@ -84,6 +88,10 @@ export class User extends BaseEntity {
   @Field({ nullable: true })
   biometricKey: string;
 
+  @Field({ nullable: true, defaultValue: UserStatus.PENDING })
+  @Column({ nullable: true, default: UserStatus.PENDING })
+  status: UserStatus;
+
   @Field(() => Company, { nullable: true })
   @OneToOne(() => Company, (company) => company.user, {
     cascade: true,
@@ -97,12 +105,6 @@ export class User extends BaseEntity {
     eager: true,
   })
   nationalIdentity?: NationalIdentity;
-
-  @Exclude()
-  @Field(() => Role)
-  @ManyToOne('Role', { eager: true })
-  @JoinColumn()
-  role: Role;
 
   @Field()
   @CreateDateColumn()

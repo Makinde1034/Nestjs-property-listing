@@ -4,23 +4,48 @@
  */
 
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { UserConfirmationRepository, UserRepository } from '../repositories';
-import type { TokenConfirmation, User } from 'src/entities';
-import { DeepPartial, FindOptionsWhere, LessThan } from 'typeorm';
+import {
+  UserConfirmationRepository,
+  UserRepository,
+  StaffRepository,
+  RoleRepository,
+} from '../repositories';
+import type { Staff, TokenConfirmation, User } from 'src/entities';
+import { DeepPartial, FindOptionsWhere, In, LessThan } from 'typeorm';
 import { PostgresError } from 'pg-error-enum';
 import { addHours, isPast } from 'date-fns';
-import { generateRandomToken } from 'src/common/utils/functions';
-import { ImageResponse, ProfileInput } from '../dtos';
+import { generateOtp, generateRandomToken } from 'src/common/utils/functions';
+import {
+  CreateStaffInput,
+  ImageResponse,
+  ProfileInput,
+  StaffConfirmDto,
+  StaffCreatedData,
+  StaffCreatedEventDto,
+} from '../dtos';
 import { StorageService } from '../../storage/storage.service';
 import { AppStrings } from 'src/common/messages/app.strings';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { RegisterEventAction, UserStatus } from 'src/common/enums';
+import { MailService } from 'src/modules/mail/mail.service';
+import { ConfigService } from '@nestjs/config';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
+  private readonly frontEndUrl: string;
   constructor(
     private readonly usersRepository: UserRepository,
     private readonly tokenRepository: UserConfirmationRepository,
     private readonly storageService: StorageService,
-  ) {}
+    private readonly staffRepository: StaffRepository,
+    private readonly roleRepository: RoleRepository,
+    private readonly eventEmitter: EventEmitter2,
+    private readonly mailService: MailService,
+    private readonly configService: ConfigService,
+  ) {
+    this.frontEndUrl = this.configService.get('FRONT_END_URL');
+  }
 
   /**
    * Create User
@@ -230,16 +255,82 @@ export class UserService {
   }
 
   /**
-   * Check if User has passed permission
+   * Create Staff User
    *
-   *
-   * @param {User} user
-   * @param {string[]} permissions
-   * @returns {boolean}
+   * @async
+   * @param {CreateStaffInput} input
+   * @returns {Promise<Staff>}
    */
-  hasPermission(user: User, permissions: string[]): boolean {
-    return user.role.permissions.some((permission) =>
-      permissions.includes(permission.slug),
+  async createStaff(input: CreateStaffInput): Promise<Staff> {
+    const roles = await this.roleRepository.find({
+      where: { id: In([...input.roles]) },
+    });
+    const password = generateRandomToken(8);
+    const staffData: Partial<Staff> = {
+      ...input,
+      roles,
+      password,
+      employeeId: `${generateOtp}`,
+    };
+    const staff = await this.staffRepository.create(staffData);
+    this.eventEmitter.emit(
+      RegisterEventAction.STAFF_CREATED,
+      new StaffCreatedEventDto({ staff, password }),
     );
+    return staff;
+  }
+
+  /**
+   * Send password reset email to staff
+   * @async
+   * @param {StaffCreatedData} data
+   * @returns {Promise<void>}
+   */
+  async sendPasswordEmailToStaff(data: StaffCreatedData): Promise<void> {
+    const { staff, password } = data;
+    const { token } = await this.generateUserConfirmation(staff);
+
+    const link = `${this.frontEndUrl}/staff-confirmation?email=${staff.email}&token=${token}`;
+
+    await this.mailService.sendStaffConfirmation(staff, link, password);
+  }
+
+  /**
+   * Confirm registered staff
+   * Validate new password
+   *
+   * @async
+   * @param {StaffConfirmDto} requestInput
+   * @returns {string}
+   */
+  async staffPasswordConfirmation(
+    requestInput: StaffConfirmDto,
+  ): Promise<string> {
+    const { email, token, oldPassword, password } = requestInput;
+    const userConfirmation = await this.findTokenConfirmation(email, token);
+
+    if (userConfirmation) {
+      const { user } = userConfirmation;
+      // If user already complete account setup
+      // FE: need to redirect to /login
+      if (user.verifiedAt) {
+        throw new BadRequestException(AppStrings.ACCOUNT_ALREADY_CONFIRMED);
+      }
+
+      if (this.validateUserConfirmation(userConfirmation, token)) {
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+          throw new BadRequestException(AppStrings.INCORRECT_PASSWORD);
+        }
+        await this.staffRepository.update(user.id, {
+          verifiedAt: new Date(),
+          status: UserStatus.VERIFIED,
+          password,
+        });
+        await this.removeUserConfirmation(userConfirmation.id);
+        return AppStrings.ACCOUNT_CONFIRMED_SUCCESSFULLY;
+      }
+    }
+    throw new BadRequestException(AppStrings.WRONG_CONFIRM_CODE);
   }
 }

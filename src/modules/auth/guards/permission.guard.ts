@@ -10,19 +10,19 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { UserService } from 'src/modules/user/services/user.service';
 import { PERMISSION_KEY } from 'src/common/decorator/permission';
 import { User } from 'src/entities';
 import { GqlExecutionContext } from '@nestjs/graphql';
+import { RoleService } from '../../user/services';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
-    private userService: UserService,
+    private roleService: RoleService,
   ) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const requiredPermission = this.reflector.get<string[]>(
       PERMISSION_KEY,
       context.getHandler(),
@@ -34,7 +34,7 @@ export class PermissionsGuard implements CanActivate {
     const ctx = GqlExecutionContext.create(context);
     const user: User = ctx.getContext().req.user; // User object is attached to the request
 
-    const hasPermission = this.userService.hasPermission(
+    const hasPermission = await this.roleService.hasPermission(
       user,
       requiredPermission,
     );
