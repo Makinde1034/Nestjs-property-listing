@@ -4,14 +4,14 @@
  */
 
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { UserConfirmationRepository, UserRepository } from './repositories';
+import { UserConfirmationRepository, UserRepository } from '../repositories';
 import type { TokenConfirmation, User } from 'src/entities';
 import { DeepPartial, FindOptionsWhere, LessThan } from 'typeorm';
 import { PostgresError } from 'pg-error-enum';
 import { addHours, isPast } from 'date-fns';
 import { generateRandomToken } from 'src/common/utils/functions';
-import { ImageResponse, ProfileInput } from './dtos';
-import { StorageService } from '../storage/storage.service';
+import { ImageResponse, ProfileInput } from '../dtos';
+import { StorageService } from '../../storage/storage.service';
 import { AppStrings } from 'src/common/messages/app.strings';
 
 @Injectable()
@@ -227,5 +227,19 @@ export class UserService {
     });
 
     return { url: imageurl };
+  }
+
+  /**
+   * Check if User has passed permission
+   *
+   *
+   * @param {User} user
+   * @param {string[]} permissions
+   * @returns {boolean}
+   */
+  hasPermission(user: User, permissions: string[]): boolean {
+    return user.role.permissions.some((permission) =>
+      permissions.includes(permission.slug),
+    );
   }
 }
