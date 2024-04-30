@@ -6,4 +6,5 @@
 export enum RegisterEventAction {
   USER_CREATED = 'user.created',
   SEND_PASSWORD_RESET = 'password.reset',
+  STAFF_CREATED = 'staff.created',
 }

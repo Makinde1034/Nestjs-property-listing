@@ -4,8 +4,12 @@
  */
 
 import { Injectable } from '@nestjs/common';
-import { PermissionRepository, RoleRepository } from '../repositories';
-import { Permission, Role } from 'src/entities';
+import {
+  PermissionRepository,
+  RoleRepository,
+  StaffRepository,
+} from '../repositories';
+import { Permission, Role, User } from 'src/entities';
 import { RoleIdInputDto, RoleInputDto, RoleUpdateInputDto } from '../dtos';
 import { In } from 'typeorm';
 import slugify from 'slugify';
@@ -16,6 +20,7 @@ export class RoleService {
   constructor(
     private readonly roleRepository: RoleRepository,
     private readonly permissionRepository: PermissionRepository,
+    private readonly staffRepository: StaffRepository,
   ) {}
 
   /**
@@ -35,7 +40,9 @@ export class RoleService {
    * @returns {Promise<Role[]>}
    */
   async findAllRoles(): Promise<Role[]> {
-    return await this.roleRepository.find();
+    return await this.roleRepository.find({
+      relations: ['permissions'],
+    });
   }
 
   /**
@@ -55,7 +62,8 @@ export class RoleService {
       slug: slugify(input.name),
     };
     const roleData = this.roleRepository.create(data);
-    return await this.roleRepository.save(roleData);
+    const role = await this.roleRepository.save(roleData);
+    return role;
   }
 
   /**
@@ -93,5 +101,24 @@ export class RoleService {
     });
     await this.roleRepository.remove(role);
     return AppStrings.ROLE_DELETED_SUCCESSFULLY;
+  }
+
+  /**
+   * Check if User has passed permission
+   *
+   *
+   * @param {User} user
+   * @param {string[]} requiredPermissions
+   * @returns {boolean}
+   */
+  async hasPermission(
+    user: User,
+    requiredPermissions: string[],
+  ): Promise<boolean> {
+    const staff = await this.staffRepository.findById(user.id, ['roles']);
+    const permissions = staff.roles.map((role) => role.permissions).flat();
+    return permissions.some((permission) =>
+      requiredPermissions.includes(permission.slug),
+    );
   }
 }

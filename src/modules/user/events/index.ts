@@ -3,4 +3,4 @@
  * For license. See license.txt
  */
 
-export type UserProfileType = 'individual' | 'company' | 'admin' | 'staff';
+export * from './user.event';

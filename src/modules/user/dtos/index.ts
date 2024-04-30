@@ -6,3 +6,5 @@
 export * from './ProfileInput';
 export * from './ImageResponse';
 export * from './RoleInput';
+export * from './StaffInput';
+export * from './StaffCreatedEvent';

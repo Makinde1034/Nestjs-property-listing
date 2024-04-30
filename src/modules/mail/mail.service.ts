@@ -120,4 +120,35 @@ export class MailService {
       this.logger.debug(error);
     }
   }
+
+  /**
+   * Send Staff Email Confirmation/Password reset
+   * @async
+   * @param {User} user
+   * @param {string} link
+   * @returns {Promise<void>}
+   */
+  async sendStaffConfirmation(
+    user: User,
+    link: string,
+    password: string,
+  ): Promise<void> {
+    try {
+      await this.mailerService.sendMail({
+        to: user.email,
+        // From: '"Support Team" <support@example.com>', // override default from
+        subject: 'Welcome to Waseet App! Reset Your Password',
+        template: './staff-confirmation', // `.hbs` extension is appended automatically
+        context: {
+          // ✏️ filling curly brackets with content
+          name: `${user.firstName} ${user.lastName}`,
+          url: link,
+          password,
+        },
+      });
+      this.logger.log('E-Mail sent Successfully');
+    } catch (error) {
+      this.logger.debug(error);
+    }
+  }
 }

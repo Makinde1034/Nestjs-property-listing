@@ -28,7 +28,7 @@ import {
 } from './dtos';
 import { User } from 'src/entities';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { RegisterEventAction } from 'src/common/enums';
+import { RegisterEventAction, UserStatus } from 'src/common/enums';
 import { MailService } from '../mail/mail.service';
 import { ConfigService } from '@nestjs/config';
 import { I18nService } from 'nestjs-i18n';
@@ -141,7 +141,10 @@ export class AuthService {
         );
       }
       if (this.userService.validateUserConfirmation(userConfirmation, token)) {
-        await this.userService.updateUser(user.id, { verifiedAt: new Date() });
+        await this.userService.updateUser(user.id, {
+          verifiedAt: new Date(),
+          status: UserStatus.VERIFIED,
+        });
         await this.userService.removeUserConfirmation(userConfirmation.id);
         return this.i18n.translate(
           'messages.register.ACCOUNT_CONFIRMED_SUCCESSFULLY',

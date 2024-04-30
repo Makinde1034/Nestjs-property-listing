@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { User } from 'src/entities';
+import { Admin } from 'src/entities';
 import { DataSource } from 'typeorm';
 import { Seeder, SeederFactoryManager } from 'typeorm-extension';
 import { SuperAdminData } from '../factories/admin.factory';
@@ -16,16 +16,16 @@ export class SuperAdmin1713821793722 implements Seeder {
     dataSource: DataSource,
     factoryManager: SeederFactoryManager,
   ): Promise<any> {
-    this.logger.debug(`Seeding For : ${User.name}....`, factoryManager);
-    const repository = dataSource.getRepository(User);
+    this.logger.debug(`Seeding For : ${Admin.name}....`, factoryManager);
+    const repository = dataSource.getRepository(Admin);
     const hasAdmin = await repository.find({
       where: { email: SuperAdminData.email },
     });
     if (!hasAdmin) {
       await repository.save(SuperAdminData);
-      this.logger.debug(`Seeding for: ${User.name} finished`);
+      this.logger.debug(`Seeding for: ${Admin.name} finished`);
     } else {
-      this.logger.debug(`Seeding ${User.name}: not empty, skipping`);
+      this.logger.debug(`Seeding ${Admin.name}: not empty, skipping`);
     }
   }
 }

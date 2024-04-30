@@ -2,14 +2,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Company {
-  id: ID!
-  name: String!
-  vatNumber: String!
-  crNumber: String!
-  user: User!
-}
-
 type NationalIdentity {
   id: ID!
   nationality: String
@@ -24,28 +16,12 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
-type Permission {
-  id: ID!
-  name: String!
-  slug: String!
-  permissionGroup: String!
-  visible: Boolean!
-}
-
-type Role {
-  id: ID!
-  name: String!
-  slug: String!
-  permissions: [Permission!]!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
 type User {
   id: ID!
   userType: String!
   firstName: String!
   lastName: String!
+  middleName: String
   email: String!
   phone: String
   verifiedAt: DateTime
@@ -57,12 +33,44 @@ type User {
   dateOfBirth: DateTime
   profilePhoto: String
   biometricKey: String
-  company: Company
+  status: String
   nationalIdentity: NationalIdentity
-  role: Role!
   createdAt: DateTime!
   updatedAt: DateTime!
   deletedAt: DateTime!
+}
+
+type CompanyUser {
+  id: ID!
+  userType: String!
+  firstName: String!
+  lastName: String!
+  middleName: String
+  email: String!
+  phone: String
+  verifiedAt: DateTime
+  password: String
+  gender: String
+  language: String
+  maritalStatus: String
+  occupation: String
+  dateOfBirth: DateTime
+  profilePhoto: String
+  biometricKey: String
+  status: String
+  nationalIdentity: NationalIdentity
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime!
+  company: Company
+}
+
+type Company {
+  id: ID!
+  name: String!
+  vatNumber: String!
+  crNumber: String!
+  user: CompanyUser!
 }
 
 type Notification {
@@ -111,6 +119,49 @@ type Attribute {
   updatedAt: DateTime!
 }
 
+type Permission {
+  id: ID!
+  name: String!
+  slug: String!
+  permissionGroup: String!
+  visible: Boolean!
+}
+
+type Role {
+  id: ID!
+  name: String!
+  slug: String!
+  permissions: [Permission!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Staff {
+  id: ID!
+  userType: String!
+  firstName: String!
+  lastName: String!
+  middleName: String
+  email: String!
+  phone: String
+  verifiedAt: DateTime
+  password: String
+  gender: String
+  language: String
+  maritalStatus: String
+  occupation: String
+  dateOfBirth: DateTime
+  profilePhoto: String
+  biometricKey: String
+  status: String
+  nationalIdentity: NationalIdentity
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime!
+  roles: [Role!]!
+  employeeId: String
+}
+
 type TokenType {
   accessToken: String!
   refreshToken: String!
@@ -128,11 +179,12 @@ type SuccessResponse {
 type Query {
   app: String!
   user: User!
-  fetchAttributeSets: [AttributeSet!]!
-  fetchRoles: [Role!]!
+  permissions: [Permission!]!
+  roles: [Role!]!
   listNotifications: [Notification!]!
   fetchListingTypes: [ListingType!]!
   fetchAttributes: [Attribute!]!
+  fetchAttributeSets: [AttributeSet!]!
 }
 
 type Mutation {
@@ -144,6 +196,8 @@ type Mutation {
   resetPasswordRequest(RequestInput: PasswordResetRequestDto!): SuccessResponse!
   resetPassword(ResetInput: PasswordResetDto!): SuccessResponse!
   updateProfile(id: String!): Notification!
+  createStaff(RequestInput: CreateStaffInput!): Staff!
+  staffConfirmation(RequestInput: StaffConfirmDto!): String!
   createRole(RequestInput: RoleInputDto!): Role!
   updateRole(RequestInput: RoleUpdateInputDto!): Role!
   deleteRole(RequestInput: RoleIdInputDto!): String!
@@ -202,6 +256,23 @@ input PasswordResetRequestDto {
 input PasswordResetDto {
   token: String!
   email: String!
+  password: String!
+}
+
+input CreateStaffInput {
+  middleName: String!
+  firstName: String!
+  lastName: String!
+  email: String!
+  phone: String!
+  dateOfBirth: DateTime!
+  roles: [Float!]!
+}
+
+input StaffConfirmDto {
+  email: String!
+  token: String!
+  oldPassword: String!
   password: String!
 }
 
