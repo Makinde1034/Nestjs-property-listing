@@ -270,7 +270,7 @@ export class UserService {
       ...input,
       roles,
       password,
-      employeeId: `${generateOtp}`,
+      employeeId: `${generateOtp()}`,
       userType: 'staff',
     };
     const staff = await this.staffRepository.create(staffData);

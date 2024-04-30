@@ -17,7 +17,6 @@ import {
 import BaseEntity from './base.entity';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { UserProfileType } from '../common/types';
-import { Company } from './company.entity';
 import * as bcrypt from 'bcrypt';
 import { Gender, MaritalStatus, UserStatus } from 'src/common/enums';
 import { NationalIdentity } from './identity.entity';
@@ -91,13 +90,6 @@ export class User extends BaseEntity {
   @Field({ nullable: true, defaultValue: UserStatus.PENDING })
   @Column({ nullable: true, default: UserStatus.PENDING })
   status: UserStatus;
-
-  @Field(() => Company, { nullable: true })
-  @OneToOne(() => Company, (company) => company.user, {
-    cascade: true,
-    eager: true,
-  })
-  company?: Company;
 
   @Field(() => NationalIdentity, { nullable: true })
   @OneToOne(() => NationalIdentity, (identity) => identity.user, {

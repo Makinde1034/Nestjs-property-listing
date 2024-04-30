@@ -40,7 +40,9 @@ export class RoleService {
    * @returns {Promise<Role[]>}
    */
   async findAllRoles(): Promise<Role[]> {
-    return await this.roleRepository.find();
+    return await this.roleRepository.find({
+      relations: ['permissions'],
+    });
   }
 
   /**
@@ -60,7 +62,8 @@ export class RoleService {
       slug: slugify(input.name),
     };
     const roleData = this.roleRepository.create(data);
-    return await this.roleRepository.save(roleData);
+    const role = await this.roleRepository.save(roleData);
+    return role;
   }
 
   /**

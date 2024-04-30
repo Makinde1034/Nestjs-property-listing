@@ -2,14 +2,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Company {
-  id: ID!
-  name: String!
-  vatNumber: String!
-  crNumber: String!
-  user: User!
-}
-
 type NationalIdentity {
   id: ID!
   nationality: String
@@ -42,11 +34,43 @@ type User {
   profilePhoto: String
   biometricKey: String
   status: String
-  company: Company
   nationalIdentity: NationalIdentity
   createdAt: DateTime!
   updatedAt: DateTime!
   deletedAt: DateTime!
+}
+
+type CompanyUser {
+  id: ID!
+  userType: String!
+  firstName: String!
+  lastName: String!
+  middleName: String
+  email: String!
+  phone: String
+  verifiedAt: DateTime
+  password: String
+  gender: String
+  language: String
+  maritalStatus: String
+  occupation: String
+  dateOfBirth: DateTime
+  profilePhoto: String
+  biometricKey: String
+  status: String
+  nationalIdentity: NationalIdentity
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime!
+  company: Company
+}
+
+type Company {
+  id: ID!
+  name: String!
+  vatNumber: String!
+  crNumber: String!
+  user: CompanyUser!
 }
 
 type Notification {
@@ -130,7 +154,6 @@ type Staff {
   profilePhoto: String
   biometricKey: String
   status: String
-  company: Company
   nationalIdentity: NationalIdentity
   createdAt: DateTime!
   updatedAt: DateTime!
@@ -156,8 +179,8 @@ type SuccessResponse {
 type Query {
   app: String!
   user: User!
-  fetchPermissions: [Permission!]!
-  fetchRoles: [Role!]!
+  permissions: [Permission!]!
+  roles: [Role!]!
   listNotifications: [Notification!]!
   fetchListingTypes: [ListingType!]!
   fetchAttributes: [Attribute!]!

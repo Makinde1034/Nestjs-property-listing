@@ -21,7 +21,7 @@ export class RoleResolver {
    * @async
    * @returns {Promise<Permission[]>}
    */
-  @Query(() => [Permission])
+  @Query(() => [Permission], { name: 'permissions' })
   @UseGuards(AccessTokenGuard)
   async fetchPermissions(): Promise<Permission[]> {
     return await this.roleService.findAllPermissions();
@@ -33,7 +33,7 @@ export class RoleResolver {
    * @async
    * @returns {Promise<Role[]>}
    */
-  @Query(() => [Role])
+  @Query(() => [Role], { name: 'roles' })
   @Permissions('read-role')
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async fetchRoles(): Promise<Role[]> {
