@@ -343,10 +343,13 @@ export class AuthService {
    * @returns {Promise<void>}
    */
   async generateAndSendPasswordResetToken(user: User): Promise<void> {
-    const { email } = user;
+    const { email, userType } = user;
     const { token } = await this.userService.generateUserConfirmation(user);
 
-    const link = `${this.frontEndUrl}/reset-password?email=${email}&token=${token}`;
+    const url =
+      userType === 'staff' ? 'staff/reset-password' : 'reset-password';
+
+    const link = `${this.frontEndUrl}/${url}?email=${email}&token=${token}`;
 
     await this.mailService.sendPasswordResetEmail(user, link);
   }
