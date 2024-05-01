@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { UserService, RoleService } from './services';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {
@@ -24,6 +24,7 @@ import { UserResolver, RoleResolver } from './resolvers';
 import { UserController } from './controllers';
 import { UserEventHandler } from './events';
 
+@Global()
 @Module({
   imports: [
     TypeOrmModule.forFeature([

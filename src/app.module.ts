@@ -21,6 +21,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { StorageModule } from './modules/storage/storage.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { ListingTypeModule } from './modules/listing-type/listing-type.module';
+import { IssueModule } from './modules/issue/issue.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { ListingTypeModule } from './modules/listing-type/listing-type.module';
     StorageModule,
     NotificationModule,
     ListingTypeModule,
+    IssueModule,
   ],
   controllers: [],
   providers: [AppResolver],
