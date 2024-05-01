@@ -54,6 +54,7 @@
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/throttler": "^5.1.2",
     "@nestjs/typeorm": "^10.0.1",
+    "@nestlab/google-recaptcha": "^3.7.0",
     "@sendgrid/mail": "^8.1.3",
     "aws-sdk": "^2.1574.0",
     "bcrypt": "^5.1.1",

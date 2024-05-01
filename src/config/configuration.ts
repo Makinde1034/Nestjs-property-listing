@@ -5,5 +5,6 @@
 
 import postgresConfig from './database/postgres/postgres.config';
 import authConfig from './auth/auth.config';
+import recaptchaConfig from './recpatcha/recaptcha.config';
 
-export default [postgresConfig, authConfig];
+export default [postgresConfig, authConfig, recaptchaConfig];

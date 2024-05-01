@@ -19,8 +19,8 @@ scalar DateTime
 type User {
   id: ID!
   userType: String!
-  firstName: String!
-  lastName: String!
+  firstName: String
+  lastName: String
   middleName: String
   email: String!
   phone: String
@@ -43,8 +43,8 @@ type User {
 type CompanyUser {
   id: ID!
   userType: String!
-  firstName: String!
-  lastName: String!
+  firstName: String
+  lastName: String
   middleName: String
   email: String!
   phone: String
@@ -139,8 +139,8 @@ type Role {
 type Staff {
   id: ID!
   userType: String!
-  firstName: String!
-  lastName: String!
+  firstName: String
+  lastName: String
   middleName: String
   email: String!
   phone: String

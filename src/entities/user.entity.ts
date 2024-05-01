@@ -31,12 +31,12 @@ export class User extends BaseEntity {
   @Field()
   userType: UserProfileType;
 
-  @Column()
-  @Field()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   firstName: string;
 
-  @Column()
-  @Field()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   lastName: string;
 
   @Column({ nullable: true })

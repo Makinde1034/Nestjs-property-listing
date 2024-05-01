@@ -4,6 +4,7 @@
  */
 
 export const AppStrings = {
+  FAILED_RACAPTCHA: 'Recaptcha Failed, Please try again',
   USER_DISABLED: 'Account disabled. Please contact support',
   UNCONFIRMED_ACCOUNT: 'UNCONFIRMED_ACCOUNT',
   INCORRECT_CREDENTIALS: 'INCORRECT_CREDENTIALS',

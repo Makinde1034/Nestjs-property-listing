@@ -8,6 +8,7 @@ import {
   IsEmail,
   IsEnum,
   IsNotEmpty,
+  IsOptional,
   IsPhoneNumber,
   IsString,
   IsStrongPassword,
@@ -27,12 +28,12 @@ export class RegisterInput {
   userType: UserProfileType;
 
   @Field()
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   firstName: string;
 
   @Field()
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   lastName: string;
 
@@ -42,7 +43,7 @@ export class RegisterInput {
   email: string;
 
   @Field()
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   @IsPhoneNumber(null, { message: 'This field must be a valid phone number' })
   phone: string;

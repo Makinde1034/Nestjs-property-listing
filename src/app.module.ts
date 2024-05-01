@@ -21,6 +21,10 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { StorageModule } from './modules/storage/storage.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { ListingTypeModule } from './modules/listing-type/listing-type.module';
+import {
+  GoogleRecaptchaModule,
+  GoogleRecaptchaModuleOptions,
+} from '@nestlab/google-recaptcha';
 import { IssueModule } from './modules/issue/issue.module';
 
 @Module({
@@ -55,6 +59,11 @@ import { IssueModule } from './modules/issue/issue.module';
         configService.get<TypeOrmModuleOptions>('db.postgres', {
           type: 'postgres',
         }),
+      inject: [ConfigService],
+    }),
+    GoogleRecaptchaModule.forRootAsync({
+      useFactory: (config: ConfigService) =>
+        config.get<GoogleRecaptchaModuleOptions>('recaptcha'),
       inject: [ConfigService],
     }),
     AuthModule,

@@ -64,10 +64,9 @@ export class AuthService {
   async register(inputDto: RegisterInput): Promise<User> {
     try {
       // Check for user with same email or phone
-      const existingUser = await this.userService.findUser([
-        { email: inputDto.email },
-        { phone: inputDto.phone },
-      ]);
+      const existingUser = await this.userService.findByEmailOrPhone(
+        inputDto.email,
+      );
 
       // Throw an exception for already used email
       if (existingUser) {
