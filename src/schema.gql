@@ -162,6 +162,21 @@ type Staff {
   employeeId: String
 }
 
+type Issue {
+  id: ID!
+  message: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type IssueCategory {
+  id: ID!
+  name: String!
+  placement: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type TokenType {
   accessToken: String!
   refreshToken: String!
@@ -185,6 +200,8 @@ type Query {
   fetchListingTypes: [ListingType!]!
   fetchAttributes: [Attribute!]!
   fetchAttributeSets: [AttributeSet!]!
+  fetchIssueCategories: [IssueCategory!]!
+  fetchIssues: [Issue!]!
 }
 
 type Mutation {
@@ -211,6 +228,12 @@ type Mutation {
   createAttributeSet(RequestInput: AttributeSetInput!): AttributeSet!
   updateAttributeSet(RequestInput: AttributeSetUpdateInput!): AttributeSet!
   deleteAttributeSet(RequestInput: AttributeDeleteInput!): String!
+  createIssueCategory(RequestInput: CreateIssueCategoryInput!): IssueCategory!
+  updateIssueCatgeory(RequestInput: UpdateIssueCategoryInput!): IssueCategory!
+  deleteIssueCategory(RequestInput: DeleteIssueInput!): String!
+  createIssue(RequestInput: CreateIssueInput!): Issue!
+  updateIssue(RequestInput: UpdateIssueInput!): Issue!
+  deleteIssue(RequestInput: DeleteIssueInput!): String!
 }
 
 input RegisterInput {
@@ -350,5 +373,31 @@ input AttributeSetInput {
 input AttributeSetUpdateInput {
   name: String!
   attributes: [String!]!
+  id: String!
+}
+
+input CreateIssueCategoryInput {
+  name: String!
+  placement: String!
+}
+
+input UpdateIssueCategoryInput {
+  name: String!
+  placement: String!
+  id: String!
+}
+
+input DeleteIssueInput {
+  id: String!
+}
+
+input CreateIssueInput {
+  issue: String!
+  categoryId: String!
+}
+
+input UpdateIssueInput {
+  issue: String!
+  categoryId: String!
   id: String!
 }

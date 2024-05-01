@@ -6,13 +6,14 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ListingTypeService } from '../services/listing-type.service';
 import { UseGuards } from '@nestjs/common';
-import { AccessTokenGuard } from '../../auth/guards';
+import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
 import {
   ListingTypeInput,
   ListingTypeUpdateInput,
   ListingTypeDeleteInput,
 } from '../dtos';
 import { ListingType } from '../../../entities';
+import { Permissions } from 'src/common/decorator/permission';
 
 @Resolver()
 export class ListingTypeResolver {
@@ -25,7 +26,8 @@ export class ListingTypeResolver {
    * @returns {Promise<ListingType[]>}
    */
   @Query(() => [ListingType])
-  @UseGuards(AccessTokenGuard)
+  @Permissions('read-listing-type')
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async fetchListingTypes(): Promise<ListingType[]> {
     return await this.listingTypeService.findAllListingTypes();
   }
@@ -38,7 +40,8 @@ export class ListingTypeResolver {
    * @returns {Promise<ListingType>}
    */
   @Mutation(() => ListingType)
-  @UseGuards(AccessTokenGuard)
+  @Permissions('create-listing-type')
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async createListingType(
     @Args('RequestInput') RequestInput: ListingTypeInput,
   ): Promise<ListingType> {
@@ -53,7 +56,8 @@ export class ListingTypeResolver {
    * @returns {Promise<ListingType>}
    */
   @Mutation(() => ListingType)
-  @UseGuards(AccessTokenGuard)
+  @Permissions('update-listing-type')
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async updateListingType(
     @Args('RequestInput') RequestInput: ListingTypeUpdateInput,
   ): Promise<ListingType> {
@@ -68,7 +72,8 @@ export class ListingTypeResolver {
    * @returns {Promise<string>}
    */
   @Mutation(() => String)
-  @UseGuards(AccessTokenGuard)
+  @Permissions('delete-listing-type')
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async deleteListingType(
     @Args('RequestInput') RequestInput: ListingTypeDeleteInput,
   ): Promise<string> {

@@ -18,3 +18,5 @@ export * from './staff.entity';
 export * from './admin.entity';
 export * from './individual-user.entity';
 export * from './company-user.entity';
+export * from './issue-category.entity';
+export * from './issue.entity';
