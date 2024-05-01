@@ -18,7 +18,16 @@ import {
 import { User } from 'src/entities';
 import { Throttle } from '@nestjs/throttler';
 import { SuccessResponse } from 'src/common/response';
+import {
+  GoogleRecaptchaNetworkException,
+  Recaptcha,
+  RecaptchaResult,
+  RecaptchaVerificationResult,
+} from '@nestlab/google-recaptcha';
+import { RECAPTCHA_SCORE } from 'src/common/constants';
+import { AppStrings } from 'src/common/messages/app.strings';
 
+@Recaptcha()
 @Resolver()
 export class AuthResolver {
   constructor(private readonly authService: AuthService) {}
@@ -33,7 +42,12 @@ export class AuthResolver {
   @Mutation(() => User, { name: 'register' })
   async register(
     @Args('RegisterInput') inputDto: RegisterInput,
+    @RecaptchaResult() recaptchaResult: RecaptchaVerificationResult,
   ): Promise<User> {
+    const { success, score } = recaptchaResult;
+    if (!success || score < RECAPTCHA_SCORE) {
+      throw new GoogleRecaptchaNetworkException(AppStrings.FAILED_RACAPTCHA);
+    }
     return await this.authService.register(inputDto);
   }
 
