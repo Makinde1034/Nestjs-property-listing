@@ -5,7 +5,7 @@
 
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
-import { AccessTokenGuard } from '../../auth/guards';
+import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
 import {
   AttributeSetInput,
   AttributeDeleteInput,
@@ -15,6 +15,7 @@ import {
 } from '../dtos';
 import { Attribute, AttributeSet } from '../../../entities';
 import { AttributeService } from '../services';
+import { Permissions } from 'src/common/decorator/permission';
 
 @Resolver()
 export class AttributeResolver {
@@ -27,7 +28,8 @@ export class AttributeResolver {
    * @returns {Promise<Attribute[]>}
    */
   @Query(() => [Attribute])
-  @UseGuards(AccessTokenGuard)
+  @Permissions('read-attribute-set')
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async fetchAttributes(): Promise<Attribute[]> {
     return await this.attributeService.findAllAttributes();
   }
@@ -40,7 +42,8 @@ export class AttributeResolver {
    * @returns {Promise<Attribute>}
    */
   @Mutation(() => Attribute)
-  @UseGuards(AccessTokenGuard)
+  @Permissions('create-attribute-set')
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async createAttribute(
     @Args('RequestInput') RequestInput: AttributeInput,
   ): Promise<Attribute> {
@@ -55,7 +58,8 @@ export class AttributeResolver {
    * @returns {Promise<Attribute>}
    */
   @Mutation(() => Attribute)
-  @UseGuards(AccessTokenGuard)
+  @Permissions('update-attribute-set')
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async updateAttribute(
     @Args('RequestInput') RequestInput: AttributeUpdateInput,
   ): Promise<Attribute> {
@@ -70,7 +74,8 @@ export class AttributeResolver {
    * @returns {Promise<string>}
    */
   @Mutation(() => String)
-  @UseGuards(AccessTokenGuard)
+  @Permissions('delete-attribute-set')
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async deleteAttribute(
     @Args('RequestInput') RequestInput: AttributeDeleteInput,
   ): Promise<string> {
@@ -84,7 +89,8 @@ export class AttributeResolver {
    * @returns {Promise<AttributeSet[]>}
    */
   @Query(() => [AttributeSet])
-  @UseGuards(AccessTokenGuard)
+  @Permissions('read-attribute-set')
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async fetchAttributeSets(): Promise<AttributeSet[]> {
     return await this.attributeService.findAllAttributeSets();
   }
@@ -97,7 +103,8 @@ export class AttributeResolver {
    * @returns {Promise<AttributeSet>}
    */
   @Mutation(() => AttributeSet)
-  @UseGuards(AccessTokenGuard)
+  @Permissions('create-attribute-set')
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async createAttributeSet(
     @Args('RequestInput') RequestInput: AttributeSetInput,
   ): Promise<AttributeSet> {
@@ -112,7 +119,8 @@ export class AttributeResolver {
    * @returns {Promise<AttributeSet>}
    */
   @Mutation(() => AttributeSet)
-  @UseGuards(AccessTokenGuard)
+  @Permissions('update-attribute-set')
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async updateAttributeSet(
     @Args('RequestInput') RequestInput: AttributeSetUpdateInput,
   ): Promise<AttributeSet> {
@@ -127,7 +135,8 @@ export class AttributeResolver {
    * @returns {Promise<string>}
    */
   @Mutation(() => String)
-  @UseGuards(AccessTokenGuard)
+  @Permissions('delete-attribute-set')
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async deleteAttributeSet(
     @Args('RequestInput') RequestInput: AttributeDeleteInput,
   ): Promise<string> {
