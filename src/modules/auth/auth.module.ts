@@ -12,6 +12,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
 import { AuthEventHandler } from './events/auth.event';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { RecaptchaValidator } from './recaptcha.validator';
 
 @Module({
   imports: [
@@ -26,6 +27,12 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       inject: [ConfigService],
     }),
   ],
-  providers: [AuthResolver, AuthService, AuthEventHandler, JwtStrategy],
+  providers: [
+    AuthResolver,
+    AuthService,
+    AuthEventHandler,
+    JwtStrategy,
+    RecaptchaValidator,
+  ],
 })
 export class AuthModule {}

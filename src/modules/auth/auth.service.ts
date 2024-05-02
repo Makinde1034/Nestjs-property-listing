@@ -38,6 +38,7 @@ import { JwtService } from '@nestjs/jwt';
 import { JWTPayload } from 'src/common/interface';
 import { AppStrings } from 'src/common/messages/app.strings';
 import { SuccessResponse } from 'src/common/response';
+import { RecaptchaValidator } from './recaptcha.validator';
 
 @Injectable()
 export class AuthService {
@@ -50,6 +51,7 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly eventEmitter: EventEmitter2,
     private readonly jwtService: JwtService,
+    private readonly recaptchaValidator: RecaptchaValidator,
   ) {
     this.frontEndUrl = this.configService.get('FRONT_END_URL');
   }
@@ -63,6 +65,7 @@ export class AuthService {
    */
   async register(inputDto: RegisterInput): Promise<User> {
     try {
+      await this.recaptchaValidator.validateRecaptcha(inputDto.recaptcha);
       // Check for user with same email or phone
       const existingUser = await this.userService.findByEmailOrPhone(
         inputDto.email,

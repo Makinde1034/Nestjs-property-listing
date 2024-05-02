@@ -14,5 +14,6 @@ export default registerAs('recaptcha', () => {
       (req.headers.recaptcha || '').toString(),
     skipIf: process.env.NODE_ENV !== 'production',
     score: 0.8,
+    actions: ['SignUp', 'SignIn', 'register'],
   };
 });
