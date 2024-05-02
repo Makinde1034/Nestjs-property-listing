@@ -37,6 +37,11 @@ export class RegisterInput {
   @IsString()
   lastName: string;
 
+  @Field({ nullable: true })
+  @IsNotEmpty()
+  @IsString()
+  recaptcha: string;
+
   @Field()
   @IsNotEmpty()
   @IsEmail()
