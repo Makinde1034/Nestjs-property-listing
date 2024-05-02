@@ -20,6 +20,7 @@ import { UserProfileType } from '../common/types';
 import * as bcrypt from 'bcrypt';
 import { Gender, MaritalStatus, UserStatus } from 'src/common/enums';
 import { NationalIdentity } from './identity.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 @ObjectType()
@@ -106,7 +107,8 @@ export class User extends BaseEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Field()
+  @Exclude()
+  @Field({ nullable: true })
   @DeleteDateColumn()
   deletedAt: Date;
 
