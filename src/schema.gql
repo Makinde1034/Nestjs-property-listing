@@ -37,7 +37,7 @@ type User {
   nationalIdentity: NationalIdentity
   createdAt: DateTime!
   updatedAt: DateTime!
-  deletedAt: DateTime!
+  deletedAt: DateTime
 }
 
 type CompanyUser {
@@ -61,7 +61,7 @@ type CompanyUser {
   nationalIdentity: NationalIdentity
   createdAt: DateTime!
   updatedAt: DateTime!
-  deletedAt: DateTime!
+  deletedAt: DateTime
   company: Company
 }
 
@@ -157,7 +157,7 @@ type Staff {
   nationalIdentity: NationalIdentity
   createdAt: DateTime!
   updatedAt: DateTime!
-  deletedAt: DateTime!
+  deletedAt: DateTime
   roles: [Role!]!
   employeeId: String
 }
@@ -238,10 +238,10 @@ type Mutation {
 
 input RegisterInput {
   userType: String!
-  firstName: String!
-  lastName: String!
+  firstName: String
+  lastName: String
   email: String!
-  phone: String!
+  phone: String
   password: String!
   company: CompanyInput
 }

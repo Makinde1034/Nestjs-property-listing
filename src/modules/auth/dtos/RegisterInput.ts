@@ -27,12 +27,12 @@ export class RegisterInput {
   @IsEnum(UserProfileTypeEnum)
   userType: UserProfileType;
 
-  @Field()
+  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   firstName: string;
 
-  @Field()
+  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   lastName: string;
@@ -42,7 +42,7 @@ export class RegisterInput {
   @IsEmail()
   email: string;
 
-  @Field()
+  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   @IsPhoneNumber(null, { message: 'This field must be a valid phone number' })
