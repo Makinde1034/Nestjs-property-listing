@@ -10,8 +10,9 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   OneToOne,
-  TableInheritance,
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
@@ -21,12 +22,11 @@ import * as bcrypt from 'bcrypt';
 import { Gender, MaritalStatus, UserStatus } from 'src/common/enums';
 import { NationalIdentity } from './identity.entity';
 import { Exclude } from 'class-transformer';
+import { Role } from './role.entity';
+import { Company } from './company.entity';
 
 @Entity()
 @ObjectType()
-@TableInheritance({
-  column: { type: 'varchar', name: 'userType', select: true },
-})
 export class User extends BaseEntity {
   @Column()
   @Field()
@@ -98,6 +98,32 @@ export class User extends BaseEntity {
     eager: true,
   })
   nationalIdentity?: NationalIdentity;
+
+  @Field(() => Company, { nullable: true })
+  @OneToOne(() => Company, (company) => company.user, {
+    cascade: true,
+    eager: true,
+  })
+  company?: Company;
+
+  @Exclude()
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  twoFactorAuthenticationSecret: string;
+
+  @Field({ nullable: true, defaultValue: false })
+  @Column({ nullable: true, default: false })
+  isTwoFactorAuthenticationEnabled: boolean;
+
+  @Exclude()
+  @Field(() => [Role], { nullable: true })
+  @ManyToMany(() => Role, { cascade: true, eager: true })
+  @JoinTable({ name: 'user_role_roles' })
+  roles: Role[];
+
+  @Field({ nullable: true })
+  @Column({ nullable: true, unique: true })
+  employeeId: string;
 
   @Field()
   @CreateDateColumn()

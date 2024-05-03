@@ -12,6 +12,6 @@ export class LoginResponse {
   @Field(() => User)
   user: User;
 
-  @Field(() => TokenType)
-  token: TokenType;
+  @Field(() => TokenType, { nullable: true })
+  token?: TokenType;
 }

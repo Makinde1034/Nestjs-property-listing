@@ -4,7 +4,7 @@
  */
 
 import { Injectable } from '@nestjs/common';
-import { User, Staff } from '../../../entities';
+import { User } from '../../../entities';
 import { EntityRepository } from '../../core/base.class/entity.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -16,15 +16,5 @@ export class UserRepository extends EntityRepository<User> {
     private readonly userRepository: Repository<User>,
   ) {
     super(userRepository);
-  }
-}
-
-@Injectable()
-export class StaffRepository extends EntityRepository<Staff> {
-  constructor(
-    @InjectRepository(Staff)
-    private readonly repository: Repository<Staff>,
-  ) {
-    super(repository);
   }
 }

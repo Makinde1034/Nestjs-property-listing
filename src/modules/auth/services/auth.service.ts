@@ -13,7 +13,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UserService } from '../user/services/user.service';
+import { UserService } from '../../user/services/user.service';
 import {
   RegisterEventDto,
   RegisterInput,
@@ -25,11 +25,13 @@ import {
   BiometricRegister,
   PasswordResetDto,
   PasswordResetRequestDto,
-} from './dtos';
-import { User } from 'src/entities';
+  TwoFaResult,
+  TwoFaLoginInput,
+} from '../dtos';
+import { Company, User } from 'src/entities';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { RegisterEventAction, UserStatus } from 'src/common/enums';
-import { MailService } from '../mail/mail.service';
+import { MailService } from '../../mail/mail.service';
 import { ConfigService } from '@nestjs/config';
 import { I18nService } from 'nestjs-i18n';
 import * as bcrypt from 'bcrypt';
@@ -39,6 +41,8 @@ import { JWTPayload } from 'src/common/interface';
 import { AppStrings } from 'src/common/messages/app.strings';
 import { SuccessResponse } from 'src/common/response';
 import { RecaptchaValidator } from './recaptcha.validator';
+import { TwoFactorAuthenticationService } from './two-fa-auth.service';
+import { UserRepository } from '../../user/repositories';
 
 @Injectable()
 export class AuthService {
@@ -52,6 +56,8 @@ export class AuthService {
     private readonly eventEmitter: EventEmitter2,
     private readonly jwtService: JwtService,
     private readonly recaptchaValidator: RecaptchaValidator,
+    private readonly twoFactorAuthenticationService: TwoFactorAuthenticationService,
+    private readonly userRepository: UserRepository,
   ) {
     this.frontEndUrl = this.configService.get('FRONT_END_URL');
   }
@@ -76,10 +82,18 @@ export class AuthService {
         throw new HttpException('User Already Exist', HttpStatus.CONFLICT);
       }
 
+      let company: Company | null;
+      if (inputDto.userType === 'company') {
+        company = {
+          ...inputDto.company,
+        } as Company;
+      }
+
       // Create user
-      const data = {
+      const data: Partial<User> = {
         ...inputDto,
-      } as Partial<User>;
+        company,
+      };
       const newUser = await this.userService.createUser(data);
       this.eventEmitter.emit(
         RegisterEventAction.USER_CREATED,
@@ -168,7 +182,7 @@ export class AuthService {
   async login(loginDto: LoginInput): Promise<LoginResponse> {
     const { username, password } = loginDto;
     // Validate the user credentials
-    const user = await this.validateUserCredentials(username, password);
+    let user = await this.validateUserCredentials(username, password);
     // Throw unauthorized error if the credential is invalid
     if (!user) {
       throw new UnauthorizedException(AppStrings.INCORRECT_CREDENTIALS);
@@ -176,6 +190,11 @@ export class AuthService {
       // Throw Forbidden error if the user is not verified
       throw new ForbiddenException(AppStrings.UNCONFIRMED_ACCOUNT);
     }
+
+    if (user.userType === 'admin') {
+      user = await this.userRepository.findById(user.id, ['roles']);
+    }
+
     // Return the user and the access tokens
     return {
       user,
@@ -383,5 +402,68 @@ export class AuthService {
     return {
       message: AppStrings.PASSWORD_RESET_SUCCEEDED,
     };
+  }
+
+  /**
+   * Generate QRCode For TwoFa
+   *
+   * @async
+   * @param {User} user
+   * @returns {Promise<TwoFaResult>}
+   */
+  async generateTwoFactorQrcode(user: User): Promise<TwoFaResult> {
+    const secret =
+      this.twoFactorAuthenticationService.generateTwoFactorAuthenticationSecret(
+        user.email,
+      );
+    const name = `${user.firstName} ${user.lastName}`;
+    const qrcode =
+      await this.twoFactorAuthenticationService.generateTwoFactorOtpUrl(
+        user.email,
+        name,
+        secret,
+      );
+
+    await this.userService.updateUser(user.id, {
+      twoFactorAuthenticationSecret: secret,
+    });
+
+    return { qrcodeImage: qrcode, user };
+  }
+
+  /**
+   * Login using TwoFa
+   *
+   * @async
+   * @param {User} user
+   * @param {TwoFaLoginInput} input
+   * @returns {Promise<LoginResponse>}
+   */
+  async loginUsingTwoFactorAuthentication(
+    user: User,
+    input: TwoFaLoginInput,
+  ): Promise<any> {
+    if (!user.twoFactorAuthenticationSecret) {
+      throw new ForbiddenException(AppStrings.TWO_FA_NOT_ENABLED);
+    }
+    const isValidToken =
+      this.twoFactorAuthenticationService.validateTwoFactorAuthenticationToken(
+        input.token,
+        user.twoFactorAuthenticationSecret,
+      );
+
+    if (!isValidToken) {
+      throw new UnauthorizedException(AppStrings.INCORRECT_TOKEN);
+    }
+
+    if (!user.isTwoFactorAuthenticationEnabled) {
+      await this.userService.updateUser(user.id, {
+        isTwoFactorAuthenticationEnabled: true,
+      });
+    }
+
+    const support = await this.userRepository.findById(user.id, ['roles']);
+
+    return await this.issueTokens(support);
   }
 }

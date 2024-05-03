@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { RoleService } from '../services';
 import { Permission, Role } from 'src/entities';
 import { UseGuards } from '@nestjs/common';
@@ -86,5 +86,16 @@ export class RoleResolver {
     @Args('RequestInput') RequestInput: RoleIdInputDto,
   ): Promise<string> {
     return await this.roleService.deleteRole(RequestInput);
+  }
+
+  /**
+   * Get User roles
+   *
+   * @returns { Promise<User>}
+   */
+  @Query(() => [Role])
+  @UseGuards(AccessTokenGuard)
+  async getUserRoles(@Context() ctx): Promise<Role[]> {
+    return await this.roleService.fetchUserRoles(ctx.req.user);
   }
 }

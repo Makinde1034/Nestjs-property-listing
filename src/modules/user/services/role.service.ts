@@ -7,7 +7,7 @@ import { Injectable } from '@nestjs/common';
 import {
   PermissionRepository,
   RoleRepository,
-  StaffRepository,
+  UserRepository,
 } from '../repositories';
 import { Permission, Role, User } from 'src/entities';
 import { RoleIdInputDto, RoleInputDto, RoleUpdateInputDto } from '../dtos';
@@ -20,7 +20,7 @@ export class RoleService {
   constructor(
     private readonly roleRepository: RoleRepository,
     private readonly permissionRepository: PermissionRepository,
-    private readonly staffRepository: StaffRepository,
+    private readonly staffRepository: UserRepository,
   ) {}
 
   /**
@@ -101,6 +101,18 @@ export class RoleService {
     });
     await this.roleRepository.remove(role);
     return AppStrings.ROLE_DELETED_SUCCESSFULLY;
+  }
+
+  /**
+   * Fetch user Roles
+   *
+   * @async
+   * @param {User} user
+   * @returns {Promise<string>}
+   */
+  async fetchUserRoles(user: User): Promise<Role[]> {
+    const userData = await this.staffRepository.findById(user.id, ['roles']);
+    return userData.roles;
   }
 
   /**

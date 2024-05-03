@@ -6,7 +6,7 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 import BaseEntity from './base.entity';
-import { CompanyUser } from './company-user.entity';
+import { User } from './user.entity';
 
 @Entity()
 @ObjectType()
@@ -23,8 +23,8 @@ export class Company extends BaseEntity {
   @Field()
   crNumber: string;
 
-  @Field(() => CompanyUser)
-  @OneToOne(() => CompanyUser, (user) => user.company, { onDelete: 'CASCADE' })
+  @Field(() => User)
+  @OneToOne(() => User, (user) => user.company, { onDelete: 'CASCADE' })
   @JoinColumn()
-  user: CompanyUser;
+  user: User;
 }
