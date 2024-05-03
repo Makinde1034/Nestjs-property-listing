@@ -3,10 +3,10 @@
  * For license. See license.txt
  */
 
-import { Staff } from 'src/entities';
+import { User } from 'src/entities';
 
 export interface StaffCreatedData {
-  staff: Staff;
+  staff: User;
   password: string;
 }
 

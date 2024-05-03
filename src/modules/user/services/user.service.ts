@@ -5,12 +5,11 @@
 
 import { BadRequestException, Injectable } from '@nestjs/common';
 import {
+  RoleRepository,
   UserConfirmationRepository,
   UserRepository,
-  StaffRepository,
-  RoleRepository,
 } from '../repositories';
-import type { Staff, TokenConfirmation, User } from 'src/entities';
+import type { TokenConfirmation, User } from 'src/entities';
 import { DeepPartial, FindOptionsWhere, In, LessThan } from 'typeorm';
 import { PostgresError } from 'pg-error-enum';
 import { addHours, isPast } from 'date-fns';
@@ -29,7 +28,6 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { RegisterEventAction, UserStatus } from 'src/common/enums';
 import { MailService } from 'src/modules/mail/mail.service';
 import { ConfigService } from '@nestjs/config';
-import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -38,7 +36,6 @@ export class UserService {
     private readonly usersRepository: UserRepository,
     private readonly tokenRepository: UserConfirmationRepository,
     private readonly storageService: StorageService,
-    private readonly staffRepository: StaffRepository,
     private readonly roleRepository: RoleRepository,
     private readonly eventEmitter: EventEmitter2,
     private readonly mailService: MailService,
@@ -91,8 +88,9 @@ export class UserService {
    * @param {string} id
    * @returns {Promise<User>}
    */
-  async findUserById(id: string): Promise<User> {
-    return await this.usersRepository.findById(id);
+  async findUserById(id: string, relations?: string[]): Promise<User> {
+    const user = await this.usersRepository.findById(id, relations);
+    return user;
   }
 
   /**
@@ -261,19 +259,19 @@ export class UserService {
    * @param {CreateStaffInput} input
    * @returns {Promise<Staff>}
    */
-  async createStaff(input: CreateStaffInput): Promise<Staff> {
+  async createStaff(input: CreateStaffInput): Promise<User> {
     const roles = await this.roleRepository.find({
       where: { id: In([...input.roles]) },
     });
     const password = generateRandomToken(8);
-    const staffData: Partial<Staff> = {
+    const staffData: Partial<User> = {
       ...input,
       roles,
       password,
       employeeId: `${generateOtp()}`,
       userType: 'staff',
     };
-    const staff = await this.staffRepository.create(staffData);
+    const staff = await this.usersRepository.create(staffData);
     this.eventEmitter.emit(
       RegisterEventAction.STAFF_CREATED,
       new StaffCreatedEventDto({ staff, password }),
@@ -307,7 +305,7 @@ export class UserService {
   async staffPasswordConfirmation(
     requestInput: StaffConfirmDto,
   ): Promise<string> {
-    const { email, token, oldPassword, password } = requestInput;
+    const { email, token, password } = requestInput;
     const userConfirmation = await this.findTokenConfirmation(email, token);
 
     if (userConfirmation) {
@@ -319,11 +317,7 @@ export class UserService {
       }
 
       if (this.validateUserConfirmation(userConfirmation, token)) {
-        const isMatch = await bcrypt.compare(oldPassword, user.password);
-        if (!isMatch) {
-          throw new BadRequestException(AppStrings.INCORRECT_PASSWORD);
-        }
-        await this.staffRepository.update(user.id, {
+        await this.usersRepository.update(user.id, {
           verifiedAt: new Date(),
           status: UserStatus.VERIFIED,
           password,

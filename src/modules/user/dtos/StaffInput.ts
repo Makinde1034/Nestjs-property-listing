@@ -68,11 +68,6 @@ export class StaffConfirmDto {
   @Field()
   @IsNotEmpty()
   @IsString()
-  oldPassword: string;
-
-  @Field()
-  @IsNotEmpty()
-  @IsString()
   @IsStrongPassword({
     minLength: 8,
     minLowercase: 1,

@@ -3,8 +3,8 @@
  * For license. See license.txt
  */
 
-import { Args, Mutation, Resolver } from '@nestjs/graphql';
-import { AuthService } from './auth.service';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { AuthService } from '../services/auth.service';
 import {
   RegisterInput,
   AuthRegisterConfirmDto,
@@ -14,10 +14,14 @@ import {
   BiometricRegister,
   PasswordResetRequestDto,
   PasswordResetDto,
-} from './dtos';
+  TwoFaResult,
+  TwoFaLoginInput,
+} from '../dtos';
 import { User } from 'src/entities';
 import { Throttle } from '@nestjs/throttler';
 import { SuccessResponse } from 'src/common/response';
+import { UseGuards } from '@nestjs/common';
+import { AccessTokenGuard } from '../guards';
 
 @Resolver()
 export class AuthResolver {
@@ -124,5 +128,36 @@ export class AuthResolver {
     @Args('ResetInput') ResetInput: PasswordResetDto,
   ): Promise<SuccessResponse> {
     return await this.authService.passwordReset(ResetInput);
+  }
+
+  /**
+   * Activate 2Fa
+   *
+   * @async
+   * @returns {Promise<TwoFaResult>}
+   */
+  @Query(() => TwoFaResult)
+  @UseGuards(AccessTokenGuard)
+  async activateTwoFa(@Context() ctx: any): Promise<TwoFaResult> {
+    return await this.authService.generateTwoFactorQrcode(ctx.req.user);
+  }
+
+  /**
+   * Login using two Fa
+   *
+   * @async
+   * @param {TwoFaLoginInput} loginInput
+   * @returns {Promise<LoginResponse>}
+   */
+  @Mutation(() => LoginResponse, { name: 'twoFaLogin' })
+  @UseGuards(AccessTokenGuard)
+  async twoFaLogin(
+    @Args('LoginInput') loginInput: TwoFaLoginInput,
+    @Context() ctx: any,
+  ): Promise<LoginResponse> {
+    return await this.authService.loginUsingTwoFactorAuthentication(
+      ctx.req.user,
+      loginInput,
+    );
   }
 }

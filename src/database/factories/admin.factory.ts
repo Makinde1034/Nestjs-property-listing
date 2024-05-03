@@ -3,15 +3,19 @@
  * For license. See license.txt
  */
 
-import { User } from 'src/entities';
+import type { User, Role } from 'src/entities';
 import * as bcrypt from 'bcrypt';
+import { UserStatus } from '../../common/enums';
 
 export const SuperAdminData: Partial<User> = {
   firstName: 'Super',
   lastName: 'Admin',
   email: 'admin@waseet.com',
-  password: bcrypt.hashSync('Admin@2024', 10),
+  password: bcrypt.hashSync('Waseet@2024', 10),
   verifiedAt: new Date(),
   userType: 'admin',
   phone: '+1100299111',
+  isTwoFactorAuthenticationEnabled: true,
+  roles: [{ id: 1 }] as Role[],
+  status: UserStatus.VERIFIED,
 };

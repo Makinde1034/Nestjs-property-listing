@@ -16,6 +16,31 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type Permission {
+  id: ID!
+  name: String!
+  slug: String!
+  permissionGroup: String!
+  visible: Boolean!
+}
+
+type Role {
+  id: ID!
+  name: String!
+  slug: String!
+  permissions: [Permission!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Company {
+  id: ID!
+  name: String!
+  vatNumber: String!
+  crNumber: String!
+  user: User!
+}
+
 type User {
   id: ID!
   userType: String!
@@ -35,42 +60,14 @@ type User {
   biometricKey: String
   status: String
   nationalIdentity: NationalIdentity
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  deletedAt: DateTime
-}
-
-type CompanyUser {
-  id: ID!
-  userType: String!
-  firstName: String
-  lastName: String
-  middleName: String
-  email: String!
-  phone: String
-  verifiedAt: DateTime
-  password: String
-  gender: String
-  language: String
-  maritalStatus: String
-  occupation: String
-  dateOfBirth: DateTime
-  profilePhoto: String
-  biometricKey: String
-  status: String
-  nationalIdentity: NationalIdentity
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  deletedAt: DateTime
   company: Company
-}
-
-type Company {
-  id: ID!
-  name: String!
-  vatNumber: String!
-  crNumber: String!
-  user: CompanyUser!
+  twoFactorAuthenticationSecret: String
+  isTwoFactorAuthenticationEnabled: Boolean
+  roles: [Role!]
+  employeeId: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
 }
 
 type Notification {
@@ -119,49 +116,6 @@ type Attribute {
   updatedAt: DateTime!
 }
 
-type Permission {
-  id: ID!
-  name: String!
-  slug: String!
-  permissionGroup: String!
-  visible: Boolean!
-}
-
-type Role {
-  id: ID!
-  name: String!
-  slug: String!
-  permissions: [Permission!]!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type Staff {
-  id: ID!
-  userType: String!
-  firstName: String
-  lastName: String
-  middleName: String
-  email: String!
-  phone: String
-  verifiedAt: DateTime
-  password: String
-  gender: String
-  language: String
-  maritalStatus: String
-  occupation: String
-  dateOfBirth: DateTime
-  profilePhoto: String
-  biometricKey: String
-  status: String
-  nationalIdentity: NationalIdentity
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  deletedAt: DateTime
-  roles: [Role!]!
-  employeeId: String
-}
-
 type Issue {
   id: ID!
   message: String!
@@ -184,7 +138,12 @@ type TokenType {
 
 type LoginResponse {
   user: User!
-  token: TokenType!
+  token: TokenType
+}
+
+type TwoFaResult {
+  user: User!
+  qrcodeImage: String!
 }
 
 type SuccessResponse {
@@ -193,9 +152,11 @@ type SuccessResponse {
 
 type Query {
   app: String!
+  activateTwoFa: TwoFaResult!
   user: User!
   permissions: [Permission!]!
   roles: [Role!]!
+  getUserRoles: [Role!]!
   listNotifications: [Notification!]!
   fetchListingTypes: [ListingType!]!
   fetchAttributes: [Attribute!]!
@@ -212,8 +173,9 @@ type Mutation {
   biometricLogin(LoginInput: BiometricLogin!): String!
   resetPasswordRequest(RequestInput: PasswordResetRequestDto!): SuccessResponse!
   resetPassword(ResetInput: PasswordResetDto!): SuccessResponse!
+  twoFaLogin(LoginInput: TwoFaLoginInput!): LoginResponse!
   updateProfile(id: String!): Notification!
-  createStaff(RequestInput: CreateStaffInput!): Staff!
+  createStaff(RequestInput: CreateStaffInput!): User!
   staffConfirmation(RequestInput: StaffConfirmDto!): String!
   createRole(RequestInput: RoleInputDto!): Role!
   updateRole(RequestInput: RoleUpdateInputDto!): Role!
@@ -240,6 +202,7 @@ input RegisterInput {
   userType: String!
   firstName: String
   lastName: String
+  recaptcha: String
   email: String!
   phone: String
   password: String!
@@ -282,6 +245,10 @@ input PasswordResetDto {
   password: String!
 }
 
+input TwoFaLoginInput {
+  token: String!
+}
+
 input CreateStaffInput {
   middleName: String!
   firstName: String!
@@ -295,7 +262,6 @@ input CreateStaffInput {
 input StaffConfirmDto {
   email: String!
   token: String!
-  oldPassword: String!
   password: String!
 }
 

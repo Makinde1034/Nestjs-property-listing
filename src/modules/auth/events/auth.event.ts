@@ -4,7 +4,7 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { AuthService } from '../auth.service';
+import { AuthService } from '../services/auth.service';
 import { OnEvent } from '@nestjs/event-emitter';
 import { RegisterEventAction } from 'src/common/enums';
 import { RegisterEventDto } from '../dtos';

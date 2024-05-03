@@ -6,7 +6,7 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
-import { Staff, User } from 'src/entities';
+import { User } from 'src/entities';
 import { UserService } from '../services/user.service';
 import { CreateStaffInput, ProfileInput, StaffConfirmDto } from '../dtos';
 import { Permissions } from 'src/common/decorator/permission';
@@ -18,12 +18,12 @@ export class UserResolver {
   /**
    * User
    *
-   * @returns {User}
+   * @returns { Promise<User>}
    */
   @Query(() => User, { name: 'user' })
   @UseGuards(AccessTokenGuard)
-  getUser(@Context() ctx) {
-    return ctx.req.user;
+  async getUser(@Context() ctx): Promise<User> {
+    return await this.userService.findUserById(ctx.req.user.id, ['roles']);
   }
 
   /**
@@ -50,7 +50,7 @@ export class UserResolver {
    * @param {ProfileInput} inputDto
    * @returns {Promise<User>}
    */
-  @Mutation(() => Staff)
+  @Mutation(() => User)
   @Permissions('create-user')
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async createStaff(
