@@ -5,7 +5,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { TicketRepository } from '../repositories';
-import { CreateTicketInput } from '../dtos';
+import { CreateTicketInput, UpdateTicketInput } from '../dtos';
 import { AppStrings } from 'src/common/messages/app.strings';
 import { Ticket, User } from 'src/entities';
 import {
@@ -23,12 +23,12 @@ export class TicketService {
   ) {}
 
   /**
-   * Raise Issue
+   * Raise Issue/ Create ticket
    *
    * @async
    * @param {User} user
    * @param {CreateTicketInput} input
-   * @returns {Promise<IssueCategory>}
+   * @returns {Promise<string>}
    */
   async raiseTicket(user: User, input: CreateTicketInput): Promise<string> {
     const { issuCategoryId, issueId } = input;
@@ -48,5 +48,36 @@ export class TicketService {
     await this.ticketRepository.create(data);
 
     return AppStrings.TICKET_RAISED_SUCCESSFULLY;
+  }
+
+  /**
+   * Get ticket
+   *
+   * @async
+   * @param {string} id
+   * @returns {Promise<Ticket>}
+   */
+  async getTicket(id: string): Promise<Ticket> {
+    return await this.ticketRepository.findByIdOrFail(id);
+  }
+
+  /**
+   * Update ticket
+   *
+   * @async
+   * @param {User} user
+   * @param {UpdateTicketInput} input
+   * @returns {Promise<Ticket>}
+   */
+  async updateTicket(user: User, input: UpdateTicketInput): Promise<Ticket> {
+    const { ticketId, status } = input;
+    const ticket = await this.ticketRepository.findByIdOrFail(ticketId);
+
+    const data: Partial<Ticket> = {
+      status,
+      assignedAt: ticket.assignedAt ?? new Date(),
+      support: user,
+    };
+    return await this.ticketRepository.update(ticketId, data);
   }
 }

@@ -3,11 +3,13 @@
  * For license. See license.txt
  */
 
-import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { TicketService } from '../services';
-import { AccessTokenGuard } from '../../auth/guards';
+import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
 import { UseGuards } from '@nestjs/common';
-import { CreateTicketInput } from '../dtos';
+import { CreateTicketInput, UpdateTicketInput } from '../dtos';
+import { Ticket } from 'src/entities';
+import { Permissions } from 'src/common/decorator/permission';
 
 @Resolver()
 export class TicketsResolver {
@@ -18,7 +20,7 @@ export class TicketsResolver {
    *
    * @async
    * @param {CreateIssueInput} RequestInput
-   * @returns {Promise<Issue>}
+   * @returns {Promise<string>}
    */
   @Mutation(() => String)
   @UseGuards(AccessTokenGuard)
@@ -27,5 +29,36 @@ export class TicketsResolver {
     @Context() ctx: any,
   ): Promise<string> {
     return await this.ticketService.raiseTicket(ctx.req.user, RequestInput);
+  }
+
+  /**
+   * Get Ticket
+   *
+   * @async
+   * @param {string} ticketId
+   * @returns {Promise<Ticket>}
+   */
+  @Query(() => Ticket)
+  @Permissions('read-support-tickets')
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  async getTicket(@Args('ticketId') ticketId: string): Promise<Ticket> {
+    return await this.ticketService.getTicket(ticketId);
+  }
+
+  /**
+   * Update Ticket
+   *
+   * @async
+   * @param {UpdateTicketInput} RequestInput
+   * @returns {Promise<Ticket>}
+   */
+  @Mutation(() => Ticket)
+  @Permissions('update-support-tickets')
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  async manageTicket(
+    @Args('RequestInput') RequestInput: UpdateTicketInput,
+    @Context() ctx: any,
+  ): Promise<Ticket> {
+    return await this.ticketService.updateTicket(ctx.req.user, RequestInput);
   }
 }
