@@ -18,5 +18,6 @@ import { IssueCategoryRepository, IssueRepository } from './repositories';
     IssueRepository,
     IssueCategoryRepository,
   ],
+  exports: [IssueRepository, IssueCategoryRepository],
 })
 export class IssueModule {}

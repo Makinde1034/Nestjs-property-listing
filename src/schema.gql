@@ -193,7 +193,7 @@ type Mutation {
   createIssueCategory(RequestInput: CreateIssueCategoryInput!): IssueCategory!
   updateIssueCatgeory(RequestInput: UpdateIssueCategoryInput!): IssueCategory!
   deleteIssueCategory(RequestInput: DeleteIssueInput!): String!
-  createIssue(RequestInput: CreateIssueInput!): Issue!
+  createIssue(RequestInput: CreateTicketInput!): String!
   updateIssue(RequestInput: UpdateIssueInput!): Issue!
   deleteIssue(RequestInput: DeleteIssueInput!): String!
 }
@@ -357,9 +357,9 @@ input DeleteIssueInput {
   id: String!
 }
 
-input CreateIssueInput {
-  issue: String!
-  categoryId: String!
+input CreateTicketInput {
+  issueId: String!
+  issuCategoryId: String!
 }
 
 input UpdateIssueInput {

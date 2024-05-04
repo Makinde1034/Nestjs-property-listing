@@ -89,8 +89,7 @@ export class IssueResolver {
    * @returns {Promise<Issue[]>}
    */
   @Query(() => [Issue])
-  @Permissions('read-issues-categories')
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @UseGuards(AccessTokenGuard)
   async fetchIssues(): Promise<Issue[]> {
     return await this.issueService.findAllIssues();
   }
