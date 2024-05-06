@@ -4,37 +4,16 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
-import * as SendGrid from '@sendgrid/mail';
 import { User } from 'src/entities';
 import { AppInfo } from 'src/common/utils/AppInfo';
 import { EmailNotificationPayload } from 'src/common/interface';
+import { MailSendService } from '../mail-service';
 
 @Injectable()
-export class MailService {
-  private readonly logger = new Logger(MailService.name);
-  constructor(
-    private readonly configService: ConfigService,
-    private readonly mailerService: MailerService,
-  ) {
-    SendGrid.setApiKey(configService.get('SENDGRID_API_KEY'));
-  }
-
-  /**
-   * Send Email
-   * @async
-   * @param {SendGrid.MailDataRequired} data
-   * @returns {Promise<void>}
-   */
-  async sendEmail(data: SendGrid.MailDataRequired): Promise<void> {
-    try {
-      await SendGrid.send(data);
-      this.logger.log('E-Mail sent Successfully');
-    } catch (error) {
-      this.logger.debug(error);
-    }
-  }
+export class NodeMailerEmailService implements MailSendService {
+  private readonly logger = new Logger(NodeMailerEmailService.name);
+  constructor(private readonly mailerService: MailerService) {}
 
   /**
    * Send Email Confirmation
@@ -128,11 +107,7 @@ export class MailService {
    * @param {string} link
    * @returns {Promise<void>}
    */
-  async sendStaffConfirmation(
-    user: User,
-    link: string,
-    password: string,
-  ): Promise<void> {
+  async sendStaffConfirmation(user: User, link: string): Promise<void> {
     try {
       await this.mailerService.sendMail({
         to: user.email,
@@ -140,10 +115,8 @@ export class MailService {
         subject: 'Welcome to Waseet App! Reset Your Password',
         template: './staff-confirmation', // `.hbs` extension is appended automatically
         context: {
-          // ✏️ filling curly brackets with content
           name: `${user.firstName} ${user.lastName}`,
-          url: link,
-          password,
+          link,
         },
       });
       this.logger.log('E-Mail sent Successfully');
