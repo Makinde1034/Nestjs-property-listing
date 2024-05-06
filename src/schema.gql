@@ -131,6 +131,23 @@ type IssueCategory {
   updatedAt: DateTime!
 }
 
+type Ticket {
+  id: ID!
+  reporter: User!
+  support: User
+  issueCategory: IssueCategory!
+  issue: Issue!
+  status: String!
+  type: String
+  openedAt: DateTime!
+  isOpen: Boolean!
+  closedAt: DateTime
+  assignedAt: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+}
+
 type TokenType {
   accessToken: String!
   refreshToken: String!
@@ -163,6 +180,7 @@ type Query {
   fetchAttributeSets: [AttributeSet!]!
   fetchIssueCategories: [IssueCategory!]!
   fetchIssues: [Issue!]!
+  getTicket(ticketId: String!): Ticket!
 }
 
 type Mutation {
@@ -193,9 +211,10 @@ type Mutation {
   createIssueCategory(RequestInput: CreateIssueCategoryInput!): IssueCategory!
   updateIssueCatgeory(RequestInput: UpdateIssueCategoryInput!): IssueCategory!
   deleteIssueCategory(RequestInput: DeleteIssueInput!): String!
-  createIssue(RequestInput: CreateIssueInput!): Issue!
+  createIssue(RequestInput: CreateTicketInput!): String!
   updateIssue(RequestInput: UpdateIssueInput!): Issue!
   deleteIssue(RequestInput: DeleteIssueInput!): String!
+  manageTicket(RequestInput: UpdateTicketInput!): Ticket!
 }
 
 input RegisterInput {
@@ -357,13 +376,18 @@ input DeleteIssueInput {
   id: String!
 }
 
-input CreateIssueInput {
-  issue: String!
-  categoryId: String!
+input CreateTicketInput {
+  issueId: String!
+  issuCategoryId: String!
 }
 
 input UpdateIssueInput {
   issue: String!
   categoryId: String!
   id: String!
+}
+
+input UpdateTicketInput {
+  ticketId: String!
+  status: String!
 }

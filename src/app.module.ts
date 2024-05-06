@@ -26,6 +26,7 @@ import {
   GoogleRecaptchaModuleOptions,
 } from '@nestlab/google-recaptcha';
 import { IssueModule } from './modules/issue/issue.module';
+import { TicketsModule } from './modules/tickets/tickets.module';
 
 @Module({
   imports: [
@@ -75,6 +76,7 @@ import { IssueModule } from './modules/issue/issue.module';
     NotificationModule,
     ListingTypeModule,
     IssueModule,
+    TicketsModule,
   ],
   controllers: [],
   providers: [AppResolver],

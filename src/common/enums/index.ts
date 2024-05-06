@@ -11,3 +11,4 @@ export * from './notification.enum';
 export * from './attribute.enum';
 export * from './user-status.enum';
 export * from './issue.enum';
+export * from './ticket.enum';

@@ -16,3 +16,4 @@ export * from './role.entity';
 export * from './permission.entity';
 export * from './issue-category.entity';
 export * from './issue.entity';
+export * from './ticket.entity';
