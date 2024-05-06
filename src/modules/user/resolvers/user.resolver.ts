@@ -8,7 +8,12 @@ import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
 import { User } from 'src/entities';
 import { UserService } from '../services/user.service';
-import { CreateStaffInput, ProfileInput, StaffConfirmDto } from '../dtos';
+import {
+  CreateStaffInput,
+  ProfileInput,
+  StaffConfirmDto,
+  UserActionInput,
+} from '../dtos';
 import { Permissions } from 'src/common/decorator/permission';
 
 @Resolver()
@@ -71,5 +76,21 @@ export class UserResolver {
     @Args('RequestInput') inputDto: StaffConfirmDto,
   ): Promise<string> {
     return await this.userService.staffPasswordConfirmation(inputDto);
+  }
+
+  /**
+   * Block User
+   *
+   * @async
+   * @param {UserActionInput} inputDto
+   * @returns {Promise<User>}
+   */
+  @Mutation(() => User)
+  @Permissions('update-user')
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  async blockUser(
+    @Args('RequestInput') inputDto: UserActionInput,
+  ): Promise<User> {
+    return await this.userService.blockUser(inputDto);
   }
 }

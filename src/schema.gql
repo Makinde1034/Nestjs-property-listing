@@ -65,6 +65,7 @@ type User {
   isTwoFactorAuthenticationEnabled: Boolean
   roles: [Role!]
   employeeId: String
+  disabledAt: DateTime
   createdAt: DateTime!
   updatedAt: DateTime!
   deletedAt: DateTime
@@ -195,6 +196,7 @@ type Mutation {
   updateProfile(id: String!): Notification!
   createStaff(RequestInput: CreateStaffInput!): User!
   staffConfirmation(RequestInput: StaffConfirmDto!): String!
+  blockUser(RequestInput: UserActionInput!): User!
   createRole(RequestInput: RoleInputDto!): Role!
   updateRole(RequestInput: RoleUpdateInputDto!): Role!
   deleteRole(RequestInput: RoleIdInputDto!): String!
@@ -282,6 +284,11 @@ input StaffConfirmDto {
   email: String!
   token: String!
   password: String!
+}
+
+input UserActionInput {
+  userId: String!
+  action: Boolean!
 }
 
 input RoleInputDto {

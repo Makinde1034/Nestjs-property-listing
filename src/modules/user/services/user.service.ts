@@ -21,6 +21,7 @@ import {
   StaffConfirmDto,
   StaffCreatedData,
   StaffCreatedEventDto,
+  UserActionInput,
 } from '../dtos';
 import { StorageService } from '../../storage/storage.service';
 import { AppStrings } from 'src/common/messages/app.strings';
@@ -327,5 +328,27 @@ export class UserService {
       }
     }
     throw new BadRequestException(AppStrings.WRONG_CONFIRM_CODE);
+  }
+
+  /**
+   * Confirm registered staff
+   * Validate new password
+   *
+   * @async
+   * @param {UserActionInput} requestInput
+   * @returns {Promise<User>}
+   */
+  async blockUser(requestInput: UserActionInput): Promise<User> {
+    const user = await this.usersRepository.findByIdOrFail(requestInput.userId);
+    if (requestInput.action) {
+      return await this.usersRepository.update(user.id, {
+        status: UserStatus.DISABLED,
+        disabledAt: new Date(),
+      });
+    }
+    return await this.usersRepository.update(user.id, {
+      status: UserStatus.ACTIVE,
+      disabledAt: null,
+    });
   }
 }
