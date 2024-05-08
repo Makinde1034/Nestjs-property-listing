@@ -5,6 +5,7 @@
 
 import { Field, InputType } from '@nestjs/graphql';
 import {
+  IsBoolean,
   IsDate,
   IsEmail,
   IsEnum,
@@ -93,4 +94,22 @@ export class ProfileInput {
   @Type(() => IdentityInput)
   @IsOptional()
   nationalIdentity: IdentityInput;
+}
+
+@InputType()
+export class NotificationPrefenceInput {
+  @Field(() => Boolean, { nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  email: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  sms: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  pushNotification: boolean;
 }

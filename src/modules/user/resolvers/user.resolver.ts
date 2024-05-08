@@ -10,6 +10,7 @@ import { User } from 'src/entities';
 import { UserService } from '../services/user.service';
 import {
   CreateStaffInput,
+  NotificationPrefenceInput,
   ProfileInput,
   StaffConfirmDto,
   UserActionInput,
@@ -92,5 +93,25 @@ export class UserResolver {
     @Args('RequestInput') inputDto: UserActionInput,
   ): Promise<User> {
     return await this.userService.blockUser(inputDto);
+  }
+
+  /**
+   * Update User Notification Preference
+   *
+   * @async
+   * @param {any} ctx
+   * @param {NotificationPrefenceInput} inputDto
+   * @returns {Promise<User>}
+   */
+  @Mutation(() => User)
+  @UseGuards(AccessTokenGuard)
+  async updateNotificationPreference(
+    @Context() ctx: any,
+    @Args('RequestInput') inputDto: NotificationPrefenceInput,
+  ): Promise<User> {
+    return await this.userService.updateNotificationPreference(
+      ctx.req.user,
+      inputDto,
+    );
   }
 }

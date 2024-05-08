@@ -24,6 +24,7 @@ import { NationalIdentity } from './identity.entity';
 import { Exclude } from 'class-transformer';
 import { Role } from './role.entity';
 import { Company } from './company.entity';
+import { UserNotificationPreference } from './notification-preference.entity';
 
 @Entity()
 @ObjectType()
@@ -88,6 +89,10 @@ export class User extends BaseEntity {
   @Field({ nullable: true })
   biometricKey: string;
 
+  @Column({ nullable: true, default: false })
+  @Field({ nullable: true })
+  twoFaRequired: boolean;
+
   @Field({ nullable: true, defaultValue: UserStatus.PENDING })
   @Column({ nullable: true, default: UserStatus.PENDING })
   status: UserStatus;
@@ -105,6 +110,13 @@ export class User extends BaseEntity {
     eager: true,
   })
   company?: Company;
+
+  @Field(() => UserNotificationPreference, { nullable: true })
+  @OneToOne(() => UserNotificationPreference, (preference) => preference.user, {
+    cascade: true,
+    eager: true,
+  })
+  notificationPreference: UserNotificationPreference;
 
   @Exclude()
   @Field({ nullable: true })

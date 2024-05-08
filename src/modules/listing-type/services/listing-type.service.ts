@@ -13,12 +13,14 @@ import {
 } from '../dtos';
 import { In } from 'typeorm';
 import { AppStrings } from 'src/common/messages/app.strings';
+import { StorageService } from 'src/modules/storage/storage.service';
 
 @Injectable()
 export class ListingTypeService {
   constructor(
     private readonly listingTypeRepository: ListingTypeRepository,
     private readonly attributeSetRepository: AttributeSetRepository,
+    private readonly storageService: StorageService,
   ) {}
 
   /**
@@ -36,16 +38,26 @@ export class ListingTypeService {
    *
    * @async
    * @param {ListingTypeInput} input
+   * @param {Express.Multer.File?} icon
    * @returns {Promise<ListingType>}
    */
-  async createListingType(input: ListingTypeInput): Promise<ListingType> {
+  async createListingType(
+    input: ListingTypeInput,
+    icon?: Express.Multer.File,
+  ): Promise<ListingType> {
     const attributeSets = await this.attributeSetRepository.findAll({
       where: { id: In([...input.attributeSets]) },
     });
+
     const data: Partial<ListingType> = {
       name: input.name,
       attributeSets,
     };
+    if (!icon) {
+      // Upload icon image
+      const imageurl = await this.storageService.upload(icon);
+      data.icon = imageurl;
+    }
     return await this.listingTypeRepository.create(data);
   }
 
@@ -54,9 +66,13 @@ export class ListingTypeService {
    *
    * @async
    * @param {ListingTypeUpdateInput} input
+   * @param {Express.Multer.File?} icon
    * @returns {Promise<ListingType>}
    */
-  async updateListingType(input: ListingTypeUpdateInput): Promise<ListingType> {
+  async updateListingType(
+    input: ListingTypeUpdateInput,
+    icon?: Express.Multer.File,
+  ): Promise<ListingType> {
     const attributeSets = await this.attributeSetRepository.findAll({
       where: { id: In([...input.attributeSets]) },
     });
@@ -64,6 +80,11 @@ export class ListingTypeService {
       name: input.name,
       attributeSets,
     };
+    if (!icon) {
+      // Upload icon image
+      const imageurl = await this.storageService.upload(icon);
+      data.icon = imageurl;
+    }
     return await this.listingTypeRepository.update(input.id, data);
   }
 

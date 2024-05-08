@@ -6,4 +6,6 @@
 export enum UserProfileTypeEnum {
   INDIVIDUAL = 'individual',
   COMPANY = 'company',
+  STAFF = 'staff',
+  ADMIN = 'admin',
 }

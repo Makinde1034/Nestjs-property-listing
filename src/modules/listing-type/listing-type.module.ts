@@ -13,9 +13,11 @@ import {
   AttributeSetRepository,
   ListingTypeRepository,
 } from './repositories';
+import { ListingTypeController } from './controllers';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Attribute, AttributeSet, ListingType])],
+  controllers: [ListingTypeController],
   providers: [
     ListingTypeResolver,
     ListingTypeService,

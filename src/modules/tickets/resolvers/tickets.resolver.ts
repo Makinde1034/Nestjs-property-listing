@@ -24,7 +24,7 @@ export class TicketsResolver {
    */
   @Mutation(() => String)
   @UseGuards(AccessTokenGuard)
-  async createIssue(
+  async createTicket(
     @Args('RequestInput') RequestInput: CreateTicketInput,
     @Context() ctx: any,
   ): Promise<string> {
