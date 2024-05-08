@@ -21,12 +21,13 @@ import {
   StaffConfirmDto,
   StaffCreatedData,
   StaffCreatedEventDto,
+  UserActionInput,
 } from '../dtos';
 import { StorageService } from '../../storage/storage.service';
 import { AppStrings } from 'src/common/messages/app.strings';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { RegisterEventAction, UserStatus } from 'src/common/enums';
-import { MailService } from 'src/modules/mail/mail.service';
+import { MailgunEmailService } from '../../mail/services/implementations';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -38,7 +39,7 @@ export class UserService {
     private readonly storageService: StorageService,
     private readonly roleRepository: RoleRepository,
     private readonly eventEmitter: EventEmitter2,
-    private readonly mailService: MailService,
+    private readonly mailService: MailgunEmailService,
     private readonly configService: ConfigService,
   ) {
     this.frontEndUrl = this.configService.get('FRONT_END_URL');
@@ -286,12 +287,12 @@ export class UserService {
    * @returns {Promise<void>}
    */
   async sendPasswordEmailToStaff(data: StaffCreatedData): Promise<void> {
-    const { staff, password } = data;
+    const { staff } = data;
     const { token } = await this.generateUserConfirmation(staff);
 
     const link = `${this.frontEndUrl}/staff-confirmation?email=${staff.email}&token=${token}`;
 
-    await this.mailService.sendStaffConfirmation(staff, link, password);
+    await this.mailService.sendStaffConfirmation(staff, link);
   }
 
   /**
@@ -327,5 +328,27 @@ export class UserService {
       }
     }
     throw new BadRequestException(AppStrings.WRONG_CONFIRM_CODE);
+  }
+
+  /**
+   * Confirm registered staff
+   * Validate new password
+   *
+   * @async
+   * @param {UserActionInput} requestInput
+   * @returns {Promise<User>}
+   */
+  async blockUser(requestInput: UserActionInput): Promise<User> {
+    const user = await this.usersRepository.findByIdOrFail(requestInput.userId);
+    if (requestInput.action) {
+      return await this.usersRepository.update(user.id, {
+        status: UserStatus.DISABLED,
+        disabledAt: new Date(),
+      });
+    }
+    return await this.usersRepository.update(user.id, {
+      status: UserStatus.ACTIVE,
+      disabledAt: null,
+    });
   }
 }

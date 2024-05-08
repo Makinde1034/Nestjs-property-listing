@@ -125,6 +125,10 @@ export class User extends BaseEntity {
   @Column({ nullable: true, unique: true })
   employeeId: string;
 
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  disabledAt: Date;
+
   @Field()
   @CreateDateColumn()
   createdAt: Date;

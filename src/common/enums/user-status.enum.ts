@@ -7,7 +7,7 @@ export enum UserStatus {
   PENDING = 'PENDING',
   FAILED = 'FAILED',
   VERIFIED = 'VERIFIED',
-  COMPLETED = 'COMPLETED',
+  ACTIVE = 'ACTIVE',
   DISABLED = 'DISABLED',
   DELETED = 'DELETED',
 }
