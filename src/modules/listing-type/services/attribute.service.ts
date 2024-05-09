@@ -16,12 +16,14 @@ import {
 } from '../dtos';
 import { In } from 'typeorm';
 import { AppStrings } from 'src/common/messages/app.strings';
+import { StorageService } from '../../storage/storage.service';
 
 @Injectable()
 export class AttributeService {
   constructor(
     private readonly attributeRepository: AttributeRepository,
     private readonly attributeSetRepository: AttributeSetRepository,
+    private readonly storageService: StorageService,
   ) {}
 
   /**
@@ -39,10 +41,22 @@ export class AttributeService {
    *
    * @async
    * @param {AttributeInput} data
+   * @param {Express.Multer.File?} icon
    * @returns {Promise<Attribute>}
    */
-  async createAttribute(data: AttributeInput): Promise<Attribute> {
-    return await this.attributeRepository.create(data);
+  async createAttribute(
+    data: AttributeInput,
+    icon?: Express.Multer.File,
+  ): Promise<Attribute> {
+    const attributeData: Partial<Attribute> = {
+      ...data,
+    };
+    if (!icon) {
+      // Upload icon image
+      const imageurl = await this.storageService.upload(icon);
+      attributeData.icon = imageurl;
+    }
+    return await this.attributeRepository.create(attributeData);
   }
 
   /**
@@ -50,10 +64,22 @@ export class AttributeService {
    *
    * @async
    * @param {AttributeUpdateInput} data
+   * @param {Express.Multer.File?} icon
    * @returns {Promise<Attribute>}
    */
-  async updateAttribute(data: AttributeUpdateInput): Promise<Attribute> {
-    return await this.attributeRepository.update(data.id, data);
+  async updateAttribute(
+    data: AttributeUpdateInput,
+    icon?: Express.Multer.File,
+  ): Promise<Attribute> {
+    const attributeData: Partial<Attribute> = {
+      ...data,
+    };
+    if (!icon) {
+      // Upload icon image
+      const imageurl = await this.storageService.upload(icon);
+      attributeData.icon = imageurl;
+    }
+    return await this.attributeRepository.update(data.id, attributeData);
   }
 
   /**

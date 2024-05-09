@@ -9,7 +9,11 @@ import {
   UserConfirmationRepository,
   UserRepository,
 } from '../repositories';
-import type { TokenConfirmation, User } from 'src/entities';
+import type {
+  TokenConfirmation,
+  User,
+  UserNotificationPreference,
+} from 'src/entities';
 import { DeepPartial, FindOptionsWhere, In, LessThan } from 'typeorm';
 import { PostgresError } from 'pg-error-enum';
 import { addHours, isPast } from 'date-fns';
@@ -17,6 +21,7 @@ import { generateOtp, generateRandomToken } from 'src/common/utils/functions';
 import {
   CreateStaffInput,
   ImageResponse,
+  NotificationPrefenceInput,
   ProfileInput,
   StaffConfirmDto,
   StaffCreatedData,
@@ -230,6 +235,27 @@ export class UserService {
   }
 
   /**
+   * Update User Profile
+   *
+   * @async
+   * @param {User} user
+   * @param {NotificationPrefenceInput} data
+   * @returns {Promise<User>}
+   */
+  async updateNotificationPreference(
+    user: User,
+    data: NotificationPrefenceInput,
+  ): Promise<User> {
+    const updateData: Partial<UserNotificationPreference> = {
+      ...data,
+    };
+    const update = await this.usersRepository.update(user.id, {
+      notificationPreference: updateData,
+    });
+    return update;
+  }
+
+  /**
    * Update User's Profile picture
    *
    * @async
@@ -271,6 +297,7 @@ export class UserService {
       password,
       employeeId: `${generateOtp()}`,
       userType: 'staff',
+      twoFaRequired: true,
     };
     const staff = await this.usersRepository.create(staffData);
     this.eventEmitter.emit(

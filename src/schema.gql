@@ -41,6 +41,14 @@ type Company {
   user: User!
 }
 
+type UserNotificationPreference {
+  id: ID!
+  email: Boolean
+  sms: Boolean
+  pushNotification: Boolean
+  user: User!
+}
+
 type User {
   id: ID!
   userType: String!
@@ -58,9 +66,11 @@ type User {
   dateOfBirth: DateTime
   profilePhoto: String
   biometricKey: String
+  twoFaRequired: Boolean
   status: String
   nationalIdentity: NationalIdentity
   company: Company
+  notificationPreference: UserNotificationPreference
   twoFactorAuthenticationSecret: String
   isTwoFactorAuthenticationEnabled: Boolean
   roles: [Role!]
@@ -188,8 +198,8 @@ type Mutation {
   register(RegisterInput: RegisterInput!): User!
   registerConfirm(RegisterConfirmInput: AuthRegisterConfirmDto!): String!
   login(LoginInput: LoginInput!): LoginResponse!
-  biometricRegister(RegisterInput: BiometricRegister!): String!
-  biometricLogin(LoginInput: BiometricLogin!): String!
+  biometricRegister(RequestInput: BiometricRegister!): String!
+  biometricLogin(LoginInput: BiometricLogin!): LoginResponse!
   resetPasswordRequest(RequestInput: PasswordResetRequestDto!): SuccessResponse!
   resetPassword(ResetInput: PasswordResetDto!): SuccessResponse!
   twoFaLogin(LoginInput: TwoFaLoginInput!): LoginResponse!
@@ -197,6 +207,7 @@ type Mutation {
   createStaff(RequestInput: CreateStaffInput!): User!
   staffConfirmation(RequestInput: StaffConfirmDto!): String!
   blockUser(RequestInput: UserActionInput!): User!
+  updateNotificationPreference(RequestInput: NotificationPrefenceInput!): User!
   createRole(RequestInput: RoleInputDto!): Role!
   updateRole(RequestInput: RoleUpdateInputDto!): Role!
   deleteRole(RequestInput: RoleIdInputDto!): String!
@@ -213,9 +224,10 @@ type Mutation {
   createIssueCategory(RequestInput: CreateIssueCategoryInput!): IssueCategory!
   updateIssueCatgeory(RequestInput: UpdateIssueCategoryInput!): IssueCategory!
   deleteIssueCategory(RequestInput: DeleteIssueInput!): String!
-  createIssue(RequestInput: CreateTicketInput!): String!
+  createIssue(RequestInput: CreateIssueInput!): Issue!
   updateIssue(RequestInput: UpdateIssueInput!): Issue!
   deleteIssue(RequestInput: DeleteIssueInput!): String!
+  createTicket(RequestInput: CreateTicketInput!): String!
   manageTicket(RequestInput: UpdateTicketInput!): Ticket!
 }
 
@@ -289,6 +301,12 @@ input StaffConfirmDto {
 input UserActionInput {
   userId: String!
   action: Boolean!
+}
+
+input NotificationPrefenceInput {
+  email: Boolean
+  sms: Boolean
+  pushNotification: Boolean
 }
 
 input RoleInputDto {
@@ -383,15 +401,20 @@ input DeleteIssueInput {
   id: String!
 }
 
-input CreateTicketInput {
-  issueId: String!
-  issuCategoryId: String!
+input CreateIssueInput {
+  issue: String!
+  categoryId: String!
 }
 
 input UpdateIssueInput {
   issue: String!
   categoryId: String!
   id: String!
+}
+
+input CreateTicketInput {
+  issueId: String!
+  issuCategoryId: String!
 }
 
 input UpdateTicketInput {
