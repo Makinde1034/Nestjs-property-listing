@@ -22,7 +22,7 @@ import {
   CreateStaffInput,
   ImageResponse,
   NotificationPrefenceInput,
-  ProfileInput,
+  UserProfileInput,
   StaffConfirmDto,
   StaffCreatedData,
   StaffCreatedEventDto,
@@ -223,10 +223,10 @@ export class UserService {
    *
    * @async
    * @param {User} user
-   * @param {ProfileInput} data
+   * @param {UserProfileInput} data
    * @returns {Promise<User>}
    */
-  async updateProfile(user: User, data: ProfileInput): Promise<User> {
+  async updateProfile(user: User, data: UserProfileInput): Promise<User> {
     const updateData = {
       ...data,
     } as Partial<User>;
@@ -287,24 +287,28 @@ export class UserService {
    * @returns {Promise<Staff>}
    */
   async createStaff(input: CreateStaffInput): Promise<User> {
-    const roles = await this.roleRepository.find({
-      where: { id: In([...input.roles]) },
-    });
-    const password = generateRandomToken(8);
-    const staffData: Partial<User> = {
-      ...input,
-      roles,
-      password,
-      employeeId: `${generateOtp()}`,
-      userType: 'staff',
-      twoFaRequired: true,
-    };
-    const staff = await this.usersRepository.create(staffData);
-    this.eventEmitter.emit(
-      RegisterEventAction.STAFF_CREATED,
-      new StaffCreatedEventDto({ staff, password }),
-    );
-    return staff;
+    try {
+      const roles = await this.roleRepository.find({
+        where: { id: In([...input.roles]) },
+      });
+      const password = generateRandomToken(8);
+      const staffData: Partial<User> = {
+        ...input,
+        roles,
+        password,
+        employeeId: `${generateOtp()}`,
+        userType: 'staff',
+        twoFaRequired: true,
+      };
+      const staff = await this.usersRepository.create(staffData);
+      this.eventEmitter.emit(
+        RegisterEventAction.STAFF_CREATED,
+        new StaffCreatedEventDto({ staff, password }),
+      );
+      return staff;
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
   }
 
   /**

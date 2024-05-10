@@ -4,7 +4,6 @@ services:
   backend:
     build:
       context: .
-      target: builder
     volumes:
       - .:/usr/src/app
       - ./node_modules:/usr/src/app/node_modules

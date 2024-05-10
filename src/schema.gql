@@ -203,7 +203,7 @@ type Mutation {
   resetPasswordRequest(RequestInput: PasswordResetRequestDto!): SuccessResponse!
   resetPassword(ResetInput: PasswordResetDto!): SuccessResponse!
   twoFaLogin(LoginInput: TwoFaLoginInput!): LoginResponse!
-  updateProfile(id: String!): Notification!
+  profileUpdate(RequestInput: UserProfileInput!): User!
   createStaff(RequestInput: CreateStaffInput!): User!
   staffConfirmation(RequestInput: StaffConfirmDto!): String!
   blockUser(RequestInput: UserActionInput!): User!
@@ -211,6 +211,7 @@ type Mutation {
   createRole(RequestInput: RoleInputDto!): Role!
   updateRole(RequestInput: RoleUpdateInputDto!): Role!
   deleteRole(RequestInput: RoleIdInputDto!): String!
+  markNotificationAsRead(id: String!): Notification!
   sendNotification(RequestInput: NotificationInput!): String!
   createListingType(RequestInput: ListingTypeInput!): ListingType!
   updateListingType(RequestInput: ListingTypeUpdateInput!): ListingType!
@@ -280,6 +281,26 @@ input PasswordResetDto {
 
 input TwoFaLoginInput {
   token: String!
+}
+
+input UserProfileInput {
+  firstName: String
+  lastName: String
+  gender: String
+  maritalStatus: String
+  occupation: String
+  language: String
+  dateOfBirth: DateTime
+  email: String!
+  phone: String
+  nationalIdentity: IdentityInput
+}
+
+input IdentityInput {
+  nationality: String!
+  type: String!
+  identityNumber: String!
+  dateOfExpiry: DateTime!
 }
 
 input CreateStaffInput {
