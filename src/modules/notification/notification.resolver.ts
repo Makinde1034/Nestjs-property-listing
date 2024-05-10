@@ -37,7 +37,7 @@ export class NotificationResolver {
    */
   @Mutation(() => Notification)
   @UseGuards(AccessTokenGuard)
-  async updateProfile(
+  async markNotificationAsRead(
     @Context() ctx: any,
     @Args('id') id: string,
   ): Promise<Notification> {

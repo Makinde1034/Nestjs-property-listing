@@ -412,23 +412,27 @@ export class AuthService {
    * @returns {Promise<TwoFaResult>}
    */
   async generateTwoFactorQrcode(user: User): Promise<TwoFaResult> {
-    const secret =
-      this.twoFactorAuthenticationService.generateTwoFactorAuthenticationSecret(
-        user.email,
-      );
-    const name = `${user.firstName} ${user.lastName}`;
-    const qrcode =
-      await this.twoFactorAuthenticationService.generateTwoFactorOtpUrl(
-        user.email,
-        name,
-        secret,
-      );
+    try {
+      const secret =
+        this.twoFactorAuthenticationService.generateTwoFactorAuthenticationSecret(
+          user.email,
+        );
+      const name = `${user.firstName} ${user.lastName}`;
+      const qrcode =
+        await this.twoFactorAuthenticationService.generateTwoFactorOtpUrl(
+          user.email,
+          name,
+          secret,
+        );
 
-    await this.userService.updateUser(user.id, {
-      twoFactorAuthenticationSecret: secret,
-    });
+      await this.userService.updateUser(user.id, {
+        twoFactorAuthenticationSecret: secret,
+      });
 
-    return { qrcodeImage: qrcode, user };
+      return { qrcodeImage: qrcode, user };
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
   }
 
   /**
@@ -442,7 +446,7 @@ export class AuthService {
   async loginUsingTwoFactorAuthentication(
     user: User,
     input: TwoFaLoginInput,
-  ): Promise<any> {
+  ): Promise<LoginResponse> {
     if (!user.twoFactorAuthenticationSecret) {
       throw new ForbiddenException(AppStrings.TWO_FA_NOT_ENABLED);
     }
@@ -464,6 +468,7 @@ export class AuthService {
 
     const support = await this.userRepository.findById(user.id, ['roles']);
 
-    return await this.issueTokens(support);
+    const token = await this.issueTokens(support);
+    return { user: support, token };
   }
 }

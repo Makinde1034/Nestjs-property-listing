@@ -9,3 +9,4 @@ export * from './RoleInput';
 export * from './StaffInput';
 export * from './StaffCreatedEvent';
 export * from './UserActionInput';
+export * from './UserProfileInput';

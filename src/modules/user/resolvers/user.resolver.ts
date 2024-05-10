@@ -11,7 +11,7 @@ import { UserService } from '../services/user.service';
 import {
   CreateStaffInput,
   NotificationPrefenceInput,
-  ProfileInput,
+  UserProfileInput,
   StaffConfirmDto,
   UserActionInput,
 } from '../dtos';
@@ -37,14 +37,14 @@ export class UserResolver {
    *
    * @async
    * @param {any} ctx
-   * @param {ProfileInput} inputDto
+   * @param {UserProfileInput} inputDto
    * @returns {Promise<User>}
    */
-  @Mutation(() => User)
+  @Mutation(() => User, { name: 'profileUpdate' })
   @UseGuards(AccessTokenGuard)
   async updateProfile(
+    @Args('RequestInput') inputDto: UserProfileInput,
     @Context() ctx: any,
-    @Args('ProfileInput') inputDto: ProfileInput,
   ): Promise<User> {
     return await this.userService.updateProfile(ctx.req.user, inputDto);
   }
@@ -53,7 +53,7 @@ export class UserResolver {
    * Create Staff User Profile
    *
    * @async
-   * @param {ProfileInput} inputDto
+   * @param {CreateStaffInput} inputDto
    * @returns {Promise<User>}
    */
   @Mutation(() => User)
