@@ -96,7 +96,7 @@ export class AuthService {
         ...inputDto,
         company,
       };
-      const newUser = await this.userService.createUser(data);
+      const newUser = await this.userRepository.create(data);
       this.eventEmitter.emit(
         RegisterEventAction.USER_CREATED,
         new RegisterEventDto(newUser),

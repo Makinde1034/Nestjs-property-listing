@@ -108,6 +108,11 @@ export abstract class EntityRepository<T extends BaseEntity> {
       const item = this.baseRepository.create(data);
       return await this.baseRepository.save(item);
     } catch (error: any) {
+      if (error.driverError?.code === PostgresError.UNIQUE_VIOLATION) {
+        throw new BadRequestException(
+          `${this.entityName.toUpperCase()} already exist`,
+        );
+      }
       throw new BadRequestException(error);
     }
   }
