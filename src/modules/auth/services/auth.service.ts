@@ -31,7 +31,7 @@ import {
 import { Company, User } from 'src/entities';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { RegisterEventAction, UserStatus } from 'src/common/enums';
-import { MailgunEmailService } from '../../mail/services/implementations';
+import { NodeMailerEmailService } from '../../mail/services/implementations';
 import { ConfigService } from '@nestjs/config';
 import { I18nService } from 'nestjs-i18n';
 import * as bcrypt from 'bcrypt';
@@ -47,11 +47,12 @@ import { UserRepository } from '../../user/repositories';
 @Injectable()
 export class AuthService {
   private readonly frontEndUrl: string;
+  private readonly adminUrl: string;
   private logger = new Logger(AuthService.name);
   constructor(
     private readonly userService: UserService,
     private readonly i18n: I18nService,
-    private readonly mailService: MailgunEmailService,
+    private readonly mailService: NodeMailerEmailService,
     private readonly configService: ConfigService,
     private readonly eventEmitter: EventEmitter2,
     private readonly jwtService: JwtService,
@@ -60,6 +61,7 @@ export class AuthService {
     private readonly userRepository: UserRepository,
   ) {
     this.frontEndUrl = this.configService.get('FRONT_END_URL');
+    this.adminUrl = this.configService.get('ADMIN_FRONTEND_URL');
   }
 
   /**
@@ -367,10 +369,9 @@ export class AuthService {
     const { email, userType } = user;
     const { token } = await this.userService.generateUserConfirmation(user);
 
-    const url =
-      userType === 'staff' ? 'staff/reset-password' : 'reset-password';
+    const url = userType === 'staff' ? 'forgotPassword' : 'reset-password';
 
-    const link = `${this.frontEndUrl}/${url}?email=${email}&token=${token}`;
+    const link = `${this.frontEndUrl}/${url}?email=${email}&token=${token}${userType === 'staff' ? '&step=createnewpassword' : ''}`;
 
     await this.mailService.sendPasswordResetEmail(user, link);
   }

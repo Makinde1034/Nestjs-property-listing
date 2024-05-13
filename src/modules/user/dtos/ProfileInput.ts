@@ -30,7 +30,7 @@ export class IdentityInput {
   identityNumber: string;
 
   @Field()
-  @IsString()
+  @IsNotEmpty()
   @IsDate()
   dateOfExpiry: Date;
 }

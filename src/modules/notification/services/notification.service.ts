@@ -9,7 +9,7 @@ import { NotificationEventDto, NotificationInput } from '../dtos';
 import { Notification, User } from 'src/entities';
 import { UserRepository } from 'src/modules/user/repositories';
 import { AppStrings } from 'src/common/messages/app.strings';
-import { MailgunEmailService } from '../../mail/services/implementations';
+import { NodeMailerEmailService } from '../../mail/services/implementations';
 import {
   EmailNotificationPayload,
   NotificationEventInput,
@@ -26,7 +26,7 @@ export class NotificationService {
   constructor(
     private readonly notificationRepository: NotificationRepository,
     private readonly userRepository: UserRepository,
-    private readonly mailService: MailgunEmailService,
+    private readonly mailService: NodeMailerEmailService,
     private readonly pushNotificationService: PushNotificationService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
