@@ -32,7 +32,7 @@ import { StorageService } from '../../storage/storage.service';
 import { AppStrings } from 'src/common/messages/app.strings';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { RegisterEventAction, UserStatus } from 'src/common/enums';
-import { MailgunEmailService } from '../../mail/services/implementations';
+import { NodeMailerEmailService } from '../../mail/services/implementations';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -44,10 +44,10 @@ export class UserService {
     private readonly storageService: StorageService,
     private readonly roleRepository: RoleRepository,
     private readonly eventEmitter: EventEmitter2,
-    private readonly mailService: MailgunEmailService,
+    private readonly mailService: NodeMailerEmailService,
     private readonly configService: ConfigService,
   ) {
-    this.frontEndUrl = this.configService.get('FRONT_END_URL');
+    this.frontEndUrl = this.configService.get('ADMIN_FRONTEND_URL');
   }
 
   /**

@@ -24,6 +24,10 @@ export class NodeMailerEmailService implements MailSendService {
    */
   async sendUserConfirmation(user: User, link: string): Promise<void> {
     try {
+      const name =
+        user.userType === 'individual'
+          ? user.email
+          : `${user.firstName} ${user.lastName}`;
       await this.mailerService.sendMail({
         to: user.email,
         // From: '"Support Team" <support@example.com>', // override default from
@@ -31,7 +35,7 @@ export class NodeMailerEmailService implements MailSendService {
         template: './confirmation', // `.hbs` extension is appended automatically
         context: {
           // ✏️ filling curly brackets with content
-          name: `${user.firstName} ${user.lastName}`,
+          name,
           url: link,
         },
       });
@@ -50,6 +54,10 @@ export class NodeMailerEmailService implements MailSendService {
    */
   async sendPasswordResetEmail(user: User, link: string): Promise<void> {
     try {
+      const name =
+        user.userType === 'individual'
+          ? user.email
+          : `${user.firstName} ${user.lastName}`;
       await this.mailerService.sendMail({
         to: user.email,
         // From: '"Support Team" <support@example.com>', // override default from
@@ -57,7 +65,7 @@ export class NodeMailerEmailService implements MailSendService {
         template: './password-reset', // `.hbs` extension is appended automatically
         context: {
           // ✏️ filling curly brackets with content
-          name: `${user.firstName} ${user.lastName}`,
+          name,
           url: link,
           app: AppInfo.APP_NAME,
         },
