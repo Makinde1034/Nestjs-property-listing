@@ -6,9 +6,7 @@
 import { Field, InputType } from '@nestjs/graphql';
 import {
   IsDate,
-  IsEmail,
   IsEnum,
-  IsNotEmpty,
   IsOptional,
   IsPhoneNumber,
   IsString,
@@ -54,11 +52,6 @@ export class UserProfileInput {
   @IsOptional()
   @IsDate()
   dateOfBirth: Date;
-
-  @Field()
-  @IsNotEmpty()
-  @IsEmail()
-  email: string;
 
   @Field({ nullable: true })
   @IsOptional()
