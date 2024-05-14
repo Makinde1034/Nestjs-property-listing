@@ -7,6 +7,7 @@ import { Field, InputType } from '@nestjs/graphql';
 import {
   IsDate,
   IsEnum,
+  IsNotEmpty,
   IsOptional,
   IsPhoneNumber,
   IsString,
@@ -64,4 +65,17 @@ export class UserProfileInput {
   @Type(() => IdentityInput)
   @IsOptional()
   nationalIdentity: IdentityInput;
+}
+
+@InputType()
+export class PasswordInput {
+  @Field()
+  @IsOptional()
+  @IsNotEmpty()
+  oldPassword: string;
+
+  @Field()
+  @IsOptional()
+  @IsNotEmpty()
+  newPassword: string;
 }

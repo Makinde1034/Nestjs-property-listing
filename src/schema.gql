@@ -208,6 +208,7 @@ type Mutation {
   staffConfirmation(RequestInput: StaffConfirmDto!): String!
   blockUser(RequestInput: UserActionInput!): User!
   updateNotificationPreference(RequestInput: NotificationPrefenceInput!): User!
+  changePassword(RequestInput: PasswordInput!): User!
   createRole(RequestInput: RoleInputDto!): Role!
   updateRole(RequestInput: RoleUpdateInputDto!): Role!
   deleteRole(RequestInput: RoleIdInputDto!): String!
@@ -291,7 +292,6 @@ input UserProfileInput {
   occupation: String
   language: String
   dateOfBirth: DateTime
-  email: String!
   phone: String
   nationalIdentity: IdentityInput
 }
@@ -328,6 +328,11 @@ input NotificationPrefenceInput {
   email: Boolean
   sms: Boolean
   pushNotification: Boolean
+}
+
+input PasswordInput {
+  oldPassword: String!
+  newPassword: String!
 }
 
 input RoleInputDto {
