@@ -27,6 +27,7 @@ import {
   PasswordResetRequestDto,
   TwoFaResult,
   TwoFaLoginInput,
+  ConfirmationInput,
 } from '../dtos';
 import { Company, User } from 'src/entities';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -131,6 +132,34 @@ export class AuthService {
     const link = `${this.frontEndUrl}/email-confirmation?email=${email}&token=${token}`;
 
     await this.mailService.sendUserConfirmation(user, link);
+  }
+
+  /**
+   * Resend email confirmation link
+   *
+   * @param {ConfirmationInput} emailConfirmDto
+   * @returns { Promise<string>}
+   */
+  async sendEmailConfirmationLink(
+    emailConfirmDto: ConfirmationInput,
+  ): Promise<string> {
+    const user = await this.userService.findByEmailOrPhone(
+      emailConfirmDto.email,
+    );
+    if (!user) {
+      throw new NotFoundException(AppStrings.INVALID_USER);
+    }
+    if (user.verifiedAt) {
+      throw new BadRequestException(AppStrings.EMAIL_ALREADY_CONFIRMED);
+    }
+
+    if (user.userType === 'company' || user.userType === 'individual') {
+      await this.sendRegisterConfirmEmail(user);
+    } else {
+      await this.userService.sendPasswordEmailToStaff({ staff: user });
+    }
+
+    return AppStrings.CONFIRMATION_SENT;
   }
 
   /**
