@@ -14,6 +14,7 @@ import {
   UserProfileInput,
   StaffConfirmDto,
   UserActionInput,
+  PasswordInput,
 } from '../dtos';
 import { Permissions } from 'src/common/decorator/permission';
 
@@ -113,5 +114,22 @@ export class UserResolver {
       ctx.req.user,
       inputDto,
     );
+  }
+
+  /**
+   * Update User Password
+   *
+   * @async
+   * @param {any} ctx
+   * @param {PasswordInput} inputDto
+   * @returns {Promise<User>}
+   */
+  @Mutation(() => User)
+  @UseGuards(AccessTokenGuard)
+  async changePassword(
+    @Args('RequestInput') inputDto: PasswordInput,
+    @Context() ctx: any,
+  ): Promise<User> {
+    return await this.userService.changePassword(ctx.req.user, inputDto);
   }
 }

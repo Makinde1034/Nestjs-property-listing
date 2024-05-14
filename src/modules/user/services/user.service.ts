@@ -5,6 +5,7 @@
 
 import { BadRequestException, Injectable } from '@nestjs/common';
 import {
+  NationalIdentityRepository,
   RoleRepository,
   UserConfirmationRepository,
   UserRepository,
@@ -27,6 +28,7 @@ import {
   StaffCreatedData,
   StaffCreatedEventDto,
   UserActionInput,
+  PasswordInput,
 } from '../dtos';
 import { StorageService } from '../../storage/storage.service';
 import { AppStrings } from 'src/common/messages/app.strings';
@@ -34,6 +36,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { RegisterEventAction, UserStatus } from 'src/common/enums';
 import { NodeMailerEmailService } from '../../mail/services/implementations';
 import { ConfigService } from '@nestjs/config';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -41,6 +44,7 @@ export class UserService {
   constructor(
     private readonly usersRepository: UserRepository,
     private readonly tokenRepository: UserConfirmationRepository,
+    private readonly nationalIdentityRepository: NationalIdentityRepository,
     private readonly storageService: StorageService,
     private readonly roleRepository: RoleRepository,
     private readonly eventEmitter: EventEmitter2,
@@ -227,10 +231,55 @@ export class UserService {
    * @returns {Promise<User>}
    */
   async updateProfile(user: User, data: UserProfileInput): Promise<User> {
+    if (data?.nationalIdentity?.dateOfExpiry) {
+      const isExpired = isPast(new Date(data.nationalIdentity.dateOfExpiry));
+      if (isExpired) {
+        throw new BadRequestException(AppStrings.EXPIRED_NATIONAL_ID);
+      }
+    }
+    const fullUserData = await this.usersRepository.findById(user.id, [
+      'nationalIdentity',
+    ]);
+    if (fullUserData.nationalIdentity && data.nationalIdentity) {
+      await this.nationalIdentityRepository.update(
+        fullUserData.nationalIdentity.id,
+        { ...data.nationalIdentity },
+      );
+    } else {
+      await this.nationalIdentityRepository.create({
+        ...data.nationalIdentity,
+        user,
+      });
+    }
+
+    delete data.nationalIdentity;
     const updateData = {
       ...data,
     } as Partial<User>;
     const update = await this.usersRepository.update(user.id, updateData);
+    return update;
+  }
+
+  /**
+   * Update User Password
+   *
+   * @async
+   * @param {User} user
+   * @param {PasswordInput} data
+   * @returns {Promise<User>}
+   */
+  async changePassword(user: User, data: PasswordInput): Promise<User> {
+    const { oldPassword, newPassword } = data;
+
+    // Compare the saved hashed password to the hash of the oldPassword
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      throw new BadRequestException(AppStrings.INCORRECT_OLD_PASSWORD);
+    }
+
+    const update = await this.usersRepository.update(user.id, {
+      password: newPassword,
+    });
     return update;
   }
 

@@ -370,8 +370,9 @@ export class AuthService {
     const { token } = await this.userService.generateUserConfirmation(user);
 
     const url = userType === 'staff' ? 'forgotPassword' : 'reset-password';
+    const urlLink = userType === 'staff' ? this.adminUrl : this.frontEndUrl;
 
-    const link = `${this.frontEndUrl}/${url}?email=${email}&token=${token}${userType === 'staff' ? '&step=createnewpassword' : ''}`;
+    const link = `${urlLink}/${url}?email=${email}&token=${token}${userType === 'staff' ? '&step=createnewpassword' : ''}`;
 
     await this.mailService.sendPasswordResetEmail(user, link);
   }

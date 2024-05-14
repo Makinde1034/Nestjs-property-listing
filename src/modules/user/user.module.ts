@@ -6,12 +6,19 @@
 import { Global, Module } from '@nestjs/common';
 import { UserService, RoleService } from './services';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Permission, Role, TokenConfirmation, User } from '../../entities';
+import {
+  NationalIdentity,
+  Permission,
+  Role,
+  TokenConfirmation,
+  User,
+} from '../../entities';
 import {
   UserConfirmationRepository,
   UserRepository,
   RoleRepository,
   PermissionRepository,
+  NationalIdentityRepository,
 } from './repositories';
 import { UserResolver, RoleResolver } from './resolvers';
 import { UserController } from './controllers';
@@ -20,7 +27,13 @@ import { UserEventHandler } from './events';
 @Global()
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, TokenConfirmation, Role, Permission]),
+    TypeOrmModule.forFeature([
+      User,
+      TokenConfirmation,
+      Role,
+      Permission,
+      NationalIdentity,
+    ]),
   ],
   controllers: [UserController],
   providers: [
@@ -33,6 +46,7 @@ import { UserEventHandler } from './events';
     RoleRepository,
     PermissionRepository,
     UserEventHandler,
+    NationalIdentityRepository,
   ],
   exports: [UserService, UserRepository, RoleService],
 })
