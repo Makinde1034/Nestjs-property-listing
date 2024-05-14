@@ -17,7 +17,7 @@ export const AppStrings = {
   WRONG_DATA_FOR_FIELD: (field: string): string =>
     `Invalid query, ${field} entry in query is wrong`,
   WRONG_CONFIRM_CODE: 'WRONG_CONFIRM_CODE',
-  CONFIRMATION_SENT: 'CONFIRMATION_SENT',
+  CONFIRMATION_SENT: 'Eamil confirmation sent',
   ACCOUNT_ALREADY_CONFIRMED: 'ACCOUNT_ALREADY_CONFIRMED',
   ACCOUNT_CONFIRMED_SUCCESSFULLY: 'ACCOUNT_CONFIRMED_SUCCESSFULLY',
   PASSWORD_RESET_SENT: 'PASSWORD_RESET_EMAIL_SENT',
@@ -45,4 +45,6 @@ export const AppStrings = {
   INCORRECT_TOKEN: 'INCORRECT_TOKEN',
   TICKET_RAISED_SUCCESSFULLY: 'TICKET_RAISED_SUCCESSFULLY',
   EXPIRED_NATIONAL_ID: 'National Identity has Expired',
+  EMAIL_ALREADY_CONFIRMED: 'This email has already been confirmed',
+  INVALID_USER: 'This user does not exist',
 };

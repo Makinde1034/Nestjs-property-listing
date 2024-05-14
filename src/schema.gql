@@ -203,6 +203,7 @@ type Mutation {
   resetPasswordRequest(RequestInput: PasswordResetRequestDto!): SuccessResponse!
   resetPassword(ResetInput: PasswordResetDto!): SuccessResponse!
   twoFaLogin(LoginInput: TwoFaLoginInput!): LoginResponse!
+  resendEmailConfirmation(RequestInput: ConfirmationInput!): SuccessResponse!
   profileUpdate(RequestInput: UserProfileInput!): User!
   createStaff(RequestInput: CreateStaffInput!): User!
   staffConfirmation(RequestInput: StaffConfirmDto!): String!
@@ -282,6 +283,10 @@ input PasswordResetDto {
 
 input TwoFaLoginInput {
   token: String!
+}
+
+input ConfirmationInput {
+  email: String!
 }
 
 input UserProfileInput {

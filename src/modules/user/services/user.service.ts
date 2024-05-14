@@ -352,7 +352,7 @@ export class UserService {
       const staff = await this.usersRepository.create(staffData);
       this.eventEmitter.emit(
         RegisterEventAction.STAFF_CREATED,
-        new StaffCreatedEventDto({ staff, password }),
+        new StaffCreatedEventDto({ staff }),
       );
       return staff;
     } catch (error) {

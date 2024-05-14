@@ -71,3 +71,11 @@ export class RegisterInput {
   @ValidateIf((o) => o.userType === UserProfileTypeEnum.COMPANY)
   company: CompanyInput;
 }
+
+@InputType()
+export class ConfirmationInput {
+  @Field()
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+}
