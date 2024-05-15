@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { TicketRepository } from '../repositories';
 import { CreateTicketInput, ListTicketInput, UpdateTicketInput } from '../dtos';
 import { AppStrings } from 'src/common/messages/app.strings';
@@ -78,7 +78,7 @@ export class TicketService {
       const tickets = await this.ticketRepository.findAll(options);
       return tickets;
     } catch (error) {
-      throw new Ba();
+      throw new BadRequestException(error);
     }
   }
 
