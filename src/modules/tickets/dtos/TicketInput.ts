@@ -4,7 +4,7 @@
  */
 
 import { Field, InputType } from '@nestjs/graphql';
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { TicketStatus } from 'src/common/enums';
 
 @InputType()
@@ -30,5 +30,13 @@ export class UpdateTicketInput {
   @Field()
   @IsEnum(TicketStatus)
   @IsNotEmpty()
+  status: TicketStatus;
+}
+
+@InputType()
+export class ListTicketInput {
+  @Field({ nullable: true })
+  @IsEnum(TicketStatus)
+  @IsOptional()
   status: TicketStatus;
 }

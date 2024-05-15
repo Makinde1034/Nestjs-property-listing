@@ -192,6 +192,11 @@ type Query {
   fetchIssueCategories: [IssueCategory!]!
   fetchIssues: [Issue!]!
   getTicket(ticketId: String!): Ticket!
+  listTickets(QueryInput: ListTicketInput): Ticket!
+}
+
+input ListTicketInput {
+  status: String
 }
 
 type Mutation {

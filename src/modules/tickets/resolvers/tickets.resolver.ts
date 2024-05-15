@@ -7,7 +7,7 @@ import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { TicketService } from '../services';
 import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
 import { UseGuards } from '@nestjs/common';
-import { CreateTicketInput, UpdateTicketInput } from '../dtos';
+import { CreateTicketInput, ListTicketInput, UpdateTicketInput } from '../dtos';
 import { Ticket } from 'src/entities';
 import { Permissions } from 'src/common/decorator/permission';
 
@@ -43,6 +43,23 @@ export class TicketsResolver {
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async getTicket(@Args('ticketId') ticketId: string): Promise<Ticket> {
     return await this.ticketService.getTicket(ticketId);
+  }
+
+  /**
+   * Get Ticket
+   *
+   * @async
+   * @param {string} ticketId
+   * @returns {Promise<Ticket>}
+   */
+  @Query(() => Ticket)
+  @Permissions('read-support-tickets')
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  async listTickets(
+    @Args({ name: 'QueryInput', nullable: true, type: () => ListTicketInput })
+    input: ListTicketInput,
+  ): Promise<Ticket[]> {
+    return await this.ticketService.listTickets(input);
   }
 
   /**
