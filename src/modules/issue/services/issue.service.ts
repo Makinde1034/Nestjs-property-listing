@@ -62,10 +62,7 @@ export class IssueService {
    * @returns {Promise<string>}
    */
   async deleteCategory(data: DeleteIssueInput): Promise<string> {
-    const category = await this.issueCategoryRepository.findByIdOrFail(
-      data.id,
-      ['issue'],
-    );
+    const category = await this.issueCategoryRepository.findByIdOrFail(data.id);
     if (category.issues && category.issues.length > 0) {
       throw new BadRequestException(AppStrings.UNABLE_TO_DELETE_ISSUE_CATEGORY);
     }
