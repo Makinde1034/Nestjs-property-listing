@@ -53,7 +53,7 @@ export class ListingTypeService {
       name: input.name,
       attributeSets,
     };
-    if (!icon) {
+    if (icon) {
       // Upload icon image
       const imageurl = await this.storageService.upload(icon);
       data.icon = imageurl;
@@ -80,7 +80,7 @@ export class ListingTypeService {
       name: input.name,
       attributeSets,
     };
-    if (!icon) {
+    if (icon) {
       // Upload icon image
       const imageurl = await this.storageService.upload(icon);
       data.icon = imageurl;
