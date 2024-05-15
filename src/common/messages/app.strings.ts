@@ -9,6 +9,8 @@ export const AppStrings = {
   FAILED_RACAPTCHA: 'Recaptcha Failed, Please try again',
   USER_DISABLED: 'Account disabled. Please contact support',
   UNCONFIRMED_ACCOUNT: 'UNCONFIRMED_ACCOUNT',
+  SUSPENDED_ACCOUNT:
+    'Your account has been suspended, please contact the administrator',
   INCORRECT_CREDENTIALS: 'Your password and email don’t match.',
   INVALID_QUERY: 'Invalid query, kindly check your query',
   UNSUPPORTED_ACTION: ' Unsupported action ',
