@@ -237,22 +237,24 @@ export class UserService {
         throw new BadRequestException(AppStrings.EXPIRED_NATIONAL_ID);
       }
     }
-    const fullUserData = await this.usersRepository.findById(user.id, [
+    const userData = await this.usersRepository.findById(user.id, [
       'nationalIdentity',
     ]);
-    if (fullUserData.nationalIdentity && data.nationalIdentity) {
-      await this.nationalIdentityRepository.update(
-        fullUserData.nationalIdentity.id,
-        { ...data.nationalIdentity },
-      );
-    } else {
-      await this.nationalIdentityRepository.create({
-        ...data.nationalIdentity,
-        user,
-      });
+    if (data.nationalIdentity) {
+      if (userData.nationalIdentity) {
+        await this.nationalIdentityRepository.update(
+          userData.nationalIdentity.id,
+          { ...data.nationalIdentity },
+        );
+      } else {
+        await this.nationalIdentityRepository.create({
+          ...data.nationalIdentity,
+          user,
+        });
+      }
+      delete data.nationalIdentity;
     }
 
-    delete data.nationalIdentity;
     const updateData = {
       ...data,
     } as Partial<User>;
