@@ -9,7 +9,7 @@ export const AppStrings = {
   FAILED_RACAPTCHA: 'Recaptcha Failed, Please try again',
   USER_DISABLED: 'Account disabled. Please contact support',
   UNCONFIRMED_ACCOUNT: 'UNCONFIRMED_ACCOUNT',
-  INCORRECT_CREDENTIALS: 'INCORRECT_CREDENTIALS',
+  INCORRECT_CREDENTIALS: 'Your password and email don’t match.',
   INVALID_QUERY: 'Invalid query, kindly check your query',
   UNSUPPORTED_ACTION: ' Unsupported action ',
   FIELD_NOT_EXIST: (field: string): string =>
@@ -42,7 +42,7 @@ export const AppStrings = {
   ISSUE_CATEGORY_DELETED_SUCCESSFULLY: 'ISSUE_CATEGORY_DELETED_SUCCESSFULLY',
   ISSUE_DELETED_SUCCESSFULLY: 'ISSUE_DELETED_SUCCESSFULLY',
   TWO_FA_NOT_ENABLED: 'TWO_FA_NOT_ENABLED',
-  INCORRECT_TOKEN: 'INCORRECT_TOKEN',
+  INCORRECT_TOKEN: 'Wrong code, please enter the correct one.',
   TICKET_RAISED_SUCCESSFULLY: 'TICKET_RAISED_SUCCESSFULLY',
   EXPIRED_NATIONAL_ID: 'National Identity has Expired',
   EMAIL_ALREADY_CONFIRMED: 'This email has already been confirmed',
