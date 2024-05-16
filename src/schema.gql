@@ -17,7 +17,7 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Permission {
-  id: ID!
+  id: Float!
   name: String!
   slug: String!
   permissionGroup: String!
@@ -25,7 +25,7 @@ type Permission {
 }
 
 type Role {
-  id: ID!
+  id: Float!
   name: String!
   slug: String!
   permissions: [Permission!]!
@@ -41,12 +41,20 @@ type Company {
   user: User!
 }
 
+type NotificationScope {
+  id: Float!
+  name: String!
+  description: String
+  scopeGroup: String
+}
+
 type UserNotificationPreference {
   id: ID!
   email: Boolean
-  sms: Boolean
-  pushNotification: Boolean
+  mobile: Boolean
+  desktop: Boolean
   user: User!
+  scope: NotificationScope!
 }
 
 type User {
@@ -73,7 +81,7 @@ type User {
   status: String
   nationalIdentity: NationalIdentity
   company: Company
-  notificationPreference: UserNotificationPreference
+  notificationPreference: [UserNotificationPreference!]
   twoFactorAuthenticationSecret: String
   isTwoFactorAuthenticationEnabled: Boolean
   roles: [Role!]
@@ -190,6 +198,7 @@ type Query {
   roles: [Role!]!
   getUserRoles: [Role!]!
   listNotifications: [Notification!]!
+  listNotificationScopes: [NotificationScope!]!
   fetchListingTypes: [ListingType!]!
   fetchAttributes: [Attribute!]!
   fetchAttributeSets: [AttributeSet!]!
@@ -342,9 +351,14 @@ input UserActionInput {
 }
 
 input NotificationPrefenceInput {
+  notificationPreferences: [NotificationItemInput!]!
+}
+
+input NotificationItemInput {
   email: Boolean
-  sms: Boolean
-  pushNotification: Boolean
+  desktop: Boolean
+  mobile: Boolean
+  scopeId: Float!
 }
 
 input PasswordInput {

@@ -8,3 +8,4 @@ export * from './token-confirmation.repository ';
 export * from './role.repository';
 export * from './permission.repository';
 export * from './national-id.repository';
+export * from './notification.repository';

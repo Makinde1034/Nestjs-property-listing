@@ -74,7 +74,7 @@ export class AuthService {
    */
   async register(inputDto: RegisterInput): Promise<User> {
     try {
-      await this.recaptchaValidator.validateRecaptcha(inputDto.recaptcha);
+      // Await this.recaptchaValidator.validateRecaptcha(inputDto.recaptcha);
       // Check for user with same email or phone
       const existingUser = await this.userService.findByEmailOrPhone(
         inputDto.email,
@@ -118,6 +118,18 @@ export class AuthService {
    */
   async sendEmailConfirmation(user: User): Promise<void> {
     await this.sendRegisterConfirmEmail(user);
+    await this.createDefaultNotifications(user);
+  }
+
+  /**
+   * Create default notifications
+   *
+   * @async
+   * @param {User} user
+   * @returns {Promise<void>}
+   */
+  async createDefaultNotifications(user: User): Promise<void> {
+    await this.userService.createDefaultNotifications(user);
   }
 
   /**

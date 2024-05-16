@@ -12,6 +12,8 @@ import {
   Role,
   TokenConfirmation,
   User,
+  NotificationScope,
+  UserNotificationPreference,
 } from '../../entities';
 import {
   UserConfirmationRepository,
@@ -19,6 +21,8 @@ import {
   RoleRepository,
   PermissionRepository,
   NationalIdentityRepository,
+  NotificationScopeRepository,
+  UserNotificationRepository,
 } from './repositories';
 import { UserResolver, RoleResolver } from './resolvers';
 import { UserController } from './controllers';
@@ -33,6 +37,8 @@ import { UserEventHandler } from './events';
       Role,
       Permission,
       NationalIdentity,
+      NotificationScope,
+      UserNotificationPreference,
     ]),
   ],
   controllers: [UserController],
@@ -47,7 +53,14 @@ import { UserEventHandler } from './events';
     PermissionRepository,
     UserEventHandler,
     NationalIdentityRepository,
+    UserNotificationRepository,
+    NotificationScopeRepository,
   ],
-  exports: [UserService, UserRepository, RoleService],
+  exports: [
+    UserService,
+    UserRepository,
+    RoleService,
+    NotificationScopeRepository,
+  ],
 })
 export class UserModule {}
