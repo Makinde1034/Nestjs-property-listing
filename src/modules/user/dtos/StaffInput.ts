@@ -13,23 +13,43 @@ import {
   IsPhoneNumber,
   IsString,
   IsStrongPassword,
+  ValidateIf,
 } from 'class-validator';
 
 @InputType()
 export class CreateStaffInput {
-  @Field()
+  @Field({ nullable: true })
   @IsOptional()
   middleName: string;
 
-  @Field()
+  @Field({ nullable: true })
   @IsNotEmpty()
   @IsString()
+  @ValidateIf((o) => !o.arabicFirstName)
   firstName: string;
 
-  @Field()
+  @Field({ nullable: true })
   @IsNotEmpty()
   @IsString()
+  @ValidateIf((o) => !o.firstName)
+  arabicFirstName: string;
+
+  @Field({ nullable: true })
+  @IsNotEmpty()
+  @IsString()
+  @ValidateIf((o) => !o.arabicLastName)
   lastName: string;
+
+  @Field({ nullable: true })
+  @IsNotEmpty()
+  @IsString()
+  @ValidateIf((o) => !o.lastName)
+  arabicLastName: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  arabicMiddleName: string;
 
   @Field()
   @IsNotEmpty()
@@ -42,7 +62,7 @@ export class CreateStaffInput {
   @IsPhoneNumber(null, { message: 'This field must be a valid phone number' })
   phone: string;
 
-  @Field()
+  @Field({ nullable: true })
   @IsOptional()
   @IsDate()
   dateOfBirth: Date;

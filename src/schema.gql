@@ -53,6 +53,9 @@ type User {
   id: ID!
   userType: String!
   firstName: String
+  arabicFirstName: String
+  arabicLastName: String
+  arabicMiddleName: String
   lastName: String
   middleName: String
   email: String!
@@ -79,6 +82,7 @@ type User {
   createdAt: DateTime!
   updatedAt: DateTime!
   deletedAt: DateTime
+  name: String
 }
 
 type Notification {
@@ -314,12 +318,15 @@ input IdentityInput {
 }
 
 input CreateStaffInput {
-  middleName: String!
-  firstName: String!
-  lastName: String!
+  middleName: String
+  firstName: String
+  arabicFirstName: String
+  lastName: String
+  arabicLastName: String
+  arabicMiddleName: String
   email: String!
   phone: String!
-  dateOfBirth: DateTime!
+  dateOfBirth: DateTime
   roles: [Float!]!
 }
 
