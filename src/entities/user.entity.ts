@@ -4,6 +4,7 @@
  */
 
 import {
+  AfterLoad,
   BeforeInsert,
   BeforeUpdate,
   Column,
@@ -25,6 +26,7 @@ import { Exclude } from 'class-transformer';
 import { Role } from './role.entity';
 import { Company } from './company.entity';
 import { UserNotificationPreference } from './notification-preference.entity';
+import { loadUserName } from 'src/common/utils/class-loader';
 
 @Entity()
 @ObjectType()
@@ -36,6 +38,18 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   @Field({ nullable: true })
   firstName: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  arabicFirstName: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  arabicLastName: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  arabicMiddleName: string;
 
   @Column({ nullable: true })
   @Field({ nullable: true })
@@ -156,6 +170,9 @@ export class User extends BaseEntity {
 
   notificationToken: string;
 
+  @Field({ nullable: true })
+  name: string;
+
   @BeforeInsert()
   @BeforeUpdate()
   async hashPassword() {
@@ -167,5 +184,10 @@ export class User extends BaseEntity {
       const salt = await bcrypt.genSalt();
       this.password = await bcrypt.hash(this.password, salt);
     }
+  }
+
+  @AfterLoad()
+  loadFullname() {
+    this.name = loadUserName(this);
   }
 }

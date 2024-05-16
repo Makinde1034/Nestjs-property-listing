@@ -18,6 +18,7 @@ import { EmailNotificationPayload } from 'src/common/interface';
 import { User } from 'src/entities';
 import { MailSendService } from '../mail-service';
 import { AppInfo } from 'src/common/utils/AppInfo';
+import { loadUserName } from 'src/common/utils/class-loader';
 
 @Injectable()
 export class MailgunEmailService implements MailSendService {
@@ -66,7 +67,7 @@ export class MailgunEmailService implements MailSendService {
         to: user.email,
         template: REGISTER_CONFIRMATION_TEMPLATE_NAME,
         'h:X-Mailgun-Variables': JSON.stringify({
-          name: `${user.firstName} ${user.lastName}`,
+          name: loadUserName(user),
           link,
         }),
       };
@@ -93,7 +94,7 @@ export class MailgunEmailService implements MailSendService {
         to: user.email,
         template: FORGOT_PASSWORD_TEMPLATE_NAME,
         'h:X-Mailgun-Variables': JSON.stringify({
-          user_name: `${user.firstName} ${user.lastName}`,
+          user_name: loadUserName(user),
           link,
           app_name: AppInfo.APP_NAME,
         }),
@@ -126,7 +127,7 @@ export class MailgunEmailService implements MailSendService {
         to: user.email,
         template: EMAIL_NOTIFICATION_TEMPLATE_NAME,
         'h:X-Mailgun-Variables': JSON.stringify({
-          user_name: `${user.firstName} ${user.lastName}`,
+          user_name: loadUserName(user),
           title,
           app_name: AppInfo.APP_NAME,
           message,
@@ -154,7 +155,7 @@ export class MailgunEmailService implements MailSendService {
         to: user.email,
         template: STAFF_CONFIRMATION_TEMPLATE_NAME,
         'h:X-Mailgun-Variables': JSON.stringify({
-          name: `${user.firstName} ${user.lastName}`,
+          name: loadUserName(user),
           link,
           app_name: AppInfo.APP_NAME,
         }),
