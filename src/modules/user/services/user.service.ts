@@ -37,6 +37,10 @@ import { RegisterEventAction, UserStatus } from 'src/common/enums';
 import { NodeMailerEmailService } from '../../mail/services/implementations';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
+import {
+  NotificationScopeRepository,
+  UserNotificationRepository,
+} from '../repositories/notification.repository';
 
 @Injectable()
 export class UserService {
@@ -47,6 +51,8 @@ export class UserService {
     private readonly nationalIdentityRepository: NationalIdentityRepository,
     private readonly storageService: StorageService,
     private readonly roleRepository: RoleRepository,
+    private readonly userNotificationRepository: UserNotificationRepository,
+    private readonly notificationScopeRepository: NotificationScopeRepository,
     private readonly eventEmitter: EventEmitter2,
     private readonly mailService: NodeMailerEmailService,
     private readonly configService: ConfigService,
@@ -286,6 +292,26 @@ export class UserService {
   }
 
   /**
+   * Create Default notifications for user
+   *
+   * @async
+   * @param {User} user
+   * @returns {Promise<void>}
+   */
+  async createDefaultNotifications(user: User): Promise<void> {
+    const scopes = await this.notificationScopeRepository.find();
+    await Promise.all(
+      scopes.map(async (scope) => {
+        const data: Partial<UserNotificationPreference> = {
+          user,
+          scope,
+        };
+        await this.userNotificationRepository.create(data);
+      }),
+    );
+  }
+
+  /**
    * Update User Profile
    *
    * @async
@@ -297,11 +323,31 @@ export class UserService {
     user: User,
     data: NotificationPrefenceInput,
   ): Promise<User> {
-    const updateData: Partial<UserNotificationPreference> = {
-      ...data,
-    };
+    const { notificationPreferences } = data;
+    const scopeIds = notificationPreferences.map((item) => item.scopeId);
+    const scopes = await this.notificationScopeRepository.find({
+      where: { id: In([...scopeIds]) },
+    });
+    const preferencesData = scopes
+      .map((scope) => {
+        const scopeItem = notificationPreferences.find(
+          (item) => item.scopeId === scope.id,
+        );
+        if (!scopeItem) {
+          return null;
+        }
+        delete scopeItem.scopeId;
+        return {
+          scope,
+          user,
+          ...scopeItem,
+        };
+      })
+      .filter((item) => item !== null);
+
+    // Save preferences
     const update = await this.usersRepository.update(user.id, {
-      notificationPreference: updateData,
+      notificationPreference: preferencesData,
     });
     return update;
   }

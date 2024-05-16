@@ -13,6 +13,7 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  OneToMany,
   OneToOne,
   UpdateDateColumn,
 } from 'typeorm';
@@ -125,12 +126,16 @@ export class User extends BaseEntity {
   })
   company?: Company;
 
-  @Field(() => UserNotificationPreference, { nullable: true })
-  @OneToOne(() => UserNotificationPreference, (preference) => preference.user, {
-    cascade: true,
-    eager: true,
-  })
-  notificationPreference: UserNotificationPreference;
+  @Field(() => [UserNotificationPreference], { nullable: true })
+  @OneToMany(
+    () => UserNotificationPreference,
+    (preference) => preference.user,
+    {
+      cascade: true,
+      eager: true,
+    },
+  )
+  notificationPreference: UserNotificationPreference[];
 
   @Exclude()
   @Field({ nullable: true })

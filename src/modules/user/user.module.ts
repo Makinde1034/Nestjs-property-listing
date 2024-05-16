@@ -12,6 +12,8 @@ import {
   Role,
   TokenConfirmation,
   User,
+  NotificationScope,
+  UserNotificationPreference,
 } from '../../entities';
 import {
   UserConfirmationRepository,
@@ -23,6 +25,10 @@ import {
 import { UserResolver, RoleResolver } from './resolvers';
 import { UserController } from './controllers';
 import { UserEventHandler } from './events';
+import {
+  NotificationScopeRepository,
+  UserNotificationRepository,
+} from './repositories/notification.repository';
 
 @Global()
 @Module({
@@ -33,6 +39,8 @@ import { UserEventHandler } from './events';
       Role,
       Permission,
       NationalIdentity,
+      NotificationScope,
+      UserNotificationPreference,
     ]),
   ],
   controllers: [UserController],
@@ -47,6 +55,8 @@ import { UserEventHandler } from './events';
     PermissionRepository,
     UserEventHandler,
     NationalIdentityRepository,
+    UserNotificationRepository,
+    NotificationScopeRepository,
   ],
   exports: [UserService, UserRepository, RoleService],
 })

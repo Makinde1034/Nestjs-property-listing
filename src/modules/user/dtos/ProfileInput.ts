@@ -4,12 +4,16 @@
  */
 
 import { Field, InputType } from '@nestjs/graphql';
+import { Type } from 'class-transformer';
 import {
+  IsArray,
   IsBoolean,
   IsDate,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
+  ValidateNested,
 } from 'class-validator';
 
 @InputType()
@@ -36,7 +40,7 @@ export class IdentityInput {
 }
 
 @InputType()
-export class NotificationPrefenceInput {
+export class NotificationItemInput {
   @Field(() => Boolean, { nullable: true })
   @IsOptional()
   @IsBoolean()
@@ -45,10 +49,25 @@ export class NotificationPrefenceInput {
   @Field(() => Boolean, { nullable: true })
   @IsOptional()
   @IsBoolean()
-  sms: boolean;
+  desktop: boolean;
 
   @Field(() => Boolean, { nullable: true })
   @IsOptional()
   @IsBoolean()
-  pushNotification: boolean;
+  mobile: boolean;
+
+  @Field(() => Number)
+  @IsNotEmpty()
+  @IsNumber()
+  scopeId: number;
+}
+
+@InputType()
+export class NotificationPrefenceInput {
+  @Field(() => [NotificationItemInput])
+  @ValidateNested()
+  @Type(() => NotificationItemInput)
+  @IsNotEmpty()
+  @IsArray()
+  notificationPreferences: NotificationItemInput[];
 }

@@ -3,10 +3,11 @@
  * For license. See license.txt
  */
 
-import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
+import { Column, Entity, ManyToOne } from 'typeorm';
 import BaseEntity from './base.entity';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { User } from './user.entity';
+import { NotificationScope } from './notification-scopes.entity';
 
 @Entity()
 @ObjectType()
@@ -17,16 +18,19 @@ export class UserNotificationPreference extends BaseEntity {
 
   @Column({ nullable: true, default: true })
   @Field({ nullable: true, defaultValue: true })
-  sms: boolean;
+  mobile: boolean;
 
   @Column({ nullable: true, default: true })
   @Field({ nullable: true, defaultValue: true })
-  pushNotification: boolean;
+  desktop: boolean;
 
   @Field(() => User)
-  @OneToOne(() => User, (user) => user.notificationPreference, {
+  @ManyToOne(() => User, (user) => user.notificationPreference, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn()
   user: User;
+
+  @ManyToOne(() => NotificationScope, { cascade: true, eager: true })
+  @Field(() => NotificationScope)
+  scope: NotificationScope;
 }
