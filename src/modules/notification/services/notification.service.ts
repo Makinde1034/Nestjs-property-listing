@@ -6,8 +6,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { NotificationRepository } from '../repositories';
 import { NotificationEventDto, NotificationInput } from '../dtos';
-import { Notification, User } from 'src/entities';
-import { UserRepository } from 'src/modules/user/repositories';
+import { Notification, NotificationScope, User } from 'src/entities';
+import {
+  UserRepository,
+  NotificationScopeRepository,
+} from '../../user/repositories';
 import { AppStrings } from 'src/common/messages/app.strings';
 import { NodeMailerEmailService } from '../../mail/services/implementations';
 import {
@@ -26,6 +29,7 @@ export class NotificationService {
   constructor(
     private readonly notificationRepository: NotificationRepository,
     private readonly userRepository: UserRepository,
+    private readonly notificationScopeRepository: NotificationScopeRepository,
     private readonly mailService: NodeMailerEmailService,
     private readonly pushNotificationService: PushNotificationService,
     private readonly eventEmitter: EventEmitter2,
@@ -187,5 +191,15 @@ export class NotificationService {
     return await this.notificationRepository.findAll({
       where: { recipient: { id: user.id } },
     });
+  }
+
+  /**
+   * List system NotificationScopes
+   *
+   * @async
+   * @returns {Promise<NotificationScope[]>}
+   */
+  async listNotificationScopes(): Promise<NotificationScope[]> {
+    return await this.notificationScopeRepository.find();
   }
 }

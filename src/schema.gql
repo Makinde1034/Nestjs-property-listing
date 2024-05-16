@@ -198,6 +198,7 @@ type Query {
   roles: [Role!]!
   getUserRoles: [Role!]!
   listNotifications: [Notification!]!
+  listNotificationScopes: [NotificationScope!]!
   fetchListingTypes: [ListingType!]!
   fetchAttributes: [Attribute!]!
   fetchAttributeSets: [AttributeSet!]!

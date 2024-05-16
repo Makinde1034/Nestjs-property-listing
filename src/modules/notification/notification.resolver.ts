@@ -5,7 +5,7 @@
 
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { NotificationService } from './services';
-import { Notification } from 'src/entities';
+import { Notification, NotificationScope } from 'src/entities';
 import { UseGuards } from '@nestjs/common';
 import { AccessTokenGuard } from '../auth/guards';
 import { NotificationInput } from './dtos';
@@ -57,5 +57,17 @@ export class NotificationResolver {
     @Args('RequestInput') RequestInput: NotificationInput,
   ): string {
     return this.notificationService.sendUsersNotification(RequestInput);
+  }
+
+  /**
+   * List notification scopes
+   *
+   * @async
+   * @returns {Promise<NotificationScope[]>}
+   */
+  @Query(() => [NotificationScope])
+  @UseGuards(AccessTokenGuard)
+  async listNotificationScopes(): Promise<NotificationScope[]> {
+    return await this.notificationService.listNotificationScopes();
   }
 }

@@ -21,14 +21,12 @@ import {
   RoleRepository,
   PermissionRepository,
   NationalIdentityRepository,
+  NotificationScopeRepository,
+  UserNotificationRepository,
 } from './repositories';
 import { UserResolver, RoleResolver } from './resolvers';
 import { UserController } from './controllers';
 import { UserEventHandler } from './events';
-import {
-  NotificationScopeRepository,
-  UserNotificationRepository,
-} from './repositories/notification.repository';
 
 @Global()
 @Module({
@@ -58,6 +56,11 @@ import {
     UserNotificationRepository,
     NotificationScopeRepository,
   ],
-  exports: [UserService, UserRepository, RoleService],
+  exports: [
+    UserService,
+    UserRepository,
+    RoleService,
+    NotificationScopeRepository,
+  ],
 })
 export class UserModule {}

@@ -9,11 +9,10 @@ import { NotificationService, PushNotificationService } from './services';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Notification } from 'src/entities';
 import { NotificationRepository } from './repositories';
-import { UserModule } from '../user/user.module';
 import { NotificationEventListener } from './events';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Notification]), UserModule],
+  imports: [TypeOrmModule.forFeature([Notification])],
   providers: [
     NotificationResolver,
     NotificationService,
