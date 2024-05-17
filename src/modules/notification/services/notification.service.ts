@@ -12,7 +12,7 @@ import {
   NotificationScopeRepository,
 } from '../../user/repositories';
 import { AppStrings } from 'src/common/messages/app.strings';
-import { NodeMailerEmailService } from '../../mail/services/implementations';
+import { MailgunEmailService } from '../../mail/services/implementations';
 import {
   EmailNotificationPayload,
   NotificationEventInput,
@@ -30,7 +30,7 @@ export class NotificationService {
     private readonly notificationRepository: NotificationRepository,
     private readonly userRepository: UserRepository,
     private readonly notificationScopeRepository: NotificationScopeRepository,
-    private readonly mailService: NodeMailerEmailService,
+    private readonly mailService: MailgunEmailService,
     private readonly pushNotificationService: PushNotificationService,
     private readonly eventEmitter: EventEmitter2,
   ) {}

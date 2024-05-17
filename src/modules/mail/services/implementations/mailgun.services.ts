@@ -71,9 +71,9 @@ export class MailgunEmailService implements MailSendService {
           link,
         }),
       };
-      await this.sendMail(mailgunData);
+      const result = await this.sendMail(mailgunData);
 
-      this.logger.log('E-Mail sent Successfully');
+      this.logger.log('E-Mail sent Successfully', result);
     } catch (error) {
       this.logger.debug(error);
     }

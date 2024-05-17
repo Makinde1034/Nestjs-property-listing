@@ -32,7 +32,7 @@ import {
 import { Company, User } from 'src/entities';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { RegisterEventAction, UserStatus } from 'src/common/enums';
-import { NodeMailerEmailService } from '../../mail/services/implementations';
+import { MailgunEmailService } from '../../mail/services/implementations';
 import { ConfigService } from '@nestjs/config';
 import { I18nService } from 'nestjs-i18n';
 import * as bcrypt from 'bcrypt';
@@ -53,7 +53,7 @@ export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly i18n: I18nService,
-    private readonly mailService: NodeMailerEmailService,
+    private readonly mailService: MailgunEmailService,
     private readonly configService: ConfigService,
     private readonly eventEmitter: EventEmitter2,
     private readonly jwtService: JwtService,
