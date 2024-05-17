@@ -34,7 +34,7 @@ import { StorageService } from '../../storage/storage.service';
 import { AppStrings } from 'src/common/messages/app.strings';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { RegisterEventAction, UserStatus } from 'src/common/enums';
-import { NodeMailerEmailService } from '../../mail/services/implementations';
+import { MailgunEmailService } from '../../mail/services/implementations';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import {
@@ -54,7 +54,7 @@ export class UserService {
     private readonly userNotificationRepository: UserNotificationRepository,
     private readonly notificationScopeRepository: NotificationScopeRepository,
     private readonly eventEmitter: EventEmitter2,
-    private readonly mailService: NodeMailerEmailService,
+    private readonly mailService: MailgunEmailService,
     private readonly configService: ConfigService,
   ) {
     this.frontEndUrl = this.configService.get('ADMIN_FRONTEND_URL');
