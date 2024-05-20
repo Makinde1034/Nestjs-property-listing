@@ -49,4 +49,5 @@ export const AppStrings = {
   EXPIRED_NATIONAL_ID: 'National Identity has Expired',
   EMAIL_ALREADY_CONFIRMED: 'This email has already been confirmed',
   INVALID_USER: 'This user does not exist',
+  INVALID_NATIONAL_ID: 'The Identity number provided is invalid',
 };

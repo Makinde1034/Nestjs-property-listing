@@ -9,12 +9,15 @@ import {
   IsArray,
   IsBoolean,
   IsDate,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
+  Length,
   ValidateNested,
 } from 'class-validator';
+import { NationalIdentityType } from 'src/common/enums';
 
 @InputType()
 export class IdentityInput {
@@ -24,13 +27,14 @@ export class IdentityInput {
   nationality: string;
 
   @Field()
-  @IsString()
+  @IsEnum(NationalIdentityType)
   @IsNotEmpty()
-  type: string;
+  type: NationalIdentityType;
 
   @Field()
   @IsString()
   @IsNotEmpty()
+  @Length(10, 10)
   identityNumber: string;
 
   @Field()
