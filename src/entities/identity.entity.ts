@@ -7,6 +7,7 @@ import { Field, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 import BaseEntity from './base.entity';
 import { User } from './user.entity';
+import { NationalIdentityType } from 'src/common/enums';
 
 @Entity()
 @ObjectType()
@@ -17,7 +18,7 @@ export class NationalIdentity extends BaseEntity {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
-  type: string;
+  type: NationalIdentityType;
 
   @Column({ nullable: true })
   @Field({ nullable: true })

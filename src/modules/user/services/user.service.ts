@@ -33,7 +33,11 @@ import {
 import { StorageService } from '../../storage/storage.service';
 import { AppStrings } from 'src/common/messages/app.strings';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { RegisterEventAction, UserStatus } from 'src/common/enums';
+import {
+  NationalIdentityType,
+  RegisterEventAction,
+  UserStatus,
+} from 'src/common/enums';
 import { MailgunEmailService } from '../../mail/services/implementations';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
@@ -247,6 +251,20 @@ export class UserService {
       'nationalIdentity',
     ]);
     if (data.nationalIdentity) {
+      const { type, identityNumber } = data.nationalIdentity;
+      if (
+        (type === NationalIdentityType.IQAMA &&
+          !identityNumber.startsWith('2')) ||
+        identityNumber.length !== 10
+      ) {
+        throw new BadRequestException(AppStrings.INVALID_NATIONAL_ID);
+      } else if (
+        (type === NationalIdentityType.NATIONAL_ID &&
+          !identityNumber.startsWith('1')) ||
+        identityNumber.length !== 10
+      ) {
+        throw new BadRequestException(AppStrings.INVALID_NATIONAL_ID);
+      }
       if (userData.nationalIdentity) {
         await this.nationalIdentityRepository.update(
           userData.nationalIdentity.id,
