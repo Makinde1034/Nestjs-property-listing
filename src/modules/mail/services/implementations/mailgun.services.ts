@@ -123,7 +123,7 @@ export class MailgunEmailService implements MailSendService {
     try {
       const mailgunData: MailgunMessageData = {
         from: this.MAIL_FROM,
-        subject: 'Reset Your Password',
+        subject: title,
         to: user.email,
         template: EMAIL_NOTIFICATION_TEMPLATE_NAME,
         'h:X-Mailgun-Variables': JSON.stringify({
