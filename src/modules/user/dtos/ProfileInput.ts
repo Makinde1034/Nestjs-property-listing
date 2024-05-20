@@ -14,7 +14,8 @@ import {
   IsNumber,
   IsOptional,
   IsString,
-  Length,
+  MaxLength,
+  MinLength,
   ValidateNested,
 } from 'class-validator';
 import { NationalIdentityType } from 'src/common/enums';
@@ -34,7 +35,8 @@ export class IdentityInput {
   @Field()
   @IsString()
   @IsNotEmpty()
-  @Length(10, 10)
+  @MinLength(10)
+  @MaxLength(10)
   identityNumber: string;
 
   @Field()

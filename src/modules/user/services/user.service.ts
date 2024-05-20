@@ -253,13 +253,15 @@ export class UserService {
     if (data.nationalIdentity) {
       const { type, identityNumber } = data.nationalIdentity;
       if (
-        type === NationalIdentityType.IQAMA &&
-        !identityNumber.startsWith('2')
+        (type === NationalIdentityType.IQAMA &&
+          !identityNumber.startsWith('2')) ||
+        identityNumber.length !== 10
       ) {
         throw new BadRequestException(AppStrings.INVALID_NATIONAL_ID);
       } else if (
-        type === NationalIdentityType.NATIONAL_ID &&
-        !identityNumber.startsWith('1')
+        (type === NationalIdentityType.NATIONAL_ID &&
+          !identityNumber.startsWith('1')) ||
+        identityNumber.length !== 10
       ) {
         throw new BadRequestException(AppStrings.INVALID_NATIONAL_ID);
       }
