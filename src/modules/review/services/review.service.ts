@@ -26,10 +26,10 @@ export class ReviewService {
     }
     try {
       createReviewDto.reviewer_id = user.id;
-      const serviceOwner = await this.userRepository.findByIdOrFail(
+      const serviceOwnerUser = await this.userRepository.findByIdOrFail(
         createReviewDto.service_owner_id,
       );
-      if (!serviceOwner) {
+      if (!serviceOwnerUser) {
         throw new BadRequestException(AppStrings.SERVICE_OWNER_NOT_FOUND);
       }
       return await this.reviewRepository.create(createReviewDto);
