@@ -49,6 +49,19 @@ type UserNotificationPreference {
   user: User!
 }
 
+type Review {
+  id: ID!
+  rating: Float!
+  type: String!
+  comment: String!
+  reviewer: User
+  service_owner: User
+  reviewer_id: String!
+  service_owner_id: String!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
 type User {
   id: ID!
   userType: String!
@@ -67,6 +80,8 @@ type User {
   profilePhoto: String
   biometricKey: String
   twoFaRequired: Boolean
+  reviewer: [Review!]
+  service_owner: [Review!]
   status: String
   nationalIdentity: NationalIdentity
   company: Company
@@ -230,6 +245,7 @@ type Mutation {
   deleteIssue(RequestInput: DeleteIssueInput!): String!
   createTicket(RequestInput: CreateTicketInput!): String!
   manageTicket(RequestInput: UpdateTicketInput!): Ticket!
+  review(createReviewDto: CreateReviewDto!): Review!
 }
 
 input RegisterInput {
@@ -291,7 +307,6 @@ input UserProfileInput {
   occupation: String
   language: String
   dateOfBirth: DateTime
-  email: String!
   phone: String
   nationalIdentity: IdentityInput
 }
@@ -441,4 +456,12 @@ input CreateTicketInput {
 input UpdateTicketInput {
   ticketId: String!
   status: String!
+}
+
+input CreateReviewDto {
+  rating: Float!
+  comment: String
+  type: String!
+  service_owner_id: String!
+  reviewer_id: String
 }

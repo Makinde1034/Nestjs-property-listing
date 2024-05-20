@@ -73,7 +73,7 @@ export class AuthService {
    */
   async register(inputDto: RegisterInput): Promise<User> {
     try {
-      await this.recaptchaValidator.validateRecaptcha(inputDto.recaptcha);
+      // await this.recaptchaValidator.validateRecaptcha(inputDto.recaptcha);
       // Check for user with same email or phone
       const existingUser = await this.userService.findByEmailOrPhone(
         inputDto.email,
