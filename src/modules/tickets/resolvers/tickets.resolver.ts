@@ -49,10 +49,10 @@ export class TicketsResolver {
    * Get Ticket
    *
    * @async
-   * @param {string} ticketId
+   * @param {ListTicketInput} input
    * @returns {Promise<Ticket>}
    */
-  @Query(() => Ticket)
+  @Query(() => [Ticket])
   @Permissions('read-support-tickets')
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async listTickets(
