@@ -9,7 +9,9 @@ export const AppStrings = {
   FAILED_RACAPTCHA: 'Recaptcha Failed, Please try again',
   USER_DISABLED: 'Account disabled. Please contact support',
   UNCONFIRMED_ACCOUNT: 'UNCONFIRMED_ACCOUNT',
-  INCORRECT_CREDENTIALS: 'INCORRECT_CREDENTIALS',
+  SUSPENDED_ACCOUNT:
+    'Your account has been suspended, please contact the administrator',
+  INCORRECT_CREDENTIALS: 'Your password and email don’t match.',
   INVALID_QUERY: 'Invalid query, kindly check your query',
   UNSUPPORTED_ACTION: ' Unsupported action ',
   FIELD_NOT_EXIST: (field: string): string =>
@@ -17,7 +19,7 @@ export const AppStrings = {
   WRONG_DATA_FOR_FIELD: (field: string): string =>
     `Invalid query, ${field} entry in query is wrong`,
   WRONG_CONFIRM_CODE: 'WRONG_CONFIRM_CODE',
-  CONFIRMATION_SENT: 'CONFIRMATION_SENT',
+  CONFIRMATION_SENT: 'Eamil confirmation sent',
   ACCOUNT_ALREADY_CONFIRMED: 'ACCOUNT_ALREADY_CONFIRMED',
   ACCOUNT_CONFIRMED_SUCCESSFULLY: 'ACCOUNT_CONFIRMED_SUCCESSFULLY',
   PASSWORD_RESET_SENT: 'PASSWORD_RESET_EMAIL_SENT',
@@ -36,13 +38,18 @@ export const AppStrings = {
   LISTINGTYPE_DELETED_SUCCESSFULLY: 'LISTINGTYPE_DELETED_SUCCESSFULLY',
   ROLE_DELETED_SUCCESSFULLY: 'ROLE_DELETED_SUCCESSFULLY',
   INCORRECT_PASSWORD: 'INCORRECT_PASSWORD',
+  INCORRECT_OLD_PASSWORD: 'Old Password is incorrect',
   UNABLE_TO_DELETE_ISSUE_CATEGORY:
     'ISSUE_CATEGORY_CAN_NOT_BE_DELETED_AS_IT_IS_BEING_USED_BY_AN_ISSUE',
   ISSUE_CATEGORY_DELETED_SUCCESSFULLY: 'ISSUE_CATEGORY_DELETED_SUCCESSFULLY',
   ISSUE_DELETED_SUCCESSFULLY: 'ISSUE_DELETED_SUCCESSFULLY',
   TWO_FA_NOT_ENABLED: 'TWO_FA_NOT_ENABLED',
-  INCORRECT_TOKEN: 'INCORRECT_TOKEN',
+  INCORRECT_TOKEN: 'Wrong code, please enter the correct one.',
   TICKET_RAISED_SUCCESSFULLY: 'TICKET_RAISED_SUCCESSFULLY',
+  EXPIRED_NATIONAL_ID: 'National Identity has Expired',
+  EMAIL_ALREADY_CONFIRMED: 'This email has already been confirmed',
+  INVALID_USER: 'This user does not exist',
+  INVALID_NATIONAL_ID: 'The Identity number provided is invalid',
 
   SERVICE_OWNER_NOT_FOUND: 'INVALID_SERVICE_OWNER ID',
 };

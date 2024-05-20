@@ -27,11 +27,12 @@ import {
   PasswordResetRequestDto,
   TwoFaResult,
   TwoFaLoginInput,
+  ConfirmationInput,
 } from '../dtos';
 import { Company, User } from 'src/entities';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { RegisterEventAction, UserStatus } from 'src/common/enums';
-import { NodeMailerEmailService } from '../../mail/services/implementations';
+import { MailgunEmailService } from '../../mail/services/implementations';
 import { ConfigService } from '@nestjs/config';
 import { I18nService } from 'nestjs-i18n';
 import * as bcrypt from 'bcrypt';
@@ -52,7 +53,7 @@ export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly i18n: I18nService,
-    private readonly mailService: NodeMailerEmailService,
+    private readonly mailService: MailgunEmailService,
     private readonly configService: ConfigService,
     private readonly eventEmitter: EventEmitter2,
     private readonly jwtService: JwtService,
@@ -73,7 +74,8 @@ export class AuthService {
    */
   async register(inputDto: RegisterInput): Promise<User> {
     try {
-      // await this.recaptchaValidator.validateRecaptcha(inputDto.recaptcha);
+      // Await this.recaptchaValidator.validateRecaptcha(inputDto.recaptcha);
+
       // Check for user with same email or phone
       const existingUser = await this.userService.findByEmailOrPhone(
         inputDto.email,
@@ -117,6 +119,18 @@ export class AuthService {
    */
   async sendEmailConfirmation(user: User): Promise<void> {
     await this.sendRegisterConfirmEmail(user);
+    await this.createDefaultNotifications(user);
+  }
+
+  /**
+   * Create default notifications
+   *
+   * @async
+   * @param {User} user
+   * @returns {Promise<void>}
+   */
+  async createDefaultNotifications(user: User): Promise<void> {
+    await this.userService.createDefaultNotifications(user);
   }
 
   /**
@@ -131,6 +145,34 @@ export class AuthService {
     const link = `${this.frontEndUrl}/email-confirmation?email=${email}&token=${token}`;
 
     await this.mailService.sendUserConfirmation(user, link);
+  }
+
+  /**
+   * Resend email confirmation link
+   *
+   * @param {ConfirmationInput} emailConfirmDto
+   * @returns { Promise<string>}
+   */
+  async sendEmailConfirmationLink(
+    emailConfirmDto: ConfirmationInput,
+  ): Promise<string> {
+    const user = await this.userService.findByEmailOrPhone(
+      emailConfirmDto.email,
+    );
+    if (!user) {
+      throw new NotFoundException(AppStrings.INVALID_USER);
+    }
+    if (user.verifiedAt) {
+      throw new BadRequestException(AppStrings.EMAIL_ALREADY_CONFIRMED);
+    }
+
+    if (user.userType === 'company' || user.userType === 'individual') {
+      await this.sendRegisterConfirmEmail(user);
+    } else {
+      await this.userService.sendPasswordEmailToStaff({ staff: user });
+    }
+
+    return AppStrings.CONFIRMATION_SENT;
   }
 
   /**
@@ -191,6 +233,9 @@ export class AuthService {
     } else if (!user.verifiedAt) {
       // Throw Forbidden error if the user is not verified
       throw new ForbiddenException(AppStrings.UNCONFIRMED_ACCOUNT);
+    } else if (user.disabledAt) {
+      // Throw Forbidden error if the user is not verified
+      throw new ForbiddenException(AppStrings.SUSPENDED_ACCOUNT);
     }
 
     if (user.userType === 'admin') {
@@ -370,8 +415,9 @@ export class AuthService {
     const { token } = await this.userService.generateUserConfirmation(user);
 
     const url = userType === 'staff' ? 'forgotPassword' : 'reset-password';
+    const urlLink = userType === 'staff' ? this.adminUrl : this.frontEndUrl;
 
-    const link = `${this.frontEndUrl}/${url}?email=${email}&token=${token}${userType === 'staff' ? '&step=createnewpassword' : ''}`;
+    const link = `${urlLink}/${url}?email=${email}&token=${token}${userType === 'staff' ? '&step=createnewpassword' : ''}`;
 
     await this.mailService.sendPasswordResetEmail(user, link);
   }

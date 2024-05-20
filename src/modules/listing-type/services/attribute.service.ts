@@ -51,7 +51,7 @@ export class AttributeService {
     const attributeData: Partial<Attribute> = {
       ...data,
     };
-    if (!icon) {
+    if (icon) {
       // Upload icon image
       const imageurl = await this.storageService.upload(icon);
       attributeData.icon = imageurl;
@@ -74,7 +74,7 @@ export class AttributeService {
     const attributeData: Partial<Attribute> = {
       ...data,
     };
-    if (!icon) {
+    if (icon) {
       // Upload icon image
       const imageurl = await this.storageService.upload(icon);
       attributeData.icon = imageurl;

@@ -3,9 +3,9 @@
  * For license. See license.txt
  */
 
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { TicketRepository } from '../repositories';
-import { CreateTicketInput, UpdateTicketInput } from '../dtos';
+import { CreateTicketInput, ListTicketInput, UpdateTicketInput } from '../dtos';
 import { AppStrings } from 'src/common/messages/app.strings';
 import { Ticket, User } from 'src/entities';
 import {
@@ -13,6 +13,7 @@ import {
   IssueRepository,
 } from '../../issue/repositories';
 import { TicketStatus } from 'src/common/enums';
+import { FindManyOptions } from 'typeorm';
 
 @Injectable()
 export class TicketService {
@@ -51,7 +52,7 @@ export class TicketService {
   }
 
   /**
-   * Get ticket
+   * Get ticket by id
    *
    * @async
    * @param {string} id
@@ -59,6 +60,26 @@ export class TicketService {
    */
   async getTicket(id: string): Promise<Ticket> {
     return await this.ticketRepository.findByIdOrFail(id);
+  }
+
+  /**
+   * List tickets
+   *
+   * @async
+   * @param {ListTicketInput} input
+   * @returns {Promise<Ticket[]>}
+   */
+  async listTickets(input?: ListTicketInput): Promise<Ticket[]> {
+    try {
+      const options: FindManyOptions<Ticket> = {};
+      if (input.status) {
+        options.where = { status: input.status };
+      }
+      const tickets = await this.ticketRepository.findAll(options);
+      return tickets;
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
   }
 
   /**

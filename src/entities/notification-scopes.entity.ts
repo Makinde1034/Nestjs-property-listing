@@ -8,7 +8,7 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 @ObjectType()
-export class Permission {
+export class NotificationScope {
   @Field(() => Number)
   @PrimaryGeneratedColumn()
   id: number;
@@ -17,15 +17,11 @@ export class Permission {
   @Field()
   name: string;
 
-  @Column()
-  @Field()
-  slug: string;
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  description: string;
 
-  @Column()
-  @Field()
-  permissionGroup: string;
-
-  @Column({ default: true })
-  @Field()
-  visible: boolean;
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  scopeGroup: string;
 }

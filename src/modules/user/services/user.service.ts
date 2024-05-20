@@ -5,6 +5,7 @@
 
 import { BadRequestException, Injectable } from '@nestjs/common';
 import {
+  NationalIdentityRepository,
   RoleRepository,
   UserConfirmationRepository,
   UserRepository,
@@ -27,13 +28,23 @@ import {
   StaffCreatedData,
   StaffCreatedEventDto,
   UserActionInput,
+  PasswordInput,
 } from '../dtos';
 import { StorageService } from '../../storage/storage.service';
 import { AppStrings } from 'src/common/messages/app.strings';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { RegisterEventAction, UserStatus } from 'src/common/enums';
-import { NodeMailerEmailService } from '../../mail/services/implementations';
+import {
+  NationalIdentityType,
+  RegisterEventAction,
+  UserStatus,
+} from 'src/common/enums';
+import { MailgunEmailService } from '../../mail/services/implementations';
 import { ConfigService } from '@nestjs/config';
+import * as bcrypt from 'bcrypt';
+import {
+  NotificationScopeRepository,
+  UserNotificationRepository,
+} from '../repositories/notification.repository';
 
 @Injectable()
 export class UserService {
@@ -41,10 +52,13 @@ export class UserService {
   constructor(
     private readonly usersRepository: UserRepository,
     private readonly tokenRepository: UserConfirmationRepository,
+    private readonly nationalIdentityRepository: NationalIdentityRepository,
     private readonly storageService: StorageService,
     private readonly roleRepository: RoleRepository,
+    private readonly userNotificationRepository: UserNotificationRepository,
+    private readonly notificationScopeRepository: NotificationScopeRepository,
     private readonly eventEmitter: EventEmitter2,
-    private readonly mailService: NodeMailerEmailService,
+    private readonly mailService: MailgunEmailService,
     private readonly configService: ConfigService,
   ) {
     this.frontEndUrl = this.configService.get('ADMIN_FRONTEND_URL');
@@ -227,11 +241,92 @@ export class UserService {
    * @returns {Promise<User>}
    */
   async updateProfile(user: User, data: UserProfileInput): Promise<User> {
+    if (data?.nationalIdentity?.dateOfExpiry) {
+      const isExpired = isPast(new Date(data.nationalIdentity.dateOfExpiry));
+      if (isExpired) {
+        throw new BadRequestException(AppStrings.EXPIRED_NATIONAL_ID);
+      }
+    }
+    const userData = await this.usersRepository.findById(user.id, [
+      'nationalIdentity',
+    ]);
+    if (data.nationalIdentity) {
+      const { type, identityNumber } = data.nationalIdentity;
+      if (
+        (type === NationalIdentityType.IQAMA &&
+          !identityNumber.startsWith('2')) ||
+        identityNumber.length !== 10
+      ) {
+        throw new BadRequestException(AppStrings.INVALID_NATIONAL_ID);
+      } else if (
+        (type === NationalIdentityType.NATIONAL_ID &&
+          !identityNumber.startsWith('1')) ||
+        identityNumber.length !== 10
+      ) {
+        throw new BadRequestException(AppStrings.INVALID_NATIONAL_ID);
+      }
+      if (userData.nationalIdentity) {
+        await this.nationalIdentityRepository.update(
+          userData.nationalIdentity.id,
+          { ...data.nationalIdentity },
+        );
+      } else {
+        await this.nationalIdentityRepository.create({
+          ...data.nationalIdentity,
+          user,
+        });
+      }
+      delete data.nationalIdentity;
+    }
+
     const updateData = {
       ...data,
     } as Partial<User>;
     const update = await this.usersRepository.update(user.id, updateData);
     return update;
+  }
+
+  /**
+   * Update User Password
+   *
+   * @async
+   * @param {User} user
+   * @param {PasswordInput} data
+   * @returns {Promise<User>}
+   */
+  async changePassword(user: User, data: PasswordInput): Promise<User> {
+    const { oldPassword, newPassword } = data;
+
+    // Compare the saved hashed password to the hash of the oldPassword
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      throw new BadRequestException(AppStrings.INCORRECT_OLD_PASSWORD);
+    }
+
+    const update = await this.usersRepository.update(user.id, {
+      password: newPassword,
+    });
+    return update;
+  }
+
+  /**
+   * Create Default notifications for user
+   *
+   * @async
+   * @param {User} user
+   * @returns {Promise<void>}
+   */
+  async createDefaultNotifications(user: User): Promise<void> {
+    const scopes = await this.notificationScopeRepository.find();
+    await Promise.all(
+      scopes.map(async (scope) => {
+        const data: Partial<UserNotificationPreference> = {
+          user,
+          scope,
+        };
+        await this.userNotificationRepository.create(data);
+      }),
+    );
   }
 
   /**
@@ -246,11 +341,31 @@ export class UserService {
     user: User,
     data: NotificationPrefenceInput,
   ): Promise<User> {
-    const updateData: Partial<UserNotificationPreference> = {
-      ...data,
-    };
+    const { notificationPreferences } = data;
+    const scopeIds = notificationPreferences.map((item) => item.scopeId);
+    const scopes = await this.notificationScopeRepository.find({
+      where: { id: In([...scopeIds]) },
+    });
+    const preferencesData = scopes
+      .map((scope) => {
+        const scopeItem = notificationPreferences.find(
+          (item) => item.scopeId === scope.id,
+        );
+        if (!scopeItem) {
+          return null;
+        }
+        delete scopeItem.scopeId;
+        return {
+          scope,
+          user,
+          ...scopeItem,
+        };
+      })
+      .filter((item) => item !== null);
+
+    // Save preferences
     const update = await this.usersRepository.update(user.id, {
-      notificationPreference: updateData,
+      notificationPreference: preferencesData,
     });
     return update;
   }
@@ -303,7 +418,7 @@ export class UserService {
       const staff = await this.usersRepository.create(staffData);
       this.eventEmitter.emit(
         RegisterEventAction.STAFF_CREATED,
-        new StaffCreatedEventDto({ staff, password }),
+        new StaffCreatedEventDto({ staff }),
       );
       return staff;
     } catch (error) {

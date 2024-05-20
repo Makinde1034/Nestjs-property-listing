@@ -17,7 +17,7 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Permission {
-  id: ID!
+  id: Float!
   name: String!
   slug: String!
   permissionGroup: String!
@@ -25,7 +25,7 @@ type Permission {
 }
 
 type Role {
-  id: ID!
+  id: Float!
   name: String!
   slug: String!
   permissions: [Permission!]!
@@ -41,12 +41,20 @@ type Company {
   user: User!
 }
 
+type NotificationScope {
+  id: Float!
+  name: String!
+  description: String
+  scopeGroup: String
+}
+
 type UserNotificationPreference {
   id: ID!
   email: Boolean
-  sms: Boolean
-  pushNotification: Boolean
+  mobile: Boolean
+  desktop: Boolean
   user: User!
+  scope: NotificationScope!
 }
 
 type Review {
@@ -66,6 +74,9 @@ type User {
   id: ID!
   userType: String!
   firstName: String
+  arabicFirstName: String
+  arabicLastName: String
+  arabicMiddleName: String
   lastName: String
   middleName: String
   email: String!
@@ -85,7 +96,7 @@ type User {
   status: String
   nationalIdentity: NationalIdentity
   company: Company
-  notificationPreference: UserNotificationPreference
+  notificationPreference: [UserNotificationPreference!]
   twoFactorAuthenticationSecret: String
   isTwoFactorAuthenticationEnabled: Boolean
   roles: [Role!]
@@ -94,6 +105,7 @@ type User {
   createdAt: DateTime!
   updatedAt: DateTime!
   deletedAt: DateTime
+  name: String
 }
 
 type Notification {
@@ -201,12 +213,18 @@ type Query {
   roles: [Role!]!
   getUserRoles: [Role!]!
   listNotifications: [Notification!]!
+  listNotificationScopes: [NotificationScope!]!
   fetchListingTypes: [ListingType!]!
   fetchAttributes: [Attribute!]!
   fetchAttributeSets: [AttributeSet!]!
   fetchIssueCategories: [IssueCategory!]!
   fetchIssues: [Issue!]!
   getTicket(ticketId: String!): Ticket!
+  listTickets(QueryInput: ListTicketInput): [Ticket!]!
+}
+
+input ListTicketInput {
+  status: String
 }
 
 type Mutation {
@@ -218,11 +236,13 @@ type Mutation {
   resetPasswordRequest(RequestInput: PasswordResetRequestDto!): SuccessResponse!
   resetPassword(ResetInput: PasswordResetDto!): SuccessResponse!
   twoFaLogin(LoginInput: TwoFaLoginInput!): LoginResponse!
+  resendEmailConfirmation(RequestInput: ConfirmationInput!): SuccessResponse!
   profileUpdate(RequestInput: UserProfileInput!): User!
   createStaff(RequestInput: CreateStaffInput!): User!
   staffConfirmation(RequestInput: StaffConfirmDto!): String!
   blockUser(RequestInput: UserActionInput!): User!
   updateNotificationPreference(RequestInput: NotificationPrefenceInput!): User!
+  changePassword(RequestInput: PasswordInput!): User!
   createRole(RequestInput: RoleInputDto!): Role!
   updateRole(RequestInput: RoleUpdateInputDto!): Role!
   deleteRole(RequestInput: RoleIdInputDto!): String!
@@ -299,6 +319,10 @@ input TwoFaLoginInput {
   token: String!
 }
 
+input ConfirmationInput {
+  email: String!
+}
+
 input UserProfileInput {
   firstName: String
   lastName: String
@@ -319,12 +343,15 @@ input IdentityInput {
 }
 
 input CreateStaffInput {
-  middleName: String!
-  firstName: String!
-  lastName: String!
+  middleName: String
+  firstName: String
+  arabicFirstName: String
+  lastName: String
+  arabicLastName: String
+  arabicMiddleName: String
   email: String!
   phone: String!
-  dateOfBirth: DateTime!
+  dateOfBirth: DateTime
   roles: [Float!]!
 }
 
@@ -340,9 +367,19 @@ input UserActionInput {
 }
 
 input NotificationPrefenceInput {
+  notificationPreferences: [NotificationItemInput!]!
+}
+
+input NotificationItemInput {
   email: Boolean
-  sms: Boolean
-  pushNotification: Boolean
+  desktop: Boolean
+  mobile: Boolean
+  scopeId: Float!
+}
+
+input PasswordInput {
+  oldPassword: String!
+  newPassword: String!
 }
 
 input RoleInputDto {

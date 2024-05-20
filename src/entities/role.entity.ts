@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 import {
   Column,
   CreateDateColumn,
@@ -18,7 +18,7 @@ import { Permission } from './permission.entity';
 @Entity()
 @ObjectType()
 export class Role {
-  @Field(() => ID)
+  @Field(() => Number)
   @PrimaryGeneratedColumn()
   id: number;
 

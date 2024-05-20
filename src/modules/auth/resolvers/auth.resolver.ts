@@ -16,6 +16,7 @@ import {
   PasswordResetDto,
   TwoFaResult,
   TwoFaLoginInput,
+  ConfirmationInput,
 } from '../dtos';
 import { User } from 'src/entities';
 import { Throttle } from '@nestjs/throttler';
@@ -159,5 +160,22 @@ export class AuthResolver {
       ctx.req.user,
       loginInput,
     );
+  }
+
+  /**
+   * Resend Email Confirmation
+   *
+   * @async
+   * @param {ConfirmationInput} RequestInput
+   * @returns {Promise<SuccessResponse>}
+   */
+  @Mutation(() => SuccessResponse)
+  @Throttle({ default: { limit: 1, ttl: 60000 } })
+  async resendEmailConfirmation(
+    @Args('RequestInput') RequestInput: ConfirmationInput,
+  ): Promise<SuccessResponse> {
+    return {
+      message: await this.authService.sendEmailConfirmationLink(RequestInput),
+    };
   }
 }
