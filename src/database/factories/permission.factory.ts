@@ -3,9 +3,7 @@
  * For license. See license.txt
  */
 
-import { Permission } from 'src/entities';
-
-export const permissionFactory: Permission[] = [
+export const permissionFactory = [
   {
     id: 1,
     permissionGroup: 'Users',

@@ -3,8 +3,28 @@
  * For license. See license.txt
  */
 
-import { Field, InputType } from '@nestjs/graphql';
-import { IsArray, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { Field, InputType, ObjectType } from '@nestjs/graphql';
+import { Type } from 'class-transformer';
+import {
+  IsBoolean,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
+
+@InputType()
+export class PermissionItem {
+  @Field(() => Number)
+  @IsNumber()
+  @IsNotEmpty()
+  permissionId: number;
+
+  @Field()
+  @IsBoolean()
+  @IsNotEmpty()
+  approve: boolean;
+}
 
 @InputType()
 export class RoleInputDto {
@@ -13,10 +33,11 @@ export class RoleInputDto {
   @IsNotEmpty()
   name: string;
 
-  @Field(() => [Number])
-  @IsArray()
+  @Field(() => [PermissionItem])
+  @ValidateNested()
+  @Type(() => PermissionItem)
   @IsNotEmpty()
-  permissions: number[];
+  permissions: PermissionItem[];
 }
 
 @InputType()
@@ -34,8 +55,45 @@ export class RoleUpdateInputDto extends RoleIdInputDto {
   @IsNotEmpty()
   name: string;
 
-  @Field(() => [Number])
-  @IsArray()
+  @Field(() => [PermissionItem])
+  @ValidateNested()
+  @Type(() => PermissionItem)
   @IsNotEmpty()
-  permissions: number[];
+  permissions: PermissionItem[];
+}
+
+@ObjectType()
+export class PermissionData {
+  @Field(() => Number)
+  id: number;
+
+  @Field()
+  name: string;
+
+  @Field()
+  slug: string;
+
+  @Field()
+  permissionGroup: string;
+
+  @Field()
+  visible: boolean;
+
+  @Field()
+  approve: boolean;
+}
+
+@ObjectType()
+export class RoleData {
+  @Field(() => Number)
+  id: number;
+
+  @Field()
+  name: string;
+
+  @Field()
+  slug: string;
+
+  @Field(() => [PermissionData])
+  permissions: PermissionData[];
 }

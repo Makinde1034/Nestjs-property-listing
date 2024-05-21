@@ -8,10 +8,17 @@ import {
   PermissionRepository,
   RoleRepository,
   UserRepository,
+  RolePermissionRepository,
 } from '../repositories';
-import { Permission, Role, User } from 'src/entities';
-import { RoleIdInputDto, RoleInputDto, RoleUpdateInputDto } from '../dtos';
-import { In } from 'typeorm';
+import { Permission, Role, RolePermissions, User } from 'src/entities';
+import {
+  PermissionData,
+  RoleData,
+  RoleIdInputDto,
+  RoleInputDto,
+  RoleUpdateInputDto,
+} from '../dtos';
+import { DeepPartial, In } from 'typeorm';
 import slugify from 'slugify';
 import { AppStrings } from 'src/common/messages/app.strings';
 
@@ -21,6 +28,7 @@ export class RoleService {
     private readonly roleRepository: RoleRepository,
     private readonly permissionRepository: PermissionRepository,
     private readonly staffRepository: UserRepository,
+    private readonly rolePermissionRepository: RolePermissionRepository,
   ) {}
 
   /**
@@ -30,7 +38,20 @@ export class RoleService {
    * @returns {Promise<Permission[]>}
    */
   async findAllPermissions(): Promise<Permission[]> {
-    return await this.permissionRepository.find();
+    const result = await this.permissionRepository.find();
+    return result;
+  }
+
+  listPermissions(items: RolePermissions[]): PermissionData[] {
+    const result: PermissionData[] = items.map((item) => ({
+      id: item.permission.id,
+      approve: item.approve,
+      name: item.permission.name,
+      slug: item.permission.slug,
+      permissionGroup: item.permission.permissionGroup,
+      visible: item.permission.visible,
+    }));
+    return result;
   }
 
   /**
@@ -39,10 +60,30 @@ export class RoleService {
    * @async
    * @returns {Promise<Role[]>}
    */
-  async findAllRoles(): Promise<Role[]> {
-    return await this.roleRepository.find({
+  async findAllRoles(): Promise<RoleData[]> {
+    const roles = await this.roleRepository.find({
       relations: ['permissions'],
     });
+    const roleData: RoleData[] = await Promise.all(
+      roles.map(async (item) => {
+        const permissionIds = item.permissions.map(
+          (permission) => permission.id,
+        );
+        const permissionItems = await this.rolePermissionRepository.find({
+          where: { permission: { id: In([...permissionIds]) } },
+          relations: ['permission'],
+        });
+        const permissionData = this.listPermissions(permissionItems);
+        delete item.permissions;
+        return {
+          id: item.id,
+          name: item.name,
+          slug: item.slug,
+          permissions: permissionData,
+        };
+      }),
+    );
+    return roleData;
   }
 
   /**
@@ -53,8 +94,9 @@ export class RoleService {
    * @returns {Promise<Role>}
    */
   async createRole(input: RoleInputDto): Promise<Role> {
+    const permissionIds = input.permissions.map((item) => item.permissionId);
     const permissions = await this.permissionRepository.find({
-      where: { id: In([...input.permissions]) },
+      where: { id: In([...permissionIds]) },
     });
     const data: Partial<Role> = {
       name: input.name,
@@ -63,6 +105,25 @@ export class RoleService {
     };
     const roleData = this.roleRepository.create(data);
     const role = await this.roleRepository.save(roleData);
+
+    const rolePermissions: DeepPartial<RolePermissions[]> = permissions
+      .map((permissionItem) => {
+        const inputItem = input.permissions.find(
+          (item) => item.permissionId === permissionItem.id,
+        );
+        if (!inputItem) {
+          return null;
+        }
+        return {
+          permission: permissionItem,
+          approve: inputItem.approve,
+          role,
+        };
+      })
+      .filter((item) => item !== null);
+
+    await this.rolePermissionRepository.save(rolePermissions);
+
     return role;
   }
 
@@ -77,14 +138,34 @@ export class RoleService {
     const role = await this.roleRepository.findOneByOrFail({
       id: input.roleId,
     });
+    const permissionIds = input.permissions.map((item) => item.permissionId);
     const permissions = await this.permissionRepository.find({
-      where: { id: In([...input.permissions]) },
+      where: { id: In([...permissionIds]) },
     });
+
     const data: Partial<Role> = {
       name: input.name,
       permissions,
       slug: slugify(input.name),
     };
+
+    const rolePermissions: DeepPartial<RolePermissions[]> = permissions
+      .map((permissionItem) => {
+        const inputItem = input.permissions.find(
+          (item) => item.permissionId === permissionItem.id,
+        );
+        if (!inputItem) {
+          return null;
+        }
+        return {
+          permission: permissionItem,
+          approve: inputItem.approve,
+          role,
+        };
+      })
+      .filter((item) => item !== null);
+
+    await this.rolePermissionRepository.save(rolePermissions);
     return await this.roleRepository.save(Object.assign(role, data));
   }
 

@@ -4,7 +4,8 @@
  */
 
 import { Field, ObjectType } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { RolePermissions } from './role-permission.entity';
 
 @Entity()
 @ObjectType()
@@ -28,4 +29,12 @@ export class Permission {
   @Column({ default: true })
   @Field()
   visible: boolean;
+
+  @Field(() => [RolePermissions])
+  @OneToMany(
+    () => RolePermissions,
+    (rolePermission) => rolePermission.permission,
+    { eager: true },
+  )
+  permissionRoles: RolePermissions[];
 }
