@@ -4,7 +4,8 @@
  */
 
 import { Field, InputType } from '@nestjs/graphql';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { AppDetail } from 'src/common/enums';
 
 @InputType()
 export class LoginInput {
@@ -17,4 +18,9 @@ export class LoginInput {
   @IsNotEmpty()
   @IsString()
   password: string;
+
+  @Field()
+  @IsNotEmpty()
+  @IsEnum(AppDetail)
+  app: AppDetail;
 }
