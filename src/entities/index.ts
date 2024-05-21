@@ -18,5 +18,6 @@ export * from './issue-category.entity';
 export * from './issue.entity';
 export * from './ticket.entity';
 export * from './notification-preference.entity';
+export * from './review.entity';
 export * from './notification-scopes.entity';
 export * from './role-permission.entity';
