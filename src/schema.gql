@@ -16,12 +16,20 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type RolePermissions {
+  id: Float!
+  role: Role!
+  permission: Permission!
+  approve: Boolean
+}
+
 type Permission {
   id: Float!
   name: String!
   slug: String!
   permissionGroup: String!
   visible: Boolean!
+  permissionRoles: [RolePermissions!]!
 }
 
 type Role {
@@ -29,6 +37,7 @@ type Role {
   name: String!
   slug: String!
   permissions: [Permission!]!
+  rolePermissions: [RolePermissions!]!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -171,6 +180,22 @@ type Ticket {
   deletedAt: DateTime
 }
 
+type PermissionData {
+  id: Float!
+  name: String!
+  slug: String!
+  permissionGroup: String!
+  visible: Boolean!
+  approve: Boolean!
+}
+
+type RoleData {
+  id: Float!
+  name: String!
+  slug: String!
+  permissions: [PermissionData!]!
+}
+
 type TokenType {
   accessToken: String!
   refreshToken: String!
@@ -195,7 +220,7 @@ type Query {
   activateTwoFa: TwoFaResult!
   user: User!
   permissions: [Permission!]!
-  roles: [Role!]!
+  roles: [RoleData!]!
   getUserRoles: [Role!]!
   listNotifications: [Notification!]!
   listNotificationScopes: [NotificationScope!]!
@@ -368,13 +393,18 @@ input PasswordInput {
 
 input RoleInputDto {
   name: String!
-  permissions: [Float!]!
+  permissions: [PermissionItem!]!
+}
+
+input PermissionItem {
+  permissionId: Float!
+  approve: Boolean!
 }
 
 input RoleUpdateInputDto {
   roleId: Float!
   name: String!
-  permissions: [Float!]!
+  permissions: [PermissionItem!]!
 }
 
 input RoleIdInputDto {

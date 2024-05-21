@@ -413,10 +413,10 @@ export class AuthService {
     const { email, userType } = user;
     const { token } = await this.userService.generateUserConfirmation(user);
 
-    const url = userType === 'staff' ? 'forgotPassword' : 'reset-password';
-    const urlLink = userType === 'staff' ? this.adminUrl : this.frontEndUrl;
-
-    const link = `${urlLink}/${url}?email=${email}&token=${token}${userType === 'staff' ? '&step=createnewpassword' : ''}`;
+    let link = `${this.frontEndUrl}/reset-password?email=${email}&token=${token}`;
+    if (userType === 'staff' || userType === 'admin') {
+      link = `${this.adminUrl}/forgotPassword?step=createnewpassword&email=${email}&token=${token}`;
+    }
 
     await this.mailService.sendPasswordResetEmail(user, link);
   }
