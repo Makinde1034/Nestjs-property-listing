@@ -302,6 +302,7 @@ input AuthRegisterConfirmDto {
 input LoginInput {
   username: String!
   password: String!
+  app: String!
 }
 
 input BiometricRegister {
