@@ -4,7 +4,7 @@
  */
 
 import { Injectable } from '@nestjs/common';
-import { Review } from 'src/entities';
+import { Review } from '../../../entities';
 
 import { EntityRepository } from '../../core/base.class/entity.repository';
 import { InjectRepository } from '@nestjs/typeorm';
