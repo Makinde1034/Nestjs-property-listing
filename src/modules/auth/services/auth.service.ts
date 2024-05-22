@@ -223,8 +223,8 @@ export class AuthService {
     ) {
       throw new UnauthorizedException();
     } else if (
-      user.userType === 'individual' ||
-      (user.userType === 'company' && app !== AppDetail.CUSTOMER)
+      (user.userType === 'individual' || user.userType === 'company') &&
+      app !== AppDetail.CUSTOMER
     ) {
       throw new UnauthorizedException();
     }

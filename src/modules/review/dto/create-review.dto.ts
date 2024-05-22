@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { Field, InputType } from '@nestjs/graphql';
 import { IsEnum, IsNumber, IsOptional } from 'class-validator';
 import { ServicesOffered } from '../../../common/enums';
