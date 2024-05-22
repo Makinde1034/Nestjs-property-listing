@@ -50,4 +50,6 @@ export const AppStrings = {
   EMAIL_ALREADY_CONFIRMED: 'This email has already been confirmed',
   INVALID_USER: 'This user does not exist',
   INVALID_NATIONAL_ID: 'The Identity number provided is invalid',
+
+  SERVICE_OWNER_NOT_FOUND: 'INVALID_SERVICE_OWNER ID',
 };

@@ -21,12 +21,13 @@ import BaseEntity from './base.entity';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { UserProfileType } from '../common/types';
 import * as bcrypt from 'bcrypt';
-import { Gender, MaritalStatus, UserStatus } from 'src/common/enums';
+import { Gender, MaritalStatus, UserStatus } from '../common/enums';
 import { NationalIdentity } from './identity.entity';
 import { Exclude } from 'class-transformer';
 import { Role } from './role.entity';
 import { Company } from './company.entity';
 import { UserNotificationPreference } from './notification-preference.entity';
+import { Review } from './review.entity';
 import { loadUserName } from 'src/common/utils/class-loader';
 
 @Entity()
@@ -107,6 +108,14 @@ export class User extends BaseEntity {
   @Column({ nullable: true, default: false })
   @Field({ nullable: true })
   twoFaRequired: boolean;
+
+  @Field(() => [Review], { nullable: true })
+  @OneToMany(() => Review, (review) => review.reviewer, { cascade: true })
+  reviewer: Review[];
+
+  @Field(() => [Review], { nullable: true })
+  @OneToMany(() => Review, (review) => review.service_owner, { cascade: true })
+  service_owner: Review[];
 
   @Field({ nullable: true, defaultValue: UserStatus.PENDING })
   @Column({ nullable: true, default: UserStatus.PENDING })
