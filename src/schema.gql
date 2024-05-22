@@ -230,6 +230,11 @@ type SuccessResponse {
   message: String!
 }
 
+type ReviewResponse {
+  reviews: [Review!]!
+  total: Int!
+}
+
 type Query {
   app: String!
   activateTwoFa: TwoFaResult!
@@ -246,10 +251,28 @@ type Query {
   fetchIssues: [Issue!]!
   getTicket(ticketId: String!): Ticket!
   listTickets(QueryInput: ListTicketInput): [Ticket!]!
+  findOne(id: String!): Review!
+  findManyReviews(findMayOptions: FindManyReviewDto): ReviewResponse!
 }
 
 input ListTicketInput {
   status: String
+}
+
+input FindManyReviewDto {
+  take: Float
+  skip: Float
+  where: WhereCondition
+  sortField: String!
+  direction_to_sort: String!
+}
+
+input WhereCondition {
+  service: ServicesOffered
+}
+
+enum ServicesOffered {
+  LISTING
 }
 
 type Mutation {
