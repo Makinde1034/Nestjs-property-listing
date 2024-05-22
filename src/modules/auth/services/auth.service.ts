@@ -218,8 +218,8 @@ export class AuthService {
 
   validateApp(user: User, app: AppDetail) {
     if (
-      user.userType === 'admin' ||
-      (user.userType === 'staff' && app !== AppDetail.ADMIN)
+      (user.userType === 'admin' || user.userType === 'staff') &&
+      app !== AppDetail.ADMIN
     ) {
       throw new UnauthorizedException();
     } else if (
