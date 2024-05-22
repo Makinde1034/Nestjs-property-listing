@@ -31,7 +31,7 @@ import {
 } from '../dtos';
 import { Company, User } from 'src/entities';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { RegisterEventAction, UserStatus } from 'src/common/enums';
+import { AppDetail, RegisterEventAction, UserStatus } from 'src/common/enums';
 import { MailgunEmailService } from '../../mail/services/implementations';
 import { ConfigService } from '@nestjs/config';
 import { I18nService } from 'nestjs-i18n';
@@ -216,6 +216,20 @@ export class AuthService {
     );
   }
 
+  validateApp(user: User, app: AppDetail) {
+    if (
+      (user.userType === 'admin' || user.userType === 'staff') &&
+      app !== AppDetail.ADMIN
+    ) {
+      throw new UnauthorizedException();
+    } else if (
+      user.userType === 'individual' ||
+      (user.userType === 'company' && app !== AppDetail.CUSTOMER)
+    ) {
+      throw new UnauthorizedException();
+    }
+  }
+
   /**
    * Login user
    *
@@ -224,7 +238,7 @@ export class AuthService {
    * @returns {Promise<LoginResponse>}
    */
   async login(loginDto: LoginInput): Promise<LoginResponse> {
-    const { username, password } = loginDto;
+    const { username, password, app } = loginDto;
     // Validate the user credentials
     let user = await this.validateUserCredentials(username, password);
     // Throw unauthorized error if the credential is invalid
@@ -237,6 +251,9 @@ export class AuthService {
       // Throw Forbidden error if the user is not verified
       throw new ForbiddenException(AppStrings.SUSPENDED_ACCOUNT);
     }
+    // Allow Indiviudal/Company to login from Customer App
+    // Allow Admin/Staff to login from Admin App
+    this.validateApp(user, app);
 
     if (user.userType === 'admin') {
       user = await this.userRepository.findById(user.id, ['roles']);
@@ -414,10 +431,10 @@ export class AuthService {
     const { email, userType } = user;
     const { token } = await this.userService.generateUserConfirmation(user);
 
-    const url = userType === 'staff' ? 'forgotPassword' : 'reset-password';
-    const urlLink = userType === 'staff' ? this.adminUrl : this.frontEndUrl;
-
-    const link = `${urlLink}/${url}?email=${email}&token=${token}${userType === 'staff' ? '&step=createnewpassword' : ''}`;
+    let link = `${this.frontEndUrl}/reset-password?email=${email}&token=${token}`;
+    if (userType === 'staff' || userType === 'admin') {
+      link = `${this.adminUrl}/forgotPassword?step=createnewpassword&email=${email}&token=${token}`;
+    }
 
     await this.mailService.sendPasswordResetEmail(user, link);
   }

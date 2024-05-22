@@ -5,11 +5,16 @@
 
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { RoleService } from '../services';
-import { Permission, Role } from 'src/entities';
+import { Role, Permission } from 'src/entities';
 import { UseGuards } from '@nestjs/common';
 import { AccessTokenGuard, PermissionsGuard } from 'src/modules/auth/guards';
 import { Permissions } from 'src/common/decorator/permission';
-import { RoleIdInputDto, RoleInputDto, RoleUpdateInputDto } from '../dtos';
+import {
+  RoleData,
+  RoleIdInputDto,
+  RoleInputDto,
+  RoleUpdateInputDto,
+} from '../dtos';
 
 @Resolver()
 export class RoleResolver {
@@ -31,12 +36,12 @@ export class RoleResolver {
    * Fetch Roles
    *
    * @async
-   * @returns {Promise<Role[]>}
+   * @returns {Promise<RoleData[]>}
    */
-  @Query(() => [Role], { name: 'roles' })
+  @Query(() => [RoleData], { name: 'roles' })
   @Permissions('read-role')
   @UseGuards(AccessTokenGuard, PermissionsGuard)
-  async fetchRoles(): Promise<Role[]> {
+  async fetchRoles(): Promise<RoleData[]> {
     return await this.roleService.findAllRoles();
   }
 

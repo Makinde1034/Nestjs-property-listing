@@ -10,10 +10,12 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Permission } from './permission.entity';
+import { RolePermissions } from './role-permission.entity';
 
 @Entity()
 @ObjectType()
@@ -34,6 +36,10 @@ export class Role {
   @ManyToMany(() => Permission, { cascade: true, eager: true })
   @JoinTable({ name: 'role_permissions_permission' })
   permissions: Permission[];
+
+  @Field(() => [RolePermissions])
+  @OneToMany(() => RolePermissions, (rolePermission) => rolePermission.role)
+  rolePermissions: RolePermissions[];
 
   @Field()
   @CreateDateColumn()
