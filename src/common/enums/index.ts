@@ -15,3 +15,4 @@ export * from './ticket.enum';
 export * from './services.enum';
 export * from './national-id.enum';
 export * from './app.enum';
+export * from './sorting.enum';

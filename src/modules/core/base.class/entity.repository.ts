@@ -90,6 +90,17 @@ export abstract class EntityRepository<T extends BaseEntity> {
    *
    * @async
    * @param {?FindManyOptions<T>} [options]
+   * @returns {Promise<[[review], number>]}
+   */
+  async findAndCount(options?: FindManyOptions<any>): Promise<[T[], number]> {
+    return await this.baseRepository.findAndCount(options);
+  }
+
+  /**
+   * Count
+   *
+   * @async
+   * @param {?FindManyOptions<T>} [options]
    * @returns {Promise<number>}
    */
   async count(options?: FindManyOptions<T>): Promise<number> {
