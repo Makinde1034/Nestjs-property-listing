@@ -26,9 +26,16 @@ type RolePermissions {
 type Permission {
   id: Float!
   name: String!
-  slug: String!
+  slug: String
   permissionGroup: String!
-  visible: Boolean!
+  description: String
+  remarks: String
+  arabicLabel: String
+  approveFlag: Boolean
+  useFlag: Boolean
+  staffAccess: Boolean
+  individualAccess: Boolean
+  companyAccess: Boolean
   permissionRoles: [RolePermissions!]!
 }
 
@@ -200,8 +207,15 @@ type PermissionData {
   name: String!
   slug: String!
   permissionGroup: String!
-  visible: Boolean!
   approve: Boolean!
+  description: String
+  remarks: String
+  arabicLabel: String
+  approveFlag: Boolean
+  useFlag: Boolean
+  staffAccess: Boolean
+  individualAccess: Boolean
+  companyAccess: Boolean
 }
 
 type RoleData {

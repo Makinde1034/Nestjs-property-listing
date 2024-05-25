@@ -49,7 +49,10 @@ export class RoleService {
       name: item.permission.name,
       slug: item.permission.slug,
       permissionGroup: item.permission.permissionGroup,
-      visible: item.permission.visible,
+      staffAccess: item.permission.staffAccess,
+      individualAccess: item.permission.individualAccess,
+      companyAccess: item.permission.companyAccess,
+      description: item.permission.description,
     }));
     return result;
   }
