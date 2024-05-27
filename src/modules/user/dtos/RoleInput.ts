@@ -77,10 +77,30 @@ export class PermissionData {
   permissionGroup: string;
 
   @Field()
-  visible: boolean;
-
-  @Field()
   approve: boolean;
+  @Field({ nullable: true })
+  description?: string;
+
+  @Field({ nullable: true })
+  remarks?: string;
+
+  @Field({ nullable: true })
+  arabicLabel?: string;
+
+  @Field({ defaultValue: false, nullable: true })
+  approveFlag?: boolean;
+
+  @Field({ defaultValue: true, nullable: true })
+  useFlag?: boolean;
+
+  @Field({ defaultValue: true, nullable: true })
+  staffAccess?: boolean;
+
+  @Field({ defaultValue: false, nullable: true })
+  individualAccess?: boolean;
+
+  @Field({ defaultValue: false, nullable: true })
+  companyAccess?: boolean;
 }
 
 @ObjectType()
