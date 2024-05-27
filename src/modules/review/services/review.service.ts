@@ -26,20 +26,14 @@ export class ReviewService {
   ) {}
   logger = new Logger(ReviewService.name);
   async createReview(createReviewDto: CreateReviewDto, user: User) {
-    const serviceOwnerUser = await this.userRepository.findById(
-      createReviewDto.service_owner_id,
-    );
-    if (!serviceOwnerUser) {
-      throw new BadRequestException(AppStrings.SERVICE_OWNER_NOT_FOUND);
-    }
     try {
-      createReviewDto.reviewer_id = user.id;
-      const serviceOwnerUser = await this.userRepository.findByIdOrFail(
+      const serviceOwnerUser = await this.userRepository.findById(
         createReviewDto.service_owner_id,
       );
       if (!serviceOwnerUser) {
         throw new BadRequestException(AppStrings.SERVICE_OWNER_NOT_FOUND);
       }
+      createReviewDto.reviewer_id = user.id;
 
       return await this.reviewRepository.create(createReviewDto);
     } catch (error) {
