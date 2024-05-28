@@ -4,13 +4,7 @@
  */
 
 import { Field, ObjectType } from '@nestjs/graphql';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Role } from './role.entity';
 import { Permission } from './permission.entity';
 
@@ -22,12 +16,10 @@ export class RolePermissions {
   id: number;
 
   @Field(() => Role)
-  @JoinColumn({ name: 'role_id' })
   @ManyToOne(() => Role, (role) => role.rolePermissions)
   role: Role;
 
   @Field(() => Permission)
-  @JoinColumn({ name: 'permission_id' })
   @ManyToOne(() => Permission, (permission) => permission.permissionRoles)
   permission: Permission;
 

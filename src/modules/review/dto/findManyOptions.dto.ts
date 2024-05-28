@@ -4,48 +4,20 @@
  */
 
 import { Field, InputType } from '@nestjs/graphql';
-import {
-  IsEnum,
-  IsNumber,
-  IsOptional,
-  IsString,
-  ValidateNested,
-} from 'class-validator';
-import { ServicesOffered, SortOrder } from '../../../common/enums';
+import { IsEnum, IsOptional, ValidateNested } from 'class-validator';
+import { ServicesOffered } from '../../../common/enums';
 import { FindOptionsWhere } from 'typeorm';
 import { Type } from 'class-transformer';
 
-import { OrderBYEnum } from '../../../common/enums/sort.enum';
+import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 
 @InputType({})
-export class FindManyReviewDto {
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsNumber()
-  take: number;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsNumber()
-  skip: number;
-
+export class FindManyReviewDto extends PaginateAndSort {
   @Field(() => WhereCondition, { nullable: true })
   @IsOptional()
   @ValidateNested()
   @Type(() => WhereCondition)
   where?: FindOptionsWhere<any>;
-
-  @IsOptional()
-  @IsString()
-  @Field()
-  @IsEnum(OrderBYEnum)
-  sortField?: string;
-
-  @IsOptional()
-  @IsString()
-  @Field()
-  @IsEnum(SortOrder)
-  direction_to_sort?: string;
 }
 @InputType()
 class WhereCondition {

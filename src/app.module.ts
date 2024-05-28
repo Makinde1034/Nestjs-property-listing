@@ -20,7 +20,7 @@ import { MailModule } from './modules/mail/mail.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { StorageModule } from './modules/storage/storage.module';
 import { NotificationModule } from './modules/notification/notification.module';
-import { ListingTypeModule } from './modules/listing-type/listing-type.module';
+import { ListingModule } from './modules/listing/listing.module';
 import {
   GoogleRecaptchaModule,
   GoogleRecaptchaModuleOptions,
@@ -28,6 +28,8 @@ import {
 import { IssueModule } from './modules/issue/issue.module';
 import { TicketsModule } from './modules/tickets/tickets.module';
 import { ReviewModule } from './modules/review/review.module';
+
+import { LocationModule } from './modules/location/location.module';
 
 @Module({
   imports: [
@@ -75,10 +77,11 @@ import { ReviewModule } from './modules/review/review.module';
     ThrottlerModule.forRoot(),
     StorageModule,
     NotificationModule,
-    ListingTypeModule,
+    ListingModule,
     IssueModule,
     TicketsModule,
     ReviewModule,
+    LocationModule,
   ],
   controllers: [],
   providers: [AppResolver],

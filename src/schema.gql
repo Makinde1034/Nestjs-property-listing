@@ -86,6 +86,26 @@ type Review {
   updated_at: DateTime!
 }
 
+type Listing {
+  id: ID!
+  selling_type: String!
+  renting_option: String!
+  property_number: String!
+  deed_number: String!
+  district_city: String!
+  property_size: String!
+  publication_date: String!
+  number_of_rooms: String!
+  number_of_bathrooms: String!
+  number_of_bedrooms: String!
+  media_type: String
+  object_name: String
+  user: User
+  user_id: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type User {
   id: ID!
   userType: String!
@@ -108,6 +128,7 @@ type User {
   biometricKey: String
   twoFaRequired: Boolean
   reviewer: [Review!]
+  listing: [Listing!]
   service_owner: [Review!]
   status: String
   nationalIdentity: NationalIdentity
@@ -202,6 +223,17 @@ type Ticket {
   deletedAt: DateTime
 }
 
+type CityEntitity {
+  id: String!
+  city: String!
+  lat: String!
+  lng: String!
+  country: String!
+  iso2: String!
+  arabic_name: String!
+  admin_name: String!
+}
+
 type PermissionData {
   id: Float!
   name: String!
@@ -249,6 +281,11 @@ type ReviewResponse {
   total: Int!
 }
 
+type CityResponse {
+  city: [CityEntitity!]!
+  total: Int!
+}
+
 type Query {
   app: String!
   activateTwoFa: TwoFaResult!
@@ -267,6 +304,7 @@ type Query {
   listTickets(QueryInput: ListTicketInput): [Ticket!]!
   findOne(id: String!): Review!
   findManyReviews(findMayOptions: FindManyReviewDto): ReviewResponse!
+  findCities(findCities: PaginateAndSort): CityResponse!
 }
 
 input ListTicketInput {
@@ -276,9 +314,9 @@ input ListTicketInput {
 input FindManyReviewDto {
   take: Float
   skip: Float
-  where: WhereCondition
   sortField: String!
   direction_to_sort: String!
+  where: WhereCondition
 }
 
 input WhereCondition {
@@ -287,6 +325,13 @@ input WhereCondition {
 
 enum ServicesOffered {
   LISTING
+}
+
+input PaginateAndSort {
+  take: Float
+  skip: Float
+  sortField: String!
+  direction_to_sort: String!
 }
 
 type Mutation {
@@ -319,6 +364,7 @@ type Mutation {
   createAttributeSet(RequestInput: AttributeSetInput!): AttributeSet!
   updateAttributeSet(RequestInput: AttributeSetUpdateInput!): AttributeSet!
   deleteAttributeSet(RequestInput: AttributeDeleteInput!): String!
+  createListing(createListing: CreateListingDto!): Listing!
   createIssueCategory(RequestInput: CreateIssueCategoryInput!): IssueCategory!
   updateIssueCatgeory(RequestInput: UpdateIssueCategoryInput!): IssueCategory!
   deleteIssueCategory(RequestInput: DeleteIssueInput!): String!
@@ -525,6 +571,21 @@ input AttributeSetUpdateInput {
   name: String!
   attributes: [String!]!
   id: String!
+}
+
+input CreateListingDto {
+  selling_type: String!
+  renting_option: String!
+  property_number: String!
+  deed_number: String!
+  district_city: String!
+  property_size: String!
+  publication_date: String!
+  number_of_rooms: String!
+  number_of_bathrooms: String!
+  number_of_bedrooms: String!
+  media_type: String
+  object_name: String
 }
 
 input CreateIssueCategoryInput {
