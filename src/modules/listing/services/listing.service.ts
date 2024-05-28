@@ -19,7 +19,6 @@ export class ListingService {
 
       return listing;
     } catch (error) {
-      console.log(error);
       this.logger.log(error);
       throw new BadRequestException(error.data || error.messages);
     }
