@@ -14,8 +14,6 @@ import {
 import BaseEntity from './base.entity';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { User } from './user.entity';
-import { ListingType } from './listing-type.entity';
-import { IsArray, IsEnum, IsIn } from 'class-validator';
 
 @Entity()
 @ObjectType()

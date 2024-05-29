@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class AddOwnerToListingTable1716983442842 implements MigrationInterface {
