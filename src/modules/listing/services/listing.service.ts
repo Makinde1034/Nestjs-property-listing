@@ -23,4 +23,8 @@ export class ListingService {
       throw new BadRequestException(error.data || error.messages);
     }
   }
+
+  async findAllListing(findListingDto) {
+    await this.listingRepository.findAndCount();
+  }
 }

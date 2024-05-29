@@ -8,9 +8,24 @@ export enum SellingType {
   SALE = 'sale',
 }
 
+export enum Ownership {
+  OWNER = 'owner',
+  NOT_OWNER = 'power_of_attorney',
+}
+
 export enum RentingOption {
   MONTHLY = 'monthly',
   QUARTERLY = 'quarterly',
   BI_QUARTERLY = 'bi-quarterly',
   YEARLY = 'yearly',
+}
+
+export enum ListingType {
+  PROPERTY = 'property',
+  BUILDING = 'building',
+  LAND = 'land',
+  FARM = 'farm',
+  VILLA = 'villa',
+  APPARTMENT = 'appartment',
+  OTHERS = 'others',
 }

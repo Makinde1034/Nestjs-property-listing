@@ -88,11 +88,15 @@ type Review {
 
 type Listing {
   id: ID!
+  ownership: String!
   selling_type: String!
+  power_of_attorney: String
+  listing_type: String!
   renting_option: String!
   property_number: String!
   deed_number: String!
   district_city: String!
+  country: String!
   property_size: String!
   publication_date: String!
   number_of_rooms: String!
@@ -102,6 +106,7 @@ type Listing {
   object_name: String
   user: User
   user_id: String!
+  amenities: [String!]
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -574,11 +579,15 @@ input AttributeSetUpdateInput {
 }
 
 input CreateListingDto {
+  ownership: String!
   selling_type: String!
+  power_of_attorney: String
+  listing_type: String! = "property"
   renting_option: String!
   property_number: String!
   deed_number: String!
   district_city: String!
+  country: String
   property_size: String!
   publication_date: String!
   number_of_rooms: String!
@@ -586,6 +595,7 @@ input CreateListingDto {
   number_of_bedrooms: String!
   media_type: String
   object_name: String
+  amenities: [String!]
 }
 
 input CreateIssueCategoryInput {

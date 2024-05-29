@@ -14,13 +14,27 @@ import {
 import BaseEntity from './base.entity';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { User } from './user.entity';
+import { ListingType } from './listing-type.entity';
+import { IsArray, IsEnum, IsIn } from 'class-validator';
 
 @Entity()
 @ObjectType()
 export class Listing extends BaseEntity {
   @Column()
   @Field()
+  ownership: string;
+
+  @Column()
+  @Field()
   selling_type: string;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  power_of_attorney: string;
+
+  @Field({ defaultValue: 'property' })
+  @Column({ default: 'property' })
+  listing_type: string;
 
   @Column()
   @Field()
@@ -37,6 +51,10 @@ export class Listing extends BaseEntity {
   @Column()
   @Field()
   district_city: string;
+
+  @Field()
+  @Column({ nullable: true })
+  country: string;
 
   @Column()
   @Field()
@@ -74,6 +92,10 @@ export class Listing extends BaseEntity {
   @Column()
   @Field()
   user_id: string;
+
+  @Field(() => [String], { nullable: true })
+  @Column('simple-array', { nullable: true })
+  amenities: string[];
 
   @Field()
   @CreateDateColumn()
