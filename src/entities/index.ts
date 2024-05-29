@@ -21,3 +21,5 @@ export * from './notification-preference.entity';
 export * from './review.entity';
 export * from './notification-scopes.entity';
 export * from './role-permission.entity';
+export * from './listing.entity';
+export * from './city.entity';
