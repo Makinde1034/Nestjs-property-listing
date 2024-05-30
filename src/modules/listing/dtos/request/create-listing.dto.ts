@@ -18,7 +18,7 @@ import {
   Ownership,
   RentingOption,
   SellingType,
-} from '../../../common/enums';
+} from '../../../../common/enums';
 
 @InputType()
 export class CreateListingDto {

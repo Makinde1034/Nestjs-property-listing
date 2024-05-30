@@ -1,6 +1,6 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
-
+npm run lint
 echo '🏗️👷 Styling, testing and building your project before committing'
 
 npx lint-staged ||

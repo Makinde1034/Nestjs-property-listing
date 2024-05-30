@@ -5,9 +5,9 @@ definitions:
     postgres:
       image: postgres:latest
       environment:
-        POSTGRES_DB: 'waseet'
-        POSTGRES_USER: 'waseet'
-        POSTGRES_PASSWORD: 'darkNight'
+        POSTGRES_DB: ${POSTGRES_DB}
+        POSTGRES_USER: ${POSTGRES_USER}
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
   caches:
     npm: node_modules
     sonar: ~/.sonar
@@ -52,7 +52,8 @@ definitions:
         services:
           - postgres
         script:
-          - export DATABASE_URL=postgres://waseet:darkNight@localhost:5432/waseet
+          - export DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+
           - npm ci
           - npm run migration:run
           - npm run seed
@@ -78,16 +79,16 @@ definitions:
               SONAR_HOST_URL: ${SONAR_HOST_URL}
               SONAR_TOKEN: ${SONAR_TOKEN}
     - step: &push-to-dockerhub
-          name: Build and Push to Docker Hub
-          runs-on:
+        name: Build and Push to Docker Hub
+        runs-on:
           - self.hosted
           - linux
-          services:
-            - docker
-          script:
-            - echo $DOCKERHUB_PASSWORD | docker login --username $DOCKERHUB_USERNAME --password-stdin
-            - docker build -f Dockerfile -t $DOCKERHUB_USERNAME/$DOCKERHUB_REPO:$BITBUCKET_COMMIT .
-            - docker push $DOCKERHUB_USERNAME/$DOCKERHUB_REPO:$BITBUCKET_COMMIT
+        services:
+          - docker
+        script:
+          - echo $DOCKERHUB_PASSWORD | docker login --username $DOCKERHUB_USERNAME --password-stdin
+          - docker build -f Dockerfile -t $DOCKERHUB_USERNAME/$DOCKERHUB_REPO:$BITBUCKET_COMMIT .
+          - docker push $DOCKERHUB_USERNAME/$DOCKERHUB_REPO:$BITBUCKET_COMMIT
     - step: &deploy-to-test
         name: Deploy to CapRover
         deployment: test
@@ -100,9 +101,6 @@ definitions:
         script:
           - docker run caprover/cli-caprover:v2.1.1 caprover deploy --caproverUrl $CAPROVER_URL  --caproverPassword $CAPROVER_PASSWORD --caproverApp $CAPROVER_APP --imageName "$DOCKERHUB_USERNAME/$DOCKERHUB_REPO:$BITBUCKET_COMMIT"
 
-
-  
-
 clone:
   depth: full
 
@@ -111,11 +109,11 @@ pipelines:
     '**':
       - step: *code-lint
       - step: *build
-      - step: *sonar-analysis   
+      - step: *sonar-analysis
       - step: *validate-db
       - step: *security-checks
       - step: *owasp-dependency-check
-        
+
   branches:
     develop:
       - step: *push-to-dockerhub

@@ -241,49 +241,55 @@ export class UserService {
    * @returns {Promise<User>}
    */
   async updateProfile(user: User, data: UserProfileInput): Promise<User> {
-    if (data?.nationalIdentity?.dateOfExpiry) {
-      const isExpired = isPast(new Date(data.nationalIdentity.dateOfExpiry));
-      if (isExpired) {
-        throw new BadRequestException(AppStrings.EXPIRED_NATIONAL_ID);
-      }
+    const { nationalIdentity } = data;
+
+    // Check if the national identity has expired
+    if (
+      nationalIdentity?.dateOfExpiry &&
+      isPast(new Date(nationalIdentity.dateOfExpiry))
+    ) {
+      throw new BadRequestException(AppStrings.EXPIRED_NATIONAL_ID);
     }
-    const userData = await this.usersRepository.findById(user.id, [
-      'nationalIdentity',
-    ]);
-    if (data.nationalIdentity) {
-      const { type, identityNumber } = data.nationalIdentity;
-      if (
+
+    // Validate the national identity if provided
+    if (nationalIdentity) {
+      const { type, identityNumber } = nationalIdentity;
+      const isInvalidIdentityNumber =
         (type === NationalIdentityType.IQAMA &&
           !identityNumber.startsWith('2')) ||
-        identityNumber.length !== 10
-      ) {
-        throw new BadRequestException(AppStrings.INVALID_NATIONAL_ID);
-      } else if (
         (type === NationalIdentityType.NATIONAL_ID &&
           !identityNumber.startsWith('1')) ||
-        identityNumber.length !== 10
-      ) {
+        identityNumber.length !== 10;
+
+      if (isInvalidIdentityNumber) {
         throw new BadRequestException(AppStrings.INVALID_NATIONAL_ID);
       }
+
+      const userData = await this.usersRepository.findById(user.id, [
+        'nationalIdentity',
+      ]);
+
       if (userData.nationalIdentity) {
         await this.nationalIdentityRepository.update(
           userData.nationalIdentity.id,
-          { ...data.nationalIdentity },
+          { ...nationalIdentity },
         );
       } else {
         await this.nationalIdentityRepository.create({
-          ...data.nationalIdentity,
+          ...nationalIdentity,
           user,
         });
       }
+
+      // Remove nationalIdentity from data to prevent updating it in the user table
       delete data.nationalIdentity;
     }
 
-    const updateData = {
-      ...data,
-    } as Partial<User>;
-    const update = await this.usersRepository.update(user.id, updateData);
-    return update;
+    const updateData = { ...data } as Partial<User>;
+    await this.usersRepository.update(user.id, updateData);
+
+    // Return the updated user
+    return this.usersRepository.findById(user.id);
   }
 
   /**
