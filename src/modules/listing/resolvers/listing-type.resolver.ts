@@ -11,7 +11,7 @@ import {
   ListingTypeInput,
   ListingTypeUpdateInput,
   ListingTypeDeleteInput,
-} from '../dtos';
+} from '../dtos/request';
 import { ListingType } from '../../../entities';
 import { Permissions } from 'src/common/decorator/permission';
 

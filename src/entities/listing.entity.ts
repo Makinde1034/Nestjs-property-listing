@@ -14,6 +14,7 @@ import {
 import BaseEntity from './base.entity';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { User } from './user.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 @ObjectType()
@@ -44,6 +45,7 @@ export class Listing extends BaseEntity {
 
   @Column()
   @Field()
+  @Exclude()
   deed_number: string;
 
   @Column()
@@ -60,6 +62,7 @@ export class Listing extends BaseEntity {
 
   @Column()
   @Field()
+  @Exclude()
   publication_date: string;
 
   @Column()
@@ -97,9 +100,9 @@ export class Listing extends BaseEntity {
 
   @Field()
   @CreateDateColumn()
-  createdAt: Date;
+  created_at: Date;
 
   @Field()
   @UpdateDateColumn()
-  updatedAt: Date;
+  updated_at: Date;
 }

@@ -3,13 +3,15 @@
  * For license. See license.txt
  */
 
-import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ListingService } from '../services/listing.service';
-import { CreateListingDto } from '../dtos/create-listing.dto';
+import { CreateListingDto } from '../dtos/request/create-listing.dto';
 
 import { Listing } from '../../../entities';
 import { UseGuards } from '@nestjs/common';
 import { AccessTokenGuard } from '../../auth/guards';
+import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
+import { ListingResponse } from '../dtos/response/listing.response';
 
 @Resolver()
 export class ListingResolver {
@@ -24,5 +26,21 @@ export class ListingResolver {
       ctx.req.user,
       createListingDto,
     );
+  }
+  @UseGuards(AccessTokenGuard)
+  @Query(() => ListingResponse, { name: 'findListingForBuyer' })
+  async findListingForBuyer(
+    @Args('findManyOptions', { nullable: true })
+    findManyOptions?: PaginateAndSort,
+  ) {
+    const [listing, total] =
+      await this.listingService.findAllListingForBuyer(findManyOptions);
+
+    return { listing, total };
+  }
+  @UseGuards(AccessTokenGuard)
+  @Query(() => Listing, { name: 'findOneForBuyer' })
+  async findOneForBuyer(@Args('id') id: string) {
+    return await this.listingService.findOneListingForBuyer(id);
   }
 }

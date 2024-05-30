@@ -12,7 +12,7 @@ import {
   AttributeInput,
   AttributeSetUpdateInput,
   AttributeUpdateInput,
-} from '../dtos';
+} from '../dtos/request';
 import { Attribute, AttributeSet } from '../../../entities';
 import { AttributeService } from '../services';
 import { Permissions } from 'src/common/decorator/permission';

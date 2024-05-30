@@ -120,16 +120,18 @@ export default abstract class BaseRepository<T> extends Repository<T> {
     const searchQuery = this.addSearchQuery(query.search, query.searchFields);
 
     queryBuilder.select = this.safeParse(query.fields);
-    queryBuilder.where = [this.safeParse(query.query)] || [];
+    queryBuilder.where = query.query ? [this.safeParse(query.query)] : [];
     queryBuilder.take = query.limit;
     queryBuilder.relations = this.addPopulation(query.populate);
-    queryBuilder.skip = ((query.page || 1) - 1) * query.limit || 0;
+    queryBuilder.skip = query.limit ? ((query.page || 1) - 1) * query.limit : 0;
     queryBuilder.order = this.addOrderBy(query.sort);
     queryBuilder.withDeleted = query.withDeleted;
 
     // Add the search query to the query builder
-    searchQuery &&
-      (queryBuilder.where = queryBuilder.where.concat(searchQuery));
+    if (searchQuery) {
+      queryBuilder.where = [...queryBuilder.where, ...searchQuery];
+    }
+
     return queryBuilder;
   }
 

@@ -4,13 +4,14 @@
  */
 
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { AppStrings } from '../messages/app.strings';
+import { AppStrings } from 'src/common/messages/app.strings';
 /**
  * Getting difference between two dates.
  * @param date2 string | Date
  * @param date1 string | Date
  * @returns
  */
+
 export const timeDifferenceInMillSecs = (
   date2: string | Date,
   date1: string | Date,
@@ -35,13 +36,17 @@ export const stringToJson = (object: any) => {
   }
 };
 
-export const parseObjectValues = (object: any) => {
-  try {
-    Object.keys(object).forEach(
-      (key: any) => (object[key] = stringToJson(object[key])),
-    );
-    return object;
-  } catch (err) {
-    return object;
+export const parseObjectValues = (
+  object: Record<string, any>,
+): Record<string, any> => {
+  if (object && typeof object === 'object') {
+    try {
+      Object.entries(object).forEach(([key, value]) => {
+        object[key] = stringToJson(value);
+      });
+    } catch (err) {
+      throw new HttpException('Error parsing object values:', err);
+    }
   }
+  return object;
 };

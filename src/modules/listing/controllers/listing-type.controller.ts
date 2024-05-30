@@ -21,7 +21,7 @@ import {
   AttributeUpdateInput,
   ListingTypeInput,
   ListingTypeUpdateInput,
-} from '../dtos';
+} from '../dtos/request';
 import { ListingType, Attribute } from 'src/entities';
 
 @Controller('api/listing-type')
