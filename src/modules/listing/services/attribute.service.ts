@@ -13,7 +13,7 @@ import {
   AttributeSetUpdateInput,
   AttributeUpdateInput,
   AttributeDeleteInput,
-} from '../dtos';
+} from '../dtos/request';
 import { In } from 'typeorm';
 import { AppStrings } from 'src/common/messages/app.strings';
 import { StorageService } from '../../storage/storage.service';
