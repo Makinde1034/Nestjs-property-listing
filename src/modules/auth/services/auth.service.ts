@@ -217,15 +217,13 @@ export class AuthService {
   }
 
   validateApp(user: User, app: AppDetail) {
-    if (
-      (user.userType === 'admin' || user.userType === 'staff') &&
-      app !== AppDetail.ADMIN
-    ) {
-      throw new UnauthorizedException();
-    } else if (
-      (user.userType === 'individual' || user.userType === 'company') &&
-      app !== AppDetail.CUSTOMER
-    ) {
+    const isUnauthorized =
+      ((user.userType === 'admin' || user.userType === 'staff') &&
+        app !== AppDetail.ADMIN) ||
+      ((user.userType === 'individual' || user.userType === 'company') &&
+        app !== AppDetail.CUSTOMER);
+
+    if (isUnauthorized) {
       throw new UnauthorizedException();
     }
   }

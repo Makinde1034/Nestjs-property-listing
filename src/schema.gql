@@ -108,8 +108,8 @@ type Listing {
   user: User
   userId: String!
   amenities: [String!]
-  createdAt: DateTime!
-  updatedAt: DateTime!
+  created_at: DateTime!
+  updated_at: DateTime!
 }
 
 type User {
@@ -282,6 +282,11 @@ type SuccessResponse {
   message: String!
 }
 
+type ListingResponse {
+  listing: [Listing!]!
+  total: Int!
+}
+
 type ReviewResponse {
   reviews: [Review!]!
   total: Int!
@@ -304,6 +309,8 @@ type Query {
   fetchListingTypes: [ListingType!]!
   fetchAttributes: [Attribute!]!
   fetchAttributeSets: [AttributeSet!]!
+  findListingForBuyer(findManyOptions: PaginateAndSort): ListingResponse!
+  findOneForBuyer(id: String!): Listing!
   fetchIssueCategories: [IssueCategory!]!
   fetchIssues: [Issue!]!
   getTicket(ticketId: String!): Ticket!
@@ -311,6 +318,13 @@ type Query {
   findOne(id: String!): Review!
   findManyReviews(findMayOptions: FindManyReviewDto): ReviewResponse!
   findCities(findCities: PaginateAndSort): CityResponse!
+}
+
+input PaginateAndSort {
+  take: Float
+  skip: Float
+  sortField: String!
+  direction_to_sort: String!
 }
 
 input ListTicketInput {
@@ -331,13 +345,6 @@ input WhereCondition {
 
 enum ServicesOffered {
   LISTING
-}
-
-input PaginateAndSort {
-  take: Float
-  skip: Float
-  sortField: String!
-  direction_to_sort: String!
 }
 
 type Mutation {
