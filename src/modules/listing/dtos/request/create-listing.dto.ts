@@ -13,6 +13,7 @@ import {
   IsUUID,
   ValidateIf,
 } from 'class-validator';
+
 import { Ownership, Purpose, RentingOption } from '../../../../common/enums';
 import { ListingType } from '../../../../entities';
 
