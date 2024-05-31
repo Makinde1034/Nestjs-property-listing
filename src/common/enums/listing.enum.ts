@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-export enum SellingType {
+export enum Purpose {
   RENT = 'rent',
   SALE = 'sale',
 }
