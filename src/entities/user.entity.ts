@@ -11,6 +11,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
   OneToMany,
@@ -116,6 +117,7 @@ export class User extends BaseEntity {
   reviewer: Review[];
 
   @Field(() => [Listing], { nullable: true })
+  @JoinColumn({ name: 'listingId' })
   @OneToMany(() => Listing, (listing) => listing.user, { cascade: true })
   listing: Listing[];
 
@@ -126,6 +128,7 @@ export class User extends BaseEntity {
   @Field(() => [Offer], { nullable: true })
   @OneToMany(() => Offer, (offer) => offer.user, { cascade: true })
   offer: Offer[];
+
   @Field({ nullable: true, defaultValue: UserStatus.PENDING })
   @Column({ nullable: true, default: UserStatus.PENDING })
   status: UserStatus;

@@ -86,6 +86,23 @@ type Review {
   updated_at: DateTime!
 }
 
+type Offer {
+  id: ID!
+  offerPrice: Float!
+  expireAt: DateTime!
+  acceptedAt: DateTime!
+  status: String!
+  coupon: Boolean!
+  couponCode: String!
+  user: User!
+  listing: Listing!
+  userId: String!
+  listingId: String!
+  createdAt: String!
+  deletedAt: String!
+  updatedAt: String!
+}
+
 type Listing {
   id: ID!
   ownership: String!
@@ -106,24 +123,11 @@ type Listing {
   mediaType: String
   objectName: [String!]
   user: User
+  offer: [Offer!]
   userId: String!
   amenities: [String!]
   createdAt: DateTime!
   updatedAt: DateTime!
-}
-
-type Offer {
-  id: ID!
-  offerPrice: Float!
-  expireAt: DateTime!
-  acceptedAt: DateTime!
-  status: String!
-  coupon: Boolean!
-  couponCode: String!
-  user: User!
-  createdAt: String!
-  deletedAt: String!
-  updatedAt: String!
 }
 
 type User {

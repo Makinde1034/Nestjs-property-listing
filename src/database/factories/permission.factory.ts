@@ -5,6 +5,7 @@
 
 export const permissionFactory = [
   {
+    id: 1,
     permissionGroup: 'Users',
     description: null,
     name: 'Create User',
@@ -16,6 +17,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 2,
     permissionGroup: 'Users',
     description: null,
     name: 'Read User',
@@ -27,6 +29,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 3,
     permissionGroup: 'Users',
     description: null,
     name: 'Update User',
@@ -38,6 +41,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 4,
     permissionGroup: 'Users',
     description: null,
     name: 'Delete User',
@@ -49,6 +53,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 5,
     permissionGroup: 'Users',
     description: null,
     name: 'Export User',
@@ -60,6 +65,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 6,
     permissionGroup: 'Users',
     description: null,
     name: 'Audit User',
@@ -71,6 +77,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 7,
     permissionGroup: 'Roles',
     description: null,
     name: 'Create role',
@@ -82,6 +89,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 8,
     permissionGroup: 'Roles',
     description: null,
     name: 'Read role',
@@ -93,6 +101,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 9,
     permissionGroup: 'Roles',
     description: null,
     name: 'Update role',
@@ -104,6 +113,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 10,
     permissionGroup: 'Roles',
     description: null,
     name: 'Delete role',
@@ -115,6 +125,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 11,
     permissionGroup: 'Roles',
     description: null,
     name: 'Export role',
@@ -126,6 +137,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 12,
     permissionGroup: 'Roles',
     description: null,
     name: 'Audit role',
@@ -137,6 +149,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 13,
     permissionGroup: 'Listing Type',
     description: null,
     name: 'Create Listing Type',
@@ -148,6 +161,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 14,
     permissionGroup: 'Listing Type',
     description: null,
     name: 'Read Listing Type',
@@ -159,6 +173,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 15,
     permissionGroup: 'Listing Type',
     description: null,
     name: 'Update Listing Type',
@@ -170,6 +185,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 16,
     permissionGroup: 'Listing Type',
     description: null,
     name: 'Delete Listing Type',
@@ -181,6 +197,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 17,
     permissionGroup: 'Listing Type',
     description: null,
     name: 'Export Listing Type',
@@ -192,6 +209,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 18,
     permissionGroup: 'Listing Type',
     description: null,
     name: 'Audit Listing Type',
@@ -203,6 +221,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 19,
     permissionGroup: 'Attribute Sets',
     description: null,
     name: 'Create Attribute Set',
@@ -214,6 +233,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 20,
     permissionGroup: 'Attribute Sets',
     description: null,
     name: 'Read Attribute Sets',
@@ -225,6 +245,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 21,
     permissionGroup: 'Attribute Sets',
     description: null,
     name: 'Update Attribute Sets',
@@ -236,6 +257,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 22,
     permissionGroup: 'Attribute Sets',
     description: null,
     name: 'Delete Attribute Sets',
@@ -247,6 +269,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 23,
     permissionGroup: 'Attribute Sets',
     description: null,
     name: 'Export Attribute Sets',
@@ -258,6 +281,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 24,
     permissionGroup: 'Attribute Sets',
     description: null,
     name: 'Audit Attribute Sets',
@@ -269,6 +293,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 25,
     permissionGroup: 'Dashboard',
     description: null,
     name: 'Create dashboard',
@@ -280,6 +305,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 26,
     permissionGroup: 'Dashboard',
     description: null,
     name: 'Read dashboard',
@@ -291,6 +317,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 27,
     permissionGroup: 'Dashboard',
     description: null,
     name: 'Update dashboard',
@@ -302,6 +329,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 28,
     permissionGroup: 'Dashboard',
     description: null,
     name: 'Delete dashboard',
@@ -313,6 +341,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 29,
     permissionGroup: 'Dashboard',
     description: null,
     name: 'Export dashboard',
@@ -324,6 +353,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 30,
     permissionGroup: 'Dashboard',
     description: null,
     name: 'Audit dashboard',
@@ -335,6 +365,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 31,
     permissionGroup: 'CMS',
     description: null,
     name: 'Create CMS',
@@ -346,6 +377,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 32,
     permissionGroup: 'CMS',
     description: null,
     name: 'Read CMS',
@@ -357,6 +389,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 33,
     permissionGroup: 'CMS',
     description: null,
     name: 'Update CMS',
@@ -368,6 +401,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 34,
     permissionGroup: 'CMS',
     description: null,
     name: 'Delete CMS',
@@ -379,6 +413,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 35,
     permissionGroup: 'CMS',
     description: null,
     name: 'Export CMS',
@@ -390,6 +425,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 36,
     permissionGroup: 'CMS',
     description: null,
     name: 'Audit CMS',
@@ -401,6 +437,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 37,
     permissionGroup: 'CMS Categories',
     description: null,
     name: 'Create CMS Categories',
@@ -412,6 +449,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 38,
     permissionGroup: 'CMS Categories',
     description: null,
     name: 'Read CMS Categories',
@@ -423,6 +461,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 39,
     permissionGroup: 'CMS Categories',
     description: null,
     name: 'Update CMS Categories',
@@ -434,6 +473,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 40,
     permissionGroup: 'CMS Categories',
     description: null,
     name: 'Delete CMS Categories',
@@ -445,6 +485,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 41,
     permissionGroup: 'CMS Categories',
     description: null,
     name: 'Export CMS Categories',
@@ -456,6 +497,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 42,
     permissionGroup: 'CMS Categories',
     description: null,
     name: 'Audit CMS Categories',
@@ -467,6 +509,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 43,
     permissionGroup: 'Listings',
     description: null,
     name: 'Create Listing',
@@ -478,6 +521,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 44,
     permissionGroup: 'Listings',
     description: null,
     name: 'Read Listing',
@@ -489,6 +533,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 45,
     permissionGroup: 'Listings',
     description: null,
     name: 'Update Listing',
@@ -500,6 +545,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 46,
     permissionGroup: 'Listings',
     description: null,
     name: 'Delete Listing',
@@ -511,6 +557,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 47,
     permissionGroup: 'Listings',
     description: null,
     name: 'Export Listing',
@@ -522,6 +569,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 48,
     permissionGroup: 'Listings',
     description: null,
     name: 'Audit Listing',
@@ -533,6 +581,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 49,
     permissionGroup: 'Services',
     description: null,
     name: 'Create Service',
@@ -544,6 +593,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 50,
     permissionGroup: 'Services',
     description: null,
     name: 'Read Service',
@@ -555,6 +605,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 51,
     permissionGroup: 'Services',
     description: null,
     name: 'Update Service',
@@ -566,6 +617,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 52,
     permissionGroup: 'Services',
     description: null,
     name: 'Delete Service',
@@ -577,6 +629,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 53,
     permissionGroup: 'Services',
     description: null,
     name: 'Export Service',
@@ -588,6 +641,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 54,
     permissionGroup: 'Services',
     description: null,
     name: 'Audit Service',
@@ -599,6 +653,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 55,
     permissionGroup: 'Reviews',
     description: null,
     name: 'Create Review',
@@ -610,6 +665,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 56,
     permissionGroup: 'Reviews',
     description: null,
     name: 'Read Review',
@@ -621,6 +677,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 57,
     permissionGroup: 'Reviews',
     description: null,
     name: 'Update Review',
@@ -632,6 +689,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 58,
     permissionGroup: 'Reviews',
     description: null,
     name: 'Delete Review',
@@ -643,6 +701,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 59,
     permissionGroup: 'Reviews',
     description: null,
     name: 'Export Review',
@@ -654,6 +713,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 60,
     permissionGroup: 'Reviews',
     description: null,
     name: 'Audit Review',
@@ -665,6 +725,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 61,
     permissionGroup: 'Auctions',
     description: null,
     name: 'Create Auction',
@@ -676,6 +737,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 62,
     permissionGroup: 'Auctions',
     description: null,
     name: 'Read Auction',
@@ -687,6 +749,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 63,
     permissionGroup: 'Auctions',
     description: null,
     name: 'Update Auction',
@@ -698,6 +761,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 64,
     permissionGroup: 'Auctions',
     description: null,
     name: 'Delete Auction',
@@ -709,6 +773,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 65,
     permissionGroup: 'Auctions',
     description: null,
     name: 'Export Auction',
@@ -720,6 +785,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 66,
     permissionGroup: 'Auctions',
     description: null,
     name: 'Audit Auction',
@@ -731,6 +797,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 67,
     permissionGroup: 'Issues Categories',
     description: null,
     name: 'Create Issues Categories',
@@ -742,6 +809,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 68,
     permissionGroup: 'Issues Categories',
     description: null,
     name: 'Read Issues Categories',
@@ -753,6 +821,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 69,
     permissionGroup: 'Issues Categories',
     description: null,
     name: 'Update Issues Categories',
@@ -764,6 +833,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 70,
     permissionGroup: 'Issues Categories',
     description: null,
     name: 'Delete Issues Categories',
@@ -775,6 +845,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 71,
     permissionGroup: 'Issues Categories',
     description: null,
     name: 'Export Issues Categories',
@@ -786,6 +857,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 72,
     permissionGroup: 'Issues Categories',
     description: null,
     name: 'Audit Issues Categories',
@@ -797,6 +869,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 73,
     permissionGroup: 'Support Tickets',
     description: null,
     name: 'Create Support Tickets',
@@ -808,6 +881,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 74,
     permissionGroup: 'Support Tickets',
     description: null,
     name: 'Read Support Tickets',
@@ -819,6 +893,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 75,
     permissionGroup: 'Support Tickets',
     description: null,
     name: 'Update Support Tickets',
@@ -830,6 +905,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 76,
     permissionGroup: 'Support Tickets',
     description: null,
     name: 'Delete Support Tickets',
@@ -841,6 +917,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 77,
     permissionGroup: 'Support Tickets',
     description: null,
     name: 'Export Support Tickets',
@@ -852,6 +929,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 78,
     permissionGroup: 'Support Tickets',
     description: null,
     name: 'Audit Support Tickets',
@@ -863,6 +941,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 79,
     permissionGroup: 'Listing Type & Attributes',
     description: 'View Listing Types',
     name: 'View Listing Types',
@@ -874,6 +953,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 80,
     permissionGroup: 'Listing Type & Attributes',
     description: 'View Attributes',
     name: 'View Attributes',
@@ -885,6 +965,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 81,
     permissionGroup: 'Listing Type & Attributes',
     description: 'Create Listing Types',
     name: 'Create Listing Types',
@@ -896,6 +977,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 82,
     permissionGroup: 'Listing Type & Attributes',
     description: 'Create Attributes',
     name: 'Create Attributes',
@@ -907,6 +989,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 82,
     permissionGroup: 'Listing Type & Attributes',
     description: 'Edit Listing Types',
     name: 'Edit Listing Types',
@@ -918,6 +1001,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 83,
     permissionGroup: 'Listing Type & Attributes',
     description: 'Edit Attributes',
     name: 'Edit Attributes',
@@ -929,6 +1013,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 84,
     permissionGroup: 'Listing Type & Attributes',
     description: 'Delete Listing Types',
     name: 'Delete Listing Types',
@@ -940,6 +1025,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 85,
     permissionGroup: 'Listing Type & Attributes',
     description: 'Delete Attributes',
     name: 'Delete Attributes',
@@ -951,6 +1037,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 86,
     permissionGroup: 'Listing Type & Attributes',
     description: 'Export Listing Types',
     name: 'Export Listing Types',
@@ -962,6 +1049,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 87,
     permissionGroup: 'Listing Type & Attributes',
     description: 'Export Attributes',
     name: 'Export Attributes',
@@ -973,6 +1061,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 88,
     permissionGroup: 'Listing Type & Attributes',
     description: 'View Listing Types Audit Trail',
     name: 'View Listing Types Audit Trail',
@@ -984,6 +1073,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
+    id: 89,
     permissionGroup: 'Listing Type & Attributes',
     description: 'View Atrributes Audit Trail',
     name: 'View Atrributes Audit Trail',

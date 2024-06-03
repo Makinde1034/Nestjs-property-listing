@@ -52,7 +52,10 @@ export class ListingResolver {
 
   @UseGuards(AccessTokenGuard)
   @Mutation(() => Offer, { name: 'createOffer' })
-  async createOffer(@Args('createOfferDto') createOfferDto: CreateOfferDto) {
-    return await this.offerService.createAnOffer(createOfferDto);
+  async createOffer(
+    @Args('createOfferDto') createOfferDto: CreateOfferDto,
+    @Context() ctx: any,
+  ) {
+    return await this.offerService.createAnOffer(createOfferDto, ctx.req.user);
   }
 }
