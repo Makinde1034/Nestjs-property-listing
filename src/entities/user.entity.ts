@@ -30,6 +30,7 @@ import { UserNotificationPreference } from './notification-preference.entity';
 import { Review } from './review.entity';
 import { loadUserName } from 'src/common/utils/class-loader';
 import { Listing } from './listing.entity';
+import { Offer } from './offer.entity';
 
 @Entity()
 @ObjectType()
@@ -122,6 +123,9 @@ export class User extends BaseEntity {
   @OneToMany(() => Review, (review) => review.service_owner, { cascade: true })
   service_owner: Review[];
 
+  @Field(() => [Offer], { nullable: true })
+  @OneToMany(() => Offer, (offer) => offer.user, { cascade: true })
+  offer: Offer[];
   @Field({ nullable: true, defaultValue: UserStatus.PENDING })
   @Column({ nullable: true, default: UserStatus.PENDING })
   status: UserStatus;

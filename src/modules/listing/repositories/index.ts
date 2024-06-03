@@ -6,3 +6,4 @@
 export * from './attribute.repository';
 export * from './attribute-set.repository';
 export * from './listing-type.repository';
+export * from './offer.repository';
