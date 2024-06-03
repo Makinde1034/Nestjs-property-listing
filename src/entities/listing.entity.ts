@@ -23,34 +23,38 @@ export class Listing extends BaseEntity {
   @Field()
   ownership: string;
 
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  name: string;
+
   @Column()
   @Field()
-  selling_type: string;
+  sellingType: string;
 
   @Field({ nullable: true })
   @Column({ nullable: true })
-  power_of_attorney: string;
+  powerOfAttorney: string;
 
   @Field({ defaultValue: 'property' })
   @Column({ default: 'property' })
-  listing_type: string;
+  listingType: string;
 
   @Column()
   @Field()
-  renting_option: string;
+  rentingOption: string;
 
   @Column()
   @Field()
-  property_number: string;
+  propertyNumber: string;
 
   @Column()
   @Field()
   @Exclude()
-  deed_number: string;
+  deedNumber: string;
 
   @Column()
   @Field()
-  district_city: string;
+  districtCity: string;
 
   @Field()
   @Column({ nullable: true })
@@ -58,41 +62,41 @@ export class Listing extends BaseEntity {
 
   @Column()
   @Field()
-  property_size: string;
+  propertySize: string;
+
+  @Column()
+  @Field()
+  price: string;
 
   @Column()
   @Field()
   @Exclude()
-  publication_date: string;
+  publicationDate: string;
 
   @Column()
   @Field()
-  number_of_rooms: string;
+  numberOfBathrooms: string;
 
   @Column()
   @Field()
-  number_of_bathrooms: string;
-
-  @Column()
-  @Field()
-  number_of_bedrooms: string;
+  numberOfBedrooms: string;
 
   @Column({ nullable: true })
   @Field({ nullable: true })
-  media_type: string;
+  mediaType: string;
 
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  object_name: string;
+  @Field(() => [String], { nullable: true })
+  @Column('simple-array', { nullable: true })
+  objectName: string[];
 
   @Field(() => User, { nullable: true })
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'userId' })
   @ManyToOne(() => User, (user) => user.reviewer)
   user: User;
 
   @Column()
   @Field()
-  user_id: string;
+  userId: string;
 
   @Field(() => [String], { nullable: true })
   @Column('simple-array', { nullable: true })

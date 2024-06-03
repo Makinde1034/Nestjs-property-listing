@@ -21,7 +21,7 @@ export class ListingService {
   logger = new Logger(ListingService.name);
   async createListing(user: User, createListingDto: CreateListingDto) {
     try {
-      createListingDto.user_id = user.id;
+      createListingDto.userId = user.id;
       const listing = await this.listingRepository.create(createListingDto);
 
       return listing;

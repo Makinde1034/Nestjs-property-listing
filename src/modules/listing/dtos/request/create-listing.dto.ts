@@ -13,15 +13,16 @@ import {
   IsUUID,
   ValidateIf,
 } from 'class-validator';
-import {
-  ListingType,
-  Ownership,
-  RentingOption,
-  SellingType,
-} from '../../../../common/enums';
+
+import { Ownership, Purpose, RentingOption } from '../../../../common/enums';
+import { ListingType } from '../../../../entities';
 
 @InputType()
 export class CreateListingDto {
+  @Field()
+  @IsString()
+  name: string;
+
   @Field()
   @IsString()
   @IsEnum(Ownership)
@@ -29,38 +30,38 @@ export class CreateListingDto {
 
   @Field()
   @IsString()
-  @IsEnum(SellingType)
-  selling_type: string;
+  @IsEnum(Purpose)
+  sellingType: string;
 
   @Field({ nullable: true })
   @ValidateIf((o) => o.ownership == Ownership.NOT_OWNER)
   @IsNotEmpty({
-    message: 'power_of_attorney is required for none owners of property',
+    message: 'power0fAttorney is required for none owners of property',
   })
   @IsString()
-  power_of_attorney: string;
+  powerOfAttorney: string;
 
   @Field({ defaultValue: 'property' })
   @IsString()
   @IsEnum(ListingType)
-  listing_type: string;
+  listingType: string;
 
   @Field()
   @IsString()
   @IsEnum(RentingOption)
-  renting_option: string;
+  rentingOption: string;
 
   @Field()
   @IsString()
-  property_number: string;
+  propertyNumber: string;
 
   @Field()
   @IsString()
-  deed_number: string;
+  deedNumber: string;
 
   @Field()
   @IsString()
-  district_city: string;
+  districtCity: string;
 
   @Field({ nullable: true })
   @IsOptional()
@@ -70,33 +71,34 @@ export class CreateListingDto {
 
   @Field()
   @IsString()
-  property_size: string;
+  propertySize: string;
 
   @Field()
   @IsString()
-  publication_date: string;
+  publicationDate: string;
 
   @Field()
   @IsString()
-  number_of_rooms: string;
+  @IsNotEmpty()
+  price: string;
 
   @Field()
   @IsString()
-  number_of_bathrooms: string;
+  numberOfBathrooms: string;
 
   @Field()
   @IsString()
-  number_of_bedrooms: string;
+  numberOfBedrooms: string;
 
-  user_id?: string;
+  userId?: string;
 
-  @Field({ nullable: true })
+  @Field({ defaultValue: 'image', nullable: true })
   @IsOptional()
-  media_type: string;
+  mediaType: string;
 
-  @Field({ nullable: true })
+  @Field(() => [String], { nullable: true })
   @IsOptional()
-  object_name: string;
+  objectName: string[];
 
   @IsOptional()
   @IsArray()

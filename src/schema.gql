@@ -89,23 +89,24 @@ type Review {
 type Listing {
   id: ID!
   ownership: String!
-  selling_type: String!
-  power_of_attorney: String
-  listing_type: String!
-  renting_option: String!
-  property_number: String!
-  deed_number: String!
-  district_city: String!
+  name: String
+  sellingType: String!
+  powerOfAttorney: String
+  listingType: String!
+  rentingOption: String!
+  propertyNumber: String!
+  deedNumber: String!
+  districtCity: String!
   country: String!
-  property_size: String!
-  publication_date: String!
-  number_of_rooms: String!
-  number_of_bathrooms: String!
-  number_of_bedrooms: String!
-  media_type: String
-  object_name: String
+  propertySize: String!
+  price: String!
+  publicationDate: String!
+  numberOfBathrooms: String!
+  numberOfBedrooms: String!
+  mediaType: String
+  objectName: [String!]
   user: User
-  user_id: String!
+  userId: String!
   amenities: [String!]
   created_at: DateTime!
   updated_at: DateTime!
@@ -586,22 +587,23 @@ input AttributeSetUpdateInput {
 }
 
 input CreateListingDto {
+  name: String!
   ownership: String!
-  selling_type: String!
-  power_of_attorney: String
-  listing_type: String! = "property"
-  renting_option: String!
-  property_number: String!
-  deed_number: String!
-  district_city: String!
+  sellingType: String!
+  powerOfAttorney: String
+  listingType: String! = "property"
+  rentingOption: String!
+  propertyNumber: String!
+  deedNumber: String!
+  districtCity: String!
   country: String
-  property_size: String!
-  publication_date: String!
-  number_of_rooms: String!
-  number_of_bathrooms: String!
-  number_of_bedrooms: String!
-  media_type: String
-  object_name: String
+  propertySize: String!
+  publicationDate: String!
+  price: String!
+  numberOfBathrooms: String!
+  numberOfBedrooms: String!
+  mediaType: String = "image"
+  objectName: [String!]
   amenities: [String!]
 }
 
