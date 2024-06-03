@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class CreateOfferTable1717454723764 implements MigrationInterface {
@@ -31,7 +36,7 @@ export class CreateOfferTable1717454723764 implements MigrationInterface {
         `);
 
     for (const constraint of constraints) {
-      await queryRunner.query(
+      queryRunner.query(
         `ALTER TABLE "role_permissions_permission" DROP CONSTRAINT IF EXISTS "${constraint.constraint_name}"`,
       );
     }
@@ -121,7 +126,7 @@ export class CreateOfferTable1717454723764 implements MigrationInterface {
         `);
 
     for (const constraint of constraints) {
-      await queryRunner.query(
+      queryRunner.query(
         `ALTER TABLE "role_permissions_permission" DROP CONSTRAINT IF EXISTS "${constraint.constraint_name}"`,
       );
     }
