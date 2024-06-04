@@ -109,3 +109,45 @@ export class CreateListingDto {
   @Field(() => [String], { nullable: true })
   amenities: string[];
 }
+@InputType()
+export class UpdateListingDto {
+  @Field()
+  @IsUUID()
+  id: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  propertyNumber?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  districtCity?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsNotEmpty()
+  price: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  numberOfBathrooms: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  numberOfBedrooms: string;
+
+  @Field(() => [String], { nullable: true })
+  @IsOptional()
+  objectName: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsNotEmpty()
+  @Field(() => [String], { nullable: true })
+  amenities: string[];
+}

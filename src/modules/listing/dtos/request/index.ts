@@ -5,3 +5,4 @@
 
 export * from './AttributeInput';
 export * from './ListingTypeInput';
+export * from './listing.dto';

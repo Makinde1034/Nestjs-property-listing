@@ -5,7 +5,7 @@
 
 export enum OrderBYEnum {
   RATING = 'rating',
-  CREATED_AT = 'created_at',
+  CREATED_AT = 'createdAt',
   TYPE = 'type',
-  SERVICE_OWNER = 'service_owner_id',
+  SERVICE_OWNER = 'serviceOwnerId',
 }

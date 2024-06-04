@@ -397,6 +397,7 @@ type Mutation {
   updateAttributeSet(RequestInput: AttributeSetUpdateInput!): AttributeSet!
   deleteAttributeSet(RequestInput: AttributeDeleteInput!): String!
   createListing(createListing: CreateListingDto!): Listing!
+  updateListing(updateListingDto: UpdateListingDto!): Listing!
   createOffer(createOfferDto: CreateOfferDto!): Offer!
   createIssueCategory(RequestInput: CreateIssueCategoryInput!): IssueCategory!
   updateIssueCatgeory(RequestInput: UpdateIssueCategoryInput!): IssueCategory!
@@ -623,6 +624,18 @@ input CreateListingDto {
   numberOfBathrooms: String!
   numberOfBedrooms: String!
   mediaType: String = "image"
+  objectName: [String!]
+  amenities: [String!]
+}
+
+input UpdateListingDto {
+  id: String!
+  name: String
+  propertyNumber: String
+  districtCity: String
+  price: String
+  numberOfBathrooms: String
+  numberOfBedrooms: String
   objectName: [String!]
   amenities: [String!]
 }

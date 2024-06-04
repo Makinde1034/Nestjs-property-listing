@@ -10,10 +10,14 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ListingRepository } from '../repositories/listing.repository';
-import { CreateListingDto } from '../dtos/request/create-listing.dto';
+import {
+  CreateListingDto,
+  UpdateListingDto,
+} from '../dtos/request/listing.dto';
 import { User } from '../../../entities';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { FindOptionsOrder } from 'typeorm';
+import { ForbiddenError } from '@nestjs/apollo';
 
 @Injectable()
 export class ListingService {
@@ -73,5 +77,21 @@ export class ListingService {
         throw error;
       } else throw new BadRequestException(error.messages || error.data);
     }
+  }
+
+  async updateListing(editListingDto: UpdateListingDto, user: User) {
+    const { id, ...partialUpdatePayload } = editListingDto;
+    const listing = await this.listingRepository.findById(id);
+    if (listing.userId !== user.id) {
+      throw new ForbiddenError(
+        'This user does not have the permision to update record',
+      );
+    }
+
+    const update = await this.listingRepository.update(
+      id,
+      partialUpdatePayload,
+    );
+    return update;
   }
 }
