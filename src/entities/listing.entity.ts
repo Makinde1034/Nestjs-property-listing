@@ -9,12 +9,14 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { User } from './user.entity';
 import { Exclude } from 'class-transformer';
+import { Offer } from './offer.entity';
 
 @Entity()
 @ObjectType()
@@ -94,6 +96,13 @@ export class Listing extends BaseEntity {
   @ManyToOne(() => User, (user) => user.reviewer)
   user: User;
 
+  @Field(() => [Offer], { nullable: true })
+  @OneToMany(() => Offer, (offer) => offer.listing, {
+    cascade: true,
+    eager: true,
+  })
+  offer: Offer[];
+
   @Column()
   @Field()
   userId: string;
@@ -104,9 +113,9 @@ export class Listing extends BaseEntity {
 
   @Field()
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
   @Field()
   @UpdateDateColumn()
-  updated_at: Date;
+  updatedAt: Date;
 }

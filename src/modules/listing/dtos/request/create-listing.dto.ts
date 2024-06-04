@@ -14,8 +14,12 @@ import {
   ValidateIf,
 } from 'class-validator';
 
-import { Ownership, Purpose, RentingOption } from '../../../../common/enums';
-import { ListingType } from '../../../../entities';
+import {
+  ListingType,
+  Ownership,
+  Purpose,
+  RentingOption,
+} from '../../../../common/enums';
 
 @InputType()
 export class CreateListingDto {

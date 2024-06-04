@@ -86,6 +86,23 @@ type Review {
   updated_at: DateTime!
 }
 
+type Offer {
+  id: ID!
+  offerPrice: Float!
+  expireAt: DateTime!
+  acceptedAt: DateTime!
+  status: String!
+  coupon: Boolean!
+  couponCode: String!
+  user: User!
+  listing: Listing!
+  userId: String!
+  listingId: String!
+  createdAt: String!
+  deletedAt: String!
+  updatedAt: String!
+}
+
 type Listing {
   id: ID!
   ownership: String!
@@ -106,10 +123,11 @@ type Listing {
   mediaType: String
   objectName: [String!]
   user: User
+  offer: [Offer!]
   userId: String!
   amenities: [String!]
-  created_at: DateTime!
-  updated_at: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type User {
@@ -136,6 +154,7 @@ type User {
   reviewer: [Review!]
   listing: [Listing!]
   service_owner: [Review!]
+  offer: [Offer!]
   status: String
   nationalIdentity: NationalIdentity
   company: Company
@@ -378,6 +397,7 @@ type Mutation {
   updateAttributeSet(RequestInput: AttributeSetUpdateInput!): AttributeSet!
   deleteAttributeSet(RequestInput: AttributeDeleteInput!): String!
   createListing(createListing: CreateListingDto!): Listing!
+  createOffer(createOfferDto: CreateOfferDto!): Offer!
   createIssueCategory(RequestInput: CreateIssueCategoryInput!): IssueCategory!
   updateIssueCatgeory(RequestInput: UpdateIssueCategoryInput!): IssueCategory!
   deleteIssueCategory(RequestInput: DeleteIssueInput!): String!
@@ -605,6 +625,14 @@ input CreateListingDto {
   mediaType: String = "image"
   objectName: [String!]
   amenities: [String!]
+}
+
+input CreateOfferDto {
+  offerPrice: Float!
+  expireAt: DateTime!
+  coupon: Boolean
+  couponCode: String
+  listingId: String!
 }
 
 input CreateIssueCategoryInput {

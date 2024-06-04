@@ -941,7 +941,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
-    id: 99,
+    id: 79,
     permissionGroup: 'Listing Type & Attributes',
     description: 'View Listing Types',
     name: 'View Listing Types',
@@ -953,7 +953,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
-    id: 100,
+    id: 80,
     permissionGroup: 'Listing Type & Attributes',
     description: 'View Attributes',
     name: 'View Attributes',
@@ -965,7 +965,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
-    id: 101,
+    id: 81,
     permissionGroup: 'Listing Type & Attributes',
     description: 'Create Listing Types',
     name: 'Create Listing Types',
@@ -977,7 +977,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
-    id: 102,
+    id: 82,
     permissionGroup: 'Listing Type & Attributes',
     description: 'Create Attributes',
     name: 'Create Attributes',
@@ -989,7 +989,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
-    id: 103,
+    id: 82,
     permissionGroup: 'Listing Type & Attributes',
     description: 'Edit Listing Types',
     name: 'Edit Listing Types',
@@ -1001,7 +1001,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
-    id: 104,
+    id: 83,
     permissionGroup: 'Listing Type & Attributes',
     description: 'Edit Attributes',
     name: 'Edit Attributes',
@@ -1013,7 +1013,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
-    id: 105,
+    id: 84,
     permissionGroup: 'Listing Type & Attributes',
     description: 'Delete Listing Types',
     name: 'Delete Listing Types',
@@ -1025,7 +1025,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
-    id: 106,
+    id: 85,
     permissionGroup: 'Listing Type & Attributes',
     description: 'Delete Attributes',
     name: 'Delete Attributes',
@@ -1037,7 +1037,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
-    id: 107,
+    id: 86,
     permissionGroup: 'Listing Type & Attributes',
     description: 'Export Listing Types',
     name: 'Export Listing Types',
@@ -1049,7 +1049,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
-    id: 108,
+    id: 87,
     permissionGroup: 'Listing Type & Attributes',
     description: 'Export Attributes',
     name: 'Export Attributes',
@@ -1061,7 +1061,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
-    id: 109,
+    id: 88,
     permissionGroup: 'Listing Type & Attributes',
     description: 'View Listing Types Audit Trail',
     name: 'View Listing Types Audit Trail',
@@ -1073,7 +1073,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
-    id: 110,
+    id: 89,
     permissionGroup: 'Listing Type & Attributes',
     description: 'View Atrributes Audit Trail',
     name: 'View Atrributes Audit Trail',

@@ -12,10 +12,16 @@ import { UseGuards } from '@nestjs/common';
 import { AccessTokenGuard } from '../../auth/guards';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { ListingResponse } from '../dtos/response/listing.response';
+import { OfferService } from '../services/offer.service';
+import { CreateOfferDto } from '../dtos/request/create-offer.dto';
+import { Offer } from '../../../entities/offer.entity';
 
 @Resolver()
 export class ListingResolver {
-  constructor(private listingService: ListingService) {}
+  constructor(
+    private listingService: ListingService,
+    private readonly offerService: OfferService,
+  ) {}
   @UseGuards(AccessTokenGuard)
   @Mutation(() => Listing, { name: 'createListing' })
   async createListing(
@@ -42,5 +48,14 @@ export class ListingResolver {
   @Query(() => Listing, { name: 'findOneForBuyer' })
   async findOneForBuyer(@Args('id') id: string) {
     return await this.listingService.findOneListingForBuyer(id);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => Offer, { name: 'createOffer' })
+  async createOffer(
+    @Args('createOfferDto') createOfferDto: CreateOfferDto,
+    @Context() ctx: any,
+  ) {
+    return await this.offerService.createAnOffer(createOfferDto, ctx.req.user);
   }
 }

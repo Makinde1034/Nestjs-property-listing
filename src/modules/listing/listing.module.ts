@@ -12,15 +12,24 @@ import {
   AttributeRepository,
   AttributeSetRepository,
   ListingTypeRepository,
+  OfferRepository,
 } from './repositories';
 import { ListingTypeController } from './controllers';
 import { ListingService } from './services/listing.service';
 import { ListingRepository } from './repositories/listing.repository';
 import { ListingResolver } from './resolvers/listing.resolver';
+import { Offer } from '../../entities/offer.entity';
+import { OfferService } from './services/offer.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Attribute, AttributeSet, ListingType, Listing]),
+    TypeOrmModule.forFeature([
+      Attribute,
+      AttributeSet,
+      ListingType,
+      Listing,
+      Offer,
+    ]),
   ],
   controllers: [ListingTypeController],
   providers: [
@@ -34,6 +43,8 @@ import { ListingResolver } from './resolvers/listing.resolver';
     ListingRepository,
     ListingService,
     ListingResolver,
+    OfferRepository,
+    OfferService,
   ],
 })
 export class ListingModule {}
