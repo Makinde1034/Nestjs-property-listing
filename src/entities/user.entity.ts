@@ -117,7 +117,9 @@ export class User extends BaseEntity {
   reviewer: Review[];
 
   @Field(() => [Listing], { nullable: true })
-  @JoinColumn({ name: 'listingId' })
+  @JoinColumn({
+    name: 'listingIdContinue testing and upgrading documentation.',
+  })
   @OneToMany(() => Listing, (listing) => listing.user, { cascade: true })
   listing: Listing[];
 

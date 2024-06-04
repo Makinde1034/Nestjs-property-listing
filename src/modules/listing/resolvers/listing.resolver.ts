@@ -5,7 +5,7 @@
 
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ListingService } from '../services/listing.service';
-import { CreateListingDto } from '../dtos/request/create-listing.dto';
+import { CreateListingDto, UpdateListingDto } from '../dtos/request/';
 
 import { Listing } from '../../../entities';
 import { UseGuards } from '@nestjs/common';
@@ -13,7 +13,7 @@ import { AccessTokenGuard } from '../../auth/guards';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { ListingResponse } from '../dtos/response/listing.response';
 import { OfferService } from '../services/offer.service';
-import { CreateOfferDto } from '../dtos/request/create-offer.dto';
+import { CreateOfferDto } from '../dtos/request/offer.dto';
 import { Offer } from '../../../entities/offer.entity';
 
 @Resolver()
@@ -44,10 +44,23 @@ export class ListingResolver {
 
     return { listing, total };
   }
+
   @UseGuards(AccessTokenGuard)
   @Query(() => Listing, { name: 'findOneForBuyer' })
   async findOneForBuyer(@Args('id') id: string) {
     return await this.listingService.findOneListingForBuyer(id);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => Listing, { name: 'updateListing' })
+  async updateListing(
+    @Args('updateListingDto') updateListingDto: UpdateListingDto,
+    @Context() ctx: any,
+  ) {
+    return await this.listingService.updateListing(
+      updateListingDto,
+      ctx.req.user,
+    );
   }
 
   @UseGuards(AccessTokenGuard)

@@ -4,7 +4,7 @@
  */
 
 import { Injectable } from '@nestjs/common';
-import { CreateOfferDto } from '../dtos/request/create-offer.dto';
+import { CreateOfferDto } from '../dtos/request/offer.dto';
 import { OfferRepository } from '../repositories';
 import { User } from '../../../entities';
 @Injectable()
