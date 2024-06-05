@@ -3,6 +3,7 @@
  * For license. See license.txt
  */
 
+//To update permission, delete all permisions in the table First
 export const permissionFactory = [
   {
     id: 1,
@@ -941,7 +942,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
-    id: 79,
+    id: 99,
     permissionGroup: 'Listing Type & Attributes',
     description: 'View Listing Types',
     name: 'View Listing Types',
@@ -953,7 +954,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
-    id: 80,
+    id: 100,
     permissionGroup: 'Listing Type & Attributes',
     description: 'View Attributes',
     name: 'View Attributes',
@@ -965,7 +966,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
-    id: 81,
+    id: 101,
     permissionGroup: 'Listing Type & Attributes',
     description: 'Create Listing Types',
     name: 'Create Listing Types',
@@ -977,7 +978,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
-    id: 82,
+    id: 102,
     permissionGroup: 'Listing Type & Attributes',
     description: 'Create Attributes',
     name: 'Create Attributes',
@@ -989,7 +990,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
-    id: 82,
+    id: 103,
     permissionGroup: 'Listing Type & Attributes',
     description: 'Edit Listing Types',
     name: 'Edit Listing Types',
@@ -1001,7 +1002,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
-    id: 83,
+    id: 104,
     permissionGroup: 'Listing Type & Attributes',
     description: 'Edit Attributes',
     name: 'Edit Attributes',
@@ -1013,7 +1014,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
-    id: 84,
+    id: 105,
     permissionGroup: 'Listing Type & Attributes',
     description: 'Delete Listing Types',
     name: 'Delete Listing Types',
@@ -1025,7 +1026,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
-    id: 85,
+    id: 106,
     permissionGroup: 'Listing Type & Attributes',
     description: 'Delete Attributes',
     name: 'Delete Attributes',
@@ -1037,7 +1038,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
-    id: 86,
+    id: 107,
     permissionGroup: 'Listing Type & Attributes',
     description: 'Export Listing Types',
     name: 'Export Listing Types',
@@ -1049,7 +1050,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
-    id: 87,
+    id: 108,
     permissionGroup: 'Listing Type & Attributes',
     description: 'Export Attributes',
     name: 'Export Attributes',
@@ -1061,7 +1062,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
-    id: 88,
+    id: 109,
     permissionGroup: 'Listing Type & Attributes',
     description: 'View Listing Types Audit Trail',
     name: 'View Listing Types Audit Trail',
@@ -1073,7 +1074,7 @@ export const permissionFactory = [
     remarks: null,
   },
   {
-    id: 89,
+    id: 110,
     permissionGroup: 'Listing Type & Attributes',
     description: 'View Atrributes Audit Trail',
     name: 'View Atrributes Audit Trail',

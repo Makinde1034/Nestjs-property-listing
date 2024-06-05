@@ -5,10 +5,17 @@
 
 import { Field, InputType } from '@nestjs/graphql';
 
-import { IsOptional, IsNumber, IsString, IsEnum } from 'class-validator';
+import {
+  IsOptional,
+  IsNumber,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 
 import { SortOrder } from '../../../common/enums';
-import { OrderBYEnum } from '../../../common/enums/sort.enum';
+
+import { WhereOption } from './where-option.dto';
+
 @InputType()
 export class PaginateAndSort {
   @Field({ nullable: true })
@@ -23,13 +30,17 @@ export class PaginateAndSort {
 
   @IsOptional()
   @IsString()
-  @Field()
-  @IsEnum(OrderBYEnum)
+  @Field({ nullable: true })
   sortField?: string;
 
   @IsOptional()
   @IsString()
-  @Field()
-  @IsEnum(SortOrder)
-  direction_to_sort?: string;
+  @Field(() => SortOrder, { nullable: true })
+  directionToSort?: string;
+
+  @IsOptional()
+  @IsString()
+  @Field({ nullable: true })
+  @ValidateNested()
+  where: WhereOption;
 }
