@@ -3,6 +3,7 @@
  * For license. See license.txt
  */
 
+//To update permission, delete all permisions in the table First
 export const permissionFactory = [
   {
     id: 1,
