@@ -25,7 +25,8 @@
     "migration:create": "npm run typeorm -- migration:create ./src/database/migrations/$npm_config_name",
     "migration:revert": "npm run typeorm -- -d ./src/config/database/typeorm-datasource.ts migration:revert",
     "seed": "ts-node ./node_modules/typeorm-extension/bin/cli.cjs seed:run  -d src/config/database/typeorm-datasource.ts",
-    "seed:create": "ts-node ./node_modules/typeorm-extension/bin/cli.cjs seed:create  --name src/database/seeders/$npm_config_name"
+    "seed:create": "ts-node ./node_modules/typeorm-extension/bin/cli.cjs seed:create  --name src/database/seeders/$npm_config_name",
+    "seed:revert": "ts-node typeorm migration:revert -c seed"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
