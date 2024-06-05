@@ -60,15 +60,6 @@ export class ListingService {
       const listing = await this.listingRepository.findAll({
         where: { id: id },
         relations: ['user'],
-        select: {
-          user: {
-            phone: true,
-            firstName: true,
-            lastName: true,
-            arabicFirstName: true,
-            arabicLastName: true,
-          },
-        },
       });
 
       return listing[0];
