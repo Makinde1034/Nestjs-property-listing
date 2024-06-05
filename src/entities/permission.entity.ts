@@ -12,10 +12,10 @@ import { RolePermissions } from './role-permission.entity';
 export class Permission {
   @Field(() => Number)
   @PrimaryGeneratedColumn()
-  id?: number;
+  id: number;
 
-  @Column()
-  @Field()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   name: string;
 
   @Column({ nullable: true })
