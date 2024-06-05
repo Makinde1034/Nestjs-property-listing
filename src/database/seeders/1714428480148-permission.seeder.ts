@@ -18,8 +18,13 @@ export class Permission1714428480148 implements Seeder {
   ): Promise<any> {
     this.logger.debug(`Seeding For : ${Permission.name}....`, factoryManager);
     const repository = dataSource.getRepository(Permission);
+    const permission = await Promise.all([repository.find()]);
 
-    await repository.save(permissionFactory as Partial<Permission>);
+    if (permission[0].length > 0) {
+      this.logger.debug(`Seeding for: ${Permission.name} Already completed`);
+    } else {
+      await repository.save(permissionFactory as Partial<Permission>);
+    }
     this.logger.debug(`Seeding for: ${Permission.name} finished`);
   }
 }
