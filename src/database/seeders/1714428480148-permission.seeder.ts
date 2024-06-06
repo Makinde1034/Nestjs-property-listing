@@ -16,7 +16,7 @@ export class Permission1714428480148 implements Seeder {
     dataSource: DataSource,
     factoryManager: SeederFactoryManager,
   ): Promise<any> {
-    this.logger.debug(`Seeding For : ${Permission.name}....`, factoryManager);
+    this.logger.debug(`Seeding For : ${Permission.name}...`, factoryManager);
     const repository = dataSource.getRepository(Permission);
     const permission = await Promise.all([repository.find()]);
 

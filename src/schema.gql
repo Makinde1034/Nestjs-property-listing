@@ -25,7 +25,7 @@ type RolePermissions {
 
 type Permission {
   id: Float!
-  name: String!
+  name: String
   slug: String
   permissionGroup: String!
   description: String
@@ -342,8 +342,18 @@ type Query {
 input PaginateAndSort {
   take: Float
   skip: Float
-  sortField: String!
-  direction_to_sort: String!
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
+}
+
+enum SortOrder {
+  ASC
+  DESC
+}
+
+input WhereOption {
+  fieldToChose: String!
 }
 
 input ListTicketInput {
@@ -353,17 +363,9 @@ input ListTicketInput {
 input FindManyReviewDto {
   take: Float
   skip: Float
-  sortField: String!
-  direction_to_sort: String!
-  where: WhereCondition
-}
-
-input WhereCondition {
-  service: ServicesOffered
-}
-
-enum ServicesOffered {
-  LISTING
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
 }
 
 type Mutation {

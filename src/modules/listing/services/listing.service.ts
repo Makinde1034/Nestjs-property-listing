@@ -16,7 +16,7 @@ import {
 } from '../dtos/request/listing.dto';
 import { User } from '../../../entities';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
-import { FindOptionsOrder } from 'typeorm';
+
 import { ForbiddenError } from '@nestjs/apollo';
 
 @Injectable()
@@ -37,16 +37,25 @@ export class ListingService {
 
   async findAllListingForBuyer(data: PaginateAndSort) {
     try {
-      const order: FindOptionsOrder<any> = {};
-      if (data.direction_to_sort) {
-        order[data.sortField] = data.direction_to_sort;
-      }
+      if (data.where === undefined) {
+        const listing = await this.listingRepository
+          .queryBuilder('listing')
+          .take(data.take)
+          .skip(data.skip)
 
-      return await this.listingRepository.findAndCount({
-        take: data.take,
-        skip: data.skip,
-        order: order,
-      });
+          .getManyAndCount();
+
+        return listing;
+      }
+      const whereParam = `listing.${data.where.fieldToChose} = : field`;
+      const listing = await this.listingRepository
+        .queryBuilder('listing')
+        .where(whereParam, { field: data.where.whereParam })
+        .take(data.take)
+        .skip(data.skip)
+        .getManyAndCount();
+
+      return listing;
     } catch (error) {
       this.logger.log(error);
       if (error instanceof HttpException) {
@@ -60,6 +69,16 @@ export class ListingService {
       const listing = await this.listingRepository.findAll({
         where: { id: id },
         relations: ['user'],
+        select: {
+          user: {
+            id: true,
+            phone: true,
+            firstName: true,
+            lastName: true,
+            arabicFirstName: true,
+            arabicLastName: true,
+          },
+        },
       });
 
       return listing[0];

@@ -44,8 +44,8 @@ export class ReviewService {
 
   async findAllAndCount(data?: FindManyReviewDto): Promise<[Review[], number]> {
     const order: FindOptionsOrder<any> = {};
-    if (data.direction_to_sort) {
-      order[data.sortField] = data.direction_to_sort;
+    if (data.directionToSort) {
+      order[data.sortField] = data.directionToSort;
     }
 
     return await this.reviewRepository.findAndCount({
@@ -58,8 +58,8 @@ export class ReviewService {
 
   async findAll(data?: FindManyReviewDto) {
     const order: FindOptionsOrder<any> = {};
-    if (data.direction_to_sort) {
-      order[data.sortField] = data.direction_to_sort;
+    if (data.directionToSort) {
+      order[data.sortField] = data.directionToSort;
     }
 
     return await this.reviewRepository.findAll({

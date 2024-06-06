@@ -12,6 +12,7 @@ import {
   DeepPartial,
   FindManyOptions,
   FindOneOptions,
+  FindOptionsWhere,
   Repository,
   SelectQueryBuilder,
 } from 'typeorm';
@@ -92,6 +93,11 @@ export abstract class EntityRepository<T extends BaseEntity> {
    * @param {?FindManyOptions<T>} [options]
    * @returns {Promise<[[Entity], number>]}
    */
+  async findAndCountBy(
+    options?: FindOptionsWhere<any>,
+  ): Promise<[T[], number]> {
+    return await this.baseRepository.findAndCountBy(options);
+  }
   async findAndCount(options?: FindManyOptions<any>): Promise<[T[], number]> {
     return await this.baseRepository.findAndCount(options);
   }
