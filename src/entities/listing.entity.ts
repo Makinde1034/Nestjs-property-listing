@@ -83,13 +83,13 @@ export class Listing extends BaseEntity {
   @Field()
   numberOfBedrooms: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'jsonb', nullable: true })
   @Field({ nullable: true })
-  mediaType: string;
+  images: string;
 
   @Field(() => [String], { nullable: true })
-  @Column('simple-array', { nullable: true })
-  objectName: string[];
+  @Column({ type: 'jsonb', nullable: true })
+  videos: string;
 
   @Field(() => User, { nullable: true })
   @JoinColumn({ name: 'userId' })
@@ -110,6 +110,54 @@ export class Listing extends BaseEntity {
   @Field(() => [String], { nullable: true })
   @Column('simple-array', { nullable: true })
   amenities: string[];
+
+  @Field()
+  @Column({ type: 'jsonb', nullable: true })
+  gpsCoordinates: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  district: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  street: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  building: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  floor: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  landArea: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  numberOfAppartment: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  numberOfStoreys: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  areaOfAppartment: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  garageArea: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  totalArea: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  numberOFRentedAppartment: string;
 
   @Field()
   @CreateDateColumn()

@@ -4,7 +4,7 @@
  */
 
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { CityEntitity } from '../../../entities';
+import { CityEntitity } from '../../../../entities';
 @ObjectType()
 export class CityResponse {
   @Field(() => [CityEntitity])

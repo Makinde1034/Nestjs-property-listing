@@ -14,7 +14,7 @@ import {
   ListingTypeRepository,
   OfferRepository,
 } from './repositories';
-import { ListingTypeController } from './controllers';
+import { ListingController, ListingTypeController } from './controllers';
 import { ListingService } from './services/listing.service';
 import { ListingRepository } from './repositories/listing.repository';
 import { ListingResolver } from './resolvers/listing.resolver';
@@ -31,7 +31,7 @@ import { OfferService } from './services/offer.service';
       Offer,
     ]),
   ],
-  controllers: [ListingTypeController],
+  controllers: [ListingController, ListingTypeController],
   providers: [
     ListingTypeResolver,
     ListingTypeService,

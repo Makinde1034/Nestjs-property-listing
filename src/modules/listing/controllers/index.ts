@@ -4,3 +4,4 @@
  */
 
 export * from './listing-type.controller';
+export * from './listing.contoller';
