@@ -125,7 +125,7 @@ export class Listing extends BaseEntity {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
-  building: string;
+  buildingNumber: string;
 
   @Column({ nullable: true })
   @Field({ nullable: true })
