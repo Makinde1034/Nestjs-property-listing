@@ -17,7 +17,8 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type RolePermissions {
-  id: Float!
+  roleId: Float!
+  permissionId: Float!
   role: Role!
   permission: Permission!
   approve: Boolean
@@ -120,12 +121,24 @@ type Listing {
   publicationDate: String!
   numberOfBathrooms: String!
   numberOfBedrooms: String!
-  mediaType: String
-  objectName: [String!]
+  images: String
+  videos: [String!]
   user: User
   offer: [Offer!]
   userId: String!
   amenities: [String!]
+  gpsCoordinates: String!
+  district: String
+  street: String
+  buildingNumber: String
+  floor: String
+  landArea: String
+  numberOfAppartment: String
+  numberOfStoreys: String
+  areaOfAppartment: String
+  garageArea: String
+  totalArea: String
+  numberOFRentedAppartment: String
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -628,6 +641,23 @@ input CreateListingDto {
   mediaType: String = "image"
   objectName: [String!]
   amenities: [String!]
+  gpsCoordinate: LocationDto
+  district: String
+  street: String
+  building: String
+  floor: String
+  landArea: String
+  numberOfAppartment: String
+  numberOfStoreys: String
+  areaPerApartment: String
+  garageArea: String
+  totalArea: String
+  numberOfRentedAppartment: String
+}
+
+input LocationDto {
+  lng: String!
+  lat: String!
 }
 
 input UpdateListingDto {
@@ -640,6 +670,21 @@ input UpdateListingDto {
   numberOfBedrooms: String
   objectName: [String!]
   amenities: [String!]
+  propertySize: String!
+  publicationDate: String!
+  mediaType: String = "image"
+  gpsCoordinate: LocationDto
+  district: String
+  street: String
+  building: String
+  floor: String
+  landArea: String
+  numberOfAppartment: String
+  numberOfStoreys: String
+  areaPerApartment: String
+  garageArea: String
+  totalArea: String
+  numberOfRentedAppartment: String
 }
 
 input CreateOfferDto {

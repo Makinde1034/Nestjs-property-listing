@@ -18,10 +18,15 @@ import { User } from '../../../entities';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 
 import { ForbiddenError } from '@nestjs/apollo';
+import { StorageService } from '../../storage/storage.service';
+import { SuccessResponse } from '../../../common/utils/success.response';
 
 @Injectable()
 export class ListingService {
-  constructor(private readonly listingRepository: ListingRepository) {}
+  constructor(
+    private readonly listingRepository: ListingRepository,
+    private readonly storageService: StorageService,
+  ) {}
   logger = new Logger(ListingService.name);
   async createListing(user: User, createListingDto: CreateListingDto) {
     try {
@@ -83,6 +88,7 @@ export class ListingService {
 
       return listing[0];
     } catch (error) {
+      this.logger.log(error);
       if (error instanceof HttpException) {
         throw error;
       } else throw new BadRequestException(error.messages || error.data);
@@ -90,18 +96,51 @@ export class ListingService {
   }
 
   async updateListing(editListingDto: UpdateListingDto, user: User) {
-    const { id, ...partialUpdatePayload } = editListingDto;
-    const listing = await this.listingRepository.findById(id);
-    if (listing.userId !== user.id) {
-      throw new ForbiddenError(
-        'This user does not have the permision to update record',
-      );
-    }
+    try {
+      const { id, ...partialUpdatePayload } = editListingDto;
+      const listing = await this.listingRepository.findById(id);
+      if (listing.userId !== user.id) {
+        throw new ForbiddenError(
+          'This user does not have the permision to update record',
+        );
+      }
 
-    const update = await this.listingRepository.update(
-      id,
-      partialUpdatePayload,
-    );
-    return update;
+      const update = await this.listingRepository.update(
+        id,
+        partialUpdatePayload,
+      );
+      return update;
+    } catch (error) {
+      this.logger.log(error);
+      if (error instanceof HttpException) {
+        throw error;
+      } else throw new BadRequestException(error.messages || error.data);
+    }
+  }
+
+  async uploadListingImage(id: string, files: Express.Multer.File[]) {
+    try {
+      let uploadUrls: string[] = [];
+      const uploadObject = {};
+
+      const uploadPromises = files.map((file) =>
+        this.storageService.upload(file),
+      );
+      uploadUrls = await Promise.all(uploadPromises);
+
+      uploadUrls.forEach((value, index) => (uploadObject[index] = value));
+      const stringifiedUploadObject = JSON.stringify(uploadObject);
+
+      await this.listingRepository.update(id, {
+        images: stringifiedUploadObject,
+      });
+
+      return new SuccessResponse('Upload successful');
+    } catch (error) {
+      this.logger.log(error);
+      if (error instanceof HttpException) {
+        throw error;
+      } else throw new BadRequestException(error.messages || error.data);
+    }
   }
 }

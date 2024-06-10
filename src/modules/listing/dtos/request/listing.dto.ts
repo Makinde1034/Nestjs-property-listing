@@ -12,6 +12,7 @@ import {
   IsString,
   IsUUID,
   ValidateIf,
+  ValidateNested,
 } from 'class-validator';
 
 import {
@@ -20,6 +21,7 @@ import {
   Purpose,
   RentingOption,
 } from '../../../../common/enums';
+import { LocationDto } from '../../../location/dto/request/location.dto';
 
 @InputType()
 export class CreateListingDto {
@@ -73,6 +75,10 @@ export class CreateListingDto {
   @IsUUID()
   country: string;
 
+  @ValidateIf((listing) => listing.listingType == ListingType.APPARTMENT)
+  @IsNotEmpty({
+    message: 'PropertySize is required for listing type appartment',
+  })
   @Field()
   @IsString()
   propertySize: string;
@@ -86,10 +92,12 @@ export class CreateListingDto {
   @IsNotEmpty()
   price: string;
 
+  @ValidateIf((listing) => listing.listingType == ListingType.APPARTMENT)
   @Field()
   @IsString()
   numberOfBathrooms: string;
 
+  @ValidateIf((listing) => listing.listingType == ListingType.APPARTMENT)
   @Field()
   @IsString()
   numberOfBedrooms: string;
@@ -108,7 +116,101 @@ export class CreateListingDto {
   @IsArray()
   @Field(() => [String], { nullable: true })
   amenities: string[];
+
+  @ValidateNested()
+  @IsOptional()
+  @Field(() => LocationDto, { nullable: true })
+  gpsCoordinate: LocationDto;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  district: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  street: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  building: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  floor: string;
+
+  @ValidateIf((listing) => listing.listingType == ListingType.LAND)
+  @Field({ nullable: true })
+  @IsNotEmpty({ message: 'LandArea must be provided for Listing type land' })
+  @IsString()
+  landArea: string;
+
+  @ValidateIf((listing) => listing.ListingType == ListingType.BUILDING)
+  @IsNotEmpty({ message: 'This is a required field for listing type building' })
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  numberOfAppartment: string;
+
+  @ValidateIf(
+    (listing) =>
+      listing.listingType == ListingType.BUILDING ||
+      listing.listingType == ListingType.VILLA,
+  )
+  @IsNotEmpty({
+    message: 'This is a required field for listing tyoe bulding and villa',
+  })
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  numberOfStoreys: string;
+
+  @ValidateIf((listing) => listing.listingType == ListingType.BUILDING)
+  @IsNotEmpty({
+    message:
+      'This is a required field for listing for listing tyoe villa and building',
+  })
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  areaPerApartment: string;
+
+  @ValidateIf((listing) => listing.listingType == ListingType.BUILDING)
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  garageArea: string;
+
+  @ValidateIf(
+    (listing) =>
+      listing.listingType == ListingType.BUILDING ||
+      listing.listingType == ListingType.VILLA,
+  )
+  @IsNotEmpty({
+    message: 'This is a required field for listing tyoe bulding and villa',
+  })
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  totalArea: string;
+
+  @ValidateIf(
+    (listing) =>
+      listing.listingType == ListingType.BUILDING ||
+      listing.listingType == ListingType.VILLA,
+  )
+  @IsNotEmpty({
+    message: 'This is a required field for listing tyoe bulding and villa',
+  })
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  numberOfRentedAppartment: string;
 }
+
 @InputType()
 export class UpdateListingDto {
   @Field()
@@ -150,4 +252,115 @@ export class UpdateListingDto {
   @IsNotEmpty()
   @Field(() => [String], { nullable: true })
   amenities: string[];
+
+  @ValidateIf((listing) => listing.listingType == ListingType.APPARTMENT)
+  @IsNotEmpty({
+    message: 'PropertySize is required for listing type appartment',
+  })
+  @Field()
+  @IsString()
+  propertySize: string;
+
+  @Field()
+  @IsString()
+  publicationDate: string;
+
+  userId?: string;
+
+  @Field({ defaultValue: 'image', nullable: true })
+  @IsOptional()
+  mediaType: string;
+
+  @ValidateNested()
+  @IsOptional()
+  @Field(() => LocationDto, { nullable: true })
+  gpsCoordinate: LocationDto;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  district: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  street: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  building: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  floor: string;
+
+  @ValidateIf((listing) => listing.listingType == ListingType.LAND)
+  @Field({ nullable: true })
+  @IsNotEmpty({ message: 'LandArea must be provided for Listing type land' })
+  @IsString()
+  landArea: string;
+
+  @ValidateIf((listing) => listing.ListingType == ListingType.BUILDING)
+  @IsNotEmpty({ message: 'This is a required field for listing type building' })
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  numberOfAppartment: string;
+
+  @ValidateIf(
+    (listing) =>
+      listing.listingType == ListingType.BUILDING ||
+      listing.listingType == ListingType.VILLA,
+  )
+  @IsNotEmpty({
+    message: 'This is a required field for listing tyoe bulding and villa',
+  })
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  numberOfStoreys: string;
+
+  @ValidateIf((listing) => listing.listingType == ListingType.BUILDING)
+  @IsNotEmpty({
+    message:
+      'This is a required field for listing for listing tyoe villa and building',
+  })
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  areaPerApartment: string;
+
+  @ValidateIf((listing) => listing.listingType == ListingType.BUILDING)
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  garageArea: string;
+
+  @ValidateIf(
+    (listing) =>
+      listing.listingType == ListingType.BUILDING ||
+      listing.listingType == ListingType.VILLA,
+  )
+  @IsNotEmpty({
+    message: 'This is a required field for listing tyoe bulding and villa',
+  })
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  totalArea: string;
+
+  @ValidateIf(
+    (listing) =>
+      listing.listingType == ListingType.BUILDING ||
+      listing.listingType == ListingType.VILLA,
+  )
+  @IsNotEmpty({
+    message: 'This is a required field for listing tyoe bulding and villa',
+  })
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  numberOfRentedAppartment: string;
 }

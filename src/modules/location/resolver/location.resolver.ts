@@ -8,7 +8,7 @@ import { Args, Query, Resolver } from '@nestjs/graphql';
 import { LocationService } from '../services';
 
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
-import { CityResponse } from '../dto/city.response';
+import { CityResponse } from '../dto/response/city.response';
 
 @Resolver()
 export class LocationResolver {
