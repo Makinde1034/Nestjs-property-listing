@@ -312,6 +312,15 @@ type SuccessResponse {
   message: String!
 }
 
+type Amenities {
+  id: Float!
+  name: String
+  image: String
+  description: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type ListingResponse {
   listing: [Listing!]!
   total: Int!
@@ -341,6 +350,7 @@ type Query {
   fetchAttributeSets: [AttributeSet!]!
   findListingForBuyer(findManyOptions: PaginateAndSort): ListingResponse!
   findOneForBuyer(id: String!): Listing!
+  findAmenities: [Amenities!]!
   fetchIssueCategories: [IssueCategory!]!
   fetchIssues: [Issue!]!
   getTicket(ticketId: String!): Ticket!

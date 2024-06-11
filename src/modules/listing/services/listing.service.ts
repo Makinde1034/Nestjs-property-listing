@@ -8,6 +8,7 @@ import {
   HttpException,
   Injectable,
   Logger,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { ListingRepository } from '../repositories/listing.repository';
 import {
@@ -20,12 +21,15 @@ import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { ForbiddenError } from '@nestjs/apollo';
 import { StorageService } from '../../storage/storage.service';
 import { SuccessResponse } from '../../../common/utils/success.response';
+import { AmenitiesRepository } from '../repositories/amenities.repository';
 
 @Injectable()
 export class ListingService {
   constructor(
     private readonly listingRepository: ListingRepository,
     private readonly storageService: StorageService,
+
+    private readonly amenitiesRepository: AmenitiesRepository,
   ) {}
   logger = new Logger(ListingService.name);
   async createListing(user: User, createListingDto: CreateListingDto) {
@@ -141,6 +145,18 @@ export class ListingService {
       if (error instanceof HttpException) {
         throw error;
       } else throw new BadRequestException(error.messages || error.data);
+    }
+  }
+
+  async findAmenities() {
+    try {
+      return await this.amenitiesRepository.find();
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new UnprocessableEntityException('Error retrieving amenities');
+      }
     }
   }
 }

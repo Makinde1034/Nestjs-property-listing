@@ -15,6 +15,7 @@ import { ListingResponse } from '../dtos/response/listing.response';
 import { OfferService } from '../services/offer.service';
 import { CreateOfferDto } from '../dtos/request/offer.dto';
 import { Offer } from '../../../entities/offer.entity';
+import { Amenities } from '../../../entities/amenities.entity';
 
 @Resolver()
 export class ListingResolver {
@@ -32,6 +33,17 @@ export class ListingResolver {
       ctx.req.user,
       createListingDto,
     );
+  }
+  @UseGuards(AccessTokenGuard)
+  @Query(() => ListingResponse, { name: 'findListingForBuyer' })
+  async findListingForBuyer(
+    @Args('findManyOptions', { nullable: true })
+    findManyOptions?: PaginateAndSort,
+  ) {
+    const [listing, total] =
+      await this.listingService.findAllListingForBuyer(findManyOptions);
+
+    return { listing, total };
   }
   @UseGuards(AccessTokenGuard)
   @Query(() => ListingResponse, { name: 'findListingForBuyer' })
@@ -70,5 +82,11 @@ export class ListingResolver {
     @Context() ctx: any,
   ) {
     return await this.offerService.createAnOffer(createOfferDto, ctx.req.user);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Query(() => [Amenities], { name: 'findAmenities' })
+  async findAmenities() {
+    return await this.listingService.findAmenities();
   }
 }

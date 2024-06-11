@@ -1252,6 +1252,7 @@ export const permissionFactory = [
     staffAccess: true,
     remarks: null,
   },
+
   {
     category: 'User Management',
     functionDescription: 'Edit Own User Status',
