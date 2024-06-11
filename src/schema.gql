@@ -26,16 +26,16 @@ type RolePermissions {
 
 type Permission {
   id: Float!
-  name: String
+  functionDescription: String!
   slug: String
-  permissionGroup: String!
-  description: String
+  category: String!
   remarks: String
   arabicLabel: String
+  englishLabel: String!
   approveFlag: Boolean
   useFlag: Boolean
-  staffAccess: Boolean
-  individualAccess: Boolean
+  staffAccess: Boolean!
+  individualAccess: Boolean!
   companyAccess: Boolean
   permissionRoles: [RolePermissions!]!
 }
@@ -274,11 +274,9 @@ type CityEntitity {
 
 type PermissionData {
   id: Float!
-  name: String!
   slug: String!
-  permissionGroup: String!
-  approve: Boolean!
-  description: String
+  category: String!
+  functionDescription: String
   remarks: String
   arabicLabel: String
   approveFlag: Boolean

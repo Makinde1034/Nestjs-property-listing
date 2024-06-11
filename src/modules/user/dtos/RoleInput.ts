@@ -68,18 +68,13 @@ export class PermissionData {
   id: number;
 
   @Field()
-  name: string;
-
-  @Field()
   slug: string;
 
   @Field()
-  permissionGroup: string;
+  category: string;
 
-  @Field()
-  approve: boolean;
   @Field({ nullable: true })
-  description?: string;
+  functionDescription?: string;
 
   @Field({ nullable: true })
   remarks?: string;

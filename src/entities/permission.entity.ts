@@ -14,9 +14,9 @@ export class Permission {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  name: string;
+  @Column()
+  @Field()
+  functionDescription: string;
 
   @Column({ nullable: true })
   @Field({ nullable: true })
@@ -24,11 +24,7 @@ export class Permission {
 
   @Column()
   @Field()
-  permissionGroup: string;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  description?: string;
+  category: string;
 
   @Column({ nullable: true })
   @Field({ nullable: true })
@@ -38,20 +34,24 @@ export class Permission {
   @Field({ nullable: true })
   arabicLabel?: string;
 
+  @Column()
+  @Field()
+  englishLabel?: string;
+
   @Column({ default: false, nullable: true })
   @Field({ defaultValue: false, nullable: true })
   approveFlag?: boolean;
 
-  @Column({ default: true, nullable: true })
+  @Column({ default: true })
   @Field({ defaultValue: true, nullable: true })
   useFlag?: boolean;
 
-  @Column({ default: true, nullable: true })
-  @Field({ defaultValue: true, nullable: true })
+  @Column({ default: true })
+  @Field({ defaultValue: true })
   staffAccess?: boolean;
 
   @Column({ default: false, nullable: true })
-  @Field({ defaultValue: false, nullable: true })
+  @Field({ defaultValue: false })
   individualAccess?: boolean;
 
   @Column({ default: false, nullable: true })
