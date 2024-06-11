@@ -46,13 +46,12 @@ export class RoleService {
     const result: PermissionData[] = items.map((item) => ({
       id: item.permission.id,
       approve: item.approve,
-      name: item.permission.name,
       slug: item.permission.slug,
-      permissionGroup: item.permission.permissionGroup,
+      category: item.permission.category,
       staffAccess: item.permission.staffAccess,
       individualAccess: item.permission.individualAccess,
       companyAccess: item.permission.companyAccess,
-      description: item.permission.description,
+      description: item.permission.functionDescription,
     }));
     return result;
   }
@@ -207,6 +206,7 @@ export class RoleService {
    * @param {string[]} requiredPermissions
    * @returns {boolean}
    */
+
   async hasPermission(
     user: User,
     requiredPermissions: string[],
