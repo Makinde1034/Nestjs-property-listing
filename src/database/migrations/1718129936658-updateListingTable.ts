@@ -5,8 +5,8 @@
 
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateAmenities1718109076731 implements MigrationInterface {
-  name = 'CreateAmenities1718109076731';
+export class UpdateListingTable1718129936658 implements MigrationInterface {
+  name = 'UpdateListingTable1718129936658';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
@@ -22,7 +22,7 @@ export class CreateAmenities1718109076731 implements MigrationInterface {
       `DROP INDEX "public"."IDX_bfbc9e263d4cea6d7a8c9eb3ad"`,
     );
     await queryRunner.query(
-      `CREATE TABLE "amenities" ("id" SERIAL NOT NULL, "name" character varying NOT NULL, "image" character varying, "description" character varying, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_c0777308847b3556086f2fb233e" PRIMARY KEY ("id"))`,
+      `ALTER TABLE "listing" RENAME COLUMN "propertyNumber" TO "property_number"`,
     );
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" DROP COLUMN "approve"`,
@@ -63,7 +63,9 @@ export class CreateAmenities1718109076731 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" ADD "approve" boolean DEFAULT false`,
     );
-    await queryRunner.query(`DROP TABLE "amenities"`);
+    await queryRunner.query(
+      `ALTER TABLE "listing" RENAME COLUMN "property_number" TO "propertyNumber"`,
+    );
     await queryRunner.query(
       `CREATE INDEX "IDX_bfbc9e263d4cea6d7a8c9eb3ad" ON "role_permissions_permission" ("permissionId") `,
     );

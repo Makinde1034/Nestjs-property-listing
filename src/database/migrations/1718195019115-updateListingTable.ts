@@ -5,8 +5,8 @@
 
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateAmenities1718109076731 implements MigrationInterface {
-  name = 'CreateAmenities1718109076731';
+export class UpdateListingTable1718195019115 implements MigrationInterface {
+  name = 'UpdateListingTable1718195019115';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
@@ -22,13 +22,13 @@ export class CreateAmenities1718109076731 implements MigrationInterface {
       `DROP INDEX "public"."IDX_bfbc9e263d4cea6d7a8c9eb3ad"`,
     );
     await queryRunner.query(
-      `CREATE TABLE "amenities" ("id" SERIAL NOT NULL, "name" character varying NOT NULL, "image" character varying, "description" character varying, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_c0777308847b3556086f2fb233e" PRIMARY KEY ("id"))`,
-    );
-    await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" DROP COLUMN "approve"`,
     );
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" ADD "approve" boolean DEFAULT false`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "listing" ADD "playground" boolean NOT NULL DEFAULT false`,
     );
     await queryRunner.query(
       `CREATE INDEX "IDX_b36cb2e04bc353ca4ede00d87b" ON "role_permissions_permission" ("roleId") `,
@@ -57,13 +57,13 @@ export class CreateAmenities1718109076731 implements MigrationInterface {
     await queryRunner.query(
       `DROP INDEX "public"."IDX_b36cb2e04bc353ca4ede00d87b"`,
     );
+    await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "playground"`);
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" DROP COLUMN "approve"`,
     );
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" ADD "approve" boolean DEFAULT false`,
     );
-    await queryRunner.query(`DROP TABLE "amenities"`);
     await queryRunner.query(
       `CREATE INDEX "IDX_bfbc9e263d4cea6d7a8c9eb3ad" ON "role_permissions_permission" ("permissionId") `,
     );
