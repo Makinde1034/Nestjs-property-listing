@@ -108,19 +108,21 @@ type Listing {
   id: ID!
   ownership: String!
   name: String
+  purpose: String
   sellingType: String!
   powerOfAttorney: String
   listingType: String!
   rentingOption: String!
   propertyNumber: String!
   deedNumber: String!
-  districtCity: String!
+  districtCity: String
+  city: String
   country: String!
   propertySize: String!
   price: String!
   publicationDate: String!
   numberOfBathrooms: String!
-  numberOfBedrooms: String!
+  numberOfRooms: String!
   images: String
   videos: [String!]
   user: User
@@ -138,7 +140,32 @@ type Listing {
   areaOfAppartment: String
   garageArea: String
   totalArea: String
-  numberOFRentedAppartment: String
+  rentedAppartment: String
+  negotiatable: Boolean
+  pool: Boolean
+  outdoorKitchen: Boolean
+  garden: Boolean
+  guestHouse: Boolean
+  tennisCourt: Boolean
+  basketballCourt: Boolean
+  jacuzzi: Boolean
+  bbqArea: Boolean
+  maidsRoom: Boolean
+  petsAllowed: Boolean
+  balcony: Boolean
+  gym: Boolean
+  playground: Boolean
+  parking: Boolean
+  security: Boolean
+  airConditioning: Boolean
+  storageRoom: Boolean
+  laundryRoom: Boolean
+  conferenceRoom: Boolean
+  gatedCommunity: Boolean
+  indoorPlayArea: Boolean
+  coveredParking: Boolean
+  wifi: Boolean
+  elevator: Boolean
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -312,6 +339,15 @@ type SuccessResponse {
   message: String!
 }
 
+type Amenities {
+  id: Float!
+  name: String
+  image: String
+  description: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type ListingResponse {
   listing: [Listing!]!
   total: Int!
@@ -339,8 +375,10 @@ type Query {
   fetchListingTypes: [ListingType!]!
   fetchAttributes: [Attribute!]!
   fetchAttributeSets: [AttributeSet!]!
-  findListingForBuyer(findManyOptions: PaginateAndSort): ListingResponse!
+  findListings(findManyOptions: AttributeDto): ListingResponse!
+  findListingsForOwner(findManyOptions: AttributeDto): ListingResponse!
   findOneForBuyer(id: String!): Listing!
+  findAmenities: [Amenities!]!
   fetchIssueCategories: [IssueCategory!]!
   fetchIssues: [Issue!]!
   getTicket(ticketId: String!): Ticket!
@@ -350,12 +388,13 @@ type Query {
   findCities(findCities: PaginateAndSort): CityResponse!
 }
 
-input PaginateAndSort {
+input AttributeDto {
   take: Float
   skip: Float
   sortField: String
   directionToSort: SortOrder
   where: WhereOption
+  listingType: String
 }
 
 enum SortOrder {
@@ -372,6 +411,14 @@ input ListTicketInput {
 }
 
 input FindManyReviewDto {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
+}
+
+input PaginateAndSort {
   take: Float
   skip: Float
   sortField: String
@@ -622,25 +669,26 @@ input AttributeSetUpdateInput {
 
 input CreateListingDto {
   name: String!
+  purpose: String!
   ownership: String!
-  sellingType: String!
   powerOfAttorney: String
   listingType: String! = "property"
   rentingOption: String!
   propertyNumber: String!
   deedNumber: String!
-  districtCity: String!
+  districtCity: String
   country: String
   propertySize: String!
   publicationDate: String!
   price: String!
   numberOfBathrooms: String!
-  numberOfBedrooms: String!
-  mediaType: String = "image"
-  objectName: [String!]
+  numberOfRooms: String!
+  mediaType: String! = "image"
+  image: [String!]
   amenities: [String!]
   gpsCoordinate: LocationDto
   district: String
+  city: String
   street: String
   building: String
   floor: String
@@ -650,7 +698,8 @@ input CreateListingDto {
   areaPerApartment: String
   garageArea: String
   totalArea: String
-  numberOfRentedAppartment: String
+  rentedAppartment: String
+  negotiable: Boolean
 }
 
 input LocationDto {
@@ -662,7 +711,6 @@ input UpdateListingDto {
   id: String!
   name: String
   propertyNumber: String
-  districtCity: String
   price: String
   numberOfBathrooms: String
   numberOfBedrooms: String
@@ -672,7 +720,7 @@ input UpdateListingDto {
   publicationDate: String!
   mediaType: String = "image"
   gpsCoordinate: LocationDto
-  district: String
+  district: String!
   street: String
   building: String
   floor: String
@@ -682,7 +730,32 @@ input UpdateListingDto {
   areaPerApartment: String
   garageArea: String
   totalArea: String
-  numberOfRentedAppartment: String
+  rentedAppartment: String
+  negotiatable: Boolean
+  pool: Boolean
+  outdoorKitchen: Boolean
+  garden: Boolean
+  guestHouse: Boolean
+  tennisCourt: Boolean
+  basketballCourt: Boolean
+  jacuzzi: Boolean
+  bbqArea: Boolean
+  maidsRoom: Boolean
+  petsAllowed: Boolean
+  balcony: Boolean
+  gym: Boolean
+  playground: Boolean
+  parking: Boolean
+  security: Boolean
+  airConditioning: Boolean
+  storageRoom: Boolean
+  laundryRoom: Boolean
+  conferenceRoom: Boolean
+  gatedCommunity: Boolean
+  indoorPlayArea: Boolean
+  coveredParking: Boolean
+  wifi: Boolean
+  elevator: Boolean
 }
 
 input CreateOfferDto {

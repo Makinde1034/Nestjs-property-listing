@@ -8,6 +8,7 @@ import {
   HttpException,
   Injectable,
   Logger,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { ListingRepository } from '../repositories/listing.repository';
 import {
@@ -15,17 +16,27 @@ import {
   UpdateListingDto,
 } from '../dtos/request/listing.dto';
 import { User } from '../../../entities';
-import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 
 import { ForbiddenError } from '@nestjs/apollo';
 import { StorageService } from '../../storage/storage.service';
 import { SuccessResponse } from '../../../common/utils/success.response';
+import { AmenitiesRepository } from '../repositories/amenities.repository';
+import {
+  appartment,
+  villa,
+  farm,
+  land,
+  building,
+} from '../constant/attributes';
+import { AttributeDto } from '../dtos/request/attributes.dto';
 
 @Injectable()
 export class ListingService {
   constructor(
     private readonly listingRepository: ListingRepository,
     private readonly storageService: StorageService,
+
+    private readonly amenitiesRepository: AmenitiesRepository,
   ) {}
   logger = new Logger(ListingService.name);
   async createListing(user: User, createListingDto: CreateListingDto) {
@@ -39,26 +50,27 @@ export class ListingService {
       throw new BadRequestException(error.data || error.messages);
     }
   }
-
-  async findAllListingForBuyer(data: PaginateAndSort) {
+  async findAllListingsForOwner(data: AttributeDto, user?: User) {
     try {
-      if (data.where === undefined) {
-        const listing = await this.listingRepository
-          .queryBuilder('listing')
-          .take(data.take)
-          .skip(data.skip)
+      const typeMappings = {
+        villa,
+        appartment,
+        farm,
+        land,
+        building,
+      };
 
-          .getManyAndCount();
-
-        return listing;
+      const selectedAttributes = typeMappings[data.listingType];
+      if (!selectedAttributes) {
+        throw new BadRequestException(
+          `Invalid listing type: ${data.listingType}`,
+        );
       }
-      const whereParam = `listing.${data.where.fieldToChose} = : field`;
-      const listing = await this.listingRepository
-        .queryBuilder('listing')
-        .where(whereParam, { field: data.where.whereParam })
-        .take(data.take)
-        .skip(data.skip)
-        .getManyAndCount();
+
+      const listing = await this.listingRepository.findAndCount({
+        where: { listingType: data.listingType, userId: user.id },
+        select: ['id', 'deedNumber', 'propertyNumber', ...selectedAttributes],
+      });
 
       return listing;
     } catch (error) {
@@ -69,9 +81,41 @@ export class ListingService {
     }
   }
 
+  async findAllListings(data: AttributeDto) {
+    try {
+      const typeMappings = {
+        villa,
+        appartment,
+        farm,
+        land,
+        building,
+      };
+
+      const selectedAttributes = typeMappings[data.listingType];
+      if (!selectedAttributes) {
+        throw new BadRequestException(
+          `Invalid listing type: ${data.listingType}`,
+        );
+      }
+
+      const listing = await this.listingRepository.findAndCount({
+        where: { listingType: data.listingType },
+        select: ['id', ...selectedAttributes],
+      });
+
+      return listing;
+    } catch (error) {
+      this.logger.log(error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      } else throw new BadRequestException(error.messages || error.data);
+    }
+  }
+
   async findOneListingForBuyer(id: string) {
     try {
-      const listing = await this.listingRepository.findAll({
+      const listing = await this.listingRepository.findOne({
         where: { id: id },
         relations: ['user'],
         select: {
@@ -86,7 +130,9 @@ export class ListingService {
         },
       });
 
-      return listing[0];
+      listing.deedNumber = '';
+
+      return listing;
     } catch (error) {
       this.logger.log(error);
       if (error instanceof HttpException) {
@@ -141,6 +187,18 @@ export class ListingService {
       if (error instanceof HttpException) {
         throw error;
       } else throw new BadRequestException(error.messages || error.data);
+    }
+  }
+
+  async findAmenities() {
+    try {
+      return await this.amenitiesRepository.find();
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new UnprocessableEntityException('Error retrieving amenities');
+      }
     }
   }
 }

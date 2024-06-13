@@ -31,13 +31,13 @@ export class CreateListingDto {
 
   @Field()
   @IsString()
-  @IsEnum(Ownership)
-  ownership: string;
+  @IsEnum(Purpose)
+  purpose: string;
 
   @Field()
   @IsString()
-  @IsEnum(Purpose)
-  sellingType: string;
+  @IsEnum(Ownership)
+  ownership: string;
 
   @Field({ nullable: true })
   @ValidateIf((o) => o.ownership == Ownership.NOT_OWNER)
@@ -65,8 +65,8 @@ export class CreateListingDto {
   @IsString()
   deedNumber: string;
 
-  @Field()
-  @IsString()
+  @Field({ nullable: true })
+  @IsOptional()
   districtCity: string;
 
   @Field({ nullable: true })
@@ -100,17 +100,17 @@ export class CreateListingDto {
   @ValidateIf((listing) => listing.listingType == ListingType.APPARTMENT)
   @Field()
   @IsString()
-  numberOfBedrooms: string;
+  numberOfRooms: string;
 
   userId?: string;
 
-  @Field({ defaultValue: 'image', nullable: true })
+  @Field({ defaultValue: 'image' })
   @IsOptional()
   mediaType: string;
 
   @Field(() => [String], { nullable: true })
   @IsOptional()
-  objectName: string[];
+  image: string[];
 
   @IsOptional()
   @IsArray()
@@ -126,6 +126,10 @@ export class CreateListingDto {
   @IsOptional()
   @IsString()
   district: string;
+
+  @Field({ nullable: true })
+  @IsString()
+  city: string;
 
   @Field({ nullable: true })
   @IsOptional()
@@ -208,7 +212,11 @@ export class CreateListingDto {
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
-  numberOfRentedAppartment: string;
+  rentedAppartment: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  negotiable: boolean;
 }
 
 @InputType()
@@ -225,10 +233,6 @@ export class UpdateListingDto {
   @Field({ nullable: true })
   @IsOptional()
   propertyNumber?: string;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  districtCity?: string;
 
   @Field({ nullable: true })
   @IsOptional()
@@ -276,7 +280,7 @@ export class UpdateListingDto {
   @Field(() => LocationDto, { nullable: true })
   gpsCoordinate: LocationDto;
 
-  @Field({ nullable: true })
+  @Field()
   @IsOptional()
   @IsString()
   district: string;
@@ -362,5 +366,79 @@ export class UpdateListingDto {
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
-  numberOfRentedAppartment: string;
+  rentedAppartment: string;
+
+  @Field({ nullable: true })
+  negotiatable: boolean;
+
+  @Field({ nullable: true })
+  pool: boolean;
+
+  @Field({ nullable: true })
+  outdoorKitchen: boolean;
+
+  @Field({ nullable: true })
+  garden: boolean;
+
+  @Field({ nullable: true })
+  guestHouse: boolean;
+
+  @Field({ nullable: true })
+  tennisCourt: boolean;
+
+  @Field({ nullable: true })
+  basketballCourt: boolean;
+
+  @Field({ nullable: true })
+  jacuzzi: boolean;
+
+  @Field({ nullable: true })
+  bbqArea: boolean;
+
+  @Field({ nullable: true })
+  maidsRoom: boolean;
+
+  @Field({ nullable: true })
+  petsAllowed: boolean;
+
+  @Field({ nullable: true })
+  balcony: boolean;
+
+  @Field({ nullable: true })
+  gym: boolean;
+  @Field({ nullable: true })
+  playground: boolean;
+
+  @Field({ nullable: true })
+  parking: boolean;
+
+  @Field({ nullable: true })
+  security: boolean;
+
+  @Field({ nullable: true })
+  airConditioning: boolean;
+
+  @Field({ nullable: true })
+  storageRoom: boolean;
+
+  @Field({ nullable: true })
+  laundryRoom: boolean;
+
+  @Field({ nullable: true })
+  conferenceRoom: boolean;
+
+  @Field({ nullable: true })
+  gatedCommunity: boolean;
+
+  @Field({ nullable: true })
+  indoorPlayArea: boolean;
+
+  @Field({ nullable: true })
+  coveredParking: boolean;
+
+  @Field({ nullable: true })
+  wifi: boolean;
+
+  @Field({ nullable: true })
+  elevator: boolean;
 }

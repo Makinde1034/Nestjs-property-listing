@@ -29,6 +29,10 @@ export class Listing extends BaseEntity {
   @Column({ nullable: true })
   name: string;
 
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  purpose: string;
+
   @Column()
   @Field()
   sellingType: string;
@@ -51,12 +55,15 @@ export class Listing extends BaseEntity {
 
   @Column()
   @Field()
-  @Exclude()
   deedNumber: string;
 
-  @Column()
-  @Field()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   districtCity: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  city: string;
 
   @Field()
   @Column({ nullable: true })
@@ -81,7 +88,7 @@ export class Listing extends BaseEntity {
 
   @Column()
   @Field()
-  numberOfBedrooms: string;
+  numberOfRooms: string;
 
   @Column({ type: 'jsonb', nullable: true })
   @Field({ nullable: true })
@@ -157,7 +164,107 @@ export class Listing extends BaseEntity {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
-  numberOFRentedAppartment: string;
+  rentedAppartment: string;
+
+  @Column({ type: 'boolean', default: false })
+  @Field({ nullable: true })
+  negotiatable: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  @Field({ nullable: true })
+  pool: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  @Field({ nullable: true })
+  outdoorKitchen: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  @Field({ nullable: true })
+  garden: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  @Field({ nullable: true })
+  guestHouse: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  @Field({ nullable: true })
+  tennisCourt: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  @Field({ nullable: true })
+  basketballCourt: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  @Field({ nullable: true })
+  jacuzzi: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  @Field({ nullable: true })
+  bbqArea: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  @Field({ nullable: true })
+  maidsRoom: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  @Field({ nullable: true })
+  petsAllowed: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  @Field({ nullable: true })
+  balcony: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  @Field({ nullable: true })
+  gym: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  @Field({ nullable: true })
+  playground: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  @Field({ nullable: true })
+  parking: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  @Field({ nullable: true })
+  security: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  @Field({ nullable: true })
+  airConditioning: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  @Field({ nullable: true })
+  storageRoom: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  @Field({ nullable: true })
+  laundryRoom: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  @Field({ nullable: true })
+  conferenceRoom: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  @Field({ nullable: true })
+  gatedCommunity: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  @Field({ nullable: true })
+  indoorPlayArea: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  @Field({ nullable: true })
+  coveredParking: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  @Field({ nullable: true })
+  wifi: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  @Field({ nullable: true })
+  elevator: boolean;
 
   @Field()
   @CreateDateColumn()

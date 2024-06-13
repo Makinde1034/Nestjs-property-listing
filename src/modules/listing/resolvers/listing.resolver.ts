@@ -10,11 +10,13 @@ import { CreateListingDto, UpdateListingDto } from '../dtos/request/';
 import { Listing } from '../../../entities';
 import { UseGuards } from '@nestjs/common';
 import { AccessTokenGuard } from '../../auth/guards';
-import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
+
 import { ListingResponse } from '../dtos/response/listing.response';
 import { OfferService } from '../services/offer.service';
 import { CreateOfferDto } from '../dtos/request/offer.dto';
 import { Offer } from '../../../entities/offer.entity';
+import { Amenities } from '../../../entities/amenities.entity';
+import { AttributeDto } from '../dtos/request/attributes.dto';
 
 @Resolver()
 export class ListingResolver {
@@ -34,13 +36,28 @@ export class ListingResolver {
     );
   }
   @UseGuards(AccessTokenGuard)
-  @Query(() => ListingResponse, { name: 'findListingForBuyer' })
+  @Query(() => ListingResponse, { name: 'findListings' })
   async findListingForBuyer(
     @Args('findManyOptions', { nullable: true })
-    findManyOptions?: PaginateAndSort,
+    findManyOptions?: AttributeDto,
   ) {
     const [listing, total] =
-      await this.listingService.findAllListingForBuyer(findManyOptions);
+      await this.listingService.findAllListings(findManyOptions);
+
+    return { listing, total };
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Query(() => ListingResponse, { name: 'findListingsForOwner' })
+  async findListingsForOwner(
+    @Context() ctx: any,
+    @Args('findManyOptions', { nullable: true })
+    findManyOptions?: AttributeDto,
+  ) {
+    const [listing, total] = await this.listingService.findAllListingsForOwner(
+      findManyOptions,
+      ctx.req.user,
+    );
 
     return { listing, total };
   }
@@ -70,5 +87,11 @@ export class ListingResolver {
     @Context() ctx: any,
   ) {
     return await this.offerService.createAnOffer(createOfferDto, ctx.req.user);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Query(() => [Amenities], { name: 'findAmenities' })
+  async findAmenities() {
+    return await this.listingService.findAmenities();
   }
 }

@@ -20,6 +20,8 @@ import { ListingRepository } from './repositories/listing.repository';
 import { ListingResolver } from './resolvers/listing.resolver';
 import { Offer } from '../../entities/offer.entity';
 import { OfferService } from './services/offer.service';
+import { Amenities } from '../../entities/amenities.entity';
+import { AmenitiesRepository } from './repositories/amenities.repository';
 
 @Module({
   imports: [
@@ -29,6 +31,7 @@ import { OfferService } from './services/offer.service';
       ListingType,
       Listing,
       Offer,
+      Amenities,
     ]),
   ],
   controllers: [ListingController, ListingTypeController],
@@ -45,6 +48,7 @@ import { OfferService } from './services/offer.service';
     ListingResolver,
     OfferRepository,
     OfferService,
+    AmenitiesRepository,
   ],
 })
 export class ListingModule {}
