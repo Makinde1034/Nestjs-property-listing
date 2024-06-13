@@ -5,6 +5,7 @@
 
 import {
   BadRequestException,
+  ConflictException,
   HttpException,
   Injectable,
   Logger,
@@ -29,19 +30,29 @@ import {
   building,
 } from '../constant/attributes';
 import { AttributeDto } from '../dtos/request/attributes.dto';
+import { CreatePromotionInput } from '../dtos/request/promotion-input';
+import { PromotionRepository } from '../repositories/promotion.repository';
+
+import { AdPackageService } from '../../ad-package/services/ad-package.service';
+import { MoreThan, QueryFailedError } from 'typeorm';
+import { addDaysToDate } from '../../../common/utils/helper';
 
 @Injectable()
 export class ListingService {
   constructor(
     private readonly listingRepository: ListingRepository,
+    private readonly promotionRepository: PromotionRepository,
     private readonly storageService: StorageService,
 
     private readonly amenitiesRepository: AmenitiesRepository,
+
+    private readonly adpackageService: AdPackageService,
   ) {}
   logger = new Logger(ListingService.name);
   async createListing(user: User, createListingDto: CreateListingDto) {
     try {
       createListingDto.userId = user.id;
+
       const listing = await this.listingRepository.create(createListingDto);
 
       return listing;
@@ -50,6 +61,7 @@ export class ListingService {
       throw new BadRequestException(error.data || error.messages);
     }
   }
+
   async findAllListingsForOwner(data: AttributeDto, user?: User) {
     try {
       const typeMappings = {
@@ -113,11 +125,48 @@ export class ListingService {
     }
   }
 
+  async findAllPromotedListings(data: AttributeDto) {
+    try {
+      const typeMappings = {
+        villa,
+        appartment,
+        farm,
+        land,
+        building,
+      };
+
+      const selectedAttributes = typeMappings[data.listingType];
+      if (!selectedAttributes) {
+        throw new BadRequestException(
+          `Invalid listing type: ${data.listingType}`,
+        );
+      }
+      const date = new Date().toISOString();
+      const listing = await this.listingRepository.findAndCount({
+        where: {
+          listingType: data.listingType,
+          promoted: true,
+          promotionExpiration: MoreThan(date),
+        },
+        select: ['id', ...selectedAttributes],
+      });
+
+      return listing;
+    } catch (error) {
+      console.log(error);
+      this.logger.log(error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      } else throw new BadRequestException(error.messages || error.data);
+    }
+  }
+
   async findOneListingForBuyer(id: string) {
     try {
       const listing = await this.listingRepository.findOne({
         where: { id: id },
-        relations: ['user'],
+        relations: ['user', 'promotion'],
         select: {
           user: {
             id: true,
@@ -127,10 +176,22 @@ export class ListingService {
             arabicFirstName: true,
             arabicLastName: true,
           },
+          promotion: {
+            id: true,
+            listingId: true,
+            adPackage: { id: true, name: true },
+          },
         },
       });
 
+      const newImpression = listing.impressions + 1;
+
+      await this.listingRepository.update(listing.id, {
+        impressions: newImpression,
+      });
+
       listing.deedNumber = '';
+      listing.propertyNumber = '';
 
       return listing;
     } catch (error) {
@@ -199,6 +260,49 @@ export class ListingService {
       } else {
         throw new UnprocessableEntityException('Error retrieving amenities');
       }
+    }
+  }
+
+  async createPromotion(createPromotionInput: CreatePromotionInput) {
+    try {
+      const listing = await this.listingRepository.findById(
+        createPromotionInput.listingId,
+      );
+
+      const adPackage = await this.adpackageService.findOne(
+        createPromotionInput.adPackageId,
+      );
+
+      if (!adPackage) {
+        throw new BadRequestException('Invalid Ad Package ');
+      }
+
+      if (!adPackage && !listing) {
+        throw new BadRequestException('Invalid listing ');
+      }
+
+      if (adPackage && listing) {
+        const promotion = await this.promotionRepository.save({
+          ...createPromotionInput,
+          adPackage: { ...adPackage },
+          listing: { ...listing },
+        });
+        const formatedDays = parseInt(adPackage.duration);
+        const expirationDate = addDaysToDate(new Date(), formatedDays);
+        await this.listingRepository.update(listing.id, {
+          promotionExpiration: expirationDate,
+        });
+
+        return promotion;
+      }
+    } catch (error) {
+      this.logger.log(error);
+      if (error instanceof QueryFailedError) {
+        if ((error as any).code === '23505') {
+          throw new ConflictException('You already have this Ad running');
+        }
+      }
+      throw new BadRequestException('You already have this Ad running');
     }
   }
 }

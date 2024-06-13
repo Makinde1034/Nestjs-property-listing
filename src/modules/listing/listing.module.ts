@@ -22,6 +22,10 @@ import { Offer } from '../../entities/offer.entity';
 import { OfferService } from './services/offer.service';
 import { Amenities } from '../../entities/amenities.entity';
 import { AmenitiesRepository } from './repositories/amenities.repository';
+import { Promotion } from '../../entities/promotion.entity';
+import { AdPackageService } from '../ad-package/services/ad-package.service';
+import { AdPackageModule } from '../ad-package/ad-package.module';
+import { PromotionRepository } from './repositories/promotion.repository';
 
 @Module({
   imports: [
@@ -32,7 +36,9 @@ import { AmenitiesRepository } from './repositories/amenities.repository';
       Listing,
       Offer,
       Amenities,
+      Promotion,
     ]),
+    AdPackageModule,
   ],
   controllers: [ListingController, ListingTypeController],
   providers: [
@@ -49,6 +55,8 @@ import { AmenitiesRepository } from './repositories/amenities.repository';
     OfferRepository,
     OfferService,
     AmenitiesRepository,
+    AdPackageService,
+    PromotionRepository,
   ],
 })
 export class ListingModule {}

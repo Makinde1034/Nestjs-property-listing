@@ -10,9 +10,10 @@ import { User } from '../../../entities';
 export class AdminGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const ctx = GqlExecutionContext.create(context).getContext();
-    const user: User = ctx.req.user;
+    const user: User = ctx.req.user; // Ensure user is correctly extracted
 
-    // Check if the user has admin privileges
-    return user && user.userType === 'admin';
+    const isAdmin = user && user.userType === 'admin';
+
+    return isAdmin || false; // Ensure returning a boolean
   }
 }

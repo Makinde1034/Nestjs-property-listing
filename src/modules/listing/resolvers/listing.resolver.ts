@@ -17,6 +17,8 @@ import { CreateOfferDto } from '../dtos/request/offer.dto';
 import { Offer } from '../../../entities/offer.entity';
 import { Amenities } from '../../../entities/amenities.entity';
 import { AttributeDto } from '../dtos/request/attributes.dto';
+import { CreatePromotionInput } from '../dtos/request/promotion-input';
+import { Promotion } from '../../../entities/promotion.entity';
 
 @Resolver()
 export class ListingResolver {
@@ -35,6 +37,7 @@ export class ListingResolver {
       createListingDto,
     );
   }
+
   @UseGuards(AccessTokenGuard)
   @Query(() => ListingResponse, { name: 'findListings' })
   async findListingForBuyer(
@@ -43,6 +46,18 @@ export class ListingResolver {
   ) {
     const [listing, total] =
       await this.listingService.findAllListings(findManyOptions);
+
+    return { listing, total };
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Query(() => ListingResponse, { name: 'findPromotedListings' })
+  async findPromotedListingForBuyer(
+    @Args('findManyOptions', { nullable: true })
+    findManyOptions?: AttributeDto,
+  ) {
+    const [listing, total] =
+      await this.listingService.findAllPromotedListings(findManyOptions);
 
     return { listing, total };
   }
@@ -93,5 +108,13 @@ export class ListingResolver {
   @Query(() => [Amenities], { name: 'findAmenities' })
   async findAmenities() {
     return await this.listingService.findAmenities();
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => Promotion, { name: 'createPromotion' })
+  async createPromotion(
+    @Args('createPromotionInput') createPromotionInput: CreatePromotionInput,
+  ) {
+    return await this.listingService.createPromotion(createPromotionInput);
   }
 }

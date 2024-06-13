@@ -17,6 +17,7 @@ import { Field, ObjectType } from '@nestjs/graphql';
 import { User } from './user.entity';
 import { Exclude } from 'class-transformer';
 import { Offer } from './offer.entity';
+import { Promotion } from './promotion.entity';
 
 @Entity()
 @ObjectType()
@@ -33,8 +34,8 @@ export class Listing extends BaseEntity {
   @Column({ nullable: true })
   purpose: string;
 
-  @Column()
-  @Field()
+  @Column({ default: 'rent' })
+  @Field({ defaultValue: 'rent' })
   sellingType: string;
 
   @Field({ nullable: true })
@@ -265,6 +266,21 @@ export class Listing extends BaseEntity {
   @Column({ type: 'boolean', default: false })
   @Field({ nullable: true })
   elevator: boolean;
+
+  @OneToMany(() => Promotion, (promotion) => promotion.listing)
+  promotion: Promotion;
+
+  @Field({ defaultValue: 0 })
+  @Column({ default: 0 })
+  impressions: number;
+
+  @Field({ defaultValue: false })
+  @Column({ default: false })
+  promoted: boolean;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  promotionExpiration: Date;
 
   @Field()
   @CreateDateColumn()

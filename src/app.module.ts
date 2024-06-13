@@ -30,6 +30,9 @@ import { TicketsModule } from './modules/tickets/tickets.module';
 import { ReviewModule } from './modules/review/review.module';
 
 import { LocationModule } from './modules/location/location.module';
+import { AdPackageModule } from './modules/ad-package/ad-package.module';
+
+import { PaymentModule } from './modules/payment/payment.module';
 
 @Module({
   imports: [
@@ -82,6 +85,9 @@ import { LocationModule } from './modules/location/location.module';
     TicketsModule,
     ReviewModule,
     LocationModule,
+    AdPackageModule,
+
+    PaymentModule,
   ],
   controllers: [],
   providers: [AppResolver],
