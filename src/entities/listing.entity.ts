@@ -274,6 +274,14 @@ export class Listing extends BaseEntity {
   @Column({ default: 0 })
   impressions: number;
 
+  @Field({ defaultValue: false })
+  @Column({ default: false })
+  promoted: boolean;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  promotionExpiration: Date;
+
   @Field()
   @CreateDateColumn()
   createdAt: Date;

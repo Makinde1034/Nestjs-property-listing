@@ -37,6 +37,7 @@ export class ListingResolver {
       createListingDto,
     );
   }
+
   @UseGuards(AccessTokenGuard)
   @Query(() => ListingResponse, { name: 'findListings' })
   async findListingForBuyer(
@@ -45,6 +46,18 @@ export class ListingResolver {
   ) {
     const [listing, total] =
       await this.listingService.findAllListings(findManyOptions);
+
+    return { listing, total };
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Query(() => ListingResponse, { name: 'findPromotedListings' })
+  async findPromotedListingForBuyer(
+    @Args('findManyOptions', { nullable: true })
+    findManyOptions?: AttributeDto,
+  ) {
+    const [listing, total] =
+      await this.listingService.findAllPromotedListings(findManyOptions);
 
     return { listing, total };
   }

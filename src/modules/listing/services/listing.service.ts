@@ -34,7 +34,8 @@ import { CreatePromotionInput } from '../dtos/request/promotion-input';
 import { PromotionRepository } from '../repositories/promotion.repository';
 
 import { AdPackageService } from '../../ad-package/services/ad-package.service';
-import { QueryFailedError } from 'typeorm';
+import { MoreThan, QueryFailedError } from 'typeorm';
+import { addDaysToDate } from '../../../common/utils/helper';
 
 @Injectable()
 export class ListingService {
@@ -51,6 +52,7 @@ export class ListingService {
   async createListing(user: User, createListingDto: CreateListingDto) {
     try {
       createListingDto.userId = user.id;
+
       const listing = await this.listingRepository.create(createListingDto);
 
       return listing;
@@ -115,6 +117,43 @@ export class ListingService {
 
       return listing;
     } catch (error) {
+      this.logger.log(error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      } else throw new BadRequestException(error.messages || error.data);
+    }
+  }
+
+  async findAllPromotedListings(data: AttributeDto) {
+    try {
+      const typeMappings = {
+        villa,
+        appartment,
+        farm,
+        land,
+        building,
+      };
+
+      const selectedAttributes = typeMappings[data.listingType];
+      if (!selectedAttributes) {
+        throw new BadRequestException(
+          `Invalid listing type: ${data.listingType}`,
+        );
+      }
+      const date = new Date().toISOString();
+      const listing = await this.listingRepository.findAndCount({
+        where: {
+          listingType: data.listingType,
+          promoted: true,
+          promotionExpiration: MoreThan(date),
+        },
+        select: ['id', ...selectedAttributes],
+      });
+
+      return listing;
+    } catch (error) {
+      console.log(error);
       this.logger.log(error);
 
       if (error instanceof HttpException) {
@@ -243,11 +282,18 @@ export class ListingService {
       }
 
       if (adPackage && listing) {
-        return await this.promotionRepository.save({
+        const promotion = await this.promotionRepository.save({
           ...createPromotionInput,
           adPackage: { ...adPackage },
           listing: { ...listing },
         });
+        const formatedDays = parseInt(adPackage.duration);
+        const expirationDate = addDaysToDate(new Date(), formatedDays);
+        await this.listingRepository.update(listing.id, {
+          promotionExpiration: expirationDate,
+        });
+
+        return promotion;
       }
     } catch (error) {
       this.logger.log(error);
@@ -256,7 +302,7 @@ export class ListingService {
           throw new ConflictException('You already have this Ad running');
         }
       }
-      throw new BadRequestException('you havr');
+      throw new BadRequestException('You already have this Ad running');
     }
   }
 }

@@ -187,6 +187,8 @@ type Listing {
   wifi: Boolean
   elevator: Boolean
   impressions: Float!
+  promoted: Boolean!
+  promotionExpiration: DateTime
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -402,6 +404,7 @@ type Query {
   fetchAttributes: [Attribute!]!
   fetchAttributeSets: [AttributeSet!]!
   findListings(findManyOptions: AttributeDto): ListingResponse!
+  findPromotedListings(findManyOptions: AttributeDto): ListingResponse!
   findListingsForOwner(findManyOptions: AttributeDto): ListingResponse!
   findOneForBuyer(id: String!): Listing!
   findAmenities: [Amenities!]!
