@@ -29,14 +29,21 @@ import {
   building,
 } from '../constant/attributes';
 import { AttributeDto } from '../dtos/request/attributes.dto';
+import { CreatePromotionInput } from '../dtos/request/promotion-input';
+import { PromotionRepository } from '../repositories/promotion.repository';
+
+import { AdPackageService } from '../../ad-package/services/ad-package.service';
 
 @Injectable()
 export class ListingService {
   constructor(
     private readonly listingRepository: ListingRepository,
+    private readonly promotionRepository: PromotionRepository,
     private readonly storageService: StorageService,
 
     private readonly amenitiesRepository: AmenitiesRepository,
+
+    private readonly adpackageService: AdPackageService,
   ) {}
   logger = new Logger(ListingService.name);
   async createListing(user: User, createListingDto: CreateListingDto) {
@@ -50,6 +57,7 @@ export class ListingService {
       throw new BadRequestException(error.data || error.messages);
     }
   }
+
   async findAllListingsForOwner(data: AttributeDto, user?: User) {
     try {
       const typeMappings = {
@@ -199,6 +207,37 @@ export class ListingService {
       } else {
         throw new UnprocessableEntityException('Error retrieving amenities');
       }
+    }
+  }
+
+  async createPromotion(createPromotionInput: CreatePromotionInput) {
+    try {
+      const listing = await this.listingRepository.findById(
+        createPromotionInput.listingId,
+      );
+
+      const adPackage = await this.adpackageService.findOne(
+        createPromotionInput.adPackageId,
+      );
+
+      if (!adPackage) {
+        throw new BadRequestException('Invalid Ad Package ');
+      }
+
+      if (!adPackage && !listing) {
+        throw new BadRequestException('Invalid listing ');
+      }
+
+      if (adPackage && listing) {
+        return await this.promotionRepository.save({
+          ...createPromotionInput,
+          adPackage: { ...adPackage },
+          listing: { ...listing },
+        });
+      }
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error.data || error.messages);
     }
   }
 }

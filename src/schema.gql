@@ -104,6 +104,26 @@ type Offer {
   updatedAt: String!
 }
 
+type AdPackage {
+  id: String!
+  name: String!
+  price: String!
+  duration: String!
+  promotion: Promotion!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Promotion {
+  id: Float!
+  listingId: String!
+  impressions: Float!
+  adPackage: AdPackage!
+  listing: Listing!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type Listing {
   id: ID!
   ownership: String!
@@ -363,6 +383,11 @@ type CityResponse {
   total: Int!
 }
 
+type Payment {
+  id: String!
+  amount: Float!
+}
+
 type Query {
   app: String!
   activateTwoFa: TwoFaResult!
@@ -379,6 +404,7 @@ type Query {
   findListingsForOwner(findManyOptions: AttributeDto): ListingResponse!
   findOneForBuyer(id: String!): Listing!
   findAmenities: [Amenities!]!
+  adPackage(id: String!): AdPackage!
   fetchIssueCategories: [IssueCategory!]!
   fetchIssues: [Issue!]!
   getTicket(ticketId: String!): Ticket!
@@ -459,6 +485,9 @@ type Mutation {
   createListing(createListing: CreateListingDto!): Listing!
   updateListing(updateListingDto: UpdateListingDto!): Listing!
   createOffer(createOfferDto: CreateOfferDto!): Offer!
+  createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
+  updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
+  removeAdPackage(id: Int!): AdPackage!
   createIssueCategory(RequestInput: CreateIssueCategoryInput!): IssueCategory!
   updateIssueCatgeory(RequestInput: UpdateIssueCategoryInput!): IssueCategory!
   deleteIssueCategory(RequestInput: DeleteIssueInput!): String!
@@ -468,6 +497,8 @@ type Mutation {
   createTicket(RequestInput: CreateTicketInput!): String!
   manageTicket(RequestInput: UpdateTicketInput!): Ticket!
   review(createReviewDto: CreateReviewDto!): Review!
+  initializePayment(createPaymentInput: CreatePaymentInput!): Payment!
+  verify(createPaymentInput: CreatePaymentInput!): Payment!
 }
 
 input RegisterInput {
@@ -682,6 +713,7 @@ input CreateListingDto {
   publicationDate: String!
   price: String!
   numberOfBathrooms: String!
+  sellingType: String! = "rent"
   numberOfRooms: String!
   mediaType: String! = "image"
   image: [String!]
@@ -700,38 +732,6 @@ input CreateListingDto {
   totalArea: String
   rentedAppartment: String
   negotiable: Boolean
-}
-
-input LocationDto {
-  lng: String!
-  lat: String!
-}
-
-input UpdateListingDto {
-  id: String!
-  name: String
-  propertyNumber: String
-  price: String
-  numberOfBathrooms: String
-  numberOfBedrooms: String
-  objectName: [String!]
-  amenities: [String!]
-  propertySize: String!
-  publicationDate: String!
-  mediaType: String = "image"
-  gpsCoordinate: LocationDto
-  district: String!
-  street: String
-  building: String
-  floor: String
-  landArea: String
-  numberOfAppartment: String
-  numberOfStoreys: String
-  areaPerApartment: String
-  garageArea: String
-  totalArea: String
-  rentedAppartment: String
-  negotiatable: Boolean
   pool: Boolean
   outdoorKitchen: Boolean
   garden: Boolean
@@ -758,12 +758,91 @@ input UpdateListingDto {
   elevator: Boolean
 }
 
+input LocationDto {
+  lng: String!
+  lat: String!
+}
+
+input UpdateListingDto {
+  name: String
+  purpose: String
+  ownership: String
+  powerOfAttorney: String
+  listingType: String = "property"
+  rentingOption: String
+  propertyNumber: String
+  deedNumber: String
+  districtCity: String
+  country: String
+  propertySize: String
+  publicationDate: String
+  price: String
+  numberOfBathrooms: String
+  sellingType: String = "rent"
+  numberOfRooms: String
+  mediaType: String = "image"
+  image: [String!]
+  amenities: [String!]
+  gpsCoordinate: LocationDto
+  district: String
+  city: String
+  street: String
+  building: String
+  floor: String
+  landArea: String
+  numberOfAppartment: String
+  numberOfStoreys: String
+  areaPerApartment: String
+  garageArea: String
+  totalArea: String
+  rentedAppartment: String
+  negotiable: Boolean
+  pool: Boolean
+  outdoorKitchen: Boolean
+  garden: Boolean
+  guestHouse: Boolean
+  tennisCourt: Boolean
+  basketballCourt: Boolean
+  jacuzzi: Boolean
+  bbqArea: Boolean
+  maidsRoom: Boolean
+  petsAllowed: Boolean
+  balcony: Boolean
+  gym: Boolean
+  playground: Boolean
+  parking: Boolean
+  security: Boolean
+  airConditioning: Boolean
+  storageRoom: Boolean
+  laundryRoom: Boolean
+  conferenceRoom: Boolean
+  gatedCommunity: Boolean
+  indoorPlayArea: Boolean
+  coveredParking: Boolean
+  wifi: Boolean
+  elevator: Boolean
+  id: String!
+}
+
 input CreateOfferDto {
   offerPrice: Float!
   expireAt: DateTime!
   coupon: Boolean
   couponCode: String
   listingId: String!
+}
+
+input CreateAdPackageInput {
+  name: String!
+  price: String!
+  duration: String!
+}
+
+input UpdateAdPackageInput {
+  name: String
+  price: String
+  duration: String
+  id: Int!
 }
 
 input CreateIssueCategoryInput {
@@ -808,4 +887,8 @@ input CreateReviewDto {
   type: String!
   service_owner_id: String!
   reviewer_id: String
+}
+
+input CreatePaymentInput {
+  amount: Float!
 }
