@@ -5,8 +5,8 @@
 
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class UpdateListingTable1718129097544 implements MigrationInterface {
-  name = 'UpdateListingTable1718129097544';
+export class UpdateListing1718269881098 implements MigrationInterface {
+  name = 'UpdateListing1718269881098';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
@@ -21,13 +21,22 @@ export class UpdateListingTable1718129097544 implements MigrationInterface {
     await queryRunner.query(
       `DROP INDEX "public"."IDX_bfbc9e263d4cea6d7a8c9eb3ad"`,
     );
-    await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "amenities"`);
-    await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "deedNumber"`);
-    await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "districtCity"`);
     await queryRunner.query(
-      `ALTER TABLE "listing" DROP COLUMN "gpsCoordinates"`,
+      `CREATE TABLE "amenities" ("id" SERIAL NOT NULL, "name" character varying NOT NULL, "image" character varying, "description" character varying, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_c0777308847b3556086f2fb233e" PRIMARY KEY ("id"))`,
     );
-    await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "landArea"`);
+    await queryRunner.query(`ALTER TABLE "permission" DROP COLUMN "name"`);
+    await queryRunner.query(
+      `ALTER TABLE "permission" DROP COLUMN "permissionGroup"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "permission" DROP COLUMN "description"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "listing" DROP COLUMN "numberOfBedrooms"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "listing" DROP COLUMN "numberOFRentedAppartment"`,
+    );
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" DROP COLUMN "approve"`,
     );
@@ -35,17 +44,28 @@ export class UpdateListingTable1718129097544 implements MigrationInterface {
       `ALTER TABLE "role_permissions_permission" ADD "approve" boolean DEFAULT false`,
     );
     await queryRunner.query(
-      `ALTER TABLE "listing" ADD "city" character varying NOT NULL`,
+      `ALTER TABLE "permission" ADD "functionDescription" character varying NOT NULL`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "permission" ADD "category" character varying NOT NULL`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "permission" ADD "englishLabel" character varying NOT NULL`,
     );
     await queryRunner.query(
       `ALTER TABLE "listing" ADD "purpose" character varying`,
     );
-    await queryRunner.query(`ALTER TABLE "listing" ADD "coordinates" jsonb`);
     await queryRunner.query(
-      `ALTER TABLE "listing" ADD "land_area" character varying`,
+      `ALTER TABLE "listing" ADD "city" character varying`,
     );
     await queryRunner.query(
-      `ALTER TABLE "listing" ADD "garage" boolean NOT NULL DEFAULT false`,
+      `ALTER TABLE "listing" ADD "numberOfRooms" character varying NOT NULL`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "listing" ADD "rentedAppartment" character varying`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "listing" ADD "negotiatable" boolean NOT NULL DEFAULT false`,
     );
     await queryRunner.query(
       `ALTER TABLE "listing" ADD "pool" boolean NOT NULL DEFAULT false`,
@@ -120,10 +140,13 @@ export class UpdateListingTable1718129097544 implements MigrationInterface {
       `ALTER TABLE "listing" ADD "elevator" boolean NOT NULL DEFAULT false`,
     );
     await queryRunner.query(
-      `ALTER TABLE "listing" ADD "deednumber" character varying NOT NULL`,
+      `ALTER TABLE "permission" ALTER COLUMN "useFlag" SET NOT NULL`,
     );
     await queryRunner.query(
-      `ALTER TABLE "listing" ADD "rentedApartments" character varying NOT NULL`,
+      `ALTER TABLE "permission" ALTER COLUMN "staffAccess" SET NOT NULL`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "listing" ALTER COLUMN "districtCity" DROP NOT NULL`,
     );
     await queryRunner.query(
       `CREATE INDEX "IDX_b36cb2e04bc353ca4ede00d87b" ON "role_permissions_permission" ("roleId") `,
@@ -153,9 +176,14 @@ export class UpdateListingTable1718129097544 implements MigrationInterface {
       `DROP INDEX "public"."IDX_b36cb2e04bc353ca4ede00d87b"`,
     );
     await queryRunner.query(
-      `ALTER TABLE "listing" DROP COLUMN "rentedApartments"`,
+      `ALTER TABLE "listing" ALTER COLUMN "districtCity" SET NOT NULL`,
     );
-    await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "deednumber"`);
+    await queryRunner.query(
+      `ALTER TABLE "permission" ALTER COLUMN "staffAccess" DROP NOT NULL`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "permission" ALTER COLUMN "useFlag" DROP NOT NULL`,
+    );
     await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "elevator"`);
     await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "wifi"`);
     await queryRunner.query(
@@ -194,11 +222,22 @@ export class UpdateListingTable1718129097544 implements MigrationInterface {
       `ALTER TABLE "listing" DROP COLUMN "outdoorKitchen"`,
     );
     await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "pool"`);
-    await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "garage"`);
-    await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "land_area"`);
-    await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "coordinates"`);
-    await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "purpose"`);
+    await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "negotiatable"`);
+    await queryRunner.query(
+      `ALTER TABLE "listing" DROP COLUMN "rentedAppartment"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "listing" DROP COLUMN "numberOfRooms"`,
+    );
     await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "city"`);
+    await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "purpose"`);
+    await queryRunner.query(
+      `ALTER TABLE "permission" DROP COLUMN "englishLabel"`,
+    );
+    await queryRunner.query(`ALTER TABLE "permission" DROP COLUMN "category"`);
+    await queryRunner.query(
+      `ALTER TABLE "permission" DROP COLUMN "functionDescription"`,
+    );
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" DROP COLUMN "approve"`,
     );
@@ -206,16 +245,21 @@ export class UpdateListingTable1718129097544 implements MigrationInterface {
       `ALTER TABLE "role_permissions_permission" ADD "approve" boolean DEFAULT false`,
     );
     await queryRunner.query(
-      `ALTER TABLE "listing" ADD "landArea" character varying`,
-    );
-    await queryRunner.query(`ALTER TABLE "listing" ADD "gpsCoordinates" jsonb`);
-    await queryRunner.query(
-      `ALTER TABLE "listing" ADD "districtCity" character varying NOT NULL`,
+      `ALTER TABLE "listing" ADD "numberOFRentedAppartment" character varying`,
     );
     await queryRunner.query(
-      `ALTER TABLE "listing" ADD "deedNumber" character varying NOT NULL`,
+      `ALTER TABLE "listing" ADD "numberOfBedrooms" character varying NOT NULL`,
     );
-    await queryRunner.query(`ALTER TABLE "listing" ADD "amenities" text`);
+    await queryRunner.query(
+      `ALTER TABLE "permission" ADD "description" character varying`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "permission" ADD "permissionGroup" character varying NOT NULL`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "permission" ADD "name" character varying`,
+    );
+    await queryRunner.query(`DROP TABLE "amenities"`);
     await queryRunner.query(
       `CREATE INDEX "IDX_bfbc9e263d4cea6d7a8c9eb3ad" ON "role_permissions_permission" ("permissionId") `,
     );
