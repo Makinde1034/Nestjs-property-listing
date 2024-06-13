@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class UpdateListingTable1717770405892 implements MigrationInterface {
