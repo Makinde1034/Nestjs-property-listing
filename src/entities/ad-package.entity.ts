@@ -1,9 +1,14 @@
-import { ObjectType, Field, Int } from '@nestjs/graphql';
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
+import { ObjectType, Field } from '@nestjs/graphql';
 import {
   Column,
   CreateDateColumn,
   Entity,
-  OneToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -28,9 +33,9 @@ export class AdPackage {
   @Column()
   duration: string;
 
-  @Field(() => Promotion)
-  @OneToOne(() => Promotion, (promotion) => promotion.adPackage)
-  promotion: Promotion;
+  @Field(() => [Promotion])
+  @OneToMany(() => Promotion, (promotion) => promotion.adPackage)
+  promotion: Promotion[];
 
   @Field()
   @CreateDateColumn()

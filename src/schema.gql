@@ -109,15 +109,15 @@ type AdPackage {
   name: String!
   price: String!
   duration: String!
-  promotion: Promotion!
+  promotion: [Promotion!]!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
 
 type Promotion {
-  id: Float!
+  id: String!
   listingId: String!
-  impressions: Float!
+  expiredAt: DateTime
   adPackage: AdPackage!
   listing: Listing!
   createdAt: DateTime!
@@ -186,6 +186,7 @@ type Listing {
   coveredParking: Boolean
   wifi: Boolean
   elevator: Boolean
+  impressions: Float!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -485,6 +486,7 @@ type Mutation {
   createListing(createListing: CreateListingDto!): Listing!
   updateListing(updateListingDto: UpdateListingDto!): Listing!
   createOffer(createOfferDto: CreateOfferDto!): Offer!
+  createPromotion(createPromotionInput: CreatePromotionInput!): Promotion!
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!
@@ -497,8 +499,8 @@ type Mutation {
   createTicket(RequestInput: CreateTicketInput!): String!
   manageTicket(RequestInput: UpdateTicketInput!): Ticket!
   review(createReviewDto: CreateReviewDto!): Review!
-  initializePayment(createPaymentInput: CreatePaymentInput!): Payment!
-  verify(createPaymentInput: CreatePaymentInput!): Payment!
+  initializePayment: Payment!
+  verify: Payment!
 }
 
 input RegisterInput {
@@ -832,6 +834,12 @@ input CreateOfferDto {
   listingId: String!
 }
 
+input CreatePromotionInput {
+  listingId: String!
+  paymentReference: String!
+  adPackageId: String!
+}
+
 input CreateAdPackageInput {
   name: String!
   price: String!
@@ -887,8 +895,4 @@ input CreateReviewDto {
   type: String!
   service_owner_id: String!
   reviewer_id: String
-}
-
-input CreatePaymentInput {
-  amount: Float!
 }

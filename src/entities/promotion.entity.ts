@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { ObjectType, Field } from '@nestjs/graphql';
 import {
   Column,
@@ -5,7 +10,6 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -16,19 +20,19 @@ import { Listing } from './listing.entity';
 @ObjectType()
 export class Promotion {
   @Field()
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Field()
   @Column()
   listingId: string;
 
-  @Field()
-  @Column()
-  impressions: number;
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  expiredAt: Date;
 
   @Field(() => AdPackage)
-  @OneToOne(() => AdPackage, (adPackage) => adPackage.promotion)
+  @ManyToOne(() => AdPackage, (adPackage) => adPackage.promotion)
   @JoinColumn()
   adPackage: AdPackage;
 

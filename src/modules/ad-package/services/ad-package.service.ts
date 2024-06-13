@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { Injectable } from '@nestjs/common';
 import { CreateAdPackageInput } from '../dto/create-ad-package.input';
 import { UpdateAdPackageInput } from '../dto/update-ad-package.input';

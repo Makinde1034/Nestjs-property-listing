@@ -5,6 +5,7 @@
 
 import {
   BadRequestException,
+  ConflictException,
   HttpException,
   Injectable,
   Logger,
@@ -33,6 +34,7 @@ import { CreatePromotionInput } from '../dtos/request/promotion-input';
 import { PromotionRepository } from '../repositories/promotion.repository';
 
 import { AdPackageService } from '../../ad-package/services/ad-package.service';
+import { QueryFailedError } from 'typeorm';
 
 @Injectable()
 export class ListingService {
@@ -125,7 +127,7 @@ export class ListingService {
     try {
       const listing = await this.listingRepository.findOne({
         where: { id: id },
-        relations: ['user'],
+        relations: ['user', 'promotion'],
         select: {
           user: {
             id: true,
@@ -135,10 +137,22 @@ export class ListingService {
             arabicFirstName: true,
             arabicLastName: true,
           },
+          promotion: {
+            id: true,
+            listingId: true,
+            adPackage: { id: true, name: true },
+          },
         },
       });
 
+      const newImpression = listing.impressions + 1;
+
+      await this.listingRepository.update(listing.id, {
+        impressions: newImpression,
+      });
+
       listing.deedNumber = '';
+      listing.propertyNumber = '';
 
       return listing;
     } catch (error) {
@@ -237,7 +251,12 @@ export class ListingService {
       }
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error.data || error.messages);
+      if (error instanceof QueryFailedError) {
+        if ((error as any).code === '23505') {
+          throw new ConflictException('You already have this Ad running');
+        }
+      }
+      throw new BadRequestException('you havr');
     }
   }
 }

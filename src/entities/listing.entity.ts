@@ -270,6 +270,10 @@ export class Listing extends BaseEntity {
   @OneToMany(() => Promotion, (promotion) => promotion.listing)
   promotion: Promotion;
 
+  @Field({ defaultValue: 0 })
+  @Column({ default: 0 })
+  impressions: number;
+
   @Field()
   @CreateDateColumn()
   createdAt: Date;

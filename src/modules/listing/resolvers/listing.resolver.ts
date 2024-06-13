@@ -17,6 +17,8 @@ import { CreateOfferDto } from '../dtos/request/offer.dto';
 import { Offer } from '../../../entities/offer.entity';
 import { Amenities } from '../../../entities/amenities.entity';
 import { AttributeDto } from '../dtos/request/attributes.dto';
+import { CreatePromotionInput } from '../dtos/request/promotion-input';
+import { Promotion } from '../../../entities/promotion.entity';
 
 @Resolver()
 export class ListingResolver {
@@ -93,5 +95,13 @@ export class ListingResolver {
   @Query(() => [Amenities], { name: 'findAmenities' })
   async findAmenities() {
     return await this.listingService.findAmenities();
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => Promotion, { name: 'createPromotion' })
+  async createPromotion(
+    @Args('createPromotionInput') createPromotionInput: CreatePromotionInput,
+  ) {
+    return await this.listingService.createPromotion(createPromotionInput);
   }
 }
