@@ -14,6 +14,7 @@ import {
 import { ListingRepository } from '../repositories/listing.repository';
 import {
   CreateListingDto,
+  FlagListingInput,
   UpdateListingDto,
 } from '../dtos/request/listing.dto';
 import { User } from '../../../entities';
@@ -36,6 +37,8 @@ import { PromotionRepository } from '../repositories/promotion.repository';
 import { AdPackageService } from '../../ad-package/services/ad-package.service';
 import { MoreThan, QueryFailedError } from 'typeorm';
 import { addDaysToDate } from '../../../common/utils/helper';
+import { FlagListingRepository } from '../repositories/flag-listing.repository';
+import { AppStrings } from '../../../common/messages/app.strings';
 
 @Injectable()
 export class ListingService {
@@ -47,6 +50,8 @@ export class ListingService {
     private readonly amenitiesRepository: AmenitiesRepository,
 
     private readonly adpackageService: AdPackageService,
+
+    private readonly flagListinRepository: FlagListingRepository,
   ) {}
   logger = new Logger(ListingService.name);
   async createListing(user: User, createListingDto: CreateListingDto) {
@@ -153,7 +158,6 @@ export class ListingService {
 
       return listing;
     } catch (error) {
-      console.log(error);
       this.logger.log(error);
 
       if (error instanceof HttpException) {
@@ -303,6 +307,25 @@ export class ListingService {
         }
       }
       throw new BadRequestException('You already have this Ad running');
+    }
+  }
+
+  async flagListing(flaglistingInput: FlagListingInput, userId: string) {
+    try {
+      const listing = await this.listingRepository.findById(
+        flaglistingInput.listingId,
+      );
+
+      await this.flagListinRepository.save({
+        userId,
+        ...flaglistingInput,
+        listing,
+      });
+
+      return new SuccessResponse(AppStrings.LISTING_FLAG_SUCCESSFULL);
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error?.messages | error.data);
     }
   }
 }

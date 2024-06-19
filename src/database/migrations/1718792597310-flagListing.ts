@@ -5,8 +5,8 @@
 
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateAdPackage1718299221729 implements MigrationInterface {
-  name = 'CreateAdPackage1718299221729';
+export class FlagListing1718792597310 implements MigrationInterface {
+  name = 'FlagListing1718792597310';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
@@ -22,16 +22,19 @@ export class CreateAdPackage1718299221729 implements MigrationInterface {
       `DROP INDEX "public"."IDX_bfbc9e263d4cea6d7a8c9eb3ad"`,
     );
     await queryRunner.query(
+      `ALTER TABLE "flag_listing" DROP COLUMN "inappropriate"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "flag_listing" DROP COLUMN "falseInformation"`,
+    );
+    await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" DROP COLUMN "approve"`,
     );
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" ADD "approve" boolean DEFAULT false`,
     );
     await queryRunner.query(
-      `ALTER TABLE "listing" ADD "promoted" boolean NOT NULL DEFAULT false`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "listing" ADD "PromotionExpiration" TIMESTAMP`,
+      `ALTER TABLE "flag_listing" ADD "reasonForFlag" character varying`,
     );
     await queryRunner.query(
       `CREATE INDEX "IDX_b36cb2e04bc353ca4ede00d87b" ON "role_permissions_permission" ("roleId") `,
@@ -61,14 +64,19 @@ export class CreateAdPackage1718299221729 implements MigrationInterface {
       `DROP INDEX "public"."IDX_b36cb2e04bc353ca4ede00d87b"`,
     );
     await queryRunner.query(
-      `ALTER TABLE "listing" DROP COLUMN "PromotionExpiration"`,
+      `ALTER TABLE "flag_listing" DROP COLUMN "reasonForFlag"`,
     );
-    await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "promoted"`);
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" DROP COLUMN "approve"`,
     );
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" ADD "approve" boolean DEFAULT false`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "flag_listing" ADD "falseInformation" boolean NOT NULL`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "flag_listing" ADD "inappropriate" boolean NOT NULL`,
     );
     await queryRunner.query(
       `CREATE INDEX "IDX_bfbc9e263d4cea6d7a8c9eb3ad" ON "role_permissions_permission" ("permissionId") `,
