@@ -126,10 +126,10 @@ type Promotion {
 
 type FlagListing {
   id: ID!
-  listingId: String!
   reasonForFlag: String!
   userId: String!
   description: String!
+  listing: Listing
   createdAt: DateTime!
   deletedAt: DateTime!
   updatedAt: DateTime!
@@ -390,6 +390,11 @@ type ListingResponse {
   total: Int!
 }
 
+type FlaggedListingResponse {
+  flaggedListing: [FlagListing!]
+  total: Int!
+}
+
 type ReviewResponse {
   reviews: [Review!]!
   total: Int!
@@ -421,6 +426,7 @@ type Query {
   findPromotedListings(findManyOptions: AttributeDto): ListingResponse!
   findListingsForOwner(findManyOptions: AttributeDto): ListingResponse!
   findOneForBuyer(id: String!): Listing!
+  viewFlaggedListings(findManyOptions: PaginateAndSort): FlaggedListingResponse
   findAmenities: [Amenities!]!
   adPackage(id: String!): AdPackage!
   fetchIssueCategories: [IssueCategory!]!
@@ -450,11 +456,7 @@ input WhereOption {
   fieldToChose: String!
 }
 
-input ListTicketInput {
-  status: String
-}
-
-input FindManyReviewDto {
+input PaginateAndSort {
   take: Float
   skip: Float
   sortField: String
@@ -462,7 +464,11 @@ input FindManyReviewDto {
   where: WhereOption
 }
 
-input PaginateAndSort {
+input ListTicketInput {
+  status: String
+}
+
+input FindManyReviewDto {
   take: Float
   skip: Float
   sortField: String
@@ -505,6 +511,7 @@ type Mutation {
   createOffer(createOfferDto: CreateOfferDto!): Offer!
   createPromotion(createPromotionInput: CreatePromotionInput!): Promotion!
   flagListing(flagListingInput: FlagListingInput!): SuccessResponse!
+  deleteListing(listingId: String!): SuccessResponse!
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!

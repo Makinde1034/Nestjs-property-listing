@@ -289,7 +289,7 @@ export class Listing extends BaseEntity {
 
   @Field({ defaultValue: false })
   @Column({ default: false })
-  disableListing: true;
+  disableListing: boolean;
 
   @Field(() => [FlagListing], { nullable: true })
   @OneToMany(() => FlagListing, (flag) => flag.listing)
