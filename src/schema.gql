@@ -124,6 +124,17 @@ type Promotion {
   updatedAt: DateTime!
 }
 
+type FlagListing {
+  id: ID!
+  listingId: String!
+  reasonForFlag: String!
+  userId: String!
+  description: String!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type Listing {
   id: ID!
   ownership: String!
@@ -189,6 +200,9 @@ type Listing {
   impressions: Float!
   promoted: Boolean!
   promotionExpiration: DateTime
+  isListingFlagged: Boolean!
+  disableListing: Boolean!
+  flag: [FlagListing!]
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -490,6 +504,7 @@ type Mutation {
   updateListing(updateListingDto: UpdateListingDto!): Listing!
   createOffer(createOfferDto: CreateOfferDto!): Offer!
   createPromotion(createPromotionInput: CreatePromotionInput!): Promotion!
+  flagListing(flagListingInput: FlagListingInput!): SuccessResponse!
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!
@@ -841,6 +856,12 @@ input CreatePromotionInput {
   listingId: String!
   paymentReference: String!
   adPackageId: String!
+}
+
+input FlagListingInput {
+  listingId: String!
+  reasonForFlag: String!
+  description: String!
 }
 
 input CreateAdPackageInput {

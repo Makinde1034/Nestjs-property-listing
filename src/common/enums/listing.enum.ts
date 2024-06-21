@@ -29,3 +29,9 @@ export enum ListingType {
   APPARTMENT = 'appartment',
   OTHERS = 'others',
 }
+
+export enum ListingFlagType {
+  INAPPROPRIAT = 'inappropriate',
+  FALSE_INFROMATION = 'false information',
+  OTHERS = 'others',
+}

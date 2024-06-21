@@ -52,5 +52,7 @@ export const AppStrings = {
   INVALID_NATIONAL_ID: 'The Identity number provided is invalid',
 
   SERVICE_OWNER_NOT_FOUND: 'INVALID_SERVICE_OWNER ID',
-  NOT_FOUND: 'NOT_FOUND',
+  NOT_FOUND: 'not found',
+
+  LISTING_FLAG_SUCCESSFULL: 'Listing has been flagged',
 };
