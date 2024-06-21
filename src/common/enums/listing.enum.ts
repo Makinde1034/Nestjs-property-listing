@@ -26,7 +26,7 @@ export enum ListingType {
   LAND = 'land',
   FARM = 'farm',
   VILLA = 'villa',
-  APPARTMENT = 'appartment',
+  APARTMENT = 'apartment',
   OTHERS = 'others',
 }
 

@@ -143,7 +143,7 @@ type Listing {
   sellingType: String!
   powerOfAttorney: String
   listingType: String!
-  rentingOption: String!
+  rentingOption: String
   propertyNumber: String!
   deedNumber: String!
   districtCity: String
@@ -166,12 +166,12 @@ type Listing {
   buildingNumber: String
   floor: String
   landArea: String
-  numberOfAppartment: String
+  numberOfApartment: String
   numberOfStoreys: String
-  areaOfAppartment: String
+  areaOfApartment: String
   garageArea: String
   totalArea: String
-  rentedAppartment: String
+  rentedApartment: String
   negotiatable: Boolean
   pool: Boolean
   outdoorKitchen: Boolean
@@ -731,7 +731,7 @@ input CreateListingDto {
   ownership: String!
   powerOfAttorney: String
   listingType: String! = "property"
-  rentingOption: String!
+  rentingOption: String
   propertyNumber: String!
   deedNumber: String!
   districtCity: String
@@ -752,37 +752,37 @@ input CreateListingDto {
   building: String
   floor: String
   landArea: String
-  numberOfAppartment: String
+  numberOfApartment: String
   numberOfStoreys: String
   areaPerApartment: String
   garageArea: String
   totalArea: String
-  rentedAppartment: String
-  negotiable: Boolean
-  pool: Boolean
-  outdoorKitchen: Boolean
-  garden: Boolean
-  guestHouse: Boolean
-  tennisCourt: Boolean
-  basketballCourt: Boolean
-  jacuzzi: Boolean
-  bbqArea: Boolean
-  maidsRoom: Boolean
-  petsAllowed: Boolean
-  balcony: Boolean
-  gym: Boolean
-  playground: Boolean
-  parking: Boolean
-  security: Boolean
-  airConditioning: Boolean
-  storageRoom: Boolean
-  laundryRoom: Boolean
-  conferenceRoom: Boolean
-  gatedCommunity: Boolean
-  indoorPlayArea: Boolean
-  coveredParking: Boolean
-  wifi: Boolean
-  elevator: Boolean
+  rentedApartment: String
+  negotiable: Boolean! = false
+  pool: Boolean! = false
+  outdoorKitchen: Boolean! = false
+  garden: Boolean! = false
+  guestHouse: Boolean! = false
+  tennisCourt: Boolean! = false
+  basketballCourt: Boolean! = false
+  jacuzzi: Boolean! = false
+  bbqArea: Boolean! = false
+  maidsRoom: Boolean! = false
+  petsAllowed: Boolean! = false
+  balcony: Boolean! = false
+  gym: Boolean! = false
+  playground: Boolean! = false
+  parking: Boolean! = false
+  security: Boolean! = false
+  airConditioning: Boolean! = false
+  storageRoom: Boolean! = false
+  laundryRoom: Boolean! = false
+  conferenceRoom: Boolean! = false
+  gatedCommunity: Boolean! = false
+  indoorPlayArea: Boolean! = false
+  coveredParking: Boolean! = false
+  wifi: Boolean! = false
+  elevator: Boolean! = false
 }
 
 input LocationDto {
@@ -817,37 +817,37 @@ input UpdateListingDto {
   building: String
   floor: String
   landArea: String
-  numberOfAppartment: String
+  numberOfApartment: String
   numberOfStoreys: String
   areaPerApartment: String
   garageArea: String
   totalArea: String
-  rentedAppartment: String
-  negotiable: Boolean
-  pool: Boolean
-  outdoorKitchen: Boolean
-  garden: Boolean
-  guestHouse: Boolean
-  tennisCourt: Boolean
-  basketballCourt: Boolean
-  jacuzzi: Boolean
-  bbqArea: Boolean
-  maidsRoom: Boolean
-  petsAllowed: Boolean
-  balcony: Boolean
-  gym: Boolean
-  playground: Boolean
-  parking: Boolean
-  security: Boolean
-  airConditioning: Boolean
-  storageRoom: Boolean
-  laundryRoom: Boolean
-  conferenceRoom: Boolean
-  gatedCommunity: Boolean
-  indoorPlayArea: Boolean
-  coveredParking: Boolean
-  wifi: Boolean
-  elevator: Boolean
+  rentedApartment: String
+  negotiable: Boolean = false
+  pool: Boolean = false
+  outdoorKitchen: Boolean = false
+  garden: Boolean = false
+  guestHouse: Boolean = false
+  tennisCourt: Boolean = false
+  basketballCourt: Boolean = false
+  jacuzzi: Boolean = false
+  bbqArea: Boolean = false
+  maidsRoom: Boolean = false
+  petsAllowed: Boolean = false
+  balcony: Boolean = false
+  gym: Boolean = false
+  playground: Boolean = false
+  parking: Boolean = false
+  security: Boolean = false
+  airConditioning: Boolean = false
+  storageRoom: Boolean = false
+  laundryRoom: Boolean = false
+  conferenceRoom: Boolean = false
+  gatedCommunity: Boolean = false
+  indoorPlayArea: Boolean = false
+  coveredParking: Boolean = false
+  wifi: Boolean = false
+  elevator: Boolean = false
   id: String!
 }
 
