@@ -5,8 +5,8 @@
 
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateAdPackage1718299221729 implements MigrationInterface {
-  name = 'CreateAdPackage1718299221729';
+export class UpdateFlagListing1718891015718 implements MigrationInterface {
+  name = 'UpdateFlagListing1718891015718';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
@@ -26,12 +26,6 @@ export class CreateAdPackage1718299221729 implements MigrationInterface {
     );
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" ADD "approve" boolean DEFAULT false`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "listing" ADD "promoted" boolean NOT NULL DEFAULT false`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "listing" ADD "PromotionExpiration" TIMESTAMP`,
     );
     await queryRunner.query(
       `CREATE INDEX "IDX_b36cb2e04bc353ca4ede00d87b" ON "role_permissions_permission" ("roleId") `,
@@ -60,10 +54,6 @@ export class CreateAdPackage1718299221729 implements MigrationInterface {
     await queryRunner.query(
       `DROP INDEX "public"."IDX_b36cb2e04bc353ca4ede00d87b"`,
     );
-    await queryRunner.query(
-      `ALTER TABLE "listing" DROP COLUMN "PromotionExpiration"`,
-    );
-    await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "promoted"`);
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" DROP COLUMN "approve"`,
     );
