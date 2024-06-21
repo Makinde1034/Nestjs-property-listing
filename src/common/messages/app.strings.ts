@@ -7,26 +7,30 @@ export const AppStrings = {
   APP_NAME: 'Waseet',
   RESOURCE_ALREADY_EXISTS: 'RESOURCE_ALREADY_EXISTS',
   FAILED_RACAPTCHA: 'Recaptcha Failed, Please try again',
-  USER_DISABLED: 'Account disabled. Please contact support',
-  UNCONFIRMED_ACCOUNT: 'UNCONFIRMED_ACCOUNT',
-  SUSPENDED_ACCOUNT:
-    'Your account has been suspended, please contact the administrator',
-  INCORRECT_CREDENTIALS: 'Your password and email don’t match.',
+  USER_DISABLED: 'Your account has been disabled. ',
+  UNCONFIRMED_ACCOUNT:
+    'Your account is not confirmed. Please check your email for the confirmation link.',
+  SUSPENDED_ACCOUNT: 'Your account has been suspended.',
+  INCORRECT_CREDENTIALS: 'Invalid Password Or Email',
   INVALID_QUERY: 'Invalid query, kindly check your query',
   UNSUPPORTED_ACTION: ' Unsupported action ',
   FIELD_NOT_EXIST: (field: string): string =>
     `Invalid query, ${field} doesn't exist`,
   WRONG_DATA_FOR_FIELD: (field: string): string =>
     `Invalid query, ${field} entry in query is wrong`,
-  WRONG_CONFIRM_CODE: 'WRONG_CONFIRM_CODE',
-  CONFIRMATION_SENT: 'Eamil confirmation sent',
-  ACCOUNT_ALREADY_CONFIRMED: 'ACCOUNT_ALREADY_CONFIRMED',
-  ACCOUNT_CONFIRMED_SUCCESSFULLY: 'ACCOUNT_CONFIRMED_SUCCESSFULLY',
-  PASSWORD_RESET_SENT: 'PASSWORD_RESET_EMAIL_SENT',
-  PASSWORD_RESET_EXPIRED: 'PASSWORD_RESET_EXPIRED',
-  PASSWORD_RESET_SUCCEEDED: 'PASSWORD_RESET_SUCCEEDED',
-  PASSWORD_RESET_FAILED: 'PASSWORD_RESET_FAILED',
-  ACCOUNT_CREATED_SUCCESSFULLY: 'ACCOUNT_CREATED_SUCCESSFULLY',
+  WRONG_CONFIRM_CODE: 'The confirmation code is incorrect. Please try again.',
+  CONFIRMATION_SENT:
+    'A confirmation email has been sent. Please check your email.',
+  ACCOUNT_ALREADY_CONFIRMED:
+    'Your account is already confirmed. Please log in.',
+  ACCOUNT_CONFIRMED_SUCCESSFULLY:
+    'Your account has been confirmed successfully.',
+  PASSWORD_RESET_SENT:
+    'A password reset link has been sent. Please check your email.',
+  PASSWORD_RESET_EXPIRED: 'The password reset link has expired. ',
+  PASSWORD_RESET_SUCCEEDED: 'Your password has been reset successfully.',
+  PASSWORD_RESET_FAILED: 'Password reset failed.',
+  ACCOUNT_CREATED_SUCCESSFULLY: 'Your account has been successfully created.',
   WRONG_TIME_ORDER: 'WRONG_TIME_ORDER',
   USER_NOT_FOUND: 'USER_NOT_FOUND',
   NO_IMAGE_SELECTED: 'NO_IMAGE_SELECTED',
@@ -38,13 +42,15 @@ export const AppStrings = {
   LISTINGTYPE_DELETED_SUCCESSFULLY: 'LISTINGTYPE_DELETED_SUCCESSFULLY',
   ROLE_DELETED_SUCCESSFULLY: 'ROLE_DELETED_SUCCESSFULLY',
   INCORRECT_PASSWORD: 'INCORRECT_PASSWORD',
-  INCORRECT_OLD_PASSWORD: 'Old Password is incorrect',
+  INCORRECT_OLD_PASSWORD:
+    'The old password entered is incorrect. Please try again.',
   UNABLE_TO_DELETE_ISSUE_CATEGORY:
     'ISSUE_CATEGORY_CAN_NOT_BE_DELETED_AS_IT_IS_BEING_USED_BY_AN_ISSUE',
   ISSUE_CATEGORY_DELETED_SUCCESSFULLY: 'ISSUE_CATEGORY_DELETED_SUCCESSFULLY',
   ISSUE_DELETED_SUCCESSFULLY: 'ISSUE_DELETED_SUCCESSFULLY',
-  TWO_FA_NOT_ENABLED: 'TWO_FA_NOT_ENABLED',
-  INCORRECT_TOKEN: 'Wrong code, please enter the correct one.',
+  TWO_FA_NOT_ENABLED:
+    'Two-factor authentication is not enabled on your account.',
+  INCORRECT_TOKEN: 'The code provided is incorrect. Please try again.',
   TICKET_RAISED_SUCCESSFULLY: 'TICKET_RAISED_SUCCESSFULLY',
   EXPIRED_NATIONAL_ID: 'National Identity has Expired',
   EMAIL_ALREADY_CONFIRMED: 'This email has already been confirmed',
