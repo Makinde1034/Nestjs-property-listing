@@ -155,7 +155,7 @@ type Listing {
   numberOfBathrooms: String!
   numberOfRooms: String!
   images: String
-  videos: [String!]
+  panoramaView: String
   user: User
   offer: [Offer!]
   userId: String!
@@ -743,7 +743,6 @@ input CreateListingDto {
   sellingType: String! = "rent"
   numberOfRooms: String!
   mediaType: String! = "image"
-  image: [String!]
   amenities: [String!]
   gpsCoordinate: LocationDto
   district: String
@@ -808,7 +807,6 @@ input UpdateListingDto {
   sellingType: String = "rent"
   numberOfRooms: String
   mediaType: String = "image"
-  image: [String!]
   amenities: [String!]
   gpsCoordinate: LocationDto
   district: String

@@ -119,9 +119,9 @@ export class CreateListingDto {
   @IsOptional()
   mediaType: string;
 
-  @Field(() => [String], { nullable: true })
-  @IsOptional()
-  image: string[];
+  // @Field(() => String, { nullable: true })
+  // @IsOptional()
+  // image: string;
 
   @IsOptional()
   @IsArray()
