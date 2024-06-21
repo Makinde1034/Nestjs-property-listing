@@ -14,6 +14,7 @@ import {
 import { ListingRepository } from '../repositories/listing.repository';
 import {
   CreateListingDto,
+  FlagListingInput,
   UpdateListingDto,
 } from '../dtos/request/listing.dto';
 import { User } from '../../../entities';
@@ -36,6 +37,8 @@ import { PromotionRepository } from '../repositories/promotion.repository';
 import { AdPackageService } from '../../ad-package/services/ad-package.service';
 import { MoreThan, QueryFailedError } from 'typeorm';
 import { addDaysToDate } from '../../../common/utils/helper';
+import { AppStrings } from '../../../common/messages/app.strings';
+import { FlagListingRepository } from '../repositories/flag-listing.repository';
 
 @Injectable()
 export class ListingService {
@@ -47,6 +50,8 @@ export class ListingService {
     private readonly amenitiesRepository: AmenitiesRepository,
 
     private readonly adpackageService: AdPackageService,
+
+    private readonly flagListingRepository: FlagListingRepository,
   ) {}
   logger = new Logger(ListingService.name);
   async createListing(user: User, createListingDto: CreateListingDto) {
@@ -303,6 +308,74 @@ export class ListingService {
         }
       }
       throw new BadRequestException('You already have this Ad running');
+    }
+  }
+
+  async flagListing(flaglistingInput: FlagListingInput, userId: string) {
+    try {
+      const listing = await this.listingRepository.findById(
+        flaglistingInput.listingId,
+      );
+
+      await this.flagListingRepository.save({
+        userId,
+        ...flaglistingInput,
+        listing,
+      });
+
+      return new SuccessResponse(AppStrings.LISTING_FLAG_SUCCESSFULL);
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error?.messages | error.data);
+    }
+  }
+
+  async viewFlaggedListing(findManyOptions) {
+    try {
+      const [flaggedListing, total] =
+        await this.flagListingRepository.findAndCount(findManyOptions);
+
+      return { flaggedListing, total };
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error?.messages | error.data);
+    }
+  }
+
+  async disableListing(listingId: string) {
+    try {
+      await this.listingRepository.update(listingId, {
+        disableListing: true,
+      });
+
+      return new SuccessResponse(AppStrings.LISTING_DISABLE_SUCCESSFULLY);
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error?.messages | error.data);
+    }
+  }
+
+  async enableListing(listingId: string) {
+    try {
+      await this.listingRepository.update(listingId, {
+        disableListing: null,
+      });
+
+      return new SuccessResponse(AppStrings.LISTING_ENABLED_SUCCESSFULLY);
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error?.messages | error.data);
+    }
+  }
+
+  async deleteListing(listingId: string) {
+    try {
+      await this.listingRepository.softDelete(listingId);
+
+      return new SuccessResponse(AppStrings.LISTING_DELETED_SUCCESSFULLY);
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error?.messages | error.data);
     }
   }
 }

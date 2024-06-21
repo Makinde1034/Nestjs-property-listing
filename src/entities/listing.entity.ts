@@ -18,6 +18,7 @@ import { User } from './user.entity';
 import { Exclude } from 'class-transformer';
 import { Offer } from './offer.entity';
 import { Promotion } from './promotion.entity';
+import { FlagListing } from './flag-listing.entity';
 
 @Entity()
 @ObjectType()
@@ -281,6 +282,18 @@ export class Listing extends BaseEntity {
   @Field({ nullable: true })
   @Column({ nullable: true })
   promotionExpiration: Date;
+
+  @Field({ defaultValue: false })
+  @Column({ default: false })
+  isListingFlagged: boolean;
+
+  @Field({ defaultValue: false })
+  @Column({ default: false })
+  disableListing: boolean;
+
+  @Field(() => [FlagListing], { nullable: true })
+  @OneToMany(() => FlagListing, (flag) => flag.listing)
+  flag: FlagListing[];
 
   @Field()
   @CreateDateColumn()
