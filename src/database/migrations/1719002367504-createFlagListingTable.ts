@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class CreateFlag1718892600855 implements MigrationInterface {
-    name = 'CreateFlag1718892600855'
+export class CreateFlagListingTable1719002367504 implements MigrationInterface {
+    name = 'CreateFlagListingTable1719002367504'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`ALTER TABLE "role_permissions_permission" DROP CONSTRAINT "FK_b36cb2e04bc353ca4ede00d87b9"`);
