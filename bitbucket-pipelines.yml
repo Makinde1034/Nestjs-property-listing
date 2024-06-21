@@ -104,7 +104,6 @@ clone:
   depth: full
 
 pipelines:
-  pull-requests:
   
 
   branches:
