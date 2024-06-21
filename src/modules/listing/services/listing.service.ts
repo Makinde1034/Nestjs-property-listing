@@ -37,8 +37,8 @@ import { PromotionRepository } from '../repositories/promotion.repository';
 import { AdPackageService } from '../../ad-package/services/ad-package.service';
 import { MoreThan, QueryFailedError } from 'typeorm';
 import { addDaysToDate } from '../../../common/utils/helper';
-import { FlagListingRepository } from '../repositories/flag-listing.repository';
 import { AppStrings } from '../../../common/messages/app.strings';
+import { FlagListingRepository } from '../repositories/flag-listing.repository';
 
 @Injectable()
 export class ListingService {
@@ -158,6 +158,7 @@ export class ListingService {
 
       return listing;
     } catch (error) {
+      console.log(error);
       this.logger.log(error);
 
       if (error instanceof HttpException) {
