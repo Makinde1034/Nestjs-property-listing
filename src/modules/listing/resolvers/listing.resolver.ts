@@ -5,11 +5,7 @@
 
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ListingService } from '../services/listing.service';
-import {
-  CreateListingDto,
-  FlagListingInput,
-  UpdateListingDto,
-} from '../dtos/request/';
+import { CreateListingDto, UpdateListingDto } from '../dtos/request/';
 
 import { Listing } from '../../../entities';
 import { UseGuards } from '@nestjs/common';
@@ -23,7 +19,6 @@ import { Amenities } from '../../../entities/amenities.entity';
 import { AttributeDto } from '../dtos/request/attributes.dto';
 import { CreatePromotionInput } from '../dtos/request/promotion-input';
 import { Promotion } from '../../../entities/promotion.entity';
-import { SuccessResponse } from '../../../common/response';
 
 @Resolver()
 export class ListingResolver {
@@ -121,17 +116,5 @@ export class ListingResolver {
     @Args('createPromotionInput') createPromotionInput: CreatePromotionInput,
   ) {
     return await this.listingService.createPromotion(createPromotionInput);
-  }
-
-  @UseGuards(AccessTokenGuard)
-  @Mutation(() => SuccessResponse, { name: 'flagListing' })
-  async flagListing(
-    @Context() ctx: any,
-    @Args('flagListingInput') flaglistingInput: FlagListingInput,
-  ) {
-    return await this.listingService.flagListing(
-      flaglistingInput,
-      ctx.req.user.id,
-    );
   }
 }

@@ -16,7 +16,6 @@ import {
 } from 'class-validator';
 
 import {
-  ListingFlagType,
   ListingType,
   Ownership,
   Purpose,
@@ -301,21 +300,4 @@ export class UpdateListingDto extends PartialType(CreateListingDto) {
   @Field()
   @IsUUID()
   id: string;
-}
-
-@InputType()
-export class FlagListingInput {
-  @Field()
-  @IsUUID()
-  @IsNotEmpty()
-  listingId: string;
-
-  @Field()
-  @IsEnum(ListingFlagType)
-  reasonForFlag: string;
-
-  @Field()
-  @IsString()
-  @IsNotEmpty()
-  description: string;
 }
