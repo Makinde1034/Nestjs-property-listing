@@ -26,7 +26,6 @@ import { Promotion } from '../../entities/promotion.entity';
 import { AdPackageService } from '../ad-package/services/ad-package.service';
 import { AdPackageModule } from '../ad-package/ad-package.module';
 import { PromotionRepository } from './repositories/promotion.repository';
-import { FlagListingRepository } from './repositories/flag-listing.repository';
 
 @Module({
   imports: [
@@ -58,7 +57,6 @@ import { FlagListingRepository } from './repositories/flag-listing.repository';
     AmenitiesRepository,
     AdPackageService,
     PromotionRepository,
-    FlagListingRepository,
   ],
 })
 export class ListingModule {}
