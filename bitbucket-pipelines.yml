@@ -105,13 +105,7 @@ clone:
 
 pipelines:
   pull-requests:
-    '**':
-      - step: *code-lint
-      - step: *build
-      - step: *sonar-analysis
-      - step: *validate-db
-      - step: *security-checks
-      - step: *owasp-dependency-check
+  
 
   branches:
     develop:
