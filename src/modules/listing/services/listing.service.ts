@@ -23,13 +23,7 @@ import { ForbiddenError } from '@nestjs/apollo';
 import { StorageService } from '../../storage/storage.service';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { AmenitiesRepository } from '../repositories/amenities.repository';
-import {
-  appartment,
-  villa,
-  farm,
-  land,
-  building,
-} from '../constant/attributes';
+import { apartment, villa, farm, land, building } from '../constant/attributes';
 import { AttributeDto } from '../dtos/request/attributes.dto';
 import { CreatePromotionInput } from '../dtos/request/promotion-input';
 import { PromotionRepository } from '../repositories/promotion.repository';
@@ -37,8 +31,8 @@ import { PromotionRepository } from '../repositories/promotion.repository';
 import { AdPackageService } from '../../ad-package/services/ad-package.service';
 import { MoreThan, QueryFailedError } from 'typeorm';
 import { addDaysToDate } from '../../../common/utils/helper';
-import { AppStrings } from '../../../common/messages/app.strings';
 import { FlagListingRepository } from '../repositories/flag-listing.repository';
+import { AppStrings } from '../../../common/messages/app.strings';
 
 @Injectable()
 export class ListingService {
@@ -71,7 +65,7 @@ export class ListingService {
     try {
       const typeMappings = {
         villa,
-        appartment,
+        apartment,
         farm,
         land,
         building,
@@ -102,7 +96,7 @@ export class ListingService {
     try {
       const typeMappings = {
         villa,
-        appartment,
+        apartment,
         farm,
         land,
         building,
@@ -134,7 +128,7 @@ export class ListingService {
     try {
       const typeMappings = {
         villa,
-        appartment,
+        apartment,
         farm,
         land,
         building,
@@ -158,7 +152,6 @@ export class ListingService {
 
       return listing;
     } catch (error) {
-      console.log(error);
       this.logger.log(error);
 
       if (error instanceof HttpException) {
