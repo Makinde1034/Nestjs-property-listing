@@ -5,7 +5,7 @@
 
 export const AppStrings = {
   APP_NAME: 'Waseet',
-  RESOURCE_ALREADY_EXISTS: 'RESOURCE_ALREADY_EXISTS',
+  RESOURCE_ALREADY_EXISTS: 'Resource already exist',
   FAILED_RACAPTCHA: 'Recaptcha Failed, Please try again',
   USER_DISABLED: 'Your account has been disabled. ',
   UNCONFIRMED_ACCOUNT:
@@ -31,17 +31,17 @@ export const AppStrings = {
   PASSWORD_RESET_SUCCEEDED: 'Your password has been reset successfully.',
   PASSWORD_RESET_FAILED: 'Password reset failed.',
   ACCOUNT_CREATED_SUCCESSFULLY: 'Your account has been successfully created.',
-  WRONG_TIME_ORDER: 'WRONG_TIME_ORDER',
-  USER_NOT_FOUND: 'USER_NOT_FOUND',
-  NO_IMAGE_SELECTED: 'NO_IMAGE_SELECTED',
-  NOTIFICATION_SENT_SUCCESSFULLY: 'NOTIFICATION_SENT_SUCCESSFULLY',
+  WRONG_TIME_ORDER: 'Wrong time order',
+  USER_NOT_FOUND: 'User not found',
+  NO_IMAGE_SELECTED: 'No image selected',
+  NOTIFICATION_SENT_SUCCESSFULLY: 'Notification sent successfully',
   UNABLE_TO_DELETE_ATTRIBUTE:
-    'ATTRIBUTE_CAN_NOT_BE_DELETED_AS_IT_IS_BEING_USED_BY_AN_ATTRIBUTESET',
-  ATTRIBUTE_DELETED_SUCCESSFULLY: 'ATTRIBUTE_DELETED_SUCCESSFULLY',
-  ATTRIBUTESET_DELETED_SUCCESSFULLY: 'ATTRIBUTESET_DELETED_SUCCESSFULLY',
-  LISTINGTYPE_DELETED_SUCCESSFULLY: 'LISTINGTYPE_DELETED_SUCCESSFULLY',
-  ROLE_DELETED_SUCCESSFULLY: 'ROLE_DELETED_SUCCESSFULLY',
-  INCORRECT_PASSWORD: 'INCORRECT_PASSWORD',
+    'Attribute cannot be deleted because it isused by an attribute set',
+  ATTRIBUTE_DELETED_SUCCESSFULLY: 'Attribute deleted successfully',
+  ATTRIBUTESET_DELETED_SUCCESSFULLY: 'Attribute set deleted successfully',
+  LISTINGTYPE_DELETED_SUCCESSFULLY: 'Listing type deleted successfully',
+  ROLE_DELETED_SUCCESSFULLY: 'Roledeleted successfully',
+  INCORRECT_PASSWORD: 'incorrect Password',
   INCORRECT_OLD_PASSWORD:
     'The old password entered is incorrect. Please try again.',
   UNABLE_TO_DELETE_ISSUE_CATEGORY:
