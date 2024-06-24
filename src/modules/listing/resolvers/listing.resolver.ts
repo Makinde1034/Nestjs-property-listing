@@ -30,8 +30,9 @@ import { Promotion } from '../../../entities/promotion.entity';
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { SuccessResponse } from '../../../common/response';
-// import { SuccessResponse } from '../../../common/utils/success.response';
-// import { SuccessResponse } from '../../../common/response/SuccessResponse';
+import { CreateSearchHistoryInput } from '../dtos/request/create-search-history';
+// Import { SuccessResponse } from '../../../common/utils/success.response';
+// Import { SuccessResponse } from '../../../common/response/SuccessResponse';
 
 @Resolver()
 export class ListingResolver {
@@ -55,7 +56,7 @@ export class ListingResolver {
   @Query(() => ListingResponse, { name: 'findListings' })
   async findListingForBuyer(
     @Args('findManyOptions', { nullable: true })
-    findManyOptions?: AttributeDto,
+    findManyOptions?: CreateSearchHistoryInput,
   ) {
     const [listing, total] =
       await this.listingService.findAllListings(findManyOptions);
@@ -67,7 +68,7 @@ export class ListingResolver {
   @Query(() => ListingResponse, { name: 'findPromotedListings' })
   async findPromotedListingForBuyer(
     @Args('findManyOptions', { nullable: true })
-    findManyOptions?: AttributeDto,
+    findManyOptions?: CreateSearchHistoryInput,
   ) {
     const [listing, total] =
       await this.listingService.findAllPromotedListings(findManyOptions);
@@ -164,8 +165,8 @@ export class ListingResolver {
     nullable: true,
     name: 'getMessageInLocalLanguage',
   })
-  async getMessageInLocalLanguage(@Context() ctx: any) {
-    return await this.listingService.shareListing(ctx.req.user);
+  getMessageInLocalLanguage(@Context() ctx: any) {
+    return this.listingService.shareListing(ctx.req.user);
   }
 
   @UseGuards(AccessTokenGuard)

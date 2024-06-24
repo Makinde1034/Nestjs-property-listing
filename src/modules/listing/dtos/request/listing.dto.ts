@@ -126,7 +126,7 @@ export class CreateListingDto {
 
   // @Field(() => String, { nullable: true })
   // @IsOptional()
-  // image: string;
+  // Image: string;
 
   @IsOptional()
   @IsArray()

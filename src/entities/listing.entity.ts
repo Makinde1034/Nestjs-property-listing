@@ -268,7 +268,11 @@ export class Listing extends BaseEntity {
   @Field({ nullable: true })
   elevator: boolean;
 
-  @OneToMany(() => Promotion, (promotion) => promotion.listing)
+  @OneToMany(() => Promotion, (promotion) => promotion.listing, {
+    cascade: true,
+    eager: true,
+    onDelete: 'CASCADE',
+  })
   promotion: Promotion;
 
   @Field({ defaultValue: 0 })
@@ -292,7 +296,10 @@ export class Listing extends BaseEntity {
   disableListing: boolean;
 
   @Field(() => [FlagListing], { nullable: true })
-  @OneToMany(() => FlagListing, (flag) => flag.listing)
+  @OneToMany(() => FlagListing, (flag) => flag.listing, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   flag: FlagListing[];
 
   @Field()

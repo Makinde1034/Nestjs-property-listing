@@ -30,13 +30,15 @@ import { CreatePromotionInput } from '../dtos/request/promotion-input';
 import { PromotionRepository } from '../repositories/promotion.repository';
 
 import { AdPackageService } from '../../ad-package/services/ad-package.service';
-import { MoreThan, QueryFailedError } from 'typeorm';
+import { LessThanOrEqual, MoreThan, QueryFailedError } from 'typeorm';
 import { addDaysToDate } from '../../../common/utils/helper';
 import { FlagListingRepository } from '../repositories/flag-listing.repository';
 import { AppStrings } from '../../../common/messages/app.strings';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { I18nService } from 'nestjs-i18n';
 import { UserService } from '../../user/services';
+import { SearchHistoryRepository } from '../repositories/search-history.repository';
+import { CreateSearchHistoryInput } from '../dtos/request/create-search-history';
 
 @Injectable()
 export class ListingService {
@@ -52,6 +54,7 @@ export class ListingService {
     private readonly flagListingRepository: FlagListingRepository,
     private readonly i18n: I18nService,
     private userService: UserService,
+    private searchHistoryRepository: SearchHistoryRepository,
   ) {}
   logger = new Logger(ListingService.name);
   async createListing(user: User, createListingDto: CreateListingDto) {
@@ -98,39 +101,7 @@ export class ListingService {
     }
   }
 
-  async findAllListings(data: AttributeDto) {
-    try {
-      const typeMappings = {
-        villa,
-        apartment,
-        farm,
-        land,
-        building,
-      };
-
-      const selectedAttributes = typeMappings[data.listingType];
-      if (!selectedAttributes) {
-        throw new BadRequestException(
-          `Invalid listing type: ${data.listingType}`,
-        );
-      }
-
-      const listing = await this.listingRepository.findAndCount({
-        where: { listingType: data.listingType },
-        select: ['id', ...selectedAttributes],
-      });
-
-      return listing;
-    } catch (error) {
-      this.logger.log(error);
-
-      if (error instanceof HttpException) {
-        throw error;
-      } else throw new BadRequestException(error.messages || error.data);
-    }
-  }
-
-  async findAllPromotedListings(data: AttributeDto) {
+  async findAllListings(data: CreateSearchHistoryInput) {
     try {
       const typeMappings = {
         villa,
@@ -149,6 +120,54 @@ export class ListingService {
       const date = new Date().toISOString();
       const listing = await this.listingRepository.findAndCount({
         where: {
+          purpose: data.type,
+          numberOfRooms: data.numberOfRooms,
+          numberOfBathrooms: data.numberOfBathrooms,
+          price: LessThanOrEqual(parseInt(data.price)),
+          city: data.location,
+          listingType: data.listingType,
+          promoted: true,
+          promotionExpiration: MoreThan(date),
+        },
+
+        select: ['id', ...selectedAttributes],
+      });
+
+      return listing;
+    } catch (error) {
+      this.logger.log(error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      } else throw new BadRequestException(error.messages || error.data);
+    }
+  }
+
+  async findAllPromotedListings(data: CreateSearchHistoryInput) {
+    try {
+      const typeMappings = {
+        villa,
+        apartment,
+        farm,
+        land,
+        building,
+      };
+      await this.searchHistoryRepository.save(data);
+
+      const selectedAttributes = typeMappings[data.listingType];
+      if (!selectedAttributes) {
+        throw new BadRequestException(
+          `Invalid listing type: ${data.listingType}`,
+        );
+      }
+      const date = new Date().toISOString();
+      const listing = await this.listingRepository.findAndCount({
+        where: {
+          purpose: data.type,
+          numberOfRooms: data.numberOfRooms,
+          numberOfBathrooms: data.numberOfBathrooms,
+          price: LessThanOrEqual(parseInt(data.price)),
+          city: data.location,
           listingType: data.listingType,
           promoted: true,
           promotionExpiration: MoreThan(date),
@@ -316,6 +335,7 @@ export class ListingService {
         const expirationDate = addDaysToDate(new Date(), formatedDays);
         await this.listingRepository.update(listing.id, {
           promotionExpiration: expirationDate,
+          promoted: true,
         });
 
         return promotion;
@@ -409,7 +429,7 @@ export class ListingService {
     }
   }
 
-  async shareListing(user: User) {
+  shareListing(user: User) {
     const message = this.i18n.t('messages.share-listing', {
       lang: user.language,
     });

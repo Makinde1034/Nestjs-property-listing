@@ -209,6 +209,53 @@ type Listing {
   updatedAt: DateTime!
 }
 
+type Attribute {
+  id: ID!
+  name: String!
+  type: String!
+  icon: String
+  dropDownOptions: [String!]
+  isRequired: Boolean!
+  showInSummary: Boolean!
+  hiddenToBuyers: Boolean!
+  showInComparison: Boolean!
+  showInFilters: Boolean!
+  attributeSets: [AttributeSet!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type AttributeSet {
+  id: ID!
+  name: String!
+  attributes: [Attribute!]!
+  listingTypes: [ListingType!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type ListingType {
+  id: ID!
+  name: String!
+  icon: String
+  attributeSets: [AttributeSet!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type SearchHistory {
+  id: ID!
+  location: String!
+  price: String!
+  numberOfBathrooms: String!
+  numberOfRooms: String!
+  type: String!
+  listingType: String!
+  createdAt: DateTime!
+  user: [User!]!
+  updatedAt: DateTime!
+}
+
 type User {
   id: ID!
   userType: String!
@@ -238,6 +285,7 @@ type User {
   nationalIdentity: NationalIdentity
   company: Company
   notificationPreference: [UserNotificationPreference!]
+  searchHistory: SearchHistory!
   twoFactorAuthenticationSecret: String
   isTwoFactorAuthenticationEnabled: Boolean
   roles: [Role!]
@@ -257,40 +305,6 @@ type Notification {
   type: String
   expiredAt: DateTime
   recipient: User!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type ListingType {
-  id: ID!
-  name: String!
-  icon: String
-  attributeSets: [AttributeSet!]!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type AttributeSet {
-  id: ID!
-  name: String!
-  attributes: [Attribute!]!
-  listingTypes: [ListingType!]!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type Attribute {
-  id: ID!
-  name: String!
-  type: String!
-  icon: String
-  dropDownOptions: [String!]
-  isRequired: Boolean!
-  showInSummary: Boolean!
-  hiddenToBuyers: Boolean!
-  showInComparison: Boolean!
-  showInFilters: Boolean!
-  attributeSets: [AttributeSet!]!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -425,8 +439,8 @@ type Query {
   fetchListingTypes: [ListingType!]!
   fetchAttributes: [Attribute!]!
   fetchAttributeSets: [AttributeSet!]!
-  findListings(findManyOptions: AttributeDto): ListingResponse!
-  findPromotedListings(findManyOptions: AttributeDto): ListingResponse!
+  findListings(findManyOptions: CreateSearchHistoryInput): ListingResponse!
+  findPromotedListings(findManyOptions: CreateSearchHistoryInput): ListingResponse!
   findListingsForOwner(findManyOptions: AttributeDto): ListingResponse!
   findOneForBuyer(id: String!): Listing!
   viewFlaggedListings(findManyOptions: PaginateAndSort): FlaggedListingResponse
@@ -442,13 +456,18 @@ type Query {
   findCities(findCities: PaginateAndSort): CityResponse!
 }
 
-input AttributeDto {
+input CreateSearchHistoryInput {
   take: Float
   skip: Float
   sortField: String
   directionToSort: SortOrder
   where: WhereOption
-  listingType: String
+  location: String!
+  price: String!
+  numberOfBathrooms: String!
+  numberOfRooms: String!
+  type: String!
+  listingType: String!
 }
 
 enum SortOrder {
@@ -458,6 +477,15 @@ enum SortOrder {
 
 input WhereOption {
   fieldToChose: String!
+}
+
+input AttributeDto {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
+  listingType: String
 }
 
 input PaginateAndSort {
