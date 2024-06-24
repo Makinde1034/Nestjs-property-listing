@@ -25,12 +25,12 @@ export class AdPackage {
   @Column()
   name: string;
 
-  @Column()
-  @Field({ nullable: true })
+  @Column({ nullable: true })
+  @Field()
   impression: string;
 
-  @Field()
-  @Column({ nullable: true })
+  @Field({ nullable: true })
+  @Column()
   coverageRadius: string;
 
   @Field()

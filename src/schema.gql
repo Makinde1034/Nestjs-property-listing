@@ -107,8 +107,8 @@ type Offer {
 type AdPackage {
   id: String!
   name: String!
-  impression: String
-  coverageRadius: String!
+  impression: String!
+  coverageRadius: String
   price: String!
   duration: String!
   promotion: [Promotion!]!
