@@ -1,12 +1,7 @@
-/*
- * Copyright (c) 2024, Waseet LLC. All rights reserved.
- * For license. See license.txt
- */
-
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class UpdateFlagListingTable1718892768927 implements MigrationInterface {
-  name = 'UpdateFlagListingTable1718892768927';
+export class CreateFlag1718892600855 implements MigrationInterface {
+  name = 'CreateFlag1718892600855';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
@@ -31,7 +26,7 @@ export class UpdateFlagListingTable1718892768927 implements MigrationInterface {
       `ALTER TABLE "flag_listing" DROP CONSTRAINT "FK_902a609e89ed9af1cdd73056e24"`,
     );
     await queryRunner.query(
-      `ALTER TABLE "flag_listing" ALTER COLUMN "listingId" DROP NOT NULL`,
+      `ALTER TABLE "flag_listing" ALTER COLUMN "listingId" SET NOT NULL`,
     );
     await queryRunner.query(
       `CREATE INDEX "IDX_b36cb2e04bc353ca4ede00d87b" ON "role_permissions_permission" ("roleId") `,
@@ -67,7 +62,7 @@ export class UpdateFlagListingTable1718892768927 implements MigrationInterface {
       `DROP INDEX "public"."IDX_b36cb2e04bc353ca4ede00d87b"`,
     );
     await queryRunner.query(
-      `ALTER TABLE "flag_listing" ALTER COLUMN "listingId" SET NOT NULL`,
+      `ALTER TABLE "flag_listing" ALTER COLUMN "listingId" DROP NOT NULL`,
     );
     await queryRunner.query(
       `ALTER TABLE "flag_listing" ADD CONSTRAINT "FK_902a609e89ed9af1cdd73056e24" FOREIGN KEY ("listingId") REFERENCES "listing"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
