@@ -5,11 +5,21 @@
 
 import { Field, ObjectType, Int } from '@nestjs/graphql';
 import { Listing } from '../../../../entities';
+import { FlagListing } from '../../../../entities/flag-listing.entity';
 
 @ObjectType()
 export class ListingResponse {
   @Field(() => [Listing])
   listing: Listing[];
+
+  @Field(() => Int)
+  total: number;
+}
+
+@ObjectType()
+export class FlaggedListingResponse {
+  @Field(() => [FlagListing], { nullable: true })
+  flaggedListing: FlagListing[];
 
   @Field(() => Int)
   total: number;

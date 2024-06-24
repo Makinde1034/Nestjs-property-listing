@@ -23,13 +23,7 @@ import { ForbiddenError } from '@nestjs/apollo';
 import { StorageService } from '../../storage/storage.service';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { AmenitiesRepository } from '../repositories/amenities.repository';
-import {
-  appartment,
-  villa,
-  farm,
-  land,
-  building,
-} from '../constant/attributes';
+import { apartment, villa, farm, land, building } from '../constant/attributes';
 import { AttributeDto } from '../dtos/request/attributes.dto';
 import { CreatePromotionInput } from '../dtos/request/promotion-input';
 import { PromotionRepository } from '../repositories/promotion.repository';
@@ -51,7 +45,7 @@ export class ListingService {
 
     private readonly adpackageService: AdPackageService,
 
-    private readonly flagListinRepository: FlagListingRepository,
+    private readonly flagListingRepository: FlagListingRepository,
   ) {}
   logger = new Logger(ListingService.name);
   async createListing(user: User, createListingDto: CreateListingDto) {
@@ -71,7 +65,7 @@ export class ListingService {
     try {
       const typeMappings = {
         villa,
-        appartment,
+        apartment,
         farm,
         land,
         building,
@@ -102,7 +96,7 @@ export class ListingService {
     try {
       const typeMappings = {
         villa,
-        appartment,
+        apartment,
         farm,
         land,
         building,
@@ -134,7 +128,7 @@ export class ListingService {
     try {
       const typeMappings = {
         villa,
-        appartment,
+        apartment,
         farm,
         land,
         building,
@@ -316,13 +310,62 @@ export class ListingService {
         flaglistingInput.listingId,
       );
 
-      await this.flagListinRepository.save({
+      await this.flagListingRepository.save({
         userId,
         ...flaglistingInput,
         listing,
       });
 
       return new SuccessResponse(AppStrings.LISTING_FLAG_SUCCESSFULL);
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error?.messages | error.data);
+    }
+  }
+
+  async viewFlaggedListing(findManyOptions) {
+    try {
+      const [flaggedListing, total] =
+        await this.flagListingRepository.findAndCount(findManyOptions);
+
+      return { flaggedListing, total };
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error?.messages | error.data);
+    }
+  }
+
+  async disableListing(listingId: string) {
+    try {
+      await this.listingRepository.update(listingId, {
+        disableListing: true,
+      });
+
+      return new SuccessResponse(AppStrings.LISTING_DISABLE_SUCCESSFULLY);
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error?.messages | error.data);
+    }
+  }
+
+  async enableListing(listingId: string) {
+    try {
+      await this.listingRepository.update(listingId, {
+        disableListing: null,
+      });
+
+      return new SuccessResponse(AppStrings.LISTING_ENABLED_SUCCESSFULLY);
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error?.messages | error.data);
+    }
+  }
+
+  async deleteListing(listingId: string) {
+    try {
+      await this.listingRepository.softDelete(listingId);
+
+      return new SuccessResponse(AppStrings.LISTING_DELETED_SUCCESSFULLY);
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error?.messages | error.data);

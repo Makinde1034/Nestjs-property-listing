@@ -15,7 +15,10 @@ import { Listing } from '../../../entities';
 import { UseGuards } from '@nestjs/common';
 import { AccessTokenGuard } from '../../auth/guards';
 
-import { ListingResponse } from '../dtos/response/listing.response';
+import {
+  FlaggedListingResponse,
+  ListingResponse,
+} from '../dtos/response/listing.response';
 import { OfferService } from '../services/offer.service';
 import { CreateOfferDto } from '../dtos/request/offer.dto';
 import { Offer } from '../../../entities/offer.entity';
@@ -24,6 +27,8 @@ import { AttributeDto } from '../dtos/request/attributes.dto';
 import { CreatePromotionInput } from '../dtos/request/promotion-input';
 import { Promotion } from '../../../entities/promotion.entity';
 import { SuccessResponse } from '../../../common/response';
+import { AdminGuard } from '../../auth/guards/admin.guard';
+import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 
 @Resolver()
 export class ListingResolver {
@@ -101,6 +106,22 @@ export class ListingResolver {
   }
 
   @UseGuards(AccessTokenGuard)
+  // @UseGuards(AdminGuard)
+  @Query(() => FlaggedListingResponse, {
+    nullable: true,
+    name: 'viewFlaggedListings',
+  })
+  async viewFlaggedListings(
+    @Args('findManyOptions', { nullable: true })
+    findManyOptions?: PaginateAndSort,
+  ) {
+    return await this.listingService.viewFlaggedListing({
+      skip: findManyOptions.skip,
+      take: findManyOptions.take,
+    });
+  }
+
+  @UseGuards(AccessTokenGuard)
   @Mutation(() => Offer, { name: 'createOffer' })
   async createOffer(
     @Args('createOfferDto') createOfferDto: CreateOfferDto,
@@ -133,5 +154,12 @@ export class ListingResolver {
       flaglistingInput,
       ctx.req.user.id,
     );
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @UseGuards(AdminGuard)
+  @Mutation(() => SuccessResponse, { name: 'deleteListing' })
+  async deleteListing(@Args('listingId') listingId: string) {
+    return await this.listingService.deleteListing(listingId);
   }
 }
