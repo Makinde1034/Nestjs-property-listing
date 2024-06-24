@@ -342,10 +342,10 @@ export class FlagListingInput {
 
   @Field()
   @IsEnum(ListingFlagType)
-  reasonForFlag: string;
+  parentIssue: string;
 
   @Field()
   @IsString()
   @IsNotEmpty()
-  description: string;
+  childIssue: string;
 }
