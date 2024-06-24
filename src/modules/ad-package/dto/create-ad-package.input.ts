@@ -21,5 +21,15 @@ export class CreateAdPackageInput {
   @Field()
   @IsNotEmpty()
   @IsString()
+  impression: string;
+
+  @Field()
+  @IsNotEmpty()
+  @IsString()
+  coverageRadius: string;
+
+  @Field()
+  @IsNotEmpty()
+  @IsString()
   duration: string;
 }

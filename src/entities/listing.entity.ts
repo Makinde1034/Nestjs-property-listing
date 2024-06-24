@@ -96,9 +96,9 @@ export class Listing extends BaseEntity {
   @Field({ nullable: true })
   images: string;
 
-  @Field(() => String, { nullable: true })
-  @Column({ nullable: true })
-  panoramaView: string;
+  @Field(() => [String], { nullable: true })
+  @Column({ type: 'simple-array', nullable: true })
+  panoramaView: string[];
 
   @Field(() => User, { nullable: true })
   @JoinColumn({ name: 'userId' })

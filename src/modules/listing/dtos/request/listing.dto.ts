@@ -104,6 +104,11 @@ export class CreateListingDto {
   @IsString()
   numberOfBathrooms: string;
 
+  @Field(() => [String], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  panoramaView: string[];
+
   @Field({ defaultValue: 'rent' })
   @IsString()
   sellingType: string;

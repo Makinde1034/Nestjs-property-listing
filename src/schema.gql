@@ -107,6 +107,8 @@ type Offer {
 type AdPackage {
   id: String!
   name: String!
+  impression: String
+  coverageRadius: String!
   price: String!
   duration: String!
   promotion: [Promotion!]!
@@ -155,7 +157,7 @@ type Listing {
   numberOfBathrooms: String!
   numberOfRooms: String!
   images: String
-  panoramaView: String
+  panoramaView: [String!]
   user: User
   offer: [Offer!]
   userId: String!
@@ -374,6 +376,7 @@ type TwoFaResult {
 
 type SuccessResponse {
   message: String!
+  data: String!
 }
 
 type Amenities {
@@ -428,6 +431,7 @@ type Query {
   findOneForBuyer(id: String!): Listing!
   viewFlaggedListings(findManyOptions: PaginateAndSort): FlaggedListingResponse
   findAmenities: [Amenities!]!
+  getMessageInLocalLanguage: SuccessResponse
   adPackage(id: String!): AdPackage!
   fetchIssueCategories: [IssueCategory!]!
   fetchIssues: [Issue!]!
@@ -740,6 +744,7 @@ input CreateListingDto {
   publicationDate: String!
   price: String!
   numberOfBathrooms: String!
+  panoramaView: [String!]
   sellingType: String! = "rent"
   numberOfRooms: String!
   mediaType: String! = "image"
@@ -804,6 +809,7 @@ input UpdateListingDto {
   publicationDate: String
   price: String
   numberOfBathrooms: String
+  panoramaView: [String!]
   sellingType: String = "rent"
   numberOfRooms: String
   mediaType: String = "image"
@@ -872,12 +878,16 @@ input FlagListingInput {
 input CreateAdPackageInput {
   name: String!
   price: String!
+  impression: String!
+  coverageRadius: String!
   duration: String!
 }
 
 input UpdateAdPackageInput {
   name: String
   price: String
+  impression: String
+  coverageRadius: String
   duration: String
   id: Int!
 }

@@ -26,9 +26,12 @@ import { Amenities } from '../../../entities/amenities.entity';
 import { AttributeDto } from '../dtos/request/attributes.dto';
 import { CreatePromotionInput } from '../dtos/request/promotion-input';
 import { Promotion } from '../../../entities/promotion.entity';
-import { SuccessResponse } from '../../../common/response';
+
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
+import { SuccessResponse } from '../../../common/response';
+// import { SuccessResponse } from '../../../common/utils/success.response';
+// import { SuccessResponse } from '../../../common/response/SuccessResponse';
 
 @Resolver()
 export class ListingResolver {
@@ -154,6 +157,15 @@ export class ListingResolver {
       flaglistingInput,
       ctx.req.user.id,
     );
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Query(() => SuccessResponse, {
+    nullable: true,
+    name: 'getMessageInLocalLanguage',
+  })
+  async getMessageInLocalLanguage(@Context() ctx: any) {
+    return await this.listingService.shareListing(ctx.req.user);
   }
 
   @UseGuards(AccessTokenGuard)

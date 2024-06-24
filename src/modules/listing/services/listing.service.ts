@@ -35,6 +35,8 @@ import { addDaysToDate } from '../../../common/utils/helper';
 import { FlagListingRepository } from '../repositories/flag-listing.repository';
 import { AppStrings } from '../../../common/messages/app.strings';
 import { SuccessResponse } from '../../../common/utils/success.response';
+import { I18nService } from 'nestjs-i18n';
+import { UserService } from '../../user/services';
 
 @Injectable()
 export class ListingService {
@@ -48,6 +50,8 @@ export class ListingService {
     private readonly adpackageService: AdPackageService,
 
     private readonly flagListingRepository: FlagListingRepository,
+    private readonly i18n: I18nService,
+    private userService: UserService,
   ) {}
   logger = new Logger(ListingService.name);
   async createListing(user: User, createListingDto: CreateListingDto) {
@@ -403,5 +407,12 @@ export class ListingService {
       this.logger.log(error);
       throw new BadRequestException(error?.messages | error.data);
     }
+  }
+
+  async shareListing(user: User) {
+    const message = this.i18n.t('messages.share-listing', {
+      lang: user.language,
+    });
+    return new SuccessResponse('success', message);
   }
 }
