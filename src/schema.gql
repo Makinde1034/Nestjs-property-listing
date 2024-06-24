@@ -155,7 +155,7 @@ type Listing {
   numberOfBathrooms: String!
   numberOfRooms: String!
   images: String
-  panoramaView: String
+  panoramaView: [String!]
   user: User
   offer: [Offer!]
   userId: String!
@@ -752,6 +752,7 @@ input CreateListingDto {
   floor: String
   landArea: String
   numberOfApartment: String
+  panoramaView: [String!]
   numberOfStoreys: String
   areaPerApartment: String
   garageArea: String
@@ -816,6 +817,7 @@ input UpdateListingDto {
   floor: String
   landArea: String
   numberOfApartment: String
+  panoramaView: [String!]
   numberOfStoreys: String
   areaPerApartment: String
   garageArea: String
