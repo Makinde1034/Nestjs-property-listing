@@ -47,8 +47,8 @@ export class Listing extends BaseEntity {
   @Column({ default: 'property' })
   listingType: string;
 
-  @Column()
-  @Field()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   rentingOption: string;
 
   @Column()
@@ -96,9 +96,9 @@ export class Listing extends BaseEntity {
   @Field({ nullable: true })
   images: string;
 
-  @Field(() => [String], { nullable: true })
-  @Column({ type: 'jsonb', nullable: true })
-  videos: string;
+  @Field(() => String, { nullable: true })
+  @Column({ nullable: true })
+  panoramaView: string;
 
   @Field(() => User, { nullable: true })
   @JoinColumn({ name: 'userId' })
@@ -146,7 +146,7 @@ export class Listing extends BaseEntity {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
-  numberOfAppartment: string;
+  numberOfApartment: string;
 
   @Column({ nullable: true })
   @Field({ nullable: true })
@@ -154,7 +154,7 @@ export class Listing extends BaseEntity {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
-  areaOfAppartment: string;
+  areaOfApartment: string;
 
   @Column({ nullable: true })
   @Field({ nullable: true })
@@ -166,7 +166,7 @@ export class Listing extends BaseEntity {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
-  rentedAppartment: string;
+  rentedApartment: string;
 
   @Column({ type: 'boolean', default: false })
   @Field({ nullable: true })

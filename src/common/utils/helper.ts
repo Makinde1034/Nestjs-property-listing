@@ -72,6 +72,7 @@ export function addDaysToDate(dateString: string | Date, days: number): string {
     // Return the new date as an ISO formatted string
     return date.toISOString();
   } catch (error) {
+    console.error('Error adding days to date:', error);
     throw new Error('Failed to add days to date');
   }
 }

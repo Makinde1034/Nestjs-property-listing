@@ -6,6 +6,7 @@
 import { Field, InputType, PartialType } from '@nestjs/graphql';
 import {
   IsArray,
+  IsBoolean,
   IsEnum,
   IsNotEmpty,
   IsOptional,
@@ -53,8 +54,13 @@ export class CreateListingDto {
   @IsEnum(ListingType)
   listingType: string;
 
-  @Field()
-  @IsString()
+  @Field({ nullable: true })
+  @ValidateIf((Listing) => Listing.purpose == 'rent')
+  @IsNotEmpty({
+    message:
+      'rentingOption must contain monthly, quarterly, bi-quarterly or yearly',
+  })
+  @IsOptional()
   @IsEnum(RentingOption)
   rentingOption: string;
 
@@ -76,9 +82,9 @@ export class CreateListingDto {
   @IsUUID()
   country: string;
 
-  @ValidateIf((listing) => listing.listingType == ListingType.APPARTMENT)
+  @ValidateIf((listing) => listing.listingType == ListingType.APARTMENT)
   @IsNotEmpty({
-    message: 'PropertySize is required for listing type appartment',
+    message: 'PropertySize is required for listing type apartment',
   })
   @Field()
   @IsString()
@@ -93,7 +99,7 @@ export class CreateListingDto {
   @IsNotEmpty()
   price: string;
 
-  @ValidateIf((listing) => listing.listingType == ListingType.APPARTMENT)
+  @ValidateIf((listing) => listing.listingType == ListingType.APARTMENT)
   @Field()
   @IsString()
   numberOfBathrooms: string;
@@ -102,7 +108,7 @@ export class CreateListingDto {
   @IsString()
   sellingType: string;
 
-  @ValidateIf((listing) => listing.listingType == ListingType.APPARTMENT)
+  @ValidateIf((listing) => listing.listingType == ListingType.APARTMENT)
   @Field()
   @IsString()
   numberOfRooms: string;
@@ -113,9 +119,9 @@ export class CreateListingDto {
   @IsOptional()
   mediaType: string;
 
-  @Field(() => [String], { nullable: true })
-  @IsOptional()
-  image: string[];
+  // @Field(() => String, { nullable: true })
+  // @IsOptional()
+  // image: string;
 
   @IsOptional()
   @IsArray()
@@ -162,7 +168,7 @@ export class CreateListingDto {
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
-  numberOfAppartment: string;
+  numberOfApartment: string;
 
   @ValidateIf(
     (listing) =>
@@ -170,7 +176,7 @@ export class CreateListingDto {
       listing.listingType == ListingType.VILLA,
   )
   @IsNotEmpty({
-    message: 'This is a required field for listing tyoe bulding and villa',
+    message: 'This is a required field for listing type bulding and villa',
   })
   @Field({ nullable: true })
   @IsOptional()
@@ -180,7 +186,7 @@ export class CreateListingDto {
   @ValidateIf((listing) => listing.listingType == ListingType.BUILDING)
   @IsNotEmpty({
     message:
-      'This is a required field for listing for listing tyoe villa and building',
+      'This is a required field for listing for listing type villa and building',
   })
   @Field({ nullable: true })
   @IsOptional()
@@ -199,7 +205,7 @@ export class CreateListingDto {
       listing.listingType == ListingType.VILLA,
   )
   @IsNotEmpty({
-    message: 'This is a required field for listing tyoe bulding and villa',
+    message: 'This is a required field for listing type bulding and villa',
   })
   @Field({ nullable: true })
   @IsOptional()
@@ -212,87 +218,111 @@ export class CreateListingDto {
       listing.listingType == ListingType.VILLA,
   )
   @IsNotEmpty({
-    message: 'This is a required field for listing tyoe bulding and villa',
+    message: 'This is a required field for listing type bulding and villa',
   })
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
-  rentedAppartment: string;
+  rentedApartment: string;
 
-  @Field({ nullable: true })
+  @Field({ defaultValue: false })
+  @IsBoolean()
   @IsOptional()
   negotiable: boolean;
 
-  @Field({ nullable: true })
+  @Field({ defaultValue: false })
+  @IsBoolean()
   pool: boolean;
 
-  @Field({ nullable: true })
+  @Field({ defaultValue: false })
+  @IsBoolean()
   outdoorKitchen: boolean;
 
-  @Field({ nullable: true })
+  @Field({ defaultValue: false })
+  @IsBoolean()
   garden: boolean;
 
-  @Field({ nullable: true })
+  @Field({ defaultValue: false })
+  @IsBoolean()
   guestHouse: boolean;
 
-  @Field({ nullable: true })
+  @Field({ defaultValue: false })
+  @IsBoolean()
   tennisCourt: boolean;
 
-  @Field({ nullable: true })
+  @Field({ defaultValue: false })
+  @IsBoolean()
   basketballCourt: boolean;
 
-  @Field({ nullable: true })
+  @Field({ defaultValue: false })
+  @IsBoolean()
   jacuzzi: boolean;
 
-  @Field({ nullable: true })
+  @Field({ defaultValue: false })
+  @IsBoolean()
   bbqArea: boolean;
 
-  @Field({ nullable: true })
+  @Field({ defaultValue: false })
+  @IsBoolean()
   maidsRoom: boolean;
 
-  @Field({ nullable: true })
+  @Field({ defaultValue: false })
+  @IsBoolean()
   petsAllowed: boolean;
 
-  @Field({ nullable: true })
+  @Field({ defaultValue: false })
+  @IsBoolean()
   balcony: boolean;
 
-  @Field({ nullable: true })
+  @Field({ defaultValue: false })
+  @IsBoolean()
   gym: boolean;
 
-  @Field({ nullable: true })
+  @Field({ defaultValue: false })
+  @IsBoolean()
   playground: boolean;
 
-  @Field({ nullable: true })
+  @Field({ defaultValue: false })
+  @IsBoolean()
   parking: boolean;
-
-  @Field({ nullable: true })
+  @Field({ defaultValue: false })
+  @IsBoolean()
   security: boolean;
 
-  @Field({ nullable: true })
+  @Field({ defaultValue: false })
+  @IsBoolean()
   airConditioning: boolean;
 
-  @Field({ nullable: true })
+  @Field({ defaultValue: false })
+  @IsBoolean()
   storageRoom: boolean;
 
-  @Field({ nullable: true })
+  @Field({ defaultValue: false })
+  @IsBoolean()
   laundryRoom: boolean;
 
-  @Field({ nullable: true })
+  @Field({ defaultValue: false })
+  @IsBoolean()
   conferenceRoom: boolean;
 
-  @Field({ nullable: true })
+  @Field({ defaultValue: false })
+  @IsBoolean()
   gatedCommunity: boolean;
 
-  @Field({ nullable: true })
+  @Field({ defaultValue: false })
+  @IsBoolean()
   indoorPlayArea: boolean;
 
-  @Field({ nullable: true })
+  @Field({ defaultValue: false })
+  @IsBoolean()
   coveredParking: boolean;
 
-  @Field({ nullable: true })
+  @Field({ defaultValue: false })
+  @IsBoolean()
   wifi: boolean;
 
-  @Field({ nullable: true })
+  @Field({ defaultValue: false })
+  @IsBoolean()
   elevator: boolean;
 }
 
@@ -312,10 +342,10 @@ export class FlagListingInput {
 
   @Field()
   @IsEnum(ListingFlagType)
-  reasonForFlag: string;
+  parentIssue: string;
 
   @Field()
   @IsString()
   @IsNotEmpty()
-  description: string;
+  childIssue: string;
 }

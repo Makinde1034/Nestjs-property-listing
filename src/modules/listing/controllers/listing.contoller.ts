@@ -25,4 +25,13 @@ export class ListingController {
   ) {
     return await this.listingService.uploadListingImage(listingId, files);
   }
+
+  @Post('panorama-listing-image-upload')
+  @UseInterceptors(AnyFilesInterceptor())
+  async uploadPanoramaListingImage(
+    @Query('listingId') listingId: string,
+    @UploadedFiles() file: Express.Multer.File,
+  ) {
+    return await this.listingService.uploadPanoramaImage(listingId, file);
+  }
 }

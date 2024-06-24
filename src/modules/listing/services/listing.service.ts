@@ -8,6 +8,7 @@ import {
   ConflictException,
   HttpException,
   Injectable,
+  InternalServerErrorException,
   Logger,
   UnprocessableEntityException,
 } from '@nestjs/common';
@@ -21,15 +22,9 @@ import { User } from '../../../entities';
 
 import { ForbiddenError } from '@nestjs/apollo';
 import { StorageService } from '../../storage/storage.service';
-import { SuccessResponse } from '../../../common/utils/success.response';
+
 import { AmenitiesRepository } from '../repositories/amenities.repository';
-import {
-  appartment,
-  villa,
-  farm,
-  land,
-  building,
-} from '../constant/attributes';
+import { apartment, villa, farm, land, building } from '../constant/attributes';
 import { AttributeDto } from '../dtos/request/attributes.dto';
 import { CreatePromotionInput } from '../dtos/request/promotion-input';
 import { PromotionRepository } from '../repositories/promotion.repository';
@@ -39,6 +34,7 @@ import { MoreThan, QueryFailedError } from 'typeorm';
 import { addDaysToDate } from '../../../common/utils/helper';
 import { FlagListingRepository } from '../repositories/flag-listing.repository';
 import { AppStrings } from '../../../common/messages/app.strings';
+import { SuccessResponse } from '../../../common/utils/success.response';
 
 @Injectable()
 export class ListingService {
@@ -71,7 +67,7 @@ export class ListingService {
     try {
       const typeMappings = {
         villa,
-        appartment,
+        apartment,
         farm,
         land,
         building,
@@ -102,7 +98,7 @@ export class ListingService {
     try {
       const typeMappings = {
         villa,
-        appartment,
+        apartment,
         farm,
         land,
         building,
@@ -134,7 +130,7 @@ export class ListingService {
     try {
       const typeMappings = {
         villa,
-        appartment,
+        apartment,
         farm,
         land,
         building,
@@ -246,12 +242,33 @@ export class ListingService {
         images: stringifiedUploadObject,
       });
 
-      return new SuccessResponse('Upload successful');
+      return new SuccessResponse(
+        AppStrings.UPLOAD_SUCCESSFUL,
+        stringifiedUploadObject,
+      );
     } catch (error) {
       this.logger.log(error);
       if (error instanceof HttpException) {
         throw error;
       } else throw new BadRequestException(error.messages || error.data);
+    }
+  }
+
+  async uploadPanoramaImage(id: string, file: Express.Multer.File) {
+    try {
+      const url = await this.storageService.upload(file);
+      await this.listingRepository.update(id, {
+        images: url,
+      });
+
+      return new SuccessResponse('Upload successful', url);
+    } catch (error) {
+      this.logger.log(error);
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new BadRequestException(error.messages || error.data);
+      }
     }
   }
 
@@ -312,20 +329,30 @@ export class ListingService {
 
   async flagListing(flaglistingInput: FlagListingInput, userId: string) {
     try {
-      const listing = await this.listingRepository.findById(
+      const listing = await this.listingRepository.findByIdOrFail(
         flaglistingInput.listingId,
       );
 
-      await this.flagListingRepository.save({
-        userId,
-        ...flaglistingInput,
-        listing,
-      });
+      if (!listing) {
+        throw new BadRequestException(AppStrings.LISTING_NOT_FOUND);
+      } else {
+        await this.flagListingRepository.save({
+          userId,
+          ...flaglistingInput,
+          listing,
+        });
 
-      return new SuccessResponse(AppStrings.LISTING_FLAG_SUCCESSFULL);
+        return new SuccessResponse(AppStrings.LISTING_FLAG_SUCCESSFULL);
+      }
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error?.messages | error.data);
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new InternalServerErrorException(
+          AppStrings.INTERNAL_SERVER_EXCEPTION,
+        );
+      }
     }
   }
 
