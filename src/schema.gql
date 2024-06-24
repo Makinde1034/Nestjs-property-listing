@@ -107,6 +107,8 @@ type Offer {
 type AdPackage {
   id: String!
   name: String!
+  impression: String!
+  coverageRadius: String
   price: String!
   duration: String!
   promotion: [Promotion!]!
@@ -155,7 +157,7 @@ type Listing {
   numberOfBathrooms: String!
   numberOfRooms: String!
   images: String
-  panoramaView: String
+  panoramaView: [String!]
   user: User
   offer: [Offer!]
   userId: String!
@@ -207,6 +209,53 @@ type Listing {
   updatedAt: DateTime!
 }
 
+type Attribute {
+  id: ID!
+  name: String!
+  type: String!
+  icon: String
+  dropDownOptions: [String!]
+  isRequired: Boolean!
+  showInSummary: Boolean!
+  hiddenToBuyers: Boolean!
+  showInComparison: Boolean!
+  showInFilters: Boolean!
+  attributeSets: [AttributeSet!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type AttributeSet {
+  id: ID!
+  name: String!
+  attributes: [Attribute!]!
+  listingTypes: [ListingType!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type ListingType {
+  id: ID!
+  name: String!
+  icon: String
+  attributeSets: [AttributeSet!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type SearchHistory {
+  id: ID!
+  location: String!
+  price: String!
+  numberOfBathrooms: String!
+  numberOfRooms: String!
+  type: String!
+  listingType: String!
+  createdAt: DateTime!
+  user: [User!]!
+  updatedAt: DateTime!
+}
+
 type User {
   id: ID!
   userType: String!
@@ -236,6 +285,7 @@ type User {
   nationalIdentity: NationalIdentity
   company: Company
   notificationPreference: [UserNotificationPreference!]
+  searchHistory: SearchHistory!
   twoFactorAuthenticationSecret: String
   isTwoFactorAuthenticationEnabled: Boolean
   roles: [Role!]
@@ -255,40 +305,6 @@ type Notification {
   type: String
   expiredAt: DateTime
   recipient: User!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type ListingType {
-  id: ID!
-  name: String!
-  icon: String
-  attributeSets: [AttributeSet!]!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type AttributeSet {
-  id: ID!
-  name: String!
-  attributes: [Attribute!]!
-  listingTypes: [ListingType!]!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type Attribute {
-  id: ID!
-  name: String!
-  type: String!
-  icon: String
-  dropDownOptions: [String!]
-  isRequired: Boolean!
-  showInSummary: Boolean!
-  hiddenToBuyers: Boolean!
-  showInComparison: Boolean!
-  showInFilters: Boolean!
-  attributeSets: [AttributeSet!]!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -374,6 +390,7 @@ type TwoFaResult {
 
 type SuccessResponse {
   message: String!
+  data: String!
 }
 
 type Amenities {
@@ -422,12 +439,13 @@ type Query {
   fetchListingTypes: [ListingType!]!
   fetchAttributes: [Attribute!]!
   fetchAttributeSets: [AttributeSet!]!
-  findListings(findManyOptions: AttributeDto): ListingResponse!
-  findPromotedListings(findManyOptions: AttributeDto): ListingResponse!
+  findListings(findManyOptions: CreateSearchHistoryInput): ListingResponse!
+  findPromotedListings(findManyOptions: CreateSearchHistoryInput): ListingResponse!
   findListingsForOwner(findManyOptions: AttributeDto): ListingResponse!
   findOneForBuyer(id: String!): Listing!
   viewFlaggedListings(findManyOptions: PaginateAndSort): FlaggedListingResponse
   findAmenities: [Amenities!]!
+  getMessageInLocalLanguage: SuccessResponse
   adPackage(id: String!): AdPackage!
   fetchIssueCategories: [IssueCategory!]!
   fetchIssues: [Issue!]!
@@ -438,13 +456,18 @@ type Query {
   findCities(findCities: PaginateAndSort): CityResponse!
 }
 
-input AttributeDto {
+input CreateSearchHistoryInput {
   take: Float
   skip: Float
   sortField: String
   directionToSort: SortOrder
   where: WhereOption
-  listingType: String
+  location: String!
+  price: String!
+  numberOfBathrooms: String!
+  numberOfRooms: String!
+  type: String!
+  listingType: String!
 }
 
 enum SortOrder {
@@ -454,6 +477,15 @@ enum SortOrder {
 
 input WhereOption {
   fieldToChose: String!
+}
+
+input AttributeDto {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
+  listingType: String
 }
 
 input PaginateAndSort {
@@ -740,6 +772,7 @@ input CreateListingDto {
   publicationDate: String!
   price: String!
   numberOfBathrooms: String!
+  panoramaView: [String!]
   sellingType: String! = "rent"
   numberOfRooms: String!
   mediaType: String! = "image"
@@ -804,6 +837,7 @@ input UpdateListingDto {
   publicationDate: String
   price: String
   numberOfBathrooms: String
+  panoramaView: [String!]
   sellingType: String = "rent"
   numberOfRooms: String
   mediaType: String = "image"
@@ -872,12 +906,16 @@ input FlagListingInput {
 input CreateAdPackageInput {
   name: String!
   price: String!
+  impression: String!
+  coverageRadius: String!
   duration: String!
 }
 
 input UpdateAdPackageInput {
   name: String
   price: String
+  impression: String
+  coverageRadius: String
   duration: String
   id: Int!
 }

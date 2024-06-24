@@ -27,6 +27,7 @@ import { AdPackageService } from '../ad-package/services/ad-package.service';
 import { AdPackageModule } from '../ad-package/ad-package.module';
 import { PromotionRepository } from './repositories/promotion.repository';
 import { FlagListingRepository } from './repositories/flag-listing.repository';
+import { SearchHistoryRepository } from './repositories/search-history.repository';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { FlagListingRepository } from './repositories/flag-listing.repository';
     AdPackageService,
     PromotionRepository,
     FlagListingRepository,
+    SearchHistoryRepository,
   ],
 })
 export class ListingModule {}

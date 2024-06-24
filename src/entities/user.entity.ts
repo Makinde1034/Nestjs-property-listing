@@ -32,6 +32,7 @@ import { Review } from './review.entity';
 import { loadUserName } from 'src/common/utils/class-loader';
 import { Listing } from './listing.entity';
 import { Offer } from './offer.entity';
+import { SearchHistory } from './search-history.entity';
 
 @Entity()
 @ObjectType()
@@ -159,6 +160,13 @@ export class User extends BaseEntity {
     },
   )
   notificationPreference: UserNotificationPreference[];
+
+  @Field()
+  @OneToMany(() => SearchHistory, (searchHistory) => searchHistory.user, {
+    cascade: true,
+    eager: true,
+  })
+  searchHistory: SearchHistory;
 
   @Exclude()
   @Field({ nullable: true })

@@ -9,4 +9,7 @@ import { Field, ObjectType } from '@nestjs/graphql';
 export class SuccessResponse {
   @Field()
   message: string;
+
+  @Field()
+  data?: string;
 }
