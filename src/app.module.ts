@@ -33,6 +33,7 @@ import { LocationModule } from './modules/location/location.module';
 import { AdPackageModule } from './modules/ad-package/ad-package.module';
 
 import { PaymentModule } from './modules/payment/payment.module';
+import { PuppeteerModule } from 'nest-puppeteer';
 
 @Module({
   imports: [
@@ -73,6 +74,8 @@ import { PaymentModule } from './modules/payment/payment.module';
         config.get<GoogleRecaptchaModuleOptions>('recaptcha'),
       inject: [ConfigService],
     }),
+
+    PuppeteerModule.forRoot({ pipe: true }, 'BrowserInstanceName'),
     AuthModule,
     UserModule,
     EventEmitterModule.forRoot(),

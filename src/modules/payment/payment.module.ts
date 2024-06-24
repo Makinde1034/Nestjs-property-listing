@@ -6,8 +6,10 @@
 import { Module } from '@nestjs/common';
 import { PaymentService } from './services/payment.service';
 import { PaymentResolver } from './resolver/payment.resolver';
+import { PuppeteerModule } from 'nest-puppeteer';
 
 @Module({
+  imports: [PuppeteerModule.forFeature()],
   providers: [PaymentResolver, PaymentService],
 })
 export class PaymentModule {}
