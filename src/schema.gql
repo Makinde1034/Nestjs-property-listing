@@ -126,9 +126,9 @@ type Promotion {
 
 type FlagListing {
   id: ID!
-  reasonForFlag: String!
+  parentIssue: String!
   userId: String!
-  description: String!
+  childIssue: String!
   listing: Listing
   createdAt: DateTime!
   deletedAt: DateTime!

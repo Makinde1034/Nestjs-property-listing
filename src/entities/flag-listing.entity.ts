@@ -19,7 +19,7 @@ import { Listing } from './listing.entity';
 export class FlagListing extends BaseEntity {
   @Field()
   @Column({ nullable: true })
-  reasonForFlag: string;
+  parentIssue: string;
 
   @Field()
   @Column()
@@ -27,7 +27,7 @@ export class FlagListing extends BaseEntity {
 
   @Field()
   @Column()
-  description: string;
+  childIssue: string;
 
   @Field(() => Listing, { nullable: true })
   @ManyToOne(() => Listing, (listing) => listing.flag, { eager: true })
