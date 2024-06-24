@@ -860,8 +860,8 @@ input CreatePromotionInput {
 
 input FlagListingInput {
   listingId: String!
-  reasonForFlag: String!
-  description: String!
+  parentIssue: String!
+  childIssue: String!
 }
 
 input CreateAdPackageInput {
