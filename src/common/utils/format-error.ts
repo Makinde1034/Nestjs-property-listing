@@ -10,6 +10,7 @@ export const formatError = (
   error: GraphQLFormattedError,
 ): GraphQLFormattedError => {
   const originalError = error.extensions.originalError as OriginalError;
+  console.log(error.extensions);
 
   if (!originalError) {
     return {
@@ -22,7 +23,8 @@ export const formatError = (
   return {
     message: originalError.message as string,
     extensions: {
-      code: error.extensions.code,
+      code: originalError.statusCode,
+      error: originalError.error,
     },
   };
 };

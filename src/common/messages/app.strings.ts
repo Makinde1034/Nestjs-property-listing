@@ -66,5 +66,12 @@ export const AppStrings = {
 
   LISTING_ENABLED_SUCCESSFULLY: 'Listing has been disabled',
 
-  LISTING_DELETED_SUCCESSFULLY: 'listing has been deleted',
+  LISTING_DELETED_SUCCESSFULLY: 'Listing has been deleted',
+
+  LISTING_NOT_FOUND: 'Listing not found',
+
+  UPLOAD_SUCCESSFUL: 'Upload successful',
+
+  INTERNAL_SERVER_EXCEPTION:
+    'Something went wrong on our server. We are working to fix it',
 };
