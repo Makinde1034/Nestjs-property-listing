@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2024, Waseet LLC. All rights reserved.
- * For license. See license.txt
- */
-
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class UpdateListingTable1719260126441 implements MigrationInterface {
@@ -21,9 +16,15 @@ export class UpdateListingTable1719260126441 implements MigrationInterface {
     await queryRunner.query(
       `DROP INDEX "public"."IDX_bfbc9e263d4cea6d7a8c9eb3ad"`,
     );
-    await queryRunner.query(
-      `ALTER TABLE "listing" RENAME COLUMN "videos" TO "panoramaView"`,
+    // Check if the column exists before renaming
+    const columnExists = await queryRunner.query(
+      `SELECT column_name FROM information_schema.columns WHERE table_name='listing' AND column_name='videos'`,
     );
+    if (columnExists.length > 0) {
+      await queryRunner.query(
+        `ALTER TABLE "listing" RENAME COLUMN "videos" TO "panoramaView"`,
+      );
+    }
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" DROP COLUMN "approve"`,
     );
