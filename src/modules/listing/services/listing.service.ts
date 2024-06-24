@@ -242,7 +242,26 @@ export class ListingService {
         images: stringifiedUploadObject,
       });
 
-      return new SuccessResponse(AppStrings.UPLOAD_SUCCESSFUL);
+      return new SuccessResponse(
+        AppStrings.UPLOAD_SUCCESSFUL,
+        stringifiedUploadObject,
+      );
+    } catch (error) {
+      this.logger.log(error);
+      if (error instanceof HttpException) {
+        throw error;
+      } else throw new BadRequestException(error.messages || error.data);
+    }
+  }
+
+  async uploadPanoramaImage(id: string, file: Express.Multer.File) {
+    try {
+      const url = await this.storageService.upload(file);
+      await this.listingRepository.update(id, {
+        images: url,
+      });
+
+      return new SuccessResponse('Upload successful', url);
     } catch (error) {
       this.logger.log(error);
       if (error instanceof HttpException) {
