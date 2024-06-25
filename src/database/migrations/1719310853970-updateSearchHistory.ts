@@ -5,8 +5,8 @@
 
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class UpdateListingTable1719260126441 implements MigrationInterface {
-  name = 'UpdateListingTable1719260126441';
+export class UpdateSearchHistory1719310853970 implements MigrationInterface {
+  name = 'UpdateSearchHistory1719310853970';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
@@ -21,15 +21,6 @@ export class UpdateListingTable1719260126441 implements MigrationInterface {
     await queryRunner.query(
       `DROP INDEX "public"."IDX_bfbc9e263d4cea6d7a8c9eb3ad"`,
     );
-    // Check if the column exists before renaming
-    const columnExists = await queryRunner.query(
-      `SELECT column_name FROM information_schema.columns WHERE table_name='listing' AND column_name='videos'`,
-    );
-    if (columnExists.length > 0) {
-      await queryRunner.query(
-        `ALTER TABLE "listing" RENAME COLUMN "videos" TO "panoramaView"`,
-      );
-    }
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" DROP COLUMN "approve"`,
     );
@@ -37,13 +28,11 @@ export class UpdateListingTable1719260126441 implements MigrationInterface {
       `ALTER TABLE "role_permissions_permission" ADD "approve" boolean DEFAULT false`,
     );
     await queryRunner.query(
-      `ALTER TABLE "ad_package" ADD "impression" character varying`,
+      `ALTER TABLE "search_history" DROP CONSTRAINT "FK_11fdc5f9da08d75bbab5296bcd5"`,
     );
     await queryRunner.query(
-      `ALTER TABLE "ad_package" ADD "coverageRadius" character varying NOT NULL`,
+      `ALTER TABLE "search_history" ALTER COLUMN "userId" SET NOT NULL`,
     );
-    await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "panoramaView"`);
-    await queryRunner.query(`ALTER TABLE "listing" ADD "panoramaView" text`);
     await queryRunner.query(
       `CREATE INDEX "IDX_b36cb2e04bc353ca4ede00d87b" ON "role_permissions_permission" ("roleId") `,
     );
@@ -56,9 +45,15 @@ export class UpdateListingTable1719260126441 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" ADD CONSTRAINT "FK_bfbc9e263d4cea6d7a8c9eb3ad2" FOREIGN KEY ("permissionId") REFERENCES "permission"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
+    await queryRunner.query(
+      `ALTER TABLE "search_history" ADD CONSTRAINT "FK_11fdc5f9da08d75bbab5296bcd5" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      `ALTER TABLE "search_history" DROP CONSTRAINT "FK_11fdc5f9da08d75bbab5296bcd5"`,
+    );
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" DROP CONSTRAINT "FK_bfbc9e263d4cea6d7a8c9eb3ad2"`,
     );
@@ -71,22 +66,17 @@ export class UpdateListingTable1719260126441 implements MigrationInterface {
     await queryRunner.query(
       `DROP INDEX "public"."IDX_b36cb2e04bc353ca4ede00d87b"`,
     );
-    await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "panoramaView"`);
-    await queryRunner.query(`ALTER TABLE "listing" ADD "panoramaView" jsonb`);
     await queryRunner.query(
-      `ALTER TABLE "ad_package" DROP COLUMN "coverageRadius"`,
+      `ALTER TABLE "search_history" ALTER COLUMN "userId" DROP NOT NULL`,
     );
     await queryRunner.query(
-      `ALTER TABLE "ad_package" DROP COLUMN "impression"`,
+      `ALTER TABLE "search_history" ADD CONSTRAINT "FK_11fdc5f9da08d75bbab5296bcd5" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" DROP COLUMN "approve"`,
     );
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" ADD "approve" boolean DEFAULT false`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "listing" RENAME COLUMN "panoramaView" TO "videos"`,
     );
     await queryRunner.query(
       `CREATE INDEX "IDX_bfbc9e263d4cea6d7a8c9eb3ad" ON "role_permissions_permission" ("permissionId") `,

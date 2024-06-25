@@ -143,7 +143,7 @@ export class ListingService {
     }
   }
 
-  async findAllPromotedListings(data: CreateSearchHistoryInput) {
+  async findAllPromotedListings(data: CreateSearchHistoryInput, user: User) {
     try {
       const typeMappings = {
         villa,
@@ -152,7 +152,7 @@ export class ListingService {
         land,
         building,
       };
-      await this.searchHistoryRepository.save(data);
+      await this.searchHistoryRepository.save({ ...data, user });
 
       const selectedAttributes = typeMappings[data.listingType];
       if (!selectedAttributes) {
@@ -434,5 +434,12 @@ export class ListingService {
       lang: user.language,
     });
     return new SuccessResponse('success', message);
+  }
+
+  async getSearchHistory(id: string) {
+    const history = await this.searchHistoryRepository.find({
+      where: { userId: id },
+    });
+    return history;
   }
 }

@@ -31,6 +31,7 @@ import { AdminGuard } from '../../auth/guards/admin.guard';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { SuccessResponse } from '../../../common/response';
 import { CreateSearchHistoryInput } from '../dtos/request/create-search-history';
+import { SearchHistory } from '../../../entities/search-history.entity';
 // Import { SuccessResponse } from '../../../common/utils/success.response';
 // Import { SuccessResponse } from '../../../common/response/SuccessResponse';
 
@@ -67,11 +68,14 @@ export class ListingResolver {
   @UseGuards(AccessTokenGuard)
   @Query(() => ListingResponse, { name: 'findPromotedListings' })
   async findPromotedListingForBuyer(
+    @Context() ctx: any,
     @Args('findManyOptions', { nullable: true })
     findManyOptions?: CreateSearchHistoryInput,
   ) {
-    const [listing, total] =
-      await this.listingService.findAllPromotedListings(findManyOptions);
+    const [listing, total] = await this.listingService.findAllPromotedListings(
+      findManyOptions,
+      ctx.req.user,
+    );
 
     return { listing, total };
   }
@@ -174,5 +178,14 @@ export class ListingResolver {
   @Mutation(() => SuccessResponse, { name: 'deleteListing' })
   async deleteListing(@Args('listingId') listingId: string) {
     return await this.listingService.deleteListing(listingId);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Query(() => [SearchHistory], {
+    nullable: true,
+    name: 'getSearchHistory',
+  })
+  async getSearchHistory(@Context() ctx: any) {
+    return await this.listingService.getSearchHistory(ctx.req.user.id);
   }
 }

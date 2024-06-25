@@ -252,6 +252,7 @@ type SearchHistory {
   type: String!
   listingType: String!
   createdAt: DateTime!
+  userId: String!
   user: [User!]!
   updatedAt: DateTime!
 }
@@ -446,6 +447,7 @@ type Query {
   viewFlaggedListings(findManyOptions: PaginateAndSort): FlaggedListingResponse
   findAmenities: [Amenities!]!
   getMessageInLocalLanguage: SuccessResponse
+  getSearchHistory: [SearchHistory!]
   adPackage(id: String!): AdPackage!
   fetchIssueCategories: [IssueCategory!]!
   fetchIssues: [Issue!]!
