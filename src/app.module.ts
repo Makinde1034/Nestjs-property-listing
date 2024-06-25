@@ -33,7 +33,6 @@ import { LocationModule } from './modules/location/location.module';
 import { AdPackageModule } from './modules/ad-package/ad-package.module';
 
 import { PaymentModule } from './modules/payment/payment.module';
-import { PuppeteerModule } from 'nest-puppeteer';
 
 @Module({
   imports: [

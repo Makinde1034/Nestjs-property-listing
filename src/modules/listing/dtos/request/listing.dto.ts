@@ -177,10 +177,6 @@ export class CreateListingDto {
   @IsString()
   numberOfApartment: string;
 
-  @Field(() => [String], { nullable: true })
-  @IsOptional()
-  panoramaView: string[];
-
   @ValidateIf(
     (listing) =>
       listing.listingType == ListingType.BUILDING ||
