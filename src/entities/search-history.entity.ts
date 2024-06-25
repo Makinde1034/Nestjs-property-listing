@@ -7,6 +7,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   UpdateDateColumn,
 } from 'typeorm';
@@ -50,7 +51,12 @@ export class SearchHistory extends BaseEntity {
   @CreateDateColumn()
   createdAt: Date;
 
+  @Column()
+  @Field()
+  userId: string;
+
   @Field(() => [User])
+  @JoinColumn({ name: 'userId' })
   @ManyToOne(() => User, (user) => user.searchHistory)
   user: User;
 
