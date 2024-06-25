@@ -28,6 +28,8 @@ import { AdPackageModule } from '../ad-package/ad-package.module';
 import { PromotionRepository } from './repositories/promotion.repository';
 import { FlagListingRepository } from './repositories/flag-listing.repository';
 import { SearchHistoryRepository } from './repositories/search-history.repository';
+import { PaymentModule } from '../payment/payment.module';
+import { PaymentService } from '../payment/services/payment.service';
 
 @Module({
   imports: [
@@ -41,6 +43,7 @@ import { SearchHistoryRepository } from './repositories/search-history.repositor
       Promotion,
     ]),
     AdPackageModule,
+    PaymentModule,
   ],
   controllers: [ListingController, ListingTypeController],
   providers: [
@@ -61,6 +64,7 @@ import { SearchHistoryRepository } from './repositories/search-history.repositor
     PromotionRepository,
     FlagListingRepository,
     SearchHistoryRepository,
+    PaymentService,
   ],
 })
 export class ListingModule {}

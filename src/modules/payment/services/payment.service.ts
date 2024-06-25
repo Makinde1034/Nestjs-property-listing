@@ -6,14 +6,29 @@
 import { Injectable } from '@nestjs/common';
 
 import { SuccessResponse } from '../../../common/response';
+import { PdfGeneratorService } from '../../file-handler/services/pdf.service';
+import { User } from '../../../entities';
+
+import { MailgunEmailService } from '../../mail/services/implementations';
 
 @Injectable()
 export class PaymentService {
+  constructor(
+    private pdfGeneratorService: PdfGeneratorService,
+    private mailService: MailgunEmailService,
+  ) {}
   initializePayment() {
     return new SuccessResponse();
   }
 
   verifyPayment() {
+    return new SuccessResponse();
+  }
+
+  async invoice(data, user?: User) {
+    const invoice = await this.pdfGeneratorService.generatePdfForInvoice(data);
+
+    await this.mailService.sendEmailInvoice(user, invoice);
     return new SuccessResponse();
   }
 }

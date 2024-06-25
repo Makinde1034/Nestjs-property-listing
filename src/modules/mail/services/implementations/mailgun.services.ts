@@ -11,6 +11,7 @@ import { IMailgunClient } from 'mailgun.js/Interfaces';
 import {
   EMAIL_NOTIFICATION_TEMPLATE_NAME,
   FORGOT_PASSWORD_TEMPLATE_NAME,
+  INVOICE,
   REGISTER_CONFIRMATION_TEMPLATE_NAME,
   STAFF_CONFIRMATION_TEMPLATE_NAME,
 } from 'src/common/constants';
@@ -163,6 +164,23 @@ export class MailgunEmailService implements MailSendService {
       await this.sendMail(mailgunData);
 
       this.logger.log('E-Mail sent Successfully');
+    } catch (error) {
+      this.logger.debug(error);
+    }
+  }
+  async sendEmailInvoice(user: User, invoice: Buffer): Promise<void> {
+    try {
+      const mailgunData: MailgunMessageData = {
+        attachment: invoice,
+        from: this.MAIL_FROM,
+        text: 'Please download your Invoice',
+
+        subject: 'Waseet Invoice',
+        to: user.email,
+        template: INVOICE,
+      };
+      await this.sendMail(mailgunData);
+      this.logger.debug('Email Sent');
     } catch (error) {
       this.logger.debug(error);
     }

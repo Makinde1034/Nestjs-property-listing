@@ -413,6 +413,11 @@ type FlaggedListingResponse {
   total: Int!
 }
 
+type Payment {
+  id: String!
+  amount: Float!
+}
+
 type ReviewResponse {
   reviews: [Review!]!
   total: Int!
@@ -421,11 +426,6 @@ type ReviewResponse {
 type CityResponse {
   city: [CityEntitity!]!
   total: Int!
-}
-
-type Payment {
-  id: String!
-  amount: Float!
 }
 
 type Query {
@@ -549,6 +549,8 @@ type Mutation {
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!
+  initializePayment: Payment!
+  verify: Payment!
   createIssueCategory(RequestInput: CreateIssueCategoryInput!): IssueCategory!
   updateIssueCatgeory(RequestInput: UpdateIssueCategoryInput!): IssueCategory!
   deleteIssueCategory(RequestInput: DeleteIssueInput!): String!
@@ -558,8 +560,6 @@ type Mutation {
   createTicket(RequestInput: CreateTicketInput!): String!
   manageTicket(RequestInput: UpdateTicketInput!): Ticket!
   review(createReviewDto: CreateReviewDto!): Review!
-  initializePayment: Payment!
-  verify: Payment!
 }
 
 input RegisterInput {

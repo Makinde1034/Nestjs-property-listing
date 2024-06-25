@@ -21,7 +21,7 @@ import {
 import { User } from '../../../entities';
 
 import { ForbiddenError } from '@nestjs/apollo';
-import { StorageService } from '../../storage/storage.service';
+import { StorageService } from '../../file-handler/services/storage.service';
 
 import { AmenitiesRepository } from '../repositories/amenities.repository';
 import { apartment, villa, farm, land, building } from '../constant/attributes';

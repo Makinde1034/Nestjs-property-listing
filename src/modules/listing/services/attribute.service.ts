@@ -16,7 +16,7 @@ import {
 } from '../dtos/request';
 import { In } from 'typeorm';
 import { AppStrings } from 'src/common/messages/app.strings';
-import { StorageService } from '../../storage/storage.service';
+import { StorageService } from '../../file-handler/services/storage.service';
 
 @Injectable()
 export class AttributeService {
