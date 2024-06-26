@@ -25,10 +25,10 @@ export class PaymentService {
     return new SuccessResponse();
   }
 
-  async invoice(data, user?: User) {
+  async invoice(data?, user?: User) {
     const invoice = await this.pdfGeneratorService.generatePdfForInvoice(data);
 
     await this.mailService.sendEmailInvoice(user, invoice);
-    return new SuccessResponse();
+    return invoice;
   }
 }

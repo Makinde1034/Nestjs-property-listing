@@ -40,11 +40,7 @@ export class PdfGeneratorService {
     return image;
   }
 
-  async generatePdfForInvoice(data: {
-    price: string;
-    type: string;
-    name: string;
-  }): Promise<Buffer> {
+  async generatePdfForInvoice(data): Promise<Buffer> {
     const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
     page.setDefaultNavigationTimeout(0);

@@ -37,6 +37,11 @@ export class MailgunEmailService implements MailSendService {
       username: 'api',
       key: this.MAILGUN_KEY,
     });
+
+    if (!this.MAILGUN_KEY || !this.MAILGUN_DOMAIN || !this.MAIL_FROM) {
+      this.logger.error('Mailgun configuration is missing.');
+      throw new Error('Mailgun configuration is missing.');
+    }
   }
 
   /**
@@ -173,7 +178,7 @@ export class MailgunEmailService implements MailSendService {
       const mailgunData: MailgunMessageData = {
         attachment: invoice,
         from: this.MAIL_FROM,
-        text: 'Please download your Invoice',
+        text: `Hi! ${user.name} your invoice is attached to this mail.`,
 
         subject: 'Waseet Invoice',
         to: user.email,
@@ -182,6 +187,7 @@ export class MailgunEmailService implements MailSendService {
       await this.sendMail(mailgunData);
       this.logger.debug('Email Sent');
     } catch (error) {
+      this.logger.log('Failed to send mail because of:', error);
       this.logger.debug(error);
     }
   }
