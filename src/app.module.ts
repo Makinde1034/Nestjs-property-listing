@@ -18,7 +18,7 @@ import { UserModule } from './modules/user/user.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MailModule } from './modules/mail/mail.module';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { StorageModule } from './modules/storage/storage.module';
+import { FilehandlerModule } from './modules/file-handler/file-handler.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { ListingModule } from './modules/listing/listing.module';
 import {
@@ -73,12 +73,13 @@ import { PaymentModule } from './modules/payment/payment.module';
         config.get<GoogleRecaptchaModuleOptions>('recaptcha'),
       inject: [ConfigService],
     }),
+
     AuthModule,
     UserModule,
     EventEmitterModule.forRoot(),
     MailModule,
     ThrottlerModule.forRoot(),
-    StorageModule,
+    FilehandlerModule,
     NotificationModule,
     ListingModule,
     IssueModule,

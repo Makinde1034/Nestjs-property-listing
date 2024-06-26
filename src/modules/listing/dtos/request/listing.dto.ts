@@ -169,7 +169,9 @@ export class CreateListingDto {
   landArea: string;
 
   @ValidateIf((listing) => listing.ListingType == ListingType.BUILDING)
-  @IsNotEmpty({ message: 'This is a required field for listing type building' })
+  @IsNotEmpty({
+    message: 'numberOfApartment is a required field for listing type building',
+  })
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
@@ -181,7 +183,8 @@ export class CreateListingDto {
       listing.listingType == ListingType.VILLA,
   )
   @IsNotEmpty({
-    message: 'This is a required field for listing type bulding and villa',
+    message:
+      'numberOfStoreys is a required field for listing type bulding and villa',
   })
   @Field({ nullable: true })
   @IsOptional()
@@ -191,7 +194,7 @@ export class CreateListingDto {
   @ValidateIf((listing) => listing.listingType == ListingType.BUILDING)
   @IsNotEmpty({
     message:
-      'This is a required field for listing for listing type villa and building',
+      'areaPerApartment is a required field for listing for listing type villa and building',
   })
   @Field({ nullable: true })
   @IsOptional()
@@ -210,7 +213,7 @@ export class CreateListingDto {
       listing.listingType == ListingType.VILLA,
   )
   @IsNotEmpty({
-    message: 'This is a required field for listing type bulding and villa',
+    message: 'totalArea is a required field for listing type bulding and villa',
   })
   @Field({ nullable: true })
   @IsOptional()
@@ -223,7 +226,8 @@ export class CreateListingDto {
       listing.listingType == ListingType.VILLA,
   )
   @IsNotEmpty({
-    message: 'This is a required field for listing type bulding and villa',
+    message:
+      'rentedApartment is a required field for listing type bulding and villa',
   })
   @Field({ nullable: true })
   @IsOptional()
