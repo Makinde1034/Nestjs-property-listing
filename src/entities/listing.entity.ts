@@ -162,6 +162,10 @@ export class Listing extends BaseEntity {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
+  garageSize: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   totalArea: string;
 
   @Column({ nullable: true })
