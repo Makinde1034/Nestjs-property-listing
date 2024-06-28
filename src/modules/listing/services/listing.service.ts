@@ -10,7 +10,6 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
-  NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { ListingRepository } from '../repositories/listing.repository';
@@ -40,6 +39,7 @@ import { I18nService } from 'nestjs-i18n';
 import { UserService } from '../../user/services';
 import { SearchHistoryRepository } from '../repositories/search-history.repository';
 import { CreateSearchHistoryInput } from '../dtos/request/create-search-history';
+import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 
 @Injectable()
 export class ListingService {
@@ -102,36 +102,15 @@ export class ListingService {
     }
   }
 
-  async findAllListings(data: CreateSearchHistoryInput) {
+  async findAllListings(paginatAndSort: PaginateAndSort) {
     try {
-      const typeMappings = {
-        villa,
-        apartment,
-        farm,
-        land,
-        building,
+      const orderOptions = {
+        [paginatAndSort.sortField]: paginatAndSort.directionToSort,
       };
-
-      const selectedAttributes = typeMappings[data.listingType];
-      if (!selectedAttributes) {
-        throw new BadRequestException(
-          `Invalid listing type: ${data.listingType}`,
-        );
-      }
-      const date = new Date().toISOString();
       const listing = await this.listingRepository.findAndCount({
-        where: {
-          purpose: data.type,
-          numberOfRooms: data.numberOfRooms,
-          numberOfBathrooms: data.numberOfBathrooms,
-          price: LessThanOrEqual(parseInt(data.price)),
-          city: data.location,
-          listingType: data.listingType,
-          promoted: true,
-          promotionExpiration: MoreThan(date),
-        },
-
-        select: ['id', ...selectedAttributes],
+        take: paginatAndSort.take,
+        skip: paginatAndSort.skip,
+        order: orderOptions,
       });
 
       return listing;
@@ -224,7 +203,7 @@ export class ListingService {
     } catch (error) {
       this.logger.log(error);
       if (error instanceof HttpException) {
-        console.log(error);
+        this.logger.log(error);
 
         throw error;
       } else
@@ -448,5 +427,16 @@ export class ListingService {
       where: { userId: id },
     });
     return history;
+  }
+
+  async getListingForAdmin(paginatAndSort: PaginateAndSort) {
+    const orderOptions = {
+      [paginatAndSort.sortField]: paginatAndSort.directionToSort,
+    };
+    const listing = await this.listingRepository.findAll({
+      order: orderOptions,
+    });
+
+    return listing;
   }
 }

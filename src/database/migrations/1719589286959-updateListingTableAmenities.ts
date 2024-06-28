@@ -5,8 +5,10 @@
 
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class UpdateOfferTable1719536016357 implements MigrationInterface {
-  name = 'UpdateOfferTable1719536016357';
+export class UpdateListingTableAmenities1719589286959
+  implements MigrationInterface
+{
+  name = 'UpdateListingTableAmenities1719589286959';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
@@ -27,10 +29,9 @@ export class UpdateOfferTable1719536016357 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" ADD "approve" boolean DEFAULT false`,
     );
-    await queryRunner.query(`ALTER TABLE "offer" DROP COLUMN "offerPrice"`);
-    await queryRunner.query(`ALTER TABLE "offer" ADD "offerPrice" integer`);
+    await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "garageArea"`);
     await queryRunner.query(
-      `ALTER TABLE "offer" ALTER COLUMN "expireAt" DROP NOT NULL`,
+      `ALTER TABLE "listing" ADD "garageArea" boolean NOT NULL DEFAULT false`,
     );
     await queryRunner.query(
       `CREATE INDEX "IDX_b36cb2e04bc353ca4ede00d87b" ON "role_permissions_permission" ("roleId") `,
@@ -59,12 +60,9 @@ export class UpdateOfferTable1719536016357 implements MigrationInterface {
     await queryRunner.query(
       `DROP INDEX "public"."IDX_b36cb2e04bc353ca4ede00d87b"`,
     );
+    await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "garageArea"`);
     await queryRunner.query(
-      `ALTER TABLE "offer" ALTER COLUMN "expireAt" SET NOT NULL`,
-    );
-    await queryRunner.query(`ALTER TABLE "offer" DROP COLUMN "offerPrice"`);
-    await queryRunner.query(
-      `ALTER TABLE "offer" ADD "offerPrice" money NOT NULL`,
+      `ALTER TABLE "listing" ADD "garageArea" character varying`,
     );
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" DROP COLUMN "approve"`,
