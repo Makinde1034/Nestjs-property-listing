@@ -31,7 +31,12 @@ import { CreatePromotionInput } from '../dtos/request/promotion-input';
 import { PromotionRepository } from '../repositories/promotion.repository';
 
 import { AdPackageService } from '../../ad-package/services/ad-package.service';
-import { LessThanOrEqual, MoreThan, QueryFailedError } from 'typeorm';
+import {
+  FindOptionsOrder,
+  LessThanOrEqual,
+  MoreThan,
+  QueryFailedError,
+} from 'typeorm';
 import { addDaysToDate } from '../../../common/utils/helper';
 import { FlagListingRepository } from '../repositories/flag-listing.repository';
 import { AppStrings } from '../../../common/messages/app.strings';
@@ -40,6 +45,7 @@ import { I18nService } from 'nestjs-i18n';
 import { UserService } from '../../user/services';
 import { SearchHistoryRepository } from '../repositories/search-history.repository';
 import { CreateSearchHistoryInput } from '../dtos/request/create-search-history';
+import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 
 @Injectable()
 export class ListingService {
@@ -102,36 +108,15 @@ export class ListingService {
     }
   }
 
-  async findAllListings(data: CreateSearchHistoryInput) {
+  async findAllListings(paginatAndSort: PaginateAndSort) {
     try {
-      const typeMappings = {
-        villa,
-        apartment,
-        farm,
-        land,
-        building,
+      const orderOptions = {
+        [paginatAndSort.sortField]: paginatAndSort.directionToSort,
       };
-
-      const selectedAttributes = typeMappings[data.listingType];
-      if (!selectedAttributes) {
-        throw new BadRequestException(
-          `Invalid listing type: ${data.listingType}`,
-        );
-      }
-      const date = new Date().toISOString();
       const listing = await this.listingRepository.findAndCount({
-        where: {
-          purpose: data.type,
-          numberOfRooms: data.numberOfRooms,
-          numberOfBathrooms: data.numberOfBathrooms,
-          price: LessThanOrEqual(parseInt(data.price)),
-          city: data.location,
-          listingType: data.listingType,
-          promoted: true,
-          promotionExpiration: MoreThan(date),
-        },
-
-        select: ['id', ...selectedAttributes],
+        take: paginatAndSort.take,
+        skip: paginatAndSort.skip,
+        order: orderOptions,
       });
 
       return listing;
@@ -448,5 +433,16 @@ export class ListingService {
       where: { userId: id },
     });
     return history;
+  }
+
+  async getListingForAdmin(paginatAndSort: PaginateAndSort) {
+    const orderOptions = {
+      [paginatAndSort.sortField]: paginatAndSort.directionToSort,
+    };
+    const listing = await this.listingRepository.findAll({
+      order: orderOptions,
+    });
+
+    return listing;
   }
 }
