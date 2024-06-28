@@ -156,9 +156,9 @@ export class Listing extends BaseEntity {
   @Field({ nullable: true })
   areaOfApartment: string;
 
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  garageArea: string;
+  @Column({ default: false })
+  @Field({ defaultValue: false })
+  garageArea: boolean;
 
   @Column({ nullable: true })
   @Field({ nullable: true })

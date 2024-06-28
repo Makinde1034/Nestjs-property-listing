@@ -202,10 +202,10 @@ export class CreateListingDto {
   areaPerApartment: string;
 
   @ValidateIf((listing) => listing.listingType == ListingType.BUILDING)
-  @Field({ nullable: true })
+  @Field({ defaultValue: false })
   @IsOptional()
-  @IsString()
-  garageArea: string;
+  @IsBoolean()
+  garageArea: boolean;
 
   @ValidateIf(
     (listing) =>
