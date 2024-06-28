@@ -10,6 +10,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import puppeteer from 'puppeteer';
+import { PdfInput } from '../dto/pdf.dto';
 
 @Injectable()
 export class PdfGeneratorService {
@@ -40,7 +41,7 @@ export class PdfGeneratorService {
     return image;
   }
 
-  async generatePdfForInvoice(data): Promise<Buffer> {
+  async generatePdfForInvoice(data: PdfInput): Promise<Buffer> {
     const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
     page.setDefaultNavigationTimeout(0);

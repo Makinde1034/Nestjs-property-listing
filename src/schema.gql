@@ -94,7 +94,7 @@ type Offer {
   acceptedAt: DateTime!
   status: String!
   coupon: Boolean!
-  couponCode: String!
+  couponCode: String
   user: User!
   listing: Listing!
   userId: String!
@@ -251,6 +251,7 @@ type SearchHistory {
   numberOfRooms: String!
   type: String!
   listingType: String!
+  isValid: Boolean!
   createdAt: DateTime!
   userId: String!
   user: [User!]!
@@ -542,7 +543,7 @@ type Mutation {
   deleteAttributeSet(RequestInput: AttributeDeleteInput!): String!
   createListing(createListing: CreateListingDto!): Listing!
   updateListing(updateListingDto: UpdateListingDto!): Listing!
-  createOffer(createOfferDto: CreateOfferDto!): Offer!
+  createOffer(createOfferDto: CreateOfferDto!): Offer
   createPromotion(createPromotionInput: CreatePromotionInput!): Promotion!
   flagListing(flagListingInput: FlagListingInput!): SuccessResponse!
   deleteListing(listingId: String!): SuccessResponse!
