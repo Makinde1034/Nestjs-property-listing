@@ -441,7 +441,7 @@ type Query {
   fetchListingTypes: [ListingType!]!
   fetchAttributes: [Attribute!]!
   fetchAttributeSets: [AttributeSet!]!
-  findListings(findManyOptions: CreateSearchHistoryInput): ListingResponse!
+  findListingsForBuyer(findManyOptions: PaginateAndSort): ListingResponse!
   findPromotedListings(findManyOptions: CreateSearchHistoryInput): ListingResponse!
   findListingsForOwner(findManyOptions: AttributeDto): ListingResponse!
   findOneForBuyer(id: String!): Listing!
@@ -459,6 +459,23 @@ type Query {
   findCities(findCities: PaginateAndSort): CityResponse!
 }
 
+input PaginateAndSort {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
+}
+
+enum SortOrder {
+  ASC
+  DESC
+}
+
+input WhereOption {
+  fieldToChose: String!
+}
+
 input CreateSearchHistoryInput {
   take: Float
   skip: Float
@@ -473,15 +490,6 @@ input CreateSearchHistoryInput {
   listingType: String!
 }
 
-enum SortOrder {
-  ASC
-  DESC
-}
-
-input WhereOption {
-  fieldToChose: String!
-}
-
 input AttributeDto {
   take: Float
   skip: Float
@@ -489,14 +497,6 @@ input AttributeDto {
   directionToSort: SortOrder
   where: WhereOption
   listingType: String
-}
-
-input PaginateAndSort {
-  take: Float
-  skip: Float
-  sortField: String
-  directionToSort: SortOrder
-  where: WhereOption
 }
 
 input ListTicketInput {
@@ -547,6 +547,7 @@ type Mutation {
   createPromotion(createPromotionInput: CreatePromotionInput!): Promotion!
   flagListing(flagListingInput: FlagListingInput!): SuccessResponse!
   deleteListing(listingId: String!): SuccessResponse!
+  findListingsForAdmin: SuccessResponse!
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!

@@ -30,6 +30,7 @@ import { FlagListingRepository } from './repositories/flag-listing.repository';
 import { SearchHistoryRepository } from './repositories/search-history.repository';
 import { PaymentModule } from '../payment/payment.module';
 import { PaymentService } from '../payment/services/payment.service';
+import { PromotionService } from './services/promotion.service';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { PaymentService } from '../payment/services/payment.service';
     FlagListingRepository,
     SearchHistoryRepository,
     PaymentService,
+    PromotionService,
   ],
 })
 export class ListingModule {}

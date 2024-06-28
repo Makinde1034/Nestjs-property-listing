@@ -28,10 +28,12 @@ import { CreatePromotionInput } from '../dtos/request/promotion-input';
 import { Promotion } from '../../../entities/promotion.entity';
 
 import { AdminGuard } from '../../auth/guards/admin.guard';
-import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
+
 import { SuccessResponse } from '../../../common/response';
 import { CreateSearchHistoryInput } from '../dtos/request/create-search-history';
 import { SearchHistory } from '../../../entities/search-history.entity';
+import { PromotionService } from '../services/promotion.service';
+import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 // Import { SuccessResponse } from '../../../common/utils/success.response';
 // Import { SuccessResponse } from '../../../common/response/SuccessResponse';
 
@@ -40,7 +42,12 @@ export class ListingResolver {
   constructor(
     private listingService: ListingService,
     private readonly offerService: OfferService,
+    private readonly promotionService: PromotionService,
   ) {}
+
+  /*************************
+   * Create Listing
+   *************************/
   @UseGuards(AccessTokenGuard)
   @Mutation(() => Listing, { name: 'createListing' })
   async createListing(
@@ -53,11 +60,15 @@ export class ListingResolver {
     );
   }
 
+  /*************************
+   * Find Listing
+   *************************/
+
   @UseGuards(AccessTokenGuard)
-  @Query(() => ListingResponse, { name: 'findListings' })
+  @Query(() => ListingResponse, { name: 'findListingsForBuyer' })
   async findListingForBuyer(
     @Args('findManyOptions', { nullable: true })
-    findManyOptions?: CreateSearchHistoryInput,
+    findManyOptions?: PaginateAndSort,
   ) {
     const [listing, total] =
       await this.listingService.findAllListings(findManyOptions);
@@ -129,6 +140,10 @@ export class ListingResolver {
     });
   }
 
+  /*************************
+   *Offer
+   *************************/
+
   @UseGuards(AccessTokenGuard)
   @Mutation(() => Offer, { name: 'createOffer', nullable: true })
   async createOffer(
@@ -143,7 +158,9 @@ export class ListingResolver {
   async findAmenities() {
     return await this.listingService.findAmenities();
   }
-
+  /*************************
+   *Promotion
+   *************************/
   @UseGuards(AccessTokenGuard)
   @Mutation(() => Promotion, { name: 'createPromotion' })
   async createPromotion(
@@ -187,5 +204,11 @@ export class ListingResolver {
   })
   async getSearchHistory(@Context() ctx: any) {
     return await this.listingService.getSearchHistory(ctx.req.user.id);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => SuccessResponse, { name: 'findListingsForAdmin' })
+  async getListingsForAdmin(paginateAndSort: PaginateAndSort) {
+    return await this.listingService.getListingForAdmin(paginateAndSort);
   }
 }
