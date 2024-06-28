@@ -10,7 +10,6 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
-  NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { ListingRepository } from '../repositories/listing.repository';
@@ -31,12 +30,7 @@ import { CreatePromotionInput } from '../dtos/request/promotion-input';
 import { PromotionRepository } from '../repositories/promotion.repository';
 
 import { AdPackageService } from '../../ad-package/services/ad-package.service';
-import {
-  FindOptionsOrder,
-  LessThanOrEqual,
-  MoreThan,
-  QueryFailedError,
-} from 'typeorm';
+import { LessThanOrEqual, MoreThan, QueryFailedError } from 'typeorm';
 import { addDaysToDate } from '../../../common/utils/helper';
 import { FlagListingRepository } from '../repositories/flag-listing.repository';
 import { AppStrings } from '../../../common/messages/app.strings';
@@ -209,7 +203,7 @@ export class ListingService {
     } catch (error) {
       this.logger.log(error);
       if (error instanceof HttpException) {
-        console.log(error);
+        this.logger.log(error);
 
         throw error;
       } else
