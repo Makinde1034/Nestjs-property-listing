@@ -172,6 +172,7 @@ type Listing {
   numberOfStoreys: String
   areaOfApartment: String
   garageArea: Boolean!
+  garageSize: String
   totalArea: String
   rentedApartment: String
   negotiatable: Boolean
@@ -792,6 +793,7 @@ input CreateListingDto {
   numberOfStoreys: String
   areaPerApartment: String
   garageArea: Boolean! = false
+  garageSize: String
   totalArea: String
   rentedApartment: String
   negotiable: Boolean! = false
@@ -857,6 +859,7 @@ input UpdateListingDto {
   numberOfStoreys: String
   areaPerApartment: String
   garageArea: Boolean = false
+  garageSize: String
   totalArea: String
   rentedApartment: String
   negotiable: Boolean = false

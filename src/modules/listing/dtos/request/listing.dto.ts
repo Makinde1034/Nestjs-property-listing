@@ -207,6 +207,10 @@ export class CreateListingDto {
   @IsBoolean()
   garageArea: boolean;
 
+  @Field({ nullable: true })
+  @IsOptional()
+  garageSize: string;
+
   @ValidateIf(
     (listing) =>
       listing.listingType == ListingType.BUILDING ||
