@@ -10,6 +10,7 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { ListingRepository } from '../repositories/listing.repository';
@@ -206,6 +207,9 @@ export class ListingService {
           },
         },
       });
+      if (!listing) {
+        throw new BadRequestException(AppStrings.LISTING_NOT_FOUND);
+      }
 
       const newImpression = listing.impressions + 1;
 
@@ -220,8 +224,11 @@ export class ListingService {
     } catch (error) {
       this.logger.log(error);
       if (error instanceof HttpException) {
+        console.log(error);
+
         throw error;
-      } else throw new BadRequestException(error.messages || error.data);
+      } else
+        throw new BadRequestException(error.messages || error.data || error);
     }
   }
 

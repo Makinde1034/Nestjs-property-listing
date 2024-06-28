@@ -10,6 +10,7 @@ import { PdfGeneratorService } from '../../file-handler/services/pdf.service';
 import { User } from '../../../entities';
 
 import { MailgunEmailService } from '../../mail/services/implementations';
+import { PdfInput } from '../../file-handler/dto/pdf.dto';
 
 @Injectable()
 export class PaymentService {
@@ -25,7 +26,7 @@ export class PaymentService {
     return new SuccessResponse();
   }
 
-  async invoice(data?, user?: User) {
+  async invoice(data?: PdfInput, user?: User) {
     const invoice = await this.pdfGeneratorService.generatePdfForInvoice(data);
 
     await this.mailService.sendEmailInvoice(user, invoice);

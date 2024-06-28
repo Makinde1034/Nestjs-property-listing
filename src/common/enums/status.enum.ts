@@ -8,3 +8,10 @@ export enum StatusEnum {
   FAILED = 'FAILED',
   VERIFIED = 'VERIFIED',
 }
+export enum StatusListEnum {
+  ACTIVE = 'active',
+  EXPIRED = 'expired',
+  CANCLED = 'cancled',
+  CLOSED = 'closed',
+  REJECTED = 'rejected',
+}

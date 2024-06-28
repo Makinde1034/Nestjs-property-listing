@@ -130,7 +130,7 @@ export class ListingResolver {
   }
 
   @UseGuards(AccessTokenGuard)
-  @Mutation(() => Offer, { name: 'createOffer' })
+  @Mutation(() => Offer, { name: 'createOffer', nullable: true })
   async createOffer(
     @Args('createOfferDto') createOfferDto: CreateOfferDto,
     @Context() ctx: any,

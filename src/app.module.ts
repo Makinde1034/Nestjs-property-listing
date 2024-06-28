@@ -33,6 +33,8 @@ import { LocationModule } from './modules/location/location.module';
 import { AdPackageModule } from './modules/ad-package/ad-package.module';
 
 import { PaymentModule } from './modules/payment/payment.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { JobService } from './modules/in-app-services/job.scheduler';
 
 @Module({
   imports: [
@@ -73,7 +75,7 @@ import { PaymentModule } from './modules/payment/payment.module';
         config.get<GoogleRecaptchaModuleOptions>('recaptcha'),
       inject: [ConfigService],
     }),
-
+    ScheduleModule.forRoot(),
     AuthModule,
     UserModule,
     EventEmitterModule.forRoot(),
@@ -91,6 +93,6 @@ import { PaymentModule } from './modules/payment/payment.module';
     PaymentModule,
   ],
   controllers: [],
-  providers: [AppResolver],
+  providers: [AppResolver, JobService],
 })
 export class AppModule {}

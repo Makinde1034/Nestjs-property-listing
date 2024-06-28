@@ -191,4 +191,19 @@ export class MailgunEmailService implements MailSendService {
       this.logger.debug(error);
     }
   }
+  async sendSearchHistoryIsNowAvailable(email: string[]): Promise<void> {
+    try {
+      const mailgunData: MailgunMessageData = {
+        from: this.MAIL_FROM,
+        text: `Hi! A listing that fits your search is now available.`,
+        subject: 'New Listing',
+        to: email,
+      };
+      await this.sendMail(mailgunData);
+      this.logger.debug('Email Sent');
+    } catch (error) {
+      this.logger.log('Failed to send mail because of:', error);
+      this.logger.debug(error);
+    }
+  }
 }
