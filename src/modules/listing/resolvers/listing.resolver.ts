@@ -221,35 +221,25 @@ export class ListingResolver {
   @Mutation(() => Listing, { name: 'adminUpdateListing' })
   async adminUpdateListing(
     @Args('adminUpdateListingDto') updateListingDto: UpdateListingAdminDto,
-    @Context() ctx: any,
   ) {
     return await this.listingService.editListingForAdmin(updateListingDto);
   }
 
   @UseGuards(AccessTokenGuard)
   @Mutation(() => SuccessResponse, { name: 'adminDisableListing' })
-  async adminDisableListing(
-    @Args('listingId') listingId: string,
-    @Context() ctx: any,
-  ) {
+  async adminDisableListing(@Args('listingId') listingId: string) {
     return await this.listingService.disableListing(listingId);
   }
 
   @UseGuards(AccessTokenGuard)
   @Mutation(() => Listing, { name: 'enableListing' })
-  async adminEnableListing(
-    @Args('listingId') listingId: string,
-    @Context() ctx: any,
-  ) {
+  async adminEnableListing(@Args('listingId') listingId: string) {
     return await this.listingService.enableListing(listingId);
   }
 
   @UseGuards(AccessTokenGuard)
   @Mutation(() => Listing, { name: 'deleteListing' })
-  async adminDeleteListing(
-    @Args('listingId') listingId: string,
-    @Context() ctx: any,
-  ) {
+  async adminDeleteListing(@Args('listingId') listingId: string) {
     return await this.listingService.deleteListing(listingId);
   }
 }

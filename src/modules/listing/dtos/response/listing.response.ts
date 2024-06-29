@@ -6,7 +6,6 @@
 import { Field, ObjectType, Int } from '@nestjs/graphql';
 import { Listing } from '../../../../entities';
 import { FlagListing } from '../../../../entities/flag-listing.entity';
-import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
 
 @ObjectType()
 export class ListingResponse {
