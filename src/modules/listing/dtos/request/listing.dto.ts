@@ -209,6 +209,10 @@ export class CreateListingDto {
   @IsBoolean()
   garageArea: boolean;
 
+  @Field({ nullable: true })
+  @IsOptional()
+  garageSize: string;
+
   @ValidateIf(
     (listing) =>
       listing.listingType == ListingType.BUILDING ||
@@ -380,8 +384,9 @@ export class UpdateListingAdminDto {
   @IsOptional()
   @IsString()
   totalArea: string;
+
   @IsOptional()
-  @Field()
+  @Field({ nullable: true })
   @IsString()
   numberOfRooms: string;
 
@@ -405,6 +410,7 @@ export class UpdateListingAdminDto {
   @IsBoolean()
   guestHouse: boolean;
 
+  @IsOptional()
   @Field({ nullable: true })
   @IsBoolean()
   tennisCourt: boolean;

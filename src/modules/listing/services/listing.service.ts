@@ -33,6 +33,7 @@ import { PromotionRepository } from '../repositories/promotion.repository';
 
 import { AdPackageService } from '../../ad-package/services/ad-package.service';
 import { Between, LessThanOrEqual, MoreThan, QueryFailedError } from 'typeorm';
+
 import { addDaysToDate } from '../../../common/utils/helper';
 import { FlagListingRepository } from '../repositories/flag-listing.repository';
 import { AppStrings } from '../../../common/messages/app.strings';

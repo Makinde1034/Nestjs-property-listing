@@ -4,10 +4,9 @@
  */
 
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { ListingService } from '../listing/services/listing.service';
 import { SearchHistoryRepository } from '../listing/repositories/search-history.repository';
 import { ListingRepository } from '../listing/repositories/listing.repository';
-import { MailSendService } from '../mail/services/mail-service';
+
 import { NotificationService } from '../notification/services';
 import { MailgunEmailService } from '../mail/services/implementations';
 
@@ -27,7 +26,7 @@ export class JobService {
       where: { isValid: false },
       relations: ['user'],
     });
-    for (const element of searchHistory) {
+    searchHistory.map(async (element) => {
       const listing = await this.listingRepository.findOne({
         where: {
           city: element.location,
@@ -38,14 +37,15 @@ export class JobService {
         },
         relations: ['user'],
       });
+
       if (listing) {
         listingArrayMails.push(element.user.email);
-        await this.searchHistoryRepository.update(element.id, {
+        this.searchHistoryRepository.update(element.id, {
           isValid: true,
         });
         listingArrayUserId.push(element.user.id);
       }
-    }
+    });
 
     await this.mailService.sendSearchHistoryIsNowAvailable(listingArrayMails);
     this.pushNotification.sendUsersNotification({

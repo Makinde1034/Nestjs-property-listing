@@ -16,7 +16,6 @@ import { PaymentService } from '../../payment/services/payment.service';
 import { MoreThanOrEqual } from 'typeorm';
 import { ListingService } from './listing.service';
 import { AppStrings } from '../../../common/messages/app.strings';
-import { Offer } from '../../../entities/offer.entity';
 
 import { PdfInput } from '../../file-handler/dto/pdf.dto';
 @Injectable()

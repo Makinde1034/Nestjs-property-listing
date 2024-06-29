@@ -13,7 +13,7 @@ import {
 } from 'typeorm';
 import BaseEntity from './base.entity';
 import { Field, ObjectType } from '@nestjs/graphql';
-import { IsString, IsEnum, IsOptional } from 'class-validator';
+import { IsString, IsEnum } from 'class-validator';
 import { ListingType } from './listing-type.entity';
 import { Purpose } from '../common/enums';
 import { User } from './user.entity';
