@@ -70,7 +70,7 @@ export class OfferService {
     }
   }
 
-  async getMinimumOfferForAListing(listingId: string, offer?: Offer) {
+  async getMinimumOfferForAListing(listingId: string) {
     try {
       const listing =
         await this.listingService.findOneListingForBuyer(listingId);

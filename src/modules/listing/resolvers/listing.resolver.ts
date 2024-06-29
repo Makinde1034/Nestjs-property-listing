@@ -6,6 +6,7 @@
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ListingService } from '../services/listing.service';
 import {
+  AdminFilterAndSort,
   CreateListingDto,
   FlagListingInput,
   UpdateListingDto,
@@ -16,6 +17,7 @@ import { UseGuards } from '@nestjs/common';
 import { AccessTokenGuard } from '../../auth/guards';
 
 import {
+  AdminListingResponse,
   FlaggedListingResponse,
   ListingResponse,
 } from '../dtos/response/listing.response';
@@ -207,8 +209,10 @@ export class ListingResolver {
   }
 
   @UseGuards(AccessTokenGuard)
-  @Mutation(() => SuccessResponse, { name: 'findListingsForAdmin' })
-  async getListingsForAdmin(paginateAndSort: PaginateAndSort) {
+  @Query(() => AdminListingResponse, { name: 'findListingsForAdmin' })
+  async getListingsForAdmin(
+    @Args('paginateAndSort') paginateAndSort: AdminFilterAndSort,
+  ) {
     return await this.listingService.getListingForAdmin(paginateAndSort);
   }
 }

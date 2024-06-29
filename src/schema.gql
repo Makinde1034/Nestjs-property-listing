@@ -171,7 +171,7 @@ type Listing {
   numberOfApartment: String
   numberOfStoreys: String
   areaOfApartment: String
-  garageArea: String
+  garageArea: Boolean!
   totalArea: String
   rentedApartment: String
   negotiatable: Boolean
@@ -204,7 +204,12 @@ type Listing {
   promotionExpiration: DateTime
   isListingFlagged: Boolean!
   disableListing: Boolean!
+  status: String!
   flag: [FlagListing!]
+  rentDate: DateTime
+  soldDate: DateTime
+  promotedDate: DateTime
+  flaggedDate: DateTime
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -414,6 +419,18 @@ type FlaggedListingResponse {
   total: Int!
 }
 
+type ListingAnalysisResponse {
+  flagged: Float!
+  promoted: Float!
+  sold: String!
+}
+
+type AdminListingResponse {
+  listing: [Listing!]
+  analysis: ListingAnalysisResponse!
+  total: Int!
+}
+
 type Payment {
   id: String!
   amount: Float!
@@ -449,6 +466,7 @@ type Query {
   findAmenities: [Amenities!]!
   getMessageInLocalLanguage: SuccessResponse
   getSearchHistory: [SearchHistory!]
+  findListingsForAdmin(paginateAndSort: AdminFilterAndSort!): AdminListingResponse!
   adPackage(id: String!): AdPackage!
   fetchIssueCategories: [IssueCategory!]!
   fetchIssues: [Issue!]!
@@ -499,6 +517,15 @@ input AttributeDto {
   listingType: String
 }
 
+input AdminFilterAndSort {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
+  timePeriod: String
+}
+
 input ListTicketInput {
   status: String
 }
@@ -547,7 +574,6 @@ type Mutation {
   createPromotion(createPromotionInput: CreatePromotionInput!): Promotion!
   flagListing(flagListingInput: FlagListingInput!): SuccessResponse!
   deleteListing(listingId: String!): SuccessResponse!
-  findListingsForAdmin: SuccessResponse!
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!
@@ -791,7 +817,7 @@ input CreateListingDto {
   numberOfApartment: String
   numberOfStoreys: String
   areaPerApartment: String
-  garageArea: String
+  garageArea: Boolean! = false
   totalArea: String
   rentedApartment: String
   negotiable: Boolean! = false
@@ -856,7 +882,7 @@ input UpdateListingDto {
   numberOfApartment: String
   numberOfStoreys: String
   areaPerApartment: String
-  garageArea: String
+  garageArea: Boolean = false
   totalArea: String
   rentedApartment: String
   negotiable: Boolean = false

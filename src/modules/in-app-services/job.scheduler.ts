@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { ListingService } from '../listing/services/listing.service';
 import { SearchHistoryRepository } from '../listing/repositories/search-history.repository';

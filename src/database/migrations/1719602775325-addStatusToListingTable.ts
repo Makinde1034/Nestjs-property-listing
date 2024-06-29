@@ -5,10 +5,10 @@
 
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class UpdateListingTableAmenities1719589286959
+export class AddStatusToListingTable1719602775325
   implements MigrationInterface
 {
-  name = 'UpdateListingTableAmenities1719589286959';
+  name = 'AddStatusToListingTable1719602775325';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
@@ -24,14 +24,13 @@ export class UpdateListingTableAmenities1719589286959
       `DROP INDEX "public"."IDX_bfbc9e263d4cea6d7a8c9eb3ad"`,
     );
     await queryRunner.query(
+      `ALTER TABLE "listing" RENAME COLUMN "garageSize" TO "status"`,
+    );
+    await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" DROP COLUMN "approve"`,
     );
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" ADD "approve" boolean DEFAULT false`,
-    );
-    await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "garageArea"`);
-    await queryRunner.query(
-      `ALTER TABLE "listing" ADD "garageArea" boolean NOT NULL DEFAULT false`,
     );
     await queryRunner.query(
       `CREATE INDEX "IDX_b36cb2e04bc353ca4ede00d87b" ON "role_permissions_permission" ("roleId") `,
@@ -60,15 +59,14 @@ export class UpdateListingTableAmenities1719589286959
     await queryRunner.query(
       `DROP INDEX "public"."IDX_b36cb2e04bc353ca4ede00d87b"`,
     );
-    await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "garageArea"`);
-    await queryRunner.query(
-      `ALTER TABLE "listing" ADD "garageArea" character varying`,
-    );
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" DROP COLUMN "approve"`,
     );
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" ADD "approve" boolean DEFAULT false`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "listing" RENAME COLUMN "status" TO "garageSize"`,
     );
     await queryRunner.query(
       `CREATE INDEX "IDX_bfbc9e263d4cea6d7a8c9eb3ad" ON "role_permissions_permission" ("permissionId") `,

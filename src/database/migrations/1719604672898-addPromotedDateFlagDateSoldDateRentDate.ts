@@ -5,10 +5,10 @@
 
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class UpdateListingTableAmenities1719589286959
+export class AddPromotedDateFlagDateSoldDateRentDate1719604672898
   implements MigrationInterface
 {
-  name = 'UpdateListingTableAmenities1719589286959';
+  name = 'AddPromotedDateFlagDateSoldDateRentDate1719604672898';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
@@ -29,9 +29,13 @@ export class UpdateListingTableAmenities1719589286959
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" ADD "approve" boolean DEFAULT false`,
     );
-    await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "garageArea"`);
+    await queryRunner.query(`ALTER TABLE "listing" ADD "rentDate" TIMESTAMP`);
+    await queryRunner.query(`ALTER TABLE "listing" ADD "soldDate" TIMESTAMP`);
     await queryRunner.query(
-      `ALTER TABLE "listing" ADD "garageArea" boolean NOT NULL DEFAULT false`,
+      `ALTER TABLE "listing" ADD "promotedDate" TIMESTAMP`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "listing" ADD "flaggedDate" TIMESTAMP`,
     );
     await queryRunner.query(
       `CREATE INDEX "IDX_b36cb2e04bc353ca4ede00d87b" ON "role_permissions_permission" ("roleId") `,
@@ -60,10 +64,10 @@ export class UpdateListingTableAmenities1719589286959
     await queryRunner.query(
       `DROP INDEX "public"."IDX_b36cb2e04bc353ca4ede00d87b"`,
     );
-    await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "garageArea"`);
-    await queryRunner.query(
-      `ALTER TABLE "listing" ADD "garageArea" character varying`,
-    );
+    await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "flaggedDate"`);
+    await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "promotedDate"`);
+    await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "soldDate"`);
+    await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "rentDate"`);
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" DROP COLUMN "approve"`,
     );
