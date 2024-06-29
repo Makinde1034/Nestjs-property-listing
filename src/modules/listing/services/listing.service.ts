@@ -14,8 +14,10 @@ import {
 } from '@nestjs/common';
 import { ListingRepository } from '../repositories/listing.repository';
 import {
+  AdminFilterAndSort,
   CreateListingDto,
   FlagListingInput,
+  UpdateListingAdminDto,
   UpdateListingDto,
 } from '../dtos/request/listing.dto';
 import { User } from '../../../entities';
@@ -30,7 +32,8 @@ import { CreatePromotionInput } from '../dtos/request/promotion-input';
 import { PromotionRepository } from '../repositories/promotion.repository';
 
 import { AdPackageService } from '../../ad-package/services/ad-package.service';
-import { LessThanOrEqual, MoreThan, QueryFailedError } from 'typeorm';
+import { Between, LessThanOrEqual, MoreThan, QueryFailedError } from 'typeorm';
+
 import { addDaysToDate } from '../../../common/utils/helper';
 import { FlagListingRepository } from '../repositories/flag-listing.repository';
 import { AppStrings } from '../../../common/messages/app.strings';
@@ -40,6 +43,17 @@ import { UserService } from '../../user/services';
 import { SearchHistoryRepository } from '../repositories/search-history.repository';
 import { CreateSearchHistoryInput } from '../dtos/request/create-search-history';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
+
+import {
+  endOfDay,
+  endOfMonth,
+  endOfWeek,
+  endOfYear,
+  startOfDay,
+  startOfMonth,
+  startOfWeek,
+  startOfYear,
+} from 'date-fns';
 
 @Injectable()
 export class ListingService {
@@ -322,6 +336,7 @@ export class ListingService {
         await this.listingRepository.update(listing.id, {
           promotionExpiration: expirationDate,
           promoted: true,
+          promotedDate: new Date(),
         });
 
         return promotion;
@@ -351,6 +366,9 @@ export class ListingService {
           ...flaglistingInput,
           listing,
         });
+        const date = new Date();
+
+        await this.listingRepository.update(listing.id, { flaggedDate: date });
 
         return new SuccessResponse(AppStrings.LISTING_FLAG_SUCCESSFULL);
       }
@@ -429,14 +447,73 @@ export class ListingService {
     return history;
   }
 
-  async getListingForAdmin(paginatAndSort: PaginateAndSort) {
+  async getListingForAdmin(paginatAndSort: AdminFilterAndSort) {
     const orderOptions = {
       [paginatAndSort.sortField]: paginatAndSort.directionToSort,
     };
-    const listing = await this.listingRepository.findAll({
+
+    const now = new Date();
+    let whereCondition: any = {};
+
+    switch (paginatAndSort.timePeriod) {
+      case 'today':
+        whereCondition = {
+          [paginatAndSort.sortField]: Between(startOfDay(now), endOfDay(now)),
+        };
+        break;
+      case 'week':
+        whereCondition = {
+          [paginatAndSort.sortField]: Between(startOfWeek(now), endOfWeek(now)),
+        };
+        break;
+      case 'month':
+        whereCondition = {
+          [paginatAndSort.sortField]: Between(
+            startOfMonth(now),
+            endOfMonth(now),
+          ),
+        };
+        break;
+      case 'year':
+        whereCondition = {
+          [paginatAndSort.sortField]: Between(startOfYear(now), endOfYear(now)),
+        };
+        break;
+      default:
+        whereCondition = null;
+    }
+
+    const [listing, total] = await this.listingRepository.findAndCount({
+      where: whereCondition,
       order: orderOptions,
     });
 
+    const flaggedListing = await this.listingRepository.findAll({
+      where: { isListingFlagged: true },
+    });
+    const promotedListing = await this.listingRepository.findAll({
+      where: {
+        promoted: true,
+      },
+    });
+    const soldListing = await this.listingRepository.findAll({
+      where: { status: 'completed' },
+    });
+
+    const analysis = {
+      flagged: flaggedListing.length,
+      promoted: promotedListing.length,
+      sold: soldListing.length,
+    };
+
+    return { listing, analysis, total };
+  }
+
+  async editListingForAdmin(editListingDto: UpdateListingAdminDto) {
+    const listing = await this.listingRepository.update(
+      editListingDto.id,
+      editListingDto,
+    );
     return listing;
   }
 }

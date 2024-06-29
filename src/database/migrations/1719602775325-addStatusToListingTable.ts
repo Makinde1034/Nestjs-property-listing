@@ -5,10 +5,10 @@
 
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddGuarageSizeToListingTable1719593063810
+export class AddStatusToListingTable1719602775325
   implements MigrationInterface
 {
-  name = 'AddGuarageSizeToListingTable1719593063810';
+  name = 'AddStatusToListingTable1719602775325';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
@@ -24,13 +24,13 @@ export class AddGuarageSizeToListingTable1719593063810
       `DROP INDEX "public"."IDX_bfbc9e263d4cea6d7a8c9eb3ad"`,
     );
     await queryRunner.query(
+      `ALTER TABLE "listing" RENAME COLUMN "garageSize" TO "status"`,
+    );
+    await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" DROP COLUMN "approve"`,
     );
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" ADD "approve" boolean DEFAULT false`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "listing" ADD "garageSize" character varying`,
     );
     await queryRunner.query(
       `CREATE INDEX "IDX_b36cb2e04bc353ca4ede00d87b" ON "role_permissions_permission" ("roleId") `,
@@ -59,12 +59,14 @@ export class AddGuarageSizeToListingTable1719593063810
     await queryRunner.query(
       `DROP INDEX "public"."IDX_b36cb2e04bc353ca4ede00d87b"`,
     );
-    await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "garageSize"`);
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" DROP COLUMN "approve"`,
     );
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" ADD "approve" boolean DEFAULT false`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "listing" RENAME COLUMN "status" TO "garageSize"`,
     );
     await queryRunner.query(
       `CREATE INDEX "IDX_bfbc9e263d4cea6d7a8c9eb3ad" ON "role_permissions_permission" ("permissionId") `,

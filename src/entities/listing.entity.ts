@@ -19,6 +19,7 @@ import { Exclude } from 'class-transformer';
 import { Offer } from './offer.entity';
 import { Promotion } from './promotion.entity';
 import { FlagListing } from './flag-listing.entity';
+import { ListingStatus } from '../common/enums/status.enum';
 
 @Entity()
 @ObjectType()
@@ -299,12 +300,32 @@ export class Listing extends BaseEntity {
   @Column({ default: false })
   disableListing: boolean;
 
+  @Field({ defaultValue: 'active' })
+  @Column({ enum: ListingStatus, nullable: true })
+  status: string;
+
   @Field(() => [FlagListing], { nullable: true })
   @OneToMany(() => FlagListing, (flag) => flag.listing, {
     cascade: true,
     onDelete: 'CASCADE',
   })
   flag: FlagListing[];
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  rentDate: Date;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  soldDate: Date;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  promotedDate: Date;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  flaggedDate: Date;
 
   @Field()
   @CreateDateColumn()

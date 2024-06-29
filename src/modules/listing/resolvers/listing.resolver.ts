@@ -6,8 +6,10 @@
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ListingService } from '../services/listing.service';
 import {
+  AdminFilterAndSort,
   CreateListingDto,
   FlagListingInput,
+  UpdateListingAdminDto,
   UpdateListingDto,
 } from '../dtos/request/';
 
@@ -16,6 +18,7 @@ import { UseGuards } from '@nestjs/common';
 import { AccessTokenGuard } from '../../auth/guards';
 
 import {
+  AdminListingResponse,
   FlaggedListingResponse,
   ListingResponse,
 } from '../dtos/response/listing.response';
@@ -207,8 +210,36 @@ export class ListingResolver {
   }
 
   @UseGuards(AccessTokenGuard)
-  @Mutation(() => SuccessResponse, { name: 'findListingsForAdmin' })
-  async getListingsForAdmin(paginateAndSort: PaginateAndSort) {
+  @Query(() => AdminListingResponse, { name: 'findListingsForAdmin' })
+  async getListingsForAdmin(
+    @Args('paginateAndSort') paginateAndSort: AdminFilterAndSort,
+  ) {
     return await this.listingService.getListingForAdmin(paginateAndSort);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => Listing, { name: 'adminUpdateListing' })
+  async adminUpdateListing(
+    @Args('adminUpdateListingDto') updateListingDto: UpdateListingAdminDto,
+  ) {
+    return await this.listingService.editListingForAdmin(updateListingDto);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => SuccessResponse, { name: 'adminDisableListing' })
+  async adminDisableListing(@Args('listingId') listingId: string) {
+    return await this.listingService.disableListing(listingId);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => Listing, { name: 'enableListing' })
+  async adminEnableListing(@Args('listingId') listingId: string) {
+    return await this.listingService.enableListing(listingId);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => Listing, { name: 'deleteListing' })
+  async adminDeleteListing(@Args('listingId') listingId: string) {
+    return await this.listingService.deleteListing(listingId);
   }
 }

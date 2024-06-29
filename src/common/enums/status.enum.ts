@@ -15,3 +15,9 @@ export enum StatusListEnum {
   CLOSED = 'closed',
   REJECTED = 'rejected',
 }
+
+export enum ListingStatus {
+  ACTIVE = 'active',
+
+  REMOVED = 'removed',
+}

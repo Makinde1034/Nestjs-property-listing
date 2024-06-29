@@ -5,10 +5,8 @@
 
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddGuarageSizeToListingTable1719593063810
-  implements MigrationInterface
-{
-  name = 'AddGuarageSizeToListingTable1719593063810';
+export class UpdateListingTable1719639220428 implements MigrationInterface {
+  name = 'UpdateListingTable1719639220428';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
