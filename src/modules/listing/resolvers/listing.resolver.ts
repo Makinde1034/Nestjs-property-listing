@@ -35,8 +35,11 @@ import { AdminGuard } from '../../auth/guards/admin.guard';
 import { SuccessResponse } from '../../../common/response';
 import { CreateSearchHistoryInput } from '../dtos/request/create-search-history';
 import { SearchHistory } from '../../../entities/search-history.entity';
-import { PromotionService } from '../services/promotion.service';
+
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
+import { CreateFeatureInput } from '../dtos/request/feature-input';
+import { Feature } from '../../../entities/feature.entity';
+
 // Import { SuccessResponse } from '../../../common/utils/success.response';
 // Import { SuccessResponse } from '../../../common/response/SuccessResponse';
 
@@ -45,7 +48,6 @@ export class ListingResolver {
   constructor(
     private listingService: ListingService,
     private readonly offerService: OfferService,
-    private readonly promotionService: PromotionService,
   ) {}
 
   /*************************
@@ -209,6 +211,7 @@ export class ListingResolver {
     return await this.listingService.getSearchHistory(ctx.req.user.id);
   }
 
+  @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard)
   @Query(() => AdminListingResponse, { name: 'findListingsForAdmin' })
   async getListingsForAdmin(
@@ -217,6 +220,7 @@ export class ListingResolver {
     return await this.listingService.getListingForAdmin(paginateAndSort);
   }
 
+  @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard)
   @Mutation(() => Listing, { name: 'adminUpdateListing' })
   async adminUpdateListing(
@@ -224,22 +228,30 @@ export class ListingResolver {
   ) {
     return await this.listingService.editListingForAdmin(updateListingDto);
   }
-
+  @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard)
   @Mutation(() => SuccessResponse, { name: 'adminDisableListing' })
   async adminDisableListing(@Args('listingId') listingId: string) {
     return await this.listingService.disableListing(listingId);
   }
-
+  @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard)
   @Mutation(() => Listing, { name: 'enableListing' })
   async adminEnableListing(@Args('listingId') listingId: string) {
     return await this.listingService.enableListing(listingId);
   }
-
+  @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard)
   @Mutation(() => Listing, { name: 'deleteListing' })
   async adminDeleteListing(@Args('listingId') listingId: string) {
     return await this.listingService.deleteListing(listingId);
+  }
+  @UseGuards(AdminGuard)
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => Feature, { name: 'createFeature' })
+  async createFeature(
+    @Args('createFeatureInput') createFeatureInput: CreateFeatureInput,
+  ) {
+    return await this.listingService.featureAListing(createFeatureInput);
   }
 }

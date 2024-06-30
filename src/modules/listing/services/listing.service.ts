@@ -54,11 +54,14 @@ import {
   startOfWeek,
   startOfYear,
 } from 'date-fns';
+import { FeatureRepository } from '../repositories/feature.repository';
+import { CreateFeatureInput } from '../dtos/request/feature-input';
 
 @Injectable()
 export class ListingService {
   constructor(
     private readonly listingRepository: ListingRepository,
+    private readonly featureRepository: FeatureRepository,
     private readonly promotionRepository: PromotionRepository,
     private readonly storageService: StorageService,
 
@@ -125,6 +128,7 @@ export class ListingService {
         take: paginatAndSort.take,
         skip: paginatAndSort.skip,
         order: orderOptions,
+        where: { disableListing: true },
       });
 
       return listing;
@@ -486,6 +490,7 @@ export class ListingService {
     const [listing, total] = await this.listingRepository.findAndCount({
       where: whereCondition,
       order: orderOptions,
+      relations: ['promotion', 'flag', 'offer', 'user', 'feature'],
     });
 
     const flaggedListing = await this.listingRepository.findAll({
@@ -515,5 +520,40 @@ export class ListingService {
       editListingDto,
     );
     return listing;
+  }
+
+  async featureAListing(createFeatureInput: CreateFeatureInput) {
+    let featured;
+    const listing = await this.listingRepository.findById(
+      createFeatureInput.listingId,
+    );
+    const adPackage = await this.adpackageService.findOne(
+      createFeatureInput.adPackageId,
+    );
+
+    if (!adPackage) {
+      throw new BadRequestException('Invalid Ad Package ');
+    }
+
+    if (!listing) {
+      throw new BadRequestException('Invalid listing ');
+    }
+
+    if (adPackage && listing) {
+      featured = await this.featureRepository.save({
+        ...createFeatureInput,
+        adPackage: { ...adPackage },
+        listing: { ...listing },
+      });
+      const formatedDays = parseInt(adPackage.duration);
+      const expirationDate = addDaysToDate(new Date(), formatedDays);
+      await this.listingRepository.update(listing.id, {
+        featureExpiration: expirationDate,
+        featured: true,
+        featureDate: new Date(),
+      });
+    }
+
+    return featured;
   }
 }
