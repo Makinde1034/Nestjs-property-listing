@@ -18,6 +18,7 @@ import { ListingService } from './listing.service';
 import { AppStrings } from '../../../common/messages/app.strings';
 
 import { PdfInput } from '../../file-handler/dto/pdf.dto';
+import { addDaysToDate } from '../../../common/utils/helper';
 @Injectable()
 export class OfferService {
   constructor(
@@ -50,6 +51,7 @@ export class OfferService {
         );
       }
       createOfferDto.userId = user.id;
+      createOfferDto.expireAt = new Date(addDaysToDate(new Date(), 1));
 
       const offerPayload = await this.offerRepository.create(createOfferDto);
 
@@ -63,6 +65,7 @@ export class OfferService {
       };
 
       await this.paymentService.invoice(data, user);
+      return offerPayload;
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error?.data || error?.message || error);
