@@ -137,6 +137,16 @@ type FlagListing {
   updatedAt: DateTime!
 }
 
+type Feature {
+  id: String!
+  listingId: String!
+  expiredAt: DateTime
+  adPackage: AdPackage!
+  listing: Listing!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type Listing {
   id: ID!
   ownership: String!
@@ -200,6 +210,8 @@ type Listing {
   coveredParking: Boolean
   wifi: Boolean
   elevator: Boolean
+  promotion: [Promotion!]!
+  feature: [Feature!]!
   impressions: Float!
   promoted: Boolean!
   promotionExpiration: DateTime
@@ -210,7 +222,10 @@ type Listing {
   rentDate: DateTime
   soldDate: DateTime
   promotedDate: DateTime
+  featureExpiration: DateTime
+  featureDate: DateTime
   flaggedDate: DateTime
+  featured: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -468,6 +483,7 @@ type Query {
   getMessageInLocalLanguage: SuccessResponse
   getSearchHistory: [SearchHistory!]
   findListingsForAdmin(paginateAndSort: AdminFilterAndSort!): AdminListingResponse!
+  adPackages: [AdPackage!]!
   adPackage(id: String!): AdPackage!
   fetchIssueCategories: [IssueCategory!]!
   fetchIssues: [Issue!]!
@@ -578,6 +594,7 @@ type Mutation {
   adminUpdateListing(adminUpdateListingDto: UpdateListingAdminDto!): Listing!
   adminDisableListing(listingId: String!): SuccessResponse!
   enableListing(listingId: String!): Listing!
+  createFeature(createFeatureInput: CreateFeatureInput!): Feature!
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!
@@ -972,6 +989,11 @@ input UpdateListingAdminDto {
   coveredParking: Boolean
   wifi: Boolean
   elevator: Boolean
+}
+
+input CreateFeatureInput {
+  listingId: String!
+  adPackageId: String!
 }
 
 input CreateAdPackageInput {

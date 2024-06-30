@@ -20,6 +20,7 @@ import { Offer } from './offer.entity';
 import { Promotion } from './promotion.entity';
 import { FlagListing } from './flag-listing.entity';
 import { ListingStatus } from '../common/enums/status.enum';
+import { Feature } from './feature.entity';
 
 @Entity()
 @ObjectType()
@@ -272,13 +273,21 @@ export class Listing extends BaseEntity {
   @Column({ type: 'boolean', default: false })
   @Field({ nullable: true })
   elevator: boolean;
-
+  @Field(() => [Promotion])
   @OneToMany(() => Promotion, (promotion) => promotion.listing, {
     cascade: true,
     eager: true,
     onDelete: 'CASCADE',
   })
-  promotion: Promotion;
+  promotion: Promotion[];
+
+  @Field(() => [Feature])
+  @OneToMany(() => Feature, (promotion) => promotion.listing, {
+    cascade: true,
+    eager: true,
+    onDelete: 'CASCADE',
+  })
+  feature: Feature[];
 
   @Field({ defaultValue: 0 })
   @Column({ default: 0 })
@@ -325,7 +334,19 @@ export class Listing extends BaseEntity {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
+  featureExpiration: Date;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  featureDate: Date;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   flaggedDate: Date;
+
+  @Column({ default: false })
+  @Field({ defaultValue: false })
+  featured: boolean;
 
   @Field()
   @CreateDateColumn()

@@ -31,6 +31,7 @@ import { SearchHistoryRepository } from './repositories/search-history.repositor
 import { PaymentModule } from '../payment/payment.module';
 import { PaymentService } from '../payment/services/payment.service';
 import { PromotionService } from './services/promotion.service';
+import { FeatureRepository } from './repositories/feature.repository';
 
 @Module({
   imports: [
@@ -67,6 +68,7 @@ import { PromotionService } from './services/promotion.service';
     SearchHistoryRepository,
     PaymentService,
     PromotionService,
+    FeatureRepository,
   ],
 })
 export class ListingModule {}

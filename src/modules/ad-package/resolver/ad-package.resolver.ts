@@ -25,7 +25,7 @@ export class AdPackageResolver {
     return await this.adPackageService.create(createAdPackageInput);
   }
   @UseGuards(AccessTokenGuard)
-  @Query(() => [AdPackage], { name: 'adPackage' })
+  @Query(() => [AdPackage], { name: 'adPackages' })
   async findAll() {
     return await this.adPackageService.findAll();
   }
