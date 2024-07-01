@@ -147,6 +147,16 @@ type Feature {
   updatedAt: DateTime!
 }
 
+type Wishlist {
+  id: ID!
+  listing: Listing!
+  user: User!
+  userId: String!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type Listing {
   id: ID!
   ownership: String!
@@ -216,9 +226,10 @@ type Listing {
   promoted: Boolean!
   promotionExpiration: DateTime
   isListingFlagged: Boolean!
-  disableListing: Boolean!
-  status: String!
+  isDisabled: Boolean!
+  status: String
   flag: [FlagListing!]
+  wishlist: [Wishlist!]!
   rentDate: DateTime
   soldDate: DateTime
   promotedDate: DateTime
@@ -227,6 +238,7 @@ type Listing {
   flaggedDate: DateTime
   featured: Boolean!
   createdAt: DateTime!
+  deletedAt: DateTime!
   updatedAt: DateTime!
 }
 
@@ -312,6 +324,7 @@ type User {
   twoFactorAuthenticationSecret: String
   isTwoFactorAuthenticationEnabled: Boolean
   roles: [Role!]
+  wishlist: Wishlist!
   employeeId: String
   disabledAt: DateTime
   createdAt: DateTime!
@@ -483,6 +496,7 @@ type Query {
   getMessageInLocalLanguage: SuccessResponse
   getSearchHistory: [SearchHistory!]
   findListingsForAdmin(paginateAndSort: AdminFilterAndSort!): AdminListingResponse!
+  getWishlist: [Wishlist!]!
   adPackages: [AdPackage!]!
   adPackage(id: String!): AdPackage!
   fetchIssueCategories: [IssueCategory!]!
@@ -590,11 +604,12 @@ type Mutation {
   createOffer(createOfferDto: CreateOfferDto!): Offer
   createPromotion(createPromotionInput: CreatePromotionInput!): Promotion!
   flagListing(flagListingInput: FlagListingInput!): SuccessResponse!
-  deleteListing(listingId: String!): Listing!
-  adminUpdateListing(adminUpdateListingDto: UpdateListingAdminDto!): Listing!
+  deleteListing(listingId: String!): SuccessResponse!
   adminDisableListing(listingId: String!): SuccessResponse!
-  enableListing(listingId: String!): Listing!
+  enableListing(listingId: String!): SuccessResponse!
   createFeature(createFeatureInput: CreateFeatureInput!): Feature!
+  addToWishlist(createWishlistInput: CreateWishlistInput!): Wishlist!
+  removeFromWishlist(wishlistId: String!): SuccessResponse!
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!
@@ -956,44 +971,13 @@ input FlagListingInput {
   childIssue: String!
 }
 
-input UpdateListingAdminDto {
-  id: String!
-  district: String
-  city: String
-  street: String
-  price: String
-  numberOfBathrooms: String
-  totalArea: String
-  numberOfRooms: String
-  pool: Boolean
-  outdoorKitchen: Boolean
-  garden: Boolean
-  guestHouse: Boolean
-  tennisCourt: Boolean
-  basketballCourt: Boolean
-  jacuzzi: Boolean
-  bbqArea: Boolean
-  maidsRoom: Boolean
-  petsAllowed: Boolean
-  balcony: Boolean
-  gym: Boolean
-  playground: Boolean
-  parking: Boolean
-  security: Boolean
-  airConditioning: Boolean
-  storageRoom: Boolean
-  laundryRoom: Boolean
-  conferenceRoom: Boolean
-  gatedCommunity: Boolean
-  indoorPlayArea: Boolean
-  coveredParking: Boolean
-  wifi: Boolean
-  elevator: Boolean
-}
-
 input CreateFeatureInput {
   listingId: String!
   adPackageId: String!
+}
+
+input CreateWishlistInput {
+  listingId: String!
 }
 
 input CreateAdPackageInput {

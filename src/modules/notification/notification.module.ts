@@ -20,6 +20,6 @@ import { NotificationEventListener } from './events';
     NotificationRepository,
     NotificationEventListener,
   ],
-  exports: [PushNotificationService],
+  exports: [PushNotificationService, NotificationRepository],
 })
 export class NotificationModule {}

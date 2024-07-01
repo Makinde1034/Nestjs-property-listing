@@ -56,6 +56,7 @@ import {
 } from 'date-fns';
 import { FeatureRepository } from '../repositories/feature.repository';
 import { CreateFeatureInput } from '../dtos/request/feature-input';
+import { NotificationService } from '../../notification/services';
 
 @Injectable()
 export class ListingService {
@@ -73,6 +74,7 @@ export class ListingService {
     private readonly i18n: I18nService,
     private userService: UserService,
     private searchHistoryRepository: SearchHistoryRepository,
+    private pushNotification: NotificationService,
   ) {}
   logger = new Logger(ListingService.name);
   async createListing(user: User, createListingDto: CreateListingDto) {
@@ -121,14 +123,22 @@ export class ListingService {
 
   async findAllListings(paginatAndSort: PaginateAndSort) {
     try {
-      const orderOptions = {
-        [paginatAndSort.sortField]: paginatAndSort.directionToSort,
-      };
+      let orderOptions;
+
+      if (paginatAndSort.sortField !== undefined) {
+        orderOptions = {
+          [paginatAndSort.sortField]: paginatAndSort.directionToSort,
+        };
+      } else {
+        orderOptions = {
+          promoted: 'DESC',
+        };
+      }
       const listing = await this.listingRepository.findAndCount({
         take: paginatAndSort.take,
         skip: paginatAndSort.skip,
         order: orderOptions,
-        where: { disableListing: true },
+        where: { disableListing: false },
       });
 
       return listing;
@@ -231,8 +241,10 @@ export class ListingService {
 
   async updateListing(editListingDto: UpdateListingDto, user: User) {
     try {
+      const subscribedUser = [];
       const { id, ...partialUpdatePayload } = editListingDto;
-      const listing = await this.listingRepository.findById(id);
+
+      const listing = await this.listingRepository.findById(id, ['wishlist']);
       if (listing.userId !== user.id) {
         throw new ForbiddenError(
           'This user does not have the permision to update record',
@@ -243,6 +255,23 @@ export class ListingService {
         id,
         partialUpdatePayload,
       );
+
+      listing.wishlist.map((element) => {
+        subscribedUser.push(element.userId);
+      });
+
+      if (partialUpdatePayload.price != undefined && update) {
+        this.pushNotification.sendUsersNotification({
+          title: 'New listing',
+          message: `Heads up! The price of an item in your wishlist has been updated. Check out the new price now.
+ 
+`,
+          isEmail: true,
+          isPushNotifcation: true,
+          recipients: subscribedUser,
+          deepLink: '',
+        });
+      }
       return update;
     } catch (error) {
       this.logger.log(error);
@@ -403,7 +432,7 @@ export class ListingService {
   async disableListing(listingId: string) {
     try {
       await this.listingRepository.update(listingId, {
-        disableListing: true,
+        isDisabled: true,
       });
 
       return new SuccessResponse(AppStrings.LISTING_DISABLE_SUCCESSFULLY);
@@ -416,7 +445,7 @@ export class ListingService {
   async enableListing(listingId: string) {
     try {
       await this.listingRepository.update(listingId, {
-        disableListing: null,
+        isDisabled: false,
       });
 
       return new SuccessResponse(AppStrings.LISTING_ENABLED_SUCCESSFULLY);
