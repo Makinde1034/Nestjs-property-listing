@@ -128,7 +128,7 @@ export class ListingService {
         take: paginatAndSort.take,
         skip: paginatAndSort.skip,
         order: orderOptions,
-        where: { disableListing: true },
+        where: { disableListing: false },
       });
 
       return listing;
