@@ -39,6 +39,9 @@ import { SearchHistory } from '../../../entities/search-history.entity';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { CreateFeatureInput } from '../dtos/request/feature-input';
 import { Feature } from '../../../entities/feature.entity';
+import { WishlistService } from '../services/wishlist.service';
+import { Wishlist } from '../../../entities/wishlist.entity';
+import { CreateWishlistInput } from '../dtos/request/wishlistInput';
 
 // Import { SuccessResponse } from '../../../common/utils/success.response';
 // Import { SuccessResponse } from '../../../common/response/SuccessResponse';
@@ -48,6 +51,7 @@ export class ListingResolver {
   constructor(
     private listingService: ListingService,
     private readonly offerService: OfferService,
+    private readonly wishlistService: WishlistService,
   ) {}
 
   /*************************
@@ -220,9 +224,9 @@ export class ListingResolver {
     return await this.listingService.getListingForAdmin(paginateAndSort);
   }
 
-  @UseGuards(AdminGuard)
-  @UseGuards(AccessTokenGuard)
-  @Mutation(() => Listing, { name: 'adminUpdateListing' })
+  // @UseGuards(AdminGuard)
+  // @UseGuards(AccessTokenGuard)
+  // @Mutation(() => Listing, { name: 'adminUpdateListing' })
   async adminUpdateListing(
     @Args('adminUpdateListingDto') updateListingDto: UpdateListingAdminDto,
   ) {
@@ -236,13 +240,13 @@ export class ListingResolver {
   }
   @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard)
-  @Mutation(() => Listing, { name: 'enableListing' })
+  @Mutation(() => SuccessResponse, { name: 'enableListing' })
   async adminEnableListing(@Args('listingId') listingId: string) {
     return await this.listingService.enableListing(listingId);
   }
   @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard)
-  @Mutation(() => Listing, { name: 'deleteListing' })
+  @Mutation(() => SuccessResponse, { name: 'deleteListing' })
   async adminDeleteListing(@Args('listingId') listingId: string) {
     return await this.listingService.deleteListing(listingId);
   }
@@ -253,5 +257,28 @@ export class ListingResolver {
     @Args('createFeatureInput') createFeatureInput: CreateFeatureInput,
   ) {
     return await this.listingService.featureAListing(createFeatureInput);
+  }
+
+  @UseGuards(AdminGuard)
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => Wishlist, { name: 'addToWishlist' })
+  async addToWishist(
+    @Args('createWishlistInput') createWishlistInput: CreateWishlistInput,
+    @Context() ctx: any,
+  ) {
+    return await this.wishlistService.create(createWishlistInput, ctx.req.user);
+  }
+
+  @UseGuards(AdminGuard)
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => SuccessResponse, { name: 'removeFromWishlist' })
+  async removeFromWishlist(@Args('wishlistId') wishlistId: string) {
+    return await this.wishlistService.delete(wishlistId);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Query(() => [Wishlist], { name: 'getWishlist' })
+  async getUserWishlist(@Context() ctx: any) {
+    return await this.wishlistService.getWishList(ctx.req.user);
   }
 }

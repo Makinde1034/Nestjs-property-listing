@@ -6,6 +6,7 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -21,6 +22,7 @@ import { Promotion } from './promotion.entity';
 import { FlagListing } from './flag-listing.entity';
 import { ListingStatus } from '../common/enums/status.enum';
 import { Feature } from './feature.entity';
+import { Wishlist } from './wishlist.entity';
 
 @Entity()
 @ObjectType()
@@ -307,10 +309,10 @@ export class Listing extends BaseEntity {
 
   @Field({ defaultValue: false })
   @Column({ default: false })
-  disableListing: boolean;
+  isDisabled: boolean;
 
-  @Field({ defaultValue: 'active' })
-  @Column({ enum: ListingStatus, nullable: true })
+  @Field({ defaultValue: 'active', nullable: true })
+  @Column({ enum: ListingStatus, default: 'active', nullable: true })
   status: string;
 
   @Field(() => [FlagListing], { nullable: true })
@@ -319,6 +321,10 @@ export class Listing extends BaseEntity {
     onDelete: 'CASCADE',
   })
   flag: FlagListing[];
+
+  @Field(() => [Wishlist])
+  @OneToMany(() => Wishlist, (wishlist) => wishlist.listing)
+  wishlist: Wishlist[];
 
   @Column({ nullable: true })
   @Field({ nullable: true })
@@ -351,6 +357,10 @@ export class Listing extends BaseEntity {
   @Field()
   @CreateDateColumn()
   createdAt: Date;
+
+  @Field()
+  @DeleteDateColumn()
+  deletedAt: Date;
 
   @Field()
   @UpdateDateColumn()

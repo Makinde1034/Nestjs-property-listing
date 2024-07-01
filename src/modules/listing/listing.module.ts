@@ -32,6 +32,10 @@ import { PaymentModule } from '../payment/payment.module';
 import { PaymentService } from '../payment/services/payment.service';
 import { PromotionService } from './services/promotion.service';
 import { FeatureRepository } from './repositories/feature.repository';
+import { WishlistRepository } from './repositories/wishlist.repository';
+import { WishlistService } from './services/wishlist.service';
+import { NotificationService } from '../notification/services';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
   imports: [
@@ -46,6 +50,7 @@ import { FeatureRepository } from './repositories/feature.repository';
     ]),
     AdPackageModule,
     PaymentModule,
+    NotificationModule,
   ],
   controllers: [ListingController, ListingTypeController],
   providers: [
@@ -69,6 +74,9 @@ import { FeatureRepository } from './repositories/feature.repository';
     PaymentService,
     PromotionService,
     FeatureRepository,
+    WishlistRepository,
+    WishlistService,
+    NotificationService,
   ],
 })
 export class ListingModule {}
