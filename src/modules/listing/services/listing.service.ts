@@ -488,32 +488,24 @@ export class ListingService {
     const now = new Date();
     let whereCondition: any = {};
 
+    // Specific field to filter by time period
+    const dateField = 'createdAt';
+
     switch (paginatAndSort.timePeriod) {
       case 'today':
-        whereCondition = {
-          [paginatAndSort.sortField]: Between(startOfDay(now), endOfDay(now)),
-        };
+        whereCondition[dateField] = Between(startOfDay(now), endOfDay(now));
         break;
       case 'week':
-        whereCondition = {
-          [paginatAndSort.sortField]: Between(startOfWeek(now), endOfWeek(now)),
-        };
+        whereCondition[dateField] = Between(startOfWeek(now), endOfWeek(now));
         break;
       case 'month':
-        whereCondition = {
-          [paginatAndSort.sortField]: Between(
-            startOfMonth(now),
-            endOfMonth(now),
-          ),
-        };
+        whereCondition[dateField] = Between(startOfMonth(now), endOfMonth(now));
         break;
       case 'year':
-        whereCondition = {
-          [paginatAndSort.sortField]: Between(startOfYear(now), endOfYear(now)),
-        };
+        whereCondition[dateField] = Between(startOfYear(now), endOfYear(now));
         break;
       default:
-        whereCondition = null;
+        whereCondition = {};
     }
 
     const [listing, total] = await this.listingRepository.findAndCount({
