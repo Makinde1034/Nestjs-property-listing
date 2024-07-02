@@ -8,6 +8,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -112,7 +113,6 @@ export class Listing extends BaseEntity {
   @Field(() => [Offer], { nullable: true })
   @OneToMany(() => Offer, (offer) => offer.listing, {
     cascade: true,
-    eager: true,
   })
   offer: Offer[];
 
@@ -278,7 +278,7 @@ export class Listing extends BaseEntity {
   @Field(() => [Promotion])
   @OneToMany(() => Promotion, (promotion) => promotion.listing, {
     cascade: true,
-    eager: true,
+
     onDelete: 'CASCADE',
   })
   promotion: Promotion[];
@@ -286,7 +286,7 @@ export class Listing extends BaseEntity {
   @Field(() => [Feature])
   @OneToMany(() => Feature, (promotion) => promotion.listing, {
     cascade: true,
-    eager: true,
+
     onDelete: 'CASCADE',
   })
   feature: Feature[];
@@ -346,8 +346,10 @@ export class Listing extends BaseEntity {
   @Field({ nullable: true })
   featureDate: Date;
 
+  @Index()
   @Column({ nullable: true })
   @Field({ nullable: true })
+  @Index()
   flaggedDate: Date;
 
   @Column({ default: false })
@@ -356,6 +358,7 @@ export class Listing extends BaseEntity {
 
   @Field()
   @CreateDateColumn()
+  @Index()
   createdAt: Date;
 
   @Field()

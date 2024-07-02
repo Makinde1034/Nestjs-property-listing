@@ -451,7 +451,7 @@ type FlaggedListingResponse {
 type ListingAnalysisResponse {
   flagged: Float!
   promoted: Float!
-  sold: String!
+  sold: Float!
 }
 
 type AdminListingResponse {
