@@ -38,7 +38,14 @@ export class PermissionsGuard implements CanActivate {
       user,
       requiredPermission,
     );
-    if (!hasPermission || user.userType == 'admin') {
+
+    /**********************
+     * Allow admin bypass
+     **********************/
+    if (user.userType === 'admin') {
+      return true;
+    }
+    if (!hasPermission) {
       throw new ForbiddenException();
     }
     return true;
