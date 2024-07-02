@@ -522,28 +522,23 @@ export class ListingService {
           whereCondition = {};
       }
 
-      const [listing, total] = await this.listingRepository.findAndCount({
-        where: whereCondition,
-        order: orderOptions,
-        relations: ['promotion', 'flag', 'offer', 'user', 'feature'],
-      });
-
-      const flaggedListing = await this.listingRepository.findAll({
-        where: { isListingFlagged: true },
-      });
-      const promotedListing = await this.listingRepository.findAll({
-        where: {
-          promoted: true,
-        },
-      });
-      const soldListing = await this.listingRepository.findAll({
-        where: { status: 'completed' },
-      });
+      const [listing, total, flagged, promoted, sold] = await Promise.all([
+        this.listingRepository.findAll({
+          where: whereCondition,
+          order: orderOptions,
+          skip: paginatAndSort.skip,
+          take: paginatAndSort.take,
+        }),
+        this.listingRepository.count({ where: whereCondition }),
+        this.listingRepository.count({ where: { isListingFlagged: true } }),
+        this.listingRepository.count({ where: { promoted: true } }),
+        this.listingRepository.count({ where: { status: 'completed' } }),
+      ]);
 
       const analysis = {
-        flagged: flaggedListing.length,
-        promoted: promotedListing.length,
-        sold: soldListing.length,
+        flagged,
+        promoted,
+        sold,
       };
 
       return { listing, analysis, total };

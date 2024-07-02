@@ -32,7 +32,7 @@ export class ListingAnalysisResponse {
   @Field()
   promoted: number;
   @Field()
-  sold: string;
+  sold: number;
 }
 
 @ObjectType()
