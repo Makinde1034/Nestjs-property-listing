@@ -22,6 +22,20 @@ import { Offer } from '../../entities/offer.entity';
 import { OfferService } from './services/offer.service';
 import { Amenities } from '../../entities/amenities.entity';
 import { AmenitiesRepository } from './repositories/amenities.repository';
+import { Promotion } from '../../entities/promotion.entity';
+import { AdPackageService } from '../ad-package/services/ad-package.service';
+import { AdPackageModule } from '../ad-package/ad-package.module';
+import { PromotionRepository } from './repositories/promotion.repository';
+import { FlagListingRepository } from './repositories/flag-listing.repository';
+import { SearchHistoryRepository } from './repositories/search-history.repository';
+import { PaymentModule } from '../payment/payment.module';
+import { PaymentService } from '../payment/services/payment.service';
+import { PromotionService } from './services/promotion.service';
+import { FeatureRepository } from './repositories/feature.repository';
+import { WishlistRepository } from './repositories/wishlist.repository';
+import { WishlistService } from './services/wishlist.service';
+import { NotificationService } from '../notification/services';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
   imports: [
@@ -32,7 +46,11 @@ import { AmenitiesRepository } from './repositories/amenities.repository';
       Listing,
       Offer,
       Amenities,
+      Promotion,
     ]),
+    AdPackageModule,
+    PaymentModule,
+    NotificationModule,
   ],
   controllers: [ListingController, ListingTypeController],
   providers: [
@@ -49,6 +67,16 @@ import { AmenitiesRepository } from './repositories/amenities.repository';
     OfferRepository,
     OfferService,
     AmenitiesRepository,
+    AdPackageService,
+    PromotionRepository,
+    FlagListingRepository,
+    SearchHistoryRepository,
+    PaymentService,
+    PromotionService,
+    FeatureRepository,
+    WishlistRepository,
+    WishlistService,
+    NotificationService,
   ],
 })
 export class ListingModule {}

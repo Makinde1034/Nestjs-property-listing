@@ -6,6 +6,7 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -17,6 +18,11 @@ import { Field, ObjectType } from '@nestjs/graphql';
 import { User } from './user.entity';
 import { Exclude } from 'class-transformer';
 import { Offer } from './offer.entity';
+import { Promotion } from './promotion.entity';
+import { FlagListing } from './flag-listing.entity';
+import { ListingStatus } from '../common/enums/status.enum';
+import { Feature } from './feature.entity';
+import { Wishlist } from './wishlist.entity';
 
 @Entity()
 @ObjectType()
@@ -33,8 +39,8 @@ export class Listing extends BaseEntity {
   @Column({ nullable: true })
   purpose: string;
 
-  @Column()
-  @Field()
+  @Column({ default: 'rent' })
+  @Field({ defaultValue: 'rent' })
   sellingType: string;
 
   @Field({ nullable: true })
@@ -45,8 +51,8 @@ export class Listing extends BaseEntity {
   @Column({ default: 'property' })
   listingType: string;
 
-  @Column()
-  @Field()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   rentingOption: string;
 
   @Column()
@@ -95,8 +101,8 @@ export class Listing extends BaseEntity {
   images: string;
 
   @Field(() => [String], { nullable: true })
-  @Column({ type: 'jsonb', nullable: true })
-  videos: string;
+  @Column({ type: 'simple-array', nullable: true })
+  panoramaView: string[];
 
   @Field(() => User, { nullable: true })
   @JoinColumn({ name: 'userId' })
@@ -144,7 +150,7 @@ export class Listing extends BaseEntity {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
-  numberOfAppartment: string;
+  numberOfApartment: string;
 
   @Column({ nullable: true })
   @Field({ nullable: true })
@@ -152,11 +158,15 @@ export class Listing extends BaseEntity {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
-  areaOfAppartment: string;
+  areaOfApartment: string;
+
+  @Column({ default: false })
+  @Field({ defaultValue: false })
+  garageArea: boolean;
 
   @Column({ nullable: true })
   @Field({ nullable: true })
-  garageArea: string;
+  garageSize: string;
 
   @Column({ nullable: true })
   @Field({ nullable: true })
@@ -164,7 +174,7 @@ export class Listing extends BaseEntity {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
-  rentedAppartment: string;
+  rentedApartment: string;
 
   @Column({ type: 'boolean', default: false })
   @Field({ nullable: true })
@@ -265,10 +275,92 @@ export class Listing extends BaseEntity {
   @Column({ type: 'boolean', default: false })
   @Field({ nullable: true })
   elevator: boolean;
+  @Field(() => [Promotion])
+  @OneToMany(() => Promotion, (promotion) => promotion.listing, {
+    cascade: true,
+    eager: true,
+    onDelete: 'CASCADE',
+  })
+  promotion: Promotion[];
+
+  @Field(() => [Feature])
+  @OneToMany(() => Feature, (promotion) => promotion.listing, {
+    cascade: true,
+    eager: true,
+    onDelete: 'CASCADE',
+  })
+  feature: Feature[];
+
+  @Field({ defaultValue: 0 })
+  @Column({ default: 0 })
+  impressions: number;
+
+  @Field({ defaultValue: false })
+  @Column({ default: false })
+  promoted: boolean;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  promotionExpiration: Date;
+
+  @Field({ defaultValue: false })
+  @Column({ default: false })
+  isListingFlagged: boolean;
+
+  @Field({ defaultValue: false })
+  @Column({ default: false })
+  isDisabled: boolean;
+
+  @Field({ defaultValue: 'active', nullable: true })
+  @Column({ enum: ListingStatus, default: 'active', nullable: true })
+  status: string;
+
+  @Field(() => [FlagListing], { nullable: true })
+  @OneToMany(() => FlagListing, (flag) => flag.listing, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
+  flag: FlagListing[];
+
+  @Field(() => [Wishlist])
+  @OneToMany(() => Wishlist, (wishlist) => wishlist.listing)
+  wishlist: Wishlist[];
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  rentDate: Date;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  soldDate: Date;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  promotedDate: Date;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  featureExpiration: Date;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  featureDate: Date;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  flaggedDate: Date;
+
+  @Column({ default: false })
+  @Field({ defaultValue: false })
+  featured: boolean;
 
   @Field()
   @CreateDateColumn()
   createdAt: Date;
+
+  @Field()
+  @DeleteDateColumn()
+  deletedAt: Date;
 
   @Field()
   @UpdateDateColumn()

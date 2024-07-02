@@ -16,26 +16,33 @@ import BaseEntity from './base.entity';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { User } from './user.entity';
 import { Listing } from './listing.entity';
+import { StatusListEnum } from '../common/enums/status.enum';
+import { IsEnum } from 'class-validator';
 @ObjectType()
 @Entity()
 export class Offer extends BaseEntity {
   @Field()
-  @Column({ type: 'money' })
+  @Column({ nullable: true })
   offerPrice: number;
+
   @Field()
-  @Column()
+  @Column({ nullable: true })
   expireAt: Date;
+
   @Field()
   @Column({ nullable: true })
   acceptedAt: Date;
-  @Field()
-  @Column({ default: 'pending' })
+
+  @Field({ defaultValue: 'active' })
+  @IsEnum(StatusListEnum)
+  @Column({ default: 'active' })
   status: string;
+
   @Field()
   @Column({ default: false })
   coupon: boolean;
 
-  @Field()
+  @Field({ nullable: true })
   @Column({ nullable: true })
   couponCode: string;
 

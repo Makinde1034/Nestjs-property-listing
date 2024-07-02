@@ -13,6 +13,14 @@ export enum Ownership {
   NOT_OWNER = 'power_of_attorney',
 }
 
+export enum TimePeriod {
+  Today = 'today',
+  Week = 'week',
+  Month = 'month',
+  Year = 'year',
+  NULL = null,
+}
+
 export enum RentingOption {
   MONTHLY = 'monthly',
   QUARTERLY = 'quarterly',
@@ -26,6 +34,20 @@ export enum ListingType {
   LAND = 'land',
   FARM = 'farm',
   VILLA = 'villa',
-  APPARTMENT = 'appartment',
+  APARTMENT = 'apartment',
   OTHERS = 'others',
+}
+
+export enum ListingFlagType {
+  INAPPROPRIAT = 'inappropriate',
+  FALSE_INFROMATION = 'false information',
+  OTHERS = 'others',
+}
+
+export enum AdminSortListingManagement {
+  RENTED = 'rentDate',
+  SOLD = 'soldDate',
+  PROMOTED = 'promotedDate',
+  CREATED = 'createdAt',
+  FLAGGED = 'flaggedDate',
 }

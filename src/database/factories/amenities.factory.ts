@@ -6,7 +6,7 @@
 import { DeepPartial } from 'typeorm';
 import { Amenities } from '../../entities/amenities.entity';
 
-export const amenitiesData: DeepPartial<Amenities>[] = [
+export const AmenitiesFactory: DeepPartial<Amenities>[] = [
   {
     name: 'Garage Area',
   },

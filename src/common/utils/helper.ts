@@ -50,3 +50,28 @@ export const parseObjectValues = (
   }
   return object;
 };
+
+/**
+ * Adds a specified number of days to a given date string.
+ * @param dateString The input date string (e.g., '2024-06-12T00:00:00Z').
+ * @param days The number of days to add.
+ * @returns The new date as a formatted string (ISO format).
+ */
+export function addDaysToDate(dateString: string | Date, days: number): string {
+  try {
+    // Parse the input date string into a Date object
+
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      throw new Error('Invalid date format');
+    }
+
+    // Add the specified number of days
+    date.setDate(date.getDate() + days);
+
+    // Return the new date as an ISO formatted string
+    return date.toISOString();
+  } catch (error) {
+    throw new Error('Failed to add days to date');
+  }
+}

@@ -30,7 +30,7 @@ import {
   UserActionInput,
   PasswordInput,
 } from '../dtos';
-import { StorageService } from '../../storage/storage.service';
+import { StorageService } from '../../file-handler/services/storage.service';
 import { AppStrings } from 'src/common/messages/app.strings';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
