@@ -467,114 +467,141 @@ export class ListingService {
   }
 
   shareListing(user: User) {
-    const message = this.i18n.t('messages.share-listing', {
-      lang: user.language,
-    });
-    return new SuccessResponse('success', message);
+    try {
+      const message = this.i18n.t('messages.share-listing', {
+        lang: user.language,
+      });
+      return new SuccessResponse('success', message);
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
   }
 
   async getSearchHistory(id: string) {
-    const history = await this.searchHistoryRepository.find({
-      where: { userId: id },
-    });
-    return history;
+    try {
+      const history = await this.searchHistoryRepository.find({
+        where: { userId: id },
+      });
+      return history;
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
   }
 
   async getListingForAdmin(paginatAndSort: AdminFilterAndSort) {
-    const orderOptions = {
-      [paginatAndSort.sortField]: paginatAndSort.directionToSort,
-    };
+    try {
+      const orderOptions = {
+        [paginatAndSort.sortField]: paginatAndSort.directionToSort,
+      };
 
-    const now = new Date();
-    let whereCondition: any = {};
+      const now = new Date();
+      let whereCondition: any = {};
 
-    // Specific field to filter by time period
-    const dateField = 'createdAt';
+      // Specific field to filter by time period
+      const dateField = 'createdAt';
 
-    switch (paginatAndSort.timePeriod) {
-      case 'today':
-        whereCondition[dateField] = Between(startOfDay(now), endOfDay(now));
-        break;
-      case 'week':
-        whereCondition[dateField] = Between(startOfWeek(now), endOfWeek(now));
-        break;
-      case 'month':
-        whereCondition[dateField] = Between(startOfMonth(now), endOfMonth(now));
-        break;
-      case 'year':
-        whereCondition[dateField] = Between(startOfYear(now), endOfYear(now));
-        break;
-      default:
-        whereCondition = {};
+      switch (paginatAndSort.timePeriod) {
+        case 'today':
+          whereCondition[dateField] = Between(startOfDay(now), endOfDay(now));
+          break;
+        case 'week':
+          whereCondition[dateField] = Between(startOfWeek(now), endOfWeek(now));
+          break;
+        case 'month':
+          whereCondition[dateField] = Between(
+            startOfMonth(now),
+            endOfMonth(now),
+          );
+          break;
+        case 'year':
+          whereCondition[dateField] = Between(startOfYear(now), endOfYear(now));
+          break;
+        default:
+          whereCondition = {};
+      }
+
+      const [listing, total] = await this.listingRepository.findAndCount({
+        where: whereCondition,
+        order: orderOptions,
+        relations: ['promotion', 'flag', 'offer', 'user', 'feature'],
+      });
+
+      const flaggedListing = await this.listingRepository.findAll({
+        where: { isListingFlagged: true },
+      });
+      const promotedListing = await this.listingRepository.findAll({
+        where: {
+          promoted: true,
+        },
+      });
+      const soldListing = await this.listingRepository.findAll({
+        where: { status: 'completed' },
+      });
+
+      const analysis = {
+        flagged: flaggedListing.length,
+        promoted: promotedListing.length,
+        sold: soldListing.length,
+      };
+
+      return { listing, analysis, total };
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
     }
-
-    const [listing, total] = await this.listingRepository.findAndCount({
-      where: whereCondition,
-      order: orderOptions,
-      relations: ['promotion', 'flag', 'offer', 'user', 'feature'],
-    });
-
-    const flaggedListing = await this.listingRepository.findAll({
-      where: { isListingFlagged: true },
-    });
-    const promotedListing = await this.listingRepository.findAll({
-      where: {
-        promoted: true,
-      },
-    });
-    const soldListing = await this.listingRepository.findAll({
-      where: { status: 'completed' },
-    });
-
-    const analysis = {
-      flagged: flaggedListing.length,
-      promoted: promotedListing.length,
-      sold: soldListing.length,
-    };
-
-    return { listing, analysis, total };
   }
 
   async editListingForAdmin(editListingDto: UpdateListingAdminDto) {
-    const listing = await this.listingRepository.update(
-      editListingDto.id,
-      editListingDto,
-    );
-    return listing;
+    try {
+      const listing = await this.listingRepository.update(
+        editListingDto.id,
+        editListingDto,
+      );
+      return listing;
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
   }
 
   async featureAListing(createFeatureInput: CreateFeatureInput) {
-    let featured;
-    const listing = await this.listingRepository.findById(
-      createFeatureInput.listingId,
-    );
-    const adPackage = await this.adpackageService.findOne(
-      createFeatureInput.adPackageId,
-    );
+    try {
+      let featured;
+      const listing = await this.listingRepository.findById(
+        createFeatureInput.listingId,
+      );
+      const adPackage = await this.adpackageService.findOne(
+        createFeatureInput.adPackageId,
+      );
 
-    if (!adPackage) {
-      throw new BadRequestException('Invalid Ad Package ');
+      if (!adPackage) {
+        throw new BadRequestException('Invalid Ad Package ');
+      }
+
+      if (!listing) {
+        throw new BadRequestException('Invalid listing ');
+      }
+
+      if (adPackage && listing) {
+        featured = await this.featureRepository.save({
+          ...createFeatureInput,
+          adPackage: { ...adPackage },
+          listing: { ...listing },
+        });
+        const formatedDays = parseInt(adPackage.duration);
+        const expirationDate = addDaysToDate(new Date(), formatedDays);
+        await this.listingRepository.update(listing.id, {
+          featureExpiration: expirationDate,
+          featured: true,
+          featureDate: new Date(),
+        });
+      }
+
+      return featured;
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
     }
-
-    if (!listing) {
-      throw new BadRequestException('Invalid listing ');
-    }
-
-    if (adPackage && listing) {
-      featured = await this.featureRepository.save({
-        ...createFeatureInput,
-        adPackage: { ...adPackage },
-        listing: { ...listing },
-      });
-      const formatedDays = parseInt(adPackage.duration);
-      const expirationDate = addDaysToDate(new Date(), formatedDays);
-      await this.listingRepository.update(listing.id, {
-        featureExpiration: expirationDate,
-        featured: true,
-        featureDate: new Date(),
-      });
-    }
-
-    return featured;
   }
 }
