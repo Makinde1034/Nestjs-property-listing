@@ -488,7 +488,7 @@ export class ListingService {
     const now = new Date();
     let whereCondition: any = {};
 
-    // Assuming there is a specific field to filter by time period, e.g., 'createdAt'
+    // Specific field to filter by time period
     const dateField = 'createdAt';
 
     switch (paginatAndSort.timePeriod) {
@@ -507,8 +507,6 @@ export class ListingService {
       default:
         whereCondition = {};
     }
-
-    // Add pagination if applicable
 
     const [listing, total] = await this.listingRepository.findAndCount({
       where: whereCondition,

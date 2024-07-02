@@ -475,28 +475,6 @@ type CityResponse {
   total: Int!
 }
 
-type AdPackage {
-  id: String!
-  name: String!
-  impression: String!
-  coverageRadius: String
-  price: String!
-  duration: String!
-  promotion: [Promotion!]!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type Promotion {
-  id: String!
-  listingId: String!
-  expiredAt: DateTime
-  adPackage: AdPackage!
-  listing: Listing!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
 type Query {
   app: String!
   activateTwoFa: TwoFaResult!
