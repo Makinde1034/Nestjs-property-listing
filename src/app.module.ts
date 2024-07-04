@@ -35,6 +35,7 @@ import { AdPackageModule } from './modules/ad-package/ad-package.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { JobService } from './modules/in-app-services/job.scheduler';
+import { PuppeteerModule } from 'nest-puppeteer';
 
 @Module({
   imports: [
