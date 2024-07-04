@@ -266,6 +266,7 @@ export class ListingResolver {
   async adminDeleteListing(@Args('listingId') listingId: string) {
     return await this.listingService.deleteListing(listingId);
   }
+
   @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard)
   @Mutation(() => Feature, { name: 'createFeature' })
