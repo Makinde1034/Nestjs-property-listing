@@ -42,7 +42,7 @@ RUN apt-get update && \
         x11-apps \
         clang \
         python \
-        g++
+        g++\
         --no-install-recommends \
         && apt-get clean \
         && rm -rf /var/lib/apt/lists/*
