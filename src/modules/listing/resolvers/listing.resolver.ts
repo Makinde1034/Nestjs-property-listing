@@ -19,6 +19,7 @@ import { AccessTokenGuard } from '../../auth/guards';
 
 import {
   AdminListingResponse,
+  AuctionResponse,
   FlaggedListingResponse,
   ListingResponse,
   OfferResponse,
@@ -47,6 +48,12 @@ import { Feature } from '../../../entities/feature.entity';
 import { WishlistService } from '../services/wishlist.service';
 import { Wishlist } from '../../../entities/wishlist.entity';
 import { CreateWishlistInput } from '../dtos/request/wishlistInput';
+import {
+  CreateAuctionInput,
+  UpdateAuctionInput,
+} from '../dtos/request/auction-input';
+import { AuctionService } from '../services/auction.service';
+import { Auction } from '../../../entities/auction-table.entity';
 
 @Resolver()
 export class ListingResolver {
@@ -54,6 +61,7 @@ export class ListingResolver {
     private listingService: ListingService,
     private readonly offerService: OfferService,
     private readonly wishlistService: WishlistService,
+    private readonly auctionService: AuctionService,
   ) {}
 
   /*************************
@@ -300,5 +308,35 @@ export class ListingResolver {
   @Query(() => [Wishlist], { name: 'getWishlist' })
   async getUserWishlist(@Context() ctx: any) {
     return await this.wishlistService.getWishList(ctx.req.user);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => Auction, { name: 'createAuction' })
+  async createAuction(
+    @Args('createAuctionInput') createAuction: CreateAuctionInput,
+  ) {
+    return await this.auctionService.create(createAuction);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => Auction, { name: 'updateAuction' })
+  async updateAuction(
+    @Args('updateAuctionInput') updateAuctionInput: UpdateAuctionInput,
+  ) {
+    return await this.auctionService.update(updateAuctionInput);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Query(() => Auction, { name: 'getAuction' })
+  async findOneAuction(@Args('id') id: string) {
+    return await this.auctionService.findOne(id);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Query(() => AuctionResponse, { name: 'getAllAuction' })
+  async findManyAuction(
+    @Args('findManyOptions') paginateAndSort: PaginateAndSort,
+  ) {
+    return await this.auctionService.findAll(paginateAndSort);
   }
 }

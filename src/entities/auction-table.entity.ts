@@ -29,6 +29,9 @@ export class Auction extends BaseEntity {
   @Field()
   maxListing: number;
 
+  @Column({ default: false })
+  @Field({ defaultValue: false })
+  status: boolean;
   @CreateDateColumn()
   @Field()
   createdAt: Date;

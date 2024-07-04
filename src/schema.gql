@@ -350,6 +350,11 @@ type Notification {
 type Issue {
   id: ID!
   message: String!
+  category: String!
+  parentReason: String!
+  parentArabicName: String!
+  childReason: String!
+  childArabicName: String!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -440,6 +445,18 @@ type Amenities {
   updatedAt: DateTime!
 }
 
+type Auction {
+  id: ID!
+  title: String!
+  description: String!
+  startDate: DateTime!
+  liveFor: Float!
+  maxListing: Float!
+  status: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type ListingResponse {
   listing: [Listing!]!
   total: Int!
@@ -464,6 +481,11 @@ type AdminListingResponse {
 
 type OfferResponse {
   offer: [Offer!]
+  total: Int!
+}
+
+type AuctionResponse {
+  auction: [Auction!]
   total: Int!
 }
 
@@ -506,6 +528,8 @@ type Query {
   getSearchHistory: [SearchHistory!]
   findListingsForAdmin(paginateAndSort: AdminFilterAndSort!): AdminListingResponse!
   getWishlist: [Wishlist!]!
+  getAuction(id: String!): Auction!
+  getAllAuction(findManyOptions: PaginateAndSort!): AuctionResponse!
   adPackages: [AdPackage!]!
   adPackage(id: String!): AdPackage!
   fetchIssueCategories: [IssueCategory!]!
@@ -633,6 +657,8 @@ type Mutation {
   createFeature(createFeatureInput: CreateFeatureInput!): Feature!
   addToWishlist(createWishlistInput: CreateWishlistInput!): Wishlist!
   removeFromWishlist(wishlistId: String!): SuccessResponse!
+  createAuction(createAuctionInput: CreateAuctionInput!): Auction!
+  updateAuction(updateAuctionInput: UpdateAuctionInput!): Auction!
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!
@@ -641,8 +667,6 @@ type Mutation {
   createIssueCategory(RequestInput: CreateIssueCategoryInput!): IssueCategory!
   updateIssueCatgeory(RequestInput: UpdateIssueCategoryInput!): IssueCategory!
   deleteIssueCategory(RequestInput: DeleteIssueInput!): String!
-  createIssue(RequestInput: CreateIssueInput!): Issue!
-  updateIssue(RequestInput: UpdateIssueInput!): Issue!
   deleteIssue(RequestInput: DeleteIssueInput!): String!
   createTicket(RequestInput: CreateTicketInput!): String!
   manageTicket(RequestInput: UpdateTicketInput!): Ticket!
@@ -1012,6 +1036,23 @@ input CreateWishlistInput {
   listingId: String!
 }
 
+input CreateAuctionInput {
+  title: String!
+  description: String!
+  startDate: DateTime!
+  liveFor: Float!
+  maxListing: Float!
+}
+
+input UpdateAuctionInput {
+  title: String
+  description: String
+  startDate: DateTime
+  liveFor: Float
+  maxListing: Float
+  id: String!
+}
+
 input CreateAdPackageInput {
   name: String!
   price: String!
@@ -1041,17 +1082,6 @@ input UpdateIssueCategoryInput {
 }
 
 input DeleteIssueInput {
-  id: String!
-}
-
-input CreateIssueInput {
-  issue: String!
-  categoryId: String!
-}
-
-input UpdateIssueInput {
-  issue: String!
-  categoryId: String!
   id: String!
 }
 

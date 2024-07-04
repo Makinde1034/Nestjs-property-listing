@@ -5,7 +5,10 @@
 
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { AuctionRepository } from '../repositories/auction.repository';
-import { CreateAuctionInput } from '../dtos/request/auction-input';
+import {
+  CreateAuctionInput,
+  UpdateAuctionInput,
+} from '../dtos/request/auction-input';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 
 @Injectable()
@@ -35,23 +38,33 @@ export class AuctionService {
         [paginateAndSort.sortField]: paginateAndSort.directionToSort,
       };
 
-      const whereCondition = {
-        [paginateAndSort.where.fieldToChose]: [
-          paginateAndSort.where.whereParam,
-        ],
-      };
-
       if (paginateAndSort.take && paginateAndSort.skip) {
         paginateAndSort.skip = 0;
         paginateAndSort.take = 20;
       }
 
-      return await this.auctionRepository.findAndCount({
+      const [auction, total] = await this.auctionRepository.findAndCount({
         take: paginateAndSort.take,
         skip: paginateAndSort.skip,
         order: orderOptions,
-        where: whereCondition,
       });
+
+      return { auction, total };
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+  async update(updateAuctionInput: UpdateAuctionInput) {
+    try {
+      const { id, ...rest } = updateAuctionInput;
+      const update = await this.auctionRepository.update(id, rest);
+      if (update.affected > 0)
+        return await this.auctionRepository.findOne({
+          where: {
+            id: id,
+          },
+        });
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);

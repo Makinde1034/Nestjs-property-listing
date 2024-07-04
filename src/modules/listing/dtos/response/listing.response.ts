@@ -7,6 +7,7 @@ import { Field, ObjectType, Int } from '@nestjs/graphql';
 import { Listing } from '../../../../entities';
 import { FlagListing } from '../../../../entities/flag-listing.entity';
 import { Offer } from '../../../../entities/offer.entity';
+import { Auction } from '../../../../entities/auction-table.entity';
 
 @ObjectType()
 export class ListingResponse {
@@ -52,6 +53,15 @@ export class AdminListingResponse {
 export class OfferResponse {
   @Field(() => [Offer], { nullable: true })
   offer: Offer[];
+
+  @Field(() => Int)
+  total: number;
+}
+
+@ObjectType()
+export class AuctionResponse {
+  @Field(() => [Auction], { nullable: true })
+  auction: Auction[];
 
   @Field(() => Int)
   total: number;

@@ -3,8 +3,8 @@
  * For license. See license.txt
  */
 
-import { Field, InputType } from '@nestjs/graphql';
-import { IsString } from 'class-validator';
+import { Field, InputType, PartialType } from '@nestjs/graphql';
+import { IsDate, IsNumber, IsString, IsUUID } from 'class-validator';
 
 @InputType()
 export class CreateAuctionInput {
@@ -17,14 +17,21 @@ export class CreateAuctionInput {
   description: string;
 
   @Field()
-  @IsString()
+  @IsDate()
   startDate: Date;
 
   @Field()
-  @IsString()
+  @IsNumber()
   liveFor: number;
 
   @Field()
-  @IsString()
+  @IsNumber()
   maxListing: number;
+}
+
+@InputType()
+export class UpdateAuctionInput extends PartialType(CreateAuctionInput) {
+  @Field()
+  @IsUUID()
+  id: string;
 }
