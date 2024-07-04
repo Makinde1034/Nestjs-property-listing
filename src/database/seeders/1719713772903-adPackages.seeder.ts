@@ -6,8 +6,8 @@
 import { Logger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { Seeder, SeederFactoryManager } from 'typeorm-extension';
-import { AdPackage } from '../../entities/ad-package.entity';
 import { AdPackageFactory } from '../factories/ad-package.factory';
+import { AdPackage } from '../../entities/ad-package.entity';
 
 export class AdPackages1719713772903 implements Seeder {
   track = false;
@@ -16,18 +16,21 @@ export class AdPackages1719713772903 implements Seeder {
     dataSource: DataSource,
     factoryManager: SeederFactoryManager,
   ): Promise<any> {
-    this.logger.debug(`Seeding For : ${AdPackage.name}...`, factoryManager);
-    dataSource.getRepository(AdPackage);
-    await dataSource.transaction(async (transactionalEntityManager) => {
-      // Delete all existing records
-      //   Await transactionalEntityManager.delete(AdPackage, {});
+    this.logger.debug(
+      `Seeding For : ${AdPackages1719713772903.name}...`,
+      factoryManager,
+    );
+    const repository = dataSource.getRepository(AdPackage);
+    const adPackage = await Promise.all([repository.find()]);
 
-      // Insert new records
-      await transactionalEntityManager.save(
-        AdPackage,
-        AdPackageFactory as Partial<AdPackage>[],
+    if (adPackage[0].length > 0) {
+      this.logger.debug(
+        `Seeding for: ${AdPackages1719713772903.name} Already completed`,
       );
-    });
+    } else {
+      await repository.save(AdPackageFactory as Partial<AdPackage>);
+    }
+
     this.logger.debug(`Seeding for: ${AdPackage.name} finished`);
   }
 }

@@ -19,11 +19,17 @@ import { AccessTokenGuard } from '../../auth/guards';
 
 import {
   AdminListingResponse,
+  AuctionResponse,
   FlaggedListingResponse,
   ListingResponse,
+  OfferResponse,
 } from '../dtos/response/listing.response';
 import { OfferService } from '../services/offer.service';
-import { CreateOfferDto } from '../dtos/request/offer.dto';
+import {
+  CreateOfferDto,
+  FindOfferInput,
+  UpdateOfferInput,
+} from '../dtos/request/offer-input';
 import { Offer } from '../../../entities/offer.entity';
 import { Amenities } from '../../../entities/amenities.entity';
 import { AttributeDto } from '../dtos/request/attributes.dto';
@@ -42,9 +48,12 @@ import { Feature } from '../../../entities/feature.entity';
 import { WishlistService } from '../services/wishlist.service';
 import { Wishlist } from '../../../entities/wishlist.entity';
 import { CreateWishlistInput } from '../dtos/request/wishlistInput';
-
-// Import { SuccessResponse } from '../../../common/utils/success.response';
-// Import { SuccessResponse } from '../../../common/response/SuccessResponse';
+import {
+  CreateAuctionInput,
+  UpdateAuctionInput,
+} from '../dtos/request/auction-input';
+import { AuctionService } from '../services/auction.service';
+import { Auction } from '../../../entities/auction-table.entity';
 
 @Resolver()
 export class ListingResolver {
@@ -52,6 +61,7 @@ export class ListingResolver {
     private listingService: ListingService,
     private readonly offerService: OfferService,
     private readonly wishlistService: WishlistService,
+    private readonly auctionService: AuctionService,
   ) {}
 
   /*************************
@@ -163,6 +173,24 @@ export class ListingResolver {
   }
 
   @UseGuards(AccessTokenGuard)
+  @Mutation(() => Offer, { name: 'updateOffer', nullable: true })
+  async updateOffer(
+    @Args('updateOfferInput') updateOfferInput: UpdateOfferInput,
+  ) {
+    return await this.offerService.updateOffer(updateOfferInput);
+  }
+
+  @Query(() => Offer, { name: 'findOneOffer' })
+  async findOne(@Args('id') id: string) {
+    return await this.offerService.findOne(id);
+  }
+
+  @Query(() => OfferResponse, { name: 'findOffers' })
+  async findMany(@Args('findOptions') paginateAndSort: FindOfferInput) {
+    return await this.offerService.findMany(paginateAndSort);
+  }
+
+  @UseGuards(AccessTokenGuard)
   @Query(() => [Amenities], { name: 'findAmenities' })
   async findAmenities() {
     return await this.listingService.findAmenities();
@@ -232,6 +260,7 @@ export class ListingResolver {
   ) {
     return await this.listingService.editListingForAdmin(updateListingDto);
   }
+
   @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard)
   @Mutation(() => SuccessResponse, { name: 'adminDisableListing' })
@@ -260,7 +289,6 @@ export class ListingResolver {
     return await this.listingService.featureAListing(createFeatureInput);
   }
 
-  @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard)
   @Mutation(() => Wishlist, { name: 'addToWishlist' })
   async addToWishist(
@@ -270,7 +298,6 @@ export class ListingResolver {
     return await this.wishlistService.create(createWishlistInput, ctx.req.user);
   }
 
-  @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard)
   @Mutation(() => SuccessResponse, { name: 'removeFromWishlist' })
   async removeFromWishlist(@Args('wishlistId') wishlistId: string) {
@@ -281,5 +308,44 @@ export class ListingResolver {
   @Query(() => [Wishlist], { name: 'getWishlist' })
   async getUserWishlist(@Context() ctx: any) {
     return await this.wishlistService.getWishList(ctx.req.user);
+  }
+
+  @UseGuards(AdminGuard)
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => Auction, { name: 'createAuction' })
+  async createAuction(
+    @Args('createAuctionInput') createAuction: CreateAuctionInput,
+  ) {
+    return await this.auctionService.create(createAuction);
+  }
+
+  @UseGuards(AdminGuard)
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => Auction, { name: 'updateAuction' })
+  async updateAuction(
+    @Args('updateAuctionInput') updateAuctionInput: UpdateAuctionInput,
+  ) {
+    return await this.auctionService.update(updateAuctionInput);
+  }
+  @UseGuards(AdminGuard)
+  @UseGuards(AccessTokenGuard)
+  @Query(() => Auction, { name: 'getAuction' })
+  async findOneAuction(@Args('id') id: string) {
+    return await this.auctionService.findOne(id);
+  }
+  @UseGuards(AdminGuard)
+  @UseGuards(AccessTokenGuard)
+  @Query(() => AuctionResponse, { name: 'getAllAuction' })
+  async findManyAuction(
+    @Args('findManyOptions') paginateAndSort: PaginateAndSort,
+  ) {
+    return await this.auctionService.findAll(paginateAndSort);
+  }
+
+  @UseGuards(AdminGuard)
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => Auction, { name: 'id' })
+  async deleteAuction(@Args('id') id: string) {
+    return await this.auctionService.delete(id);
   }
 }

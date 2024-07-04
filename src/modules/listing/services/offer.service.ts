@@ -9,7 +9,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateOfferDto } from '../dtos/request/offer.dto';
+import { CreateOfferDto, FindOfferInput } from '../dtos/request/offer-input';
 import { OfferRepository } from '../repositories';
 import { User } from '../../../entities';
 import { PaymentService } from '../../payment/services/payment.service';
@@ -85,7 +85,41 @@ export class OfferService {
       return minimumListingPrice;
     } catch (error) {
       this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async findOne(id: string) {
+    try {
+      return await this.offerRepository.findByIdOrFail(id, ['listing']);
+    } catch (error) {
+      this.logger.log(error);
       throw new BadRequestException();
+    }
+  }
+
+  async findMany(findOfferInput: FindOfferInput) {
+    try {
+      const [offer, total] = await this.offerRepository.findAndCount({
+        where: { listingId: findOfferInput.listingId },
+        skip: findOfferInput.skip,
+        take: findOfferInput.take,
+      });
+
+      return { offer, total };
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException();
+    }
+  }
+  async updateOffer(updateOfferInput) {
+    try {
+      const { id, ...rest } = updateOfferInput;
+
+      return await this.offerRepository.update(id, rest);
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
     }
   }
 }

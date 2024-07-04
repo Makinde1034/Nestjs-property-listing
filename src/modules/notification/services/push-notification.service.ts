@@ -6,7 +6,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as firebase from 'firebase-admin';
 import { PushNotificationPayload } from 'src/common/interface';
-import StorageConfig from 'src/config/serviceAccount/storage-config';
+import StorageConfig from '../../../database/seeders/config/serviceAccount/storage-config';
 
 firebase.initializeApp({
   credential: firebase.credential.cert({

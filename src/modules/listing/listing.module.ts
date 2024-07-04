@@ -36,6 +36,9 @@ import { WishlistRepository } from './repositories/wishlist.repository';
 import { WishlistService } from './services/wishlist.service';
 import { NotificationService } from '../notification/services';
 import { NotificationModule } from '../notification/notification.module';
+import { AuctionService } from './services/auction.service';
+import { AuctionRepository } from './repositories/auction.repository';
+import { AuctionParticipant } from '../../entities/auction-participant.entity';
 
 @Module({
   imports: [
@@ -77,6 +80,9 @@ import { NotificationModule } from '../notification/notification.module';
     WishlistRepository,
     WishlistService,
     NotificationService,
+    AuctionService,
+    AuctionRepository,
+    AuctionParticipant,
   ],
 })
 export class ListingModule {}

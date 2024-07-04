@@ -21,7 +21,6 @@ import { Exclude } from 'class-transformer';
 import { Offer } from './offer.entity';
 import { Promotion } from './promotion.entity';
 import { FlagListing } from './flag-listing.entity';
-import { ListingStatus } from '../common/enums/status.enum';
 import { Feature } from './feature.entity';
 import { Wishlist } from './wishlist.entity';
 
@@ -297,7 +296,7 @@ export class Listing extends BaseEntity {
 
   @Field({ defaultValue: false })
   @Column({ default: false })
-  promoted: boolean;
+  isListingPromoted: boolean;
 
   @Field({ nullable: true })
   @Column({ nullable: true })
@@ -309,11 +308,23 @@ export class Listing extends BaseEntity {
 
   @Field({ defaultValue: false })
   @Column({ default: false })
+  isListingSold: boolean;
+
+  @Field({ defaultValue: false })
+  @Column({ default: false })
+  isListingRented: boolean;
+
+  @Field({ defaultValue: false })
+  @Column({ default: false })
+  isListing: boolean;
+
+  @Field({ defaultValue: false })
+  @Column({ default: false })
   isDisabled: boolean;
 
-  @Field({ defaultValue: 'active', nullable: true })
-  @Column({ enum: ListingStatus, default: 'active', nullable: true })
-  status: string;
+  // @Field({ defaultValue: '', nullable: true })
+  // @Column({ enum: ListingStatus, default: 'active', nullable: true })
+  // Status: string;
 
   @Field(() => [FlagListing], { nullable: true })
   @OneToMany(() => FlagListing, (flag) => flag.listing, {
@@ -346,7 +357,6 @@ export class Listing extends BaseEntity {
   @Field({ nullable: true })
   featureDate: Date;
 
-  @Index()
   @Column({ nullable: true })
   @Field({ nullable: true })
   @Index()
@@ -358,7 +368,6 @@ export class Listing extends BaseEntity {
 
   @Field()
   @CreateDateColumn()
-  @Index()
   createdAt: Date;
 
   @Field()

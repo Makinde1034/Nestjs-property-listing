@@ -8,10 +8,8 @@ import { UseGuards } from '@nestjs/common';
 import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
 import {
   CreateIssueCategoryInput,
-  CreateIssueInput,
   DeleteIssueInput,
   UpdateIssueCategoryInput,
-  UpdateIssueInput,
 } from '../dtos';
 import { Issue, IssueCategory } from '../../../entities';
 import { IssueService } from '../services';
@@ -101,14 +99,14 @@ export class IssueResolver {
    * @param {CreateIssueInput} RequestInput
    * @returns {Promise<Issue>}
    */
-  @Mutation(() => Issue)
-  @Permissions('create-issues-categories')
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
-  async createIssue(
-    @Args('RequestInput') RequestInput: CreateIssueInput,
-  ): Promise<Issue> {
-    return await this.issueService.createIssue(RequestInput);
-  }
+  // @Mutation(() => Issue)
+  // @Permissions('create-issues-categories')
+  // @UseGuards(AccessTokenGuard, PermissionsGuard)
+  // Async createIssue(
+  //   @Args('RequestInput') RequestInput: CreateIssueInput,
+  // ): Promise<Issue> {
+  //   Return await this.issueService.createIssue(RequestInput);
+  // }
 
   /**
    * Update Issue
@@ -117,14 +115,14 @@ export class IssueResolver {
    * @param {UpdateIssueInput} RequestInput
    * @returns {Promise<Issue>}
    */
-  @Mutation(() => Issue)
-  @Permissions('update-issues-categories')
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
-  async updateIssue(
-    @Args('RequestInput') RequestInput: UpdateIssueInput,
-  ): Promise<Issue> {
-    return await this.issueService.updateIssue(RequestInput);
-  }
+  // @Mutation(() => Issue)
+  // @Permissions('update-issues-categories')
+  // @UseGuards(AccessTokenGuard, PermissionsGuard)
+  // Async updateIssue(
+  //   @Args('RequestInput') RequestInput: UpdateIssueInput,
+  // ): Promise<Issue> {
+  //   Return await this.issueService.updateIssue(RequestInput);
+  // }
 
   /**
    * Delete Issue
