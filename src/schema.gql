@@ -447,6 +447,7 @@ type Amenities {
 
 type AuctionParticipant {
   id: ID!
+  listingId: String!
   auction: Auction!
 }
 
