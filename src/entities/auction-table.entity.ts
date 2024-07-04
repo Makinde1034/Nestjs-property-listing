@@ -3,9 +3,16 @@
  * For license. See license.txt
  */
 
-import { Column, CreateDateColumn, Entity, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  UpdateDateColumn,
+} from 'typeorm';
 import BaseEntity from './base.entity';
 import { Field, ObjectType } from '@nestjs/graphql';
+import { AuctionParticipant } from './auction-participant.entity';
 @ObjectType()
 @Entity()
 export class Auction extends BaseEntity {
@@ -29,9 +36,17 @@ export class Auction extends BaseEntity {
   @Field()
   maxListing: number;
 
+  @Field(() => [AuctionParticipant])
+  @OneToMany(
+    () => AuctionParticipant,
+    (auctionParticipant) => auctionParticipant.auction,
+  )
+  auctionParticipant: AuctionParticipant[];
+
   @Column({ default: false })
   @Field({ defaultValue: false })
   status: boolean;
+
   @CreateDateColumn()
   @Field()
   createdAt: Date;

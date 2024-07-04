@@ -445,6 +445,11 @@ type Amenities {
   updatedAt: DateTime!
 }
 
+type AuctionParticipant {
+  id: ID!
+  auction: Auction!
+}
+
 type Auction {
   id: ID!
   title: String!
@@ -452,6 +457,7 @@ type Auction {
   startDate: DateTime!
   liveFor: Float!
   maxListing: Float!
+  auctionParticipant: [AuctionParticipant!]!
   status: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
@@ -659,6 +665,7 @@ type Mutation {
   removeFromWishlist(wishlistId: String!): SuccessResponse!
   createAuction(createAuctionInput: CreateAuctionInput!): Auction!
   updateAuction(updateAuctionInput: UpdateAuctionInput!): Auction!
+  id(id: String!): Auction!
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!
