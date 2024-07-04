@@ -14,14 +14,16 @@ import {
 } from '@nestjs/common';
 import { ListingRepository } from '../repositories/listing.repository';
 import {
+  AdminFilterAndSort,
   CreateListingDto,
   FlagListingInput,
+  UpdateListingAdminDto,
   UpdateListingDto,
 } from '../dtos/request/listing.dto';
 import { User } from '../../../entities';
 
 import { ForbiddenError } from '@nestjs/apollo';
-import { StorageService } from '../../storage/storage.service';
+import { StorageService } from '../../file-handler/services/storage.service';
 
 import { AmenitiesRepository } from '../repositories/amenities.repository';
 import { apartment, villa, farm, land, building } from '../constant/attributes';
@@ -30,16 +32,37 @@ import { CreatePromotionInput } from '../dtos/request/promotion-input';
 import { PromotionRepository } from '../repositories/promotion.repository';
 
 import { AdPackageService } from '../../ad-package/services/ad-package.service';
-import { MoreThan, QueryFailedError } from 'typeorm';
+import { Between, LessThanOrEqual, MoreThan, QueryFailedError } from 'typeorm';
+
 import { addDaysToDate } from '../../../common/utils/helper';
 import { FlagListingRepository } from '../repositories/flag-listing.repository';
 import { AppStrings } from '../../../common/messages/app.strings';
 import { SuccessResponse } from '../../../common/utils/success.response';
+import { I18nService } from 'nestjs-i18n';
+import { UserService } from '../../user/services';
+import { SearchHistoryRepository } from '../repositories/search-history.repository';
+import { CreateSearchHistoryInput } from '../dtos/request/create-search-history';
+import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
+
+import {
+  endOfDay,
+  endOfMonth,
+  endOfWeek,
+  endOfYear,
+  startOfDay,
+  startOfMonth,
+  startOfWeek,
+  startOfYear,
+} from 'date-fns';
+import { FeatureRepository } from '../repositories/feature.repository';
+import { CreateFeatureInput } from '../dtos/request/feature-input';
+import { NotificationService } from '../../notification/services';
 
 @Injectable()
 export class ListingService {
   constructor(
     private readonly listingRepository: ListingRepository,
+    private readonly featureRepository: FeatureRepository,
     private readonly promotionRepository: PromotionRepository,
     private readonly storageService: StorageService,
 
@@ -48,6 +71,10 @@ export class ListingService {
     private readonly adpackageService: AdPackageService,
 
     private readonly flagListingRepository: FlagListingRepository,
+    private readonly i18n: I18nService,
+    private userService: UserService,
+    private searchHistoryRepository: SearchHistoryRepository,
+    private pushNotification: NotificationService,
   ) {}
   logger = new Logger(ListingService.name);
   async createListing(user: User, createListingDto: CreateListingDto) {
@@ -94,26 +121,24 @@ export class ListingService {
     }
   }
 
-  async findAllListings(data: AttributeDto) {
+  async findAllListings(paginatAndSort: PaginateAndSort) {
     try {
-      const typeMappings = {
-        villa,
-        apartment,
-        farm,
-        land,
-        building,
-      };
+      let orderOptions;
 
-      const selectedAttributes = typeMappings[data.listingType];
-      if (!selectedAttributes) {
-        throw new BadRequestException(
-          `Invalid listing type: ${data.listingType}`,
-        );
+      if (paginatAndSort.sortField !== undefined) {
+        orderOptions = {
+          [paginatAndSort.sortField]: paginatAndSort.directionToSort,
+        };
+      } else {
+        orderOptions = {
+          promoted: 'DESC',
+        };
       }
-
       const listing = await this.listingRepository.findAndCount({
-        where: { listingType: data.listingType },
-        select: ['id', ...selectedAttributes],
+        take: paginatAndSort.take,
+        skip: paginatAndSort.skip,
+        order: orderOptions,
+        where: { isDisabled: false },
       });
 
       return listing;
@@ -126,7 +151,7 @@ export class ListingService {
     }
   }
 
-  async findAllPromotedListings(data: AttributeDto) {
+  async findAllPromotedListings(data: CreateSearchHistoryInput, user: User) {
     try {
       const typeMappings = {
         villa,
@@ -135,6 +160,7 @@ export class ListingService {
         land,
         building,
       };
+      await this.searchHistoryRepository.save({ ...data, user });
 
       const selectedAttributes = typeMappings[data.listingType];
       if (!selectedAttributes) {
@@ -145,6 +171,11 @@ export class ListingService {
       const date = new Date().toISOString();
       const listing = await this.listingRepository.findAndCount({
         where: {
+          purpose: data.type,
+          numberOfRooms: data.numberOfRooms,
+          numberOfBathrooms: data.numberOfBathrooms,
+          price: LessThanOrEqual(parseInt(data.price)),
+          city: data.location,
           listingType: data.listingType,
           promoted: true,
           promotionExpiration: MoreThan(date),
@@ -183,6 +214,9 @@ export class ListingService {
           },
         },
       });
+      if (!listing) {
+        throw new BadRequestException(AppStrings.LISTING_NOT_FOUND);
+      }
 
       const newImpression = listing.impressions + 1;
 
@@ -197,15 +231,20 @@ export class ListingService {
     } catch (error) {
       this.logger.log(error);
       if (error instanceof HttpException) {
+        this.logger.log(error);
+
         throw error;
-      } else throw new BadRequestException(error.messages || error.data);
+      } else
+        throw new BadRequestException(error.messages || error.data || error);
     }
   }
 
   async updateListing(editListingDto: UpdateListingDto, user: User) {
     try {
+      const subscribedUser = [];
       const { id, ...partialUpdatePayload } = editListingDto;
-      const listing = await this.listingRepository.findById(id);
+
+      const listing = await this.listingRepository.findById(id, ['wishlist']);
       if (listing.userId !== user.id) {
         throw new ForbiddenError(
           'This user does not have the permision to update record',
@@ -216,6 +255,23 @@ export class ListingService {
         id,
         partialUpdatePayload,
       );
+
+      listing.wishlist.map((element) => {
+        subscribedUser.push(element.userId);
+      });
+
+      if (partialUpdatePayload.price != undefined && update) {
+        this.pushNotification.sendUsersNotification({
+          title: 'New listing',
+          message: `Heads up! The price of an item in your wishlist has been updated. Check out the new price now.
+ 
+`,
+          isEmail: true,
+          isPushNotifcation: true,
+          recipients: subscribedUser,
+          deepLink: '',
+        });
+      }
       return update;
     } catch (error) {
       this.logger.log(error);
@@ -312,6 +368,8 @@ export class ListingService {
         const expirationDate = addDaysToDate(new Date(), formatedDays);
         await this.listingRepository.update(listing.id, {
           promotionExpiration: expirationDate,
+          promoted: true,
+          promotedDate: new Date(),
         });
 
         return promotion;
@@ -341,6 +399,9 @@ export class ListingService {
           ...flaglistingInput,
           listing,
         });
+        const date = new Date();
+
+        await this.listingRepository.update(listing.id, { flaggedDate: date });
 
         return new SuccessResponse(AppStrings.LISTING_FLAG_SUCCESSFULL);
       }
@@ -371,7 +432,7 @@ export class ListingService {
   async disableListing(listingId: string) {
     try {
       await this.listingRepository.update(listingId, {
-        disableListing: true,
+        isDisabled: true,
       });
 
       return new SuccessResponse(AppStrings.LISTING_DISABLE_SUCCESSFULLY);
@@ -384,7 +445,7 @@ export class ListingService {
   async enableListing(listingId: string) {
     try {
       await this.listingRepository.update(listingId, {
-        disableListing: null,
+        isDisabled: false,
       });
 
       return new SuccessResponse(AppStrings.LISTING_ENABLED_SUCCESSFULLY);
@@ -402,6 +463,140 @@ export class ListingService {
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error?.messages | error.data);
+    }
+  }
+
+  shareListing(user: User) {
+    try {
+      const message = this.i18n.t('messages.share-listing', {
+        lang: user.language,
+      });
+      return new SuccessResponse('success', message);
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async getSearchHistory(id: string) {
+    try {
+      const history = await this.searchHistoryRepository.find({
+        where: { userId: id },
+      });
+      return history;
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async getListingForAdmin(paginatAndSort: AdminFilterAndSort) {
+    try {
+      const orderOptions = {
+        [paginatAndSort.sortField]: paginatAndSort.directionToSort,
+      };
+
+      const now = new Date();
+      let whereCondition: any = {};
+
+      // Specific field to filter by time period
+      const dateField = 'createdAt';
+
+      switch (paginatAndSort.timePeriod) {
+        case 'today':
+          whereCondition[dateField] = Between(startOfDay(now), endOfDay(now));
+          break;
+        case 'week':
+          whereCondition[dateField] = Between(startOfWeek(now), endOfWeek(now));
+          break;
+        case 'month':
+          whereCondition[dateField] = Between(
+            startOfMonth(now),
+            endOfMonth(now),
+          );
+          break;
+        case 'year':
+          whereCondition[dateField] = Between(startOfYear(now), endOfYear(now));
+          break;
+        default:
+          whereCondition = {};
+      }
+
+      const [listing, total, flagged, promoted, sold] = await Promise.all([
+        this.listingRepository.findAll({
+          where: whereCondition,
+          order: orderOptions,
+          skip: paginatAndSort.skip,
+          take: paginatAndSort.take,
+        }),
+        this.listingRepository.count({ where: whereCondition }),
+        this.listingRepository.count({ where: { isListingFlagged: true } }),
+        this.listingRepository.count({ where: { promoted: true } }),
+        this.listingRepository.count({ where: { status: 'completed' } }),
+      ]);
+
+      const analysis = {
+        flagged,
+        promoted,
+        sold,
+      };
+
+      return { listing, analysis, total };
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async editListingForAdmin(editListingDto: UpdateListingAdminDto) {
+    try {
+      const listing = await this.listingRepository.update(
+        editListingDto.id,
+        editListingDto,
+      );
+      return listing;
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+
+  async featureAListing(createFeatureInput: CreateFeatureInput) {
+    try {
+      let featured;
+      const listing = await this.listingRepository.findById(
+        createFeatureInput.listingId,
+      );
+      const adPackage = await this.adpackageService.findOne(
+        createFeatureInput.adPackageId,
+      );
+
+      if (!adPackage) {
+        throw new BadRequestException('Invalid Ad Package ');
+      }
+
+      if (!listing) {
+        throw new BadRequestException('Invalid listing ');
+      }
+
+      if (adPackage && listing) {
+        featured = await this.featureRepository.save({
+          ...createFeatureInput,
+          adPackage: { ...adPackage },
+          listing: { ...listing },
+        });
+        const formatedDays = parseInt(adPackage.duration);
+        const expirationDate = addDaysToDate(new Date(), formatedDays);
+        await this.listingRepository.update(listing.id, {
+          featureExpiration: expirationDate,
+          featured: true,
+          featureDate: new Date(),
+        });
+      }
+
+      return featured;
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
     }
   }
 }

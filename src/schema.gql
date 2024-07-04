@@ -94,7 +94,7 @@ type Offer {
   acceptedAt: DateTime!
   status: String!
   coupon: Boolean!
-  couponCode: String!
+  couponCode: String
   user: User!
   listing: Listing!
   userId: String!
@@ -107,6 +107,8 @@ type Offer {
 type AdPackage {
   id: String!
   name: String!
+  impression: String!
+  coverageRadius: String
   price: String!
   duration: String!
   promotion: [Promotion!]!
@@ -130,6 +132,26 @@ type FlagListing {
   userId: String!
   childIssue: String!
   listing: Listing
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Feature {
+  id: String!
+  listingId: String!
+  expiredAt: DateTime
+  adPackage: AdPackage!
+  listing: Listing!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Wishlist {
+  id: ID!
+  listing: Listing!
+  user: User!
+  userId: String!
   createdAt: DateTime!
   deletedAt: DateTime!
   updatedAt: DateTime!
@@ -169,7 +191,8 @@ type Listing {
   numberOfApartment: String
   numberOfStoreys: String
   areaOfApartment: String
-  garageArea: String
+  garageArea: Boolean!
+  garageSize: String
   totalArea: String
   rentedApartment: String
   negotiatable: Boolean
@@ -197,13 +220,74 @@ type Listing {
   coveredParking: Boolean
   wifi: Boolean
   elevator: Boolean
+  promotion: [Promotion!]!
+  feature: [Feature!]!
   impressions: Float!
   promoted: Boolean!
   promotionExpiration: DateTime
   isListingFlagged: Boolean!
-  disableListing: Boolean!
+  isDisabled: Boolean!
+  status: String
   flag: [FlagListing!]
+  wishlist: [Wishlist!]!
+  rentDate: DateTime
+  soldDate: DateTime
+  promotedDate: DateTime
+  featureExpiration: DateTime
+  featureDate: DateTime
+  flaggedDate: DateTime
+  featured: Boolean!
   createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Attribute {
+  id: ID!
+  name: String!
+  type: String!
+  icon: String
+  dropDownOptions: [String!]
+  isRequired: Boolean!
+  showInSummary: Boolean!
+  hiddenToBuyers: Boolean!
+  showInComparison: Boolean!
+  showInFilters: Boolean!
+  attributeSets: [AttributeSet!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type AttributeSet {
+  id: ID!
+  name: String!
+  attributes: [Attribute!]!
+  listingTypes: [ListingType!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type ListingType {
+  id: ID!
+  name: String!
+  icon: String
+  attributeSets: [AttributeSet!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type SearchHistory {
+  id: ID!
+  location: String!
+  price: String!
+  numberOfBathrooms: String!
+  numberOfRooms: String!
+  type: String!
+  listingType: String!
+  isValid: Boolean!
+  createdAt: DateTime!
+  userId: String!
+  user: [User!]!
   updatedAt: DateTime!
 }
 
@@ -236,9 +320,11 @@ type User {
   nationalIdentity: NationalIdentity
   company: Company
   notificationPreference: [UserNotificationPreference!]
+  searchHistory: SearchHistory!
   twoFactorAuthenticationSecret: String
   isTwoFactorAuthenticationEnabled: Boolean
   roles: [Role!]
+  wishlist: Wishlist!
   employeeId: String
   disabledAt: DateTime
   createdAt: DateTime!
@@ -255,40 +341,6 @@ type Notification {
   type: String
   expiredAt: DateTime
   recipient: User!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type ListingType {
-  id: ID!
-  name: String!
-  icon: String
-  attributeSets: [AttributeSet!]!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type AttributeSet {
-  id: ID!
-  name: String!
-  attributes: [Attribute!]!
-  listingTypes: [ListingType!]!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type Attribute {
-  id: ID!
-  name: String!
-  type: String!
-  icon: String
-  dropDownOptions: [String!]
-  isRequired: Boolean!
-  showInSummary: Boolean!
-  hiddenToBuyers: Boolean!
-  showInComparison: Boolean!
-  showInFilters: Boolean!
-  attributeSets: [AttributeSet!]!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -374,6 +426,7 @@ type TwoFaResult {
 
 type SuccessResponse {
   message: String!
+  data: String!
 }
 
 type Amenities {
@@ -395,6 +448,23 @@ type FlaggedListingResponse {
   total: Int!
 }
 
+type ListingAnalysisResponse {
+  flagged: Float!
+  promoted: Float!
+  sold: Float!
+}
+
+type AdminListingResponse {
+  listing: [Listing!]
+  analysis: ListingAnalysisResponse!
+  total: Int!
+}
+
+type Payment {
+  id: String!
+  amount: Float!
+}
+
 type ReviewResponse {
   reviews: [Review!]!
   total: Int!
@@ -403,11 +473,6 @@ type ReviewResponse {
 type CityResponse {
   city: [CityEntitity!]!
   total: Int!
-}
-
-type Payment {
-  id: String!
-  amount: Float!
 }
 
 type Query {
@@ -422,12 +487,17 @@ type Query {
   fetchListingTypes: [ListingType!]!
   fetchAttributes: [Attribute!]!
   fetchAttributeSets: [AttributeSet!]!
-  findListings(findManyOptions: AttributeDto): ListingResponse!
-  findPromotedListings(findManyOptions: AttributeDto): ListingResponse!
+  findListingsForBuyer(findManyOptions: PaginateAndSort): ListingResponse!
+  findPromotedListings(findManyOptions: CreateSearchHistoryInput): ListingResponse!
   findListingsForOwner(findManyOptions: AttributeDto): ListingResponse!
   findOneForBuyer(id: String!): Listing!
   viewFlaggedListings(findManyOptions: PaginateAndSort): FlaggedListingResponse
   findAmenities: [Amenities!]!
+  getMessageInLocalLanguage: SuccessResponse
+  getSearchHistory: [SearchHistory!]
+  findListingsForAdmin(paginateAndSort: AdminFilterAndSort!): AdminListingResponse!
+  getWishlist: [Wishlist!]!
+  adPackages: [AdPackage!]!
   adPackage(id: String!): AdPackage!
   fetchIssueCategories: [IssueCategory!]!
   fetchIssues: [Issue!]!
@@ -438,13 +508,12 @@ type Query {
   findCities(findCities: PaginateAndSort): CityResponse!
 }
 
-input AttributeDto {
+input PaginateAndSort {
   take: Float
   skip: Float
   sortField: String
   directionToSort: SortOrder
   where: WhereOption
-  listingType: String
 }
 
 enum SortOrder {
@@ -456,12 +525,36 @@ input WhereOption {
   fieldToChose: String!
 }
 
-input PaginateAndSort {
+input CreateSearchHistoryInput {
   take: Float
   skip: Float
   sortField: String
   directionToSort: SortOrder
   where: WhereOption
+  location: String!
+  price: String!
+  numberOfBathrooms: String!
+  numberOfRooms: String!
+  type: String!
+  listingType: String!
+}
+
+input AttributeDto {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
+  listingType: String
+}
+
+input AdminFilterAndSort {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
+  timePeriod: String
 }
 
 input ListTicketInput {
@@ -508,13 +601,20 @@ type Mutation {
   deleteAttributeSet(RequestInput: AttributeDeleteInput!): String!
   createListing(createListing: CreateListingDto!): Listing!
   updateListing(updateListingDto: UpdateListingDto!): Listing!
-  createOffer(createOfferDto: CreateOfferDto!): Offer!
+  createOffer(createOfferDto: CreateOfferDto!): Offer
   createPromotion(createPromotionInput: CreatePromotionInput!): Promotion!
   flagListing(flagListingInput: FlagListingInput!): SuccessResponse!
   deleteListing(listingId: String!): SuccessResponse!
+  adminDisableListing(listingId: String!): SuccessResponse!
+  enableListing(listingId: String!): SuccessResponse!
+  createFeature(createFeatureInput: CreateFeatureInput!): Feature!
+  addToWishlist(createWishlistInput: CreateWishlistInput!): Wishlist!
+  removeFromWishlist(wishlistId: String!): SuccessResponse!
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!
+  initializePayment: Payment!
+  verify: Payment!
   createIssueCategory(RequestInput: CreateIssueCategoryInput!): IssueCategory!
   updateIssueCatgeory(RequestInput: UpdateIssueCategoryInput!): IssueCategory!
   deleteIssueCategory(RequestInput: DeleteIssueInput!): String!
@@ -524,8 +624,6 @@ type Mutation {
   createTicket(RequestInput: CreateTicketInput!): String!
   manageTicket(RequestInput: UpdateTicketInput!): Ticket!
   review(createReviewDto: CreateReviewDto!): Review!
-  initializePayment: Payment!
-  verify: Payment!
 }
 
 input RegisterInput {
@@ -740,6 +838,7 @@ input CreateListingDto {
   publicationDate: String!
   price: String!
   numberOfBathrooms: String!
+  panoramaView: [String!]
   sellingType: String! = "rent"
   numberOfRooms: String!
   mediaType: String! = "image"
@@ -755,7 +854,8 @@ input CreateListingDto {
   panoramaView: [String!]
   numberOfStoreys: String
   areaPerApartment: String
-  garageArea: String
+  garageArea: Boolean! = false
+  garageSize: String
   totalArea: String
   rentedApartment: String
   negotiable: Boolean! = false
@@ -805,6 +905,7 @@ input UpdateListingDto {
   publicationDate: String
   price: String
   numberOfBathrooms: String
+  panoramaView: [String!]
   sellingType: String = "rent"
   numberOfRooms: String
   mediaType: String = "image"
@@ -820,7 +921,8 @@ input UpdateListingDto {
   panoramaView: [String!]
   numberOfStoreys: String
   areaPerApartment: String
-  garageArea: String
+  garageArea: Boolean = false
+  garageSize: String
   totalArea: String
   rentedApartment: String
   negotiable: Boolean = false
@@ -871,15 +973,28 @@ input FlagListingInput {
   childIssue: String!
 }
 
+input CreateFeatureInput {
+  listingId: String!
+  adPackageId: String!
+}
+
+input CreateWishlistInput {
+  listingId: String!
+}
+
 input CreateAdPackageInput {
   name: String!
   price: String!
+  impression: String!
+  coverageRadius: String!
   duration: String!
 }
 
 input UpdateAdPackageInput {
   name: String
   price: String
+  impression: String
+  coverageRadius: String
   duration: String
   id: Int!
 }

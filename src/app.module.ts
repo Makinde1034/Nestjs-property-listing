@@ -18,7 +18,7 @@ import { UserModule } from './modules/user/user.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MailModule } from './modules/mail/mail.module';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { StorageModule } from './modules/storage/storage.module';
+import { FilehandlerModule } from './modules/file-handler/file-handler.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { ListingModule } from './modules/listing/listing.module';
 import {
@@ -33,6 +33,8 @@ import { LocationModule } from './modules/location/location.module';
 import { AdPackageModule } from './modules/ad-package/ad-package.module';
 
 import { PaymentModule } from './modules/payment/payment.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { JobService } from './modules/in-app-services/job.scheduler';
 
 @Module({
   imports: [
@@ -73,12 +75,13 @@ import { PaymentModule } from './modules/payment/payment.module';
         config.get<GoogleRecaptchaModuleOptions>('recaptcha'),
       inject: [ConfigService],
     }),
+    ScheduleModule.forRoot(),
     AuthModule,
     UserModule,
     EventEmitterModule.forRoot(),
     MailModule,
     ThrottlerModule.forRoot(),
-    StorageModule,
+    FilehandlerModule,
     NotificationModule,
     ListingModule,
     IssueModule,
@@ -90,6 +93,6 @@ import { PaymentModule } from './modules/payment/payment.module';
     PaymentModule,
   ],
   controllers: [],
-  providers: [AppResolver],
+  providers: [AppResolver, JobService],
 })
 export class AppModule {}

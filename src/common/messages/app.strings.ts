@@ -64,7 +64,7 @@ export const AppStrings = {
 
   LISTING_DISABLE_SUCCESSFULLY: 'Listing has been disabled',
 
-  LISTING_ENABLED_SUCCESSFULLY: 'Listing has been disabled',
+  LISTING_ENABLED_SUCCESSFULLY: 'Listing has been enabled',
 
   LISTING_DELETED_SUCCESSFULLY: 'Listing has been deleted',
 
@@ -74,4 +74,8 @@ export const AppStrings = {
 
   INTERNAL_SERVER_EXCEPTION:
     'Something went wrong on our server. We are working to fix it',
+
+  WISHLIST_CREATION_FAILED: 'failed to add to wishlist',
+
+  WISHLIST_DELETE_SUCCESS: 'removed from wishlist',
 };

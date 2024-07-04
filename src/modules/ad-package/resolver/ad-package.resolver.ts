@@ -17,7 +17,7 @@ import { AdminGuard } from '../../auth/guards/admin.guard';
 export class AdPackageResolver {
   constructor(private readonly adPackageService: AdPackageService) {}
 
-  @UseGuards(AdminGuard)
+  // @UseGuards(AdminGuard)
   @Mutation(() => AdPackage)
   async createAdPackage(
     @Args('createAdPackageInput') createAdPackageInput: CreateAdPackageInput,
@@ -25,7 +25,7 @@ export class AdPackageResolver {
     return await this.adPackageService.create(createAdPackageInput);
   }
   @UseGuards(AccessTokenGuard)
-  @Query(() => [AdPackage], { name: 'adPackage' })
+  @Query(() => [AdPackage], { name: 'adPackages' })
   async findAll() {
     return await this.adPackageService.findAll();
   }

@@ -1,0 +1,18 @@
+{
+  "APP_NAME": "Waseet",
+  "error": {
+    "server_error": "Internal server error",
+    "RESOURCE_NOT_FOUND": "{name} not Found",
+    "EXISTING_RESOURCE": "{name} already exist"
+  },
+  "app": {
+    "hello": "Hello From Waseet API"
+  },
+  "register": {
+    "ACCOUNT_ALREADY_CONFIRMED": "Account already confirmed",
+    "WRONG_CONFIRM_CODE": "Wrong Confirmation token",
+    "ACCOUNT_CONFIRMED_SUCCESSFULLY": "Account confirmed successfully"
+  },
+
+  "share-listing": "🏡✨ لقد قمت للتو بمشاركة منزلي المريح على Waseet! إنه مكان مثالي لإقامة مريحة مع إطلالات خلابة. تحقق منه هنا"
+}

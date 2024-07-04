@@ -11,6 +11,7 @@ import { IMailgunClient } from 'mailgun.js/Interfaces';
 import {
   EMAIL_NOTIFICATION_TEMPLATE_NAME,
   FORGOT_PASSWORD_TEMPLATE_NAME,
+  INVOICE,
   REGISTER_CONFIRMATION_TEMPLATE_NAME,
   STAFF_CONFIRMATION_TEMPLATE_NAME,
 } from 'src/common/constants';
@@ -36,6 +37,11 @@ export class MailgunEmailService implements MailSendService {
       username: 'api',
       key: this.MAILGUN_KEY,
     });
+
+    if (!this.MAILGUN_KEY || !this.MAILGUN_DOMAIN || !this.MAIL_FROM) {
+      this.logger.error('Mailgun configuration is missing.');
+      throw new Error('Mailgun configuration is missing.');
+    }
   }
 
   /**
@@ -164,6 +170,39 @@ export class MailgunEmailService implements MailSendService {
 
       this.logger.log('E-Mail sent Successfully');
     } catch (error) {
+      this.logger.debug(error);
+    }
+  }
+  async sendEmailInvoice(user: User, invoice: Buffer): Promise<void> {
+    try {
+      const mailgunData: MailgunMessageData = {
+        attachment: invoice,
+        from: this.MAIL_FROM,
+        text: `Hi! ${user.name} your invoice is attached to this mail.`,
+
+        subject: 'Waseet Invoice',
+        to: user.email,
+        template: INVOICE,
+      };
+      await this.sendMail(mailgunData);
+      this.logger.debug('Email Sent');
+    } catch (error) {
+      this.logger.log('Failed to send mail because of:', error);
+      this.logger.debug(error);
+    }
+  }
+  async sendSearchHistoryIsNowAvailable(email: string[]): Promise<void> {
+    try {
+      const mailgunData: MailgunMessageData = {
+        from: this.MAIL_FROM,
+        text: `Hi! A listing that fits your search is now available.`,
+        subject: 'New Listing',
+        to: email,
+      };
+      await this.sendMail(mailgunData);
+      this.logger.debug('Email Sent');
+    } catch (error) {
+      this.logger.log('Failed to send mail because of:', error);
       this.logger.debug(error);
     }
   }

@@ -22,8 +22,10 @@ import {
   Ownership,
   Purpose,
   RentingOption,
+  TimePeriod,
 } from '../../../../common/enums';
 import { LocationDto } from '../../../location/dto/request/location.dto';
+import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
 
 @InputType()
 export class CreateListingDto {
@@ -104,6 +106,11 @@ export class CreateListingDto {
   @IsString()
   numberOfBathrooms: string;
 
+  @Field(() => [String], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  panoramaView: string[];
+
   @Field({ defaultValue: 'rent' })
   @IsString()
   sellingType: string;
@@ -121,7 +128,7 @@ export class CreateListingDto {
 
   // @Field(() => String, { nullable: true })
   // @IsOptional()
-  // image: string;
+  // Image: string;
 
   @IsOptional()
   @IsArray()
@@ -164,7 +171,9 @@ export class CreateListingDto {
   landArea: string;
 
   @ValidateIf((listing) => listing.ListingType == ListingType.BUILDING)
-  @IsNotEmpty({ message: 'This is a required field for listing type building' })
+  @IsNotEmpty({
+    message: 'numberOfApartment is a required field for listing type building',
+  })
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
@@ -176,7 +185,8 @@ export class CreateListingDto {
       listing.listingType == ListingType.VILLA,
   )
   @IsNotEmpty({
-    message: 'This is a required field for listing type bulding and villa',
+    message:
+      'numberOfStoreys is a required field for listing type bulding and villa',
   })
   @Field({ nullable: true })
   @IsOptional()
@@ -186,7 +196,7 @@ export class CreateListingDto {
   @ValidateIf((listing) => listing.listingType == ListingType.BUILDING)
   @IsNotEmpty({
     message:
-      'This is a required field for listing for listing type villa and building',
+      'areaPerApartment is a required field for listing for listing type villa and building',
   })
   @Field({ nullable: true })
   @IsOptional()
@@ -194,10 +204,14 @@ export class CreateListingDto {
   areaPerApartment: string;
 
   @ValidateIf((listing) => listing.listingType == ListingType.BUILDING)
+  @Field({ defaultValue: false })
+  @IsOptional()
+  @IsBoolean()
+  garageArea: boolean;
+
   @Field({ nullable: true })
   @IsOptional()
-  @IsString()
-  garageArea: string;
+  garageSize: string;
 
   @ValidateIf(
     (listing) =>
@@ -205,7 +219,7 @@ export class CreateListingDto {
       listing.listingType == ListingType.VILLA,
   )
   @IsNotEmpty({
-    message: 'This is a required field for listing type bulding and villa',
+    message: 'totalArea is a required field for listing type bulding and villa',
   })
   @Field({ nullable: true })
   @IsOptional()
@@ -218,7 +232,8 @@ export class CreateListingDto {
       listing.listingType == ListingType.VILLA,
   )
   @IsNotEmpty({
-    message: 'This is a required field for listing type bulding and villa',
+    message:
+      'rentedApartment is a required field for listing type bulding and villa',
   })
   @Field({ nullable: true })
   @IsOptional()
@@ -334,6 +349,168 @@ export class UpdateListingDto extends PartialType(CreateListingDto) {
 }
 
 @InputType()
+export class UpdateListingAdminDto {
+  @Field()
+  @IsUUID()
+  id: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  district: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  city: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  street: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  price: string;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  numberOfBathrooms: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  totalArea: string;
+
+  @IsOptional()
+  @Field({ nullable: true })
+  @IsString()
+  numberOfRooms: string;
+
+  @IsOptional()
+  @Field({ nullable: true })
+  @IsBoolean()
+  pool: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  outdoorKitchen: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  garden: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  guestHouse: boolean;
+
+  @IsOptional()
+  @Field({ nullable: true })
+  @IsBoolean()
+  tennisCourt: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  basketballCourt: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  jacuzzi: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  bbqArea: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  maidsRoom: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  petsAllowed: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  balcony: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  gym: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  playground: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  parking: boolean;
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  security: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  airConditioning: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  storageRoom: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  laundryRoom: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  conferenceRoom: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  gatedCommunity: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  indoorPlayArea: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  coveredParking: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  wifi: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  elevator: boolean;
+}
+
+@InputType()
 export class FlagListingInput {
   @Field()
   @IsUUID()
@@ -348,4 +525,11 @@ export class FlagListingInput {
   @IsString()
   @IsNotEmpty()
   childIssue: string;
+}
+@InputType()
+export class AdminFilterAndSort extends PaginateAndSort {
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsEnum(TimePeriod)
+  timePeriod: string;
 }

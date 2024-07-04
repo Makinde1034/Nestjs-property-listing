@@ -10,7 +10,6 @@ export const formatError = (
   error: GraphQLFormattedError,
 ): GraphQLFormattedError => {
   const originalError = error.extensions.originalError as OriginalError;
-  console.log(error.extensions);
 
   if (!originalError) {
     return {

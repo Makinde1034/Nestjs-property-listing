@@ -24,3 +24,25 @@ export class FlaggedListingResponse {
   @Field(() => Int)
   total: number;
 }
+
+@ObjectType()
+export class ListingAnalysisResponse {
+  @Field()
+  flagged: number;
+  @Field()
+  promoted: number;
+  @Field()
+  sold: number;
+}
+
+@ObjectType()
+export class AdminListingResponse {
+  @Field(() => [Listing], { nullable: true })
+  listing: Listing[];
+
+  @Field(() => ListingAnalysisResponse)
+  analysis: ListingAnalysisResponse;
+
+  @Field(() => Int)
+  total: number;
+}

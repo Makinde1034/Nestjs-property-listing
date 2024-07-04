@@ -10,9 +10,10 @@ import {
   IsNumber,
   IsString,
   ValidateNested,
+  IsEnum,
 } from 'class-validator';
 
-import { SortOrder } from '../../../common/enums';
+import { AdminSortListingManagement, SortOrder } from '../../../common/enums';
 
 import { WhereOption } from './where-option.dto';
 
@@ -31,6 +32,7 @@ export class PaginateAndSort {
   @IsOptional()
   @IsString()
   @Field({ nullable: true })
+  @IsEnum(AdminSortListingManagement)
   sortField?: string;
 
   @IsOptional()
