@@ -438,7 +438,7 @@ export class UpdateListingAdminDto {
   @Field({ nullable: true })
   @IsOptional()
   @IsBoolean()
-  petsAllowed: boolean;
+  petAllowed: boolean;
 
   @Field({ nullable: true })
   @IsOptional()
