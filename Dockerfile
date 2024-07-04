@@ -13,10 +13,43 @@ COPY package*.json ./
 RUN npm install
 
 
-# Install Puppeteer dependencies (chromium, fonts, etc.)
+# Install Puppeteer and Chromium dependencies
 RUN apt-get update && \
-    apt-get install -y chromium && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y \
+        chromium \
+        fonts-liberation \
+        fonts-ipafont-gothic \
+        fonts-wqy-zenhei \
+        fonts-thai-tlwg \
+        fonts-kacst \
+        ttf-freefont \
+        libcups2 \
+        libxss1 \
+        libappindicator1 \
+        libnss3 \
+        libatk-bridge2.0-0 \
+        libgtk-3-0 \
+        libx11-xcb1 \
+        libxtst6 \
+        libxkbcommon-x11-0 \
+        libasound2 \
+        xvfb \
+        x11-xkb-utils \
+        xfonts-100dpi \
+        xfonts-75dpi \
+        xfonts-scalable \
+        xfonts-cyrillic \
+        x11-apps \
+        clang \
+        python \
+        g++
+        --no-install-recommends \
+        && apt-get clean \
+        && rm -rf /var/lib/apt/lists/*
+        
+# Set Puppeteer environment variables
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 # Set Puppeteer environment variables (for running in Docker)
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
