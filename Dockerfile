@@ -1,17 +1,14 @@
 # Base image
 FROM node:18
 
-
-
 # Create app directory
 WORKDIR /usr/src/app
 
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
+# Copy package.json and package-lock.json
 COPY package*.json ./
 
 # Install app dependencies
 RUN npm install
-
 
 # Install Puppeteer and Chromium dependencies
 RUN apt-get update && \
@@ -42,16 +39,12 @@ RUN apt-get update && \
         x11-apps \
         clang \
         python \
-        g++\
+        g++ \
         --no-install-recommends \
         && apt-get clean \
         && rm -rf /var/lib/apt/lists/*
-        
-# Set Puppeteer environment variables
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
-# Set Puppeteer environment variables (for running in Docker)
+# Set Puppeteer environment variables
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
@@ -63,5 +56,6 @@ RUN npm run build
 
 # Expose the port the app runs on
 EXPOSE 3000
+
 # Run the application
 CMD ["npm", "run", "start:prod"]
