@@ -7,13 +7,18 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { AuctionRepository } from '../repositories/auction.repository';
 import {
   CreateAuctionInput,
+  CreateAuctionParticipantInput,
   UpdateAuctionInput,
 } from '../dtos/request/auction-input';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
+import { AuctionParticipantRepository } from '../repositories/auction-participant.repository';
 
 @Injectable()
 export class AuctionService {
-  constructor(private auctionRepository: AuctionRepository) {}
+  constructor(
+    private auctionRepository: AuctionRepository,
+    private auctionParticipantRepository: AuctionParticipantRepository,
+  ) {}
   logger = new Logger(AuctionService.name);
   async create(auctionInput: CreateAuctionInput) {
     try {
@@ -69,5 +74,14 @@ export class AuctionService {
       this.logger.log(error);
       throw new BadRequestException(error);
     }
+  }
+
+  async addListingToAuction(data: CreateAuctionParticipantInput) {
+    const result = await this.auctionParticipantRepository.save(data);
+  }
+
+  async delete(id: string) {
+    const deleteAuction = await this.auctionRepository.delete(id);
+    return deleteAuction;
   }
 }

@@ -341,4 +341,11 @@ export class ListingResolver {
   ) {
     return await this.auctionService.findAll(paginateAndSort);
   }
+
+  @UseGuards(AdminGuard)
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => Auction, { name: 'id' })
+  async deleteAuction(@Args('id') id: string) {
+    return await this.auctionService.delete(id);
+  }
 }
