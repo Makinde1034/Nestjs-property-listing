@@ -310,6 +310,7 @@ export class ListingResolver {
     return await this.wishlistService.getWishList(ctx.req.user);
   }
 
+  @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard)
   @Mutation(() => Auction, { name: 'createAuction' })
   async createAuction(
@@ -318,6 +319,7 @@ export class ListingResolver {
     return await this.auctionService.create(createAuction);
   }
 
+  @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard)
   @Mutation(() => Auction, { name: 'updateAuction' })
   async updateAuction(
@@ -325,13 +327,13 @@ export class ListingResolver {
   ) {
     return await this.auctionService.update(updateAuctionInput);
   }
-
+  @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard)
   @Query(() => Auction, { name: 'getAuction' })
   async findOneAuction(@Args('id') id: string) {
     return await this.auctionService.findOne(id);
   }
-
+  @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard)
   @Query(() => AuctionResponse, { name: 'getAllAuction' })
   async findManyAuction(
