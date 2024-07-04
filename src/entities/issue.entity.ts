@@ -4,27 +4,40 @@
  */
 
 import { Field, ObjectType } from '@nestjs/graphql';
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  ManyToOne,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, CreateDateColumn, Entity, UpdateDateColumn } from 'typeorm';
 import BaseEntity from './base.entity';
-import { IssueCategory } from './issue-category.entity';
 
 @Entity()
 @ObjectType()
 export class Issue extends BaseEntity {
-  @Column()
+  @Column({ nullable: true })
   @Field()
   message: string;
 
-  @ManyToOne(() => IssueCategory, (category) => category.issues, {
-    cascade: true,
-  })
-  category: IssueCategory;
+  @Column({ nullable: true })
+  @Field()
+  category: string;
+
+  @Column({ nullable: true })
+  @Field()
+  parentReason: string;
+
+  @Column({ nullable: true })
+  @Field()
+  parentArabicName: string;
+
+  @Column({ nullable: true })
+  @Field()
+  childReason: string;
+
+  @Column({ nullable: true })
+  @Field()
+  childArabicName: string;
+
+  // @ManyToOne(() => IssueCategory, (category) => category.issues, {
+  //   Cascade: true,
+  // })
+  // Category: IssueCategory;
 
   @Field()
   @CreateDateColumn()

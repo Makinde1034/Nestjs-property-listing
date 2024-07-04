@@ -223,11 +223,13 @@ type Listing {
   promotion: [Promotion!]!
   feature: [Feature!]!
   impressions: Float!
-  promoted: Boolean!
+  isListingPromoted: Boolean!
   promotionExpiration: DateTime
   isListingFlagged: Boolean!
+  isListingSold: Boolean!
+  isListingRented: Boolean!
+  isListing: Boolean!
   isDisabled: Boolean!
-  status: String
   flag: [FlagListing!]
   wishlist: [Wishlist!]!
   rentDate: DateTime
@@ -348,6 +350,11 @@ type Notification {
 type Issue {
   id: ID!
   message: String!
+  category: String!
+  parentReason: String!
+  parentArabicName: String!
+  childReason: String!
+  childArabicName: String!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -438,6 +445,18 @@ type Amenities {
   updatedAt: DateTime!
 }
 
+type Auction {
+  id: ID!
+  title: String!
+  description: String!
+  startDate: DateTime!
+  liveFor: Float!
+  maxListing: Float!
+  status: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type ListingResponse {
   listing: [Listing!]!
   total: Int!
@@ -457,6 +476,16 @@ type ListingAnalysisResponse {
 type AdminListingResponse {
   listing: [Listing!]
   analysis: ListingAnalysisResponse!
+  total: Int!
+}
+
+type OfferResponse {
+  offer: [Offer!]
+  total: Int!
+}
+
+type AuctionResponse {
+  auction: [Auction!]
   total: Int!
 }
 
@@ -492,11 +521,15 @@ type Query {
   findListingsForOwner(findManyOptions: AttributeDto): ListingResponse!
   findOneForBuyer(id: String!): Listing!
   viewFlaggedListings(findManyOptions: PaginateAndSort): FlaggedListingResponse
+  findOneOffer(id: String!): Offer!
+  findOffers(findOptions: FindOfferInput!): OfferResponse!
   findAmenities: [Amenities!]!
   getMessageInLocalLanguage: SuccessResponse
   getSearchHistory: [SearchHistory!]
   findListingsForAdmin(paginateAndSort: AdminFilterAndSort!): AdminListingResponse!
   getWishlist: [Wishlist!]!
+  getAuction(id: String!): Auction!
+  getAllAuction(findManyOptions: PaginateAndSort!): AuctionResponse!
   adPackages: [AdPackage!]!
   adPackage(id: String!): AdPackage!
   fetchIssueCategories: [IssueCategory!]!
@@ -548,13 +581,26 @@ input AttributeDto {
   listingType: String
 }
 
+input FindOfferInput {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
+  listingId: String!
+}
+
 input AdminFilterAndSort {
   take: Float
   skip: Float
   sortField: String
   directionToSort: SortOrder
   where: WhereOption
-  timePeriod: String
+  timePeriod: String! = "false"
+  promoted: Boolean! = false
+  sold: Boolean! = false
+  flagged: Boolean! = false
+  rented: Boolean! = false
 }
 
 input ListTicketInput {
@@ -602,6 +648,7 @@ type Mutation {
   createListing(createListing: CreateListingDto!): Listing!
   updateListing(updateListingDto: UpdateListingDto!): Listing!
   createOffer(createOfferDto: CreateOfferDto!): Offer
+  updateOffer(updateOfferInput: UpdateOfferInput!): Offer
   createPromotion(createPromotionInput: CreatePromotionInput!): Promotion!
   flagListing(flagListingInput: FlagListingInput!): SuccessResponse!
   deleteListing(listingId: String!): SuccessResponse!
@@ -610,6 +657,8 @@ type Mutation {
   createFeature(createFeatureInput: CreateFeatureInput!): Feature!
   addToWishlist(createWishlistInput: CreateWishlistInput!): Wishlist!
   removeFromWishlist(wishlistId: String!): SuccessResponse!
+  createAuction(createAuctionInput: CreateAuctionInput!): Auction!
+  updateAuction(updateAuctionInput: UpdateAuctionInput!): Auction!
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!
@@ -618,8 +667,6 @@ type Mutation {
   createIssueCategory(RequestInput: CreateIssueCategoryInput!): IssueCategory!
   updateIssueCatgeory(RequestInput: UpdateIssueCategoryInput!): IssueCategory!
   deleteIssueCategory(RequestInput: DeleteIssueInput!): String!
-  createIssue(RequestInput: CreateIssueInput!): Issue!
-  updateIssue(RequestInput: UpdateIssueInput!): Issue!
   deleteIssue(RequestInput: DeleteIssueInput!): String!
   createTicket(RequestInput: CreateTicketInput!): String!
   manageTicket(RequestInput: UpdateTicketInput!): Ticket!
@@ -866,8 +913,8 @@ input CreateListingDto {
   basketballCourt: Boolean! = false
   jacuzzi: Boolean! = false
   bbqArea: Boolean! = false
-  maidsRoom: Boolean! = false
-  petsAllowed: Boolean! = false
+  maidRoom: Boolean! = false
+  petAllowed: Boolean! = false
   balcony: Boolean! = false
   gym: Boolean! = false
   playground: Boolean! = false
@@ -932,8 +979,8 @@ input UpdateListingDto {
   basketballCourt: Boolean = false
   jacuzzi: Boolean = false
   bbqArea: Boolean = false
-  maidsRoom: Boolean = false
-  petsAllowed: Boolean = false
+  maidRoom: Boolean = false
+  petAllowed: Boolean = false
   balcony: Boolean = false
   gym: Boolean = false
   playground: Boolean = false
@@ -959,6 +1006,15 @@ input CreateOfferDto {
   listingId: String!
 }
 
+input UpdateOfferInput {
+  offerPrice: Float
+  expireAt: DateTime
+  coupon: Boolean
+  couponCode: String
+  listingId: String
+  id: String!
+}
+
 input CreatePromotionInput {
   listingId: String!
   paymentReference: String!
@@ -978,6 +1034,23 @@ input CreateFeatureInput {
 
 input CreateWishlistInput {
   listingId: String!
+}
+
+input CreateAuctionInput {
+  title: String!
+  description: String!
+  startDate: DateTime!
+  liveFor: Float!
+  maxListing: Float!
+}
+
+input UpdateAuctionInput {
+  title: String
+  description: String
+  startDate: DateTime
+  liveFor: Float
+  maxListing: Float
+  id: String!
 }
 
 input CreateAdPackageInput {
@@ -1009,17 +1082,6 @@ input UpdateIssueCategoryInput {
 }
 
 input DeleteIssueInput {
-  id: String!
-}
-
-input CreateIssueInput {
-  issue: String!
-  categoryId: String!
-}
-
-input UpdateIssueInput {
-  issue: String!
-  categoryId: String!
   id: String!
 }
 

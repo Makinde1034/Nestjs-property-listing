@@ -9,8 +9,6 @@ import { Issue, IssueCategory } from 'src/entities';
 import {
   CreateIssueCategoryInput,
   UpdateIssueCategoryInput,
-  CreateIssueInput,
-  UpdateIssueInput,
   DeleteIssueInput,
 } from '../dtos';
 import { AppStrings } from 'src/common/messages/app.strings';
@@ -87,16 +85,16 @@ export class IssueService {
    * @param {CreateIssueInput} input
    * @returns {Promise<Issue>}
    */
-  async createIssue(input: CreateIssueInput): Promise<Issue> {
-    const category = await this.issueCategoryRepository.findByIdOrFail(
-      input.categoryId,
-    );
-    const data: Partial<Issue> = {
-      message: input.issue,
-      category,
-    };
-    return await this.issueRepository.create(data);
-  }
+  // Async createIssue(input: CreateIssueInput): Promise<Issue> {
+  //   Const category = await this.issueCategoryRepository.findByIdOrFail(
+  //     Input.categoryId,
+  //   );
+  //   Const data: Partial<Issue> = {
+  //     Message: input.issue,
+  //     Category,
+  //   };
+  //   Return await this.issueRepository.create(data);
+  // }
 
   /**
    * Update Issue
@@ -105,16 +103,16 @@ export class IssueService {
    * @param {UpdateIssueInput} input
    * @returns {Promise<Issue>}
    */
-  async updateIssue(input: UpdateIssueInput): Promise<Issue> {
-    const category = await this.issueCategoryRepository.findByIdOrFail(
-      input.categoryId,
-    );
-    const data: Partial<Issue> = {
-      message: input.issue,
-      category,
-    };
-    return await this.issueRepository.update(input.id, data);
-  }
+  // Async updateIssue(input: UpdateIssueInput): Promise<Issue> {
+  //   Const category = await this.issueCategoryRepository.findByIdOrFail(
+  //     Input.categoryId,
+  //   );
+  //   Const data: Partial<Issue> = {
+  //     Message: input.issue,
+  //     Category,
+  //   };
+  //   Return await this.issueRepository.update(input.id, data);
+  // }
 
   /**
    * Delete issue

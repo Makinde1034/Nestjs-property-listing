@@ -279,11 +279,11 @@ export class CreateListingDto {
 
   @Field({ defaultValue: false })
   @IsBoolean()
-  maidsRoom: boolean;
+  maidRoom: boolean;
 
   @Field({ defaultValue: false })
   @IsBoolean()
-  petsAllowed: boolean;
+  petAllowed: boolean;
 
   @Field({ defaultValue: false })
   @IsBoolean()
@@ -438,7 +438,7 @@ export class UpdateListingAdminDto {
   @Field({ nullable: true })
   @IsOptional()
   @IsBoolean()
-  petsAllowed: boolean;
+  petAllowed: boolean;
 
   @Field({ nullable: true })
   @IsOptional()
@@ -528,8 +528,28 @@ export class FlagListingInput {
 }
 @InputType()
 export class AdminFilterAndSort extends PaginateAndSort {
-  @Field({ nullable: true })
+  @Field({ defaultValue: false })
   @IsOptional()
   @IsEnum(TimePeriod)
   timePeriod: string;
+
+  @Field({ defaultValue: false })
+  @IsOptional()
+  @IsBoolean()
+  promoted: boolean;
+
+  @Field({ defaultValue: false })
+  @IsOptional()
+  @IsBoolean()
+  sold: boolean;
+
+  @Field({ defaultValue: false })
+  @IsOptional()
+  @IsBoolean()
+  flagged: boolean;
+
+  @Field({ defaultValue: false })
+  @IsOptional()
+  @IsBoolean()
+  rented: boolean;
 }

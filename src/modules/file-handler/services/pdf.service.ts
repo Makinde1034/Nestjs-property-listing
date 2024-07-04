@@ -16,7 +16,9 @@ import { PdfInput } from '../dto/pdf.dto';
 export class PdfGeneratorService {
   constructor() {}
   async generateImage(data) {
-    const browser = await puppeteer.launch({ headless: true });
+    const browser = await puppeteer.launch({
+      headless: 'shell',
+    });
     const page = await browser.newPage();
     page.setDefaultNavigationTimeout(0);
 
@@ -42,7 +44,9 @@ export class PdfGeneratorService {
   }
 
   async generatePdfForInvoice(data: PdfInput): Promise<Buffer> {
-    const browser = await puppeteer.launch({ headless: true });
+    const browser = await puppeteer.launch({
+      headless: 'shell',
+    });
     const page = await browser.newPage();
     page.setDefaultNavigationTimeout(0);
     page.waitForNavigation();
