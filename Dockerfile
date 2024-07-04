@@ -13,7 +13,8 @@ RUN npm install
 # Install Puppeteer and Chromium dependencies
 RUN apt-get update && \
     apt-get install -y \
-        chromium \
+        wget \
+        ca-certificates \
         fonts-liberation \
         fonts-ipafont-gothic \
         fonts-wqy-zenhei \
@@ -40,12 +41,18 @@ RUN apt-get update && \
         clang \
         python \
         g++ \
-        --no-install-recommends \
-        && apt-get clean \
-        && rm -rf /var/lib/apt/lists/*
+        --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Chromium manually
+RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - && \
+    echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list && \
+    apt-get update && \
+    apt-get install -y google-chrome-stable --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/*
 
 # Set Puppeteer environment variables
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 # Bundle app source
