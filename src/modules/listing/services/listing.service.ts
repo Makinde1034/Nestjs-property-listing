@@ -368,7 +368,7 @@ export class ListingService {
         const expirationDate = addDaysToDate(new Date(), formatedDays);
         await this.listingRepository.update(listing.id, {
           promotionExpiration: expirationDate,
-          promoted: true,
+          IsListingPromoted: true,
           promotedDate: new Date(),
         });
 
@@ -490,10 +490,10 @@ export class ListingService {
     }
   }
 
-  async getListingForAdmin(paginatAndSort: AdminFilterAndSort) {
+  async getListingForAdmin(paginateAndSort: AdminFilterAndSort) {
     try {
       const orderOptions = {
-        [paginatAndSort.sortField]: paginatAndSort.directionToSort,
+        [paginateAndSort.sortField]: paginateAndSort.directionToSort,
       };
 
       const now = new Date();
@@ -502,7 +502,7 @@ export class ListingService {
       // Specific field to filter by time period
       const dateField = 'createdAt';
 
-      switch (paginatAndSort.timePeriod) {
+      switch (paginateAndSort.timePeriod) {
         case 'today':
           whereCondition[dateField] = Between(startOfDay(now), endOfDay(now));
           break;
@@ -522,17 +522,27 @@ export class ListingService {
           whereCondition = {};
       }
 
+      whereCondition = {
+        ...whereCondition,
+        promoted: paginateAndSort.promoted,
+        isListingSold: paginateAndSort.sold,
+        isListingFlagged: paginateAndSort.flagged,
+        isListingRented: paginateAndSort.rented,
+      };
       const [listing, total, flagged, promoted, sold] = await Promise.all([
         this.listingRepository.findAll({
           where: whereCondition,
+
           order: orderOptions,
-          skip: paginatAndSort.skip,
-          take: paginatAndSort.take,
+          skip: paginateAndSort.skip,
+          take: paginateAndSort.take,
         }),
         this.listingRepository.count({ where: whereCondition }),
         this.listingRepository.count({ where: { isListingFlagged: true } }),
-        this.listingRepository.count({ where: { promoted: true } }),
-        this.listingRepository.count({ where: { status: 'completed' } }),
+        this.listingRepository.count({ where: { IsListingPromoted: true } }),
+        this.listingRepository.count({
+          where: { isListingSold: true, isListingRented: true },
+        }),
       ]);
 
       const analysis = {

@@ -1,0 +1,55 @@
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { AuctionRepository } from '../repositories/auction.repository';
+import { CreateAuctionInput } from '../dtos/request/auction-input';
+import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
+
+@Injectable()
+export class AuctionService {
+  constructor(private auctionRepository: AuctionRepository) {}
+  logger = new Logger(AuctionService.name);
+  async create(auctionInput: CreateAuctionInput) {
+    try {
+      return await this.auctionRepository.save(auctionInput);
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async findOne(id: string) {
+    try {
+      return await this.auctionRepository.findOneOrFail({ where: { id: id } });
+    } catch (error) {
+      this.logger.log(error);
+    }
+  }
+
+  async findAll(paginateAndSort: PaginateAndSort) {
+    try {
+      const orderOptions = {
+        [paginateAndSort.sortField]: paginateAndSort.directionToSort,
+      };
+
+      const whereCondition = {
+        [paginateAndSort.where.fieldToChose]: [
+          paginateAndSort.where.whereParam,
+        ],
+      };
+
+      if (paginateAndSort.take && paginateAndSort.skip) {
+        paginateAndSort.skip = 0;
+        paginateAndSort.take = 20;
+      }
+
+      return await this.auctionRepository.findAndCount({
+        take: paginateAndSort.take,
+        skip: paginateAndSort.skip,
+        order: orderOptions,
+        where: whereCondition,
+      });
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+}

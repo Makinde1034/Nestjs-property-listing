@@ -1,0 +1,34 @@
+import { Column, CreateDateColumn, Entity, UpdateDateColumn } from 'typeorm';
+import BaseEntity from './base.entity';
+import { Field, ObjectType } from '@nestjs/graphql';
+@ObjectType()
+@Entity()
+export class Auction extends BaseEntity {
+  @Column()
+  @Field()
+  title: string;
+
+  @Column()
+  @Field()
+  description: string;
+
+  @Column()
+  @Field()
+  startDate: Date;
+
+  @Column()
+  @Field()
+  liveFor: number;
+
+  @Column()
+  @Field()
+  maxListing: number;
+
+  @CreateDateColumn()
+  @Field()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  @Field()
+  updatedAt: Date;
+}

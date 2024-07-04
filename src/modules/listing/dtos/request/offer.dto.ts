@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, PartialType } from '@nestjs/graphql';
 import {
   IsBoolean,
   IsDate,
@@ -11,6 +11,7 @@ import {
   IsOptional,
   IsPositive,
   IsString,
+  IsUUID,
   ValidateIf,
 } from 'class-validator';
 
@@ -43,4 +44,12 @@ export class CreateOfferDto {
   listingId: string;
 
   userId?: string;
+}
+
+@InputType()
+export class UpdateOfferInput extends PartialType(CreateOfferDto) {
+  @Field()
+  @IsUUID()
+  @IsNotEmpty()
+  id: string;
 }

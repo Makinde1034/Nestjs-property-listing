@@ -223,11 +223,13 @@ type Listing {
   promotion: [Promotion!]!
   feature: [Feature!]!
   impressions: Float!
-  promoted: Boolean!
+  IsListingPromoted: Boolean!
   promotionExpiration: DateTime
   isListingFlagged: Boolean!
+  isListingSold: Boolean!
+  isListingRented: Boolean!
+  isListing: Boolean!
   isDisabled: Boolean!
-  status: String
   flag: [FlagListing!]
   wishlist: [Wishlist!]!
   rentDate: DateTime
@@ -492,6 +494,7 @@ type Query {
   findListingsForOwner(findManyOptions: AttributeDto): ListingResponse!
   findOneForBuyer(id: String!): Listing!
   viewFlaggedListings(findManyOptions: PaginateAndSort): FlaggedListingResponse
+  findOneOffer(findOptions: PaginateAndSort!): [Offer!]!
   findAmenities: [Amenities!]!
   getMessageInLocalLanguage: SuccessResponse
   getSearchHistory: [SearchHistory!]
@@ -554,7 +557,11 @@ input AdminFilterAndSort {
   sortField: String
   directionToSort: SortOrder
   where: WhereOption
-  timePeriod: String
+  timePeriod: String! = "false"
+  promoted: Boolean! = false
+  sold: Boolean! = false
+  flagged: Boolean! = false
+  rented: Boolean! = false
 }
 
 input ListTicketInput {
@@ -602,6 +609,7 @@ type Mutation {
   createListing(createListing: CreateListingDto!): Listing!
   updateListing(updateListingDto: UpdateListingDto!): Listing!
   createOffer(createOfferDto: CreateOfferDto!): Offer
+  updateOffer(updateOfferDto: UpdateOfferInput!): Offer
   createPromotion(createPromotionInput: CreatePromotionInput!): Promotion!
   flagListing(flagListingInput: FlagListingInput!): SuccessResponse!
   deleteListing(listingId: String!): SuccessResponse!
@@ -866,8 +874,8 @@ input CreateListingDto {
   basketballCourt: Boolean! = false
   jacuzzi: Boolean! = false
   bbqArea: Boolean! = false
-  maidsRoom: Boolean! = false
-  petsAllowed: Boolean! = false
+  maidRoom: Boolean! = false
+  petAllowed: Boolean! = false
   balcony: Boolean! = false
   gym: Boolean! = false
   playground: Boolean! = false
@@ -932,8 +940,8 @@ input UpdateListingDto {
   basketballCourt: Boolean = false
   jacuzzi: Boolean = false
   bbqArea: Boolean = false
-  maidsRoom: Boolean = false
-  petsAllowed: Boolean = false
+  maidRoom: Boolean = false
+  petAllowed: Boolean = false
   balcony: Boolean = false
   gym: Boolean = false
   playground: Boolean = false
@@ -957,6 +965,15 @@ input CreateOfferDto {
   coupon: Boolean
   couponCode: String
   listingId: String!
+}
+
+input UpdateOfferInput {
+  offerPrice: Float
+  expireAt: DateTime
+  coupon: Boolean
+  couponCode: String
+  listingId: String
+  id: String!
 }
 
 input CreatePromotionInput {

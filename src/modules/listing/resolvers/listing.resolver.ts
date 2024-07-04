@@ -23,7 +23,7 @@ import {
   ListingResponse,
 } from '../dtos/response/listing.response';
 import { OfferService } from '../services/offer.service';
-import { CreateOfferDto } from '../dtos/request/offer.dto';
+import { CreateOfferDto, UpdateOfferInput } from '../dtos/request/offer.dto';
 import { Offer } from '../../../entities/offer.entity';
 import { Amenities } from '../../../entities/amenities.entity';
 import { AttributeDto } from '../dtos/request/attributes.dto';
@@ -42,9 +42,6 @@ import { Feature } from '../../../entities/feature.entity';
 import { WishlistService } from '../services/wishlist.service';
 import { Wishlist } from '../../../entities/wishlist.entity';
 import { CreateWishlistInput } from '../dtos/request/wishlistInput';
-
-// Import { SuccessResponse } from '../../../common/utils/success.response';
-// Import { SuccessResponse } from '../../../common/response/SuccessResponse';
 
 @Resolver()
 export class ListingResolver {
@@ -163,6 +160,24 @@ export class ListingResolver {
   }
 
   @UseGuards(AccessTokenGuard)
+  @Mutation(() => Offer, { name: 'updateOffer', nullable: true })
+  async updateOffer(
+    @Args('updateOfferDto') updateOfferInput: UpdateOfferInput,
+  ) {
+    return await this.offerService.updateOffer(updateOfferInput);
+  }
+
+  @Query(() => Offer, { name: 'findOneOffer' })
+  async findOne(@Args('id') id: string) {
+    return await this.offerService.findOne(id);
+  }
+
+  @Query(() => [Offer], { name: 'findOneOffer' })
+  async findMany(@Args('findOptions') paginateAndSort: PaginateAndSort) {
+    return await this.offerService.findMany(paginateAndSort);
+  }
+
+  @UseGuards(AccessTokenGuard)
   @Query(() => [Amenities], { name: 'findAmenities' })
   async findAmenities() {
     return await this.listingService.findAmenities();
@@ -232,6 +247,7 @@ export class ListingResolver {
   ) {
     return await this.listingService.editListingForAdmin(updateListingDto);
   }
+
   @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard)
   @Mutation(() => SuccessResponse, { name: 'adminDisableListing' })
@@ -259,7 +275,6 @@ export class ListingResolver {
     return await this.listingService.featureAListing(createFeatureInput);
   }
 
-  @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard)
   @Mutation(() => Wishlist, { name: 'addToWishlist' })
   async addToWishist(
@@ -269,7 +284,6 @@ export class ListingResolver {
     return await this.wishlistService.create(createWishlistInput, ctx.req.user);
   }
 
-  @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard)
   @Mutation(() => SuccessResponse, { name: 'removeFromWishlist' })
   async removeFromWishlist(@Args('wishlistId') wishlistId: string) {

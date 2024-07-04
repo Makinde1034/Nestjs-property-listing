@@ -297,7 +297,7 @@ export class Listing extends BaseEntity {
 
   @Field({ defaultValue: false })
   @Column({ default: false })
-  promoted: boolean;
+  IsListingPromoted: boolean;
 
   @Field({ nullable: true })
   @Column({ nullable: true })
@@ -309,11 +309,23 @@ export class Listing extends BaseEntity {
 
   @Field({ defaultValue: false })
   @Column({ default: false })
+  isListingSold: boolean;
+
+  @Field({ defaultValue: false })
+  @Column({ default: false })
+  isListingRented: boolean;
+
+  @Field({ defaultValue: false })
+  @Column({ default: false })
+  isListing: boolean;
+
+  @Field({ defaultValue: false })
+  @Column({ default: false })
   isDisabled: boolean;
 
-  @Field({ defaultValue: 'active', nullable: true })
-  @Column({ enum: ListingStatus, default: 'active', nullable: true })
-  status: string;
+  // @Field({ defaultValue: '', nullable: true })
+  // @Column({ enum: ListingStatus, default: 'active', nullable: true })
+  // status: string;
 
   @Field(() => [FlagListing], { nullable: true })
   @OneToMany(() => FlagListing, (flag) => flag.listing, {

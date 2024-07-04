@@ -19,6 +19,8 @@ import { AppStrings } from '../../../common/messages/app.strings';
 
 import { PdfInput } from '../../file-handler/dto/pdf.dto';
 import { addDaysToDate } from '../../../common/utils/helper';
+import { SuccessResponse } from '../../../common/response';
+import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 @Injectable()
 export class OfferService {
   constructor(
@@ -85,7 +87,42 @@ export class OfferService {
       return minimumListingPrice;
     } catch (error) {
       this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async findOne(id: string) {
+    try {
+      return await this.offerRepository.findByIdOrFail(id, ['listing']);
+    } catch (error) {
+      this.logger.log(error);
       throw new BadRequestException();
+    }
+  }
+
+  async findMany(paginatAndSort: PaginateAndSort) {
+    try {
+      return await this.offerRepository.findAndCount({
+        skip: paginatAndSort.skip,
+        take: paginatAndSort.take,
+      });
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException();
+    }
+  }
+  async updateOffer(updateOfferInput) {
+    try {
+      const [id, ...rest] = updateOfferInput;
+
+      const offer = await this.offerRepository.update(id, rest);
+
+      if (offer) {
+        return new SuccessResponse();
+      }
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
     }
   }
 }
