@@ -77,7 +77,7 @@ export class AuctionService {
   }
 
   async addListingToAuction(data: CreateAuctionParticipantInput) {
-    const result = await this.auctionParticipantRepository.save(data);
+    return await this.auctionParticipantRepository.save(data);
   }
 
   async delete(id: string) {
