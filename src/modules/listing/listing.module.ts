@@ -39,6 +39,7 @@ import { NotificationModule } from '../notification/notification.module';
 import { AuctionService } from './services/auction.service';
 import { AuctionRepository } from './repositories/auction.repository';
 import { AuctionParticipant } from '../../entities/auction-participant.entity';
+import { AuctionParticipantRepository } from './repositories/auction-participant.repository';
 
 @Module({
   imports: [
@@ -82,7 +83,7 @@ import { AuctionParticipant } from '../../entities/auction-participant.entity';
     NotificationService,
     AuctionService,
     AuctionRepository,
-    AuctionParticipant,
+    AuctionParticipantRepository,
   ],
 })
 export class ListingModule {}
