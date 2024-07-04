@@ -368,7 +368,7 @@ export class ListingService {
         const expirationDate = addDaysToDate(new Date(), formatedDays);
         await this.listingRepository.update(listing.id, {
           promotionExpiration: expirationDate,
-          IsListingPromoted: true,
+          isListingPromoted: true,
           promotedDate: new Date(),
         });
 
@@ -524,7 +524,7 @@ export class ListingService {
 
       whereCondition = {
         ...whereCondition,
-        promoted: paginateAndSort.promoted,
+        isListingPromoted: paginateAndSort.promoted,
         isListingSold: paginateAndSort.sold,
         isListingFlagged: paginateAndSort.flagged,
         isListingRented: paginateAndSort.rented,
@@ -532,6 +532,17 @@ export class ListingService {
       const [listing, total, flagged, promoted, sold] = await Promise.all([
         this.listingRepository.findAll({
           where: whereCondition,
+          relations: ['user'],
+          select: {
+            user: {
+              firstName: true,
+              lastName: true,
+              language: true,
+              arabicFirstName: true,
+              arabicLastName: true,
+              userType: true,
+            },
+          },
 
           order: orderOptions,
           skip: paginateAndSort.skip,
@@ -539,7 +550,7 @@ export class ListingService {
         }),
         this.listingRepository.count({ where: whereCondition }),
         this.listingRepository.count({ where: { isListingFlagged: true } }),
-        this.listingRepository.count({ where: { IsListingPromoted: true } }),
+        this.listingRepository.count({ where: { isListingPromoted: true } }),
         this.listingRepository.count({
           where: { isListingSold: true, isListingRented: true },
         }),

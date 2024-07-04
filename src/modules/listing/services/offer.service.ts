@@ -9,7 +9,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateOfferDto } from '../dtos/request/offer.dto';
+import { CreateOfferDto, FindOfferInput } from '../dtos/request/offer-input';
 import { OfferRepository } from '../repositories';
 import { User } from '../../../entities';
 import { PaymentService } from '../../payment/services/payment.service';
@@ -19,8 +19,6 @@ import { AppStrings } from '../../../common/messages/app.strings';
 
 import { PdfInput } from '../../file-handler/dto/pdf.dto';
 import { addDaysToDate } from '../../../common/utils/helper';
-import { SuccessResponse } from '../../../common/response';
-import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 @Injectable()
 export class OfferService {
   constructor(
@@ -100,12 +98,15 @@ export class OfferService {
     }
   }
 
-  async findMany(paginatAndSort: PaginateAndSort) {
+  async findMany(findOfferInput: FindOfferInput) {
     try {
-      return await this.offerRepository.findAndCount({
-        skip: paginatAndSort.skip,
-        take: paginatAndSort.take,
+      const [offer, total] = await this.offerRepository.findAndCount({
+        where: { listingId: findOfferInput.listingId },
+        skip: findOfferInput.skip,
+        take: findOfferInput.take,
       });
+
+      return { offer, total };
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException();
@@ -113,13 +114,9 @@ export class OfferService {
   }
   async updateOffer(updateOfferInput) {
     try {
-      const [id, ...rest] = updateOfferInput;
+      const { id, ...rest } = updateOfferInput;
 
-      const offer = await this.offerRepository.update(id, rest);
-
-      if (offer) {
-        return new SuccessResponse();
-      }
+      return await this.offerRepository.update(id, rest);
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);

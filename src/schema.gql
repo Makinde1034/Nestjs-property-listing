@@ -223,7 +223,7 @@ type Listing {
   promotion: [Promotion!]!
   feature: [Feature!]!
   impressions: Float!
-  IsListingPromoted: Boolean!
+  isListingPromoted: Boolean!
   promotionExpiration: DateTime
   isListingFlagged: Boolean!
   isListingSold: Boolean!
@@ -462,6 +462,11 @@ type AdminListingResponse {
   total: Int!
 }
 
+type OfferResponse {
+  offer: [Offer!]
+  total: Int!
+}
+
 type Payment {
   id: String!
   amount: Float!
@@ -494,7 +499,8 @@ type Query {
   findListingsForOwner(findManyOptions: AttributeDto): ListingResponse!
   findOneForBuyer(id: String!): Listing!
   viewFlaggedListings(findManyOptions: PaginateAndSort): FlaggedListingResponse
-  findOneOffer(findOptions: PaginateAndSort!): [Offer!]!
+  findOneOffer(id: String!): Offer!
+  findOffers(findOptions: FindOfferInput!): OfferResponse!
   findAmenities: [Amenities!]!
   getMessageInLocalLanguage: SuccessResponse
   getSearchHistory: [SearchHistory!]
@@ -549,6 +555,15 @@ input AttributeDto {
   directionToSort: SortOrder
   where: WhereOption
   listingType: String
+}
+
+input FindOfferInput {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
+  listingId: String!
 }
 
 input AdminFilterAndSort {
@@ -609,7 +624,7 @@ type Mutation {
   createListing(createListing: CreateListingDto!): Listing!
   updateListing(updateListingDto: UpdateListingDto!): Listing!
   createOffer(createOfferDto: CreateOfferDto!): Offer
-  updateOffer(updateOfferDto: UpdateOfferInput!): Offer
+  updateOffer(updateOfferInput: UpdateOfferInput!): Offer
   createPromotion(createPromotionInput: CreatePromotionInput!): Promotion!
   flagListing(flagListingInput: FlagListingInput!): SuccessResponse!
   deleteListing(listingId: String!): SuccessResponse!

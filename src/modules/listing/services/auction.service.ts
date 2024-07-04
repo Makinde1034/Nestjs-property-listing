@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { AuctionRepository } from '../repositories/auction.repository';
 import { CreateAuctionInput } from '../dtos/request/auction-input';

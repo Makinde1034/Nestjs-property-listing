@@ -21,9 +21,14 @@ import {
   AdminListingResponse,
   FlaggedListingResponse,
   ListingResponse,
+  OfferResponse,
 } from '../dtos/response/listing.response';
 import { OfferService } from '../services/offer.service';
-import { CreateOfferDto, UpdateOfferInput } from '../dtos/request/offer.dto';
+import {
+  CreateOfferDto,
+  FindOfferInput,
+  UpdateOfferInput,
+} from '../dtos/request/offer-input';
 import { Offer } from '../../../entities/offer.entity';
 import { Amenities } from '../../../entities/amenities.entity';
 import { AttributeDto } from '../dtos/request/attributes.dto';
@@ -162,7 +167,7 @@ export class ListingResolver {
   @UseGuards(AccessTokenGuard)
   @Mutation(() => Offer, { name: 'updateOffer', nullable: true })
   async updateOffer(
-    @Args('updateOfferDto') updateOfferInput: UpdateOfferInput,
+    @Args('updateOfferInput') updateOfferInput: UpdateOfferInput,
   ) {
     return await this.offerService.updateOffer(updateOfferInput);
   }
@@ -172,8 +177,8 @@ export class ListingResolver {
     return await this.offerService.findOne(id);
   }
 
-  @Query(() => [Offer], { name: 'findOneOffer' })
-  async findMany(@Args('findOptions') paginateAndSort: PaginateAndSort) {
+  @Query(() => OfferResponse, { name: 'findOffers' })
+  async findMany(@Args('findOptions') paginateAndSort: FindOfferInput) {
     return await this.offerService.findMany(paginateAndSort);
   }
 
