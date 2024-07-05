@@ -61,6 +61,9 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 # Bundle app source
 COPY . .
 
+# Change ownership of the app directory to the non-root user
+RUN chown -R puppeteer:puppeteer /usr/src/app
+
 # Creates a "dist" folder with the production build
 RUN npm run build
 
