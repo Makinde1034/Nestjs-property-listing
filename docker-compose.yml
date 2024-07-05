@@ -7,7 +7,7 @@ services:
     volumes:
       - .:/usr/src/app
       - ./node_modules:/usr/src/app/node_modules
-    command: sh -c "npm install && npm run migration:run && npm run start:dev"
+    command: bash -c "./wait-for-it.sh postgres:5432 -- npm run migration:run && npm run start:dev"
     env_file:
       - .env
     ports:
@@ -16,17 +16,9 @@ services:
       - app-network
     depends_on:
       - postgres
-      - puppeteer # New dependency on Puppeteer service
-
-  puppeteer:
-    image: zenika/alpine-chrome:latest
-    shm_size: 1gb # Adjust as per your application's needs
-    command: ['chromium-browser', '--no-sandbox', '--disable-setuid-sandbox']
-    networks:
-      - app-network
-    depends_on:
-      - postgres # Ensure Puppeteer waits for PostgreSQL to be ready
-
+  #
+  # Postgres DB
+  #
   postgres:
     image: postgres:14.1-alpine
     environment:
@@ -34,10 +26,9 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=waseet_db
     ports:
-      - '${POSTGRES_PORT}:${POSTGRES_PORT}'
+      - '${POSTGRES_PORT}:5432'
     volumes:
       - db:/var/lib/postgresql/data
-    command: -p ${POSTGRES_PORT}
     restart: always
     networks:
       - app-network
