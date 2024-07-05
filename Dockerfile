@@ -40,7 +40,6 @@ RUN apt-get update && apt-get install -y \
     
 
 # Install Puppeteer and other npm dependencies as the root user
-RUN npm install puppeteer@latest --save
 
 # Install app dependencies as the root user
 RUN npm install
