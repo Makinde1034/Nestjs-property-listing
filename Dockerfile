@@ -49,6 +49,11 @@ RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add
     apt-get install -y google-chrome-stable --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
+# Add a new user group and user
+RUN groupadd -r puppeteer && useradd -r -g puppeteer -G audio,video puppeteer \
+    && mkdir -p /home/puppeteer/Downloads /usr/src/app \
+    && chown -R puppeteer:puppeteer /home/puppeteer /usr/src/app
+
 # Set Puppeteer environment variables
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
@@ -61,6 +66,9 @@ RUN npm run build
 
 # Expose the port the app runs on
 EXPOSE 3000
+
+# Switch to non-root user
+USER puppeteer
 
 # Run the application
 CMD ["npm", "run", "start:prod"]
