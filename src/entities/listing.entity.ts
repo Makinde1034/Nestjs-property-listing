@@ -213,11 +213,11 @@ export class Listing extends BaseEntity {
 
   @Column({ type: 'boolean', default: false })
   @Field({ nullable: true })
-  maidsRoom: boolean;
+  maidRoom: boolean;
 
   @Column({ type: 'boolean', default: false })
   @Field({ nullable: true })
-  petsAllowed: boolean;
+  petAllowed: boolean;
 
   @Column({ type: 'boolean', default: false })
   @Field({ nullable: true })

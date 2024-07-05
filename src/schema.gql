@@ -204,8 +204,8 @@ type Listing {
   basketballCourt: Boolean
   jacuzzi: Boolean
   bbqArea: Boolean
-  maidsRoom: Boolean
-  petsAllowed: Boolean
+  maidRoom: Boolean
+  petAllowed: Boolean
   balcony: Boolean
   gym: Boolean
   playground: Boolean
