@@ -19,8 +19,7 @@ RUN apt-get update && \
         fonts-ipafont-gothic \
         fonts-wqy-zenhei \
         fonts-thai-tlwg \
-        fonts-kacst \
-        ttf-freefont \
+        fonts-kacst-one \
         libcups2 \
         libxss1 \
         libappindicator1 \
@@ -36,10 +35,9 @@ RUN apt-get update && \
         xfonts-100dpi \
         xfonts-75dpi \
         xfonts-scalable \
-        xfonts-cyrillic \
         x11-apps \
         clang \
-        python \
+        python3 \
         g++ \
         --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
