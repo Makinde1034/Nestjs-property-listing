@@ -17,6 +17,8 @@ export class PdfGeneratorService {
   constructor() {}
   async generateImage(data) {
     const browser = await puppeteer.launch({
+      executablePath: '/usr/bin/chromium-browser',
+
       headless: true,
 
       args: [
