@@ -5,8 +5,8 @@
 
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class UpdateFlagListingTable1718892768927 implements MigrationInterface {
-  name = 'UpdateFlagListingTable1718892768927';
+export class UpdateFlagListingTable1719012458954 implements MigrationInterface {
+  name = 'UpdateFlagListingTable1719012458954';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(

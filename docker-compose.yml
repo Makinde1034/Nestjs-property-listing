@@ -7,7 +7,7 @@ services:
     volumes:
       - .:/usr/src/app
       - ./node_modules:/usr/src/app/node_modules
-    command: bash -c "./wait-for-it.sh postgres:5432 -- npm run migration:run && npm run start:dev"
+    command: sh -c "npm install &&  npm run migration:run && npm run start:dev"
     env_file:
       - .env
     ports:
@@ -26,9 +26,10 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=waseet_db
     ports:
-      - '${POSTGRES_PORT}:5432'
+      - '${POSTGRES_PORT}:${POSTGRES_PORT}'
     volumes:
       - db:/var/lib/postgresql/data
+    command: -p ${POSTGRES_PORT}
     restart: always
     networks:
       - app-network
