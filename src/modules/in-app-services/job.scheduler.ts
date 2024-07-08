@@ -9,6 +9,8 @@ import { ListingRepository } from '../listing/repositories/listing.repository';
 
 import { NotificationService } from '../notification/services';
 import { MailgunEmailService } from '../mail/services/implementations';
+import { OfferRepository } from '../listing/repositories';
+import { Offer } from '../../entities/offer.entity';
 
 export class JobService {
   constructor(
@@ -17,6 +19,8 @@ export class JobService {
 
     private mailService: MailgunEmailService,
     private pushNotification: NotificationService,
+
+    private offerRepository: OfferRepository,
   ) {}
   @Cron(CronExpression.EVERY_DAY_AT_8PM)
   async sendNotificationForNewListingBasedOnSearchHistory() {
@@ -56,5 +60,17 @@ export class JobService {
       recipients: listingArrayUserId,
       deepLink: '',
     });
+
+    /**************************
+     * Update expired offers
+     *
+     ***************************/
+
+    await this.offerRepository
+      .queryBuilder('offer')
+      .update(Offer)
+      .set({ status: 'expired' })
+      .where('offer.expireAt > :date', { date: new Date() })
+      .execute();
   }
 }

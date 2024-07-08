@@ -4,7 +4,7 @@
  */
 
 export class PdfInput {
-  createdDate: string;
+  createdDate: Date;
   dueDate: string;
   clientName: string;
   type: string;

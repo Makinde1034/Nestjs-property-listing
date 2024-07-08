@@ -99,9 +99,9 @@ type Offer {
   listing: Listing!
   userId: String!
   listingId: String!
-  createdAt: String!
-  deletedAt: String!
-  updatedAt: String!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type AdPackage {
@@ -656,6 +656,8 @@ type Mutation {
   updateListing(updateListingDto: UpdateListingDto!): Listing!
   createOffer(createOfferDto: CreateOfferDto!): Offer
   updateOffer(updateOfferInput: UpdateOfferInput!): Offer
+  acceptOffer(updateOfferInput: UpdateOfferInput!): Offer
+  rejectOffer(updateOfferInput: UpdateOfferInput!): Offer
   createPromotion(createPromotionInput: CreatePromotionInput!): Promotion!
   flagListing(flagListingInput: FlagListingInput!): SuccessResponse!
   deleteListing(listingId: String!): SuccessResponse!
@@ -1007,6 +1009,7 @@ input UpdateListingDto {
 input CreateOfferDto {
   offerPrice: Float!
   expireAt: DateTime!
+  status: String
   coupon: Boolean
   couponCode: String
   listingId: String!
@@ -1015,6 +1018,7 @@ input CreateOfferDto {
 input UpdateOfferInput {
   offerPrice: Float
   expireAt: DateTime
+  status: String
   coupon: Boolean
   couponCode: String
   listingId: String

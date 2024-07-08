@@ -7,6 +7,7 @@ import { Field, InputType, PartialType } from '@nestjs/graphql';
 import {
   IsBoolean,
   IsDate,
+  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsPositive,
@@ -15,6 +16,7 @@ import {
   ValidateIf,
 } from 'class-validator';
 import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
+import { StatusListEnum } from '../../../../common/enums/status.enum';
 
 @InputType()
 export class CreateOfferDto {
@@ -27,6 +29,11 @@ export class CreateOfferDto {
   @IsDate()
   @IsNotEmpty()
   expireAt: Date;
+
+  @Field({ nullable: true })
+  @IsEnum(StatusListEnum)
+  @IsNotEmpty()
+  status: string;
 
   @Field({ nullable: true })
   @IsOptional()
