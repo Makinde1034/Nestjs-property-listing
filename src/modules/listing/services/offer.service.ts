@@ -36,6 +36,8 @@ export class OfferService {
         },
         order: { offerPrice: 'DESC' },
       });
+
+      this.logger.log(offer.length);
       if (offer.length > 0) {
         throw new BadRequestException(
           `Minimum Offer must be greater than ${offer[0].offerPrice}`,
@@ -50,6 +52,7 @@ export class OfferService {
           `Minimum Offer must be greater than  ${minimumPrice}`,
         );
       }
+
       createOfferDto.userId = user.id;
       createOfferDto.expireAt = new Date(addDaysToDate(new Date(), 1));
 
@@ -64,7 +67,7 @@ export class OfferService {
         totalPrice: offerPayload.offerPrice,
       };
 
-      this.paymentService.invoice(data, user);
+      await this.paymentService.invoice(data, user);
       return offerPayload;
     } catch (error) {
       this.logger.log(error);
