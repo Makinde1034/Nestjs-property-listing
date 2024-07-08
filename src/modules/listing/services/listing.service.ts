@@ -241,7 +241,7 @@ export class ListingService {
 
   async updateListing(editListingDto: UpdateListingDto, user: User) {
     try {
-      const subscribedUser = [];
+      const subscribedUser: Array<{ id: string; name: string }> = [];
       const { id, ...partialUpdatePayload } = editListingDto;
 
       const listing = await this.listingRepository.findById(id, ['wishlist']);
@@ -257,20 +257,20 @@ export class ListingService {
       );
 
       listing.wishlist.map((element) => {
-        subscribedUser.push(element.userId);
+        subscribedUser.push({ id: element.userId, name: user.name });
       });
 
       if (partialUpdatePayload.price != undefined && update) {
-        this.pushNotification.sendUsersNotification({
-          title: 'New listing',
-          message: `Heads up! The price of an item in your wishlist has been updated. Check out the new price now.
- 
-`,
-          isEmail: true,
-          isPushNotifcation: true,
-          recipients: subscribedUser,
-          deepLink: '',
-        });
+        for (const element of subscribedUser) {
+          this.pushNotification.sendUsersNotification({
+            title: 'New listing',
+            message: `Hi!${element.name}, Heads up! The price of an item in your wishlist has been updated. Check out the new price now.`,
+            isEmail: true,
+            isPushNotifcation: true,
+            recipients: [element.id],
+            deepLink: '',
+          });
+        }
       }
       return update;
     } catch (error) {
