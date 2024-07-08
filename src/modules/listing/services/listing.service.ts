@@ -264,7 +264,7 @@ export class ListingService {
         for (const element of subscribedUser) {
           this.pushNotification.sendUsersNotification({
             title: 'New listing',
-            message: `Hi!${element.name}, Heads up! The price of an item in your wishlist has been updated. Check out the new price now.`,
+            message: `Hi${element.name}, Heads up! The price of an item in your wishlist has been updated. Check out the new price now.`,
             isEmail: true,
             isPushNotifcation: true,
             recipients: [element.id],
