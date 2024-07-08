@@ -49,7 +49,7 @@ EXPOSE 3000
 ENV NODE_ENV=production
 
 # Run the application
-CMD ["npm", "run", "start:prod"]
+CMD ["google-chrome-stable", "npm", "run", "start:prod"]
 
 
 
