@@ -180,6 +180,22 @@ export class ListingResolver {
     return await this.offerService.updateOffer(updateOfferInput);
   }
 
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => Offer, { name: 'acceptOffer', nullable: true })
+  async acceptOffer(
+    @Args('updateOfferInput') updateOfferInput: UpdateOfferInput,
+  ) {
+    return await this.offerService.updateOffer(updateOfferInput);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => Offer, { name: 'rejectOffer', nullable: true })
+  async rejectOffer(
+    @Args('updateOfferInput') updateOfferInput: UpdateOfferInput,
+  ) {
+    return await this.offerService.updateOffer(updateOfferInput);
+  }
+
   @Query(() => Offer, { name: 'findOneOffer' })
   async findOne(@Args('id') id: string) {
     return await this.offerService.findOne(id);

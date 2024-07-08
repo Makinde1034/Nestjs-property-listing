@@ -65,13 +65,13 @@ export class Offer extends BaseEntity {
 
   @Field()
   @CreateDateColumn()
-  createdAt: string;
+  createdAt: Date;
 
   @Field()
   @DeleteDateColumn()
-  deletedAt: string;
+  deletedAt: Date;
 
   @Field()
   @UpdateDateColumn()
-  updatedAt: string;
+  updatedAt: Date;
 }

@@ -9,7 +9,11 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateOfferDto, FindOfferInput } from '../dtos/request/offer-input';
+import {
+  CreateOfferDto,
+  FindOfferInput,
+  UpdateOfferInput,
+} from '../dtos/request/offer-input';
 import { OfferRepository } from '../repositories';
 import { User } from '../../../entities';
 import { PaymentService } from '../../payment/services/payment.service';
@@ -115,11 +119,33 @@ export class OfferService {
       throw new BadRequestException();
     }
   }
-  async updateOffer(updateOfferInput) {
+  async updateOffer(updateOfferInput: UpdateOfferInput) {
     try {
       const { id, ...rest } = updateOfferInput;
 
       return await this.offerRepository.update(id, rest);
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async acceptOffer(updateOfferInput: UpdateOfferInput) {
+    try {
+      const { id } = updateOfferInput;
+
+      return await this.offerRepository.update(id, { status: 'accepted' });
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async rejectOffer(updateOfferInput: UpdateOfferInput) {
+    try {
+      const { id } = updateOfferInput;
+
+      return await this.offerRepository.update(id, { status: 'rejected' });
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
