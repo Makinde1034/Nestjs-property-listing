@@ -894,7 +894,6 @@ input CreateListingDto {
   price: String!
   numberOfBathrooms: String!
   panoramaView: [String!]
-  sellingType: String! = "rent"
   numberOfRooms: String!
   mediaType: String! = "image"
   amenities: [String!]
@@ -921,8 +920,8 @@ input CreateListingDto {
   basketballCourt: Boolean! = false
   jacuzzi: Boolean! = false
   bbqArea: Boolean! = false
-  maidRoom: Boolean! = false
-  petAllowed: Boolean! = false
+  maidsRoom: Boolean! = false
+  petsAllowed: Boolean! = false
   balcony: Boolean! = false
   gym: Boolean! = false
   playground: Boolean! = false
@@ -960,7 +959,6 @@ input UpdateListingDto {
   price: String
   numberOfBathrooms: String
   panoramaView: [String!]
-  sellingType: String = "rent"
   numberOfRooms: String
   mediaType: String = "image"
   amenities: [String!]
@@ -987,8 +985,8 @@ input UpdateListingDto {
   basketballCourt: Boolean = false
   jacuzzi: Boolean = false
   bbqArea: Boolean = false
-  maidRoom: Boolean = false
-  petAllowed: Boolean = false
+  maidsRoom: Boolean = false
+  petsAllowed: Boolean = false
   balcony: Boolean = false
   gym: Boolean = false
   playground: Boolean = false

@@ -28,7 +28,8 @@ export class PaymentService {
 
   async invoice(data?: PdfInput, user?: User) {
     const invoice = await this.pdfGeneratorService.generatePdfForInvoice(data);
-    await this.mailService.sendEmailInvoice(user, invoice);
+
+    this.mailService.sendEmailInvoice(user, invoice);
     return invoice;
   }
 }

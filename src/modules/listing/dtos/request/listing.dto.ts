@@ -111,10 +111,6 @@ export class CreateListingDto {
   @IsArray()
   panoramaView: string[];
 
-  @Field({ defaultValue: 'rent' })
-  @IsString()
-  sellingType: string;
-
   @ValidateIf((listing) => listing.listingType == ListingType.APARTMENT)
   @Field()
   @IsString()
@@ -279,11 +275,11 @@ export class CreateListingDto {
 
   @Field({ defaultValue: false })
   @IsBoolean()
-  maidRoom: boolean;
+  maidsRoom: boolean;
 
   @Field({ defaultValue: false })
   @IsBoolean()
-  petAllowed: boolean;
+  petsAllowed: boolean;
 
   @Field({ defaultValue: false })
   @IsBoolean()
