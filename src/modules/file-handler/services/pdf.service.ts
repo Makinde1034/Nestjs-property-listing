@@ -1,34 +1,21 @@
-/*
- * Copyright (c) 2024, Waseet LLC. All rights reserved.
- * For license. See license.txt
- */
-
-import { Injectable } from '@nestjs/common';
-
+import { Injectable, Logger } from '@nestjs/common';
 import * as handlebars from 'handlebars';
 import * as fs from 'fs';
 import * as path from 'path';
-
 import puppeteer from 'puppeteer';
 import { PdfInput } from '../dto/pdf.dto';
 
 @Injectable()
 export class PdfGeneratorService {
   constructor() {}
-  async generateImage(data) {
+  logger = new Logger(PdfGeneratorService.name);
+  async generateImage(data): Promise<Buffer> {
     const browser = await puppeteer.launch({
-      executablePath: '/usr/bin/chromium-browser',
-
+      executablePath: '/usr/bin/google-chrome-stable',
       headless: true,
-
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--single-process',
-        '--no-zygote',
-      ],
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
+
     const page = await browser.newPage();
     page.setDefaultNavigationTimeout(0);
 
@@ -38,49 +25,50 @@ export class PdfGeneratorService {
     );
 
     const template = handlebars.compile(templateSource);
-
-    // Render HTML using Handlebars template and data
     const htmlContent = template(data);
 
-    // Set the HTML content for the page
     await page.setContent(htmlContent);
-    page.waitForNavigation();
-    const image = await page.screenshot();
+    await page.waitForNavigation({ waitUntil: 'networkidle0' });
 
-    // Generate PDF
-    //Const pdfBuffer = await page.pdf({ format: 'A4', preferCSSPageSize: true });
+    const image = await page.screenshot();
     await browser.close();
+
     return image;
   }
 
   async generatePdfForInvoice(data: PdfInput): Promise<Buffer> {
-    const browser = await puppeteer.launch({
-      headless: 'shell',
-    });
-    const page = await browser.newPage();
-    page.setDefaultNavigationTimeout(0);
-    page.waitForNavigation();
+    try {
+      const browser = await puppeteer.launch({
+        executablePath: '/usr/bin/google-chrome-stable',
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      });
 
-    const templateSource = fs.readFileSync(
-      path.join(__dirname, '../../', 'mail', 'templates', 'invoice.hbs'),
-      'utf8',
-    );
-    const template = handlebars.compile(templateSource);
+      const page = await browser.newPage();
+      page.setDefaultNavigationTimeout(0);
 
-    // Render HTML using Handlebars template and data
-    const htmlContent = template(data);
+      const templateSource = fs.readFileSync(
+        path.join(__dirname, '../../', 'mail', 'templates', 'invoice.hbs'),
+        'utf8',
+      );
 
-    // Set the HTML content for the page
-    await page.setContent(htmlContent);
+      const template = handlebars.compile(templateSource);
+      const htmlContent = template(data);
 
-    // Generate PDF
-    const pdfBuffer = await page.pdf({
-      format: 'A4',
-      preferCSSPageSize: true,
-      printBackground: true,
-    });
-    await browser.close();
+      await page.setContent(htmlContent);
+      await page.waitForNavigation({ waitUntil: 'networkidle0' });
 
-    return pdfBuffer;
+      const pdfBuffer = await page.pdf({
+        format: 'A4',
+        preferCSSPageSize: true,
+        printBackground: true,
+      });
+
+      await browser.close();
+
+      return pdfBuffer;
+    } catch (error) {
+      this.logger.log(error);
+    }
   }
 }

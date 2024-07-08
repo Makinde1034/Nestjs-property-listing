@@ -21,7 +21,6 @@ const connectionSource = {
 };
 
 const AppDataSource = new DataSource(connectionSource as DataSourceOptions);
-
 AppDataSource.initialize()
   .then(() => {
     Logger.log('Data Source has been initialized!!');

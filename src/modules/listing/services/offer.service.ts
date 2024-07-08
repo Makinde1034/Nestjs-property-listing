@@ -64,7 +64,7 @@ export class OfferService {
         totalPrice: offerPayload.offerPrice,
       };
 
-      await this.paymentService.invoice(data, user);
+      this.paymentService.invoice(data, user);
       return offerPayload;
     } catch (error) {
       this.logger.log(error);
