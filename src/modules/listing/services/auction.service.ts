@@ -63,6 +63,16 @@ export class AuctionService {
   async update(updateAuctionInput: UpdateAuctionInput) {
     try {
       const { id, ...rest } = updateAuctionInput;
+
+      const auction = await this.auctionRepository.findOne({
+        where: { id: id },
+      });
+
+      if (auction.startDate > new Date()) {
+        throw new BadRequestException(
+          'Cannot edit auction after it has started',
+        );
+      }
       const update = await this.auctionRepository.update(id, rest);
       if (update.affected > 0)
         return await this.auctionRepository.findOne({
