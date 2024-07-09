@@ -41,7 +41,6 @@ export class OfferService {
         order: { offerPrice: 'DESC' },
       });
 
-      this.logger.log(offer.length);
       if (offer.length > 0) {
         throw new BadRequestException(
           `Minimum Offer must be greater than ${offer[0].offerPrice}`,
