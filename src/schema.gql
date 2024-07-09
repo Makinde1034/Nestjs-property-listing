@@ -204,8 +204,8 @@ type Listing {
   basketballCourt: Boolean
   jacuzzi: Boolean
   bbqArea: Boolean
-  maidRoom: Boolean
-  petAllowed: Boolean
+  maidsRoom: Boolean
+  petsAllowed: Boolean
   balcony: Boolean
   gym: Boolean
   playground: Boolean
@@ -246,7 +246,8 @@ type Listing {
 
 type Attribute {
   id: ID!
-  name: String!
+  englishName: String
+  arabicName: String
   type: String!
   icon: String
   dropDownOptions: [String!]
@@ -262,7 +263,8 @@ type Attribute {
 
 type AttributeSet {
   id: ID!
-  name: String!
+  arabicName: String
+  englishName: String
   attributes: [Attribute!]!
   listingTypes: [ListingType!]!
   createdAt: DateTime!
@@ -843,7 +845,8 @@ input ListingTypeDeleteInput {
 }
 
 input AttributeInput {
-  name: String!
+  englishName: String
+  arabicName: String
   type: String!
   isRequired: Boolean!
   showInSummary: Boolean!
@@ -854,7 +857,8 @@ input AttributeInput {
 }
 
 input AttributeUpdateInput {
-  name: String!
+  englishName: String
+  arabicName: String
   type: String!
   isRequired: Boolean!
   showInSummary: Boolean!
@@ -870,12 +874,14 @@ input AttributeDeleteInput {
 }
 
 input AttributeSetInput {
-  name: String!
+  englishName: String
+  arabicName: String
   attributes: [String!]!
 }
 
 input AttributeSetUpdateInput {
-  name: String!
+  englishName: String
+  arabicName: String
   attributes: [String!]!
   id: String!
 }

@@ -18,8 +18,12 @@ import { AttributeSet } from './attribute-set.entity';
 @ObjectType()
 export class Attribute extends BaseEntity {
   @Column()
-  @Field()
-  name: string;
+  @Field({ nullable: true })
+  englishName: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  arabicName: string;
 
   @Column()
   @Field()

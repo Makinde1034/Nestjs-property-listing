@@ -11,15 +11,23 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  ValidateIf,
 } from 'class-validator';
 import { AttributeType } from 'src/common/enums';
 
 @InputType()
 export class AttributeInput {
-  @Field()
+  @Field({ nullable: true })
+  @ValidateIf((attribute) => attribute.arablicName === null)
   @IsString()
   @IsNotEmpty()
-  name: string;
+  englishName: string;
+
+  @Field({ nullable: true })
+  @ValidateIf((attribute) => attribute.englishName === null)
+  @IsString()
+  @IsNotEmpty()
+  arabicName: string;
 
   @Field()
   @IsEnum(AttributeType)
@@ -75,10 +83,17 @@ export class AttributeDeleteInput {
 
 @InputType()
 export class AttributeSetInput {
-  @Field()
+  @Field({ nullable: true })
+  @ValidateIf((attribute) => attribute.arablicName === null)
   @IsString()
   @IsNotEmpty()
-  name: string;
+  englishName: string;
+
+  @Field({ nullable: true })
+  @ValidateIf((attribute) => attribute.englishName === null)
+  @IsString()
+  @IsNotEmpty()
+  arabicName: string;
 
   @Field(() => [String])
   @IsArray()
