@@ -122,7 +122,8 @@ export class AttributeService {
       where: { id: In([...input.attributes]) },
     });
     const data: Partial<AttributeSet> = {
-      name: input.name,
+      englishName: input.englishName,
+      arabicName: input.arabicName,
       attributes,
     };
     return await this.attributeSetRepository.create(data);
@@ -142,7 +143,8 @@ export class AttributeService {
       where: { id: In([...input.attributes]) },
     });
     const data: Partial<AttributeSet> = {
-      name: input.name,
+      englishName: input.englishName,
+      arabicName: input.arabicName,
       attributes,
     };
     return await this.attributeSetRepository.update(input.id, data);

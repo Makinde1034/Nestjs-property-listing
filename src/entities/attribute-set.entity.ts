@@ -19,9 +19,13 @@ import { ListingType } from './listing-type.entity';
 @Entity()
 @ObjectType()
 export class AttributeSet extends BaseEntity {
-  @Column()
-  @Field()
-  name: string;
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  arabicName: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  englishName: string;
 
   @Field(() => [Attribute])
   @ManyToMany(() => Attribute, (attribute) => attribute.attributeSets, {
