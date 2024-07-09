@@ -1014,7 +1014,7 @@ input UpdateListingDto {
 
 input CreateOfferDto {
   offerPrice: Float!
-  expireAt: DateTime!
+  expireAt: DateTime
   status: String
   coupon: Boolean
   couponCode: String
