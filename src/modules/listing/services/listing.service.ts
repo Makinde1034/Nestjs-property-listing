@@ -121,33 +121,45 @@ export class ListingService {
     }
   }
 
-  async findAllListings(paginatAndSort: PaginateAndSort) {
+  async findAllListings(paginateAndSort: PaginateAndSort) {
     try {
-      let orderOptions;
+      const { sortField, directionToSort, take, skip } = paginateAndSort;
 
-      if (paginatAndSort.sortField !== undefined) {
-        orderOptions = {
-          [paginatAndSort.sortField]: paginatAndSort.directionToSort,
-        };
-      } else {
-        orderOptions = {
-          promoted: 'DESC',
-        };
-      }
-      const listing = await this.listingRepository.findAndCount({
-        take: paginatAndSort.take,
-        skip: paginatAndSort.skip,
+      // Determine the order options based on provided sorting criteria
+      const orderOptions = sortField
+        ? { [sortField]: directionToSort }
+        : { isListingPromoted: 'DESC' };
+
+      // Fetch non-featured listings
+      const [listings, total] = await this.listingRepository.findAndCount({
+        take,
+        skip,
         order: orderOptions,
         where: { isDisabled: false },
       });
 
-      return listing;
+      // Fetch featured listings separately with a reduced take
+      const featuredTake = Math.ceil(take / 3);
+      const featuredSkip = Math.ceil(skip / 3);
+      const [featuredListings] = await this.listingRepository.findAndCount({
+        take: featuredTake,
+        skip: featuredSkip,
+        order: { featured: 'DESC' },
+        where: { isDisabled: false },
+      });
+
+      // Combine featured and non-featured listings
+      const updatedListing = [...featuredListings, ...listings];
+
+      return [updatedListing, total];
     } catch (error) {
       this.logger.log(error);
 
       if (error instanceof HttpException) {
         throw error;
-      } else throw new BadRequestException(error.messages || error.data);
+      } else {
+        throw new BadRequestException(error.message || error.data);
+      }
     }
   }
 
@@ -241,7 +253,7 @@ export class ListingService {
 
   async updateListing(editListingDto: UpdateListingDto, user: User) {
     try {
-      const subscribedUser: Array<{ id: string; name: string }> = [];
+      const subscribedUser: { id: string; name: string }[] = [];
       const { id, ...partialUpdatePayload } = editListingDto;
 
       const listing = await this.listingRepository.findById(id, ['wishlist']);

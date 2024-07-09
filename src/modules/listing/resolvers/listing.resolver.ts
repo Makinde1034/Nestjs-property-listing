@@ -83,7 +83,7 @@ export class ListingResolver {
    * Find Listing
    *************************/
 
-  @UseGuards(AccessTokenGuard)
+  // @UseGuards(AccessTokenGuard)
   @Query(() => ListingResponse, { name: 'findListingsForBuyer' })
   async findListingForBuyer(
     @Args('findManyOptions', { nullable: true })
