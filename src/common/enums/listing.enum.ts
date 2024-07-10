@@ -13,14 +13,6 @@ export enum Ownership {
   NOT_OWNER = 'power_of_attorney',
 }
 
-export enum TimePeriod {
-  Today = 'today',
-  Week = 'week',
-  Month = 'month',
-  Year = 'year',
-  NULL = null,
-}
-
 export enum RentingOption {
   MONTHLY = 'monthly',
   QUARTERLY = 'quarterly',

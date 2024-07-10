@@ -6,7 +6,10 @@
 import { registerEnumType } from '@nestjs/graphql';
 
 export enum ServicesOffered {
-  LISTING = 'listing',
+  LISTING = 'Create Listing',
+  RENTING = 'Renting',
+  BUYING = 'Buying',
+  MAKE_OFFER = 'Making offer',
 }
 
 registerEnumType(ServicesOffered, {

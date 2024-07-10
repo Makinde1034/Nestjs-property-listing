@@ -106,7 +106,7 @@ export class Listing extends BaseEntity {
 
   @Field(() => User, { nullable: true })
   @JoinColumn({ name: 'userId' })
-  @ManyToOne(() => User, (user) => user.reviewer)
+  @ManyToOne(() => User, (user) => user.listing)
   user: User;
 
   @Field(() => [Offer], { nullable: true })

@@ -138,7 +138,6 @@ export class ListingService {
       const featuredTake = Math.ceil(take / 3);
       const featuredSkip = Math.ceil(skip / 3);
 
-      console.log(skip, take, featuredTake, featuredSkip);
       const [featuredListings] = await this.listingRepository.findAndCount({
         take: featuredTake,
         skip: featuredSkip,
@@ -146,7 +145,7 @@ export class ListingService {
         where: { isDisabled: false },
       });
 
-      // checks to encure accurate take doesn't return a negative value
+      // Checks to encure accurate take doesn't return a negative value
       if (take < 2) {
         accurateTake = take;
       } else {
@@ -161,7 +160,6 @@ export class ListingService {
 
       // Combine featured and non-featured listings
       const updatedListing = [...featuredListings, ...listings];
-      console.log(updatedListing.length);
 
       return [updatedListing, total];
     } catch (error) {

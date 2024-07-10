@@ -8,12 +8,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
   ManyToOne,
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
 import { User } from './user.entity';
+import { IsEnum } from 'class-validator';
+import { ServicesOffered } from '../common/enums';
 
 @Entity()
 @ObjectType()
@@ -22,36 +23,28 @@ export class Review extends BaseEntity {
   @Field()
   rating: number;
 
-  @Column()
-  @Field()
-  type: string;
-
   @Column({ nullable: true })
   @Field()
   comment: string;
 
-  @Field(() => User, { nullable: true })
-  @JoinColumn({ name: 'reviewer_id' })
-  @ManyToOne(() => User, (user) => user.reviewer)
-  reviewer: User;
-
-  @Field(() => User, { nullable: true })
-  @JoinColumn({ name: 'service_owner_id' })
-  @ManyToOne(() => User, (user) => user.service_owner)
-  service_owner: User;
+  @Field(() => User)
+  @ManyToOne(() => User, (user) => user.review)
+  user: User;
 
   @Column()
   @Field()
-  reviewer_id: string;
+  userId: string;
+
   @Column()
   @Field()
-  service_owner_id: string;
+  @IsEnum(ServicesOffered)
+  reviewType: string;
 
   @Field()
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
   @Field()
-  updated_at: Date;
+  updatedAt: Date;
 }

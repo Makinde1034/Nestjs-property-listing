@@ -9,7 +9,7 @@ import { Review } from '../../../entities';
 import { CreateReviewDto } from '../dto/create-review.dto';
 import { UseGuards } from '@nestjs/common';
 import { AccessTokenGuard } from '../../auth/guards';
-import { FindManyReviewDto } from '../dto/findManyOptions.dto';
+import { FindManyReviewDto } from '../dto/review.dto';
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { ReviewResponse } from '../dto/review-response';
 
@@ -23,7 +23,7 @@ export class ReviewResolver {
    * @param createReviewDto
    * @returns {Review}
    */
-  @Mutation(() => Review, { name: 'review' })
+  @Mutation(() => Review, { name: 'createReview' })
   @UseGuards(AccessTokenGuard)
   async createReview(
     @Context() ctx: any,
@@ -32,7 +32,7 @@ export class ReviewResolver {
     return await this.reviewService.createReview(createReviewDto, ctx.req.user);
   }
 
-  @Query(() => Review, { name: 'findOne' })
+  @Query(() => Review, { name: 'findOneReview' })
   @UseGuards(AccessTokenGuard, AdminGuard)
   async findOne(@Args('id') id: string) {
     return await this.reviewService.findOne(id);
@@ -43,8 +43,8 @@ export class ReviewResolver {
     @Args('findMayOptions', { nullable: true })
     findManyOption?: FindManyReviewDto,
   ) {
-    const [reviews, total] =
-      await this.reviewService.findAllAndCount(findManyOption);
-    return { reviews, total };
+    const [reviews, total, averageRating] =
+      await this.reviewService.findAll(findManyOption);
+    return { reviews, total, averageRating };
   }
 }
