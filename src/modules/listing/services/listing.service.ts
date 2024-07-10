@@ -123,6 +123,8 @@ export class ListingService {
 
   async findAllListings(paginateAndSort: PaginateAndSort) {
     try {
+      let accurateTake;
+
       const { sortField, directionToSort, take, skip } = paginateAndSort;
 
       // Determine the order options based on provided sorting criteria
@@ -131,16 +133,12 @@ export class ListingService {
         : { isListingPromoted: 'DESC' };
 
       // Fetch non-featured listings
-      const [listings, total] = await this.listingRepository.findAndCount({
-        take,
-        skip,
-        order: orderOptions,
-        where: { isDisabled: false },
-      });
 
       // Fetch featured listings separately with a reduced take
       const featuredTake = Math.ceil(take / 3);
       const featuredSkip = Math.ceil(skip / 3);
+
+      console.log(skip, take, featuredTake, featuredSkip);
       const [featuredListings] = await this.listingRepository.findAndCount({
         take: featuredTake,
         skip: featuredSkip,
@@ -148,8 +146,22 @@ export class ListingService {
         where: { isDisabled: false },
       });
 
+      // checks to encure accurate take doesn't return a negative value
+      if (take < 2) {
+        accurateTake = take;
+      } else {
+        accurateTake = take - featuredTake;
+      }
+      const [listings, total] = await this.listingRepository.findAndCount({
+        take: accurateTake,
+        skip,
+        order: orderOptions,
+        where: { isDisabled: false },
+      });
+
       // Combine featured and non-featured listings
       const updatedListing = [...featuredListings, ...listings];
+      console.log(updatedListing.length);
 
       return [updatedListing, total];
     } catch (error) {
