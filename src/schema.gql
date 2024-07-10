@@ -182,7 +182,7 @@ type Listing {
   offer: [Offer!]
   userId: String!
   amenities: [String!]
-  gpsCoordinates: String!
+  gpsCoordinates: String
   district: String
   street: String
   buildingNumber: String
@@ -231,7 +231,7 @@ type Listing {
   isListing: Boolean!
   isDisabled: Boolean!
   flag: [FlagListing!]
-  wishlist: [Wishlist!]!
+  wishlist: [Wishlist!]
   rentDate: DateTime
   soldDate: DateTime
   promotedDate: DateTime

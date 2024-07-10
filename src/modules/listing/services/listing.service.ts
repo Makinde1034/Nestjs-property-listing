@@ -209,7 +209,7 @@ export class ListingService {
     try {
       const listing = await this.listingRepository.findOne({
         where: { id: id },
-        relations: ['user', 'promotion'],
+        relations: ['user', 'promotion', 'wishlist'],
         select: {
           user: {
             id: true,

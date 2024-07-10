@@ -123,7 +123,7 @@ export class Listing extends BaseEntity {
   @Column('simple-array', { nullable: true })
   amenities: string[];
 
-  @Field()
+  @Field({ nullable: true })
   @Column({ type: 'jsonb', nullable: true })
   gpsCoordinates: string;
 
@@ -333,7 +333,7 @@ export class Listing extends BaseEntity {
   })
   flag: FlagListing[];
 
-  @Field(() => [Wishlist])
+  @Field(() => [Wishlist], { nullable: true })
   @OneToMany(() => Wishlist, (wishlist) => wishlist.listing)
   wishlist: Wishlist[];
 
