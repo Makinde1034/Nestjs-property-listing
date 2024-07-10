@@ -115,8 +115,8 @@ export class User extends BaseEntity {
   twoFaRequired: boolean;
 
   @Field(() => [Review], { nullable: true })
-  @OneToMany(() => Review, (review) => review.reviewer, { cascade: true })
-  reviewer: Review[];
+  @OneToMany(() => Review, (review) => review.user, { cascade: true })
+  review: Review[];
 
   @Field(() => [Listing], { nullable: true })
   @JoinColumn({
@@ -124,10 +124,6 @@ export class User extends BaseEntity {
   })
   @OneToMany(() => Listing, (listing) => listing.user, { cascade: true })
   listing: Listing[];
-
-  @Field(() => [Review], { nullable: true })
-  @OneToMany(() => Review, (review) => review.service_owner, { cascade: true })
-  service_owner: Review[];
 
   @Field(() => [Offer], { nullable: true })
   @OneToMany(() => Offer, (offer) => offer.user, { cascade: true })

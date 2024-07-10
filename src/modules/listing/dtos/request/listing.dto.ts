@@ -22,10 +22,10 @@ import {
   Ownership,
   Purpose,
   RentingOption,
-  TimePeriod,
 } from '../../../../common/enums';
 import { LocationDto } from '../../../location/dto/request/location.dto';
 import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
+import { TimePeriod } from '../../../../common/enums/sort.enum';
 
 @InputType()
 export class CreateListingDto {

@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Field, ObjectType, Int } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 import { Review } from '../../../entities';
 
 @ObjectType()
@@ -11,6 +11,9 @@ export class ReviewResponse {
   @Field(() => [Review])
   reviews: Review[];
 
-  @Field(() => Int)
+  @Field()
   total: number;
+
+  @Field()
+  averageRating: string;
 }

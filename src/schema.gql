@@ -77,14 +77,12 @@ type UserNotificationPreference {
 type Review {
   id: ID!
   rating: Float!
-  type: String!
   comment: String!
-  reviewer: User
-  service_owner: User
-  reviewer_id: String!
-  service_owner_id: String!
-  created_at: DateTime!
-  updated_at: DateTime!
+  user: User!
+  userId: String!
+  reviewType: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type Offer {
@@ -316,9 +314,8 @@ type User {
   profilePhoto: String
   biometricKey: String
   twoFaRequired: Boolean
-  reviewer: [Review!]
+  review: [Review!]
   listing: [Listing!]
-  service_owner: [Review!]
   offer: [Offer!]
   status: String
   nationalIdentity: NationalIdentity
@@ -505,7 +502,8 @@ type Payment {
 
 type ReviewResponse {
   reviews: [Review!]!
-  total: Int!
+  total: Float!
+  averageRating: String!
 }
 
 type CityResponse {
@@ -545,7 +543,7 @@ type Query {
   fetchIssues: [Issue!]!
   getTicket(ticketId: String!): Ticket!
   listTickets(QueryInput: ListTicketInput): [Ticket!]!
-  findOne(id: String!): Review!
+  findOneReview(id: String!): Review!
   findManyReviews(findMayOptions: FindManyReviewDto): ReviewResponse!
   findCities(findCities: PaginateAndSort): CityResponse!
 }
@@ -622,6 +620,8 @@ input FindManyReviewDto {
   sortField: String
   directionToSort: SortOrder
   where: WhereOption
+  rating: Float!
+  timePeriod: String! = "false"
 }
 
 type Mutation {
@@ -682,7 +682,7 @@ type Mutation {
   deleteIssue(RequestInput: DeleteIssueInput!): String!
   createTicket(RequestInput: CreateTicketInput!): String!
   manageTicket(RequestInput: UpdateTicketInput!): Ticket!
-  review(createReviewDto: CreateReviewDto!): Review!
+  createReview(createReviewDto: CreateReviewDto!): Review!
 }
 
 input RegisterInput {
@@ -1114,7 +1114,5 @@ input UpdateTicketInput {
 input CreateReviewDto {
   rating: Float!
   comment: String
-  type: String!
-  service_owner_id: String!
-  reviewer_id: String
+  reviewType: String!
 }

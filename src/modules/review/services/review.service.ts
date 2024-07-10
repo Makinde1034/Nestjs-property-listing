@@ -12,33 +12,34 @@ import {
 import { ReviewRepository } from '../repository/review.repository';
 import { CreateReviewDto } from '../dto/create-review.dto';
 import { Review, User } from '../../../entities';
-import { UserRepository } from '../../user/repositories';
 import { AppStrings } from '../../../common/messages/app.strings';
-import { FindManyReviewDto } from '../dto/findManyOptions.dto';
+import { FindManyReviewDto } from '../dto/review.dto';
 
-import { FindOptionsOrder } from 'typeorm';
+import { Between, FindOptionsOrder } from 'typeorm';
+import {
+  startOfDay,
+  endOfDay,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  startOfYear,
+  endOfYear,
+} from 'date-fns';
 
 @Injectable()
 export class ReviewService {
-  constructor(
-    private reviewRepository: ReviewRepository,
-    private userRepository: UserRepository,
-  ) {}
+  constructor(private reviewRepository: ReviewRepository) {}
   logger = new Logger(ReviewService.name);
   async createReview(createReviewDto: CreateReviewDto, user: User) {
     try {
-      const serviceOwnerUser = await this.userRepository.findById(
-        createReviewDto.service_owner_id,
-      );
-      if (!serviceOwnerUser) {
-        throw new BadRequestException(AppStrings.SERVICE_OWNER_NOT_FOUND);
-      }
-      createReviewDto.reviewer_id = user.id;
-
-      return await this.reviewRepository.create(createReviewDto);
+      createReviewDto.userId = user.id;
+      return await this.reviewRepository.save({ ...createReviewDto, user });
     } catch (error) {
       this.logger.error('Failed to create review', error.stack);
-      throw new Error('Could not create review. Please try again later.');
+      throw new BadRequestException(
+        'Could not create review. Please try again later.',
+      );
     }
   }
 
@@ -56,26 +57,72 @@ export class ReviewService {
     });
   }
 
-  async findAll(data?: FindManyReviewDto) {
-    const order: FindOptionsOrder<any> = {};
-    if (data.directionToSort) {
-      order[data.sortField] = data.directionToSort;
+  async findAll(paginateAndSort?: FindManyReviewDto) {
+    const now = new Date();
+    let whereCondition: any = {};
+
+    // Specific field to filter by time period
+    const dateField = 'createdAt';
+
+    switch (paginateAndSort.timePeriod) {
+      case 'today':
+        whereCondition[dateField] = Between(startOfDay(now), endOfDay(now));
+        break;
+      case 'week':
+        whereCondition[dateField] = Between(startOfWeek(now), endOfWeek(now));
+        break;
+      case 'month':
+        whereCondition[dateField] = Between(startOfMonth(now), endOfMonth(now));
+        break;
+      case 'year':
+        whereCondition[dateField] = Between(startOfYear(now), endOfYear(now));
+        break;
+      default:
+        whereCondition = {};
     }
 
-    return await this.reviewRepository.findAll({
-      where: {},
-      take: data.take,
-      skip: data.skip,
-      order: order,
+    const [review, total] = await this.reviewRepository.findAndCount({
+      where: whereCondition,
+      take: paginateAndSort.take,
+      skip: paginateAndSort.skip,
+      order: { createdAt: 'DESC' },
     });
+
+    const averageRating = await this.aggregateReview();
+
+    return [review, total, averageRating.toPrecision(2)];
   }
 
   async findOne(id: string) {
     try {
-      return await this.reviewRepository.findByIdOrFail(id);
+      return await this.reviewRepository.findOneOrFail({
+        where: { id },
+        relations: ['user'],
+        select: {
+          user: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            arabicFirstName: true,
+            arabicLastName: true,
+            language: true,
+          },
+        },
+      });
     } catch (error) {
       this.logger.log(AppStrings.NOT_FOUND);
       throw new NotFoundException(AppStrings.NOT_FOUND);
     }
+  }
+
+  async aggregateReview() {
+    const [sum, count] = await Promise.all([
+      this.reviewRepository.sum('rating'),
+      this.reviewRepository.count(),
+    ]);
+
+    const averageRating = sum / count;
+
+    return averageRating;
   }
 }
