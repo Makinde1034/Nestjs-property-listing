@@ -523,7 +523,7 @@ type Query {
   fetchListingTypes: [ListingType!]!
   fetchAttributes: [Attribute!]!
   fetchAttributeSets: [AttributeSet!]!
-  findListingsForBuyer(findManyOptions: PaginateAndSort): ListingResponse!
+  findListingsForBuyer(findManyOptions: CreateSearchHistoryInput): ListingResponse!
   findPromotedListings(findManyOptions: CreateSearchHistoryInput): ListingResponse!
   findListingsForOwner(findManyOptions: AttributeDto): ListingResponse!
   findOneForBuyer(id: String!): Listing!
@@ -549,12 +549,18 @@ type Query {
   findCities(findCities: PaginateAndSort): CityResponse!
 }
 
-input PaginateAndSort {
+input CreateSearchHistoryInput {
   take: Float
   skip: Float
   sortField: String
   directionToSort: SortOrder
   where: WhereOption
+  location: String
+  price: String
+  numberOfBathrooms: String
+  numberOfRooms: String
+  type: String
+  listingType: String
 }
 
 enum SortOrder {
@@ -566,20 +572,6 @@ input WhereOption {
   fieldToChose: String!
 }
 
-input CreateSearchHistoryInput {
-  take: Float
-  skip: Float
-  sortField: String
-  directionToSort: SortOrder
-  where: WhereOption
-  location: String!
-  price: String!
-  numberOfBathrooms: String!
-  numberOfRooms: String!
-  type: String!
-  listingType: String!
-}
-
 input AttributeDto {
   take: Float
   skip: Float
@@ -587,6 +579,14 @@ input AttributeDto {
   directionToSort: SortOrder
   where: WhereOption
   listingType: String
+}
+
+input PaginateAndSort {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
 }
 
 input FindOfferInput {

@@ -32,17 +32,15 @@ import { CreatePromotionInput } from '../dtos/request/promotion-input';
 import { PromotionRepository } from '../repositories/promotion.repository';
 
 import { AdPackageService } from '../../ad-package/services/ad-package.service';
-import { Between, LessThanOrEqual, MoreThan, QueryFailedError } from 'typeorm';
+import { Between, LessThanOrEqual, QueryFailedError } from 'typeorm';
 
 import { addDaysToDate, toCamelCase } from '../../../common/utils/helper';
 import { FlagListingRepository } from '../repositories/flag-listing.repository';
 import { AppStrings } from '../../../common/messages/app.strings';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { I18nService } from 'nestjs-i18n';
-import { UserService } from '../../user/services';
 import { SearchHistoryRepository } from '../repositories/search-history.repository';
 import { CreateSearchHistoryInput } from '../dtos/request/create-search-history';
-import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 
 import {
   endOfDay,
@@ -72,7 +70,7 @@ export class ListingService {
 
     private readonly flagListingRepository: FlagListingRepository,
     private readonly i18n: I18nService,
-    private userService: UserService,
+
     private searchHistoryRepository: SearchHistoryRepository,
     private pushNotification: NotificationService,
   ) {}
@@ -80,8 +78,12 @@ export class ListingService {
   async createListing(user: User, createListingDto: CreateListingDto) {
     try {
       createListingDto.userId = user.id;
+      const gpsCoordinate = JSON.stringify(createListingDto.gpsCoordinate);
 
-      const listing = await this.listingRepository.create(createListingDto);
+      const listing = await this.listingRepository.create({
+        ...createListingDto,
+        gpsCoordinates: gpsCoordinate,
+      });
 
       return listing;
     } catch (error) {
@@ -121,41 +123,73 @@ export class ListingService {
     }
   }
 
-  async findAllListings(paginateAndSort: PaginateAndSort) {
+  async findAllListings(paginateAndSort: CreateSearchHistoryInput) {
     try {
-      let accurateTake;
-
-      const { sortField, directionToSort, take, skip } = paginateAndSort;
+      const {
+        type,
+        listingType,
+        sortField,
+        directionToSort,
+        take,
+        skip,
+        numberOfRooms,
+        numberOfBathrooms,
+        price,
+        location,
+      } = paginateAndSort;
 
       // Determine the order options based on provided sorting criteria
       const orderOptions = sortField
         ? { [sortField]: directionToSort }
         : { isListingPromoted: 'DESC' };
 
-      // Fetch non-featured listings
-
-      // Fetch featured listings separately with a reduced take
+      // Calculate accurate take for featured and non-featured listings
       const featuredTake = Math.ceil(take / 3);
       const featuredSkip = Math.ceil(skip / 3);
+      const accurateTake = take < 2 ? take : take - featuredTake;
 
+      // Define base where conditions
+      const baseWhereConditions = {
+        isDisabled: false,
+        purpose: type,
+        numberOfRooms,
+        numberOfBathrooms,
+        price: LessThanOrEqual(parseInt(price)),
+        city: location,
+      };
+
+      let selectedAttributes = [];
+
+      // If listingType is provided, get the corresponding attributes
+      if (listingType) {
+        const typeMappings = {
+          villa,
+          apartment,
+          farm,
+          land,
+          building,
+        };
+        selectedAttributes = typeMappings[listingType] || [];
+        if (!selectedAttributes.length) {
+          throw new BadRequestException(`Invalid listing type: ${listingType}`);
+        }
+        baseWhereConditions['listingType'] = listingType;
+      }
+
+      // Fetch featured listings
       const [featuredListings] = await this.listingRepository.findAndCount({
         take: featuredTake,
         skip: featuredSkip,
         order: { featured: 'DESC' },
-        where: { isDisabled: false },
+        where: baseWhereConditions,
       });
 
-      // Checks to encure accurate take doesn't return a negative value
-      if (take < 2) {
-        accurateTake = take;
-      } else {
-        accurateTake = take - featuredTake;
-      }
+      // Fetch non-featured listings
       const [listings, total] = await this.listingRepository.findAndCount({
         take: accurateTake,
         skip,
         order: orderOptions,
-        where: { isDisabled: false },
+        where: baseWhereConditions,
       });
 
       // Combine featured and non-featured listings
@@ -173,7 +207,10 @@ export class ListingService {
     }
   }
 
-  async findAllPromotedListings(data: CreateSearchHistoryInput, user: User) {
+  async authenticatedFindAllListings(
+    data: CreateSearchHistoryInput,
+    user: User,
+  ) {
     try {
       const typeMappings = {
         villa,
@@ -190,7 +227,6 @@ export class ListingService {
           `Invalid listing type: ${data.listingType}`,
         );
       }
-      const date = new Date().toISOString();
       const listing = await this.listingRepository.findAndCount({
         where: {
           purpose: data.type,
@@ -199,8 +235,6 @@ export class ListingService {
           price: LessThanOrEqual(parseInt(data.price)),
           city: data.location,
           listingType: data.listingType,
-          promoted: true,
-          promotionExpiration: MoreThan(date),
         },
         select: ['id', ...selectedAttributes],
       });

@@ -522,8 +522,9 @@ export class FlagListingInput {
   @IsNotEmpty()
   childIssue: string;
 }
+
 @InputType()
-export class AdminFilterAndSort extends PaginateAndSort {
+export class UserFilterAndSort extends PaginateAndSort {
   @Field({ defaultValue: false })
   @IsOptional()
   @IsEnum(TimePeriod)
@@ -549,3 +550,6 @@ export class AdminFilterAndSort extends PaginateAndSort {
   @IsBoolean()
   rented: boolean;
 }
+
+@InputType()
+export class AdminFilterAndSort extends UserFilterAndSort {}

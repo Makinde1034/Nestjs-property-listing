@@ -87,7 +87,7 @@ export class ListingResolver {
   @Query(() => ListingResponse, { name: 'findListingsForBuyer' })
   async findListingForBuyer(
     @Args('findManyOptions', { nullable: true })
-    findManyOptions?: PaginateAndSort,
+    findManyOptions?: CreateSearchHistoryInput,
   ) {
     const [listing, total] =
       await this.listingService.findAllListings(findManyOptions);
@@ -102,10 +102,11 @@ export class ListingResolver {
     @Args('findManyOptions', { nullable: true })
     findManyOptions?: CreateSearchHistoryInput,
   ) {
-    const [listing, total] = await this.listingService.findAllPromotedListings(
-      findManyOptions,
-      ctx.req.user,
-    );
+    const [listing, total] =
+      await this.listingService.authenticatedFindAllListings(
+        findManyOptions,
+        ctx.req.user,
+      );
 
     return { listing, total };
   }
