@@ -75,3 +75,25 @@ export function addDaysToDate(dateString: string | Date, days: number): string {
     throw new Error('Failed to add days to date');
   }
 }
+
+export function toCamelCase(str: string): string {
+  // Check if the input is a string
+  if (typeof str !== 'string') {
+    throw new Error('Input must be a string');
+  }
+
+  // Split the string by non-alphanumeric characters
+  const words = str.split(/[\s-_]+/);
+
+  // Map through the words and convert them to camel case
+  return words
+    .map((word, index) => {
+      // Convert the first word to lowercase
+      if (index === 0) {
+        return word.toLowerCase();
+      }
+      // Capitalize the first letter of the subsequent words
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
+    .join('');
+}

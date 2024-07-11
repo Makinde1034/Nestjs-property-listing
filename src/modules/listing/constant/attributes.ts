@@ -19,7 +19,7 @@ export const one = [
 ];
 
 export const two = ['numberOfBathrooms', 'numberOfRooms'];
-export const three = ['rentedApartment'];
+export const three = ['rentedApartment', 'garageArea'];
 export const four = ['level'];
 export const five = ['numberOfStoreys'];
 export const six = [

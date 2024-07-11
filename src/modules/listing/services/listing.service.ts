@@ -34,7 +34,7 @@ import { PromotionRepository } from '../repositories/promotion.repository';
 import { AdPackageService } from '../../ad-package/services/ad-package.service';
 import { Between, LessThanOrEqual, MoreThan, QueryFailedError } from 'typeorm';
 
-import { addDaysToDate } from '../../../common/utils/helper';
+import { addDaysToDate, toCamelCase } from '../../../common/utils/helper';
 import { FlagListingRepository } from '../repositories/flag-listing.repository';
 import { AppStrings } from '../../../common/messages/app.strings';
 import { SuccessResponse } from '../../../common/utils/success.response';
@@ -349,14 +349,33 @@ export class ListingService {
       }
     }
   }
-
-  async findAmenities() {
+  async findAmenities(listingType: string) {
     try {
-      return await this.amenitiesRepository.find();
+      const selectedAttributes = {
+        villa: villa,
+        building: building,
+        land: land,
+        apartment: apartment,
+        farm: farm,
+      };
+
+      const amenities = await this.amenitiesRepository.find();
+      const amenitiesToReturn = [];
+
+      amenities.forEach((amenity) => {
+        const amenityToCamelCase = toCamelCase(amenity.name);
+
+        if (selectedAttributes[listingType].includes(amenityToCamelCase)) {
+          amenitiesToReturn.push(amenity);
+        }
+      });
+
+      return amenitiesToReturn;
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
       } else {
+        this.logger.log(error);
         throw new UnprocessableEntityException('Error retrieving amenities');
       }
     }
@@ -588,6 +607,18 @@ export class ListingService {
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
+    }
+  }
+
+  async getOneListingForAdmin(listingId: string) {
+    try {
+      return await this.listingRepository.findOne({
+        where: { id: listingId },
+        relations: ['promotion'],
+      });
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(AppStrings.LISTING_NOT_FOUND);
     }
   }
 

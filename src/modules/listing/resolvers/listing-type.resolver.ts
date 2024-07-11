@@ -26,8 +26,7 @@ export class ListingTypeResolver {
    * @returns {Promise<ListingType[]>}
    */
   @Query(() => [ListingType])
-  @Permissions('read-listing-type')
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @UseGuards(AccessTokenGuard)
   async fetchListingTypes(): Promise<ListingType[]> {
     return await this.listingTypeService.findAllListingTypes();
   }
@@ -45,6 +44,7 @@ export class ListingTypeResolver {
   async createListingType(
     @Args('RequestInput') RequestInput: ListingTypeInput,
   ): Promise<ListingType> {
+    RequestInput.name = RequestInput.name.toLocaleLowerCase();
     return await this.listingTypeService.createListingType(RequestInput);
   }
 
