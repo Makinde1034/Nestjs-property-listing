@@ -530,9 +530,10 @@ type Query {
   viewFlaggedListings(findManyOptions: PaginateAndSort): FlaggedListingResponse
   findOneOffer(id: String!): Offer!
   findOffers(findOptions: FindOfferInput!): OfferResponse!
-  findAmenities: [Amenities!]!
+  findAmenities(listingType: String!): [Amenities!]!
   getMessageInLocalLanguage: SuccessResponse
   getSearchHistory: [SearchHistory!]
+  findOneListingsForAdmin(listingId: String!): Listing!
   findListingsForAdmin(paginateAndSort: AdminFilterAndSort!): AdminListingResponse!
   getWishlist: [Wishlist!]!
   getAuction(id: String!): Auction!

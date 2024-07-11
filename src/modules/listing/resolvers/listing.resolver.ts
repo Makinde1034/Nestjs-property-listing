@@ -83,7 +83,7 @@ export class ListingResolver {
    * Find Listing
    *************************/
 
-  @UseGuards(AccessTokenGuard)
+  // @UseGuards(AccessTokenGuard)
   @Query(() => ListingResponse, { name: 'findListingsForBuyer' })
   async findListingForBuyer(
     @Args('findManyOptions', { nullable: true })
@@ -208,12 +208,13 @@ export class ListingResolver {
 
   @UseGuards(AccessTokenGuard)
   @Query(() => [Amenities], { name: 'findAmenities' })
-  async findAmenities() {
-    return await this.listingService.findAmenities();
+  async findAmenities(@Args('listingType') listingType: string) {
+    return await this.listingService.findAmenities(listingType);
   }
   /*************************
    *Promotion
    *************************/
+
   @UseGuards(AccessTokenGuard)
   @Mutation(() => Promotion, { name: 'createPromotion' })
   async createPromotion(
@@ -257,6 +258,13 @@ export class ListingResolver {
   })
   async getSearchHistory(@Context() ctx: any) {
     return await this.listingService.getSearchHistory(ctx.req.user.id);
+  }
+
+  @UseGuards(AdminGuard)
+  @UseGuards(AccessTokenGuard)
+  @Query(() => Listing, { name: 'findOneListingsForAdmin' })
+  async getOneListingsForAdmin(@Args('listingId') listingId: string) {
+    return await this.listingService.getOneListingForAdmin(listingId);
   }
 
   @UseGuards(AdminGuard)
