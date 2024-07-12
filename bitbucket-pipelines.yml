@@ -16,7 +16,7 @@ definitions:
         name: Linting
         runs-on:
           - self.hosted #Runner Label
-          - linux #Runner Label
+          - linux.shell #Runner Label
         caches:
           - npm
         script:
