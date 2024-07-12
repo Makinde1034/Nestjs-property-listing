@@ -317,6 +317,7 @@ export class ListingService {
   async uploadListingImage(id: string, files: Express.Multer.File[]) {
     try {
       let uploadUrls: string[] = [];
+      let urlsToUpload: string[] = [];
       const uploadObject = {};
 
       const uploadPromises = files.map((file) =>
@@ -324,8 +325,11 @@ export class ListingService {
       );
       uploadUrls = await Promise.all(uploadPromises);
 
-      uploadUrls.forEach((value, index) => (uploadObject[index] = value));
-      const stringifiedUploadObject = JSON.stringify(uploadObject);
+      uploadUrls.forEach((value, index) => {
+        const imageUrl = (uploadObject[index] = value);
+        urlsToUpload.push(imageUrl);
+      });
+      const stringifiedUploadObject = JSON.stringify(urlsToUpload);
 
       await this.listingRepository.update(id, {
         images: stringifiedUploadObject,
@@ -339,7 +343,7 @@ export class ListingService {
       this.logger.log(error);
       if (error instanceof HttpException) {
         throw error;
-      } else throw new BadRequestException(error.messages || error.data);
+      } else throw new BadRequestException(error.message || error.data);
     }
   }
 
