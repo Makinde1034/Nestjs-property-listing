@@ -10,10 +10,9 @@ import {
   IsNumber,
   IsString,
   ValidateNested,
-  IsEnum,
 } from 'class-validator';
 
-import { AdminSortListingManagement, SortOrder } from '../../../common/enums';
+import { SortOrder } from '../../../common/enums';
 
 import { WhereOption } from './where-option.dto';
 
