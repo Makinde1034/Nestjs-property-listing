@@ -207,9 +207,10 @@ export class ListingResolver {
     return await this.offerService.findMany(paginateAndSort);
   }
 
-  @UseGuards(AccessTokenGuard)
-  @Query(() => [Amenities], { name: 'findAmenities' })
-  async findAmenities(@Args('listingType') listingType: string) {
+  @Query(() => [Amenities], { name: 'findAmenities', nullable: true })
+  async findAmenities(
+    @Args('listingType', { nullable: true }) listingType: string,
+  ) {
     return await this.listingService.findAmenities(listingType);
   }
   /*************************

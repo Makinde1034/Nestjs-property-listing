@@ -43,3 +43,9 @@ export enum AdminSortListingManagement {
   CREATED = 'createdAt',
   FLAGGED = 'flaggedDate',
 }
+
+export enum FurnishingStatusEnum {
+  ALL_FURNISHED = 'all-furnished',
+  FURNISHED = 'furnished',
+  UN_FURNISHED = 'unfurnished',
+}
