@@ -63,14 +63,10 @@ export class ListingService {
     private readonly featureRepository: FeatureRepository,
     private readonly promotionRepository: PromotionRepository,
     private readonly storageService: StorageService,
-
     private readonly amenitiesRepository: AmenitiesRepository,
-
     private readonly adpackageService: AdPackageService,
-
     private readonly flagListingRepository: FlagListingRepository,
     private readonly i18n: I18nService,
-
     private searchHistoryRepository: SearchHistoryRepository,
     private pushNotification: NotificationService,
   ) {}
@@ -151,10 +147,11 @@ export class ListingService {
 
       // Determine the sorting order
       const orderOptions = sortField
-        ? { [sortField]: directionToSort }
-        : { isListingPromoted: 'DESC' };
+        ? { [sortField]: directionToSort, listingDate: 'DESC' }
+        : { listingDate: 'DESC' };
 
       // Define base where conditions
+
       const baseWhereConditions = {
         isDisabled: false,
         purpose: type,
@@ -176,11 +173,11 @@ export class ListingService {
         const listingTypeMappings = { villa, apartment, farm, land, building };
         const selectedAttributes = listingTypeMappings[listingType] || [];
 
-        if (!selectedAttributes.length) {
+        if (selectedAttributes.length == 0) {
           throw new BadRequestException(`Invalid listing type: ${listingType}`);
+        } else {
+          baseWhereConditions['listingType'] = listingType;
         }
-
-        baseWhereConditions['listingType'] = listingType;
       }
 
       // Fetch featured listings
