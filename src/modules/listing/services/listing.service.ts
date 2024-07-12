@@ -96,6 +96,10 @@ export class ListingService {
         : { createdAt: 'DESC' };
 
       const take = initialTake <= 20 ? initialTake : 20;
+     
+      
+
+      
 
       const listing = await this.listingRepository.findAndCount({
         take,
@@ -103,6 +107,10 @@ export class ListingService {
         where: { userId: user.id },
         relations: ['offer'],
         order: orderOptions,
+       
+        
+       
+   
       });
 
       return listing;
