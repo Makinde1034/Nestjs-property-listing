@@ -34,6 +34,10 @@ export class AttributeInput {
   @IsNotEmpty()
   type: AttributeType;
 
+  @Field({ nullable: true })
+  @IsBoolean()
+  isAmmenity: string;
+
   @Field()
   @IsBoolean()
   @IsNotEmpty()

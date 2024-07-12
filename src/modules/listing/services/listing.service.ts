@@ -90,24 +90,19 @@ export class ListingService {
 
   async findAllListingsForOwner(data: AttributeDto, user?: User) {
     try {
-      const listingTypeMappings = {
-        villa,
-        apartment,
-        farm,
-        land,
-        building,
-      };
+      const { take: initialTake, skip, sortField, directionToSort } = data;
+      const orderOptions = sortField
+        ? { [sortField]: directionToSort }
+        : { createdAt: 'DESC' };
 
-      const selectedAttributes = listingTypeMappings[data.listingType];
-      if (!selectedAttributes) {
-        throw new BadRequestException(
-          `Invalid listing type: ${data.listingType}`,
-        );
-      }
+      const take = initialTake <= 20 ? initialTake : 20;
 
       const listing = await this.listingRepository.findAndCount({
-        where: { listingType: data.listingType, userId: user.id },
-        select: ['id', 'deedNumber', 'propertyNumber', ...selectedAttributes],
+        take,
+        skip,
+        where: { userId: user.id },
+        relations: ['offer'],
+        order: orderOptions,
       });
 
       return listing;
@@ -138,7 +133,7 @@ export class ListingService {
       } = paginateAndSort;
 
       // Ensure minimum take value
-      const take = initialTake >= 20 ? initialTake : 20;
+      const take = initialTake <= 20 ? initialTake : 20;
 
       // Calculate take values for featured and non-featured listings
       const featuredTake = Math.ceil(take / 3);
