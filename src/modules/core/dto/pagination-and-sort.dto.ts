@@ -32,7 +32,6 @@ export class PaginateAndSort {
   @IsOptional()
   @IsString()
   @Field({ nullable: true })
-  @IsEnum(AdminSortListingManagement)
   sortField?: string;
 
   @IsOptional()

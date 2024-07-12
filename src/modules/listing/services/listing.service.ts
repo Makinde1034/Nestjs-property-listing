@@ -32,7 +32,7 @@ import { CreatePromotionInput } from '../dtos/request/promotion-input';
 import { PromotionRepository } from '../repositories/promotion.repository';
 
 import { AdPackageService } from '../../ad-package/services/ad-package.service';
-import { Between, LessThanOrEqual, QueryFailedError } from 'typeorm';
+import { Between, In, MoreThan, QueryFailedError } from 'typeorm';
 
 import { addDaysToDate, toCamelCase } from '../../../common/utils/helper';
 import { FlagListingRepository } from '../repositories/flag-listing.repository';
@@ -63,14 +63,10 @@ export class ListingService {
     private readonly featureRepository: FeatureRepository,
     private readonly promotionRepository: PromotionRepository,
     private readonly storageService: StorageService,
-
     private readonly amenitiesRepository: AmenitiesRepository,
-
     private readonly adpackageService: AdPackageService,
-
     private readonly flagListingRepository: FlagListingRepository,
     private readonly i18n: I18nService,
-
     private searchHistoryRepository: SearchHistoryRepository,
     private pushNotification: NotificationService,
   ) {}
@@ -94,7 +90,7 @@ export class ListingService {
 
   async findAllListingsForOwner(data: AttributeDto, user?: User) {
     try {
-      const typeMappings = {
+      const listingTypeMappings = {
         villa,
         apartment,
         farm,
@@ -102,7 +98,7 @@ export class ListingService {
         building,
       };
 
-      const selectedAttributes = typeMappings[data.listingType];
+      const selectedAttributes = listingTypeMappings[data.listingType];
       if (!selectedAttributes) {
         throw new BadRequestException(
           `Invalid listing type: ${data.listingType}`,
@@ -130,50 +126,58 @@ export class ListingService {
         listingType,
         sortField,
         directionToSort,
-        take,
         skip,
         numberOfRooms,
         numberOfBathrooms,
-        price,
+        minPrice,
+        maxPrice,
+        minArea,
+        maxArea,
         location,
+        take: initialTake,
       } = paginateAndSort;
 
-      // Determine the order options based on provided sorting criteria
-      const orderOptions = sortField
-        ? { [sortField]: directionToSort }
-        : { isListingPromoted: 'DESC' };
+      // Ensure minimum take value
+      const take = initialTake >= 20 ? initialTake : 20;
 
-      // Calculate accurate take for featured and non-featured listings
+      // Calculate take values for featured and non-featured listings
       const featuredTake = Math.ceil(take / 3);
       const featuredSkip = Math.ceil(skip / 3);
-      const accurateTake = take < 2 ? take : take - featuredTake;
+      const regularTake = take < 2 ? take : take - featuredTake;
+
+      // Determine the sorting order
+      const orderOptions = sortField
+        ? { [sortField]: directionToSort, listingDate: 'DESC' }
+        : { promotedDate: 'DESC' };
 
       // Define base where conditions
+
       const baseWhereConditions = {
         isDisabled: false,
         purpose: type,
-        numberOfRooms,
-        numberOfBathrooms,
-        price: LessThanOrEqual(parseInt(price)),
+        numberOfRooms: numberOfRooms ? In(numberOfRooms) : MoreThan(0),
+        numberOfBathrooms: numberOfBathrooms
+          ? In(numberOfBathrooms)
+          : MoreThan(0),
+        price: minPrice
+          ? Between(parseInt(minPrice), parseInt(maxPrice))
+          : MoreThan(0),
+        totalArea: minArea
+          ? Between(parseInt(minArea), parseInt(maxArea))
+          : MoreThan(0),
         city: location,
       };
 
-      let selectedAttributes = [];
-
-      // If listingType is provided, get the corresponding attributes
+      // Add listing type conditions if provided
       if (listingType) {
-        const typeMappings = {
-          villa,
-          apartment,
-          farm,
-          land,
-          building,
-        };
-        selectedAttributes = typeMappings[listingType] || [];
-        if (!selectedAttributes.length) {
+        const listingTypeMappings = { villa, apartment, farm, land, building };
+        const selectedAttributes = listingTypeMappings[listingType] || [];
+
+        if (selectedAttributes.length == 0) {
           throw new BadRequestException(`Invalid listing type: ${listingType}`);
+        } else {
+          baseWhereConditions['listingType'] = listingType;
         }
-        baseWhereConditions['listingType'] = listingType;
       }
 
       // Fetch featured listings
@@ -184,19 +188,21 @@ export class ListingService {
         where: baseWhereConditions,
       });
 
-      // Fetch non-featured listings
-      const [listings, total] = await this.listingRepository.findAndCount({
-        take: accurateTake,
-        skip,
-        order: orderOptions,
-        where: baseWhereConditions,
-      });
+      // Fetch regular listings
+      const [regularListings, total] =
+        await this.listingRepository.findAndCount({
+          take: regularTake,
+          skip,
+          order: orderOptions,
+          where: baseWhereConditions,
+        });
 
-      // Combine featured and non-featured listings
-      const updatedListing = [...featuredListings, ...listings];
+      // Combine featured and regular listings
+      const combinedListings = [...featuredListings, ...regularListings];
 
-      return [updatedListing, total];
+      return [combinedListings, total];
     } catch (error) {
+      console.log(error);
       this.logger.log(error);
 
       if (error instanceof HttpException) {
@@ -212,7 +218,7 @@ export class ListingService {
     user: User,
   ) {
     try {
-      const typeMappings = {
+      const listingTypeMappings = {
         villa,
         apartment,
         farm,
@@ -221,7 +227,7 @@ export class ListingService {
       };
       await this.searchHistoryRepository.save({ ...data, user });
 
-      const selectedAttributes = typeMappings[data.listingType];
+      const selectedAttributes = listingTypeMappings[data.listingType];
       if (!selectedAttributes) {
         throw new BadRequestException(
           `Invalid listing type: ${data.listingType}`,
@@ -232,7 +238,7 @@ export class ListingService {
           purpose: data.type,
           numberOfRooms: data.numberOfRooms,
           numberOfBathrooms: data.numberOfBathrooms,
-          price: LessThanOrEqual(parseInt(data.price)),
+          // price: LessThanOrEqual(parseInt(data.price)),
           city: data.location,
           listingType: data.listingType,
         },
@@ -394,17 +400,21 @@ export class ListingService {
       };
 
       const amenities = await this.amenitiesRepository.find();
-      const amenitiesToReturn = [];
 
-      amenities.forEach((amenity) => {
-        const amenityToCamelCase = toCamelCase(amenity.name);
+      if (listingType == null || listingType == 'all') {
+        return amenities;
+      } else {
+        const amenitiesToReturn = [];
+        amenities.forEach((amenity) => {
+          const amenityToCamelCase = toCamelCase(amenity.name);
 
-        if (selectedAttributes[listingType].includes(amenityToCamelCase)) {
-          amenitiesToReturn.push(amenity);
-        }
-      });
+          if (selectedAttributes[listingType].includes(amenityToCamelCase)) {
+            amenitiesToReturn.push(amenity);
+          }
+        });
 
-      return amenitiesToReturn;
+        return amenitiesToReturn;
+      }
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;

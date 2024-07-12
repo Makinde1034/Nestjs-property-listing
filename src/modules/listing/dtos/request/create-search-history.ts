@@ -4,9 +4,10 @@
  */
 
 import { Field, InputType } from '@nestjs/graphql';
-import { IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 
 import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
+import { FurnishingStatusEnum } from '../../../../common/enums';
 @InputType()
 export class CreateSearchHistoryInput extends PaginateAndSort {
   @IsOptional()
@@ -17,16 +18,43 @@ export class CreateSearchHistoryInput extends PaginateAndSort {
   @IsOptional()
   @IsString()
   @Field({ nullable: true })
-  price: string;
+  minPrice: string;
 
   @IsOptional()
   @IsString()
   @Field({ nullable: true })
-  numberOfBathrooms: string;
+  maxPrice: string;
+
   @IsOptional()
   @IsString()
   @Field({ nullable: true })
-  numberOfRooms: string;
+  minArea: string;
+
+  @IsOptional()
+  @IsString()
+  @Field({ nullable: true })
+  maxArea: string;
+
+  @IsOptional()
+  @IsString()
+  @Field(() => [String], { nullable: true })
+  numberOfBathrooms: string[];
+
+  @IsOptional()
+  @IsString()
+  @IsEnum(FurnishingStatusEnum)
+  @Field({ nullable: true })
+  furnishing: string;
+
+  @IsOptional()
+  @IsString()
+  @Field(() => [String], { nullable: true })
+  numberOfRooms: string[];
+
+  @IsOptional()
+  @IsString()
+  @Field({ nullable: true })
+  floor: string;
 
   @IsOptional()
   @IsString()

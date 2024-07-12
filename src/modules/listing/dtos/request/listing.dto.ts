@@ -291,10 +291,6 @@ export class CreateListingDto {
 
   @Field({ defaultValue: false })
   @IsBoolean()
-  playground: boolean;
-
-  @Field({ defaultValue: false })
-  @IsBoolean()
   parking: boolean;
   @Field({ defaultValue: false })
   @IsBoolean()

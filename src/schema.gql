@@ -282,8 +282,8 @@ type SearchHistory {
   id: ID!
   location: String!
   price: String!
-  numberOfBathrooms: String!
-  numberOfRooms: String!
+  numberOfBathrooms: [String!]!
+  numberOfRooms: [String!]!
   type: String!
   listingType: String!
   isValid: Boolean!
@@ -530,7 +530,7 @@ type Query {
   viewFlaggedListings(findManyOptions: PaginateAndSort): FlaggedListingResponse
   findOneOffer(id: String!): Offer!
   findOffers(findOptions: FindOfferInput!): OfferResponse!
-  findAmenities(listingType: String!): [Amenities!]!
+  findAmenities(listingType: String): [Amenities!]
   getMessageInLocalLanguage: SuccessResponse
   getSearchHistory: [SearchHistory!]
   findOneListingsForAdmin(listingId: String!): Listing!
@@ -556,9 +556,14 @@ input CreateSearchHistoryInput {
   directionToSort: SortOrder
   where: WhereOption
   location: String
-  price: String
-  numberOfBathrooms: String
-  numberOfRooms: String
+  minPrice: String
+  maxPrice: String
+  minArea: String
+  maxArea: String
+  numberOfBathrooms: [String!]
+  furnishing: String
+  numberOfRooms: [String!]
+  floor: String
   type: String
   listingType: String
 }
@@ -933,7 +938,6 @@ input CreateListingDto {
   petsAllowed: Boolean! = false
   balcony: Boolean! = false
   gym: Boolean! = false
-  playground: Boolean! = false
   parking: Boolean! = false
   security: Boolean! = false
   airConditioning: Boolean! = false
@@ -998,7 +1002,6 @@ input UpdateListingDto {
   petsAllowed: Boolean = false
   balcony: Boolean = false
   gym: Boolean = false
-  playground: Boolean = false
   parking: Boolean = false
   security: Boolean = false
   airConditioning: Boolean = false
