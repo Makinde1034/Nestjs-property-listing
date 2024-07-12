@@ -202,7 +202,6 @@ export class ListingService {
 
       return [combinedListings, total];
     } catch (error) {
-      console.log(error);
       this.logger.log(error);
 
       if (error instanceof HttpException) {
@@ -238,7 +237,7 @@ export class ListingService {
           purpose: data.type,
           numberOfRooms: data.numberOfRooms,
           numberOfBathrooms: data.numberOfBathrooms,
-          // price: LessThanOrEqual(parseInt(data.price)),
+          // Price: LessThanOrEqual(parseInt(data.price)),
           city: data.location,
           listingType: data.listingType,
         },
@@ -403,18 +402,17 @@ export class ListingService {
 
       if (listingType == null || listingType == 'all') {
         return amenities;
-      } else {
-        const amenitiesToReturn = [];
-        amenities.forEach((amenity) => {
-          const amenityToCamelCase = toCamelCase(amenity.name);
-
-          if (selectedAttributes[listingType].includes(amenityToCamelCase)) {
-            amenitiesToReturn.push(amenity);
-          }
-        });
-
-        return amenitiesToReturn;
       }
+      const amenitiesToReturn = [];
+      amenities.forEach((amenity) => {
+        const amenityToCamelCase = toCamelCase(amenity.name);
+
+        if (selectedAttributes[listingType].includes(amenityToCamelCase)) {
+          amenitiesToReturn.push(amenity);
+        }
+      });
+
+      return amenitiesToReturn;
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
