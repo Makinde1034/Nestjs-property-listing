@@ -253,6 +253,7 @@ type Attribute {
   showInSummary: Boolean!
   hiddenToBuyers: Boolean!
   showInComparison: Boolean!
+  isAmenities: String
   showInFilters: Boolean!
   attributeSets: [AttributeSet!]!
   createdAt: DateTime!
@@ -854,6 +855,7 @@ input AttributeInput {
   englishName: String
   arabicName: String
   type: String!
+  isAmmenity: String
   isRequired: Boolean!
   showInSummary: Boolean!
   hiddenToBuyers: Boolean!
@@ -866,6 +868,7 @@ input AttributeUpdateInput {
   englishName: String
   arabicName: String
   type: String!
+  isAmmenity: String
   isRequired: Boolean!
   showInSummary: Boolean!
   hiddenToBuyers: Boolean!

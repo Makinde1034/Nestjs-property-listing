@@ -8,6 +8,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   UpdateDateColumn,
@@ -52,6 +53,7 @@ export class Offer extends BaseEntity {
 
   @Field(() => Listing)
   @JoinColumn({ name: 'listingId' })
+  @Index()
   @ManyToOne(() => Listing, (listing) => listing.offer)
   listing: Listing;
 

@@ -4,13 +4,14 @@
  */
 
 import { Field, InputType } from '@nestjs/graphql';
-import { IsEnum, IsNotEmpty } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional } from 'class-validator';
 import { ListingType } from 'src/common/enums';
 import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
 
 @InputType()
 export class AttributeDto extends PaginateAndSort {
   @Field({ nullable: true })
+  @IsOptional()
   @IsEnum(ListingType)
   @IsNotEmpty()
   listingType: string;
