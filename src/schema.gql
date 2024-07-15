@@ -246,13 +246,13 @@ type Attribute {
   id: ID!
   englishName: String
   arabicName: String
-  type: String!
+  type: String
   icon: String
   dropDownOptions: [String!]
-  isRequired: Boolean!
+  isRequired: Boolean
   showInSummary: Boolean!
   hiddenToBuyers: Boolean!
-  isAmenity: Boolean!
+  isAmenity: Boolean
   showInComparison: Boolean!
   isAmenities: String
   showInFilters: Boolean!
