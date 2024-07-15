@@ -116,6 +116,7 @@ export class ListingService {
 
   async findAllListings(paginateAndSort: CreateSearchHistoryInput) {
     try {
+      // Destructure input parameters
       const {
         type,
         listingType,
@@ -132,21 +133,18 @@ export class ListingService {
         take: initialTake,
       } = paginateAndSort;
 
-      // Ensure minimum take value
-      const take = initialTake <= 20 ? initialTake : 20;
+      // Ensure the take value does not exceed 20
+      const take = Math.min(initialTake, 20);
 
-      // Calculate take values for featured and non-featured listings
       const featuredTake = Math.ceil(take / 3);
-      const featuredSkip = Math.ceil(skip / 3);
-      const regularTake = take < 2 ? take : take - featuredTake;
+      const regularTake = take - featuredTake;
 
-      // Determine the sorting order
+      // Determine sorting options
       const orderOptions = sortField
         ? { [sortField]: directionToSort, listingDate: 'DESC' }
         : { promotedDate: 'DESC' };
 
       // Define base where conditions
-
       const baseWhereConditions = {
         isDisabled: false,
         purpose: type,
@@ -154,36 +152,20 @@ export class ListingService {
         numberOfBathrooms: numberOfBathrooms
           ? In(numberOfBathrooms)
           : MoreThan(0),
-        price: minPrice
-          ? Between(parseInt(minPrice), parseInt(maxPrice))
-          : MoreThan(0),
-        totalArea: minArea
-          ? Between(parseInt(minArea), parseInt(maxArea))
-          : MoreThan(0),
+        price: minPrice ? Between(+minPrice, +maxPrice) : MoreThan(0),
+        totalArea: minArea ? Between(+minArea, +maxArea) : MoreThan(0),
         city: location,
+        listingType: listingType || undefined,
       };
 
-      // Add listing type conditions if provided
-      if (listingType) {
-        const listingTypeMappings = { villa, apartment, farm, land, building };
-        const selectedAttributes = listingTypeMappings[listingType] || [];
-
-        if (selectedAttributes.length == 0) {
-          throw new BadRequestException(`Invalid listing type: ${listingType}`);
-        } else {
-          baseWhereConditions['listingType'] = listingType;
-        }
-      }
-
-      // Fetch featured listings
+      // Fetch listings
       const [featuredListings] = await this.listingRepository.findAndCount({
         take: featuredTake,
-        skip: featuredSkip,
+        skip: Math.ceil(skip / 3),
         order: { featured: 'DESC' },
         where: baseWhereConditions,
       });
 
-      // Fetch regular listings
       const [regularListings, total] =
         await this.listingRepository.findAndCount({
           take: regularTake,
@@ -192,18 +174,13 @@ export class ListingService {
           where: baseWhereConditions,
         });
 
-      // Combine featured and regular listings
-      const combinedListings = [...featuredListings, ...regularListings];
-
-      return [combinedListings, total];
+      // Combine results
+      return [[...featuredListings, ...regularListings], total];
     } catch (error) {
       this.logger.log(error);
-
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        throw new BadRequestException(error.message || error.data);
-      }
+      throw error instanceof HttpException
+        ? error
+        : new BadRequestException(error.message);
     }
   }
 
@@ -340,6 +317,7 @@ export class ListingService {
   async uploadListingImage(id: string, files: Express.Multer.File[]) {
     try {
       let uploadUrls: string[] = [];
+      let urlsToUpload: string[] = [];
       const uploadObject = {};
 
       const uploadPromises = files.map((file) =>
@@ -347,8 +325,11 @@ export class ListingService {
       );
       uploadUrls = await Promise.all(uploadPromises);
 
-      uploadUrls.forEach((value, index) => (uploadObject[index] = value));
-      const stringifiedUploadObject = JSON.stringify(uploadObject);
+      uploadUrls.forEach((value, index) => {
+        const imageUrl = (uploadObject[index] = value);
+        urlsToUpload.push(imageUrl);
+      });
+      const stringifiedUploadObject = JSON.stringify(urlsToUpload);
 
       await this.listingRepository.update(id, {
         images: stringifiedUploadObject,
@@ -362,7 +343,7 @@ export class ListingService {
       this.logger.log(error);
       if (error instanceof HttpException) {
         throw error;
-      } else throw new BadRequestException(error.messages || error.data);
+      } else throw new BadRequestException(error.message || error.data);
     }
   }
 
