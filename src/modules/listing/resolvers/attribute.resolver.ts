@@ -29,11 +29,7 @@ export class AttributeResolver {
    * @returns {Promise<Attribute[]>}
    */
   @Query(() => [Attribute])
-  @Permissions('read-attribute-set')
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
-  async fetchAttributes(
-    @Args('findOptions', { nullable: true }) findOptions: PaginateAndSort,
-  ): Promise<Attribute[]> {
+  async fetchAttributes(@Args("findOptions", {nullable:true})findOptions: PaginateAndSort): Promise<Attribute[]> {
     return await this.attributeService.findAllAttributes(findOptions);
   }
 
