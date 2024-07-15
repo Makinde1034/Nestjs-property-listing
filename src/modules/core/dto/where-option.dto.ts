@@ -5,6 +5,7 @@
 
 import { Field, InputType } from '@nestjs/graphql';
 import { IsNotEmpty, IsOptional, IsString, ValidateIf } from 'class-validator';
+
 @InputType()
 export class WhereOption {
   @IsOptional()
@@ -14,6 +15,6 @@ export class WhereOption {
 
   @ValidateIf((o) => o.fieldToChose !== undefined)
   @IsNotEmpty({ message: 'WhereParam must contain a value' })
-  @IsString()
-  whereParam: string;
+  @Field(() => Boolean || String || Number)
+  whereParam: boolean | string | number;
 }

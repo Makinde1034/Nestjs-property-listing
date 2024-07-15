@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, PartialType } from '@nestjs/graphql';
 import {
   IsArray,
   IsBoolean,
@@ -70,7 +70,7 @@ export class AttributeInput {
 }
 
 @InputType()
-export class AttributeUpdateInput extends AttributeInput {
+export class AttributeUpdateInput extends PartialType(AttributeInput) {
   @Field()
   @IsString()
   @IsNotEmpty()
