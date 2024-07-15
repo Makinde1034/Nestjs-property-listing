@@ -4,10 +4,9 @@
  */
 
 import {
-  Body,
   Controller,
-  Patch,
   Post,
+  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -16,15 +15,10 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { PermissionsGuard, RestAccessTokenGuard } from '../../auth/guards';
 import { AttributeService, ListingTypeService } from '../services';
 import { Permissions } from 'src/common/decorator/permission';
-import {
-  AttributeInput,
-  AttributeUpdateInput,
-  ListingTypeInput,
-  ListingTypeUpdateInput,
-} from '../dtos/request';
-import { ListingType, Attribute } from 'src/entities';
 
-@Controller('api/listing-type')
+import { Attribute } from 'src/entities';
+
+@Controller('listing-type')
 export class ListingTypeController {
   constructor(
     private readonly listingTypeService: ListingTypeService,
@@ -32,73 +26,19 @@ export class ListingTypeController {
   ) {}
 
   /**
-   * Create Lising Type with Icon upload
+   * Upload Attribute with Icon
    *
    * @async
-   * @param {Express.Multer.File} icon
-   * @returns {Promise<UserDetailsResponse>}
-   */
-  @UseInterceptors(FileInterceptor('icon'))
-  @Post('/create')
-  @Permissions('create-listing-type')
-  @UseGuards(RestAccessTokenGuard, PermissionsGuard)
-  async createListingType(
-    @Body() RequestInput: ListingTypeInput,
-    @UploadedFile() icon: Express.Multer.File,
-  ): Promise<ListingType> {
-    return await this.listingTypeService.createListingType(RequestInput, icon);
-  }
-
-  /**
-   * Update Lising Type with Icon upload
-   *
-   * @async
-   * @param {Express.Multer.File} icon
-   * @returns {Promise<UserDetailsResponse>}
-   */
-  @UseInterceptors(FileInterceptor('icon'))
-  @Patch('/update')
-  @Permissions('update-listing-type')
-  @UseGuards(RestAccessTokenGuard, PermissionsGuard)
-  async updateListingType(
-    @Body() RequestInput: ListingTypeUpdateInput,
-    @UploadedFile() icon: Express.Multer.File,
-  ): Promise<ListingType> {
-    return await this.listingTypeService.updateListingType(RequestInput, icon);
-  }
-
-  /**
-   * Create Attribute with Icon upload
-   *
-   * @async
-   * @param {Attribute} RequestInput
    * @returns {Promise<Attribute>}
    */
   @UseInterceptors(FileInterceptor('icon'))
   @Permissions('create-attribute-set')
-  @Post('/attribute/create')
+  @Post('/attribute/upload')
   @UseGuards(RestAccessTokenGuard, PermissionsGuard)
-  async createAttribute(
-    @Body() RequestInput: AttributeInput,
+  async uploadAttributeIcon(
+    @Query('attributId') attributId: string,
     @UploadedFile() icon: Express.Multer.File,
   ): Promise<Attribute> {
-    return await this.attributeService.createAttribute(RequestInput, icon);
-  }
-
-  /**
-   * Update Attribute with Icon upload
-   *
-   * @async
-   * @param {AttributeUpdateInput} RequestInput
-   * @returns {Promise<Attribute>}
-   */
-  @UseInterceptors(FileInterceptor('icon'))
-  @Permissions('update-attribute-set')
-  @UseGuards(RestAccessTokenGuard, PermissionsGuard)
-  async updateAttribute(
-    @Body() RequestInput: AttributeUpdateInput,
-    @UploadedFile() icon: Express.Multer.File,
-  ): Promise<Attribute> {
-    return await this.attributeService.updateAttribute(RequestInput, icon);
+    return await this.attributeService.uploadAttributeIcon(attributId, icon);
   }
 }

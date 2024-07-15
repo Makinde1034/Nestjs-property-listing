@@ -16,6 +16,7 @@ import {
 import { Attribute, AttributeSet } from '../../../entities';
 import { AttributeService } from '../services';
 import { Permissions } from 'src/common/decorator/permission';
+import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 
 @Resolver()
 export class AttributeResolver {
@@ -30,8 +31,10 @@ export class AttributeResolver {
   @Query(() => [Attribute])
   @Permissions('read-attribute-set')
   @UseGuards(AccessTokenGuard, PermissionsGuard)
-  async fetchAttributes(): Promise<Attribute[]> {
-    return await this.attributeService.findAllAttributes();
+  async fetchAttributes(
+    @Args('findOptions', { nullable: true }) findOptions: PaginateAndSort,
+  ): Promise<Attribute[]> {
+    return await this.attributeService.findAllAttributes(findOptions);
   }
 
   /**

@@ -66,7 +66,7 @@ export class AuthResolver {
   @Mutation(() => LoginResponse, { name: 'login' })
   @Throttle({ default: { limit: 2, ttl: 60000 } })
   async login(
-    @Args('LoginInput') loginInput: LoginInput,
+    @Args('loginInput') loginInput: LoginInput,
   ): Promise<LoginResponse> {
     return await this.authService.login(loginInput);
   }

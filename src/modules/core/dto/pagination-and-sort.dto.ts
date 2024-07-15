@@ -39,7 +39,6 @@ export class PaginateAndSort {
   directionToSort?: string;
 
   @IsOptional()
-  @IsString()
   @Field({ nullable: true })
   @ValidateNested()
   where: WhereOption;

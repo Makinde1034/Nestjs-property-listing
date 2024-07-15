@@ -17,6 +17,7 @@ import {
 import { In } from 'typeorm';
 import { AppStrings } from 'src/common/messages/app.strings';
 import { StorageService } from '../../file-handler/services/storage.service';
+import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 
 @Injectable()
 export class AttributeService {
@@ -32,8 +33,15 @@ export class AttributeService {
    * @async
    * @returns {Promise<Attribute[]>}
    */
-  async findAllAttributes(): Promise<Attribute[]> {
-    return await this.attributeRepository.findAll();
+  async findAllAttributes(findOptions: PaginateAndSort): Promise<Attribute[]> {
+    let whereOption = {};
+    const { where } = findOptions;
+
+    if (where) {
+      whereOption = { [where.fieldToChose]: where.whereParam };
+    }
+
+    return await this.attributeRepository.findAll({ where: whereOption });
   }
 
   /**
@@ -41,7 +49,6 @@ export class AttributeService {
    *
    * @async
    * @param {AttributeInput} data
-   * @param {Express.Multer.File?} icon
    * @returns {Promise<Attribute>}
    */
   async createAttribute(
@@ -57,6 +64,18 @@ export class AttributeService {
       attributeData.icon = imageurl;
     }
     return await this.attributeRepository.create(attributeData);
+  }
+
+  async uploadAttributeIcon(
+    id: string,
+    icon?: Express.Multer.File,
+  ): Promise<Attribute> {
+    let imageurl;
+    if (icon) {
+      // Upload icon image
+      imageurl = await this.storageService.upload(icon);
+    }
+    return await this.attributeRepository.update(id, { icon: imageurl });
   }
 
   /**

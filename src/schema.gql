@@ -252,6 +252,7 @@ type Attribute {
   isRequired: Boolean!
   showInSummary: Boolean!
   hiddenToBuyers: Boolean!
+  isAmenity: Boolean!
   showInComparison: Boolean!
   isAmenities: String
   showInFilters: Boolean!
@@ -522,7 +523,7 @@ type Query {
   listNotifications: [Notification!]!
   listNotificationScopes: [NotificationScope!]!
   fetchListingTypes: [ListingType!]!
-  fetchAttributes: [Attribute!]!
+  fetchAttributes(findOptions: PaginateAndSort): [Attribute!]!
   fetchAttributeSets: [AttributeSet!]!
   findListingsForBuyer(findManyOptions: CreateSearchHistoryInput): ListingResponse!
   findPromotedListings(findManyOptions: CreateSearchHistoryInput): ListingResponse!
@@ -550,6 +551,24 @@ type Query {
   findCities(findCities: PaginateAndSort): CityResponse!
 }
 
+input PaginateAndSort {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
+}
+
+enum SortOrder {
+  ASC
+  DESC
+}
+
+input WhereOption {
+  fieldToChose: String!
+  whereParam: Boolean!
+}
+
 input CreateSearchHistoryInput {
   take: Float
   skip: Float
@@ -569,15 +588,6 @@ input CreateSearchHistoryInput {
   listingType: String
 }
 
-enum SortOrder {
-  ASC
-  DESC
-}
-
-input WhereOption {
-  fieldToChose: String!
-}
-
 input AttributeDto {
   take: Float
   skip: Float
@@ -585,14 +595,6 @@ input AttributeDto {
   directionToSort: SortOrder
   where: WhereOption
   listingType: String
-}
-
-input PaginateAndSort {
-  take: Float
-  skip: Float
-  sortField: String
-  directionToSort: SortOrder
-  where: WhereOption
 }
 
 input FindOfferInput {
@@ -634,7 +636,7 @@ input FindManyReviewDto {
 type Mutation {
   register(RegisterInput: RegisterInput!): User!
   registerConfirm(RegisterConfirmInput: AuthRegisterConfirmDto!): String!
-  login(LoginInput: LoginInput!): LoginResponse!
+  login(loginInput: LoginInput!): LoginResponse!
   biometricRegister(RequestInput: BiometricRegister!): String!
   biometricLogin(LoginInput: BiometricLogin!): LoginResponse!
   resetPasswordRequest(RequestInput: PasswordResetRequestDto!): SuccessResponse!
@@ -867,13 +869,13 @@ input AttributeInput {
 input AttributeUpdateInput {
   englishName: String
   arabicName: String
-  type: String!
+  type: String
   isAmmenity: String
-  isRequired: Boolean!
-  showInSummary: Boolean!
-  hiddenToBuyers: Boolean!
-  showInComparison: Boolean!
-  showInFilters: Boolean!
+  isRequired: Boolean
+  showInSummary: Boolean
+  hiddenToBuyers: Boolean
+  showInComparison: Boolean
+  showInFilters: Boolean
   dropDownOptions: [String!]
   id: String!
 }
