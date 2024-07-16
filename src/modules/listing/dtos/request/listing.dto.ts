@@ -9,7 +9,10 @@ import {
   IsBoolean,
   IsEnum,
   IsNotEmpty,
+  isNumber,
+  IsNumber,
   IsOptional,
+  IsPositive,
   IsString,
   IsUUID,
   ValidateIf,
@@ -98,13 +101,13 @@ export class CreateListingDto {
 
   @Field()
   @IsString()
-  @IsNotEmpty()
-  price: string;
+  @IsPositive()
+  price: number;
 
   @ValidateIf((listing) => listing.listingType == ListingType.APARTMENT)
   @Field()
   @IsString()
-  numberOfBathrooms: string;
+  numberOfBathrooms: number;
 
   @Field(() => [String], { nullable: true })
   @IsOptional()
@@ -114,7 +117,7 @@ export class CreateListingDto {
   @ValidateIf((listing) => listing.listingType == ListingType.APARTMENT)
   @Field()
   @IsString()
-  numberOfRooms: string;
+  numberOfRooms: number;
 
   userId?: string;
 
@@ -126,10 +129,7 @@ export class CreateListingDto {
   // @IsOptional()
   // Image: string;
 
-  @IsOptional()
-  @IsArray()
-  @Field(() => [String], { nullable: true })
-  amenities: string[];
+
 
   @ValidateNested()
   @IsOptional()
@@ -163,8 +163,8 @@ export class CreateListingDto {
   @ValidateIf((listing) => listing.listingType == ListingType.LAND)
   @Field({ nullable: true })
   @IsNotEmpty({ message: 'LandArea must be provided for Listing type land' })
-  @IsString()
-  landArea: string;
+  @IsNumber()
+  landArea: number;
 
   @ValidateIf((listing) => listing.ListingType == ListingType.BUILDING)
   @IsNotEmpty({
@@ -196,8 +196,8 @@ export class CreateListingDto {
   })
   @Field({ nullable: true })
   @IsOptional()
-  @IsString()
-  areaPerApartment: string;
+  @IsNumber()
+  areaPerApartment: number;
 
   @ValidateIf((listing) => listing.listingType == ListingType.BUILDING)
   @Field({ defaultValue: false })
@@ -219,8 +219,8 @@ export class CreateListingDto {
   })
   @Field({ nullable: true })
   @IsOptional()
-  @IsString()
-  totalArea: string;
+  @IsNumber()
+  totalArea: number;
 
   @ValidateIf(
     (listing) =>
@@ -363,24 +363,24 @@ export class UpdateListingAdminDto {
 
   @Field({ nullable: true })
   @IsOptional()
-  @IsString()
+  @IsPositive()
   @IsNotEmpty()
-  price: string;
+  price: number;
 
   @Field({ nullable: true })
   @IsString()
   @IsOptional()
-  numberOfBathrooms: string;
+  numberOfBathrooms: number;
 
   @Field({ nullable: true })
   @IsOptional()
-  @IsString()
-  totalArea: string;
+  @IsNumber()
+  totalArea: number;
 
   @IsOptional()
   @Field({ nullable: true })
   @IsString()
-  numberOfRooms: string;
+  numberOfRooms: number;
 
   @IsOptional()
   @Field({ nullable: true })

@@ -151,6 +151,7 @@ export class ListingService {
       const orderOptions = sortField
         ? { [sortField]: directionToSort }
         : { promotedDate: 'DESC' };
+        
 
       // Define base where conditions
       const baseWhereConditions = {
@@ -160,8 +161,8 @@ export class ListingService {
         numberOfBathrooms: numberOfBathrooms
           ? In(numberOfBathrooms)
           : MoreThan(0),
-        price: minPrice ? Between(+minPrice, +maxPrice) : MoreThan(0),
-        totalArea: minArea ? Between(+minArea, +maxArea) : MoreThan(0),
+        price: minPrice ? Between(minPrice, maxPrice) : MoreThan(0),
+        totalArea: minArea ? Between(minArea, maxArea) : MoreThan(0),
         city: location,
         listingType: listingType || undefined,
       };

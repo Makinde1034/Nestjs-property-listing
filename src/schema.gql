@@ -170,10 +170,10 @@ type Listing {
   city: String
   country: String!
   propertySize: String!
-  price: String!
+  price: Float!
   publicationDate: String!
-  numberOfBathrooms: String!
-  numberOfRooms: String!
+  numberOfBathrooms: Float!
+  numberOfRooms: Float!
   images: String
   panoramaView: [String!]
   user: User
@@ -185,13 +185,13 @@ type Listing {
   street: String
   buildingNumber: String
   floor: String
-  landArea: String
+  landArea: Float
   numberOfApartment: String
   numberOfStoreys: String
-  areaOfApartment: String
+  areaOfApartment: Float
   garageArea: Boolean!
   garageSize: String
-  totalArea: String
+  totalArea: Float
   rentedApartment: String
   negotiatable: Boolean
   pool: Boolean
@@ -283,9 +283,9 @@ type ListingType {
 type SearchHistory {
   id: ID!
   location: String!
-  price: String!
-  numberOfBathrooms: [String!]!
-  numberOfRooms: [String!]!
+  price: Float!
+  numberOfBathrooms: [Float!]!
+  numberOfRooms: [Float!]!
   type: String!
   listingType: String!
   isValid: Boolean!
@@ -576,13 +576,13 @@ input CreateSearchHistoryInput {
   directionToSort: SortOrder
   where: WhereOption
   location: String
-  minPrice: String
-  maxPrice: String
-  minArea: String
-  maxArea: String
-  numberOfBathrooms: [String!]
+  minPrice: Float
+  maxPrice: Float
+  minArea: Float
+  maxArea: Float
+  numberOfBathrooms: [Float!]
   furnishing: String
-  numberOfRooms: [String!]
+  numberOfRooms: [Float!]
   floor: String
   type: String
   listingType: String
@@ -910,25 +910,24 @@ input CreateListingDto {
   country: String
   propertySize: String!
   publicationDate: String!
-  price: String!
-  numberOfBathrooms: String!
+  price: Float!
+  numberOfBathrooms: Float!
   panoramaView: [String!]
-  numberOfRooms: String!
+  numberOfRooms: Float!
   mediaType: String! = "image"
-  amenities: [String!]
   gpsCoordinate: LocationDto
   district: String
   city: String
   street: String
   building: String
   floor: String
-  landArea: String
+  landArea: Float
   numberOfApartment: String
   numberOfStoreys: String
-  areaPerApartment: String
+  areaPerApartment: Float
   garageArea: Boolean! = false
   garageSize: String
-  totalArea: String
+  totalArea: Float
   rentedApartment: String
   negotiable: Boolean! = false
   pool: Boolean! = false
@@ -974,25 +973,24 @@ input UpdateListingDto {
   country: String
   propertySize: String
   publicationDate: String
-  price: String
-  numberOfBathrooms: String
+  price: Float
+  numberOfBathrooms: Float
   panoramaView: [String!]
-  numberOfRooms: String
+  numberOfRooms: Float
   mediaType: String = "image"
-  amenities: [String!]
   gpsCoordinate: LocationDto
   district: String
   city: String
   street: String
   building: String
   floor: String
-  landArea: String
+  landArea: Float
   numberOfApartment: String
   numberOfStoreys: String
-  areaPerApartment: String
+  areaPerApartment: Float
   garageArea: Boolean = false
   garageSize: String
-  totalArea: String
+  totalArea: Float
   rentedApartment: String
   negotiable: Boolean = false
   pool: Boolean = false

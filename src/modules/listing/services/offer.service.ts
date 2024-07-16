@@ -86,7 +86,7 @@ export class OfferService {
       if (!listing) {
         throw new NotFoundException(AppStrings.LISTING_NOT_FOUND);
       }
-      const minimumListingPrice = (80 / parseInt(listing.price)) * 100;
+      const minimumListingPrice = (80 / listing.price) * 100;
 
       return minimumListingPrice;
     } catch (error) {
