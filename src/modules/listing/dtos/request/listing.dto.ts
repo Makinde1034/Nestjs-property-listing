@@ -9,7 +9,6 @@ import {
   IsBoolean,
   IsEnum,
   IsNotEmpty,
-  isNumber,
   IsNumber,
   IsOptional,
   IsPositive,
@@ -100,7 +99,7 @@ export class CreateListingDto {
   publicationDate: string;
 
   @Field()
-  @IsString()
+  @IsNumber()
   @IsPositive()
   price: number;
 
@@ -128,8 +127,6 @@ export class CreateListingDto {
   // @Field(() => String, { nullable: true })
   // @IsOptional()
   // Image: string;
-
-
 
   @ValidateNested()
   @IsOptional()

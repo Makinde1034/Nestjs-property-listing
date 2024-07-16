@@ -96,10 +96,6 @@ export class ListingService {
         : { createdAt: 'DESC' };
 
       const take = initialTake <= 20 ? initialTake : 20;
-     
-      
-
-      
 
       const listing = await this.listingRepository.findAndCount({
         take,
@@ -107,10 +103,6 @@ export class ListingService {
         where: { userId: user.id },
         relations: ['offer'],
         order: orderOptions,
-       
-        
-       
-   
       });
 
       return listing;
@@ -151,7 +143,6 @@ export class ListingService {
       const orderOptions = sortField
         ? { [sortField]: directionToSort }
         : { promotedDate: 'DESC' };
-        
 
       // Define base where conditions
       const baseWhereConditions = {
@@ -326,7 +317,7 @@ export class ListingService {
   async uploadListingImage(id: string, files: Express.Multer.File[]) {
     try {
       let uploadUrls: string[] = [];
-      let urlsToUpload: string[] = [];
+      const urlsToUpload: string[] = [];
       const uploadObject = {};
 
       const uploadPromises = files.map((file) =>

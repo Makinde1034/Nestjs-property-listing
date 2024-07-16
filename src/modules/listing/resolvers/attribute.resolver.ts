@@ -29,7 +29,9 @@ export class AttributeResolver {
    * @returns {Promise<Attribute[]>}
    */
   @Query(() => [Attribute])
-  async fetchAttributes(@Args("findOptions", {nullable:true})findOptions: PaginateAndSort): Promise<Attribute[]> {
+  async fetchAttributes(
+    @Args('findOptions', { nullable: true }) findOptions: PaginateAndSort,
+  ): Promise<Attribute[]> {
     return await this.attributeService.findAllAttributes(findOptions);
   }
 
