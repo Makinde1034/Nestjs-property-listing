@@ -124,9 +124,7 @@ export class CreateListingDto {
   @IsOptional()
   mediaType: string;
 
-  // @Field(() => String, { nullable: true })
-  // @IsOptional()
-  // Image: string;
+
 
   @ValidateNested()
   @IsOptional()
