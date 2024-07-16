@@ -142,7 +142,7 @@ export class ListingService {
       // Determine sorting options
       const orderOptions = sortField
         ? { [sortField]: directionToSort }
-        : { promotedDate: 'DESC' };
+        : { promotedDate: 'ASC', isListingPromoted:true };
 
       // Define base where conditions
       const baseWhereConditions = {
@@ -154,7 +154,7 @@ export class ListingService {
           : MoreThan(0),
         price: minPrice ? Between(minPrice, maxPrice) : MoreThan(0),
         totalArea: minArea ? Between(minArea, maxArea) : MoreThan(0),
-        // city: location,
+        city: location,
         listingType: listingType || undefined,
       };
 
@@ -162,8 +162,8 @@ export class ListingService {
       const [featuredListings] = await this.listingRepository.findAndCount({
         take: featuredTake,
         skip: Math.ceil(skip / 3),
-        order: { featured: 'DESC' },
-        where: baseWhereConditions,
+        order: { featureDate: 'ASC' },
+        where: {featured: true, ...baseWhereConditions},
       });
 
       const [regularListings, total] =
