@@ -81,7 +81,7 @@ export class Listing extends BaseEntity {
 
   @Column()
   @Field()
-  price: string;
+  price: number;
 
   @Column()
   @Field()
@@ -90,11 +90,11 @@ export class Listing extends BaseEntity {
 
   @Column()
   @Field()
-  numberOfBathrooms: string;
+  numberOfBathrooms: number;
 
   @Column()
   @Field()
-  numberOfRooms: string;
+  numberOfRooms: number;
 
   @Column({ type: 'jsonb', nullable: true })
   @Field({ nullable: true })
@@ -145,7 +145,7 @@ export class Listing extends BaseEntity {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
-  landArea: string;
+  landArea: number;
 
   @Column({ nullable: true })
   @Field({ nullable: true })
@@ -157,7 +157,7 @@ export class Listing extends BaseEntity {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
-  areaOfApartment: string;
+  areaOfApartment: number;
 
   @Column({ default: false })
   @Field({ defaultValue: false })
@@ -169,7 +169,7 @@ export class Listing extends BaseEntity {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
-  totalArea: string;
+  totalArea: number;
 
   @Column({ nullable: true })
   @Field({ nullable: true })

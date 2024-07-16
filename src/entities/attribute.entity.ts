@@ -25,8 +25,8 @@ export class Attribute extends BaseEntity {
   @Field({ nullable: true })
   arabicName: string;
 
-  @Column({nullable: true})
-  @Field({nullable:true})
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   type: string;
 
   @Column({ nullable: true })
@@ -37,8 +37,8 @@ export class Attribute extends BaseEntity {
   @Field(() => [String], { nullable: true })
   dropDownOptions: string[];
 
-  @Column({nullable:true})
-  @Field({nullable:true})
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   isRequired: boolean;
 
   @Column()
@@ -49,8 +49,8 @@ export class Attribute extends BaseEntity {
   @Field()
   hiddenToBuyers: boolean;
 
-  @Column({nullable: true})
-  @Field({nullable:true})
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   isAmenity: boolean;
 
   @Column()
