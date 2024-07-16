@@ -154,7 +154,7 @@ export class ListingService {
           : MoreThan(0),
         price: minPrice ? Between(minPrice, maxPrice) : MoreThan(0),
         totalArea: minArea ? Between(minArea, maxArea) : MoreThan(0),
-        city: location,
+        // city: location,
         listingType: listingType || undefined,
       };
 

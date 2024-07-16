@@ -927,7 +927,7 @@ input CreateListingDto {
   areaPerApartment: Float
   garageArea: Boolean! = false
   garageSize: String
-  totalArea: Float
+  totalArea: Float!
   rentedApartment: String
   negotiable: Boolean! = false
   pool: Boolean! = false

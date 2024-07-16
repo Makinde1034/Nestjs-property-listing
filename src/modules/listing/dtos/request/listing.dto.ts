@@ -214,8 +214,8 @@ export class CreateListingDto {
   @IsNotEmpty({
     message: 'totalArea is a required field for listing type bulding and villa',
   })
-  @Field({ nullable: true })
-  @IsOptional()
+  @Field({})
+  @IsNumber()
   @IsNumber()
   totalArea: number;
 
