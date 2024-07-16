@@ -149,7 +149,7 @@ export class ListingService {
 
       // Determine sorting options
       const orderOptions = sortField
-        ? { [sortField]: directionToSort, listingDate: 'DESC' }
+        ? { [sortField]: directionToSort }
         : { promotedDate: 'DESC' };
 
       // Define base where conditions
