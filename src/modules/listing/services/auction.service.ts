@@ -80,7 +80,7 @@ export class AuctionService {
         );
       }
 
-      if (updateAuctionInput.startDate > new Date()) {
+      if (updateAuctionInput.startDate < new Date()) {
         throw new BadRequestException(
           AppStrings.START_DATE_CANNOT_BE_LESS_THAN_DATE_0F_CREATION,
         );
