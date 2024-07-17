@@ -20,6 +20,8 @@ import { MailSendService } from '../mail-service';
 import { AppInfo } from 'src/common/utils/AppInfo';
 import { loadUserName } from 'src/common/utils/class-loader';
 
+import { MailInput } from '../../mail.dto';
+
 @Injectable()
 export class MailgunEmailService implements MailSendService {
   private readonly logger = new Logger(MailgunEmailService.name);
@@ -172,25 +174,29 @@ export class MailgunEmailService implements MailSendService {
       this.logger.debug(error);
     }
   }
-  async sendEmailInvoice(
-    user: User,
-    invoice: Buffer,
-    type: string,
-  ): Promise<void> {
+
+  async sendOfferMail(data: MailInput): Promise<void> {
     try {
-      const seller = `Hi ${user.name}, an offer has been made on your listing!`;
-      const buyer = `Hi! ${user.name}, you have successfully created an offer on a listing.`;
-      let text;
-      if (type == 'seller') {
-        text = seller;
-      }
-      if (type == 'buyer') {
-        text = buyer;
-      }
+      const mailgunData: MailgunMessageData = {
+        from: this.MAIL_FROM,
+        text: data.text,
+        subject: data.subject,
+        to: data.email,
+      };
+      await this.sendMail(mailgunData);
+
+      this.logger.debug('Email Sent');
+    } catch (error) {
+      this.logger.log('Failed to send mail because of:', error);
+      this.logger.debug(error);
+    }
+  }
+  async sendEmailInvoice(user: User, invoice: Buffer): Promise<void> {
+    try {
       const mailgunData: MailgunMessageData = {
         attachment: invoice,
         from: this.MAIL_FROM,
-        text: text,
+        text: 'Your Invoice is attached to this mail',
 
         subject: 'Waseet Invoice',
         to: user.email,
@@ -203,6 +209,7 @@ export class MailgunEmailService implements MailSendService {
       this.logger.debug(error);
     }
   }
+
   async sendSearchHistoryIsNowAvailable(email: string[]): Promise<void> {
     try {
       const mailgunData: MailgunMessageData = {

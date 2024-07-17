@@ -8,8 +8,8 @@ import { Attribute } from '../../entities';
 
 export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
-    englishName: 'Attribute',
-    type: 'number',
+    englishName: 'number of rooms',
+    type: 'options',
     showInFilters: false,
     showInComparison: true,
     showInSummary: true,

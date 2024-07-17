@@ -21,8 +21,9 @@ import { MoreThanOrEqual } from 'typeorm';
 import { ListingService } from './listing.service';
 import { AppStrings } from '../../../common/messages/app.strings';
 
-import { PdfInput } from '../../file-handler/dto/pdf.dto';
 import { addDaysToDate } from '../../../common/utils/helper';
+import { MailgunEmailService } from '../../mail/services/implementations';
+import { getMessageData } from '../../../common/messages/alert-messages';
 
 @Injectable()
 export class OfferService {
@@ -30,10 +31,15 @@ export class OfferService {
     private readonly offerRepository: OfferRepository,
     private paymentService: PaymentService,
     private listingService: ListingService,
+    private mailService: MailgunEmailService,
   ) {}
   logger = new Logger(OfferService.name);
   async createAnOffer(createOfferDto: CreateOfferDto, user: User) {
     try {
+      await this.listingService.findOneListingForBuyer(
+        createOfferDto.listingId,
+      );
+
       const offer = await this.offerRepository.findAll({
         where: {
           offerPrice: MoreThanOrEqual(createOfferDto.offerPrice),
@@ -48,7 +54,7 @@ export class OfferService {
         );
       }
 
-      const [minimumPrice, userId, listing] =
+      const [minimumPrice, listing] =
         await this.getMinimumOfferForAListingAndUser(createOfferDto.listingId);
       if (minimumPrice > createOfferDto.offerPrice) {
         throw new BadRequestException(
@@ -56,7 +62,7 @@ export class OfferService {
         );
       }
 
-      if (user.id == userId) {
+      if (user.id == listing.user.id) {
         throw new BadRequestException(
           'The creator of a listing cannot create an offer on  that listing',
         );
@@ -67,19 +73,29 @@ export class OfferService {
 
       const offerPayload = await this.offerRepository.create(createOfferDto);
 
-      const data: PdfInput = {
-        createdDate: `${offerPayload.createdAt.getDay()}-${offerPayload.createdAt.getMonth()}-${offerPayload.createdAt.getFullYear()}`,
-        dueDate: `${offerPayload.expireAt.getDate()}-${offerPayload.expireAt.getMonth()}-${offerPayload.expireAt.getFullYear()}`,
-        clientName: `${user.firstName} ${user.lastName}`,
-        item: listing.listingType,
-        type: 'invoice',
-        price: offerPayload.offerPrice,
-        totalPrice: offerPayload.offerPrice,
-      };
+      const mailMessageForBuyer = getMessageData(
+        user.firstName,
+        'Create',
+        'Offers',
+        'Offer Creator',
+      );
+      const mailMessageForSeller = getMessageData(
+        listing.user.arabicFirstName,
+        'Create',
+        'Offers',
+        'Seller',
+      );
 
-      this.paymentService.invoice(data, user);
-      this.paymentService.invoice(null, listing.user);
-
+      await this.mailService.sendOfferMail({
+        email: user.email,
+        subject: mailMessageForBuyer[0]['Title'],
+        text: mailMessageForBuyer[0]['Body'],
+      });
+      await this.mailService.sendOfferMail({
+        email: listing.user.email,
+        subject: mailMessageForSeller[0]['Title'],
+        text: mailMessageForSeller[0]['Body'],
+      });
       return offerPayload;
     } catch (error) {
       this.logger.log(error);
@@ -89,7 +105,7 @@ export class OfferService {
 
   async getMinimumOfferForAListingAndUser(
     listingId: string,
-  ): Promise<[number, string, Listing]> {
+  ): Promise<[number, Listing]> {
     try {
       const listing =
         await this.listingService.findOneListingForBuyer(listingId);
@@ -98,8 +114,8 @@ export class OfferService {
         throw new NotFoundException(AppStrings.LISTING_NOT_FOUND);
       }
       const minimumListingPrice = (80 / listing.price) * 100;
-      const user = listing.userId;
-      return [minimumListingPrice, user, listing];
+
+      return [minimumListingPrice, listing];
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -129,43 +145,239 @@ export class OfferService {
       throw new BadRequestException();
     }
   }
-  async updateOffer(updateOfferInput: UpdateOfferInput) {
+  async updateOffer(user: User, updateOfferInput: UpdateOfferInput) {
     try {
       const { id, ...rest } = updateOfferInput;
 
+      const [offer, allOffers] = await Promise.all([
+        await this.offerRepository.findOne({
+          where: { id: updateOfferInput.id },
+          relations: ['listing.user'],
+          select: {
+            user: { email: true, firstName: true },
+          },
+        }),
+
+        await this.offerRepository.findAll({
+          where: {
+            offerPrice: MoreThanOrEqual(updateOfferInput.offerPrice),
+            listingId: updateOfferInput.listingId,
+          },
+          order: { offerPrice: 'DESC' },
+        }),
+      ]);
+
+      if (allOffers.length > 0) {
+        throw new BadRequestException(
+          `Minimum Offer must be greater than ${allOffers[0].offerPrice}`,
+        );
+      }
+
+      const [minimumPrice, listing] =
+        await this.getMinimumOfferForAListingAndUser(
+          updateOfferInput.listingId,
+        );
+      if (minimumPrice > updateOfferInput.offerPrice) {
+        throw new BadRequestException(
+          `Minimum Offer must be greater than  ${minimumPrice}`,
+        );
+      }
+
+      if (user.id == listing.user.id) {
+        throw new BadRequestException(
+          'The creator of a listing cannot create an offer on  that listing',
+        );
+      }
+
+      const mailMessageForBuyer = getMessageData(
+        offer.user.firstName,
+        'Update',
+        'Offers',
+        'Offer Creator',
+      );
+      const mailMessageForSeller = getMessageData(
+        offer.listing.user.firstName,
+        'Update',
+        'Offers',
+        'Seller',
+      );
+
       const update = await this.offerRepository.update(id, rest);
-
-      await this.paymentService.invoice()
+      await this.mailService.sendOfferMail({
+        email: offer.user.email,
+        subject: mailMessageForBuyer[0]['Title'],
+        text: mailMessageForBuyer[0]['Body'],
+      });
+      await this.mailService.sendOfferMail({
+        email: offer.listing.user.email,
+        subject: mailMessageForSeller[0]['Title'],
+        text: mailMessageForSeller[0]['Body'],
+      });
+      return update;
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
     }
   }
 
-  async acceptOffer(updateOfferInput: UpdateOfferInput) {
+  async acceptOffer(user: User, updateOfferInput: UpdateOfferInput) {
     try {
       const { id } = updateOfferInput;
 
-      await this.paymentService.invoice()
+      const offer = await this.offerRepository.findOne({
+        where: { id: id },
+        relations: ['listing.user'],
+        select: {
+          user: { email: true, firstName: true },
+        },
+      });
+      if (!offer) {
+        throw new NotFoundException('Offer not found');
+      }
 
+      if (user.id != offer.listing.user.id) {
+        throw new BadRequestException('Only the creator can accept an offer');
+      }
 
-      return await this.offerRepository.update(id, { status: 'accepted' });
+      const update = await this.offerRepository.update(id, {
+        status: 'accepted',
+      });
 
-      
+      const mailMessageForBuyer = getMessageData(
+        offer.user.firstName,
+        'Accepted',
+        'Offers',
+        'Buyer',
+      );
+      const mailMessageForSeller = getMessageData(
+        offer.listing.user.firstName,
+        'If Accepted Offer',
+        'Offers',
+        'Seller',
+      );
+      const mailMessageForBuyerResponse = getMessageData(
+        offer.user.firstName,
+        'Response',
+        'Offers',
+        'Offer Creator',
+      );
+      const mailMessageForSellerResponse = getMessageData(
+        offer.listing.user.firstName,
+        'Response',
+        'Offers',
+        'Seller',
+      );
+
+      await this.mailService.sendOfferMail({
+        email: offer.user.email,
+        subject: mailMessageForBuyer[0]['Title'],
+        text: mailMessageForBuyer[0]['Body'],
+      });
+      await this.mailService.sendOfferMail({
+        email: offer.listing.user.email,
+        subject: mailMessageForSeller[0]['Title'],
+        text: mailMessageForSeller[0]['Body'],
+      });
+
+      await this.mailService.sendOfferMail({
+        email: offer.user.email,
+        subject: mailMessageForBuyerResponse[0]['Title'],
+        text: mailMessageForBuyerResponse[0]['Body'],
+      });
+      await this.mailService.sendOfferMail({
+        email: offer.listing.user.email,
+        subject: mailMessageForSellerResponse[0]['Title'],
+        text: mailMessageForSellerResponse[0]['Body'],
+      });
+
+      return update;
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
     }
   }
 
-  async rejectOffer(updateOfferInput: UpdateOfferInput) {
+  async rejectOffer(user: User, updateOfferInput: UpdateOfferInput) {
     try {
       const { id } = updateOfferInput;
 
-      await this.paymentService.invoice()
+      const offer = await this.offerRepository.findOne({
+        where: { id: id },
+        relations: ['listing.user'],
+        select: {
+          user: { email: true, firstName: true },
+        },
+      });
 
+      if (!offer) {
+        throw new NotFoundException('Offer not found');
+      }
 
-      return await this.offerRepository.update(id, { status: 'rejected' });
+      if (user.id != offer.listing.user.id) {
+        throw new BadRequestException('Only the Creator can reject an offer');
+      }
+
+      const update = await this.offerRepository.update(id, {
+        status: 'rejected',
+      });
+
+      const mailMessageForBuyer = getMessageData(
+        offer.user.firstName,
+        'Accepted',
+        'Offers',
+        'Buyer',
+      );
+      const mailMessageForSeller = getMessageData(
+        offer.listing.user.firstName,
+        'If Accepted Offer',
+        'Offers',
+        'Seller',
+      );
+      const mailMessageForBuyerResponse = getMessageData(
+        offer.user.firstName,
+        'Response',
+        'Offers',
+        'Offer Creator',
+      );
+      const mailMessageForSellerResponse = getMessageData(
+        offer.listing.user.firstName,
+        'Response',
+        'Offers',
+        'Seller',
+      );
+
+      await this.mailService.sendOfferMail({
+        email: offer.user.email,
+        subject: mailMessageForBuyer[0]['Title'],
+        text: mailMessageForBuyer[0]['Body'],
+      });
+      await this.mailService.sendOfferMail({
+        email: offer.listing.user.email,
+        subject: mailMessageForSeller[0]['Title'],
+        text: mailMessageForSeller[0]['Body'],
+      });
+      await this.mailService.sendOfferMail({
+        email: offer.user.email,
+        subject: mailMessageForBuyer[0]['Title'],
+        text: mailMessageForBuyer[0]['Body'],
+      });
+      await this.mailService.sendOfferMail({
+        email: offer.listing.user.email,
+        subject: mailMessageForSeller[0]['Title'],
+        text: mailMessageForSeller[0]['Body'],
+      });
+
+      await this.mailService.sendOfferMail({
+        email: offer.user.email,
+        subject: mailMessageForBuyerResponse[0]['Title'],
+        text: mailMessageForBuyerResponse[0]['Body'],
+      });
+      await this.mailService.sendOfferMail({
+        email: offer.listing.user.email,
+        subject: mailMessageForSellerResponse[0]['Title'],
+        text: mailMessageForSellerResponse[0]['Body'],
+      });
+      return update;
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
