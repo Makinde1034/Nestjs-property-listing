@@ -78,4 +78,8 @@ export const AppStrings = {
   WISHLIST_CREATION_FAILED: 'failed to add to wishlist',
 
   WISHLIST_DELETE_SUCCESS: 'removed from wishlist',
+  CANNOT_EDIT_AUCTION_ONCE_IT_HAS_STARTED:
+    'Cannot edit auction after it has started',
+  START_DATE_CANNOT_BE_LESS_THAN_DATE_0F_CREATION:
+    'Start date cannot be less than data of creation.',
 };

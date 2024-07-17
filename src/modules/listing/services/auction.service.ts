@@ -12,6 +12,7 @@ import {
 } from '../dtos/request/auction-input';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { AuctionParticipantRepository } from '../repositories/auction-participant.repository';
+import { AppStrings } from '../../../common/messages/app.strings';
 
 @Injectable()
 export class AuctionService {
@@ -22,6 +23,11 @@ export class AuctionService {
   logger = new Logger(AuctionService.name);
   async create(auctionInput: CreateAuctionInput) {
     try {
+      if (auctionInput.startDate < new Date()) {
+        throw new BadRequestException(
+          AppStrings.START_DATE_CANNOT_BE_LESS_THAN_DATE_0F_CREATION,
+        );
+      }
       return await this.auctionRepository.save(auctionInput);
     } catch (error) {
       this.logger.log(error);
@@ -68,9 +74,15 @@ export class AuctionService {
         where: { id: id },
       });
 
-      if (auction.startDate > new Date()) {
+      if (auction.startDate < new Date()) {
         throw new BadRequestException(
-          'Cannot edit auction after it has started',
+          AppStrings.CANNOT_EDIT_AUCTION_ONCE_IT_HAS_STARTED,
+        );
+      }
+
+      if (updateAuctionInput.startDate < new Date()) {
+        throw new BadRequestException(
+          AppStrings.START_DATE_CANNOT_BE_LESS_THAN_DATE_0F_CREATION,
         );
       }
       const update = await this.auctionRepository.update(id, rest);

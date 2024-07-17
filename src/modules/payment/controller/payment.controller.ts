@@ -10,8 +10,8 @@ import { Response } from 'express';
 export class PaymentController {
   constructor(private paymentService: PaymentService) {}
   @Get('invoice')
-  async generateInvoice(@Res() res: Response) {
-    const screenshot = await this.paymentService.invoice();
+  generateInvoice(@Res() res: Response) {
+    const screenshot = this.paymentService.invoice();
 
     res.set({
       'Content-Type': 'application/pdf',
