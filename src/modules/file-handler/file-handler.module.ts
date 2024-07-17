@@ -5,14 +5,12 @@
 
 import { Global, Module } from '@nestjs/common';
 import { StorageService } from './services/storage.service';
-import { PuppeteerModule } from 'nest-puppeteer';
-
-import { PdfGeneratorService } from './services/pdf.service';
+import { PdfService } from './services/pdf.service';
 
 @Global()
 @Module({
-  imports: [PuppeteerModule.forFeature()],
-  providers: [PdfGeneratorService, StorageService],
-  exports: [PdfGeneratorService, StorageService],
+  imports: [],
+  providers: [PdfService, StorageService],
+  exports: [PdfService, StorageService],
 })
 export class FilehandlerModule {}

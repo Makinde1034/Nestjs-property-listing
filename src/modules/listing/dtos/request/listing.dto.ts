@@ -124,8 +124,6 @@ export class CreateListingDto {
   @IsOptional()
   mediaType: string;
 
-
-
   @ValidateNested()
   @IsOptional()
   @Field(() => LocationDto, { nullable: true })

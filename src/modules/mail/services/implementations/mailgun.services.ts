@@ -11,7 +11,6 @@ import { IMailgunClient } from 'mailgun.js/Interfaces';
 import {
   EMAIL_NOTIFICATION_TEMPLATE_NAME,
   FORGOT_PASSWORD_TEMPLATE_NAME,
-  INVOICE,
   REGISTER_CONFIRMATION_TEMPLATE_NAME,
   STAFF_CONFIRMATION_TEMPLATE_NAME,
 } from 'src/common/constants';
@@ -173,18 +172,31 @@ export class MailgunEmailService implements MailSendService {
       this.logger.debug(error);
     }
   }
-  async sendEmailInvoice(user: User, invoice: Buffer): Promise<void> {
+  async sendEmailInvoice(
+    user: User,
+    invoice: Buffer,
+    type: string,
+  ): Promise<void> {
     try {
+      const seller = `Hi ${user.name}, an offer has been made on your listing!`;
+      const buyer = `Hi! ${user.name}, you have successfully created an offer on a listing.`;
+      let text;
+      if (type == 'seller') {
+        text = seller;
+      }
+      if (type == 'buyer') {
+        text = buyer;
+      }
       const mailgunData: MailgunMessageData = {
         attachment: invoice,
         from: this.MAIL_FROM,
-        text: `Hi! ${user.name} your invoice is attached to this mail.`,
+        text: text,
 
         subject: 'Waseet Invoice',
         to: user.email,
-        template: INVOICE,
       };
       await this.sendMail(mailgunData);
+
       this.logger.debug('Email Sent');
     } catch (error) {
       this.logger.log('Failed to send mail because of:', error);
