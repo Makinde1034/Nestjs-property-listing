@@ -142,7 +142,7 @@ export class ListingService {
       // Determine sorting options
       const orderOptions = sortField
         ? { [sortField]: directionToSort }
-        : { promotedDate: 'ASC', isListingPromoted:true };
+        : { promotedDate: 'ASC', isListingPromoted: true };
 
       // Define base where conditions
       const baseWhereConditions = {
@@ -163,7 +163,7 @@ export class ListingService {
         take: featuredTake,
         skip: Math.ceil(skip / 3),
         order: { featureDate: 'ASC' },
-        where: {featured: true, ...baseWhereConditions},
+        where: { featured: true, ...baseWhereConditions },
       });
 
       const [regularListings, total] =

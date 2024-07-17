@@ -15,7 +15,7 @@ import {
   UpdateOfferInput,
 } from '../dtos/request/offer-input';
 import { OfferRepository } from '../repositories';
-import { User } from '../../../entities';
+import { Listing, User } from '../../../entities';
 import { PaymentService } from '../../payment/services/payment.service';
 import { MoreThanOrEqual } from 'typeorm';
 import { ListingService } from './listing.service';
@@ -23,6 +23,7 @@ import { AppStrings } from '../../../common/messages/app.strings';
 
 import { PdfInput } from '../../file-handler/dto/pdf.dto';
 import { addDaysToDate } from '../../../common/utils/helper';
+
 @Injectable()
 export class OfferService {
   constructor(
@@ -47,12 +48,17 @@ export class OfferService {
         );
       }
 
-      const minimumPrice = await this.getMinimumOfferForAListing(
-        createOfferDto.listingId,
-      );
+      const [minimumPrice, userId, listing] =
+        await this.getMinimumOfferForAListingAndUser(createOfferDto.listingId);
       if (minimumPrice > createOfferDto.offerPrice) {
         throw new BadRequestException(
           `Minimum Offer must be greater than  ${minimumPrice}`,
+        );
+      }
+
+      if (user.id == userId) {
+        throw new BadRequestException(
+          'The creator of a listing cannot create an offer on  that listing',
         );
       }
 
@@ -62,15 +68,18 @@ export class OfferService {
       const offerPayload = await this.offerRepository.create(createOfferDto);
 
       const data: PdfInput = {
-        createdDate: offerPayload.createdAt,
-        dueDate: offerPayload.expireAt.toDateString(),
+        createdDate: `${offerPayload.createdAt.getDay()}-${offerPayload.createdAt.getMonth()}-${offerPayload.createdAt.getFullYear()}`,
+        dueDate: `${offerPayload.expireAt.getDate()}-${offerPayload.expireAt.getMonth()}-${offerPayload.expireAt.getFullYear()}`,
         clientName: `${user.firstName} ${user.lastName}`,
+        item: listing.listingType,
         type: 'invoice',
         price: offerPayload.offerPrice,
         totalPrice: offerPayload.offerPrice,
       };
 
       this.paymentService.invoice(data, user);
+      this.paymentService.invoice(null, listing.user);
+
       return offerPayload;
     } catch (error) {
       this.logger.log(error);
@@ -78,7 +87,9 @@ export class OfferService {
     }
   }
 
-  async getMinimumOfferForAListing(listingId: string) {
+  async getMinimumOfferForAListingAndUser(
+    listingId: string,
+  ): Promise<[number, string, Listing]> {
     try {
       const listing =
         await this.listingService.findOneListingForBuyer(listingId);
@@ -87,8 +98,8 @@ export class OfferService {
         throw new NotFoundException(AppStrings.LISTING_NOT_FOUND);
       }
       const minimumListingPrice = (80 / listing.price) * 100;
-
-      return minimumListingPrice;
+      const user = listing.userId;
+      return [minimumListingPrice, user, listing];
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -122,7 +133,9 @@ export class OfferService {
     try {
       const { id, ...rest } = updateOfferInput;
 
-      return await this.offerRepository.update(id, rest);
+      const update = await this.offerRepository.update(id, rest);
+
+      await this.paymentService.invoice()
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -133,7 +146,12 @@ export class OfferService {
     try {
       const { id } = updateOfferInput;
 
+      await this.paymentService.invoice()
+
+
       return await this.offerRepository.update(id, { status: 'accepted' });
+
+      
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -143,6 +161,9 @@ export class OfferService {
   async rejectOffer(updateOfferInput: UpdateOfferInput) {
     try {
       const { id } = updateOfferInput;
+
+      await this.paymentService.invoice()
+
 
       return await this.offerRepository.update(id, { status: 'rejected' });
     } catch (error) {

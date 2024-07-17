@@ -35,9 +35,11 @@ import { AdPackageModule } from './modules/ad-package/ad-package.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { JobService } from './modules/in-app-services/job.scheduler';
+import { WebHookModule } from './modules/webhook/web-hook.module';
 
 @Module({
   imports: [
+    // PuppeteerModule.forRoot(),
     ConfigModule.forRoot({
       envFilePath: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
       load: configuration,
@@ -91,6 +93,7 @@ import { JobService } from './modules/in-app-services/job.scheduler';
     AdPackageModule,
 
     PaymentModule,
+    WebHookModule,
   ],
   controllers: [],
   providers: [AppResolver, JobService],

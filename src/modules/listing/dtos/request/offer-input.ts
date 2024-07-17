@@ -6,7 +6,6 @@
 import { Field, InputType, PartialType } from '@nestjs/graphql';
 import {
   IsBoolean,
-  IsDate,
   IsNotEmpty,
   IsOptional,
   IsPositive,
@@ -23,8 +22,6 @@ export class CreateOfferDto {
   @IsNotEmpty()
   offerPrice: number;
 
-  @Field({ nullable: true })
-  @IsDate()
   expireAt: Date;
 
   @Field({ nullable: true })

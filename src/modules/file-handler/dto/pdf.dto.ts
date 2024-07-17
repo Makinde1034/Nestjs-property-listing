@@ -4,9 +4,10 @@
  */
 
 export class PdfInput {
-  createdDate: Date;
+  createdDate: string;
   dueDate: string;
   clientName: string;
+  item: string;
   type: string;
   price: number;
   totalPrice: number;
