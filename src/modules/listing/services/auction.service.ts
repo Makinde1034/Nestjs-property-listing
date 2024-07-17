@@ -74,13 +74,13 @@ export class AuctionService {
         where: { id: id },
       });
 
-      if (auction.startDate < new Date()) {
+      if (auction.startDate > new Date()) {
         throw new BadRequestException(
           AppStrings.CANNOT_EDIT_AUCTION_ONCE_IT_HAS_STARTED,
         );
       }
 
-      if (updateAuctionInput.startDate < new Date()) {
+      if (updateAuctionInput.startDate > new Date()) {
         throw new BadRequestException(
           AppStrings.START_DATE_CANNOT_BE_LESS_THAN_DATE_0F_CREATION,
         );
