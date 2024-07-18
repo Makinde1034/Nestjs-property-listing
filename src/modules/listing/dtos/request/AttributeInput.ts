@@ -36,7 +36,7 @@ export class AttributeInput {
 
   @Field({ nullable: true })
   @IsBoolean()
-  isAmmenity: string;
+  isAmenity: boolean;
 
   @Field()
   @IsBoolean()
