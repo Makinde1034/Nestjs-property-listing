@@ -17,12 +17,14 @@ import {
 import BaseEntity from './base.entity';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { User } from './user.entity';
-import { Exclude } from 'class-transformer';
+
 import { Offer } from './offer.entity';
 import { Promotion } from './promotion.entity';
 import { FlagListing } from './flag-listing.entity';
 import { Feature } from './feature.entity';
 import { Wishlist } from './wishlist.entity';
+import { ListingType } from './listing-type.entity';
+import { ListingAttributes } from './listing-attributes.entity';
 
 @Entity()
 @ObjectType()
@@ -33,51 +35,54 @@ export class Listing extends BaseEntity {
 
   @Field({ nullable: true })
   @Column({ nullable: true })
+  poaNumber: string;
+
+  @Field()
+  @Column()
   name: string;
 
-  @Field({ nullable: true })
-  @Column({ nullable: true })
+  @Field()
+  @Column()
   purpose: string;
-
-  @Column({ default: 'rent' })
-  @Field({ defaultValue: 'rent' })
-  sellingType: string;
-
-  @Field({ nullable: true })
-  @Column({ nullable: true })
-  powerOfAttorney: string;
-
-  @Field({ defaultValue: 'property' })
-  @Column({ default: 'property' })
-  listingType: string;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  rentingOption: string;
 
   @Column()
   @Field()
-  propertyNumber: string;
+  rentingOption: string;
 
   @Column()
   @Field()
   deedNumber: string;
 
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  districtCity: string;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  city: string;
-
+  @Column()
   @Field()
-  @Column({ nullable: true })
-  country: string;
+  iban: string;
 
   @Column()
   @Field()
-  propertySize: string;
+  zatcaNumber: string;
+
+  @Field(() => ListingType)
+  @JoinColumn({ name: 'listingTypeId' })
+  @ManyToOne(() => ListingType, (listingType) => listingType.listing, {
+    eager: true,
+  })
+  listingType: ListingType[];
+
+  @Field()
+  @Column()
+  listingTypeId: string;
+
+  @Column()
+  @Field()
+  address: string;
+
+  @Column()
+  @Field()
+  city: string;
+
+  @Field()
+  @Column()
+  country: string;
 
   @Column()
   @Field()
@@ -85,16 +90,81 @@ export class Listing extends BaseEntity {
 
   @Column()
   @Field()
-  @Exclude()
-  publicationDate: string;
+  street: string;
 
   @Column()
   @Field()
-  numberOfBathrooms: number;
+  district: string;
 
-  @Column()
-  @Field()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  floor: number;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  buildingNumber: number;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  apartmentNumber: number;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  villaAndFarmNumber: number;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  area: number;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  totalArea: number;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  garageArea: number;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   numberOfRooms: number;
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  bathrooms: number;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  numberOfStoreys: number;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  areaPerApartment: number;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  bathsroomPerApartment: number;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  numberOfRentedApartments: number;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  roomsPerApartment: number;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  apartmentInBuilding: string;
+
+  @Field({ nullable: true })
+  @Column({ type: 'jsonb', nullable: true })
+  gpsCoordinate: string;
+
+  @Field(() => [ListingAttributes])
+  @OneToMany(
+    () => ListingAttributes,
+    (listingAttributes) => listingAttributes.listing,
+  )
+  listingAttributes: ListingAttributes[];
 
   @Column({ type: 'jsonb', nullable: true })
   @Field({ nullable: true })
@@ -112,6 +182,7 @@ export class Listing extends BaseEntity {
   @Field(() => [Offer], { nullable: true })
   @OneToMany(() => Offer, (offer) => offer.listing, {
     cascade: true,
+    onDelete: 'CASCADE',
   })
   offer: Offer[];
 
@@ -119,162 +190,7 @@ export class Listing extends BaseEntity {
   @Field()
   userId: string;
 
-  @Field(() => [String], { nullable: true })
-  @Column('simple-array', { nullable: true })
-  amenities: string[];
-
-  @Field({ nullable: true })
-  @Column({ type: 'jsonb', nullable: true })
-  gpsCoordinates: string;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  district: string;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  street: string;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  buildingNumber: string;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  floor: string;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  landArea: number;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  numberOfApartment: string;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  numberOfStoreys: string;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  areaOfApartment: number;
-
-  @Column({ default: false })
-  @Field({ defaultValue: false })
-  garageArea: boolean;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  garageSize: string;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  totalArea: number;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  rentedApartment: string;
-
-  @Column({ type: 'boolean', default: false })
-  @Field({ nullable: true })
-  negotiatable: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  @Field({ nullable: true })
-  pool: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  @Field({ nullable: true })
-  outdoorKitchen: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  @Field({ nullable: true })
-  garden: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  @Field({ nullable: true })
-  guestHouse: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  @Field({ nullable: true })
-  tennisCourt: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  @Field({ nullable: true })
-  basketballCourt: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  @Field({ nullable: true })
-  jacuzzi: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  @Field({ nullable: true })
-  bbqArea: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  @Field({ nullable: true })
-  maidsRoom: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  @Field({ nullable: true })
-  petsAllowed: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  @Field({ nullable: true })
-  balcony: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  @Field({ nullable: true })
-  gym: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  @Field({ nullable: true })
-  playground: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  @Field({ nullable: true })
-  parking: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  @Field({ nullable: true })
-  security: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  @Field({ nullable: true })
-  airConditioning: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  @Field({ nullable: true })
-  storageRoom: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  @Field({ nullable: true })
-  laundryRoom: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  @Field({ nullable: true })
-  conferenceRoom: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  @Field({ nullable: true })
-  gatedCommunity: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  @Field({ nullable: true })
-  indoorPlayArea: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  @Field({ nullable: true })
-  coveredParking: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  @Field({ nullable: true })
-  wifi: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  @Field({ nullable: true })
-  elevator: boolean;
-  @Field(() => [Promotion])
+  @Field(() => [Promotion], { nullable: true })
   @OneToMany(() => Promotion, (promotion) => promotion.listing, {
     cascade: true,
 
@@ -282,7 +198,7 @@ export class Listing extends BaseEntity {
   })
   promotion: Promotion[];
 
-  @Field(() => [Feature])
+  @Field(() => [Feature], { nullable: true })
   @OneToMany(() => Feature, (promotion) => promotion.listing, {
     cascade: true,
 
@@ -298,10 +214,6 @@ export class Listing extends BaseEntity {
   @Column({ default: false })
   isListingPromoted: boolean;
 
-  @Field({ nullable: true })
-  @Column({ nullable: true })
-  promotionExpiration: Date;
-
   @Field({ defaultValue: false })
   @Column({ default: false })
   isListingFlagged: boolean;
@@ -316,15 +228,15 @@ export class Listing extends BaseEntity {
 
   @Field({ defaultValue: false })
   @Column({ default: false })
-  isListing: boolean;
+  isListingFeatured: boolean;
 
   @Field({ defaultValue: false })
   @Column({ default: false })
-  isDisabled: boolean;
+  isListingDisabled: boolean;
 
-  // @Field({ defaultValue: '', nullable: true })
-  // @Column({ enum: ListingStatus, default: 'active', nullable: true })
-  // Status: string;
+  @Field({ defaultValue: false })
+  @Column({ default: false })
+  negotiable: boolean;
 
   @Field(() => [FlagListing], { nullable: true })
   @OneToMany(() => FlagListing, (flag) => flag.listing, {
@@ -351,10 +263,6 @@ export class Listing extends BaseEntity {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
-  featureExpiration: Date;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
   featureDate: Date;
 
   @Column({ nullable: true })
@@ -362,9 +270,13 @@ export class Listing extends BaseEntity {
   @Index()
   flaggedDate: Date;
 
-  @Column({ default: false })
-  @Field({ defaultValue: false })
-  featured: boolean;
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  featureExpiration: Date;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  promotionExpiration: Date;
 
   @Field()
   @CreateDateColumn()

@@ -11,7 +11,6 @@ import { NotificationService } from '../notification/services';
 import { MailgunEmailService } from '../mail/services/implementations';
 import { OfferRepository } from '../listing/repositories';
 import { Offer } from '../../entities/offer.entity';
-import { In } from 'typeorm';
 
 export class JobService {
   constructor(
@@ -36,8 +35,8 @@ export class JobService {
         where: {
           city: element.location,
           price: element.price,
-          numberOfBathrooms: In(element.numberOfBathrooms),
-          numberOfRooms: In(element.numberOfRooms),
+          // NumberOfBathrooms: In(element.numberOfBathrooms),
+          // NumberOfRooms: In(element.numberOfRooms),
           purpose: element.type,
         },
         relations: ['user'],

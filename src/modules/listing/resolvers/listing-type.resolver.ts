@@ -39,8 +39,8 @@ export class ListingTypeResolver {
    * @returns {Promise<ListingType>}
    */
   @Mutation(() => ListingType)
-  @Permissions('create-listing-type')
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  // @Permissions('create-listing-type')
+  // @UseGuards(AccessTokenGuard, PermissionsGuard)
   async createListingType(
     @Args('RequestInput') RequestInput: ListingTypeInput,
   ): Promise<ListingType> {

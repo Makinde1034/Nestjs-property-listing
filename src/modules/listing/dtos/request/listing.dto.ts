@@ -5,325 +5,181 @@
 
 import { Field, InputType, PartialType } from '@nestjs/graphql';
 import {
-  IsArray,
   IsBoolean,
   IsEnum,
   IsNotEmpty,
   IsNumber,
+  IsNumberString,
+  IsObject,
   IsOptional,
   IsPositive,
   IsString,
   IsUUID,
   ValidateIf,
-  ValidateNested,
 } from 'class-validator';
 
 import {
   ListingFlagType,
-  ListingType,
   Ownership,
   Purpose,
   RentingOption,
 } from '../../../../common/enums';
-import { LocationDto } from '../../../location/dto/request/location.dto';
+
 import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
 import { TimePeriod } from '../../../../common/enums/sort.enum';
+import { LocationDto } from '../../../location/dto/request/location.dto';
 
 @InputType()
 export class CreateListingDto {
   @Field()
-  @IsString()
-  name: string;
-
-  @Field()
-  @IsString()
-  @IsEnum(Purpose)
-  purpose: string;
-
-  @Field()
-  @IsString()
   @IsEnum(Ownership)
   ownership: string;
 
-  @Field({ nullable: true })
-  @ValidateIf((o) => o.ownership == Ownership.NOT_OWNER)
+  @ValidateIf((listing) => listing.ownership == 'power_of_attorney')
   @IsNotEmpty({
-    message: 'power0fAttorney is required for none owners of property',
+    message: 'poaNumber field is required for power_of_attorney ownership',
   })
-  @IsString()
-  powerOfAttorney: string;
+  @Field({ nullable: true })
+  @IsNumberString()
+  poaNumber: string;
 
-  @Field({ defaultValue: 'property' })
+  @Field()
   @IsString()
-  @IsEnum(ListingType)
-  listingType: string;
+  name: string;
 
   @Field({ nullable: true })
-  @ValidateIf((Listing) => Listing.purpose == 'rent')
+  @IsEnum(Purpose)
+  purpose: string;
+
+  @ValidateIf((listing) => listing.purpose == 'rent')
   @IsNotEmpty({
-    message:
-      'rentingOption must contain monthly, quarterly, bi-quarterly or yearly',
+    message: 'rentingOption field is required for purpose of rent',
   })
-  @IsOptional()
+  @Field({ nullable: true })
   @IsEnum(RentingOption)
   rentingOption: string;
 
   @Field()
-  @IsString()
-  propertyNumber: string;
-
-  @Field()
-  @IsString()
+  @IsNumberString()
   deedNumber: string;
 
-  @Field({ nullable: true })
-  @IsOptional()
-  districtCity: string;
+  @Field()
+  @IsNumberString()
+  iban: string;
 
-  @Field({ nullable: true })
-  @IsOptional()
+  @Field()
+  @IsNumberString()
+  zatcaNumber: string;
+
+  @Field()
   @IsString()
-  @IsUUID()
+  listingTypeId?: string;
+
+  @Field()
+  @IsString()
+  address: string;
+
+  @Field()
+  @IsString()
+  city: string;
+
+  @Field()
+  @IsString()
   country: string;
 
-  @ValidateIf((listing) => listing.listingType == ListingType.APARTMENT)
-  @IsNotEmpty({
-    message: 'PropertySize is required for listing type apartment',
-  })
   @Field()
-  @IsString()
-  propertySize: string;
-
-  @Field()
-  @IsString()
-  publicationDate: string;
-
-  @Field()
-  @IsNumber()
   @IsPositive()
   price: number;
 
-  @ValidateIf((listing) => listing.listingType == ListingType.APARTMENT)
   @Field()
   @IsString()
-  numberOfBathrooms: number;
+  street: string;
 
-  @Field(() => [String], { nullable: true })
-  @IsOptional()
-  @IsArray()
-  panoramaView: string[];
-
-  @ValidateIf((listing) => listing.listingType == ListingType.APARTMENT)
   @Field()
-  @IsString()
-  numberOfRooms: number;
-
-  userId?: string;
-
-  @Field({ defaultValue: 'image' })
-  @IsOptional()
-  mediaType: string;
-
-  @ValidateNested()
-  @IsOptional()
-  @Field(() => LocationDto, { nullable: true })
-  gpsCoordinate: LocationDto;
-
-  @Field({ nullable: true })
-  @IsOptional()
   @IsString()
   district: string;
 
   @Field({ nullable: true })
-  @IsString()
-  city: string;
+  @IsNumber()
+  floor: number;
 
   @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  street: string;
+  @IsNumber()
+  buildingNumber: number;
 
   @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  building: string;
+  @IsNumber()
+  apartmentNumber: number;
 
   @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  floor: string;
+  @IsNumber()
+  villaAndFarmNumber: number;
 
-  @ValidateIf((listing) => listing.listingType == ListingType.LAND)
   @Field({ nullable: true })
-  @IsNotEmpty({ message: 'LandArea must be provided for Listing type land' })
   @IsNumber()
   landArea: number;
 
-  @ValidateIf((listing) => listing.ListingType == ListingType.BUILDING)
-  @IsNotEmpty({
-    message: 'numberOfApartment is a required field for listing type building',
-  })
+  @Field({ nullable: true })
+  @IsNumber()
+  area: number;
+
+  @Field({ nullable: true })
+  @IsObject()
+  gpsCoordinate: LocationDto;
+
+  @Field(() => [String], { nullable: true })
+  panoramaView: string[];
+
+  @Field({ defaultValue: false, nullable: true })
+  @IsBoolean()
+  negotiable: boolean;
+
   @Field({ nullable: true })
   @IsOptional()
-  @IsString()
-  numberOfApartment: string;
+  @IsNumber()
+  garageArea: number;
 
-  @ValidateIf(
-    (listing) =>
-      listing.listingType == ListingType.BUILDING ||
-      listing.listingType == ListingType.VILLA,
-  )
-  @IsNotEmpty({
-    message:
-      'numberOfStoreys is a required field for listing type bulding and villa',
-  })
   @Field({ nullable: true })
   @IsOptional()
-  @IsString()
-  numberOfStoreys: string;
+  @IsNumber()
+  numberOfRooms: number;
 
-  @ValidateIf((listing) => listing.listingType == ListingType.BUILDING)
-  @IsNotEmpty({
-    message:
-      'areaPerApartment is a required field for listing for listing type villa and building',
-  })
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsNumber()
+  bathrooms: number;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsNumber()
+  numberOfStoreys: number;
+
   @Field({ nullable: true })
   @IsOptional()
   @IsNumber()
   areaPerApartment: number;
 
-  @ValidateIf((listing) => listing.listingType == ListingType.BUILDING)
-  @Field({ defaultValue: false })
+  @Field({ nullable: true })
   @IsOptional()
-  @IsBoolean()
-  garageArea: boolean;
+  @IsNumber()
+  bathsroomPerApartment: number;
 
   @Field({ nullable: true })
   @IsOptional()
-  garageSize: string;
-
-  @ValidateIf(
-    (listing) =>
-      listing.listingType == ListingType.BUILDING ||
-      listing.listingType == ListingType.VILLA,
-  )
-  @IsNotEmpty({
-    message: 'totalArea is a required field for listing type bulding and villa',
-  })
-  @Field({})
   @IsNumber()
-  @IsNumber()
-  totalArea: number;
+  numberOfRentedApartments: number;
 
-  @ValidateIf(
-    (listing) =>
-      listing.listingType == ListingType.BUILDING ||
-      listing.listingType == ListingType.VILLA,
-  )
-  @IsNotEmpty({
-    message:
-      'rentedApartment is a required field for listing type bulding and villa',
-  })
   @Field({ nullable: true })
   @IsOptional()
-  @IsString()
-  rentedApartment: string;
+  @IsNumber()
+  roomsPerApartment: number;
 
-  @Field({ defaultValue: false })
-  @IsBoolean()
+  @Field({ nullable: true })
   @IsOptional()
-  negotiable: boolean;
+  @IsNumber()
+  apartmentInBuilding: string;
 
-  @Field({ defaultValue: false })
-  @IsBoolean()
-  pool: boolean;
-
-  @Field({ defaultValue: false })
-  @IsBoolean()
-  outdoorKitchen: boolean;
-
-  @Field({ defaultValue: false })
-  @IsBoolean()
-  garden: boolean;
-
-  @Field({ defaultValue: false })
-  @IsBoolean()
-  guestHouse: boolean;
-
-  @Field({ defaultValue: false })
-  @IsBoolean()
-  tennisCourt: boolean;
-
-  @Field({ defaultValue: false })
-  @IsBoolean()
-  basketballCourt: boolean;
-
-  @Field({ defaultValue: false })
-  @IsBoolean()
-  jacuzzi: boolean;
-
-  @Field({ defaultValue: false })
-  @IsBoolean()
-  bbqArea: boolean;
-
-  @Field({ defaultValue: false })
-  @IsBoolean()
-  maidsRoom: boolean;
-
-  @Field({ defaultValue: false })
-  @IsBoolean()
-  petsAllowed: boolean;
-
-  @Field({ defaultValue: false })
-  @IsBoolean()
-  balcony: boolean;
-
-  @Field({ defaultValue: false })
-  @IsBoolean()
-  gym: boolean;
-
-  @Field({ defaultValue: false })
-  @IsBoolean()
-  parking: boolean;
-  @Field({ defaultValue: false })
-  @IsBoolean()
-  security: boolean;
-
-  @Field({ defaultValue: false })
-  @IsBoolean()
-  airConditioning: boolean;
-
-  @Field({ defaultValue: false })
-  @IsBoolean()
-  storageRoom: boolean;
-
-  @Field({ defaultValue: false })
-  @IsBoolean()
-  laundryRoom: boolean;
-
-  @Field({ defaultValue: false })
-  @IsBoolean()
-  conferenceRoom: boolean;
-
-  @Field({ defaultValue: false })
-  @IsBoolean()
-  gatedCommunity: boolean;
-
-  @Field({ defaultValue: false })
-  @IsBoolean()
-  indoorPlayArea: boolean;
-
-  @Field({ defaultValue: false })
-  @IsBoolean()
-  coveredParking: boolean;
-
-  @Field({ defaultValue: false })
-  @IsBoolean()
-  wifi: boolean;
-
-  @Field({ defaultValue: false })
-  @IsBoolean()
-  elevator: boolean;
+  userId?: string;
 }
 
 @InputType()
@@ -334,165 +190,10 @@ export class UpdateListingDto extends PartialType(CreateListingDto) {
 }
 
 @InputType()
-export class UpdateListingAdminDto {
+export class UpdateListingAdminDto extends PartialType(CreateListingDto) {
   @Field()
   @IsUUID()
   id: string;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  district: string;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  city: string;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  street: string;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsPositive()
-  @IsNotEmpty()
-  price: number;
-
-  @Field({ nullable: true })
-  @IsString()
-  @IsOptional()
-  numberOfBathrooms: number;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsNumber()
-  totalArea: number;
-
-  @IsOptional()
-  @Field({ nullable: true })
-  @IsString()
-  numberOfRooms: number;
-
-  @IsOptional()
-  @Field({ nullable: true })
-  @IsBoolean()
-  pool: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  outdoorKitchen: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  garden: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  guestHouse: boolean;
-
-  @IsOptional()
-  @Field({ nullable: true })
-  @IsBoolean()
-  tennisCourt: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  basketballCourt: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  jacuzzi: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  bbqArea: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  maidsRoom: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  petAllowed: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  balcony: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  gym: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  playground: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  parking: boolean;
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  security: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  airConditioning: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  storageRoom: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  laundryRoom: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  conferenceRoom: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  gatedCommunity: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  indoorPlayArea: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  coveredParking: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  wifi: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  elevator: boolean;
 }
 
 @InputType()
