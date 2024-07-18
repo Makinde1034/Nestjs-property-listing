@@ -62,5 +62,5 @@ export class CreateSearchHistoryInput extends PaginateAndSort {
   @IsOptional()
   @Field({ nullable: true })
   @IsString()
-  listingType: string;
+  listingId: string;
 }

@@ -84,5 +84,6 @@ import { AuctionParticipantRepository } from './repositories/auction-participant
     AuctionRepository,
     AuctionParticipantRepository,
   ],
+  exports: [ListingTypeService],
 })
 export class ListingModule {}

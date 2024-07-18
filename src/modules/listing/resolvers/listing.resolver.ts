@@ -9,7 +9,6 @@ import {
   AdminFilterAndSort,
   CreateListingDto,
   FlagListingInput,
-  UpdateListingAdminDto,
   UpdateListingDto,
 } from '../dtos/request/';
 
@@ -90,7 +89,9 @@ export class ListingResolver {
     findManyOptions?: CreateSearchHistoryInput,
   ) {
     const [listing, total] =
-      await this.listingService.findAllListings(findManyOptions);
+      await this.listingService.findAllListingForUnauthenticated(
+        findManyOptions,
+      );
 
     return { listing, total };
   }
@@ -280,15 +281,6 @@ export class ListingResolver {
     @Args('paginateAndSort') paginateAndSort: AdminFilterAndSort,
   ) {
     return await this.listingService.getListingForAdmin(paginateAndSort);
-  }
-
-  // @UseGuards(AdminGuard)
-  // @UseGuards(AccessTokenGuard)
-  // @Mutation(() => Listing, { name: 'adminUpdateListing' })
-  async adminUpdateListing(
-    @Args('adminUpdateListingDto') updateListingDto: UpdateListingAdminDto,
-  ) {
-    return await this.listingService.editListingForAdmin(updateListingDto);
   }
 
   @UseGuards(AdminGuard)

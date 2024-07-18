@@ -10,10 +10,12 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  OneToMany,
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
 import { AttributeSet } from './attribute-set.entity';
+import { Listing } from './listing.entity';
 
 @Entity()
 @ObjectType()
@@ -25,6 +27,10 @@ export class ListingType extends BaseEntity {
   @Column({ nullable: true })
   @Field({ nullable: true })
   icon: string;
+
+  @Field(() => Listing)
+  @OneToMany(() => Listing, (listing) => listing.listingType)
+  listing: Listing;
 
   @Field(() => [AttributeSet])
   @ManyToMany(() => AttributeSet, (attribute) => attribute.listingTypes, {

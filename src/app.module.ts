@@ -36,6 +36,7 @@ import { PaymentModule } from './modules/payment/payment.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { JobService } from './modules/in-app-services/job.scheduler';
 import { WebHookModule } from './modules/webhook/web-hook.module';
+import { DynamicEnumService } from './modules/app/services/dynamic-enum.services';
 
 @Module({
   imports: [
@@ -96,6 +97,6 @@ import { WebHookModule } from './modules/webhook/web-hook.module';
     WebHookModule,
   ],
   controllers: [],
-  providers: [AppResolver, JobService],
+  providers: [AppResolver, JobService, DynamicEnumService],
 })
 export class AppModule {}

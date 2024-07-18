@@ -17,8 +17,6 @@ import {
   AdminFilterAndSort,
   CreateListingDto,
   FlagListingInput,
-  UpdateListingAdminDto,
-  UpdateListingDto,
 } from '../dtos/request/listing.dto';
 import { User } from '../../../entities';
 
@@ -74,11 +72,12 @@ export class ListingService {
   async createListing(user: User, createListingDto: CreateListingDto) {
     try {
       createListingDto.userId = user.id;
+
       const gpsCoordinate = JSON.stringify(createListingDto.gpsCoordinate);
 
       const listing = await this.listingRepository.create({
         ...createListingDto,
-        gpsCoordinates: gpsCoordinate,
+        gpsCoordinate: gpsCoordinate,
       });
 
       return listing;
@@ -114,12 +113,14 @@ export class ListingService {
     }
   }
 
-  async findAllListings(paginateAndSort: CreateSearchHistoryInput) {
+  async findAllListingForUnauthenticated(
+    paginateAndSort: CreateSearchHistoryInput,
+  ) {
     try {
       // Destructure input parameters
       const {
         type,
-        listingType,
+        listingId,
         sortField,
         directionToSort,
         skip,
@@ -133,7 +134,8 @@ export class ListingService {
         take: initialTake,
       } = paginateAndSort;
 
-      // Ensure the take value does not exceed 20
+      // Ensures the take value does not exceed 20
+      // Ensures the take value does not exceed 20
       const take = Math.min(initialTake, 20);
 
       const featuredTake = Math.ceil(take / 3);
@@ -146,16 +148,14 @@ export class ListingService {
 
       // Define base where conditions
       const baseWhereConditions = {
-        isDisabled: false,
+        isListingDisabled: false,
         purpose: type,
         numberOfRooms: numberOfRooms ? In(numberOfRooms) : MoreThan(0),
-        numberOfBathrooms: numberOfBathrooms
-          ? In(numberOfBathrooms)
-          : MoreThan(0),
+        bathrooms: numberOfBathrooms ? In(numberOfBathrooms) : MoreThan(0),
         price: minPrice ? Between(minPrice, maxPrice) : MoreThan(0),
-        totalArea: minArea ? Between(minArea, maxArea) : MoreThan(0),
+        area: minArea ? Between(minArea, maxArea) : MoreThan(0),
         city: location,
-        listingType: listingType || undefined,
+        listingTypeId: listingId,
       };
 
       // Fetch listings
@@ -163,7 +163,7 @@ export class ListingService {
         take: featuredTake,
         skip: Math.ceil(skip / 3),
         order: { featureDate: 'ASC' },
-        where: { featured: true, ...baseWhereConditions },
+        where: { ...baseWhereConditions },
       });
 
       const [regularListings, total] =
@@ -185,10 +185,64 @@ export class ListingService {
   }
 
   async authenticatedFindAllListings(
-    data: CreateSearchHistoryInput,
+    paginateAndSort: CreateSearchHistoryInput,
     user: User,
   ) {
+    // Try {
+    //   Const listingTypeMappings = {
+    //     Villa,
+    //     Apartment,
+    //     Farm,
+    //     Land,
+    //     Building,
+    //   };
+    //   Await this.searchHistoryRepository.save({ ...data, user });
+
+    //   Const selectedAttributes = listingTypeMappings[data.listingType];
+    //   If (!selectedAttributes) {
+    //     Throw new BadRequestException(
+    //       `Invalid listing type: ${data.listingType}`,
+    //     );
+    //   }
+    //   Const listing = await this.listingRepository.findAndCount({
+    //     Where: {
+    //       Purpose: data.type,
+    //       NumberOfRooms: data.numberOfRooms,
+    //       NumberOfBathrooms: data.numberOfBathrooms,
+    //       // Price: LessThanOrEqual(parseInt(data.price)),
+    //       City: data.location,
+    //       ListingType: data.listingType,
+    //     },
+    //     Select: ['id', ...selectedAttributes],
+    //   });
+
+    //   Return listing;
+    // } catch (error) {
+    //   This.logger.log(error);
+
+    //   If (error instanceof HttpException) {
+    //     Throw error;
+    //   } else throw new BadRequestException(error.messages || error.data);
+    // }
+
     try {
+      // Destructure input parameters
+      const {
+        type,
+        listingId,
+        sortField,
+        directionToSort,
+        skip,
+        numberOfRooms,
+        numberOfBathrooms,
+        minPrice,
+        maxPrice,
+        minArea,
+        maxArea,
+        location,
+        take: initialTake,
+      } = paginateAndSort;
+
       const listingTypeMappings = {
         villa,
         apartment,
@@ -196,33 +250,64 @@ export class ListingService {
         land,
         building,
       };
-      await this.searchHistoryRepository.save({ ...data, user });
+      await this.searchHistoryRepository.save({ ...paginateAndSort, user });
 
-      const selectedAttributes = listingTypeMappings[data.listingType];
+      const selectedAttributes = listingTypeMappings[paginateAndSort.listingId];
       if (!selectedAttributes) {
         throw new BadRequestException(
-          `Invalid listing type: ${data.listingType}`,
+          `Invalid listing type: ${paginateAndSort.listingId}`,
         );
       }
-      const listing = await this.listingRepository.findAndCount({
-        where: {
-          purpose: data.type,
-          numberOfRooms: data.numberOfRooms,
-          numberOfBathrooms: data.numberOfBathrooms,
-          // Price: LessThanOrEqual(parseInt(data.price)),
-          city: data.location,
-          listingType: data.listingType,
-        },
-        select: ['id', ...selectedAttributes],
+
+      // Ensure the take value does not exceed 20
+      // Ensure the take value does not exceed 20
+      const take = Math.min(initialTake, 20);
+
+      const featuredTake = Math.ceil(take / 3);
+      const regularTake = take - featuredTake;
+
+      // Determine sorting options
+      const orderOptions = sortField
+        ? { [sortField]: directionToSort, listingDate: 'DESC' }
+        : { promotedDate: 'DESC' };
+
+      // Define base where conditions
+      const baseWhereConditions = {
+        isDisabled: false,
+        purpose: type,
+        numberOfRooms: numberOfRooms ? In(numberOfRooms) : MoreThan(0),
+        numberOfBathrooms: numberOfBathrooms
+          ? In(numberOfBathrooms)
+          : MoreThan(0),
+        price: minPrice ? Between(+minPrice, +maxPrice) : MoreThan(0),
+        totalArea: minArea ? Between(+minArea, +maxArea) : MoreThan(0),
+        city: location,
+        listingId: listingId || undefined,
+      };
+
+      // Fetch listings
+      const [featuredListings] = await this.listingRepository.findAndCount({
+        take: featuredTake,
+        skip: Math.ceil(skip / 3),
+        order: { featured: 'DESC' },
+        where: baseWhereConditions,
       });
 
-      return listing;
+      const [regularListings, total] =
+        await this.listingRepository.findAndCount({
+          take: regularTake,
+          skip,
+          order: orderOptions,
+          where: baseWhereConditions,
+        });
+
+      // Combine results
+      return [[...featuredListings, ...regularListings], total];
     } catch (error) {
       this.logger.log(error);
-
-      if (error instanceof HttpException) {
-        throw error;
-      } else throw new BadRequestException(error.messages || error.data);
+      throw error instanceof HttpException
+        ? error
+        : new BadRequestException(error.message);
     }
   }
 
@@ -258,7 +343,8 @@ export class ListingService {
       });
 
       listing.deedNumber = '';
-      listing.propertyNumber = '';
+      listing.zatcaNumber = '';
+      listing.iban = '';
 
       return listing;
     } catch (error) {
@@ -272,7 +358,11 @@ export class ListingService {
     }
   }
 
-  async updateListing(editListingDto: UpdateListingDto, user: User) {
+  async updateListing(
+    editListingDto,
+    // : UpdateListingDto
+    user: User,
+  ) {
     try {
       const subscribedUser: { id: string; name: string }[] = [];
       const { id, ...partialUpdatePayload } = editListingDto;
@@ -491,7 +581,7 @@ export class ListingService {
   async disableListing(listingId: string) {
     try {
       await this.listingRepository.update(listingId, {
-        isDisabled: true,
+        isListingDisabled: true,
       });
 
       return new SuccessResponse(AppStrings.LISTING_DISABLE_SUCCESSFULLY);
@@ -504,7 +594,7 @@ export class ListingService {
   async enableListing(listingId: string) {
     try {
       await this.listingRepository.update(listingId, {
-        isDisabled: false,
+        isListingDisabled: false,
       });
 
       return new SuccessResponse(AppStrings.LISTING_ENABLED_SUCCESSFULLY);
@@ -628,27 +718,32 @@ export class ListingService {
     }
   }
 
-  async getOneListingForAdmin(listingId: string) {
+  async getOneListingForAdmin(id: string) {
     try {
-      return await this.listingRepository.findOne({
-        where: { id: listingId },
-        relations: ['promotion'],
+      const listing = await this.listingRepository.findOne({
+        where: { id: id },
+        relations: ['user', 'promotion', 'feature'],
       });
-    } catch (error) {
-      this.logger.log(error);
-      throw new BadRequestException(AppStrings.LISTING_NOT_FOUND);
-    }
-  }
 
-  async editListingForAdmin(editListingDto: UpdateListingAdminDto) {
-    try {
-      const listing = await this.listingRepository.update(
-        editListingDto.id,
-        editListingDto,
-      );
+      const newImpression = listing.impressions + 1;
+
+      await this.listingRepository.update(listing.id, {
+        impressions: newImpression,
+      });
+
+      listing.deedNumber = '';
+      listing.zatcaNumber = '';
+      listing.iban = '';
+
       return listing;
     } catch (error) {
-      throw new BadRequestException(error);
+      this.logger.log(error);
+      if (error instanceof HttpException) {
+        this.logger.log(error);
+
+        throw error;
+      } else
+        throw new BadRequestException(error.messages || error.data || error);
     }
   }
 
@@ -680,7 +775,7 @@ export class ListingService {
         const expirationDate = addDaysToDate(new Date(), formatedDays);
         await this.listingRepository.update(listing.id, {
           featureExpiration: expirationDate,
-          featured: true,
+          isListingFeatured: true,
           featureDate: new Date(),
         });
       }
