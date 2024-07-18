@@ -254,7 +254,7 @@ type Attribute {
   hiddenToBuyers: Boolean!
   isAmenity: Boolean
   showInComparison: Boolean!
-  isAmenities: String
+  isAmenities: Boolean
   showInFilters: Boolean!
   attributeSets: [AttributeSet!]!
   createdAt: DateTime!
@@ -524,7 +524,6 @@ type Query {
   listNotificationScopes: [NotificationScope!]!
   fetchListingTypes: [ListingType!]!
   fetchAttributes(findOptions: PaginateAndSort): [Attribute!]!
-  fetchAttributeSets: [AttributeSet!]!
   findListingsForBuyer(findManyOptions: CreateSearchHistoryInput): ListingResponse!
   findPromotedListings(findManyOptions: CreateSearchHistoryInput): ListingResponse!
   findListingsForOwner(findManyOptions: AttributeDto): ListingResponse!
@@ -857,7 +856,7 @@ input AttributeInput {
   englishName: String
   arabicName: String
   type: String!
-  isAmmenity: String
+  isAmenity: Boolean
   isRequired: Boolean!
   showInSummary: Boolean!
   hiddenToBuyers: Boolean!
@@ -870,7 +869,7 @@ input AttributeUpdateInput {
   englishName: String
   arabicName: String
   type: String
-  isAmmenity: String
+  isAmenity: Boolean
   isRequired: Boolean
   showInSummary: Boolean
   hiddenToBuyers: Boolean

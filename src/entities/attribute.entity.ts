@@ -59,7 +59,7 @@ export class Attribute extends BaseEntity {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
-  isAmenities: string;
+  isAmenities: boolean;
 
   @Column()
   @Field()

@@ -89,9 +89,8 @@ export class AttributeResolver {
    * @async
    * @returns {Promise<AttributeSet[]>}
    */
-  @Query(() => [AttributeSet])
-  @Permissions('read-attribute-set')
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  
+  
   async fetchAttributeSets(): Promise<AttributeSet[]> {
     return await this.attributeService.findAllAttributeSets();
   }
