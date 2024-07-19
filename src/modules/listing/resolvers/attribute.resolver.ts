@@ -89,7 +89,7 @@ export class AttributeResolver {
    * @async
    * @returns {Promise<AttributeSet[]>}
    */
-
+  @Query(() => [AttributeSet])
   async fetchAttributeSets(): Promise<AttributeSet[]> {
     return await this.attributeService.findAllAttributeSets();
   }

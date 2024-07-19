@@ -9,10 +9,12 @@ import {
   CreateDateColumn,
   Entity,
   ManyToMany,
+  OneToMany,
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
 import { AttributeSet } from './attribute-set.entity';
+import { ListingAttributes } from './listing-attributes.entity';
 
 @Entity()
 @ObjectType()
@@ -68,6 +70,13 @@ export class Attribute extends BaseEntity {
   @Field(() => [AttributeSet])
   @ManyToMany(() => AttributeSet, (set) => set.attributes)
   attributeSets: AttributeSet[];
+
+  @Field(() => Attribute)
+  @OneToMany(
+    () => ListingAttributes,
+    (listingAttributes) => listingAttributes.attribute,
+  )
+  listingAttribute: ListingAttributes;
 
   @Field()
   @CreateDateColumn()

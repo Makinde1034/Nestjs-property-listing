@@ -5,6 +5,7 @@
 
 import { Field, InputType, PartialType } from '@nestjs/graphql';
 import {
+  IsArray,
   IsBoolean,
   IsEnum,
   IsNotEmpty,
@@ -73,7 +74,12 @@ export class CreateListingDto {
 
   @Field()
   @IsString()
-  listingTypeId?: string;
+  listingTypeId: string;
+
+  @Field(() => [String])
+  @IsOptional()
+  @IsArray()
+  amenities: string[];
 
   @Field()
   @IsString()

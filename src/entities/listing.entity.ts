@@ -159,10 +159,11 @@ export class Listing extends BaseEntity {
   @Column({ type: 'jsonb', nullable: true })
   gpsCoordinate: string;
 
-  @Field(() => [ListingAttributes])
+  @Field(() => [ListingAttributes], { nullable: true })
   @OneToMany(
     () => ListingAttributes,
     (listingAttributes) => listingAttributes.listing,
+    { onDelete: 'CASCADE' },
   )
   listingAttributes: ListingAttributes[];
 
