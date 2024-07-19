@@ -59,10 +59,6 @@ export class Attribute extends BaseEntity {
   @Field()
   showInComparison: boolean;
 
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  isAmenities: boolean;
-
   @Column()
   @Field()
   showInFilters: boolean;

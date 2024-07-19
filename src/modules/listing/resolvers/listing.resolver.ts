@@ -30,7 +30,7 @@ import {
   UpdateOfferInput,
 } from '../dtos/request/offer-input';
 import { Offer } from '../../../entities/offer.entity';
-import { Amenities } from '../../../entities/amenities.entity';
+
 import { AttributeDto } from '../dtos/request/attributes.dto';
 import { CreatePromotionInput } from '../dtos/request/promotion-input';
 import { Promotion } from '../../../entities/promotion.entity';
@@ -89,24 +89,8 @@ export class ListingResolver {
     findManyOptions?: CreateSearchHistoryInput,
   ) {
     const [listing, total] =
-      await this.listingService.findAllListingForUnauthenticated(
+      await this.listingService.findAllListingForBuyerUnauthenticated(
         findManyOptions,
-      );
-
-    return { listing, total };
-  }
-
-  @UseGuards(AccessTokenGuard)
-  @Query(() => ListingResponse, { name: 'findPromotedListings' })
-  async findPromotedListingForBuyer(
-    @Context() ctx: any,
-    @Args('findManyOptions', { nullable: true })
-    findManyOptions?: CreateSearchHistoryInput,
-  ) {
-    const [listing, total] =
-      await this.listingService.authenticatedFindAllListings(
-        findManyOptions,
-        ctx.req.user,
       );
 
     return { listing, total };
@@ -127,10 +111,43 @@ export class ListingResolver {
     return { listing, total };
   }
 
+  @UseGuards(AdminGuard)
+  @UseGuards(AccessTokenGuard)
+  @Query(() => AdminListingResponse, { name: 'findListingsForAdmin' })
+  async getListingsForAdmin(
+    @Args('paginateAndSort', { nullable: true })
+    paginateAndSort: AdminFilterAndSort,
+  ) {
+    return await this.listingService.getListingForAdmin(paginateAndSort);
+  }
+
+  @UseGuards(AdminGuard)
+  @UseGuards(AccessTokenGuard)
+  @Query(() => Listing, { name: 'findOneListingForAdmin' })
+  async getOneListingForAdmin(@Args('id') id: string) {
+    return await this.listingService.getOneListingForAdmin(id);
+  }
+
   @UseGuards(AccessTokenGuard)
   @Query(() => Listing, { name: 'findOneForBuyer' })
   async findOneForBuyer(@Args('id') id: string) {
     return await this.listingService.findOneListingForBuyer(id);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Query(() => ListingResponse, { name: 'findListingForBuyerAuthenticated' })
+  async findListingForBuyerAuthenticated(
+    @Context() ctx: any,
+    @Args('findManyOptions', { nullable: true })
+    findManyOptions?: CreateSearchHistoryInput,
+  ) {
+    const [listing, total] =
+      await this.listingService.findListingForBuyerAuthenticated(
+        findManyOptions,
+        ctx.req.user,
+      );
+
+    return { listing, total };
   }
 
   @UseGuards(AccessTokenGuard)
@@ -146,7 +163,7 @@ export class ListingResolver {
   }
 
   @UseGuards(AccessTokenGuard)
-  // @UseGuards(AdminGuard)
+  @UseGuards(AdminGuard)
   @Query(() => FlaggedListingResponse, {
     nullable: true,
     name: 'viewFlaggedListings',
@@ -161,9 +178,51 @@ export class ListingResolver {
     });
   }
 
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => SuccessResponse, { name: 'flagListing' })
+  async flagListing(
+    @Context() ctx: any,
+    @Args('flagListingInput') flaglistingInput: FlagListingInput,
+  ) {
+    return await this.listingService.flagListing(
+      flaglistingInput,
+      ctx.req.user.id,
+    );
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Query(() => SuccessResponse, {
+    nullable: true,
+    name: 'getMessageInLocalLanguage',
+  })
+  getMessageInLocalLanguage(@Context() ctx: any) {
+    return this.listingService.shareListing(ctx.req.user);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @UseGuards(AdminGuard)
+  @Mutation(() => SuccessResponse, { name: 'deleteListing' })
+  async deleteListing(
+    @Context() ctx: any,
+    @Args('listingId') listingId: string,
+  ) {
+    return await this.listingService.deleteListing(ctx.req.user, listingId);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Query(() => [SearchHistory], {
+    nullable: true,
+    name: 'getSearchHistory',
+  })
+  async getSearchHistory(@Context() ctx: any) {
+    return await this.listingService.getSearchHistory(ctx.req.user.id);
+  }
+
   /*************************
+   *
    *Offer
-   *************************/
+   *
+   * ************************/
 
   @UseGuards(AccessTokenGuard)
   @Mutation(() => Offer, { name: 'createOffer', nullable: true })
@@ -212,14 +271,10 @@ export class ListingResolver {
     return await this.offerService.findMany(paginateAndSort);
   }
 
-  @Query(() => [Amenities], { name: 'findAmenities', nullable: true })
-  async findAmenities(
-    @Args('listingType', { nullable: true }) listingType: string,
-  ) {
-    return await this.listingService.findAmenities(listingType);
-  }
-  /*************************
+  /**************************
+   *
    *Promotion
+   *
    *************************/
 
   @UseGuards(AccessTokenGuard)
@@ -230,87 +285,9 @@ export class ListingResolver {
     return await this.listingService.createPromotion(createPromotionInput);
   }
 
-  @UseGuards(AccessTokenGuard)
-  @Mutation(() => SuccessResponse, { name: 'flagListing' })
-  async flagListing(
-    @Context() ctx: any,
-    @Args('flagListingInput') flaglistingInput: FlagListingInput,
-  ) {
-    return await this.listingService.flagListing(
-      flaglistingInput,
-      ctx.req.user.id,
-    );
-  }
-
-  @UseGuards(AccessTokenGuard)
-  @Query(() => SuccessResponse, {
-    nullable: true,
-    name: 'getMessageInLocalLanguage',
-  })
-  getMessageInLocalLanguage(@Context() ctx: any) {
-    return this.listingService.shareListing(ctx.req.user);
-  }
-
-  @UseGuards(AccessTokenGuard)
-  @UseGuards(AdminGuard)
-  @Mutation(() => SuccessResponse, { name: 'deleteListing' })
-  async deleteListing(@Args('listingId') listingId: string) {
-    return await this.listingService.deleteListing(listingId);
-  }
-
-  @UseGuards(AccessTokenGuard)
-  @Query(() => [SearchHistory], {
-    nullable: true,
-    name: 'getSearchHistory',
-  })
-  async getSearchHistory(@Context() ctx: any) {
-    return await this.listingService.getSearchHistory(ctx.req.user.id);
-  }
-
-  @UseGuards(AdminGuard)
-  @UseGuards(AccessTokenGuard)
-  @Query(() => Listing, { name: 'findOneListingsForAdmin' })
-  async getOneListingsForAdmin(@Args('listingId') listingId: string) {
-    return await this.listingService.getOneListingForAdmin(listingId);
-  }
-
-  @UseGuards(AdminGuard)
-  @UseGuards(AccessTokenGuard)
-  @Query(() => AdminListingResponse, { name: 'findListingsForAdmin' })
-  async getListingsForAdmin(
-    @Args('paginateAndSort') paginateAndSort: AdminFilterAndSort,
-  ) {
-    return await this.listingService.getListingForAdmin(paginateAndSort);
-  }
-
-  @UseGuards(AdminGuard)
-  @UseGuards(AccessTokenGuard)
-  @Mutation(() => SuccessResponse, { name: 'adminDisableListing' })
-  async adminDisableListing(@Args('listingId') listingId: string) {
-    return await this.listingService.disableListing(listingId);
-  }
-  @UseGuards(AdminGuard)
-  @UseGuards(AccessTokenGuard)
-  @Mutation(() => SuccessResponse, { name: 'enableListing' })
-  async adminEnableListing(@Args('listingId') listingId: string) {
-    return await this.listingService.enableListing(listingId);
-  }
-  @UseGuards(AdminGuard)
-  @UseGuards(AccessTokenGuard)
-  @Mutation(() => SuccessResponse, { name: 'deleteListing' })
-  async adminDeleteListing(@Args('listingId') listingId: string) {
-    return await this.listingService.deleteListing(listingId);
-  }
-
-  @UseGuards(AdminGuard)
-  @UseGuards(AccessTokenGuard)
-  @Mutation(() => Feature, { name: 'createFeature' })
-  async createFeature(
-    @Args('createFeatureInput') createFeatureInput: CreateFeatureInput,
-  ) {
-    return await this.listingService.featureAListing(createFeatureInput);
-  }
-
+  /*************************
+   * WISHLIST
+   *************************/
   @UseGuards(AccessTokenGuard)
   @Mutation(() => Wishlist, { name: 'addToWishlist' })
   async addToWishist(
@@ -330,6 +307,50 @@ export class ListingResolver {
   @Query(() => [Wishlist], { name: 'getWishlist' })
   async getUserWishlist(@Context() ctx: any) {
     return await this.wishlistService.getWishList(ctx.req.user);
+  }
+
+  /*******************************************
+   *
+   * ADMIN
+   *
+   ********************************************/
+
+  @UseGuards(AdminGuard)
+  @UseGuards(AccessTokenGuard)
+  @Query(() => Listing, { name: 'findOneListingsForAdmin' })
+  async getOneListingsForAdmin(@Args('listingId') listingId: string) {
+    return await this.listingService.getOneListingForAdmin(listingId);
+  }
+
+  @UseGuards(AdminGuard)
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => SuccessResponse, { name: 'adminDisableListing' })
+  async adminDisableListing(@Args('listingId') listingId: string) {
+    return await this.listingService.disableListing(listingId);
+  }
+  @UseGuards(AdminGuard)
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => SuccessResponse, { name: 'enableListing' })
+  async adminEnableListing(@Args('listingId') listingId: string) {
+    return await this.listingService.enableListing(listingId);
+  }
+  @UseGuards(AdminGuard)
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => SuccessResponse, { name: 'deleteListing' })
+  async adminDeleteListing(
+    @Context() ctx: any,
+    @Args('listingId') listingId: string,
+  ) {
+    return await this.listingService.deleteListing(ctx.req.user, listingId);
+  }
+
+  @UseGuards(AdminGuard)
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => Feature, { name: 'createFeature' })
+  async createFeature(
+    @Args('createFeatureInput') createFeatureInput: CreateFeatureInput,
+  ) {
+    return await this.listingService.featureAListing(createFeatureInput);
   }
 
   @UseGuards(AdminGuard)

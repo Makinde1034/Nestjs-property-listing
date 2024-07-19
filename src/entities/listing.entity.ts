@@ -260,6 +260,10 @@ export class Listing extends BaseEntity {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
+  furnished: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   promotedDate: Date;
 
   @Column({ nullable: true })

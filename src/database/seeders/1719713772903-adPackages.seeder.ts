@@ -21,9 +21,9 @@ export class AdPackages1719713772903 implements Seeder {
       factoryManager,
     );
     const repository = dataSource.getRepository(AdPackage);
-    const adPackage = await Promise.all([repository.find()]);
+    const adPackage = await repository.find();
 
-    if (adPackage[0].length > 0) {
+    if (adPackage.length > 0) {
       this.logger.debug(
         `Seeding for: ${AdPackages1719713772903.name} Already completed`,
       );
