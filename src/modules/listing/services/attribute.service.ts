@@ -27,6 +27,10 @@ export class AttributeService {
     private readonly storageService: StorageService,
   ) {}
 
+  async findOne(id: string) {
+    return await this.attributeRepository.findOneOrFail({ where: { id: id } });
+  }
+
   /**
    * List Attributes
    *
@@ -41,7 +45,7 @@ export class AttributeService {
       whereOption = { [where.fieldToChose]: where.whereParam };
     }
 
-    return await this.attributeRepository.findAll({ where: whereOption });
+    return await this.attributeRepository.find({ where: whereOption });
   }
 
   /**
@@ -63,7 +67,7 @@ export class AttributeService {
       const imageurl = await this.storageService.upload(icon);
       attributeData.icon = imageurl;
     }
-    return await this.attributeRepository.create(attributeData);
+    return this.attributeRepository.create(attributeData);
   }
 
   async uploadAttributeIcon(
@@ -75,7 +79,12 @@ export class AttributeService {
       // Upload icon image
       imageurl = await this.storageService.upload(icon);
     }
-    return await this.attributeRepository.update(id, { icon: imageurl });
+    const update = await this.attributeRepository.update(id, {
+      icon: imageurl,
+    });
+    if (update.affected > 0) {
+      return this.attributeRepository.findOneOrFail({ where: { id: id } });
+    }
   }
 
   /**
@@ -97,8 +106,17 @@ export class AttributeService {
       // Upload icon image
       const imageurl = await this.storageService.upload(icon);
       attributeData.icon = imageurl;
+
+      const update = await this.attributeRepository.update(
+        data.id,
+        attributeData,
+      );
+      if (update.affected > 0) {
+        return this.attributeRepository.findOneOrFail({
+          where: { id: data.id },
+        });
+      }
     }
-    return await this.attributeRepository.update(data.id, attributeData);
   }
 
   /**
@@ -109,9 +127,10 @@ export class AttributeService {
    * @returns {Promise<string>}
    */
   async deleteAttribute(data: AttributeDeleteInput): Promise<string> {
-    const attribute = await this.attributeRepository.findByIdOrFail(data.id, [
-      'attributeSets',
-    ]);
+    const attribute = await this.attributeRepository.findOneOrFail({
+      where: { id: data.id },
+      relations: ['attributeSets'],
+    });
     if (attribute.attributeSets && attribute.attributeSets.length > 0) {
       throw new BadRequestException(AppStrings.UNABLE_TO_DELETE_ATTRIBUTE);
     }
@@ -137,7 +156,7 @@ export class AttributeService {
    * @returns {Promise<AttributeSet>}
    */
   async createAttributeSet(input: AttributeSetInput): Promise<AttributeSet> {
-    const attributes = await this.attributeRepository.findAll({
+    const attributes = await this.attributeRepository.find({
       where: { id: In([...input.attributes]) },
     });
     const data: Partial<AttributeSet> = {
@@ -158,7 +177,7 @@ export class AttributeService {
   async updateAttributeSet(
     input: AttributeSetUpdateInput,
   ): Promise<AttributeSet> {
-    const attributes = await this.attributeRepository.findAll({
+    const attributes = await this.attributeRepository.find({
       where: { id: In([...input.attributes]) },
     });
     const data: Partial<AttributeSet> = {

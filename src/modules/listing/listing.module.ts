@@ -39,6 +39,7 @@ import { NotificationModule } from '../notification/notification.module';
 import { AuctionService } from './services/auction.service';
 import { AuctionRepository } from './repositories/auction.repository';
 import { AuctionParticipantRepository } from './repositories/auction-participant.repository';
+import { ListingAttributeRepository } from './repositories/listing-attributes.repository';
 
 @Module({
   imports: [
@@ -83,6 +84,7 @@ import { AuctionParticipantRepository } from './repositories/auction-participant
     AuctionService,
     AuctionRepository,
     AuctionParticipantRepository,
+    ListingAttributeRepository,
   ],
   exports: [ListingTypeService],
 })

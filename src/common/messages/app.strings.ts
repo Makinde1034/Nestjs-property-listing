@@ -70,6 +70,8 @@ export const AppStrings = {
 
   LISTING_NOT_FOUND: 'Listing not found',
 
+  LISTING_TYPE_NOT_FOUND: 'Listing Type not found',
+
   UPLOAD_SUCCESSFUL: 'Upload successful',
 
   INTERNAL_SERVER_EXCEPTION:

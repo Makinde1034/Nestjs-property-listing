@@ -53,6 +53,10 @@ import {
 import { FeatureRepository } from '../repositories/feature.repository';
 import { CreateFeatureInput } from '../dtos/request/feature-input';
 import { NotificationService } from '../../notification/services';
+import { AttributeService } from './attribute.service';
+import { ListingAttributes } from '../../../entities/listing-attributes.entity';
+import { ListingAttributeRepository } from '../repositories/listing-attributes.repository';
+import { ListingTypeService } from './listing-type.service';
 
 @Injectable()
 export class ListingService {
@@ -65,25 +69,58 @@ export class ListingService {
     private readonly adpackageService: AdPackageService,
     private readonly flagListingRepository: FlagListingRepository,
     private readonly i18n: I18nService,
+    private readonly attributeService: AttributeService,
     private searchHistoryRepository: SearchHistoryRepository,
     private pushNotification: NotificationService,
+    private listingTypeService: ListingTypeService,
+    private readonly listingAttributesRepository: ListingAttributeRepository,
   ) {}
   logger = new Logger(ListingService.name);
+
   async createListing(user: User, createListingDto: CreateListingDto) {
     try {
       createListingDto.userId = user.id;
+      const attributes: ListingAttributes[] = [];
+      const { amenities, ...rest } = createListingDto;
+      const listingType = await this.listingTypeService.findOne(
+        createListingDto.listingTypeId,
+      );
+      if (!listingType) {
+        throw new BadRequestException(AppStrings.LISTING_TYPE_NOT_FOUND);
+      }
 
       const gpsCoordinate = JSON.stringify(createListingDto.gpsCoordinate);
 
       const listing = await this.listingRepository.create({
-        ...createListingDto,
+        ...rest,
         gpsCoordinate: gpsCoordinate,
       });
+
+      const attributePromises = amenities.map(async (amenity) => {
+        const attribute = await this.attributeService.findOne(amenity);
+
+        if (attribute) {
+          const newAttribute: Partial<ListingAttributes> = {
+            listing,
+            attribute,
+          };
+          const createEntity =
+            this.listingAttributesRepository.create(newAttribute);
+          attributes.push(createEntity);
+        }
+      });
+
+      await Promise.all(attributePromises);
+
+      await this.listingAttributesRepository.insert(attributes);
 
       return listing;
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error.data || error.messages);
+      throw new BadRequestException(
+        error.data || error.messages,
+        error.response.message,
+      );
     }
   }
 
@@ -164,6 +201,7 @@ export class ListingService {
         skip: Math.ceil(skip / 3),
         order: { featureDate: 'ASC' },
         where: { ...baseWhereConditions },
+        relations: ['listingAttributes'],
       });
 
       const [regularListings, total] =
@@ -172,6 +210,7 @@ export class ListingService {
           skip,
           order: orderOptions,
           where: baseWhereConditions,
+          relations: ['listingAttributes'],
         });
 
       // Combine results
@@ -188,43 +227,6 @@ export class ListingService {
     paginateAndSort: CreateSearchHistoryInput,
     user: User,
   ) {
-    // Try {
-    //   Const listingTypeMappings = {
-    //     Villa,
-    //     Apartment,
-    //     Farm,
-    //     Land,
-    //     Building,
-    //   };
-    //   Await this.searchHistoryRepository.save({ ...data, user });
-
-    //   Const selectedAttributes = listingTypeMappings[data.listingType];
-    //   If (!selectedAttributes) {
-    //     Throw new BadRequestException(
-    //       `Invalid listing type: ${data.listingType}`,
-    //     );
-    //   }
-    //   Const listing = await this.listingRepository.findAndCount({
-    //     Where: {
-    //       Purpose: data.type,
-    //       NumberOfRooms: data.numberOfRooms,
-    //       NumberOfBathrooms: data.numberOfBathrooms,
-    //       // Price: LessThanOrEqual(parseInt(data.price)),
-    //       City: data.location,
-    //       ListingType: data.listingType,
-    //     },
-    //     Select: ['id', ...selectedAttributes],
-    //   });
-
-    //   Return listing;
-    // } catch (error) {
-    //   This.logger.log(error);
-
-    //   If (error instanceof HttpException) {
-    //     Throw error;
-    //   } else throw new BadRequestException(error.messages || error.data);
-    // }
-
     try {
       // Destructure input parameters
       const {

@@ -155,6 +155,12 @@ type Wishlist {
   updatedAt: DateTime!
 }
 
+type ListingAttributes {
+  id: ID!
+  listing: Listing!
+  attribute: Attribute!
+}
+
 type Attribute {
   id: ID!
   englishName: String
@@ -170,6 +176,7 @@ type Attribute {
   isAmenities: Boolean
   showInFilters: Boolean!
   attributeSets: [AttributeSet!]!
+  listingAttribute: Attribute!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -192,11 +199,6 @@ type ListingType {
   attributeSets: [AttributeSet!]!
   createdAt: DateTime!
   updatedAt: DateTime!
-}
-
-type ListingAttributes {
-  id: ID!
-  listing: Listing!
 }
 
 type Listing {
@@ -233,7 +235,7 @@ type Listing {
   roomsPerApartment: Float
   apartmentInBuilding: String
   gpsCoordinate: String
-  listingAttributes: [ListingAttributes!]!
+  listingAttributes: [ListingAttributes!]
   images: String
   panoramaView: [String!]
   user: User
@@ -507,6 +509,7 @@ type Query {
   listNotificationScopes: [NotificationScope!]!
   fetchListingTypes: [ListingType!]!
   fetchAttributes(findOptions: PaginateAndSort): [Attribute!]!
+  fetchAttributeSets: [AttributeSet!]!
   findListingsForBuyer(findManyOptions: CreateSearchHistoryInput): ListingResponse!
   findPromotedListings(findManyOptions: CreateSearchHistoryInput): ListingResponse!
   findListingsForOwner(findManyOptions: AttributeDto): ListingResponse!
@@ -889,6 +892,7 @@ input CreateListingDto {
   iban: String!
   zatcaNumber: String!
   listingTypeId: String!
+  amenities: [String!]!
   address: String!
   city: String!
   country: String!
@@ -930,6 +934,7 @@ input UpdateListingDto {
   iban: String
   zatcaNumber: String
   listingTypeId: String
+  amenities: [String!]
   address: String
   city: String
   country: String

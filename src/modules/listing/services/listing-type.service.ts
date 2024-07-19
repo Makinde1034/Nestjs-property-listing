@@ -23,6 +23,10 @@ export class ListingTypeService {
     private readonly storageService: StorageService,
   ) {}
 
+  async findOne(id: string) {
+    return await this.listingTypeRepository.findById(id);
+  }
+
   /**
    * List Listing Types
    *
