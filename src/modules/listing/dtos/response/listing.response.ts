@@ -35,6 +35,9 @@ export class ListingAnalysisResponse {
   promoted: number;
   @Field()
   sold: number;
+
+  @Field()
+  rented: number;
 }
 
 @ObjectType()

@@ -19,9 +19,9 @@ export class Issue1720110596406 implements Seeder {
     this.logger.debug(`Seeding For : ${Issue.name}...`, factoryManager);
     const repository = dataSource.getRepository(Issue);
 
-    const issue = await Promise.all([repository.find()]);
+    const issue = await repository.find();
 
-    if (issue[0].length > 0) {
+    if (issue.length > 0) {
       this.logger.debug(`Seeding for: ${Issue.name} Already completed`);
     } else {
       await repository.save(IssueFactory as Partial<Issue>);

@@ -10,7 +10,6 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
-  UnprocessableEntityException,
 } from '@nestjs/common';
 import { ListingRepository } from '../repositories/listing.repository';
 import {
@@ -24,7 +23,6 @@ import { ForbiddenError } from '@nestjs/apollo';
 import { StorageService } from '../../file-handler/services/storage.service';
 
 import { AmenitiesRepository } from '../repositories/amenities.repository';
-import { apartment, villa, farm, land, building } from '../constant/attributes';
 import { AttributeDto } from '../dtos/request/attributes.dto';
 import { CreatePromotionInput } from '../dtos/request/promotion-input';
 import { PromotionRepository } from '../repositories/promotion.repository';
@@ -32,7 +30,7 @@ import { PromotionRepository } from '../repositories/promotion.repository';
 import { AdPackageService } from '../../ad-package/services/ad-package.service';
 import { Between, In, MoreThan, QueryFailedError } from 'typeorm';
 
-import { addDaysToDate, toCamelCase } from '../../../common/utils/helper';
+import { addDaysToDate } from '../../../common/utils/helper';
 import { FlagListingRepository } from '../repositories/flag-listing.repository';
 import { AppStrings } from '../../../common/messages/app.strings';
 import { SuccessResponse } from '../../../common/utils/success.response';
@@ -57,6 +55,7 @@ import { AttributeService } from './attribute.service';
 import { ListingAttributes } from '../../../entities/listing-attributes.entity';
 import { ListingAttributeRepository } from '../repositories/listing-attributes.repository';
 import { ListingTypeService } from './listing-type.service';
+import { FurnishingStatusEnum } from '../../../common/enums';
 
 @Injectable()
 export class ListingService {
@@ -98,7 +97,11 @@ export class ListingService {
 
       const attributePromises = amenities.map(async (amenity) => {
         const attribute = await this.attributeService.findOne(amenity);
-
+        if (!attribute) {
+          throw new BadRequestException(
+            `${amenity} is ` + AppStrings.N0T_AN_AMENITY,
+          );
+        }
         if (attribute) {
           const newAttribute: Partial<ListingAttributes> = {
             listing,
@@ -113,6 +116,46 @@ export class ListingService {
       await Promise.all(attributePromises);
 
       await this.listingAttributesRepository.insert(attributes);
+
+      /*
+        Calculate furnished status from number of amenities added
+        compared to number of amenities in listing type
+       */
+      const furnishedValue = listingType.attributeSets.length;
+
+      let furnishedStatus = furnishedValue == attributes.length;
+      if (!furnishedStatus) {
+        const furnishedPercent = (furnishedValue * 100) / 60;
+
+        if (attributes.length >= furnishedPercent) {
+          furnishedStatus = false;
+        } else {
+          furnishedStatus = null;
+        }
+      }
+
+      switch (furnishedStatus) {
+        case true:
+          await this.listingRepository.update(listing.id, {
+            furnished: FurnishingStatusEnum.ALL_FURNISHED,
+          });
+
+          break;
+
+        case false:
+          await this.listingRepository.update(listing.id, {
+            furnished: FurnishingStatusEnum.FURNISHED,
+          });
+
+          break;
+
+        case null:
+          await this.listingRepository.update(listing.id, {
+            furnished: FurnishingStatusEnum.UN_FURNISHED,
+          });
+
+          break;
+      }
 
       return listing;
     } catch (error) {
@@ -137,7 +180,7 @@ export class ListingService {
         take,
         skip,
         where: { userId: user.id },
-        relations: ['offer'],
+        relations: ['listingAttributes', 'listingType'],
         order: orderOptions,
       });
 
@@ -150,10 +193,67 @@ export class ListingService {
     }
   }
 
-  async findAllListingForUnauthenticated(
+  /***************************
+   * Buyers
+   ***************************/
+
+  async findAllListingForBuyerUnauthenticated(
     paginateAndSort: CreateSearchHistoryInput,
   ) {
     try {
+      const selectOptions = {
+        id: true,
+
+        name: true,
+        purpose: true,
+        rentingOption: true,
+
+        listingType: {
+          id: true,
+          name: true,
+        },
+        featureDate: true,
+        promotedDate: true,
+
+        listingTypeId: true,
+        address: true,
+        city: true,
+        country: true,
+
+        street: true,
+        district: true,
+        floor: true,
+        buildingNumber: true,
+        apartmentNumber: true,
+        villaAndFarmNumber: true,
+        area: true,
+        totalArea: true,
+        garageArea: true,
+        numberOfRooms: true,
+        bathrooms: true,
+        numberOfStoreys: true,
+        areaPerApartment: true,
+        bathsroomPerApartment: true,
+        numberOfRentedApartments: true,
+        roomsPerApartment: true,
+        apartmentInBuilding: true,
+        gpsCoordinate: true,
+        listingAttributes: true,
+        images: true,
+        panoramaView: true,
+        offer: true,
+        impressions: true,
+        isListingPromoted: true,
+        isListingFlagged: true,
+        isListingSold: true,
+        isListingRented: true,
+        isListingFeatured: true,
+        isListingDisabled: true,
+        negotiable: true,
+        createdAt: true,
+        deletedAt: true,
+        updatedAt: true,
+      };
       // Destructure input parameters
       const {
         type,
@@ -168,11 +268,12 @@ export class ListingService {
         minArea,
         maxArea,
         location,
+        furnishing,
         take: initialTake,
       } = paginateAndSort;
 
       // Ensures the take value does not exceed 20
-      // Ensures the take value does not exceed 20
+
       const take = Math.min(initialTake, 20);
 
       const featuredTake = Math.ceil(take / 3);
@@ -192,6 +293,7 @@ export class ListingService {
         price: minPrice ? Between(minPrice, maxPrice) : MoreThan(0),
         area: minArea ? Between(minArea, maxArea) : MoreThan(0),
         city: location,
+        furnished: furnishing,
         listingTypeId: listingId,
       };
 
@@ -202,6 +304,7 @@ export class ListingService {
         order: { featureDate: 'ASC' },
         where: { ...baseWhereConditions },
         relations: ['listingAttributes'],
+        select: selectOptions,
       });
 
       const [regularListings, total] =
@@ -211,6 +314,7 @@ export class ListingService {
           order: orderOptions,
           where: baseWhereConditions,
           relations: ['listingAttributes'],
+          select: selectOptions,
         });
 
       // Combine results
@@ -223,11 +327,64 @@ export class ListingService {
     }
   }
 
-  async authenticatedFindAllListings(
+  async findListingForBuyerAuthenticated(
     paginateAndSort: CreateSearchHistoryInput,
     user: User,
   ) {
     try {
+      const selectOptions = {
+        id: true,
+
+        name: true,
+        purpose: true,
+        rentingOption: true,
+
+        listingType: {
+          id: true,
+          name: true,
+        },
+        featureDate: true,
+        promotedDate: true,
+
+        listingTypeId: true,
+        address: true,
+        city: true,
+        country: true,
+        price: true,
+        street: true,
+        district: true,
+        floor: true,
+        buildingNumber: true,
+        apartmentNumber: true,
+        villaAndFarmNumber: true,
+        area: true,
+        totalArea: true,
+        garageArea: true,
+        numberOfRooms: true,
+        bathrooms: true,
+        numberOfStoreys: true,
+        areaPerApartment: true,
+        bathsroomPerApartment: true,
+        numberOfRentedApartments: true,
+        roomsPerApartment: true,
+        apartmentInBuilding: true,
+        gpsCoordinate: true,
+        listingAttributes: true,
+        images: true,
+        panoramaView: true,
+        offer: true,
+        impressions: true,
+        isListingPromoted: true,
+        isListingFlagged: true,
+        isListingSold: true,
+        isListingRented: true,
+        isListingFeatured: true,
+        isListingDisabled: true,
+        negotiable: true,
+        createdAt: true,
+        deletedAt: true,
+        updatedAt: true,
+      };
       // Destructure input parameters
       const {
         type,
@@ -242,27 +399,14 @@ export class ListingService {
         minArea,
         maxArea,
         location,
+        furnishing,
         take: initialTake,
       } = paginateAndSort;
 
-      const listingTypeMappings = {
-        villa,
-        apartment,
-        farm,
-        land,
-        building,
-      };
       await this.searchHistoryRepository.save({ ...paginateAndSort, user });
 
-      const selectedAttributes = listingTypeMappings[paginateAndSort.listingId];
-      if (!selectedAttributes) {
-        throw new BadRequestException(
-          `Invalid listing type: ${paginateAndSort.listingId}`,
-        );
-      }
+      // Ensures the take value does not exceed 20
 
-      // Ensure the take value does not exceed 20
-      // Ensure the take value does not exceed 20
       const take = Math.min(initialTake, 20);
 
       const featuredTake = Math.ceil(take / 3);
@@ -270,29 +414,30 @@ export class ListingService {
 
       // Determine sorting options
       const orderOptions = sortField
-        ? { [sortField]: directionToSort, listingDate: 'DESC' }
-        : { promotedDate: 'DESC' };
+        ? { [sortField]: directionToSort }
+        : { promotedDate: 'ASC', isListingPromoted: true };
 
       // Define base where conditions
       const baseWhereConditions = {
-        isDisabled: false,
+        isListingDisabled: false,
         purpose: type,
         numberOfRooms: numberOfRooms ? In(numberOfRooms) : MoreThan(0),
-        numberOfBathrooms: numberOfBathrooms
-          ? In(numberOfBathrooms)
-          : MoreThan(0),
-        price: minPrice ? Between(+minPrice, +maxPrice) : MoreThan(0),
-        totalArea: minArea ? Between(+minArea, +maxArea) : MoreThan(0),
+        bathrooms: numberOfBathrooms ? In(numberOfBathrooms) : MoreThan(0),
+        price: minPrice ? Between(minPrice, maxPrice) : MoreThan(0),
+        area: minArea ? Between(minArea, maxArea) : MoreThan(0),
         city: location,
-        listingId: listingId || undefined,
+        furnished: furnishing,
+        listingTypeId: listingId,
       };
 
       // Fetch listings
       const [featuredListings] = await this.listingRepository.findAndCount({
         take: featuredTake,
         skip: Math.ceil(skip / 3),
-        order: { featured: 'DESC' },
-        where: baseWhereConditions,
+        order: { featureDate: 'ASC' },
+        where: { ...baseWhereConditions },
+        relations: ['listingAttributes'],
+        select: selectOptions,
       });
 
       const [regularListings, total] =
@@ -301,6 +446,8 @@ export class ListingService {
           skip,
           order: orderOptions,
           where: baseWhereConditions,
+          relations: ['listingAttributes'],
+          select: selectOptions,
         });
 
       // Combine results
@@ -313,12 +460,144 @@ export class ListingService {
     }
   }
 
+  async getListingForAdmin(paginateAndSort: AdminFilterAndSort) {
+    try {
+      const orderOptions = {
+        [paginateAndSort.sortField]: paginateAndSort.directionToSort,
+      };
+
+      const now = new Date();
+      let whereCondition: any = {};
+
+      // Specific field to filter by time period
+      const dateField = 'createdAt';
+
+      switch (paginateAndSort.timePeriod) {
+        case 'today':
+          whereCondition[dateField] = Between(startOfDay(now), endOfDay(now));
+          break;
+        case 'week':
+          whereCondition[dateField] = Between(startOfWeek(now), endOfWeek(now));
+          break;
+        case 'month':
+          whereCondition[dateField] = Between(
+            startOfMonth(now),
+            endOfMonth(now),
+          );
+          break;
+        case 'year':
+          whereCondition[dateField] = Between(startOfYear(now), endOfYear(now));
+          break;
+        default:
+          whereCondition = {};
+      }
+
+      whereCondition = {
+        ...whereCondition,
+        isListingPromoted: paginateAndSort.isListinPromoted,
+        isListingSold: paginateAndSort.isListingSold,
+        isListingFlagged: paginateAndSort.isListingFlagged,
+        isListingRented: paginateAndSort.isListingSold,
+      };
+      const [listing, total, flagged, promoted, sold, rented] =
+        await Promise.all([
+          this.listingRepository.findAll({
+            where: whereCondition,
+            relations: ['user'],
+            select: {
+              user: {
+                firstName: true,
+                lastName: true,
+                language: true,
+                arabicFirstName: true,
+                arabicLastName: true,
+                userType: true,
+              },
+            },
+
+            order: orderOptions,
+            skip: paginateAndSort.skip,
+            take: paginateAndSort.take,
+          }),
+          this.listingRepository.count({ where: whereCondition }),
+          this.listingRepository.count({ where: { isListingFlagged: true } }),
+          this.listingRepository.count({ where: { isListingPromoted: true } }),
+          this.listingRepository.count({
+            where: { isListingSold: true },
+          }),
+          this.listingRepository.count({
+            where: { isListingRented: true },
+          }),
+        ]);
+
+      const analysis = {
+        flagged,
+        promoted,
+        sold,
+        rented,
+      };
+
+      return { listing, analysis, total };
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
   async findOneListingForBuyer(id: string) {
     try {
       const listing = await this.listingRepository.findOne({
         where: { id: id },
-        relations: ['user', 'promotion', 'wishlist'],
+        relations: ['listingType', 'listingAttributes'],
         select: {
+          id: true,
+
+          name: true,
+          purpose: true,
+          rentingOption: true,
+
+          featureDate: true,
+          promotedDate: true,
+
+          listingTypeId: true,
+          address: true,
+          city: true,
+          country: true,
+          price: true,
+          street: true,
+          district: true,
+          floor: true,
+          buildingNumber: true,
+          apartmentNumber: true,
+          villaAndFarmNumber: true,
+          area: true,
+          totalArea: true,
+          garageArea: true,
+          numberOfRooms: true,
+          bathrooms: true,
+          numberOfStoreys: true,
+          areaPerApartment: true,
+          bathsroomPerApartment: true,
+          numberOfRentedApartments: true,
+          roomsPerApartment: true,
+          apartmentInBuilding: true,
+          gpsCoordinate: true,
+          listingAttributes: true,
+          images: true,
+          panoramaView: true,
+          offer: true,
+          impressions: true,
+          isListingPromoted: true,
+          isListingFlagged: true,
+          isListingSold: true,
+          isListingRented: true,
+          isListingFeatured: true,
+          isListingDisabled: true,
+          negotiable: true,
+          createdAt: true,
+          deletedAt: true,
+          updatedAt: true,
+
           user: {
             id: true,
             phone: true,
@@ -326,11 +605,6 @@ export class ListingService {
             lastName: true,
             arabicFirstName: true,
             arabicLastName: true,
-          },
-          promotion: {
-            id: true,
-            listingId: true,
-            adPackage: { id: true, name: true },
           },
         },
       });
@@ -456,40 +730,6 @@ export class ListingService {
       }
     }
   }
-  async findAmenities(listingType: string) {
-    try {
-      const selectedAttributes = {
-        villa: villa,
-        building: building,
-        land: land,
-        apartment: apartment,
-        farm: farm,
-      };
-
-      const amenities = await this.amenitiesRepository.find();
-
-      if (listingType == null || listingType == 'all') {
-        return amenities;
-      }
-      const amenitiesToReturn = [];
-      amenities.forEach((amenity) => {
-        const amenityToCamelCase = toCamelCase(amenity.name);
-
-        if (selectedAttributes[listingType].includes(amenityToCamelCase)) {
-          amenitiesToReturn.push(amenity);
-        }
-      });
-
-      return amenitiesToReturn;
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        this.logger.log(error);
-        throw new UnprocessableEntityException('Error retrieving amenities');
-      }
-    }
-  }
 
   async createPromotion(createPromotionInput: CreatePromotionInput) {
     try {
@@ -606,9 +846,13 @@ export class ListingService {
     }
   }
 
-  async deleteListing(listingId: string) {
+  async deleteListing(user: User, id: string) {
     try {
-      await this.listingRepository.softDelete(listingId);
+      const listing = await this.listingRepository.findByIdOrFail(id);
+      if (listing.userId != user.id || user.userType != 'admin') {
+        throw new BadRequestException('Only the creator can delete Listing');
+      }
+      await this.listingRepository.softDelete(id);
 
       return new SuccessResponse(AppStrings.LISTING_DELETED_SUCCESSFULLY);
     } catch (error) {
@@ -641,85 +885,6 @@ export class ListingService {
     }
   }
 
-  async getListingForAdmin(paginateAndSort: AdminFilterAndSort) {
-    try {
-      const orderOptions = {
-        [paginateAndSort.sortField]: paginateAndSort.directionToSort,
-      };
-
-      const now = new Date();
-      let whereCondition: any = {};
-
-      // Specific field to filter by time period
-      const dateField = 'createdAt';
-
-      switch (paginateAndSort.timePeriod) {
-        case 'today':
-          whereCondition[dateField] = Between(startOfDay(now), endOfDay(now));
-          break;
-        case 'week':
-          whereCondition[dateField] = Between(startOfWeek(now), endOfWeek(now));
-          break;
-        case 'month':
-          whereCondition[dateField] = Between(
-            startOfMonth(now),
-            endOfMonth(now),
-          );
-          break;
-        case 'year':
-          whereCondition[dateField] = Between(startOfYear(now), endOfYear(now));
-          break;
-        default:
-          whereCondition = {};
-      }
-
-      whereCondition = {
-        ...whereCondition,
-        isListingPromoted: paginateAndSort.promoted,
-        isListingSold: paginateAndSort.sold,
-        isListingFlagged: paginateAndSort.flagged,
-        isListingRented: paginateAndSort.rented,
-      };
-      const [listing, total, flagged, promoted, sold] = await Promise.all([
-        this.listingRepository.findAll({
-          where: whereCondition,
-          relations: ['user'],
-          select: {
-            user: {
-              firstName: true,
-              lastName: true,
-              language: true,
-              arabicFirstName: true,
-              arabicLastName: true,
-              userType: true,
-            },
-          },
-
-          order: orderOptions,
-          skip: paginateAndSort.skip,
-          take: paginateAndSort.take,
-        }),
-        this.listingRepository.count({ where: whereCondition }),
-        this.listingRepository.count({ where: { isListingFlagged: true } }),
-        this.listingRepository.count({ where: { isListingPromoted: true } }),
-        this.listingRepository.count({
-          where: { isListingSold: true, isListingRented: true },
-        }),
-      ]);
-
-      const analysis = {
-        flagged,
-        promoted,
-        sold,
-      };
-
-      return { listing, analysis, total };
-    } catch (error) {
-      this.logger.log(error);
-      throw new BadRequestException(error);
-    }
-  }
-
   async getOneListingForAdmin(id: string) {
     try {
       const listing = await this.listingRepository.findOne({
@@ -732,10 +897,6 @@ export class ListingService {
       await this.listingRepository.update(listing.id, {
         impressions: newImpression,
       });
-
-      listing.deedNumber = '';
-      listing.zatcaNumber = '';
-      listing.iban = '';
 
       return listing;
     } catch (error) {

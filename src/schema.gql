@@ -173,7 +173,6 @@ type Attribute {
   hiddenToBuyers: Boolean!
   isAmenity: Boolean
   showInComparison: Boolean!
-  isAmenities: Boolean
   showInFilters: Boolean!
   attributeSets: [AttributeSet!]!
   listingAttribute: Attribute!
@@ -255,6 +254,7 @@ type Listing {
   wishlist: [Wishlist!]
   rentDate: DateTime
   soldDate: DateTime
+  furnished: String
   promotedDate: DateTime
   featureDate: DateTime
   flaggedDate: DateTime
@@ -422,15 +422,6 @@ type SuccessResponse {
   data: String!
 }
 
-type Amenities {
-  id: Float!
-  name: String
-  image: String
-  description: String
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
 type AuctionParticipant {
   id: ID!
   listingId: String!
@@ -464,6 +455,7 @@ type ListingAnalysisResponse {
   flagged: Float!
   promoted: Float!
   sold: Float!
+  rented: Float!
 }
 
 type AdminListingResponse {
@@ -511,18 +503,18 @@ type Query {
   fetchAttributes(findOptions: PaginateAndSort): [Attribute!]!
   fetchAttributeSets: [AttributeSet!]!
   findListingsForBuyer(findManyOptions: CreateSearchHistoryInput): ListingResponse!
-  findPromotedListings(findManyOptions: CreateSearchHistoryInput): ListingResponse!
   findListingsForOwner(findManyOptions: AttributeDto): ListingResponse!
+  findListingsForAdmin(paginateAndSort: AdminFilterAndSort): AdminListingResponse!
+  findOneListingForAdmin(id: String!): Listing!
   findOneForBuyer(id: String!): Listing!
+  findListingForBuyerAuthenticated(findManyOptions: CreateSearchHistoryInput): ListingResponse!
   viewFlaggedListings(findManyOptions: PaginateAndSort): FlaggedListingResponse
-  findOneOffer(id: String!): Offer!
-  findOffers(findOptions: FindOfferInput!): OfferResponse!
-  findAmenities(listingType: String): [Amenities!]
   getMessageInLocalLanguage: SuccessResponse
   getSearchHistory: [SearchHistory!]
-  findOneListingsForAdmin(listingId: String!): Listing!
-  findListingsForAdmin(paginateAndSort: AdminFilterAndSort!): AdminListingResponse!
+  findOneOffer(id: String!): Offer!
+  findOffers(findOptions: FindOfferInput!): OfferResponse!
   getWishlist: [Wishlist!]!
+  findOneListingsForAdmin(listingId: String!): Listing!
   getAuction(id: String!): Auction!
   getAllAuction(findManyOptions: PaginateAndSort!): AuctionResponse!
   adPackages: [AdPackage!]!
@@ -582,15 +574,6 @@ input AttributeDto {
   listingType: String
 }
 
-input FindOfferInput {
-  take: Float
-  skip: Float
-  sortField: String
-  directionToSort: SortOrder
-  where: WhereOption
-  listingId: String!
-}
-
 input AdminFilterAndSort {
   take: Float
   skip: Float
@@ -598,10 +581,19 @@ input AdminFilterAndSort {
   directionToSort: SortOrder
   where: WhereOption
   timePeriod: String! = "false"
-  promoted: Boolean! = false
-  sold: Boolean! = false
-  flagged: Boolean! = false
-  rented: Boolean! = false
+  isListinPromoted: Boolean! = false
+  isListingSold: Boolean! = false
+  isListingFlagged: Boolean! = false
+  isListingRented: Boolean! = false
+}
+
+input FindOfferInput {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
+  listingId: String!
 }
 
 input ListTicketInput {
@@ -650,18 +642,18 @@ type Mutation {
   deleteAttributeSet(RequestInput: AttributeDeleteInput!): String!
   createListing(createListing: CreateListingDto!): Listing!
   updateListing(updateListingDto: UpdateListingDto!): Listing!
+  flagListing(flagListingInput: FlagListingInput!): SuccessResponse!
+  deleteListing(listingId: String!): SuccessResponse!
   createOffer(createOfferDto: CreateOfferDto!): Offer
   updateOffer(updateOfferInput: UpdateOfferInput!): Offer
   acceptOffer(updateOfferInput: UpdateOfferInput!): Offer
   rejectOffer(updateOfferInput: UpdateOfferInput!): Offer
   createPromotion(createPromotionInput: CreatePromotionInput!): Promotion!
-  flagListing(flagListingInput: FlagListingInput!): SuccessResponse!
-  deleteListing(listingId: String!): SuccessResponse!
+  addToWishlist(createWishlistInput: CreateWishlistInput!): Wishlist!
+  removeFromWishlist(wishlistId: String!): SuccessResponse!
   adminDisableListing(listingId: String!): SuccessResponse!
   enableListing(listingId: String!): SuccessResponse!
   createFeature(createFeatureInput: CreateFeatureInput!): Feature!
-  addToWishlist(createWishlistInput: CreateWishlistInput!): Wishlist!
-  removeFromWishlist(wishlistId: String!): SuccessResponse!
   createAuction(createAuctionInput: CreateAuctionInput!): Auction!
   updateAuction(updateAuctionInput: UpdateAuctionInput!): Auction!
   id(id: String!): Auction!
@@ -962,6 +954,12 @@ input UpdateListingDto {
   id: String!
 }
 
+input FlagListingInput {
+  listingId: String!
+  parentIssue: String!
+  childIssue: String!
+}
+
 input CreateOfferDto {
   offerPrice: Float!
   status: String
@@ -985,19 +983,13 @@ input CreatePromotionInput {
   adPackageId: String!
 }
 
-input FlagListingInput {
+input CreateWishlistInput {
   listingId: String!
-  parentIssue: String!
-  childIssue: String!
 }
 
 input CreateFeatureInput {
   listingId: String!
   adPackageId: String!
-}
-
-input CreateWishlistInput {
-  listingId: String!
 }
 
 input CreateAuctionInput {

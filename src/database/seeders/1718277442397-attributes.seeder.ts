@@ -20,9 +20,9 @@ export class AttributeSeeder implements Seeder {
     this.logger.debug(`Seeding For : ${Attribute.name}...`, factoryManager);
     const repository = dataSource.getRepository(Attribute);
 
-    const AttributeRepository = await Promise.all([repository.find()]);
+    const AttributeRepository = await repository.find();
 
-    if (AttributeRepository[0].length == AttributeFactory.length) {
+    if (AttributeRepository.length > 0) {
       this.logger.debug(`Seeding for: ${Attribute.name} Already completed`);
     } else {
       await repository.save(AttributeFactory as Partial<Attribute>);

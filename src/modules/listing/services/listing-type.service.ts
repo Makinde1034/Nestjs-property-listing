@@ -24,7 +24,17 @@ export class ListingTypeService {
   ) {}
 
   async findOne(id: string) {
-    return await this.listingTypeRepository.findById(id);
+    const listingType = await this.listingTypeRepository.findAll({
+      where: { id: id },
+      relations: ['attributeSets'],
+      select: {
+        attributeSets: {
+          id: true,
+        },
+      },
+    });
+
+    return listingType[0];
   }
 
   /**

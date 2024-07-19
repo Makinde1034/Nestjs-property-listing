@@ -229,22 +229,22 @@ export class UserFilterAndSort extends PaginateAndSort {
   @Field({ defaultValue: false })
   @IsOptional()
   @IsBoolean()
-  promoted: boolean;
+  isListinPromoted: boolean;
 
   @Field({ defaultValue: false })
   @IsOptional()
   @IsBoolean()
-  sold: boolean;
+  isListingSold: boolean;
 
   @Field({ defaultValue: false })
   @IsOptional()
   @IsBoolean()
-  flagged: boolean;
+  isListingFlagged: boolean;
 
   @Field({ defaultValue: false })
   @IsOptional()
   @IsBoolean()
-  rented: boolean;
+  isListingRented: boolean;
 }
 
 @InputType()
