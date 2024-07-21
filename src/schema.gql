@@ -267,15 +267,15 @@ type Listing {
 
 type SearchHistory {
   id: ID!
-  location: String!
-  price: Float!
+  location: String
+  price: Float
   numberOfBathrooms: [Float!]!
   numberOfRooms: [Float!]!
-  type: String!
-  listingType: String!
+  type: String
+  listingType: String
   isValid: Boolean!
   createdAt: DateTime!
-  userId: String!
+  userId: String
   user: [User!]!
   updatedAt: DateTime!
 }

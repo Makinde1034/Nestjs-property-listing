@@ -17,7 +17,7 @@ import BaseEntity from './base.entity';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { User } from './user.entity';
 import { Listing } from './listing.entity';
-import { StatusListEnum } from '../common/enums/status.enum';
+import { OfferListEnum } from '../common/enums/status.enum';
 import { IsEnum } from 'class-validator';
 @ObjectType()
 @Entity()
@@ -35,7 +35,7 @@ export class Offer extends BaseEntity {
   acceptedAt: Date;
 
   @Field({ defaultValue: 'active' })
-  @IsEnum(StatusListEnum)
+  @IsEnum(OfferListEnum)
   @Column({ default: 'active' })
   status: string;
 

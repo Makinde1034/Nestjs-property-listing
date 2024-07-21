@@ -37,6 +37,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { JobService } from './modules/in-app-services/job.scheduler';
 import { WebHookModule } from './modules/webhook/web-hook.module';
 import { DynamicEnumService } from './modules/app/services/dynamic-enum.services';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -92,7 +93,7 @@ import { DynamicEnumService } from './modules/app/services/dynamic-enum.services
     ReviewModule,
     LocationModule,
     AdPackageModule,
-
+    AdminModule,
     PaymentModule,
     WebHookModule,
   ],
