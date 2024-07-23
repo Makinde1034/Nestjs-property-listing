@@ -286,6 +286,7 @@ type User {
   firstName: String
   arabicFirstName: String
   arabicLastName: String
+  age: Float
   arabicMiddleName: String
   lastName: String
   middleName: String
@@ -305,6 +306,8 @@ type User {
   listing: [Listing!]
   offer: [Offer!]
   status: String
+  nationality: String
+  city: String
   nationalIdentity: NationalIdentity
   company: Company
   notificationPreference: [UserNotificationPreference!]
@@ -341,7 +344,10 @@ type Issue {
   parentArabicName: String!
   childReason: String!
   childArabicName: String!
+  isClosed: String!
+  closedAt: DateTime
   createdAt: DateTime!
+  reviewedAt: DateTime
   updatedAt: DateTime!
 }
 
@@ -490,6 +496,67 @@ type CityResponse {
   total: Int!
 }
 
+type UserCity {
+  user_city: String
+  total: Float
+}
+
+type ResponseTime {
+  averageCloseTime: Float
+  averageSupportTime: Float
+}
+
+type UserDemography {
+  total: Float
+  userDemography: [UserCity!]
+}
+
+type ListingStats {
+  offer: Float
+  listing: Float
+  acceptedOffer: Float
+  ownershipTransfer: Float
+}
+
+type Group {
+  type: String
+  fees: Float
+}
+
+type SaiiFees {
+  total: Float
+  group: [Group!]
+}
+
+type UserFunneling {
+  guest: Float
+  levelOne: Float
+  levelTwo: Float
+  converged: Float
+}
+
+type UserAgeRange {
+  age_range: String
+  count: Float
+}
+
+type UserCountryCount {
+  nationality: String
+  count: Float
+}
+
+type UserGenderCount {
+  gender: String
+  count: Float
+}
+
+type FinancialVsOrder {
+  year: Float
+  quarter: Float
+  totalSold: Float
+  totalOrdered: Float
+}
+
 type Query {
   app: String!
   activateTwoFa: TwoFaResult!
@@ -526,6 +593,15 @@ type Query {
   findOneReview(id: String!): Review!
   findManyReviews(findMayOptions: FindManyReviewDto): ReviewResponse!
   findCities(findCities: PaginateAndSort): CityResponse!
+  listingStats(findOptions: AdminDashboardSort!): ListingStats!
+  totalUser(findOptions: AdminDashboardSort!): UserDemography!
+  userCount(findOptions: AdminDashboardSort!): [UserGenderCount!]!
+  nationality(findOptions: AdminDashboardSort!): [UserCountryCount!]!
+  userAgeCount(findOptions: AdminDashboardSort!): [UserAgeRange!]!
+  userFunnel(findOptions: AdminDashboardSort): UserFunneling!
+  averageResponse: ResponseTime!
+  saiiFees(findOptions: AdminDashboardSort): SaiiFees!
+  financialVsOrder(findOptions: AdminDashboardSort!): [FinancialVsOrder!]!
 }
 
 input PaginateAndSort {
@@ -608,6 +684,11 @@ input FindManyReviewDto {
   where: WhereOption
   rating: Float!
   timePeriod: String! = "false"
+}
+
+input AdminDashboardSort {
+  timePeriod: String! = "false"
+  value: Float! = 0
 }
 
 type Mutation {

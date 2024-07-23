@@ -18,7 +18,6 @@ import {
   IsUUID,
   ValidateIf,
 } from 'class-validator';
-
 import {
   ListingFlagType,
   Ownership,

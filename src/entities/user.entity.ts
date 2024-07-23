@@ -11,7 +11,6 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinColumn,
   JoinTable,
   ManyToMany,
   OneToMany,
@@ -53,6 +52,10 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   @Field({ nullable: true })
   arabicLastName: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  age: number;
 
   @Column({ nullable: true })
   @Field({ nullable: true })
@@ -119,9 +122,6 @@ export class User extends BaseEntity {
   review: Review[];
 
   @Field(() => [Listing], { nullable: true })
-  @JoinColumn({
-    name: 'listingIdContinue testing and upgrading documentation.',
-  })
   @OneToMany(() => Listing, (listing) => listing.user, { cascade: true })
   listing: Listing[];
 
@@ -132,6 +132,14 @@ export class User extends BaseEntity {
   @Field({ nullable: true, defaultValue: UserStatus.PENDING })
   @Column({ nullable: true, default: UserStatus.PENDING })
   status: UserStatus;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  nationality: string;
+
+  @Column({ default: 'riyadh', nullable: true })
+  @Field({ nullable: true })
+  city: string;
 
   @Field(() => NationalIdentity, { nullable: true })
   @OneToOne(() => NationalIdentity, (identity) => identity.user, {

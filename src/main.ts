@@ -8,6 +8,8 @@ import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { I18nMiddleware } from 'nestjs-i18n';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
+import { TrackingMiddleware } from './common/interceptors/user-visit';
+import { UserTrackingService } from './modules/user/services/user.tracking.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -31,6 +33,14 @@ async function bootstrap() {
     }),
   );
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+
+  const UsertrackingService = app.get(UserTrackingService);
+
+  // Apply the middleware
+  app.use((req, res, next) => {
+    const trackingMiddleware = new TrackingMiddleware(UsertrackingService);
+    trackingMiddleware.use(req, res, next);
+  });
 
   await app.listen(PORT, HOST);
 }

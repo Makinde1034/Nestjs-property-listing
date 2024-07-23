@@ -5,8 +5,8 @@
 
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class UpdateListingTable1721402591045 implements MigrationInterface {
-  name = 'UpdateListingTable1721402591045';
+export class UpdateIssueTable1721665249350 implements MigrationInterface {
+  name = 'UpdateIssueTable1721665249350';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
@@ -22,17 +22,16 @@ export class UpdateListingTable1721402591045 implements MigrationInterface {
       `DROP INDEX "public"."IDX_bfbc9e263d4cea6d7a8c9eb3ad"`,
     );
     await queryRunner.query(
-      `ALTER TABLE "attribute" DROP COLUMN "isAmenities"`,
-    );
-    await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" DROP COLUMN "approve"`,
     );
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" ADD "approve" boolean DEFAULT false`,
     );
     await queryRunner.query(
-      `ALTER TABLE "listing" ADD "furnished" character varying`,
+      `ALTER TABLE "issue" ADD "isClosed" character varying NOT NULL DEFAULT false`,
     );
+    await queryRunner.query(`ALTER TABLE "issue" ADD "closedAt" TIMESTAMP`);
+    await queryRunner.query(`ALTER TABLE "issue" ADD "reviewedAt" TIMESTAMP`);
     await queryRunner.query(
       `CREATE INDEX "IDX_b36cb2e04bc353ca4ede00d87b" ON "role_permissions_permission" ("roleId") `,
     );
@@ -60,15 +59,14 @@ export class UpdateListingTable1721402591045 implements MigrationInterface {
     await queryRunner.query(
       `DROP INDEX "public"."IDX_b36cb2e04bc353ca4ede00d87b"`,
     );
-    await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "furnished"`);
+    await queryRunner.query(`ALTER TABLE "issue" DROP COLUMN "reviewedAt"`);
+    await queryRunner.query(`ALTER TABLE "issue" DROP COLUMN "closedAt"`);
+    await queryRunner.query(`ALTER TABLE "issue" DROP COLUMN "isClosed"`);
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" DROP COLUMN "approve"`,
     );
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" ADD "approve" boolean DEFAULT false`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "attribute" ADD "isAmenities" boolean`,
     );
     await queryRunner.query(
       `CREATE INDEX "IDX_bfbc9e263d4cea6d7a8c9eb3ad" ON "role_permissions_permission" ("permissionId") `,
