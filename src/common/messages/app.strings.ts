@@ -78,7 +78,7 @@ export const AppStrings = {
     'Something went wrong on our server. We are working to fix it',
 
   WISHLIST_CREATION_FAILED: 'failed to add to wishlist',
-  N0T_AN_AMENITY: 'not an amenity',
+  N0T_AN_ATTRIBUTE: 'not an attribute',
 
   WISHLIST_DELETE_SUCCESS: 'removed from wishlist',
   CANNOT_EDIT_AUCTION_ONCE_IT_HAS_STARTED:

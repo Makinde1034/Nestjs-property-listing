@@ -30,7 +30,31 @@ import { TimePeriod } from '../../../../common/enums/sort.enum';
 import { LocationDto } from '../../../location/dto/request/location.dto';
 
 @InputType()
+export class Attributes {
+  @Field()
+  @IsString()
+  value: string;
+
+  @Field()
+  @IsString()
+  attributeId: string;
+}
+
+@InputType()
 export class CreateListingDto {
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  title: string;
+
+  @Field()
+  @IsEnum(Purpose)
+  purpose: string;
+
+  @Field()
+  @IsPositive()
+  price: string;
+
   @Field()
   @IsEnum(Ownership)
   ownership: string;
@@ -43,14 +67,6 @@ export class CreateListingDto {
   @IsNumberString()
   poaNumber: string;
 
-  @Field()
-  @IsString()
-  name: string;
-
-  @Field({ nullable: true })
-  @IsEnum(Purpose)
-  purpose: string;
-
   @ValidateIf((listing) => listing.purpose == 'rent')
   @IsNotEmpty({
     message: 'rentingOption field is required for purpose of rent',
@@ -58,10 +74,6 @@ export class CreateListingDto {
   @Field({ nullable: true })
   @IsEnum(RentingOption)
   rentingOption: string;
-
-  @Field()
-  @IsNumberString()
-  deedNumber: string;
 
   @Field()
   @IsNumberString()
@@ -75,14 +87,9 @@ export class CreateListingDto {
   @IsString()
   listingTypeId: string;
 
-  @Field(() => [String])
-  @IsOptional()
+  @Field(() => [Attributes])
   @IsArray()
-  amenities: string[];
-
-  @Field()
-  @IsString()
-  address: string;
+  attributes: Attributes[];
 
   @Field()
   @IsString()
@@ -91,10 +98,6 @@ export class CreateListingDto {
   @Field()
   @IsString()
   country: string;
-
-  @Field()
-  @IsPositive()
-  price: number;
 
   @Field()
   @IsString()
@@ -125,10 +128,6 @@ export class CreateListingDto {
   landArea: number;
 
   @Field({ nullable: true })
-  @IsNumber()
-  area: number;
-
-  @Field({ nullable: true })
   @IsObject()
   gpsCoordinate: LocationDto;
 
@@ -138,51 +137,6 @@ export class CreateListingDto {
   @Field({ defaultValue: false, nullable: true })
   @IsBoolean()
   negotiable: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsNumber()
-  garageArea: number;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsNumber()
-  numberOfRooms: number;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsNumber()
-  bathrooms: number;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsNumber()
-  numberOfStoreys: number;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsNumber()
-  areaPerApartment: number;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsNumber()
-  bathsroomPerApartment: number;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsNumber()
-  numberOfRentedApartments: number;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsNumber()
-  roomsPerApartment: number;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsNumber()
-  apartmentInBuilding: string;
 
   userId?: string;
 }

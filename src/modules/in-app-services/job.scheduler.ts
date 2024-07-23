@@ -11,7 +11,7 @@ import { NotificationService } from '../notification/services';
 import { MailgunEmailService } from '../mail/services/implementations';
 import { OfferRepository } from '../listing/repositories';
 import { Offer } from '../../entities/offer.entity';
-import { formatDate } from 'date-fns';
+
 import { UserRepository } from '../user/repositories';
 
 export class JobService {
@@ -37,10 +37,10 @@ export class JobService {
       const listing = await this.listingRepository.findOne({
         where: {
           city: element.location,
-          price: element.price,
+          // Price: element.price,//TODO
           // NumberOfBathrooms: In(element.numberOfBathrooms),
           // NumberOfRooms: In(element.numberOfRooms),
-          purpose: element.type,
+          // Purpose: element.type,
         },
         relations: ['user'],
       });
@@ -82,7 +82,7 @@ export class JobService {
     const currentDate = new Date();
     const targetDate = new Date();
     targetDate.setDate(currentDate.getDate() + 1);
-    const user = await this.userRepository.findOne({
+    await this.userRepository.findOne({
       where: {
         userType: 'admin',
       },
@@ -96,23 +96,24 @@ export class JobService {
       })
       .getMany();
 
-    for (const element of records) {
-      if (element.listing.price >= element.offerPrice) {
-        this.pushNotification.sendUsersNotification({
-          title: 'New listing',
-          message: `This offers created on ${formatDate(element.createdAt, 'MM/dd/yyyy')}, with listing Id: ${element.listingId}, 
-          seller's name: ${element.user.firstName} ${element.user.lastName},
-          buyer's name: ${element.user.firstName} ${
-            element.user.lastName
-          }, price ${element.offerPrice}
-           has been left resolved for a while`,
-          isEmail: false,
-          isPushNotifcation: true,
-          recipients: [user.email],
-          deepLink: '',
-        });
-      }
-    }
+    // For (const element of records) {
+    //   If (element.listing.price >= element.offerPrice) {
+    //     This.pushNotification.sendUsersNotification({
+    //       Title: 'New listing',
+    //       Message: `This offers created on ${formatDate(element.createdAt, 'MM/dd/yyyy')}, with listing Id: ${element.listingId},
+    //       Seller's name: ${element.user.firstName} ${element.user.lastName},
+    //       Buyer's name: ${element.user.firstName} ${
+    //         Element.user.lastName
+    //       }, price ${element.offerPrice}
+    //        Has been left resolved for a while`,
+    //       IsEmail: false,
+    //       IsPushNotifcation: true,
+    //       Recipients: [user.email],
+    //       DeepLink: '',
+    //     });
+    //   }
+    // }
+    //TODO:
 
     return records;
   }

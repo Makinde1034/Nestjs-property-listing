@@ -28,8 +28,8 @@ export class AttributeService {
   ) {}
 
   async findOne(id: string) {
-    return await this.attributeRepository.findOneOrFail({
-      where: { id: id, isAmenity: true },
+    return await this.attributeRepository.findOne({
+      where: { id: id },
     });
   }
 

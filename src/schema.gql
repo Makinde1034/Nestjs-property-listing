@@ -159,6 +159,8 @@ type ListingAttributes {
   id: ID!
   listing: Listing!
   attribute: Attribute!
+  attributeId: String!
+  value: String!
 }
 
 type Attribute {
@@ -172,6 +174,7 @@ type Attribute {
   showInSummary: Boolean!
   hiddenToBuyers: Boolean!
   isAmenity: Boolean
+  isAddress: Boolean
   showInComparison: Boolean!
   showInFilters: Boolean!
   attributeSets: [AttributeSet!]!
@@ -203,36 +206,20 @@ type ListingType {
 type Listing {
   id: ID!
   ownership: String!
-  poaNumber: String
-  name: String!
+  title: String!
   purpose: String!
+  price: String!
+  deedNumber: String
+  poaNumber: String
   rentingOption: String!
-  deedNumber: String!
   iban: String!
   zatcaNumber: String!
   listingType: ListingType!
   listingTypeId: String!
-  address: String!
   city: String!
   country: String!
-  price: Float!
   street: String!
   district: String!
-  floor: Float
-  buildingNumber: Float
-  apartmentNumber: Float
-  villaAndFarmNumber: Float
-  area: Float
-  totalArea: Float
-  garageArea: Float
-  numberOfRooms: Float
-  bathrooms: Float
-  numberOfStoreys: Float
-  areaPerApartment: Float
-  bathsroomPerApartment: Float
-  numberOfRentedApartments: Float
-  roomsPerApartment: Float
-  apartmentInBuilding: String
   gpsCoordinate: String
   listingAttributes: [ListingAttributes!]
   images: String
@@ -956,20 +943,18 @@ input AttributeSetUpdateInput {
 }
 
 input CreateListingDto {
+  title: String!
+  purpose: String!
+  price: String!
   ownership: String!
   poaNumber: String
-  name: String!
-  purpose: String
   rentingOption: String
-  deedNumber: String!
   iban: String!
   zatcaNumber: String!
   listingTypeId: String!
-  amenities: [String!]!
-  address: String!
+  attributes: [Attributes!]!
   city: String!
   country: String!
-  price: Float!
   street: String!
   district: String!
   floor: Float
@@ -977,19 +962,14 @@ input CreateListingDto {
   apartmentNumber: Float
   villaAndFarmNumber: Float
   landArea: Float
-  area: Float
   gpsCoordinate: LocationDto
   panoramaView: [String!]
   negotiable: Boolean = false
-  garageArea: Float
-  numberOfRooms: Float
-  bathrooms: Float
-  numberOfStoreys: Float
-  areaPerApartment: Float
-  bathsroomPerApartment: Float
-  numberOfRentedApartments: Float
-  roomsPerApartment: Float
-  apartmentInBuilding: String
+}
+
+input Attributes {
+  value: String!
+  attributeId: String!
 }
 
 input LocationDto {
@@ -998,20 +978,18 @@ input LocationDto {
 }
 
 input UpdateListingDto {
+  title: String
+  purpose: String
+  price: String
   ownership: String
   poaNumber: String
-  name: String
-  purpose: String
   rentingOption: String
-  deedNumber: String
   iban: String
   zatcaNumber: String
   listingTypeId: String
-  amenities: [String!]
-  address: String
+  attributes: [Attributes!]
   city: String
   country: String
-  price: Float
   street: String
   district: String
   floor: Float
@@ -1019,19 +997,9 @@ input UpdateListingDto {
   apartmentNumber: Float
   villaAndFarmNumber: Float
   landArea: Float
-  area: Float
   gpsCoordinate: LocationDto
   panoramaView: [String!]
   negotiable: Boolean = false
-  garageArea: Float
-  numberOfRooms: Float
-  bathrooms: Float
-  numberOfStoreys: Float
-  areaPerApartment: Float
-  bathsroomPerApartment: Float
-  numberOfRentedApartments: Float
-  roomsPerApartment: Float
-  apartmentInBuilding: String
   id: String!
 }
 

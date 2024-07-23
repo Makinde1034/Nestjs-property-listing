@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Entity, Index, ManyToOne } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import BaseEntity from './base.entity';
 import { Listing } from './listing.entity';
 import { Field, ObjectType } from '@nestjs/graphql';
@@ -17,9 +17,18 @@ export class ListingAttributes extends BaseEntity {
   listing: Listing;
 
   @Field(() => Attribute)
+  @JoinColumn({ name: 'attributeId' })
   @Index()
   @ManyToOne(() => Attribute, (attribute) => attribute.listingAttribute, {
     eager: true,
   })
   attribute: Attribute;
+
+  @Column()
+  @Field()
+  attributeId: string;
+
+  @Column()
+  @Field()
+  value: string;
 }
