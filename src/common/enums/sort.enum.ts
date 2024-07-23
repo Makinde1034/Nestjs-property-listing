@@ -16,3 +16,8 @@ export enum TimePeriod {
   Year = 'year',
   NULL = null,
 }
+
+export enum TimePeriodForDashboard {
+  Month = 'month',
+  Year = 'year',
+}

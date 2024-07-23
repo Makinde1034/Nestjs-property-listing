@@ -29,6 +29,8 @@ import {
 import { UserResolver, RoleResolver } from './resolvers';
 import { UserController } from './controllers';
 import { UserEventHandler } from './events';
+import { UserTrackingService } from './services/user.tracking.service';
+import { UserTrackingRepository } from './repositories/user-tracking-repository';
 
 @Global()
 @Module({
@@ -46,6 +48,8 @@ import { UserEventHandler } from './events';
   ],
   controllers: [UserController],
   providers: [
+    UserTrackingRepository,
+    UserTrackingService,
     UserService,
     UserRepository,
     UserConfirmationRepository,

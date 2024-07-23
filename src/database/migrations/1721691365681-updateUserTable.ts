@@ -5,8 +5,8 @@
 
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class UpdateListingTable1721402591045 implements MigrationInterface {
-  name = 'UpdateListingTable1721402591045';
+export class UpdateUserTable1721691365681 implements MigrationInterface {
+  name = 'UpdateUserTable1721691365681';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
@@ -22,16 +22,13 @@ export class UpdateListingTable1721402591045 implements MigrationInterface {
       `DROP INDEX "public"."IDX_bfbc9e263d4cea6d7a8c9eb3ad"`,
     );
     await queryRunner.query(
-      `ALTER TABLE "attribute" DROP COLUMN "isAmenities"`,
+      `ALTER TABLE "user" RENAME COLUMN "nationaity" TO "nationality"`,
     );
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" DROP COLUMN "approve"`,
     );
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" ADD "approve" boolean DEFAULT false`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "listing" ADD "furnished" character varying`,
     );
     await queryRunner.query(
       `CREATE INDEX "IDX_b36cb2e04bc353ca4ede00d87b" ON "role_permissions_permission" ("roleId") `,
@@ -60,7 +57,6 @@ export class UpdateListingTable1721402591045 implements MigrationInterface {
     await queryRunner.query(
       `DROP INDEX "public"."IDX_b36cb2e04bc353ca4ede00d87b"`,
     );
-    await queryRunner.query(`ALTER TABLE "listing" DROP COLUMN "furnished"`);
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" DROP COLUMN "approve"`,
     );
@@ -68,7 +64,7 @@ export class UpdateListingTable1721402591045 implements MigrationInterface {
       `ALTER TABLE "role_permissions_permission" ADD "approve" boolean DEFAULT false`,
     );
     await queryRunner.query(
-      `ALTER TABLE "attribute" ADD "isAmenities" boolean`,
+      `ALTER TABLE "user" RENAME COLUMN "nationality" TO "nationaity"`,
     );
     await queryRunner.query(
       `CREATE INDEX "IDX_bfbc9e263d4cea6d7a8c9eb3ad" ON "role_permissions_permission" ("permissionId") `,

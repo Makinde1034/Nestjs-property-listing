@@ -34,14 +34,21 @@ export class Issue extends BaseEntity {
   @Field()
   childArabicName: string;
 
-  // @ManyToOne(() => IssueCategory, (category) => category.issues, {
-  //   Cascade: true,
-  // })
-  // Category: IssueCategory;
+  @Column({ default: false })
+  @Field()
+  isClosed: string;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  closedAt: Date;
 
   @Field()
   @CreateDateColumn()
   createdAt: Date;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  reviewedAt: Date;
 
   @Field()
   @UpdateDateColumn()
