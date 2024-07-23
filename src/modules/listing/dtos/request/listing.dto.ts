@@ -53,7 +53,7 @@ export class CreateListingDto {
 
   @Field()
   @IsPositive()
-  price: string;
+  price: number;
 
   @Field()
   @IsEnum(Ownership)
@@ -110,22 +110,6 @@ export class CreateListingDto {
   @Field({ nullable: true })
   @IsNumber()
   floor: number;
-
-  @Field({ nullable: true })
-  @IsNumber()
-  buildingNumber: number;
-
-  @Field({ nullable: true })
-  @IsNumber()
-  apartmentNumber: number;
-
-  @Field({ nullable: true })
-  @IsNumber()
-  villaAndFarmNumber: number;
-
-  @Field({ nullable: true })
-  @IsNumber()
-  landArea: number;
 
   @Field({ nullable: true })
   @IsObject()

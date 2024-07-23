@@ -208,7 +208,7 @@ type Listing {
   ownership: String!
   title: String!
   purpose: String!
-  price: String!
+  price: Float!
   deedNumber: String
   poaNumber: String
   rentingOption: String!
@@ -945,7 +945,7 @@ input AttributeSetUpdateInput {
 input CreateListingDto {
   title: String!
   purpose: String!
-  price: String!
+  price: Float!
   ownership: String!
   poaNumber: String
   rentingOption: String
@@ -958,10 +958,6 @@ input CreateListingDto {
   street: String!
   district: String!
   floor: Float
-  buildingNumber: Float
-  apartmentNumber: Float
-  villaAndFarmNumber: Float
-  landArea: Float
   gpsCoordinate: LocationDto
   panoramaView: [String!]
   negotiable: Boolean = false
@@ -980,7 +976,7 @@ input LocationDto {
 input UpdateListingDto {
   title: String
   purpose: String
-  price: String
+  price: Float
   ownership: String
   poaNumber: String
   rentingOption: String
@@ -993,10 +989,6 @@ input UpdateListingDto {
   street: String
   district: String
   floor: Float
-  buildingNumber: Float
-  apartmentNumber: Float
-  villaAndFarmNumber: Float
-  landArea: Float
   gpsCoordinate: LocationDto
   panoramaView: [String!]
   negotiable: Boolean = false
