@@ -54,19 +54,19 @@ export class OfferService {
         );
       }
 
-      const [minimumPrice, listing] =
-        await this.getMinimumOfferForAListingAndUser(createOfferDto.listingId);
-      if (minimumPrice > createOfferDto.offerPrice) {
-        throw new BadRequestException(
-          `Minimum Offer must be greater than  ${minimumPrice}`,
-        );
-      }
+      // Const [minimumPrice, listing] =
+      //   Await this.getMinimumOfferForAListingAndUser(createOfferDto.listingId);
+      // If (minimumPrice > createOfferDto.offerPrice) {
+      //   Throw new BadRequestException(
+      //     `Minimum Offer must be greater than  ${minimumPrice}`,
+      //   );
+      // }
 
-      if (user.id == listing.user.id) {
-        throw new BadRequestException(
-          'The creator of a listing cannot create an offer on  that listing',
-        );
-      }
+      // If (user.id == listing.user.id) {
+      //   Throw new BadRequestException(
+      //     'The creator of a listing cannot create an offer on  that listing',
+      //   );
+      // }TODO:
 
       createOfferDto.userId = user.id;
       createOfferDto.expireAt = new Date(addDaysToDate(new Date(), 1));
@@ -79,23 +79,23 @@ export class OfferService {
         'Offers',
         'Offer Creator',
       );
-      const mailMessageForSeller = getMessageData(
-        listing.user.arabicFirstName,
-        'Create',
-        'Offers',
-        'Seller',
-      );
+      // Const mailMessageForSeller = getMessageData(
+      //   Listing.user.arabicFirstName,
+      //   'Create',
+      //   'Offers',
+      //   'Seller',
+      // );
 
       await this.mailService.sendOfferMail({
         email: user.email,
         subject: mailMessageForBuyer[0]['Title'],
         text: mailMessageForBuyer[0]['Body'],
       });
-      await this.mailService.sendOfferMail({
-        email: listing.user.email,
-        subject: mailMessageForSeller[0]['Title'],
-        text: mailMessageForSeller[0]['Body'],
-      });
+      // Await this.mailService.sendOfferMail({
+      //   Email: listing.user.email,
+      //   Subject: mailMessageForSeller[0]['Title'],
+      //   Text: mailMessageForSeller[0]['Body'],
+      // });
       return offerPayload;
     } catch (error) {
       this.logger.log(error);
@@ -113,7 +113,8 @@ export class OfferService {
       if (!listing) {
         throw new NotFoundException(AppStrings.LISTING_NOT_FOUND);
       }
-      const minimumListingPrice = (80 / listing.price) * 100;
+      const minimumListingPrice = 1000;
+      // (80 / listing.listingAttributes[1].value) * 100;
 
       return [minimumListingPrice, listing];
     } catch (error) {

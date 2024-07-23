@@ -8,57 +8,15 @@ import { Attribute } from '../../entities';
 
 export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
-    englishName: 'Number of Rooms',
-    type: 'number',
+    englishName: 'Title',
+    type: '',
     showInFilters: false,
     showInComparison: true,
     showInSummary: true,
     isRequired: true,
     hiddenToBuyers: false,
     isAmenity: false,
-    dropDownOptions: [
-      '1',
-      '2',
-      '3',
-      '4',
-      '5',
-      '6',
-      '7',
-      '8',
-      '9',
-      '10',
-      '11',
-      '12',
-      '13',
-      'More than 13',
-    ],
-  },
-
-  {
-    englishName: 'Number of Bathrooms',
-    type: 'number',
-    showInFilters: true,
-    showInComparison: true,
-    showInSummary: true,
-    isRequired: true,
-    hiddenToBuyers: false,
-    isAmenity: false,
-    dropDownOptions: [
-      '1',
-      '2',
-      '3',
-      '4',
-      '5',
-      '6',
-      '7',
-      '8',
-      '9',
-      '10',
-      '11',
-      '12',
-      '13',
-      'More than 13',
-    ],
+    isAddress: false,
   },
 
   {
@@ -70,7 +28,9 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isRequired: true,
     hiddenToBuyers: false,
     isAmenity: false,
+    isAddress: false,
   },
+
   {
     englishName: 'Purpose',
     type: '',
@@ -80,16 +40,18 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isRequired: true,
     hiddenToBuyers: false,
     isAmenity: false,
+    isAddress: false,
   },
   {
-    englishName: 'Images',
-    type: 'media',
+    englishName: 'Image',
+    type: '',
     showInFilters: false,
     showInComparison: true,
     showInSummary: true,
     isRequired: true,
     hiddenToBuyers: false,
     isAmenity: false,
+    isAddress: false,
   },
   {
     englishName: 'Deed number',
@@ -100,7 +62,9 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isRequired: true,
     hiddenToBuyers: true,
     isAmenity: false,
+    isAddress: false,
   },
+
   {
     englishName: 'Price',
     type: 'number',
@@ -110,7 +74,9 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isRequired: true,
     hiddenToBuyers: false,
     isAmenity: false,
+    isAddress: false,
   },
+
   {
     englishName: 'Area',
     type: 'number',
@@ -120,7 +86,57 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isRequired: true,
     hiddenToBuyers: false,
     isAmenity: false,
+    isAddress: false,
   },
+
+  {
+    englishName: 'City',
+    type: 'Address',
+    showInFilters: true,
+    showInComparison: true,
+    showInSummary: true,
+    isRequired: true,
+    hiddenToBuyers: false,
+    isAmenity: false,
+    isAddress: true,
+  },
+
+  {
+    englishName: 'Country',
+    type: 'Address',
+    showInFilters: true,
+    showInComparison: true,
+    showInSummary: true,
+    isRequired: true,
+    hiddenToBuyers: false,
+    isAmenity: false,
+    isAddress: true,
+  },
+
+  {
+    englishName: 'District',
+    type: 'Address',
+    showInFilters: true,
+    showInComparison: true,
+    showInSummary: true,
+    isRequired: true,
+    hiddenToBuyers: false,
+    isAmenity: false,
+    isAddress: true,
+  },
+
+  {
+    englishName: 'Street',
+    type: 'Address',
+    showInFilters: true,
+    showInComparison: true,
+    showInSummary: true,
+    isRequired: true,
+    hiddenToBuyers: false,
+    isAmenity: false,
+    isAddress: true,
+  },
+
   {
     englishName: 'Geolocation',
     type: '',
@@ -130,9 +146,11 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isRequired: true,
     hiddenToBuyers: false,
     isAmenity: false,
+    isAddress: false,
   },
+
   {
-    englishName: 'Property number', //I am
+    englishName: 'Property number',
     type: 'number',
     showInFilters: false,
     showInComparison: false,
@@ -140,10 +158,11 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isRequired: true,
     hiddenToBuyers: true,
     isAmenity: false,
+    isAddress: false,
   },
 
   {
-    englishName: 'Level', //I am assuming this is equvalent to the "floor" in the design
+    englishName: 'Number of Bathrooms',
     type: 'number',
     showInFilters: true,
     showInComparison: true,
@@ -151,6 +170,87 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isRequired: true,
     hiddenToBuyers: false,
     isAmenity: false,
+    isAddress: false,
+    dropDownOptions: [
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9',
+      '10',
+      '11',
+      '12',
+      '13',
+      'More than 13',
+    ],
+  },
+
+  {
+    englishName: 'Number of Rooms',
+    type: 'number',
+    showInFilters: false,
+    showInComparison: true,
+    showInSummary: true,
+    isRequired: true,
+    hiddenToBuyers: false,
+    isAmenity: false,
+    isAddress: false,
+    dropDownOptions: [
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9',
+      '10',
+      '11',
+      '12',
+      '13',
+      'More than 13',
+    ],
+  },
+
+  {
+    englishName: 'Level',
+    type: 'number',
+    showInFilters: true,
+    showInComparison: true,
+    showInSummary: true,
+    isRequired: true,
+    hiddenToBuyers: false,
+    isAmenity: false,
+    isAddress: false,
+  },
+
+  {
+    englishName: 'Area',
+    type: 'number',
+    showInFilters: true,
+    showInComparison: true,
+    showInSummary: true,
+    isRequired: true,
+    hiddenToBuyers: false,
+    isAmenity: false,
+    isAddress: false,
+  },
+
+  {
+    englishName: 'Level',
+    type: 'number',
+    showInFilters: true,
+    showInComparison: true,
+    showInSummary: true,
+    isRequired: true,
+    hiddenToBuyers: false,
+    isAmenity: false,
+    isAddress: false,
   },
   {
     englishName: 'Rented apartments',
@@ -161,6 +261,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isRequired: true,
     hiddenToBuyers: false,
     isAmenity: false,
+    isAddress: false,
     dropDownOptions: [
       '1',
       '2',
@@ -178,6 +279,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
       'More than 13',
     ],
   },
+
   {
     englishName: 'Number of Storeys',
     type: 'number',
@@ -187,6 +289,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isRequired: true,
     hiddenToBuyers: false,
     isAmenity: false,
+    isAddress: false,
     dropDownOptions: [
       '1',
       '2',
@@ -204,15 +307,17 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
       'More than 13',
     ],
   },
+
   {
-    englishName: 'Number of Apartments',
+    englishName: 'Number of Appartments',
     type: 'number',
     showInFilters: false,
     showInComparison: true,
     showInSummary: true,
-    isRequired: true,
+    isRequired: false,
     hiddenToBuyers: false,
     isAmenity: false,
+    isAddress: false,
     dropDownOptions: [
       '1',
       '2',
@@ -230,6 +335,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
       'More than 13',
     ],
   },
+
   {
     englishName: 'Bathrooms per apartment',
     type: 'number',
@@ -239,6 +345,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isRequired: false,
     hiddenToBuyers: false,
     isAmenity: false,
+    isAddress: false,
     dropDownOptions: [
       '1',
       '2',
@@ -256,6 +363,35 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
       'More than 13',
     ],
   },
+
+  {
+    englishName: 'Bathrooms per apartment',
+    type: 'number',
+    showInFilters: false,
+    showInComparison: true,
+    showInSummary: true,
+    isRequired: false,
+    hiddenToBuyers: false,
+    isAmenity: false,
+    isAddress: false,
+    dropDownOptions: [
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9',
+      '10',
+      '11',
+      '12',
+      '13',
+      'More than 13',
+    ],
+  },
+
   {
     englishName: 'Rooms per apartment',
     type: 'number',
@@ -265,6 +401,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isRequired: false,
     hiddenToBuyers: false,
     isAmenity: false,
+    isAddress: false,
     dropDownOptions: [
       '1',
       '2',
@@ -282,6 +419,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
       'More than 13',
     ],
   },
+
   {
     englishName: 'Area per apartment',
     type: 'number',
@@ -291,6 +429,74 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isRequired: false,
     hiddenToBuyers: false,
     isAmenity: false,
+    isAddress: false,
+    dropDownOptions: [
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9',
+      '10',
+      '11',
+      '12',
+      '13',
+      'More than 13',
+    ],
+  },
+
+  /////////////////////////////////////////////
+  //////////////////////////////////////////////
+
+  //////////////////////////////////////////////////
+
+  {
+    englishName: 'Address',
+    type: '',
+    showInFilters: false,
+    showInComparison: true,
+    showInSummary: true,
+    isRequired: true,
+    hiddenToBuyers: false,
+    isAmenity: false,
+    isAddress: false,
+  },
+  {
+    englishName: 'Purpose',
+    type: '',
+    showInFilters: true,
+    showInComparison: true,
+    showInSummary: true,
+    isRequired: true,
+    hiddenToBuyers: false,
+    isAmenity: false,
+    isAddress: false,
+  },
+  {
+    englishName: 'Images',
+    type: 'media',
+    showInFilters: false,
+    showInComparison: true,
+    showInSummary: true,
+    isRequired: true,
+    hiddenToBuyers: false,
+    isAmenity: false,
+    isAddress: false,
+  },
+
+  {
+    englishName: 'Number of Apartments',
+    type: 'number',
+    showInFilters: false,
+    showInComparison: true,
+    showInSummary: true,
+    isRequired: true,
+    hiddenToBuyers: false,
+    isAmenity: false,
+    isAddress: false,
     dropDownOptions: [
       '1',
       '2',
@@ -319,6 +525,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     showInComparison: true,
     showInFilters: false,
   },
+
   {
     englishName: 'Pool',
     icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--swimming-pool.png',
@@ -339,6 +546,18 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     showInComparison: true,
     showInFilters: false,
   },
+
+  {
+    englishName: 'Garden',
+    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--tree.png',
+    isRequired: false,
+    showInSummary: true,
+    hiddenToBuyers: false,
+    isAmenity: true,
+    showInComparison: true,
+    showInFilters: true,
+  },
+
   {
     englishName: 'Guest house',
     icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--house.png',
@@ -349,6 +568,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     showInComparison: true,
     showInFilters: true,
   },
+
   {
     englishName: 'Tennis court',
     icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--tennis-ball.png',
@@ -382,6 +602,17 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'BBQ area',
     icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--hamburger.png',
+    isRequired: false,
+    showInSummary: true,
+    hiddenToBuyers: false,
+    isAmenity: true,
+    showInComparison: true,
+    showInFilters: true,
+  },
+
+  {
+    englishName: 'Maids room',
+    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--broom.png',
     isRequired: false,
     showInSummary: true,
     hiddenToBuyers: false,
@@ -480,6 +711,16 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     showInFilters: false,
   },
   {
+    englishName: 'Conference room',
+    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--microphone-stage.png',
+    isRequired: false,
+    showInSummary: true,
+    hiddenToBuyers: false,
+    isAmenity: true,
+    showInComparison: true,
+    showInFilters: false,
+  },
+  {
     englishName: 'Gated community',
     icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--wall.png',
     isRequired: false,
@@ -522,36 +763,6 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Elevator',
     icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--elevator-duotone.png',
-    isRequired: false,
-    showInSummary: true,
-    hiddenToBuyers: false,
-    isAmenity: true,
-    showInComparison: true,
-    showInFilters: true,
-  },
-  {
-    englishName: 'Garden',
-    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--tree.png',
-    isRequired: false,
-    showInSummary: true,
-    hiddenToBuyers: false,
-    isAmenity: true,
-    showInComparison: true,
-    showInFilters: true,
-  },
-  {
-    englishName: 'Conference room',
-    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--microphone-stage.png',
-    isRequired: false,
-    showInSummary: true,
-    hiddenToBuyers: false,
-    isAmenity: true,
-    showInComparison: true,
-    showInFilters: false,
-  },
-  {
-    englishName: 'Maids room',
-    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--broom.png',
     isRequired: false,
     showInSummary: true,
     hiddenToBuyers: false,

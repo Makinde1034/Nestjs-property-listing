@@ -33,25 +33,29 @@ export class Listing extends BaseEntity {
   @Field()
   ownership: string;
 
-  @Field({ nullable: true })
-  @Column({ nullable: true })
-  poaNumber: string;
-
-  @Field()
   @Column()
-  name: string;
-
   @Field()
+  title: string;
+
   @Column()
+  @Field()
   purpose: string;
 
   @Column()
   @Field()
-  rentingOption: string;
+  price: string;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  deedNumber: string;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  poaNumber: string;
 
   @Column()
   @Field()
-  deedNumber: string;
+  rentingOption: string;
 
   @Column()
   @Field()
@@ -74,10 +78,6 @@ export class Listing extends BaseEntity {
 
   @Column()
   @Field()
-  address: string;
-
-  @Column()
-  @Field()
   city: string;
 
   @Field()
@@ -86,74 +86,11 @@ export class Listing extends BaseEntity {
 
   @Column()
   @Field()
-  price: number;
-
-  @Column()
-  @Field()
   street: string;
 
   @Column()
   @Field()
   district: string;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  floor: number;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  buildingNumber: number;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  apartmentNumber: number;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  villaAndFarmNumber: number;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  area: number;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  totalArea: number;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  garageArea: number;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  numberOfRooms: number;
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  bathrooms: number;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  numberOfStoreys: number;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  areaPerApartment: number;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  bathsroomPerApartment: number;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  numberOfRentedApartments: number;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  roomsPerApartment: number;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  apartmentInBuilding: string;
 
   @Field({ nullable: true })
   @Column({ type: 'jsonb', nullable: true })

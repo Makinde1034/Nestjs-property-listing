@@ -55,7 +55,6 @@ import { AttributeService } from './attribute.service';
 import { ListingAttributes } from '../../../entities/listing-attributes.entity';
 import { ListingAttributeRepository } from '../repositories/listing-attributes.repository';
 import { ListingTypeService } from './listing-type.service';
-import { FurnishingStatusEnum } from '../../../common/enums';
 
 @Injectable()
 export class ListingService {
@@ -79,8 +78,7 @@ export class ListingService {
   async createListing(user: User, createListingDto: CreateListingDto) {
     try {
       createListingDto.userId = user.id;
-      const attributes: ListingAttributes[] = [];
-      const { amenities, ...rest } = createListingDto;
+      const { attributes, ...rest } = createListingDto;
       const listingType = await this.listingTypeService.findOne(
         createListingDto.listingTypeId,
       );
@@ -95,17 +93,22 @@ export class ListingService {
         gpsCoordinate: gpsCoordinate,
       });
 
-      const attributePromises = amenities.map(async (amenity) => {
-        const attribute = await this.attributeService.findOne(amenity);
+      const attributePromises = attributes.map(async (element) => {
+        const attribute = await this.attributeService.findOne(
+          element.attributeId,
+        );
+
         if (!attribute) {
           throw new BadRequestException(
-            `${amenity} is ` + AppStrings.N0T_AN_AMENITY,
+            `${element.attributeId} is ` + AppStrings.N0T_AN_ATTRIBUTE,
           );
         }
         if (attribute) {
           const newAttribute: Partial<ListingAttributes> = {
             listing,
             attribute,
+
+            value: element.value,
           };
           const createEntity =
             this.listingAttributesRepository.create(newAttribute);
@@ -121,41 +124,41 @@ export class ListingService {
         Calculate furnished status from number of amenities added
         compared to number of amenities in listing type
        */
-      const furnishedValue = listingType.attributeSets.length;
+      // Const furnishedValue = listingType.attributeSets.length;
 
-      let furnishedStatus = furnishedValue == attributes.length;
-      if (!furnishedStatus) {
-        const furnishedPercent = (furnishedValue * 100) / 60;
+      // Let furnishedStatus = furnishedValue == attributes.length;
+      // If (!furnishedStatus) {
+      //   Const furnishedPercent = (furnishedValue * 100) / 60;
 
-        if (attributes.length >= furnishedPercent) {
-          furnishedStatus = false;
-        } else {
-          furnishedStatus = null;
-        }
-      }
+      //   If (attributes.length >= furnishedPercent) {
+      //     FurnishedStatus = false;
+      //   } else {
+      //     FurnishedStatus = null;
+      //   }
+      // }
 
-      switch (furnishedStatus) {
-        case true:
-          await this.listingRepository.update(listing.id, {
-            furnished: FurnishingStatusEnum.ALL_FURNISHED,
-          });
+      // Switch (furnishedStatus) {
+      //   Case true:
+      //     Await this.listingRepository.update(listing.id, {
+      //       Furnished: FurnishingStatusEnum.ALL_FURNISHED,
+      //     });
 
-          break;
+      //     Break;
 
-        case false:
-          await this.listingRepository.update(listing.id, {
-            furnished: FurnishingStatusEnum.FURNISHED,
-          });
+      //   Case false:
+      //     Await this.listingRepository.update(listing.id, {
+      //       Furnished: FurnishingStatusEnum.FURNISHED,
+      //     });
 
-          break;
+      //     Break;
 
-        case null:
-          await this.listingRepository.update(listing.id, {
-            furnished: FurnishingStatusEnum.UN_FURNISHED,
-          });
+      //   Case null:
+      //     Await this.listingRepository.update(listing.id, {
+      //       Furnished: FurnishingStatusEnum.UN_FURNISHED,
+      //     });
 
-          break;
-      }
+      //     Break;
+      // }
 
       return listing;
     } catch (error) {
@@ -552,35 +555,27 @@ export class ListingService {
         select: {
           id: true,
 
-          name: true,
-          purpose: true,
+          // Purpose: true,
           rentingOption: true,
-
           featureDate: true,
           promotedDate: true,
-
           listingTypeId: true,
-          address: true,
           city: true,
           country: true,
-          price: true,
           street: true,
           district: true,
-          floor: true,
-          buildingNumber: true,
-          apartmentNumber: true,
-          villaAndFarmNumber: true,
-          area: true,
-          totalArea: true,
-          garageArea: true,
-          numberOfRooms: true,
-          bathrooms: true,
-          numberOfStoreys: true,
-          areaPerApartment: true,
-          bathsroomPerApartment: true,
-          numberOfRentedApartments: true,
-          roomsPerApartment: true,
-          apartmentInBuilding: true,
+
+          // Area: true,
+          // TotalArea: true,
+          // GarageArea: true,
+          // NumberOfRooms: true,
+          // Bathrooms: true,
+          // NumberOfStoreys: true,
+          // AreaPerApartment: true,
+          // BathsroomPerApartment: true,
+          // NumberOfRentedApartments: true,
+          // RoomsPerApartment: true,
+          // ApartmentInBuilding: true,
           gpsCoordinate: true,
           listingAttributes: true,
           images: true,
