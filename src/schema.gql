@@ -89,7 +89,7 @@ type Offer {
   id: ID!
   offerPrice: Float!
   expireAt: DateTime!
-  acceptedAt: DateTime!
+  acceptedAt: DateTime
   status: String!
   coupon: Boolean!
   couponCode: String

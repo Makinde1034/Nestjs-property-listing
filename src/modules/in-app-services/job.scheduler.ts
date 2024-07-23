@@ -11,9 +11,12 @@ import { NotificationService } from '../notification/services';
 import { MailgunEmailService } from '../mail/services/implementations';
 import { OfferRepository } from '../listing/repositories';
 import { Offer } from '../../entities/offer.entity';
+import { formatDate } from 'date-fns';
+import { UserRepository } from '../user/repositories';
 
 export class JobService {
   constructor(
+    private userRepository: UserRepository,
     private listingRepository: ListingRepository,
     private searchHistoryRepository: SearchHistoryRepository,
 
@@ -72,5 +75,45 @@ export class JobService {
       .set({ status: 'expired' })
       .where('offer.expireAt > :date', { date: new Date() })
       .execute();
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_8PM)
+  async sendAlertOnIncompleteOffers() {
+    const currentDate = new Date();
+    const targetDate = new Date();
+    targetDate.setDate(currentDate.getDate() + 1);
+    const user = await this.userRepository.findOne({
+      where: {
+        userType: 'admin',
+      },
+    });
+    const records = await this.offerRepository
+      .queryBuilder('offer')
+      .leftJoinAndSelect('offer.user', 'user')
+      .leftJoinAndSelect('offer.listing', 'listing')
+      .where('offer.createdAt = :targetDate', {
+        targetDate: targetDate.toISOString(),
+      })
+      .getMany();
+
+    for (const element of records) {
+      if (element.listing.price >= element.offerPrice) {
+        this.pushNotification.sendUsersNotification({
+          title: 'New listing',
+          message: `This offers created on ${formatDate(element.createdAt, 'MM/dd/yyyy')}, with listing Id: ${element.listingId}, 
+          seller's name: ${element.user.firstName} ${element.user.lastName},
+          buyer's name: ${element.user.firstName} ${
+            element.user.lastName
+          }, price ${element.offerPrice}
+           has been left resolved for a while`,
+          isEmail: false,
+          isPushNotifcation: true,
+          recipients: [user.email],
+          deepLink: '',
+        });
+      }
+    }
+
+    return records;
   }
 }
