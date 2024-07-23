@@ -30,7 +30,7 @@ export class Offer extends BaseEntity {
   @Column({ nullable: true })
   expireAt: Date;
 
-  @Field()
+  @Field({ nullable: true })
   @Column({ nullable: true })
   acceptedAt: Date;
 
