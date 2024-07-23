@@ -43,7 +43,7 @@ export class Listing extends BaseEntity {
 
   @Column()
   @Field()
-  price: string;
+  price: number;
 
   @Field({ nullable: true })
   @Column({ nullable: true })
