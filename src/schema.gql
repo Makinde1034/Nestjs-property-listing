@@ -555,8 +555,11 @@ type Query {
   listNotifications: [Notification!]!
   listNotificationScopes: [NotificationScope!]!
   fetchListingTypes: [ListingType!]!
+  fetchOneListingTypes(id: String!): ListingType!
   fetchAttributes(findOptions: AttributeFilter): [Attribute!]!
   fetchAttributeSets: [AttributeSet!]!
+  fetchOneAttributeSets(id: String!): AttributeSet!
+  fetchOneAttribute(id: String!): Attribute!
   findListingsForBuyer(findManyOptions: CreateSearchHistoryInput): ListingResponse!
   findListingsForOwner(findManyOptions: AttributeDto): ListingResponse!
   findListingsForAdmin(paginateAndSort: AdminFilterAndSort): AdminListingResponse!

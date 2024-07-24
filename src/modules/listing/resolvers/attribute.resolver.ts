@@ -94,6 +94,16 @@ export class AttributeResolver {
     return await this.attributeService.findAllAttributeSets();
   }
 
+  @Query(() => AttributeSet)
+  async fetchOneAttributeSets(@Args('id') id: string): Promise<AttributeSet> {
+    return await this.attributeService.findOneAttributeSet(id);
+  }
+
+  @Query(() => Attribute)
+  async fetchOneAttribute(@Args('id') id: string): Promise<Attribute> {
+    return await this.attributeService.findOneAttribute(id);
+  }
+
   /**
    * Create Attribute
    *

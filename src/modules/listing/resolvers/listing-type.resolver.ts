@@ -31,6 +31,12 @@ export class ListingTypeResolver {
     return await this.listingTypeService.findAllListingTypes();
   }
 
+  @Query(() => ListingType)
+  @UseGuards(AccessTokenGuard)
+  async fetchOneListingTypes(@Args('id') id: string): Promise<ListingType> {
+    return await this.listingTypeService.findOne(id);
+  }
+
   /**
    * Create ListingType
    *

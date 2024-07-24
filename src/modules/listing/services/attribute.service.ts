@@ -27,7 +27,7 @@ export class AttributeService {
     private readonly storageService: StorageService,
   ) {}
 
-  async findOne(id: string) {
+  async findOneAttribute(id: string) {
     return await this.attributeRepository.findOne({
       where: { id: id },
     });
@@ -135,6 +135,13 @@ export class AttributeService {
     }
     await this.attributeRepository.delete(data.id);
     return AppStrings.ATTRIBUTE_DELETED_SUCCESSFULLY;
+  }
+
+  async findOneAttributeSet(id: string) {
+    return await this.attributeSetRepository.findOne({
+      where: { id: id },
+      relations: ['attribute'],
+    });
   }
 
   /**
