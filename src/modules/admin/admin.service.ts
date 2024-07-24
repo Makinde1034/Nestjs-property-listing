@@ -133,7 +133,7 @@ export class AdminService {
 
     // Query for sold items in the past year
     const soldItems = await this.listingRepository
-      .queryBuilder('listing')
+      .createQueryBuilder('listing')
       .select('EXTRACT(YEAR FROM listing.soldDate)::int', 'year')
       .addSelect('EXTRACT(QUARTER FROM listing.soldDate)::int', 'quarter')
       .addSelect('SUM(listing.price)::float', 'totalSold')

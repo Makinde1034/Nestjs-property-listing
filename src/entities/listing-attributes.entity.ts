@@ -26,6 +26,10 @@ export class ListingAttributes extends BaseEntity {
 
   @Column()
   @Field()
+  name: string;
+
+  @Column()
+  @Field()
   attributeId: string;
 
   @Column()

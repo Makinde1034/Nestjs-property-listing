@@ -22,9 +22,9 @@ export class WishlistService {
 
   async create(wishlistInput: CreateWishlistInput, user: User) {
     try {
-      const listing = await this.listingRepository.findById(
-        wishlistInput.listingId,
-      );
+      const listing = await this.listingRepository.findOne({
+        where: { id: wishlistInput.listingId },
+      });
 
       const wishlist = await this.wishlistRepository.save({
         listing,

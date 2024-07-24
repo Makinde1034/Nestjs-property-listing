@@ -159,6 +159,7 @@ type ListingAttributes {
   id: ID!
   listing: Listing!
   attribute: Attribute!
+  name: String!
   attributeId: String!
   value: String!
 }
@@ -214,7 +215,7 @@ type Listing {
   rentingOption: String!
   iban: String!
   zatcaNumber: String!
-  listingType: ListingType!
+  listingType: ListingType
   listingTypeId: String!
   city: String!
   country: String!
@@ -948,6 +949,7 @@ input CreateListingDto {
   price: Float!
   ownership: String!
   poaNumber: String
+  deedNumber: String
   rentingOption: String
   iban: String!
   zatcaNumber: String!
@@ -979,6 +981,7 @@ input UpdateListingDto {
   price: Float
   ownership: String
   poaNumber: String
+  deedNumber: String
   rentingOption: String
   iban: String
   zatcaNumber: String

@@ -67,6 +67,10 @@ export class CreateListingDto {
   @IsNumberString()
   poaNumber: string;
 
+  @Field({ nullable: true })
+  @IsNumberString()
+  deedNumber: string;
+
   @ValidateIf((listing) => listing.purpose == 'rent')
   @IsNotEmpty({
     message: 'rentingOption field is required for purpose of rent',

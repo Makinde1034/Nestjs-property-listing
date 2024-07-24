@@ -22,13 +22,12 @@ import { User } from '../../../entities';
 import { ForbiddenError } from '@nestjs/apollo';
 import { StorageService } from '../../file-handler/services/storage.service';
 
-import { AmenitiesRepository } from '../repositories/amenities.repository';
 import { AttributeDto } from '../dtos/request/attributes.dto';
 import { CreatePromotionInput } from '../dtos/request/promotion-input';
 import { PromotionRepository } from '../repositories/promotion.repository';
 
 import { AdPackageService } from '../../ad-package/services/ad-package.service';
-import { Between, In, MoreThan, QueryFailedError } from 'typeorm';
+import { Between, QueryFailedError } from 'typeorm';
 
 import { addDaysToDate } from '../../../common/utils/helper';
 import { FlagListingRepository } from '../repositories/flag-listing.repository';
@@ -52,9 +51,9 @@ import { FeatureRepository } from '../repositories/feature.repository';
 import { CreateFeatureInput } from '../dtos/request/feature-input';
 import { NotificationService } from '../../notification/services';
 import { AttributeService } from './attribute.service';
-import { ListingAttributes } from '../../../entities/listing-attributes.entity';
 import { ListingAttributeRepository } from '../repositories/listing-attributes.repository';
 import { ListingTypeService } from './listing-type.service';
+import { FurnishingStatusEnum } from '../../../common/enums';
 
 @Injectable()
 export class ListingService {
@@ -63,7 +62,6 @@ export class ListingService {
     private readonly featureRepository: FeatureRepository,
     private readonly promotionRepository: PromotionRepository,
     private readonly storageService: StorageService,
-    private readonly amenitiesRepository: AmenitiesRepository,
     private readonly adpackageService: AdPackageService,
     private readonly flagListingRepository: FlagListingRepository,
     private readonly i18n: I18nService,
@@ -79,6 +77,7 @@ export class ListingService {
     try {
       createListingDto.userId = user.id;
       const { attributes, ...rest } = createListingDto;
+
       const listingType = await this.listingTypeService.findOne(
         createListingDto.listingTypeId,
       );
@@ -88,84 +87,72 @@ export class ListingService {
 
       const gpsCoordinate = JSON.stringify(createListingDto.gpsCoordinate);
 
-      const listing = await this.listingRepository.create({
+      const listing = await this.listingRepository.save({
         ...rest,
         gpsCoordinate: gpsCoordinate,
+        userId: user.id,
       });
 
-      const attributePromises = attributes.map(async (element) => {
-        const attribute = await this.attributeService.findOne(
-          element.attributeId,
-        );
-
-        if (!attribute) {
-          throw new BadRequestException(
-            `${element.attributeId} is ` + AppStrings.N0T_AN_ATTRIBUTE,
+      const attributeEntities = await Promise.all(
+        attributes.map(async (element) => {
+          const attribute = await this.attributeService.findOne(
+            element.attributeId,
           );
-        }
-        if (attribute) {
-          const newAttribute: Partial<ListingAttributes> = {
+
+          if (!attribute) {
+            throw new BadRequestException(
+              `${element.attributeId} is ` + AppStrings.N0T_AN_ATTRIBUTE,
+            );
+          }
+
+          return this.listingAttributesRepository.create({
             listing,
+            attributeId: attribute.id,
             attribute,
-
+            name: attribute.englishName,
             value: element.value,
-          };
-          const createEntity =
-            this.listingAttributesRepository.create(newAttribute);
-          attributes.push(createEntity);
-        }
-      });
+          });
+        }),
+      );
 
-      await Promise.all(attributePromises);
-
-      await this.listingAttributesRepository.insert(attributes);
+      await this.listingAttributesRepository.insert(attributeEntities);
 
       /*
         Calculate furnished status from number of amenities added
         compared to number of amenities in listing type
-       */
-      // Const furnishedValue = listingType.attributeSets.length;
+      */
+      const furnishedValue = listingType.attributeSets.length;
 
-      // Let furnishedStatus = furnishedValue == attributes.length;
-      // If (!furnishedStatus) {
-      //   Const furnishedPercent = (furnishedValue * 100) / 60;
+      let furnishedStatus = null; // Default to null
+      if (attributes.length >= (furnishedValue * 100) / 60) {
+        furnishedStatus = false;
+      } else if (attributes.length === furnishedValue) {
+        furnishedStatus = true;
+      }
 
-      //   If (attributes.length >= furnishedPercent) {
-      //     FurnishedStatus = false;
-      //   } else {
-      //     FurnishedStatus = null;
-      //   }
-      // }
-
-      // Switch (furnishedStatus) {
-      //   Case true:
-      //     Await this.listingRepository.update(listing.id, {
-      //       Furnished: FurnishingStatusEnum.ALL_FURNISHED,
-      //     });
-
-      //     Break;
-
-      //   Case false:
-      //     Await this.listingRepository.update(listing.id, {
-      //       Furnished: FurnishingStatusEnum.FURNISHED,
-      //     });
-
-      //     Break;
-
-      //   Case null:
-      //     Await this.listingRepository.update(listing.id, {
-      //       Furnished: FurnishingStatusEnum.UN_FURNISHED,
-      //     });
-
-      //     Break;
-      // }
+      switch (furnishedStatus) {
+        case true:
+          await this.listingRepository.update(listing.id, {
+            furnished: FurnishingStatusEnum.ALL_FURNISHED,
+          });
+          break;
+        case false:
+          await this.listingRepository.update(listing.id, {
+            furnished: FurnishingStatusEnum.FURNISHED,
+          });
+          break;
+        case null:
+          await this.listingRepository.update(listing.id, {
+            furnished: FurnishingStatusEnum.UN_FURNISHED,
+          });
+          break;
+      }
 
       return listing;
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(
-        error.data || error.messages,
-        error.response.message,
+        error.message || 'An unexpected error occurred',
       );
     }
   }
@@ -173,9 +160,10 @@ export class ListingService {
   async findAllListingsForOwner(data: AttributeDto, user?: User) {
     try {
       const { take: initialTake, skip, sortField, directionToSort } = data;
-      const orderOptions = sortField
-        ? { [sortField]: directionToSort }
-        : { createdAt: 'DESC' };
+
+      const orderOptions = {
+        [sortField]: directionToSort,
+      };
 
       const take = initialTake <= 20 ? initialTake : 20;
 
@@ -199,64 +187,24 @@ export class ListingService {
   /***************************
    * Buyers
    ***************************/
-
   async findAllListingForBuyerUnauthenticated(
     paginateAndSort: CreateSearchHistoryInput,
   ) {
     try {
-      const selectOptions = {
-        id: true,
+      const allColumns = this.listingRepository.metadata.columns.map(
+        (column) => `listing.${column.propertyName}`,
+      );
+      const columnsToExclude = [
+        'listing.price',
+        'listing.deedNumber',
+        'listing.poaNumber',
+        'listing.iban',
+        'listing.zatcaNumber',
+      ];
 
-        name: true,
-        purpose: true,
-        rentingOption: true,
-
-        listingType: {
-          id: true,
-          name: true,
-        },
-        featureDate: true,
-        promotedDate: true,
-
-        listingTypeId: true,
-        address: true,
-        city: true,
-        country: true,
-
-        street: true,
-        district: true,
-        floor: true,
-        buildingNumber: true,
-        apartmentNumber: true,
-        villaAndFarmNumber: true,
-        area: true,
-        totalArea: true,
-        garageArea: true,
-        numberOfRooms: true,
-        bathrooms: true,
-        numberOfStoreys: true,
-        areaPerApartment: true,
-        bathsroomPerApartment: true,
-        numberOfRentedApartments: true,
-        roomsPerApartment: true,
-        apartmentInBuilding: true,
-        gpsCoordinate: true,
-        listingAttributes: true,
-        images: true,
-        panoramaView: true,
-        offer: true,
-        impressions: true,
-        isListingPromoted: true,
-        isListingFlagged: true,
-        isListingSold: true,
-        isListingRented: true,
-        isListingFeatured: true,
-        isListingDisabled: true,
-        negotiable: true,
-        createdAt: true,
-        deletedAt: true,
-        updatedAt: true,
-      };
+      const columnsToSelect = allColumns.filter(
+        (column) => !columnsToExclude.includes(column),
+      );
       // Destructure input parameters
       const {
         type,
@@ -271,57 +219,155 @@ export class ListingService {
         minArea,
         maxArea,
         location,
+        floor,
         furnishing,
         take: initialTake,
       } = paginateAndSort;
 
       // Ensures the take value does not exceed 20
-
       const take = Math.min(initialTake, 20);
-
       const featuredTake = Math.ceil(take / 3);
-      const regularTake = take - featuredTake;
+      let regularTake = take - featuredTake;
 
       // Determine sorting options
-      const orderOptions = sortField
-        ? { [sortField]: directionToSort }
-        : { promotedDate: 'ASC', isListingPromoted: true };
+      const sortDirections = ['ASC', 'DESC'] as const;
+      type SortDirection = (typeof sortDirections)[number];
 
-      // Define base where conditions
-      const baseWhereConditions = {
-        isListingDisabled: false,
-        purpose: type,
-        numberOfRooms: numberOfRooms ? In(numberOfRooms) : MoreThan(0),
-        bathrooms: numberOfBathrooms ? In(numberOfBathrooms) : MoreThan(0),
-        price: minPrice ? Between(minPrice, maxPrice) : MoreThan(0),
-        area: minArea ? Between(minArea, maxArea) : MoreThan(0),
-        city: location,
-        furnished: furnishing,
-        listingTypeId: listingId,
+      // Common query setup
+      const baseQuery = (isFeatured: boolean) => {
+        const query = this.listingRepository
+          .createQueryBuilder('listing')
+
+          .select(columnsToSelect)
+          .where(
+            'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented',
+            {
+              isListingDisabled: false,
+              isListingSold: false,
+              isListingRented: false,
+            },
+          );
+
+        if (isFeatured) {
+          query
+            .andWhere('listing.isListingPromoted = :isListingPromoted', {
+              isListingPromoted: true,
+            })
+            .andWhere('listing.isListingFeatured = :isListingFeatured', {
+              isListingFeatured: true,
+            });
+        } else {
+          query.andWhere('listing.isListingFeatured = :isListingFeatured', {
+            isListingFeatured: false,
+          });
+        }
+
+        if (minPrice !== undefined && maxPrice !== undefined) {
+          query.andWhere('listing.price BETWEEN :minPrice AND :maxPrice', {
+            minPrice,
+            maxPrice,
+          });
+        }
+
+        if (type !== undefined) {
+          query.andWhere('listing.purpose = :type', { type });
+        }
+
+        if (furnishing !== undefined) {
+          query.andWhere('listing.furnished = :furnished', { furnishing });
+        }
+
+        if (listingId !== undefined) {
+          query.andWhere('listing.listingTypeid = :listingTypeId', {
+            listingTypeId: listingId,
+          });
+        }
+
+        if (numberOfRooms !== undefined) {
+          query.andWhere(
+            'attributes.name = :attributeName AND attributes.value IN (:...numberOfRooms)',
+            { attributeName: 'Number of Rooms', numberOfRooms },
+          );
+        }
+
+        if (numberOfBathrooms !== undefined) {
+          query.andWhere(
+            'attributes.name = :attributeName AND attributes.value IN (:...numberOfBathrooms)',
+            {
+              attributeName: 'Number of Bathrooms',
+              numberOfBathrooms,
+            },
+          );
+        }
+
+        if (minArea !== undefined && maxArea !== undefined) {
+          query.andWhere(
+            'attributes.name = :attributeName AND attributes.value BETWEEN :minArea AND :maxArea',
+            { attributeName: 'Area', minArea, maxArea },
+          );
+        }
+
+        if (floor !== undefined) {
+          query.andWhere(
+            'attributes.name = :attributeName AND attributes.value IN (:...floor)',
+            { attributeName: 'Level', floor },
+          );
+        }
+
+        if (location !== undefined) {
+          query.andWhere(
+            'attributes.name = :attributeName AND attributes.value IN (:...location)',
+            { attributeName: 'Address', location },
+          );
+        }
+
+        if (
+          sortField &&
+          sortDirections.includes(
+            directionToSort.toUpperCase() as SortDirection,
+          )
+        ) {
+          query.orderBy(
+            `listing.${sortField}`,
+            directionToSort.toUpperCase() as SortDirection,
+          );
+        } else {
+          query
+            .orderBy('listing.promotedDate', 'ASC')
+            .addOrderBy('listing.isListingPromoted', 'DESC');
+        }
+
+        return query;
       };
 
-      // Fetch listings
-      const [featuredListings] = await this.listingRepository.findAndCount({
-        take: featuredTake,
-        skip: Math.ceil(skip / 3),
-        order: { featureDate: 'ASC' },
-        where: { ...baseWhereConditions },
-        relations: ['listingAttributes'],
-        select: selectOptions,
-      });
+      const featuredQuery = baseQuery(true);
+      featuredQuery.take(featuredTake).skip(skip);
 
-      const [regularListings, total] =
-        await this.listingRepository.findAndCount({
-          take: regularTake,
-          skip,
-          order: orderOptions,
-          where: baseWhereConditions,
-          relations: ['listingAttributes'],
-          select: selectOptions,
-        });
+      const [featuredListings, featuredCount] = await featuredQuery
+        .leftJoinAndSelect('listing.user', 'user')
+        .leftJoinAndSelect('listing.listingAttributes', 'attributes')
+        .leftJoinAndSelect('listing.listingType', 'listingType')
+
+        .getManyAndCount();
 
       // Combine results
-      return [[...featuredListings, ...regularListings], total];
+
+      if (featuredListings.length < featuredTake) {
+        regularTake = regularTake + featuredTake - featuredListings.length;
+      }
+      const regularQuery = baseQuery(false);
+      regularQuery.take(regularTake).skip(skip);
+
+      const [regularListings, regularCount] = await regularQuery
+        .leftJoinAndSelect('listing.user', 'user')
+        .leftJoinAndSelect('listing.listingAttributes', 'attributes')
+        .leftJoinAndSelect('listing.listingType', 'listingType')
+
+        .getManyAndCount();
+      const listing = [...featuredListings, ...regularListings];
+      const total = featuredCount + regularCount;
+
+      return { listing, total };
     } catch (error) {
       this.logger.log(error);
       throw error instanceof HttpException
@@ -335,59 +381,19 @@ export class ListingService {
     user: User,
   ) {
     try {
-      const selectOptions = {
-        id: true,
+      const allColumns = this.listingRepository.metadata.columns.map(
+        (column) => `listing.${column.propertyName}`,
+      );
+      const columnsToExclude = [
+        'listing.deedNumber',
+        'listing.poaNumber',
+        'listing.iban',
+        'listing.zatcaNumber',
+      ];
 
-        name: true,
-        purpose: true,
-        rentingOption: true,
-
-        listingType: {
-          id: true,
-          name: true,
-        },
-        featureDate: true,
-        promotedDate: true,
-
-        listingTypeId: true,
-        address: true,
-        city: true,
-        country: true,
-        price: true,
-        street: true,
-        district: true,
-        floor: true,
-        buildingNumber: true,
-        apartmentNumber: true,
-        villaAndFarmNumber: true,
-        area: true,
-        totalArea: true,
-        garageArea: true,
-        numberOfRooms: true,
-        bathrooms: true,
-        numberOfStoreys: true,
-        areaPerApartment: true,
-        bathsroomPerApartment: true,
-        numberOfRentedApartments: true,
-        roomsPerApartment: true,
-        apartmentInBuilding: true,
-        gpsCoordinate: true,
-        listingAttributes: true,
-        images: true,
-        panoramaView: true,
-        offer: true,
-        impressions: true,
-        isListingPromoted: true,
-        isListingFlagged: true,
-        isListingSold: true,
-        isListingRented: true,
-        isListingFeatured: true,
-        isListingDisabled: true,
-        negotiable: true,
-        createdAt: true,
-        deletedAt: true,
-        updatedAt: true,
-      };
+      const columnsToSelect = allColumns.filter(
+        (column) => !columnsToExclude.includes(column),
+      );
       // Destructure input parameters
       const {
         type,
@@ -402,59 +408,157 @@ export class ListingService {
         minArea,
         maxArea,
         location,
+        floor,
         furnishing,
         take: initialTake,
       } = paginateAndSort;
 
-      await this.searchHistoryRepository.save({ ...paginateAndSort, user });
-
       // Ensures the take value does not exceed 20
-
       const take = Math.min(initialTake, 20);
-
       const featuredTake = Math.ceil(take / 3);
-      const regularTake = take - featuredTake;
+      let regularTake = take - featuredTake;
 
       // Determine sorting options
-      const orderOptions = sortField
-        ? { [sortField]: directionToSort }
-        : { promotedDate: 'ASC', isListingPromoted: true };
+      const sortDirections = ['ASC', 'DESC'] as const;
+      type SortDirection = (typeof sortDirections)[number];
 
-      // Define base where conditions
-      const baseWhereConditions = {
-        isListingDisabled: false,
-        purpose: type,
-        numberOfRooms: numberOfRooms ? In(numberOfRooms) : MoreThan(0),
-        bathrooms: numberOfBathrooms ? In(numberOfBathrooms) : MoreThan(0),
-        price: minPrice ? Between(minPrice, maxPrice) : MoreThan(0),
-        area: minArea ? Between(minArea, maxArea) : MoreThan(0),
-        city: location,
-        furnished: furnishing,
-        listingTypeId: listingId,
+      // Common query setup
+      const baseQuery = (isFeatured: boolean) => {
+        const query = this.listingRepository
+          .createQueryBuilder('listing')
+
+          .select(columnsToSelect)
+          .where(
+            'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented',
+            {
+              isListingDisabled: false,
+              isListingSold: false,
+              isListingRented: false,
+            },
+          );
+
+        if (isFeatured) {
+          query
+            .andWhere('listing.isListingPromoted = :isListingPromoted', {
+              isListingPromoted: true,
+            })
+            .andWhere('listing.isListingFeatured = :isListingFeatured', {
+              isListingFeatured: true,
+            });
+        } else {
+          query.andWhere('listing.isListingFeatured = :isListingFeatured', {
+            isListingFeatured: false,
+          });
+        }
+
+        if (minPrice !== undefined && maxPrice !== undefined) {
+          query.andWhere('listing.price BETWEEN :minPrice AND :maxPrice', {
+            minPrice,
+            maxPrice,
+          });
+        }
+
+        if (type !== undefined) {
+          query.andWhere('listing.purpose = :type', { type });
+        }
+
+        if (furnishing !== undefined) {
+          query.andWhere('listing.furnished = :furnished', { furnishing });
+        }
+
+        if (listingId !== undefined) {
+          query.andWhere('listing.listingTypeid = :listingTypeId', {
+            listingTypeId: listingId,
+          });
+        }
+
+        if (numberOfRooms !== undefined) {
+          query.andWhere(
+            'attributes.name = :attributeName AND attributes.value IN (:...numberOfRooms)',
+            { attributeName: 'Number of Rooms', numberOfRooms },
+          );
+        }
+
+        if (numberOfBathrooms !== undefined) {
+          query.andWhere(
+            'attributes.name = :attributeName AND attributes.value IN (:...numberOfBathrooms)',
+            {
+              attributeName: 'Number of Bathrooms',
+              numberOfBathrooms,
+            },
+          );
+        }
+
+        if (minArea !== undefined && maxArea !== undefined) {
+          query.andWhere(
+            'attributes.name = :attributeName AND attributes.value BETWEEN :minArea AND :maxArea',
+            { attributeName: 'Area', minArea, maxArea },
+          );
+        }
+
+        if (floor !== undefined) {
+          query.andWhere(
+            'attributes.name = :attributeName AND attributes.value IN (:...floor)',
+            { attributeName: 'Level', floor },
+          );
+        }
+
+        if (location !== undefined) {
+          query.andWhere(
+            'attributes.name = :attributeName AND attributes.value IN (:...location)',
+            { attributeName: 'Address', location },
+          );
+        }
+
+        if (
+          sortField &&
+          sortDirections.includes(
+            directionToSort.toUpperCase() as SortDirection,
+          )
+        ) {
+          query.orderBy(
+            `listing.${sortField}`,
+            directionToSort.toUpperCase() as SortDirection,
+          );
+        } else {
+          query
+            .orderBy('listing.promotedDate', 'ASC')
+            .addOrderBy('listing.isListingPromoted', 'DESC');
+        }
+
+        return query;
       };
 
-      // Fetch listings
-      const [featuredListings] = await this.listingRepository.findAndCount({
-        take: featuredTake,
-        skip: Math.ceil(skip / 3),
-        order: { featureDate: 'ASC' },
-        where: { ...baseWhereConditions },
-        relations: ['listingAttributes'],
-        select: selectOptions,
-      });
+      const featuredQuery = baseQuery(true);
+      featuredQuery.take(featuredTake).skip(skip);
 
-      const [regularListings, total] =
-        await this.listingRepository.findAndCount({
-          take: regularTake,
-          skip,
-          order: orderOptions,
-          where: baseWhereConditions,
-          relations: ['listingAttributes'],
-          select: selectOptions,
-        });
+      const [featuredListings, featuredCount] = await featuredQuery
+        .leftJoinAndSelect('listing.user', 'user')
+        .leftJoinAndSelect('listing.listingAttributes', 'attributes')
+        .leftJoinAndSelect('listing.listingType', 'listingType')
+
+        .getManyAndCount();
 
       // Combine results
-      return [[...featuredListings, ...regularListings], total];
+
+      if (featuredListings.length < featuredTake) {
+        regularTake = regularTake + featuredTake - featuredListings.length;
+      }
+      const regularQuery = baseQuery(false);
+      regularQuery.take(regularTake).skip(skip);
+
+      const [regularListings, regularCount] = await regularQuery
+        .leftJoinAndSelect('listing.user', 'user')
+        .leftJoinAndSelect('listing.listingAttributes', 'attributes')
+        .leftJoinAndSelect('listing.listingType', 'listingType')
+
+        .getManyAndCount();
+      const listing = [...featuredListings, ...regularListings];
+      const total = featuredCount + regularCount;
+
+      await this.searchHistoryRepository.save({ ...paginateAndSort, user });
+
+      return { listing, total };
     } catch (error) {
       this.logger.log(error);
       throw error instanceof HttpException
@@ -504,9 +608,10 @@ export class ListingService {
       };
       const [listing, total, flagged, promoted, sold, rented] =
         await Promise.all([
-          this.listingRepository.findAll({
+          this.listingRepository.find({
             where: whereCondition,
-            relations: ['user'],
+            relations: ['user', 'listingType'],
+
             select: {
               user: {
                 firstName: true,
@@ -565,17 +670,6 @@ export class ListingService {
           street: true,
           district: true,
 
-          // Area: true,
-          // TotalArea: true,
-          // GarageArea: true,
-          // NumberOfRooms: true,
-          // Bathrooms: true,
-          // NumberOfStoreys: true,
-          // AreaPerApartment: true,
-          // BathsroomPerApartment: true,
-          // NumberOfRentedApartments: true,
-          // RoomsPerApartment: true,
-          // ApartmentInBuilding: true,
           gpsCoordinate: true,
           listingAttributes: true,
           images: true,
@@ -638,7 +732,10 @@ export class ListingService {
       const subscribedUser: { id: string; name: string }[] = [];
       const { id, ...partialUpdatePayload } = editListingDto;
 
-      const listing = await this.listingRepository.findById(id, ['wishlist']);
+      const listing = await this.listingRepository.findOne({
+        where: { id: id },
+        relations: ['wishlist'],
+      });
       if (listing.userId !== user.id) {
         throw new ForbiddenError(
           'This user does not have the permision to update record',
@@ -728,9 +825,9 @@ export class ListingService {
 
   async createPromotion(createPromotionInput: CreatePromotionInput) {
     try {
-      const listing = await this.listingRepository.findById(
-        createPromotionInput.listingId,
-      );
+      const listing = await this.listingRepository.findOne({
+        where: { id: createPromotionInput.listingId },
+      });
 
       const adPackage = await this.adpackageService.findOne(
         createPromotionInput.adPackageId,
@@ -773,9 +870,9 @@ export class ListingService {
 
   async flagListing(flaglistingInput: FlagListingInput, userId: string) {
     try {
-      const listing = await this.listingRepository.findByIdOrFail(
-        flaglistingInput.listingId,
-      );
+      const listing = await this.listingRepository.findOneOrFail({
+        where: { id: flaglistingInput.listingId },
+      });
 
       if (!listing) {
         throw new BadRequestException(AppStrings.LISTING_NOT_FOUND);
@@ -843,7 +940,9 @@ export class ListingService {
 
   async deleteListing(user: User, id: string) {
     try {
-      const listing = await this.listingRepository.findByIdOrFail(id);
+      const listing = await this.listingRepository.findOneOrFail({
+        where: { id: id },
+      });
       if (listing.userId != user.id || user.userType != 'admin') {
         throw new BadRequestException('Only the creator can delete Listing');
       }
@@ -908,9 +1007,9 @@ export class ListingService {
   async featureAListing(createFeatureInput: CreateFeatureInput) {
     try {
       let featured;
-      const listing = await this.listingRepository.findById(
-        createFeatureInput.listingId,
-      );
+      const listing = await this.listingRepository.findOne({
+        where: { id: createFeatureInput.listingId },
+      });
       const adPackage = await this.adpackageService.findOne(
         createFeatureInput.adPackageId,
       );
