@@ -16,7 +16,7 @@ import {
 import { Attribute, AttributeSet } from '../../../entities';
 import { AttributeService } from '../services';
 import { Permissions } from 'src/common/decorator/permission';
-import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
+import { AttributeFilter } from '../dtos/request/attributes.dto';
 
 @Resolver()
 export class AttributeResolver {
@@ -30,7 +30,7 @@ export class AttributeResolver {
    */
   @Query(() => [Attribute])
   async fetchAttributes(
-    @Args('findOptions', { nullable: true }) findOptions: PaginateAndSort,
+    @Args('findOptions', { nullable: true }) findOptions: AttributeFilter,
   ): Promise<Attribute[]> {
     return await this.attributeService.findAllAttributes(findOptions);
   }

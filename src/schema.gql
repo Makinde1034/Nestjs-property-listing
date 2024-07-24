@@ -555,7 +555,7 @@ type Query {
   listNotifications: [Notification!]!
   listNotificationScopes: [NotificationScope!]!
   fetchListingTypes: [ListingType!]!
-  fetchAttributes(findOptions: PaginateAndSort): [Attribute!]!
+  fetchAttributes(findOptions: AttributeFilter): [Attribute!]!
   fetchAttributeSets: [AttributeSet!]!
   findListingsForBuyer(findManyOptions: CreateSearchHistoryInput): ListingResponse!
   findListingsForOwner(findManyOptions: AttributeDto): ListingResponse!
@@ -592,12 +592,21 @@ type Query {
   financialVsOrder(findOptions: AdminDashboardSort!): [FinancialVsOrder!]!
 }
 
-input PaginateAndSort {
+input AttributeFilter {
   take: Float
   skip: Float
   sortField: String
   directionToSort: SortOrder
   where: WhereOption
+  englishName: String
+  type: String
+  showInFilters: Boolean
+  showInComparison: Boolean
+  showInSummary: Boolean
+  isRequired: Boolean
+  hiddenToBuyers: Boolean
+  isAmenity: Boolean
+  isAddress: Boolean
 }
 
 enum SortOrder {
@@ -649,6 +658,14 @@ input AdminFilterAndSort {
   isListingSold: Boolean! = false
   isListingFlagged: Boolean! = false
   isListingRented: Boolean! = false
+}
+
+input PaginateAndSort {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
 }
 
 input FindOfferInput {

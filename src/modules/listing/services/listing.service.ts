@@ -16,6 +16,7 @@ import {
   AdminFilterAndSort,
   CreateListingDto,
   FlagListingInput,
+  UpdateListingDto,
 } from '../dtos/request/listing.dto';
 import { User } from '../../../entities';
 
@@ -54,6 +55,7 @@ import { AttributeService } from './attribute.service';
 import { ListingAttributeRepository } from '../repositories/listing-attributes.repository';
 import { ListingTypeService } from './listing-type.service';
 import { FurnishingStatusEnum } from '../../../common/enums';
+import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 
 @Injectable()
 export class ListingService {
@@ -77,13 +79,31 @@ export class ListingService {
     try {
       createListingDto.userId = user.id;
       const { attributes, ...rest } = createListingDto;
-
       const listingType = await this.listingTypeService.findOne(
         createListingDto.listingTypeId,
       );
       if (!listingType) {
         throw new BadRequestException(AppStrings.LISTING_TYPE_NOT_FOUND);
       }
+
+      // Flatten all attributes from attribute sets into a single array
+      const allAttributes = listingType.attributeSets.flatMap(
+        (element) => element.attributes,
+      );
+
+      // Check required attributes
+      allAttributes.forEach((attribute) => {
+        if (attribute.isRequired) {
+          const match = attributes.some(
+            (attr) => attr.attributeId === attribute.id,
+          );
+          if (!match) {
+            throw new BadRequestException(
+              `${attribute.englishName} is required`,
+            );
+          }
+        }
+      });
 
       const gpsCoordinate = JSON.stringify(createListingDto.gpsCoordinate);
 
@@ -656,11 +676,19 @@ export class ListingService {
     try {
       const listing = await this.listingRepository.findOne({
         where: { id: id },
-        relations: ['listingType', 'listingAttributes'],
+        relations: ['user', 'listingType', 'listingAttributes'],
         select: {
+          user: {
+            id: true,
+            phone: true,
+            firstName: true,
+            lastName: true,
+            arabicFirstName: true,
+            arabicLastName: true,
+          },
           id: true,
-
-          // Purpose: true,
+          price: true,
+          purpose: true,
           rentingOption: true,
           featureDate: true,
           promotedDate: true,
@@ -669,7 +697,6 @@ export class ListingService {
           country: true,
           street: true,
           district: true,
-
           gpsCoordinate: true,
           listingAttributes: true,
           images: true,
@@ -686,15 +713,6 @@ export class ListingService {
           createdAt: true,
           deletedAt: true,
           updatedAt: true,
-
-          user: {
-            id: true,
-            phone: true,
-            firstName: true,
-            lastName: true,
-            arabicFirstName: true,
-            arabicLastName: true,
-          },
         },
       });
       if (!listing) {
@@ -723,14 +741,11 @@ export class ListingService {
     }
   }
 
-  async updateListing(
-    editListingDto,
-    // : UpdateListingDto
-    user: User,
-  ) {
+  async updateListing(editListingDto: UpdateListingDto, user: User) {
     try {
       const subscribedUser: { id: string; name: string }[] = [];
-      const { id, ...partialUpdatePayload } = editListingDto;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id, gpsCoordinate, ...partialUpdatePayload } = editListingDto;
 
       const listing = await this.listingRepository.findOne({
         where: { id: id },
@@ -900,10 +915,22 @@ export class ListingService {
     }
   }
 
-  async viewFlaggedListing(findManyOptions) {
+  async viewFlaggedListing(paginateAndSort: PaginateAndSort) {
     try {
+      const orderOptions = {
+        [paginateAndSort.sortField]: paginateAndSort.directionToSort,
+      };
+
+      if (paginateAndSort.take && paginateAndSort.skip) {
+        paginateAndSort.skip = 0;
+        paginateAndSort.take = 20;
+      }
       const [flaggedListing, total] =
-        await this.flagListingRepository.findAndCount(findManyOptions);
+        await this.flagListingRepository.findAndCount({
+          take: paginateAndSort.take,
+          skip: paginateAndSort.skip,
+          order: orderOptions,
+        });
 
       return { flaggedListing, total };
     } catch (error) {

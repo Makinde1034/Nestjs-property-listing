@@ -172,10 +172,7 @@ export class ListingResolver {
     @Args('findManyOptions', { nullable: true })
     findManyOptions?: PaginateAndSort,
   ) {
-    return await this.listingService.viewFlaggedListing({
-      skip: findManyOptions.skip,
-      take: findManyOptions.take,
-    });
+    return await this.listingService.viewFlaggedListing(findManyOptions);
   }
 
   @UseGuards(AccessTokenGuard)
