@@ -16,3 +16,34 @@ export class AttributeDto extends PaginateAndSort {
   @IsNotEmpty()
   listingType: string;
 }
+
+@InputType()
+export class AttributeFilter extends PaginateAndSort {
+  @Field({ nullable: true })
+  @IsOptional()
+  englishName: string;
+  @Field({ nullable: true })
+  @IsOptional()
+  type: string;
+  @Field({ nullable: true })
+  @IsOptional()
+  showInFilters: boolean;
+  @Field({ nullable: true })
+  @IsOptional()
+  showInComparison: boolean;
+  @Field({ nullable: true })
+  @IsOptional()
+  showInSummary: boolean;
+  @Field({ nullable: true })
+  @IsOptional()
+  isRequired: boolean;
+  @Field({ nullable: true })
+  @IsOptional()
+  hiddenToBuyers: boolean;
+  @Field({ nullable: true })
+  @IsOptional()
+  isAmenity: boolean;
+  @Field({ nullable: true })
+  @IsOptional()
+  isAddress: boolean;
+}

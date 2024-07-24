@@ -17,7 +17,7 @@ import {
 import { In } from 'typeorm';
 import { AppStrings } from 'src/common/messages/app.strings';
 import { StorageService } from '../../file-handler/services/storage.service';
-import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
+import { AttributeFilter } from '../dtos/request/attributes.dto';
 
 @Injectable()
 export class AttributeService {
@@ -39,15 +39,12 @@ export class AttributeService {
    * @async
    * @returns {Promise<Attribute[]>}
    */
-  async findAllAttributes(findOptions: PaginateAndSort): Promise<Attribute[]> {
-    let whereOption = {};
-    const { where } = findOptions;
+  async findAllAttributes(findOptions: AttributeFilter): Promise<Attribute[]> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { where, skip, take, directionToSort, sortField, ...rest } =
+      findOptions;
 
-    if (where) {
-      whereOption = { [where.fieldToChose]: where.whereParam };
-    }
-
-    return await this.attributeRepository.find({ where: whereOption });
+    return await this.attributeRepository.find({ where: rest, take, skip });
   }
 
   /**
