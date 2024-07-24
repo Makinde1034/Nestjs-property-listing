@@ -88,7 +88,7 @@ export class ListingResolver {
     @Args('findManyOptions', { nullable: true })
     findManyOptions?: CreateSearchHistoryInput,
   ) {
-    const [listing, total] =
+    const { listing, total } =
       await this.listingService.findAllListingForBuyerUnauthenticated(
         findManyOptions,
       );
@@ -141,7 +141,7 @@ export class ListingResolver {
     @Args('findManyOptions', { nullable: true })
     findManyOptions?: CreateSearchHistoryInput,
   ) {
-    const [listing, total] =
+    const { listing, total } =
       await this.listingService.findListingForBuyerAuthenticated(
         findManyOptions,
         ctx.req.user,

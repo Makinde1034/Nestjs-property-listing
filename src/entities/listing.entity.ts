@@ -41,7 +41,7 @@ export class Listing extends BaseEntity {
   @Field()
   purpose: string;
 
-  @Column()
+  @Column('decimal', { precision: 10, scale: 2 })
   @Field()
   price: number;
 
@@ -65,12 +65,12 @@ export class Listing extends BaseEntity {
   @Field()
   zatcaNumber: string;
 
-  @Field(() => ListingType)
+  @Field(() => ListingType, { nullable: true })
   @JoinColumn({ name: 'listingTypeId' })
   @ManyToOne(() => ListingType, (listingType) => listingType.listing, {
     eager: true,
   })
-  listingType: ListingType[];
+  listingType: ListingType;
 
   @Field()
   @Column()
@@ -103,7 +103,6 @@ export class Listing extends BaseEntity {
     { onDelete: 'CASCADE' },
   )
   listingAttributes: ListingAttributes[];
-
   @Column({ type: 'jsonb', nullable: true })
   @Field({ nullable: true })
   images: string;
