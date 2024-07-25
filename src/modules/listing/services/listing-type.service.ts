@@ -24,7 +24,7 @@ export class ListingTypeService {
   ) {}
 
   async findOne(id: string) {
-    const listingType = await this.listingTypeRepository.findAll({
+    const listingType = await this.listingTypeRepository.findOne({
       where: { id: id },
       relations: ['attributeSets'],
       select: {
@@ -34,7 +34,7 @@ export class ListingTypeService {
       },
     });
 
-    return listingType[0];
+    return listingType;
   }
 
   /**

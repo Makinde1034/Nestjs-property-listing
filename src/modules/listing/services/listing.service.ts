@@ -115,7 +115,7 @@ export class ListingService {
 
       const attributeEntities = await Promise.all(
         attributes.map(async (element) => {
-          const attribute = await this.attributeService.findOne(
+          const attribute = await this.attributeService.findOneAttribute(
             element.attributeId,
           );
 
