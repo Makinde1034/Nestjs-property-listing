@@ -87,7 +87,7 @@ type Review {
 
 type Offer {
   id: ID!
-  offerPrice: Float!
+  price: Float!
   expireAt: DateTime!
   acceptedAt: DateTime
   status: String!
@@ -271,6 +271,7 @@ type SearchHistory {
 type User {
   id: ID!
   userType: String!
+  userLevel: String!
   firstName: String
   arabicFirstName: String
   arabicLastName: String
@@ -1025,7 +1026,7 @@ input FlagListingInput {
 }
 
 input CreateOfferDto {
-  offerPrice: Float!
+  price: Float!
   status: String
   coupon: Boolean
   couponCode: String
@@ -1033,7 +1034,7 @@ input CreateOfferDto {
 }
 
 input UpdateOfferInput {
-  offerPrice: Float
+  price: Float
   status: String
   coupon: Boolean
   couponCode: String

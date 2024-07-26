@@ -24,6 +24,8 @@ import { AppStrings } from '../../../common/messages/app.strings';
 import { addDaysToDate } from '../../../common/utils/helper';
 import { MailgunEmailService } from '../../mail/services/implementations';
 import { getMessageData } from '../../../common/messages/alert-messages';
+import { PdfInput } from '../../file-handler/dto/pdf.dto';
+import { UserRepository } from '../../user/repositories';
 
 @Injectable()
 export class OfferService {
@@ -32,8 +34,10 @@ export class OfferService {
     private paymentService: PaymentService,
     private listingService: ListingService,
     private mailService: MailgunEmailService,
+    private userRepository: UserRepository,
   ) {}
   logger = new Logger(OfferService.name);
+
   async createAnOffer(createOfferDto: CreateOfferDto, user: User) {
     try {
       await this.listingService.findOneListingForBuyer(
@@ -42,21 +46,21 @@ export class OfferService {
 
       const offer = await this.offerRepository.findAll({
         where: {
-          offerPrice: MoreThanOrEqual(createOfferDto.offerPrice),
+          price: MoreThanOrEqual(createOfferDto.price),
           listingId: createOfferDto.listingId,
         },
-        order: { offerPrice: 'DESC' },
+        order: { price: 'DESC' },
       });
 
       if (offer.length > 0) {
         throw new BadRequestException(
-          `Minimum Offer must be greater than ${offer[0].offerPrice}`,
+          `Minimum Offer must be greater than ${offer[0].price}`,
         );
       }
 
       const [minimumPrice, listing] =
         await this.getMinimumOfferForAListingAndUser(createOfferDto.listingId);
-      if (minimumPrice > createOfferDto.offerPrice) {
+      if (minimumPrice > createOfferDto.price) {
         throw new BadRequestException(
           `Minimum Offer must be greater than  ${minimumPrice}`,
         );
@@ -73,29 +77,50 @@ export class OfferService {
 
       const offerPayload = await this.offerRepository.create(createOfferDto);
 
-      const mailMessageForBuyer = getMessageData(
-        user.firstName,
-        'Create',
-        'Offers',
-        'Offer Creator',
-      );
-      const mailMessageForSeller = getMessageData(
-        listing.user.arabicFirstName,
-        'Create',
-        'Offers',
-        'Seller',
-      );
+      const data: PdfInput = {
+        createdDate: `${offerPayload.createdAt.getDay()}-${offerPayload.createdAt.getMonth()}-${offerPayload.createdAt.getFullYear()}`,
+        dueDate: `${offerPayload.expireAt.getDate()}-${offerPayload.expireAt.getMonth()}-${offerPayload.expireAt.getFullYear()}`,
+        clientName: `${user.firstName} ${user.lastName}`,
+        item: listing.listingType.name,
+        type: 'invoice',
+        price: offerPayload.price,
+        totalPrice: offerPayload.price,
+      };
 
-      await this.mailService.sendOfferMail({
-        email: user.email,
-        subject: mailMessageForBuyer[0]['Title'],
-        text: mailMessageForBuyer[0]['Body'],
-      });
-      await this.mailService.sendOfferMail({
-        email: listing.user.email,
-        subject: mailMessageForSeller[0]['Title'],
-        text: mailMessageForSeller[0]['Body'],
-      });
+      this.paymentService.invoice(data, user, listing);
+
+      const seller = await this.userRepository.findById(listing.userId, [
+        'notificationPreference',
+      ]);
+
+      if (user.notificationPreference[0].email) {
+        const mailMessageForBuyer = getMessageData(
+          user.firstName,
+          'Create',
+          'Offers',
+          'Offer Creator',
+        );
+
+        await this.mailService.sendOfferMail({
+          email: user.email,
+          subject: mailMessageForBuyer[0]['Title'],
+          text: mailMessageForBuyer[0]['Body'],
+        });
+      }
+
+      if (seller.notificationPreference[0].email) {
+        const mailMessageForSeller = getMessageData(
+          listing.user.arabicFirstName,
+          'Create',
+          'Offers',
+          'Seller',
+        );
+        await this.mailService.sendOfferMail({
+          email: listing.user.email,
+          subject: mailMessageForSeller[0]['Title'],
+          text: mailMessageForSeller[0]['Body'],
+        });
+      }
       return offerPayload;
     } catch (error) {
       this.logger.log(error);
@@ -160,16 +185,16 @@ export class OfferService {
 
         await this.offerRepository.findAll({
           where: {
-            offerPrice: MoreThanOrEqual(updateOfferInput.offerPrice),
+            price: MoreThanOrEqual(updateOfferInput.price),
             listingId: updateOfferInput.listingId,
           },
-          order: { offerPrice: 'DESC' },
+          order: { price: 'DESC' },
         }),
       ]);
 
       if (allOffers.length > 0) {
         throw new BadRequestException(
-          `Minimum Offer must be greater than ${allOffers[0].offerPrice}`,
+          `Minimum Offer must be greater than ${allOffers[0].price}`,
         );
       }
 
@@ -177,7 +202,7 @@ export class OfferService {
         await this.getMinimumOfferForAListingAndUser(
           updateOfferInput.listingId,
         );
-      if (minimumPrice > updateOfferInput.offerPrice) {
+      if (minimumPrice > updateOfferInput.price) {
         throw new BadRequestException(
           `Minimum Offer must be greater than  ${minimumPrice}`,
         );

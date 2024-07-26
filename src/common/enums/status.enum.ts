@@ -17,7 +17,7 @@ export enum StatusListEnum {
 }
 
 export enum OfferListEnum {
-  // CANCLED = 'cancled',
+  INACTIVE = 'inactive',
   EXPIRED = 'expired',
   ACTIVE = 'active',
   ACCEPTED = 'accepted',

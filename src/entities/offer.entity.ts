@@ -22,21 +22,21 @@ import { IsEnum } from 'class-validator';
 @ObjectType()
 @Entity()
 export class Offer extends BaseEntity {
+  @Column('decimal', { precision: 10, scale: 2, default: 1300 })
   @Field()
-  @Column({ nullable: true })
-  offerPrice: number;
+  price: number;
 
   @Field()
-  @Column({ nullable: true })
+  @Column()
   expireAt: Date;
 
   @Field({ nullable: true })
   @Column({ nullable: true })
   acceptedAt: Date;
 
-  @Field({ defaultValue: 'active' })
+  @Field({ defaultValue: 'inactive' })
   @IsEnum(OfferListEnum)
-  @Column({ default: 'active' })
+  @Column({ default: 'inactive' })
   status: string;
 
   @Field()

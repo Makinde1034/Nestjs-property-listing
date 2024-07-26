@@ -4,6 +4,7 @@
  */
 
 export class PdfInput {
+  invoiceNumber?: number;
   createdDate: string;
   dueDate: string;
   clientName: string;

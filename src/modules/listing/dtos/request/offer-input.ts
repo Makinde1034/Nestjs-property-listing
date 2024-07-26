@@ -20,7 +20,7 @@ export class CreateOfferDto {
   @Field()
   @IsPositive()
   @IsNotEmpty()
-  offerPrice: number;
+  price: number;
 
   expireAt: Date;
 

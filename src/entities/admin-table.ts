@@ -3,11 +3,14 @@
  * For license. See license.txt
  */
 
-import { CreateDateColumn, Entity, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, UpdateDateColumn } from 'typeorm';
 import BaseEntity from './base.entity';
 
 @Entity()
 export class Admin extends BaseEntity {
+  @Column({ default: 80 })
+  minimumOfferPercentage: number;
+
   @CreateDateColumn()
   createdAt: Date;
 
