@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as handlebars from 'handlebars';
@@ -12,32 +12,40 @@ import { PdfInput } from '../dto/pdf.dto';
 
 @Injectable()
 export class PdfService {
-  async pdfGeneratorService(data: PdfInput): Promise<Buffer> {
-    const templatePath = path.join(
-      __dirname,
-      '../../',
-      'mail',
-      'templates',
-      'invoice.hbs',
-    );
-    const htmlTemplate = fs.readFileSync(templatePath, 'utf8');
-    const template = handlebars.compile(htmlTemplate);
-    const html = template(data);
+  logger = new Logger(PdfService.name);
+  async generatePdfForInvoice(data: PdfInput): Promise<Buffer> {
+    try {
+      const templatePath = path.join(
+        __dirname,
+        '../../',
+        'mail',
+        'templates',
+        'invoice.hbs',
+      );
+      const htmlTemplate = fs.readFileSync(templatePath, 'utf8');
+      const template = handlebars.compile(htmlTemplate);
+      const html = template(data);
 
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
+      const browser = await puppeteer.launch({
+        product: 'firefox',
+        headless: true,
+      });
+      const page = await browser.newPage();
 
-    await page.setContent(html, {
-      waitUntil: 'domcontentloaded',
-    });
+      await page.setContent(html, {
+        waitUntil: 'domcontentloaded',
+      });
 
-    const pdfBuffer = await page.pdf({
-      format: 'A4',
-      printBackground: true,
-    });
+      const pdfBuffer = await page.pdf({
+        format: 'A4',
+        printBackground: true,
+      });
 
-    await browser.close();
+      await browser.close();
 
-    return pdfBuffer;
+      return pdfBuffer;
+    } catch (error) {
+      this.logger.log(error);
+    }
   }
 }

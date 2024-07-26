@@ -4,3 +4,5 @@
  */
 
 export type UserProfileType = 'individual' | 'company' | 'admin' | 'staff';
+
+export type UserLevel = 'level_1' | 'level_2' | 'level_3';

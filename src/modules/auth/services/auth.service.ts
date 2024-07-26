@@ -307,6 +307,7 @@ export class AuthService {
     const payload: JWTPayload = {
       username: user.email,
       sub: user.id,
+      level: user.userLevel,
     };
 
     // Generate JWT tokens for access and refresh tokens

@@ -19,7 +19,7 @@ import {
 } from 'typeorm';
 import BaseEntity from './base.entity';
 import { Field, ObjectType } from '@nestjs/graphql';
-import { UserProfileType } from '../common/types';
+import { UserLevel, UserProfileType } from '../common/types';
 import * as bcrypt from 'bcrypt';
 import { Gender, MaritalStatus, UserStatus } from '../common/enums';
 import { NationalIdentity } from './identity.entity';
@@ -40,6 +40,10 @@ export class User extends BaseEntity {
   @Column()
   @Field()
   userType: UserProfileType;
+
+  @Column({ default: 'level_1' })
+  @Field()
+  userLevel: UserLevel;
 
   @Column({ nullable: true })
   @Field({ nullable: true })

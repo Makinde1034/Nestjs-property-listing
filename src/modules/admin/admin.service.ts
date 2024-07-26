@@ -9,18 +9,6 @@ import { OfferRepository } from '../listing/repositories';
 
 import { OfferListEnum } from '../../common/enums/status.enum';
 import { UserRepository } from '../user/repositories';
-import {
-  FinancialVsOrder,
-  ListingStats,
-  SaiiFees,
-  UserAgeRange,
-  UserCity,
-  UserCountryCount,
-  UserDemography,
-  UserFunneling,
-  UserGenderCount,
-  UserStats,
-} from './dto/admin-response';
 
 import { UserTrackingRepository } from '../user/repositories/user-tracking-repository';
 import { IssueRepository } from '../issue/repositories';
@@ -38,6 +26,18 @@ import {
 import { AdminDashboardSort } from './dto/admin-request';
 
 import { Between } from 'typeorm';
+import {
+  SaiiFees,
+  FinancialVsOrder,
+  ListingStats,
+  UserStats,
+  UserFunneling,
+  UserDemography,
+  UserCity,
+  UserCountryCount,
+  UserGenderCount,
+  UserAgeRange,
+} from './dto/admin-response';
 @Injectable()
 export class AdminService {
   constructor(
