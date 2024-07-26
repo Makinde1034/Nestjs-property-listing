@@ -33,7 +33,6 @@ export class PaymentService {
 
   async invoice(data?: PdfInput, user?: User, listing?: Listing) {
     try {
-      console.log(listing);
       const payload: CreateInvoiceInput = {
         expiredAt: addDays(new Date(), 4),
         price: data.price,
