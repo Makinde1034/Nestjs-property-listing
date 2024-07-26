@@ -21,8 +21,9 @@ RUN apt-get update && \
     apt-get install -y wget gnupg firefox-esr fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Puppeteer with WebDriver BiDi support
-RUN npm install puppeteer @puppeteer/bidi
+# Install Puppeteer with Firefox support
+RUN npm install puppeteer && \
+    npx puppeteer browsers install firefox
 
 # Expose the port the app runs on
 EXPOSE 3000
