@@ -38,6 +38,9 @@ export const AppStrings = {
   UNABLE_TO_DELETE_ATTRIBUTE:
     'Attribute cannot be deleted because it isused by an attribute set',
   ATTRIBUTE_DELETED_SUCCESSFULLY: 'Attribute deleted successfully',
+  ATTRIBUTE_NOT_FOUND: 'Attribute not found',
+  ATTRIBUTE_SET_NOT_FOUND: 'Attribute set not found',
+
   ATTRIBUTESET_DELETED_SUCCESSFULLY: 'Attribute set deleted successfully',
   LISTINGTYPE_DELETED_SUCCESSFULLY: 'Listing type deleted successfully',
   ROLE_DELETED_SUCCESSFULLY: 'Roledeleted successfully',

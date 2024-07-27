@@ -1,9 +1,13 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { registerAs } from '@nestjs/config';
 
 const token = process.env.HYPERPAY_TOKEN;
 const baseUrl = process.env.HYPERPAY_BASE_URL;
 const entityId = process.env.HYPERPAY_ENTITY_ID;
-console.log(token, baseUrl, entityId);
 
 export type HyperpayConfig = {
   token: string;
