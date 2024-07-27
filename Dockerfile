@@ -1,5 +1,5 @@
 # Stage 1: Build stage
-FROM node:20-slim
+FROM node:20
 
 # Set a working directory
 WORKDIR /usr/src/app

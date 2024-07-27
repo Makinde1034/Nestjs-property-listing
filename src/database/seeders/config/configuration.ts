@@ -6,5 +6,11 @@
 import postgresConfig from './database/postgres/postgres.config';
 import authConfig from './auth/auth.config';
 import recaptchaConfig from './recpatcha/recaptcha.config';
+import hyperPaymentConfig from '../../../config/payment/hyper-payment.config';
 
-export default [postgresConfig, authConfig, recaptchaConfig];
+export default [
+  postgresConfig,
+  authConfig,
+  recaptchaConfig,
+  hyperPaymentConfig,
+];
