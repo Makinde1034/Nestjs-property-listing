@@ -9,9 +9,10 @@ import { PaymentResolver } from './resolver/payment.resolver';
 import { FilehandlerModule } from '../file-handler/file-handler.module';
 import { PaymentController } from './controller/payment.controller';
 import { InvoiceRepository } from './repositories/invoice.repository';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
-  imports: [FilehandlerModule],
+  imports: [FilehandlerModule, HttpModule],
   providers: [PaymentResolver, PaymentService, InvoiceRepository],
   controllers: [PaymentController],
   exports: [InvoiceRepository, PaymentService],

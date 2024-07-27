@@ -4,11 +4,39 @@
  */
 
 import { Field, InputType } from '@nestjs/graphql';
-import { IsPositive } from 'class-validator';
+import { IsPositive, IsString } from 'class-validator';
 
 @InputType()
 export class CreatePaymentInput {
   @Field()
   @IsPositive()
   amount: number;
+
+  @Field()
+  @IsString()
+  paymentBrand: string;
+
+  @Field()
+  @IsString()
+  cardNumber: string;
+
+  @Field()
+  @IsString()
+  cardHolder: string;
+
+  @Field()
+  @IsString()
+  cardExpiryMonth: string;
+
+  @Field()
+  @IsString()
+  cardExpiryYear: string;
+
+  @Field()
+  @IsString()
+  cardCvv: string;
+
+  paymentType?: string;
+  entityId?: string;
+  currency?: string;
 }

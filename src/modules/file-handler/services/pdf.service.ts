@@ -29,6 +29,7 @@ export class PdfService {
       const browser = await puppeteer.launch({
         product: 'firefox',
         headless: true,
+        protocol: 'webDriverBiDi',
       });
       const page = await browser.newPage();
 

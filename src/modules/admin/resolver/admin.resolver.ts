@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { AdminService } from '../admin.service';
+import { AdminService } from '../services/admin.service';
 import {
   FinancialVsOrder,
   ListingStats,
@@ -19,10 +19,13 @@ import {
 import { Args, Query, Resolver } from '@nestjs/graphql';
 
 import { AdminDashboardSort } from '../dto/admin-request';
+import { UseGuards } from '@nestjs/common';
+import { AccessTokenGuard } from '../../auth/guards';
+import { AdminGuard } from '../../auth/guards/admin.guard';
 
 @Resolver()
-// @UseGuards(AccessTokenGuard)
-// @UseGuards(AdminGuard)
+@UseGuards(AccessTokenGuard)
+@UseGuards(AdminGuard)
 export class AdminResolver {
   constructor(private adminService: AdminService) {}
 
