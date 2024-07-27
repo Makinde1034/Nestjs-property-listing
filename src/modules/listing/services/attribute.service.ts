@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { AttributeSetRepository } from '../repositories/attribute-set.repository';
 import { AttributeRepository } from '../repositories';
 import { Attribute, AttributeSet } from 'src/entities';
@@ -26,11 +26,16 @@ export class AttributeService {
     private readonly attributeSetRepository: AttributeSetRepository,
     private readonly storageService: StorageService,
   ) {}
-
+  logger = new Logger(AttributeService.name);
   async findOneAttribute(id: string) {
-    return await this.attributeRepository.findOne({
-      where: { id: id },
-    });
+    try {
+      return await this.attributeRepository.findOneOrFail({
+        where: { id: id },
+      });
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(AppStrings.ATTRIBUTE_NOT_FOUND);
+    }
   }
 
   /**
@@ -138,10 +143,14 @@ export class AttributeService {
   }
 
   async findOneAttributeSet(id: string) {
-    return await this.attributeSetRepository.findOne({
-      where: { id: id },
-      relations: ['attribute'],
-    });
+    try {
+      return await this.attributeSetRepository.findOne({
+        where: { id: id },
+      });
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(AppStrings.ATTRIBUTE_SET_NOT_FOUND);
+    }
   }
 
   /**
