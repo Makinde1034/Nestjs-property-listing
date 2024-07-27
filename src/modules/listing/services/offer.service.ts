@@ -52,6 +52,13 @@ export class OfferService {
         order: { price: 'DESC' },
       });
 
+      const offerExpiry = new Date(createOfferDto.expireAt);
+
+      const maxExpiry = new Date(addDaysToDate(new Date(), 2));
+
+      if (offerExpiry > maxExpiry) {
+        throw new BadRequestException('Max expiry is 2 days');
+      }
       if (offer.length > 0) {
         throw new BadRequestException(
           `Minimum Offer must be greater than ${offer[0].price}`,

@@ -22,6 +22,8 @@ export class CreateOfferDto {
   @IsNotEmpty()
   price: number;
 
+  @Field()
+  @IsNotEmpty()
   expireAt: Date;
 
   @Field({ nullable: true })
