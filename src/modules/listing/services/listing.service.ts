@@ -741,6 +741,75 @@ export class ListingService {
     }
   }
 
+  async findOneListingForBuyerUnauthenticated(id: string) {
+    try {
+      const listing = await this.listingRepository.findOne({
+        where: { id: id },
+        relations: ['user', 'listingType', 'listingAttributes'],
+        select: {
+          user: {
+            id: true,
+            phone: true,
+            firstName: true,
+            lastName: true,
+            arabicFirstName: true,
+            arabicLastName: true,
+          },
+          id: true,
+
+          purpose: true,
+          rentingOption: true,
+          featureDate: true,
+          promotedDate: true,
+          listingTypeId: true,
+          city: true,
+          country: true,
+          street: true,
+          district: true,
+          gpsCoordinate: true,
+          listingAttributes: true,
+          images: true,
+          panoramaView: true,
+          offer: true,
+          impressions: true,
+          isListingPromoted: true,
+          isListingFlagged: true,
+          isListingSold: true,
+          isListingRented: true,
+          isListingFeatured: true,
+          isListingDisabled: true,
+          negotiable: true,
+          createdAt: true,
+          deletedAt: true,
+          updatedAt: true,
+        },
+      });
+      if (!listing) {
+        throw new BadRequestException(AppStrings.LISTING_NOT_FOUND);
+      }
+
+      const newImpression = listing.impressions + 1;
+
+      await this.listingRepository.update(listing.id, {
+        impressions: newImpression,
+      });
+
+      listing.deedNumber = '';
+      listing.zatcaNumber = '';
+      listing.iban = '';
+
+      return listing;
+    } catch (error) {
+      this.logger.log(error);
+      if (error instanceof HttpException) {
+        this.logger.log(error);
+
+        throw error;
+      } else
+        throw new BadRequestException(error.messages || error.data || error);
+    }
+  }
+
   async updateListing(editListingDto: UpdateListingDto, user: User) {
     try {
       const subscribedUser: { id: string; name: string }[] = [];

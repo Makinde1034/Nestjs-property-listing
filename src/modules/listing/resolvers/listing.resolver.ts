@@ -134,6 +134,11 @@ export class ListingResolver {
     return await this.listingService.findOneListingForBuyer(id);
   }
 
+  @Query(() => Listing, { name: 'findOneForAuthenticatedBuyer' })
+  async findOneForUnauthenticatedBuyer(@Args('id') id: string) {
+    return await this.listingService.findOneListingForBuyer(id);
+  }
+
   @UseGuards(AccessTokenGuard)
   @Query(() => ListingResponse, { name: 'findListingForBuyerAuthenticated' })
   async findListingForBuyerAuthenticated(
