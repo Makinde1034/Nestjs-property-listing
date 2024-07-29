@@ -196,7 +196,8 @@ type AttributeSet {
 
 type ListingType {
   id: ID!
-  name: String!
+  englishName: String!
+  arabicName: String!
   icon: String
   listing: Listing!
   attributeSets: [AttributeSet!]!
@@ -907,12 +908,14 @@ input NotificationInput {
 }
 
 input ListingTypeInput {
-  name: String!
+  englishName: String!
+  arabicName: String!
   attributeSets: [String!]!
 }
 
 input ListingTypeUpdateInput {
-  name: String!
+  englishName: String!
+  arabicName: String!
   attributeSets: [String!]!
   id: String!
 }
