@@ -79,9 +79,9 @@ export class OfferService {
       }
 
       if (user.id == listing.user.id) {
-        // throw new BadRequestException(
-        //   'The creator of a listing cannot create an offer on  that listing',
-        // );
+        throw new BadRequestException(
+          'The creator of a listing cannot create an offer on  that listing',
+        );
       }
 
       createOfferDto.userId = user.id;
