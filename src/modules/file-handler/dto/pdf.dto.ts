@@ -9,6 +9,8 @@ export class PdfInput {
   dueDate: string;
   clientName: string;
   item: string;
+  englishName?: string;
+  arabicName?: string;
   type: string;
   price: number;
   totalPrice: number;

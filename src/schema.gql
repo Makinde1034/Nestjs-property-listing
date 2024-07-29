@@ -566,6 +566,7 @@ type Query {
   findListingsForAdmin(paginateAndSort: AdminFilterAndSort): AdminListingResponse!
   findOneListingForAdmin(id: String!): Listing!
   findOneForBuyer(id: String!): Listing!
+  findOneForAuthenticatedBuyer(id: String!): Listing!
   findListingForBuyerAuthenticated(findManyOptions: CreateSearchHistoryInput): ListingResponse!
   viewFlaggedListings(findManyOptions: PaginateAndSort): FlaggedListingResponse
   getMessageInLocalLanguage: SuccessResponse

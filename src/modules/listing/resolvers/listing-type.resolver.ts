@@ -26,13 +26,11 @@ export class ListingTypeResolver {
    * @returns {Promise<ListingType[]>}
    */
   @Query(() => [ListingType])
-  @UseGuards(AccessTokenGuard)
   async fetchListingTypes(): Promise<ListingType[]> {
     return await this.listingTypeService.findAllListingTypes();
   }
 
   @Query(() => ListingType)
-  @UseGuards(AccessTokenGuard)
   async fetchOneListingTypes(@Args('id') id: string): Promise<ListingType> {
     return await this.listingTypeService.findOne(id);
   }
@@ -45,12 +43,12 @@ export class ListingTypeResolver {
    * @returns {Promise<ListingType>}
    */
   @Mutation(() => ListingType)
-  // @Permissions('create-listing-type')
-  // @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions('create-listing-type')
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async createListingType(
     @Args('RequestInput') RequestInput: ListingTypeInput,
   ): Promise<ListingType> {
-    RequestInput.name = RequestInput.name.toLocaleLowerCase();
+    RequestInput.englishName = RequestInput.englishName.toLocaleLowerCase();
     return await this.listingTypeService.createListingType(RequestInput);
   }
 
