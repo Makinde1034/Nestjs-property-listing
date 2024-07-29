@@ -306,8 +306,10 @@ export class AuthService {
     // JWT payload to identify the user
     const payload: JWTPayload = {
       username: user.email,
-      sub: user.id,
-      level: user.userLevel,
+      sub: {
+        userId: user.id,
+        level: user.userLevel,
+      },
     };
 
     // Generate JWT tokens for access and refresh tokens

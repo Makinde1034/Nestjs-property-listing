@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AuthResolver } from './resolvers';
 import {
   AuthService,
@@ -15,6 +15,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
 import { AuthEventHandler } from './events/auth.event';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { AuthMiddleware } from '../../common/interceptors/auth-middleware';
 
 @Module({
   imports: [
@@ -37,4 +38,8 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     TwoFactorAuthenticationService,
   ],
 })
-export class AuthModule {}
+export class AuthModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(AuthMiddleware).forRoutes('*');
+  }
+}

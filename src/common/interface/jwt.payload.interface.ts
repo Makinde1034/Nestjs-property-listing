@@ -5,6 +5,8 @@
 
 export interface JWTPayload {
   username: string;
-  sub: string;
-  level: string;
+  sub: {
+    userId: string;
+    level: string;
+  };
 }
