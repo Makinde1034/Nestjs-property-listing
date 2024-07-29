@@ -39,6 +39,7 @@ export class PaymentService {
         userId: user.id,
         listingid: listing.id,
       };
+      data.item = listing.title;
 
       const invoice = await this.invoiceRepository.save(payload);
       data.invoiceNumber = invoice.id;

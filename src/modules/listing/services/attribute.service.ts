@@ -48,7 +48,6 @@ export class AttributeService {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { where, skip, take, directionToSort, sortField, ...rest } =
       findOptions;
-    console.log(rest);
 
     return await this.attributeRepository.find({
       where: { ...rest },
