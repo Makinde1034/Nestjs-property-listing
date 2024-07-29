@@ -8,10 +8,11 @@ export class PdfInput {
   createdDate: string;
   dueDate: string;
   clientName: string;
-  item: string;
+  item?: string;
   englishName?: string;
   arabicName?: string;
   type: string;
   price: number;
   totalPrice: number;
+  rentingOption?: string;
 }

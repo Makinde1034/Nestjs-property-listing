@@ -93,7 +93,9 @@ export class OfferService {
         createdDate: `${offerPayload.createdAt.getDate()}-${offerPayload.createdAt.getMonth() + 1}-${offerPayload.createdAt.getFullYear()}`,
         dueDate: `${offerPayload.expireAt.getDate()}-${offerPayload.expireAt.getMonth() + 1}-${offerPayload.expireAt.getFullYear()}`,
         clientName: `${user.firstName} ${user.lastName}`,
-        item: listing.purpose === Purpose.SALE ? null : listing.rentingOption,
+
+        rentingOption:
+          listing.purpose === Purpose.SALE ? null : listing.rentingOption,
         type: listing.purpose === Purpose.SALE ? 'buy' : 'rent',
         price: offerPayload.price,
         totalPrice: offerPayload.price,
