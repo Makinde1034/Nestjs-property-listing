@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { AttributeSetRepository, ListingTypeRepository } from '../repositories';
 import { ListingType } from 'src/entities';
 import {
@@ -24,17 +24,14 @@ export class ListingTypeService {
   ) {}
 
   async findOne(id: string) {
-    const listingType = await this.listingTypeRepository.findOne({
-      where: { id: id },
-      relations: ['attributeSets'],
-      select: {
-        attributeSets: {
-          id: true,
-        },
-      },
-    });
-
-    return listingType;
+    try {
+      const listingType = await this.listingTypeRepository.findByIdOrFail(id, [
+        'attributeSets',
+      ]);
+      return listingType;
+    } catch (error) {
+      throw new BadRequestException(AppStrings.NOT_FOUND);
+    }
   }
 
   /**
@@ -65,6 +62,7 @@ export class ListingTypeService {
 
     const data: Partial<ListingType> = {
       englishName: input.englishName,
+      arabicName: input.arabicName,
       attributeSets,
     };
     if (icon) {
