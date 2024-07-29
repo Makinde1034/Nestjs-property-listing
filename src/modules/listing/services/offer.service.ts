@@ -88,7 +88,8 @@ export class OfferService {
         createdDate: `${offerPayload.createdAt.getDay()}-${offerPayload.createdAt.getMonth()}-${offerPayload.createdAt.getFullYear()}`,
         dueDate: `${offerPayload.expireAt.getDate()}-${offerPayload.expireAt.getMonth()}-${offerPayload.expireAt.getFullYear()}`,
         clientName: `${user.firstName} ${user.lastName}`,
-        item: listing.listingType.name,
+        item: listing.listingType.englishName,
+
         type: 'invoice',
         price: offerPayload.price,
         totalPrice: offerPayload.price,

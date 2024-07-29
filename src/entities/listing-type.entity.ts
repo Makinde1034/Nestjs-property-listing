@@ -22,7 +22,11 @@ import { Listing } from './listing.entity';
 export class ListingType extends BaseEntity {
   @Column()
   @Field()
-  name: string;
+  englishName: string;
+
+  @Column()
+  @Field()
+  arabicName: string;
 
   @Column({ nullable: true })
   @Field({ nullable: true })

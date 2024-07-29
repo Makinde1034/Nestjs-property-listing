@@ -19,7 +19,12 @@ export class ListingTypeInput {
   @Field()
   @IsString()
   @IsNotEmpty()
-  name: string;
+  englishName: string;
+
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  arabicName: string;
 
   @Field(() => [String])
   @IsArray()

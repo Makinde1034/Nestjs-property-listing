@@ -48,7 +48,7 @@ export class ListingTypeResolver {
   async createListingType(
     @Args('RequestInput') RequestInput: ListingTypeInput,
   ): Promise<ListingType> {
-    RequestInput.name = RequestInput.name.toLocaleLowerCase();
+    RequestInput.englishName = RequestInput.englishName.toLocaleLowerCase();
     return await this.listingTypeService.createListingType(RequestInput);
   }
 
