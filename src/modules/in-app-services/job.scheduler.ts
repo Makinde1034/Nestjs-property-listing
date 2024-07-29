@@ -37,7 +37,6 @@ export class JobService {
     searchHistory.map(async (element) => {
       const listing = await this.listingRepository.findOne({
         where: {
-          city: element.location,
           price: element.price,
           purpose: element.type, //TODO: add more conditions
         },

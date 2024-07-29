@@ -30,7 +30,7 @@ export class ListingTypeService {
       ]);
       return listingType;
     } catch (error) {
-      throw new BadRequestException(AppStrings.NOT_FOUND);
+      throw new BadRequestException(AppStrings.LISTING_TYPE_NOT_FOUND);
     }
   }
 

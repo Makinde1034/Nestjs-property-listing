@@ -83,7 +83,9 @@ export class ListingResolver {
    *************************/
 
   // @UseGuards(AccessTokenGuard)
-  @Query(() => ListingResponse, { name: 'findListingsForBuyer' })
+  @Query(() => ListingResponse, {
+    name: 'findAllListingForBuyerUnauthenticated',
+  })
   async findListingForBuyer(
     @Args('findManyOptions', { nullable: true })
     findManyOptions?: CreateSearchHistoryInput,

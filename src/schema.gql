@@ -218,10 +218,6 @@ type Listing {
   zatcaNumber: String!
   listingType: ListingType
   listingTypeId: String!
-  city: String!
-  country: String!
-  street: String!
-  district: String!
   gpsCoordinate: String
   listingAttributes: [ListingAttributes!]
   images: String
@@ -562,7 +558,7 @@ type Query {
   fetchAttributeSets: [AttributeSet!]!
   fetchOneAttributeSets(id: String!): AttributeSet!
   fetchOneAttribute(id: String!): Attribute!
-  findListingsForBuyer(findManyOptions: CreateSearchHistoryInput): ListingResponse!
+  findAllListingForBuyerUnauthenticated(findManyOptions: CreateSearchHistoryInput): ListingResponse!
   findListingsForOwner(findManyOptions: AttributeDto): ListingResponse!
   findListingsForAdmin(paginateAndSort: AdminFilterAndSort): AdminListingResponse!
   findOneListingForAdmin(id: String!): Listing!
@@ -980,11 +976,6 @@ input CreateListingDto {
   zatcaNumber: String!
   listingTypeId: String!
   attributes: [Attributes!]!
-  city: String!
-  country: String!
-  street: String!
-  district: String!
-  floor: Float
   gpsCoordinate: LocationDto
   panoramaView: [String!]
   negotiable: Boolean = false
@@ -1012,11 +1003,6 @@ input UpdateListingDto {
   zatcaNumber: String
   listingTypeId: String
   attributes: [Attributes!]
-  city: String
-  country: String
-  street: String
-  district: String
-  floor: Float
   gpsCoordinate: LocationDto
   panoramaView: [String!]
   negotiable: Boolean = false

@@ -95,26 +95,6 @@ export class CreateListingDto {
   @IsArray()
   attributes: Attributes[];
 
-  @Field()
-  @IsString()
-  city: string;
-
-  @Field()
-  @IsString()
-  country: string;
-
-  @Field()
-  @IsString()
-  street: string;
-
-  @Field()
-  @IsString()
-  district: string;
-
-  @Field({ nullable: true })
-  @IsNumber()
-  floor: number;
-
   @Field({ nullable: true })
   @IsObject()
   gpsCoordinate: LocationDto;
