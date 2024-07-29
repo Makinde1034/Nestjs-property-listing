@@ -6,7 +6,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 
 import { SuccessResponse } from '../../../common/response';
-import { PdfService } from '../../file-handler/services/pdf.service';
 import { Listing, User } from '../../../entities';
 
 import { MailgunEmailService } from '../../mail/services/implementations';
@@ -14,6 +13,7 @@ import { PdfInput } from '../../file-handler/dto/pdf.dto';
 import { InvoiceRepository } from '../repositories/invoice.repository';
 import { CreateInvoiceInput } from '../dto/invoice';
 import { addDays } from 'date-fns';
+import { PdfService } from '../../file-handler/services/pdf.service';
 
 @Injectable()
 export class PaymentService {
