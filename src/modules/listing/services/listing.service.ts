@@ -689,6 +689,7 @@ export class ListingService {
             arabicLastName: true,
           },
           id: true,
+          title: true,
           price: true,
           purpose: true,
           rentingOption: true,
