@@ -351,9 +351,8 @@ export class AdminService {
           },
         }),
       ]);
-
       const userDemography: UserCity[] = userDemographyResult.map((item) => ({
-        user_city: item.city,
+        user_city: item.user_city,
         total: parseInt(item.total, 10), // Convert total to number
       }));
 
