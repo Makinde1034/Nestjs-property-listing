@@ -171,9 +171,11 @@ export class ListingService {
       return listing;
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(
-        error.message || 'An unexpected error occurred',
-      );
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new BadRequestException(error.message);
+      }
     }
   }
 
@@ -693,10 +695,7 @@ export class ListingService {
           featureDate: true,
           promotedDate: true,
           listingTypeId: true,
-          city: true,
-          country: true,
-          street: true,
-          district: true,
+
           gpsCoordinate: true,
           listingAttributes: true,
           images: true,
@@ -762,10 +761,7 @@ export class ListingService {
           featureDate: true,
           promotedDate: true,
           listingTypeId: true,
-          city: true,
-          country: true,
-          street: true,
-          district: true,
+
           gpsCoordinate: true,
           listingAttributes: true,
           images: true,

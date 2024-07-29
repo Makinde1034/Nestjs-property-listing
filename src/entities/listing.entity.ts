@@ -76,22 +76,6 @@ export class Listing extends BaseEntity {
   @Column()
   listingTypeId: string;
 
-  @Column()
-  @Field()
-  city: string;
-
-  @Field()
-  @Column()
-  country: string;
-
-  @Column()
-  @Field()
-  street: string;
-
-  @Column()
-  @Field()
-  district: string;
-
   @Field({ nullable: true })
   @Column({ type: 'jsonb', nullable: true })
   gpsCoordinate: string;
