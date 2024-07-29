@@ -15,7 +15,7 @@ import {
   UpdateOfferInput,
 } from '../dtos/request/offer-input';
 import { OfferRepository } from '../repositories';
-import { Listing, User } from '../../../entities';
+import { Listing, NotificationScope, User } from '../../../entities';
 import { PaymentService } from '../../payment/services/payment.service';
 import { MoreThanOrEqual } from 'typeorm';
 import { ListingService } from './listing.service';
@@ -25,7 +25,11 @@ import { addDaysToDate } from '../../../common/utils/helper';
 import { MailgunEmailService } from '../../mail/services/implementations';
 import { getMessageData } from '../../../common/messages/alert-messages';
 import { PdfInput } from '../../file-handler/dto/pdf.dto';
-import { UserRepository } from '../../user/repositories';
+import {
+  NotificationScopeRepository,
+  UserRepository,
+} from '../../user/repositories';
+import { Purpose } from '../../../common/enums';
 
 @Injectable()
 export class OfferService {
@@ -35,6 +39,7 @@ export class OfferService {
     private listingService: ListingService,
     private mailService: MailgunEmailService,
     private userRepository: UserRepository,
+    private notificationRepository: NotificationScopeRepository,
   ) {}
   logger = new Logger(OfferService.name);
 
@@ -74,9 +79,9 @@ export class OfferService {
       }
 
       if (user.id == listing.user.id) {
-        throw new BadRequestException(
-          'The creator of a listing cannot create an offer on  that listing',
-        );
+        // throw new BadRequestException(
+        //   'The creator of a listing cannot create an offer on  that listing',
+        // );
       }
 
       createOfferDto.userId = user.id;
@@ -85,12 +90,11 @@ export class OfferService {
       const offerPayload = await this.offerRepository.create(createOfferDto);
 
       const data: PdfInput = {
-        createdDate: `${offerPayload.createdAt.getDay()}-${offerPayload.createdAt.getMonth()}-${offerPayload.createdAt.getFullYear()}`,
-        dueDate: `${offerPayload.expireAt.getDate()}-${offerPayload.expireAt.getMonth()}-${offerPayload.expireAt.getFullYear()}`,
+        createdDate: `${offerPayload.createdAt.getDate()}-${offerPayload.createdAt.getMonth() + 1}-${offerPayload.createdAt.getFullYear()}`,
+        dueDate: `${offerPayload.expireAt.getDate()}-${offerPayload.expireAt.getMonth() + 1}-${offerPayload.expireAt.getFullYear()}`,
         clientName: `${user.firstName} ${user.lastName}`,
-        item: listing.listingType.englishName,
-
-        type: 'invoice',
+        item: listing.purpose === Purpose.SALE ? null : listing.rentingOption,
+        type: listing.purpose === Purpose.SALE ? 'buy' : 'rent',
         price: offerPayload.price,
         totalPrice: offerPayload.price,
       };
@@ -101,29 +105,51 @@ export class OfferService {
         'notificationPreference',
       ]);
 
-      if (user.notificationPreference[0].email) {
+      const notificationPreference = await this.notificationRepository.find();
+
+      const scope: NotificationScope = notificationPreference.find(
+        (element) => {
+          if (element.name == 'Create Offer') {
+            return element;
+          }
+        },
+      );
+
+      const userPrefBuyer = user.notificationPreference.find((element) => {
+        if (element.scope.id == scope.id) {
+          return element;
+        }
+      });
+
+      const userPrefSeller = seller.notificationPreference.find((element) => {
+        if (element.scope.id == scope.id) {
+          return element;
+        }
+      });
+
+      if (userPrefBuyer?.email) {
         const mailMessageForBuyer = getMessageData(
           user.firstName,
           'Create',
           'Offers',
           'Offer Creator',
         );
-
-        await this.mailService.sendOfferMail({
+        this.mailService.sendOfferMail({
           email: user.email,
           subject: mailMessageForBuyer[0]['Title'],
           text: mailMessageForBuyer[0]['Body'],
         });
       }
 
-      if (seller.notificationPreference[0].email) {
+      if (userPrefSeller?.email) {
         const mailMessageForSeller = getMessageData(
           listing.user.arabicFirstName,
           'Create',
           'Offers',
           'Seller',
         );
-        await this.mailService.sendOfferMail({
+
+        this.mailService.sendOfferMail({
           email: listing.user.email,
           subject: mailMessageForSeller[0]['Title'],
           text: mailMessageForSeller[0]['Body'],
@@ -171,7 +197,6 @@ export class OfferService {
         skip: findOfferInput.skip,
         take: findOfferInput.take,
       });
-
       return { offer, total };
     } catch (error) {
       this.logger.log(error);
