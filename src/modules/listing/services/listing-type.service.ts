@@ -64,7 +64,7 @@ export class ListingTypeService {
     });
 
     const data: Partial<ListingType> = {
-      name: input.name,
+      englishName: input.englishName,
       attributeSets,
     };
     if (icon) {
@@ -91,7 +91,7 @@ export class ListingTypeService {
       where: { id: In([...input.attributeSets]) },
     });
     const data: Partial<ListingType> = {
-      name: input.name,
+      englishName: input.englishName,
       attributeSets,
     };
     if (icon) {
