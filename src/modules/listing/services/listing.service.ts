@@ -56,6 +56,7 @@ import { ListingAttributeRepository } from '../repositories/listing-attributes.r
 import { ListingTypeService } from './listing-type.service';
 import { FurnishingStatusEnum } from '../../../common/enums';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
+import { AttributeRepository } from '../repositories';
 
 @Injectable()
 export class ListingService {
@@ -830,11 +831,12 @@ export class ListingService {
     try {
       const subscribedUser: { id: string; name: string }[] = [];
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { id, gpsCoordinate, ...partialUpdatePayload } = editListingDto;
+      const { id, gpsCoordinate, attributes, ...partialUpdatePayload } =
+        editListingDto;
 
       const listing = await this.listingRepository.findOne({
         where: { id: id },
-        relations: ['wishlist'],
+        relations: ['listingAttributes', 'wishlist'],
       });
       if (listing.userId !== user.id) {
         throw new ForbiddenError(
@@ -846,6 +848,46 @@ export class ListingService {
         id,
         partialUpdatePayload,
       );
+
+      // Create a map for quick lookups of existing attributes
+      const existingAttributesMap = new Map(
+        listing.listingAttributes.map((attr) => [attr.attributeId, attr]),
+      );
+
+      const updates = []; // Collect updates to perform in batch
+      const newAttributes = []; // Collect new attributes to save
+
+      for (const element of attributes) {
+        const existingAttribute = existingAttributesMap.get(
+          element.attributeId,
+        );
+
+        if (existingAttribute) {
+          // If the attribute exists and its value is different, queue it for update
+          if (element.value !== existingAttribute.value) {
+            updates.push(
+              this.listingAttributesRepository.update(existingAttribute.id, {
+                value: element.value,
+              }),
+            );
+          }
+        } else {
+          // If the attribute does not exist, prepare it for saving as a new attribute
+          const attribute = await this.attributeService.findOneAttribute(
+            element.attributeId,
+          );
+          newAttributes.push({
+            ...element,
+            name: attribute.englishName,
+            listing,
+          });
+        }
+      }
+
+      // Wait for all updates to complete before saving new attributes
+      await Promise.all(updates);
+
+      await this.listingAttributesRepository.save(newAttributes);
 
       listing.wishlist.map((element) => {
         subscribedUser.push({ id: element.userId, name: user.name });
@@ -863,7 +905,11 @@ export class ListingService {
           });
         }
       }
-      return update;
+      if (update.affected > 0) {
+        return await this.listingRepository.findOneOrFail({
+          where: { id: editListingDto.id },
+        });
+      }
     } catch (error) {
       this.logger.log(error);
       if (error instanceof HttpException) {
