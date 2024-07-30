@@ -19,6 +19,6 @@ export interface NotificationEventInput {
   message: string;
   recipients: string[];
   isEmail: boolean;
-  isPushNotifcation: boolean;
+  isPushNotification: boolean;
   deepLink?: string;
 }
