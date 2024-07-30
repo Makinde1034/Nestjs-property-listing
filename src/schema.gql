@@ -254,8 +254,8 @@ type SearchHistory {
   id: ID!
   location: String
   price: Float
-  numberOfBathrooms: [Float!]!
-  numberOfRooms: [Float!]!
+  numberOfBathrooms: [String!]!
+  numberOfRooms: [String!]!
   type: String
   listingType: String
   isValid: Boolean!
@@ -632,9 +632,9 @@ input CreateSearchHistoryInput {
   maxPrice: Float
   minArea: Float
   maxArea: Float
-  numberOfBathrooms: [Float!]
+  numberOfBathrooms: [String!]
   furnishing: String
-  numberOfRooms: [Float!]
+  numberOfRooms: [String!]
   floor: String
   type: String
   listingId: String

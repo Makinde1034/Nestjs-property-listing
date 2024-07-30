@@ -99,7 +99,7 @@ export class ListingService {
           );
           if (!match) {
             throw new BadRequestException(
-              `${attribute.englishName} is required`,
+              `${attribute.englishName ? attribute.englishName : attribute.arabicName} is required`,
             );
           }
         }

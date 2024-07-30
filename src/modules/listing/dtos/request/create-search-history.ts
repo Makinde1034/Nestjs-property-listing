@@ -36,8 +36,8 @@ export class CreateSearchHistoryInput extends PaginateAndSort {
   maxArea: number;
 
   @IsOptional()
-  @Field(() => [Number], { nullable: true })
-  numberOfBathrooms: number[];
+  @Field(() => [String], { nullable: true })
+  numberOfBathrooms: string[];
 
   @IsOptional()
   @IsString()
@@ -46,8 +46,8 @@ export class CreateSearchHistoryInput extends PaginateAndSort {
   furnishing: string;
 
   @IsOptional()
-  @Field(() => [Number], { nullable: true })
-  numberOfRooms: number[];
+  @Field(() => [String], { nullable: true })
+  numberOfRooms: string[];
 
   @IsOptional()
   @IsString()

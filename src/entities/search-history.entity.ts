@@ -30,12 +30,12 @@ export class SearchHistory extends BaseEntity {
   price: number;
 
   @Column({ type: 'simple-array', nullable: true })
-  @Field(() => [Number])
-  numberOfBathrooms: number[];
+  @Field(() => [String])
+  numberOfBathrooms: string[];
 
   @Column({ type: 'simple-array', nullable: true })
-  @Field(() => [Number])
-  numberOfRooms: number[];
+  @Field(() => [String])
+  numberOfRooms: string[];
 
   @Column({ nullable: true })
   @Field({ nullable: true })
