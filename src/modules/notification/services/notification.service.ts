@@ -42,14 +42,20 @@ export class NotificationService {
    * @returns {Promise<string>}
    */
   sendUsersNotification(notificationInput: NotificationInput): string {
-    const { recipients, isEmail, isPushNotifcation, title, message, deepLink } =
-      notificationInput;
+    const {
+      recipients,
+      isEmail,
+      isPushNotification,
+      title,
+      message,
+      deepLink,
+    } = notificationInput;
     this.eventEmitter.emit(
       NotificationEvent.SEND_NOTIFICATION,
       new NotificationEventDto({
         recipients,
         isEmail,
-        isPushNotifcation,
+        isPushNotification,
         title,
         message,
         deepLink,
@@ -68,8 +74,14 @@ export class NotificationService {
   async handleNotificationEvent(
     notification: NotificationEventInput,
   ): Promise<void> {
-    const { recipients, isEmail, isPushNotifcation, title, message, deepLink } =
-      notification;
+    const {
+      recipients,
+      isEmail,
+      isPushNotification,
+      title,
+      message,
+      deepLink,
+    } = notification;
     const users = await this.userRepository.findAll({
       where: { id: In([...recipients]) },
     });
@@ -91,14 +103,14 @@ export class NotificationService {
           userId: user.id,
         };
 
-        if (isPushNotifcation) {
+        if (isPushNotification) {
           // Send EMail notification
           await this.sendPushNotification(pushNotificationData);
         }
         const notificationLog: Partial<Notification> = {
           ...emailData,
           recipient: user,
-          type: this.getNotificationType(isEmail, isPushNotifcation),
+          type: this.getNotificationType(isEmail, isPushNotification),
         };
         await this.saveNotificationLog(notificationLog);
       }),

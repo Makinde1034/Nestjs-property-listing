@@ -57,7 +57,7 @@ export class JobService {
       title: 'New listing',
       message: 'A listing that matches  your search is now available',
       isEmail: false,
-      isPushNotifcation: true,
+      isPushNotification: true,
       recipients: listingArrayUserId,
       deepLink: '',
     });
@@ -105,7 +105,7 @@ export class JobService {
           }, price ${element.price}
            Has been left resolved for a while`,
           isEmail: false,
-          isPushNotifcation: true,
+          isPushNotification: true,
           recipients: [user.email],
           deepLink: '',
         });

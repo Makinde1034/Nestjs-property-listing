@@ -899,7 +899,7 @@ input NotificationInput {
   title: String!
   message: String!
   isEmail: Boolean!
-  isPushNotifcation: Boolean!
+  isPushNotification: Boolean!
   recipients: [String!]!
   deepLink: String
 }

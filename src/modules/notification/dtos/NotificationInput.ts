@@ -33,7 +33,7 @@ export class NotificationInput {
   @Field()
   @IsBoolean()
   @IsNotEmpty()
-  isPushNotifcation: boolean;
+  isPushNotification: boolean;
 
   @Field(() => [String])
   @IsArray()

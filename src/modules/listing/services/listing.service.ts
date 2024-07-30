@@ -56,7 +56,6 @@ import { ListingAttributeRepository } from '../repositories/listing-attributes.r
 import { ListingTypeService } from './listing-type.service';
 import { FurnishingStatusEnum } from '../../../common/enums';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
-import { AttributeRepository } from '../repositories';
 
 @Injectable()
 export class ListingService {
@@ -826,24 +825,26 @@ export class ListingService {
         throw new BadRequestException(error.messages || error.data || error);
     }
   }
-
   async updateListing(editListingDto: UpdateListingDto, user: User) {
     try {
       const subscribedUser: { id: string; name: string }[] = [];
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { id, gpsCoordinate, attributes, ...partialUpdatePayload } =
         editListingDto;
 
+      // Fetch the listing with its relations
       const listing = await this.listingRepository.findOne({
-        where: { id: id },
+        where: { id },
         relations: ['listingAttributes', 'wishlist'],
       });
+
+      // Check permission
       if (listing.userId !== user.id) {
         throw new ForbiddenError(
-          'This user does not have the permision to update record',
+          'This user does not have permission to update the record',
         );
       }
 
+      // Update listing details
       const update = await this.listingRepository.update(
         id,
         partialUpdatePayload,
@@ -854,8 +855,9 @@ export class ListingService {
         listing.listingAttributes.map((attr) => [attr.attributeId, attr]),
       );
 
-      const updates = []; // Collect updates to perform in batch
-      const newAttributes = []; // Collect new attributes to save
+      // Collect promises for attribute updates and new attributes
+      const updatePromises = [];
+      const newAttributesPromises = [];
 
       for (const element of attributes) {
         const existingAttribute = existingAttributesMap.get(
@@ -863,58 +865,70 @@ export class ListingService {
         );
 
         if (existingAttribute) {
-          // If the attribute exists and its value is different, queue it for update
           if (element.value !== existingAttribute.value) {
-            updates.push(
+            updatePromises.push(
               this.listingAttributesRepository.update(existingAttribute.id, {
                 value: element.value,
               }),
             );
           }
         } else {
-          // If the attribute does not exist, prepare it for saving as a new attribute
-          const attribute = await this.attributeService.findOneAttribute(
-            element.attributeId,
+          // Fetch attribute details only if needed
+          newAttributesPromises.push(
+            this.attributeService
+              .findOneAttribute(element.attributeId)
+              .then((attribute) => ({
+                ...element,
+                name: attribute.englishName,
+                listing,
+              })),
           );
-          newAttributes.push({
-            ...element,
-            name: attribute.englishName,
-            listing,
-          });
         }
       }
 
-      // Wait for all updates to complete before saving new attributes
-      await Promise.all(updates);
+      // Wait for all attribute updates to complete
+      await Promise.all(updatePromises);
 
+      // Save new attributes
+      const newAttributes = await Promise.all(newAttributesPromises);
       await this.listingAttributesRepository.save(newAttributes);
 
-      listing.wishlist.map((element) => {
-        subscribedUser.push({ id: element.userId, name: user.name });
-      });
+      // Prepare notifications
+      const wishlistUserIds = listing.wishlist.map((w) => w.userId);
+      const notificationPromises = [];
 
-      if (partialUpdatePayload.price != undefined && update) {
-        for (const element of subscribedUser) {
-          this.pushNotification.sendUsersNotification({
-            title: 'New listing',
-            message: `Hi${element.name}, Heads up! The price of an item in your wishlist has been updated. Check out the new price now.`,
-            isEmail: true,
-            isPushNotifcation: true,
-            recipients: [element.id],
-            deepLink: '',
-          });
+      if (partialUpdatePayload.price != undefined) {
+        for (const userId of wishlistUserIds) {
+          notificationPromises.push(
+            this.pushNotification.sendUsersNotification({
+              title: 'New listing',
+              message: `Hi ${user.name}, Heads up! The price of an item in your wishlist has been updated. Check out the new price now.`,
+              isEmail: true,
+              isPushNotification: true,
+              recipients: [userId],
+              deepLink: '',
+            }),
+          );
         }
       }
+
+      // Wait for all notifications to be sent
+      await Promise.all(notificationPromises);
+
+      // Return the updated listing
       if (update.affected > 0) {
         return await this.listingRepository.findOneOrFail({
-          where: { id: editListingDto.id },
+          where: { id },
+          relations: ['listingAttributes'],
         });
       }
     } catch (error) {
       this.logger.log(error);
       if (error instanceof HttpException) {
         throw error;
-      } else throw new BadRequestException(error.messages || error.data);
+      } else {
+        throw new BadRequestException(error.message || error.data);
+      }
     }
   }
 
