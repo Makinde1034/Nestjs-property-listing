@@ -9,7 +9,7 @@ import {
   IsBoolean,
   IsEnum,
   IsNotEmpty,
-  IsNumber,
+
   IsNumberString,
   IsObject,
   IsOptional,

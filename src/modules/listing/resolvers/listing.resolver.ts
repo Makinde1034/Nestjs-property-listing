@@ -113,6 +113,21 @@ export class ListingResolver {
     return { listing, total };
   }
 
+  @UseGuards(AccessTokenGuard)
+  @Query(() => Listing, { name: 'findOneListingForOwner' })
+  async findOneListingForOwner(
+    @Context() ctx: any,
+    @Args('id')
+    id: string,
+  ) {
+    const listing = await this.listingService.findOneListingForOwner(
+      id,
+      ctx.req.user,
+    );
+
+    return listing;
+  }
+
   @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard)
   @Query(() => AdminListingResponse, { name: 'findListingsForAdmin' })
@@ -131,7 +146,7 @@ export class ListingResolver {
   }
 
   @UseGuards(AccessTokenGuard)
-  @Query(() => Listing, { name: 'findOneForBuyer' })
+  @Query(() => Listing, { name: 'findOneListingForAuthenticatedBuyer' })
   async findOneForBuyer(@Args('id') id: string) {
     return await this.listingService.findOneListingForBuyer(id);
   }

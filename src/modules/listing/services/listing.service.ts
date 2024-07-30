@@ -206,6 +206,26 @@ export class ListingService {
     }
   }
 
+  async findOneListingForOwner(id: string, user?: User) {
+    try {
+      const listing = await this.listingRepository.findOneOrFail({
+        where: { id: id },
+        relations: ['listingAttributes', 'listingType', 'promotion'],
+      });
+
+      if (listing.userId != user.id) {
+        throw new BadRequestException('Listing does not belong to this user');
+      }
+
+      return listing;
+    } catch (error) {
+      this.logger.log(error);
+      if (error instanceof HttpException) {
+        throw error;
+      } else throw new BadRequestException(error.messages || error.data);
+    }
+  }
+
   /***************************
    * Buyers
    ***************************/
@@ -251,7 +271,6 @@ export class ListingService {
       const featuredTake = Math.ceil(take / 3);
       let regularTake = take - featuredTake;
 
-      // Determine sorting options
       const sortDirections = ['ASC', 'DESC'] as const;
       type SortDirection = (typeof sortDirections)[number];
 
@@ -689,6 +708,7 @@ export class ListingService {
             arabicLastName: true,
           },
           id: true,
+          title: true,
           price: true,
           purpose: true,
           rentingOption: true,
@@ -755,6 +775,7 @@ export class ListingService {
             arabicLastName: true,
           },
           id: true,
+          title: true,
 
           purpose: true,
           rentingOption: true,
@@ -1075,7 +1096,14 @@ export class ListingService {
     try {
       const listing = await this.listingRepository.findOne({
         where: { id: id },
-        relations: ['user', 'promotion', 'feature'],
+        relations: [
+          'user',
+          'listingAttributes',
+          'listingType',
+
+          'promotion',
+          'feature',
+        ],
       });
 
       const newImpression = listing.impressions + 1;
