@@ -274,7 +274,6 @@ export class ListingService {
       const sortDirections = ['ASC', 'DESC'] as const;
       type SortDirection = (typeof sortDirections)[number];
 
-      // Common query setup
       const baseQuery = (isFeatured: boolean) => {
         const query = this.listingRepository
           .createQueryBuilder('listing')
