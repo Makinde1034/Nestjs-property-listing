@@ -40,3 +40,27 @@ export class PreAuthorisedPaymentInput {
   entityId?: string;
   currency?: string;
 }
+
+export interface DebitPaymentResponse {
+  id: string;
+  paymentType: string;
+  paymentBrand: string;
+  result: Result;
+  card: Card;
+  buildNumber: string;
+  timestamp: string;
+  ndc: string;
+}
+
+export interface Card {
+  bin: string;
+  last4Digits: string;
+  holder: string;
+  expiryMonth: string;
+  expiryYear: string;
+}
+
+export interface Result {
+  code: string;
+  description: string;
+}
