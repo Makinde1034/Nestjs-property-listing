@@ -249,6 +249,7 @@ export class ListingService {
       );
       // Destructure input parameters
       const {
+        attributes,
         type,
         listingId,
         sortField,
@@ -328,6 +329,12 @@ export class ListingService {
             'attributes.name = :attributeName AND attributes.value IN (:...numberOfRooms)',
             { attributeName: 'Number of Rooms', numberOfRooms },
           );
+        }
+
+        if (attributes !== undefined && attributes.length > 0) {
+          query.andWhere('attributes.id IN (:...attributeIds)', {
+            attributeIds: attributes,
+          });
         }
 
         if (numberOfBathrooms !== undefined) {
@@ -436,6 +443,7 @@ export class ListingService {
       );
       // Destructure input parameters
       const {
+        attributes,
         type,
         listingId,
         sortField,
@@ -527,6 +535,12 @@ export class ListingService {
               numberOfBathrooms,
             },
           );
+        }
+
+        if (attributes !== undefined && attributes.length > 0) {
+          query.andWhere('attributes.id IN (:...attributeIds)', {
+            attributeIds: attributes,
+          });
         }
 
         if (minArea !== undefined && maxArea !== undefined) {

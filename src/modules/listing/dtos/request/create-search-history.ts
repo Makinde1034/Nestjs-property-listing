@@ -40,6 +40,10 @@ export class CreateSearchHistoryInput extends PaginateAndSort {
   numberOfBathrooms: string[];
 
   @IsOptional()
+  @Field(() => [String], { nullable: true })
+  attributes: string[];
+
+  @IsOptional()
   @IsString()
   @IsEnum(FurnishingStatusEnum)
   @Field({ nullable: true })
