@@ -15,9 +15,13 @@ import { UserTrackingRepository } from '../user/repositories/user-tracking-repos
 import { IssueRepository } from '../issue/repositories';
 import { TransactionRepository } from '../payment/repository/transaction.repository';
 import { AdminService } from './services/admin.service';
+import { AdminRepository } from './repositories/admin.repository';
+import { AdminDefault } from '../../entities/admin-table.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Offer, Listing, User, Issue])],
+  imports: [
+    TypeOrmModule.forFeature([Offer, Listing, User, Issue, AdminDefault]),
+  ],
   providers: [
     AdminResolver,
     OfferRepository,
@@ -27,6 +31,8 @@ import { AdminService } from './services/admin.service';
     UserTrackingRepository,
     IssueRepository,
     TransactionRepository,
+    AdminRepository,
   ],
+  exports: [AdminService, AdminRepository],
 })
 export class AdminModule {}

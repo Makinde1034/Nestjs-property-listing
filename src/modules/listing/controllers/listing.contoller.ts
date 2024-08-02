@@ -8,16 +8,19 @@ import {
   Post,
   Query,
   UploadedFiles,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ListingService } from '../services/listing.service';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
+import { RestAccessTokenGuard } from '../../auth/guards';
 
 @Controller('listing')
 export class ListingController {
   constructor(private listingService: ListingService) {}
 
   @Post('listing-image-upload')
+  @UseGuards(RestAccessTokenGuard)
   @UseInterceptors(AnyFilesInterceptor())
   async uploadListingImage(
     @Query('listingId') listingId: string,
@@ -27,6 +30,7 @@ export class ListingController {
   }
 
   @Post('panorama-listing-image-upload')
+  @UseGuards(RestAccessTokenGuard)
   @UseInterceptors(AnyFilesInterceptor())
   async uploadPanoramaListingImage(
     @Query('listingId') listingId: string,

@@ -5,7 +5,6 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 
-import { SuccessResponse } from '../../../common/response';
 import { Listing, User } from '../../../entities';
 
 import { MailgunEmailService } from '../../mail/services/implementations';
@@ -14,6 +13,10 @@ import { InvoiceRepository } from '../repositories/invoice.repository';
 import { CreateInvoiceInput } from '../dto/invoice';
 import { addDays } from 'date-fns';
 import { PdfService } from '../../file-handler/services/pdf.service';
+import { HyperPayService } from '../service-providers/hyper-pay.service';
+import { InitiatePaymentInput } from '../dto/request/payment.input';
+import { SuccessResponse } from '../../../common/utils/success.response';
+import { generateRandomString } from '../../../common/utils/helper';
 
 @Injectable()
 export class PaymentService {
@@ -21,10 +24,18 @@ export class PaymentService {
     private pdfGeneratorService: PdfService,
     private mailService: MailgunEmailService,
     private invoiceRepository: InvoiceRepository,
+    private readonly hyperPayService: HyperPayService,
   ) {}
   logger = new Logger(PaymentService.name);
-  initializePayment() {
-    return new SuccessResponse();
+  async initializePayment(createPaymentInput: InitiatePaymentInput) {
+    const checkout =
+      await this.hyperPayService.createCheckout(createPaymentInput);
+
+    return new SuccessResponse(checkout.result.description, {
+      checkoutId: checkout.id,
+      referenceId: generateRandomString(),
+      timeStamp: checkout.timestamp,
+    });
   }
 
   verifyPayment() {

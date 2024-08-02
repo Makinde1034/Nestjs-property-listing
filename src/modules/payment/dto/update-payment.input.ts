@@ -3,11 +3,11 @@
  * For license. See license.txt
  */
 
-import { Field, InputType } from '@nestjs/graphql';
-import { PreAuthorisedPaymentInput } from './request/payment.input';
-import { PartialType } from '@nestjs/mapped-types';
-@InputType()
-export class UpdatePaymentInput extends PartialType(PreAuthorisedPaymentInput) {
-  @Field()
-  id: string;
-}
+// Import { Field, InputType } from '@nestjs/graphql';
+// Import { PreAuthorisedPaymentInput } from './request/payment.input';
+// Import { PartialType } from '@nestjs/mapped-types';
+// @InputType()
+// Export class UpdatePaymentInput extends PartialType(PreAuthorisedPaymentInput) {
+//   @Field()
+//   Id: string;
+// }

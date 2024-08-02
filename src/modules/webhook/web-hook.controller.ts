@@ -3,14 +3,48 @@
  * For license. See license.txt
  */
 
-import { Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Header,
+  Headers,
+  HttpCode,
+  HttpStatus,
+  Post,
+} from '@nestjs/common';
+import { WebHookPaymentResponse } from './dto/wehook.response';
+import { ConfigService } from '@nestjs/config';
+import {
+  getWebhookConfigName,
+  WebhookConfig,
+} from '../../config/web-hook.config.ts/web-hook.config';
+import { createHash } from 'crypto';
+import { HyperPayService } from '../payment/service-providers/hyper-pay.service';
+import { PaymentEnum } from '../../common/enums/payment.enum';
+import { WebhookService } from './services/web-hook.services';
 @Controller()
 export class WebHookController {
+  private webhookConfig: WebhookConfig;
+  constructor(
+    private configService: ConfigService,
+    private webhookService: WebhookService,
+  ) {
+    this.webhookConfig = this.configService.get<WebhookConfig>(
+      getWebhookConfigName(),
+    );
+  }
   @Post('webhook/payment')
   @HttpCode(200)
-  payment() {
-    return HttpStatus.OK;
+  payment(
+    @Body() hyperPayWebHookResponse: WebHookPaymentResponse,
+    @Headers('x-signature') signature: string,
+  ) {
+    this.webhookService.handleWebHookForHyperpay(
+      hyperPayWebHookResponse,
+      signature,
+    );
   }
+
   @Post('api/v1/user/iam')
   @HttpCode(200)
   user() {

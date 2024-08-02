@@ -16,15 +16,20 @@ import {
   HyperpayConfig,
   getHyperpayConfigName,
 } from '../../../config/payment/hyper-payment.config';
-import { PreAuthorisedPaymentInput } from '../dto/request/payment.input';
+import {
+  CheckoutResponse,
+  InitiatePaymentInput,
+  PerformCopyAndPayInput,
+} from '../dto/request/payment.input';
 import { AxiosRequestConfig } from 'axios';
-import { PreAuthorisedPaymentResponse } from '../dto/response/payment.response';
+import { URLSearchParams } from 'url';
 
 @Injectable()
-export class HyperPay {
-  private readonly logger = new Logger(HyperPay.name);
+export class HyperPayService {
+  private readonly logger = new Logger(HyperPayService.name);
   private hyperPayConfig: HyperpayConfig;
   private readonly options: AxiosRequestConfig;
+
   constructor(
     private httpService: HttpService,
     private configService: ConfigService,
@@ -36,24 +41,34 @@ export class HyperPay {
     this.options = {
       headers: {
         Authorization: `Bearer ${this.hyperPayConfig.token}`,
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
     };
   }
 
-  async preAuthorisedPayment(payload: PreAuthorisedPaymentInput) {
+  async createCheckout(initiatePaymentInput: InitiatePaymentInput) {
     try {
+      const payload: PerformCopyAndPayInput = {
+        entityId: this.hyperPayConfig.entityId,
+        amount: initiatePaymentInput.amount,
+        currency: 'SAR',
+        paymentType: 'DB',
+      };
+
+      const payloadEntries: [string, string][] = Object.entries(payload).map(
+        ([key, value]) => [key, String(value)],
+      );
+      const requestPayload = new URLSearchParams(payloadEntries).toString();
+
       const response = this.httpService.post(
-        this.hyperPayConfig.baseUrl + '/payments',
-        payload,
+        this.hyperPayConfig.baseUrl + '/checkouts',
+        requestPayload,
         this.options,
       );
-      const data: PreAuthorisedPaymentResponse = await (
-        await lastValueFrom(response)
-      ).data;
+      const data: CheckoutResponse = await (await lastValueFrom(response)).data;
       return data;
     } catch (error) {
-      this.logger.error('Error in payment pre-authorization', error);
+      this.logger.error('Error creating chackout', error);
       if (error instanceof HttpException) {
         throw error;
       } else {
@@ -62,30 +77,21 @@ export class HyperPay {
     }
   }
 
-  async capturePayment(payload) {
-    try {
-      const response = this.httpService.post(
-        this.hyperPayConfig.baseUrl + '/payments',
-        payload,
-        this.options,
-      );
-      const data: PreAuthorisedPaymentResponse = await (
-        await lastValueFrom(response)
-      ).data;
-      return data;
-    } catch (error) {
-      this.logger.error('Error in payment pre-authorization', error);
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        throw new BadRequestException(error.message);
-      }
-    }
+  async checkPaymentStatus(checkoutId: string) {
+    const requestPayload1 = new URLSearchParams(checkoutId).toString();
+
+    const requestpayload2 = new URLSearchParams({
+      entityId: this.hyperPayConfig.entityId,
+    }).toString();
+
+    const response = this.httpService.get(
+      this.hyperPayConfig.baseUrl +
+        `checkouts/${requestPayload1}/payment?${requestpayload2}`,
+      this.options,
+    );
+
+    const data = await (await lastValueFrom(response)).data;
+
+    return data;
   }
 }
-//   Const random = crypto
-//   .createHmac('sha512', r)
-//   .update(JSON.stringify(input))
-//   .digest('hex');
-// Const rand = random.slice(15, 25);
-// Return rand;

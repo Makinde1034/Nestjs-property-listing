@@ -5,6 +5,8 @@
 
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { AppStrings } from 'src/common/messages/app.strings';
+import { v4 as uuidv4 } from 'uuid';
+
 /**
  * Getting difference between two dates.
  * @param date2 string | Date
@@ -97,3 +99,33 @@ export function toCamelCase(str: string): string {
     })
     .join('');
 }
+
+export function capitalizeFirstLetter(text: string): string {
+  if (!text) return text; // Handle empty string
+  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+}
+
+export function generateRandomString(): string {
+  const data = `WASEET-${uuidv4()}-${randomNumbers(100000, 999999)}`;
+
+  return data;
+}
+
+export const randomNumbers = (min: number, max: number) => {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
+export const generateRandomArray = (length: number, key_length: number) => {
+  const keys = [];
+  for (let i = 0; i < length; i++) {
+    let key = '';
+    const characters =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    for (let j = 0; j < key_length; j++) {
+      const random_index = Math.floor(Math.random() * characters.length);
+      key += characters.charAt(random_index);
+    }
+    keys.push(key);
+  }
+  return keys;
+};
