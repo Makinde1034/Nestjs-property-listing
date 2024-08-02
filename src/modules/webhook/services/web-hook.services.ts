@@ -12,7 +12,8 @@ import {
   WebhookConfig,
   getWebhookConfigName,
 } from '../../../config/web-hook.config.ts/web-hook.config';
-
+import { Injectable } from '@nestjs/common';
+@Injectable()
 export class WebhookService {
   private webhookConfig: WebhookConfig;
 
