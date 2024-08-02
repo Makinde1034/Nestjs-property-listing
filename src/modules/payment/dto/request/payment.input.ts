@@ -3,61 +3,90 @@
  * For license. See license.txt
  */
 
-import { Field, InputType } from '@nestjs/graphql';
-import { IsPositive, IsString } from 'class-validator';
+import { IsString } from 'class-validator';
 
-@InputType()
-export class PreAuthorisedPaymentInput {
-  @Field()
-  @IsPositive()
-  amount: number;
-
-  @Field()
+export class InitiatePaymentInput {
+  entityId?: string;
   @IsString()
-  paymentBrand: string;
-
-  @Field()
-  @IsString()
-  cardNumber: string;
-
-  @Field()
-  @IsString()
-  cardHolder: string;
-
-  @Field()
-  @IsString()
-  cardExpiryMonth: string;
-
-  @Field()
-  @IsString()
-  cardExpiryYear: string;
-
-  @Field()
-  @IsString()
-  cardCvv: string;
+  amount: string;
+  currency?: string;
 
   paymentType?: string;
-  entityId?: string;
-  currency?: string;
 }
 
-export interface DebitPaymentResponse {
-  id: string;
+export class PerformCopyAndPayInput {
+  entityId: string;
+  amount: string;
+  currency: string;
   paymentType: string;
-  paymentBrand: string;
+}
+
+// @InputType()
+// Export class PreAuthorisedPaymentInput {
+//   @Field()
+//   @IsPositive()
+//   Amount: number;
+
+//   @Field()
+//   @IsString()
+//   PaymentBrand: string;
+
+//   @Field()
+//   @IsString()
+//   CardNumber: string;
+
+//   @Field()
+//   @IsString()
+//   CardHolder: string;
+
+//   @Field()
+//   @IsString()
+//   CardExpiryMonth: string;
+
+//   @Field()
+//   @IsString()
+//   CardExpiryYear: string;
+
+//   @Field()
+//   @IsString()
+//   CardCvv: string;
+
+//   PaymentType?: string;
+//   EntityId?: string;
+//   Currency?: string;
+// }
+
+// Export interface DebitPaymentResponse {
+//   Id: string;
+//   PaymentType: string;
+//   PaymentBrand: string;
+//   Result: Result;
+//   Card: Card;
+//   BuildNumber: string;
+//   Timestamp: string;
+//   Ndc: string;
+// }
+
+// Export interface Card {
+//   Bin: string;
+//   Last4Digits: string;
+//   Holder: string;
+//   ExpiryMonth: string;
+//   ExpiryYear: string;
+// }
+
+// Export interface Result {
+//   Code: string;
+//   Description: string;
+// }
+
+export interface CheckoutResponse {
+  id: string;
+
   result: Result;
-  card: Card;
   buildNumber: string;
   timestamp: string;
   ndc: string;
-}
-
-export interface Card {
-  bin: string;
-  last4Digits: string;
-  holder: string;
-  expiryMonth: string;
-  expiryYear: string;
 }
 
 export interface Result {

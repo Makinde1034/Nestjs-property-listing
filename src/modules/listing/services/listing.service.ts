@@ -827,7 +827,7 @@ export class ListingService {
   }
   async updateListing(editListingDto: UpdateListingDto, user: User) {
     try {
-      const subscribedUser: { id: string; name: string }[] = [];
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { id, gpsCoordinate, attributes, ...partialUpdatePayload } =
         editListingDto;
 

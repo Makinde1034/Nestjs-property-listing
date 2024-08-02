@@ -12,10 +12,10 @@ import { PaymentService } from '../services/payment.service';
 export class PaymentResolver {
   constructor(private readonly paymentService: PaymentService) {}
 
-  @Mutation(() => Payment)
-  initializePayment() {
-    return this.paymentService.initializePayment();
-  }
+  // @Mutation(() => Payment)
+  // InitializePayment() {
+  //   Return this.paymentService.initializePayment();
+  // }
 
   @Mutation(() => Payment)
   verify() {

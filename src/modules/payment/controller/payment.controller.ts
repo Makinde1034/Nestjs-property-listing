@@ -3,9 +3,11 @@
  * For license. See license.txt
  */
 
-import { Controller, Get, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
 import { PaymentService } from '../services/payment.service';
 import { Response } from 'express';
+import { InitiatePaymentInput } from '../dto/request/payment.input';
+import { RestAccessTokenGuard } from '../../auth/guards';
 @Controller('payment')
 export class PaymentController {
   constructor(private paymentService: PaymentService) {}
@@ -17,5 +19,10 @@ export class PaymentController {
       'Content-Type': 'application/pdf',
     });
     res.end(screenshot);
+  }
+  @UseGuards(RestAccessTokenGuard)
+  @Post('initialize')
+  async initiatePayment(@Body() createPaymentInput: InitiatePaymentInput) {
+    return await this.paymentService.initializePayment(createPaymentInput);
   }
 }
