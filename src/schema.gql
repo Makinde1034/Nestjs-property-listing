@@ -207,24 +207,24 @@ type ListingType {
 
 type Listing {
   id: ID!
-  ownership: String!
-  title: String!
-  purpose: String!
-  price: Float!
+  ownership: String
+  title: String
+  purpose: String
+  price: Float
   deedNumber: String
   poaNumber: String
-  rentingOption: String!
-  iban: String!
-  zatcaNumber: String!
+  rentingOption: String
+  iban: String
+  zatcaNumber: String
   listingType: ListingType
-  listingTypeId: String!
+  listingTypeId: String
   gpsCoordinate: String
   listingAttributes: [ListingAttributes!]
   images: String
   panoramaView: [String!]
   user: User
   offer: [Offer!]
-  userId: String!
+  userId: String
   promotion: [Promotion!]
   feature: [Feature!]
   impressions: Float!
@@ -245,7 +245,7 @@ type Listing {
   flaggedDate: DateTime
   featureExpiration: DateTime
   promotionExpiration: DateTime
-  createdAt: DateTime!
+  createdAt: DateTime
   deletedAt: DateTime!
   updatedAt: DateTime!
 }
@@ -422,10 +422,13 @@ type AuctionParticipant {
 
 type Auction {
   id: ID!
-  title: String!
-  description: String!
+  titleInEnglish: String!
+  titleInArabic: String
+  arabicDescription: String
+  englishDescription: String
   startDate: DateTime!
-  liveFor: Float!
+  liveFor: Float
+  imageLink: String
   maxListing: Float!
   auctionParticipant: [AuctionParticipant!]!
   status: Boolean!
@@ -747,6 +750,7 @@ type Mutation {
   createAuction(createAuctionInput: CreateAuctionInput!): Auction!
   updateAuction(updateAuctionInput: UpdateAuctionInput!): Auction!
   id(id: String!): Auction!
+  addAuctionParticipant(createAuctionParticipantInput: CreateAuctionParticipantInput!): AuctionParticipant!
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!
@@ -1051,20 +1055,31 @@ input CreateFeatureInput {
 }
 
 input CreateAuctionInput {
-  title: String!
-  description: String!
+  titleInEnglish: String!
+  titleInArabic: String!
+  arabicDescription: String!
+  englishDescription: String!
   startDate: DateTime!
   liveFor: Float!
   maxListing: Float!
+  imageLink: String
 }
 
 input UpdateAuctionInput {
-  title: String
-  description: String
+  titleInEnglish: String
+  titleInArabic: String
+  arabicDescription: String
+  englishDescription: String
   startDate: DateTime
   liveFor: Float
   maxListing: Float
+  imageLink: String
   id: String!
+}
+
+input CreateAuctionParticipantInput {
+  auctionId: String!
+  listingId: String!
 }
 
 input CreateAdPackageInput {

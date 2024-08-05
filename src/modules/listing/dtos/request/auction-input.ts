@@ -10,11 +10,19 @@ import { IsDate, IsNumber, IsString, IsUUID } from 'class-validator';
 export class CreateAuctionInput {
   @Field()
   @IsString()
-  title: string;
+  titleInEnglish: string;
 
   @Field()
   @IsString()
-  description: string;
+  titleInArabic: string;
+
+  @Field()
+  @IsString()
+  arabicDescription: string;
+
+  @Field()
+  @IsString()
+  englishDescription: string;
 
   @Field()
   @IsDate()
@@ -27,6 +35,9 @@ export class CreateAuctionInput {
   @Field()
   @IsNumber()
   maxListing: number;
+
+  @Field({ nullable: true })
+  imageLink: string;
 }
 
 @InputType()

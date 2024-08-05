@@ -49,10 +49,12 @@ import { Wishlist } from '../../../entities/wishlist.entity';
 import { CreateWishlistInput } from '../dtos/request/wishlistInput';
 import {
   CreateAuctionInput,
+  CreateAuctionParticipantInput,
   UpdateAuctionInput,
 } from '../dtos/request/auction-input';
 import { AuctionService } from '../services/auction.service';
 import { Auction } from '../../../entities/auction-table.entity';
+import { AuctionParticipant } from '../../../entities/auction-participant.entity';
 
 @Resolver()
 export class ListingResolver {
@@ -82,7 +84,6 @@ export class ListingResolver {
    * Find Listing
    *************************/
 
-  // @UseGuards(AccessTokenGuard)
   @Query(() => ListingResponse, {
     name: 'findAllListingForBuyerUnauthenticated',
   })
@@ -109,7 +110,6 @@ export class ListingResolver {
       findManyOptions,
       ctx.req.user,
     );
-
     return { listing, total };
   }
 
@@ -124,7 +124,6 @@ export class ListingResolver {
       id,
       ctx.req.user,
     );
-
     return listing;
   }
 
@@ -168,7 +167,6 @@ export class ListingResolver {
         findManyOptions,
         ctx.req.user,
       );
-
     return { listing, total };
   }
 
@@ -372,6 +370,10 @@ export class ListingResolver {
     return await this.listingService.featureAListing(createFeatureInput);
   }
 
+  /**********************************
+   * Auction
+   **********************************/
+
   @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard)
   @Mutation(() => Auction, { name: 'createAuction' })
@@ -409,5 +411,20 @@ export class ListingResolver {
   @Mutation(() => Auction, { name: 'id' })
   async deleteAuction(@Args('id') id: string) {
     return await this.auctionService.delete(id);
+  }
+
+  /********************************
+   * Aution Participant
+   *******************************/
+
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => AuctionParticipant, { name: 'addAuctionParticipant' })
+  async createAuctionParticipant(
+    @Args('createAuctionParticipantInput')
+    addParticipantToAuctionInput: CreateAuctionParticipantInput,
+  ) {
+    return await this.auctionService.addListingToAuction(
+      addParticipantToAuctionInput,
+    );
   }
 }

@@ -13,12 +13,15 @@ import {
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { AuctionParticipantRepository } from '../repositories/auction-participant.repository';
 import { AppStrings } from '../../../common/messages/app.strings';
+import { AdminRepository } from '../../admin/repositories/admin.repository';
+import { addDaysToDate } from '../../../common/utils/helper';
 
 @Injectable()
 export class AuctionService {
   constructor(
     private auctionRepository: AuctionRepository,
     private auctionParticipantRepository: AuctionParticipantRepository,
+    private adminRepository: AdminRepository,
   ) {}
   logger = new Logger(AuctionService.name);
   async create(auctionInput: CreateAuctionInput) {
@@ -28,6 +31,13 @@ export class AuctionService {
           AppStrings.START_DATE_CANNOT_BE_LESS_THAN_DATE_0F_CREATION,
         );
       }
+
+      if (auctionInput.liveFor > 24 || auctionInput.liveFor < 4) {
+        throw new BadRequestException(
+          AppStrings.AUCTION_DURATION_IS_BETWEEN_4_TO_24_HOURS,
+        );
+      }
+
       return await this.auctionRepository.save(auctionInput);
     } catch (error) {
       this.logger.log(error);
@@ -40,27 +50,31 @@ export class AuctionService {
       return await this.auctionRepository.findOneOrFail({ where: { id: id } });
     } catch (error) {
       this.logger.log(error);
+      throw new BadRequestException(AppStrings.AUCTION_NOT_FOUND);
     }
   }
 
   async findAll(paginateAndSort: PaginateAndSort) {
     try {
-      const orderOptions = {
-        [paginateAndSort.sortField]: paginateAndSort.directionToSort,
-      };
+      const sortField = paginateAndSort.sortField;
+      const sortDirection: 'ASC' | 'DESC' = paginateAndSort.directionToSort as
+        | 'ASC'
+        | 'DESC';
 
       if (paginateAndSort.take && paginateAndSort.skip) {
         paginateAndSort.skip = 0;
         paginateAndSort.take = 20;
       }
 
-      const [auction, total] = await this.auctionRepository.findAndCount({
-        take: paginateAndSort.take,
-        skip: paginateAndSort.skip,
-        order: orderOptions,
-      });
+      const auctions = await this.auctionRepository
+        .createQueryBuilder('auction')
+        .where("CURRENT_DATE < auction.startDate - INTERVAL '3 days'")
+        .take(paginateAndSort.take)
+        .skip(paginateAndSort.skip)
+        .orderBy(`auction.${sortField}`, sortDirection)
+        .getManyAndCount();
 
-      return { auction, total };
+      return { auctions: auctions[0], total: auctions[1] };
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -85,6 +99,12 @@ export class AuctionService {
           AppStrings.START_DATE_CANNOT_BE_LESS_THAN_DATE_0F_CREATION,
         );
       }
+
+      if (!updateAuctionInput.imageLink) {
+        throw new BadRequestException(
+          AppStrings.AUCTION_IS_NOT_COMPLETELY_SET_UP,
+        );
+      }
       const update = await this.auctionRepository.update(id, rest);
       if (update.affected > 0)
         return await this.auctionRepository.findOne({
@@ -99,6 +119,33 @@ export class AuctionService {
   }
 
   async addListingToAuction(data: CreateAuctionParticipantInput) {
+    const adminDefault = await this.adminRepository.find();
+
+    const auction = await this.findOne(data.auctionId);
+
+    if (!auction.imageLink) {
+      throw new BadRequestException(
+        AppStrings.AUCTION_IS_NOT_COMPLETELY_SET_UP,
+      );
+    }
+    const date = new Date();
+    if (
+      auction.startDate >
+      new Date(
+        addDaysToDate(date, adminDefault[0].daysToAuctionRegistrationStart),
+      )
+    ) {
+      throw new BadRequestException(AppStrings.AUCTION_REGISTATION_HAS_ENDED);
+    }
+
+    if (
+      auction.startDate <
+      new Date(
+        addDaysToDate(date, adminDefault[0].daysToAuctionRegistrationEnd),
+      )
+    ) {
+      throw new BadRequestException(AppStrings.AUCTION_REGISTATION_HAS_ENDED);
+    }
     return await this.auctionParticipantRepository.save(data);
   }
 

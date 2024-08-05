@@ -18,9 +18,7 @@ import {
   getWebhookConfigName,
   WebhookConfig,
 } from '../../config/web-hook.config.ts/web-hook.config';
-import { createHash } from 'crypto';
-import { HyperPayService } from '../payment/service-providers/hyper-pay.service';
-import { PaymentEnum } from '../../common/enums/payment.enum';
+
 import { WebhookService } from './services/web-hook.services';
 @Controller()
 export class WebHookController {

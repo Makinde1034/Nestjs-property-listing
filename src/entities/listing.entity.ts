@@ -30,19 +30,19 @@ import { ListingAttributes } from './listing-attributes.entity';
 @ObjectType()
 export class Listing extends BaseEntity {
   @Column()
-  @Field()
+  @Field({ nullable: true })
   ownership: string;
 
   @Column()
-  @Field()
+  @Field({ nullable: true })
   title: string;
 
   @Column()
-  @Field()
+  @Field({ nullable: true })
   purpose: string;
 
   @Column('decimal', { precision: 10, scale: 2 })
-  @Field()
+  @Field({ nullable: true })
   price: number;
 
   @Field({ nullable: true })
@@ -54,15 +54,15 @@ export class Listing extends BaseEntity {
   poaNumber: string;
 
   @Column()
-  @Field()
+  @Field({ nullable: true })
   rentingOption: string;
 
   @Column()
-  @Field()
+  @Field({ nullable: true })
   iban: string;
 
   @Column()
-  @Field()
+  @Field({ nullable: true })
   zatcaNumber: string;
 
   @Field(() => ListingType, { nullable: true })
@@ -72,7 +72,7 @@ export class Listing extends BaseEntity {
   })
   listingType: ListingType;
 
-  @Field()
+  @Field({ nullable: true })
   @Column()
   listingTypeId: string;
 
@@ -108,7 +108,7 @@ export class Listing extends BaseEntity {
   offer: Offer[];
 
   @Column()
-  @Field()
+  @Field({ nullable: true })
   userId: string;
 
   @Field(() => [Promotion], { nullable: true })
@@ -203,7 +203,7 @@ export class Listing extends BaseEntity {
   @Field({ nullable: true })
   promotionExpiration: Date;
 
-  @Field()
+  @Field({ nullable: true })
   @CreateDateColumn()
   createdAt: Date;
 
