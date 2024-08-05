@@ -634,6 +634,7 @@ input CreateSearchHistoryInput {
   minArea: Float
   maxArea: Float
   numberOfBathrooms: [String!]
+  attributes: [String!]
   furnishing: String
   numberOfRooms: [String!]
   floor: String
