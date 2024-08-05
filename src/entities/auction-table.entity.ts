@@ -18,19 +18,31 @@ import { AuctionParticipant } from './auction-participant.entity';
 export class Auction extends BaseEntity {
   @Column()
   @Field()
-  title: string;
+  titleInEnglish: string;
 
-  @Column()
-  @Field()
-  description: string;
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  titleInArabic: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  arabicDescription: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  englishDescription: string;
 
   @Column()
   @Field()
   startDate: Date;
 
-  @Column()
-  @Field()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   liveFor: number;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  imageLink: string;
 
   @Column()
   @Field()

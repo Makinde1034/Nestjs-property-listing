@@ -78,6 +78,28 @@ export function addDaysToDate(dateString: string | Date, days: number): string {
   }
 }
 
+export function removeDaysFromDate(
+  dateString: string | Date,
+  days: number,
+): string {
+  try {
+    // Parse the input date string into a Date object
+
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      throw new Error('Invalid date format');
+    }
+
+    // Add the specified number of days
+    date.setDate(date.getDate() - days);
+
+    // Return the new date as an ISO formatted string
+    return date.toISOString();
+  } catch (error) {
+    throw new Error('Failed to add days to date');
+  }
+}
+
 export function toCamelCase(str: string): string {
   // Check if the input is a string
   if (typeof str !== 'string') {

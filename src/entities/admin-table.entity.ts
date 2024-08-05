@@ -32,9 +32,19 @@ export class AdminDefault extends BaseEntity {
   @Field()
   @Column()
   postcode: string;
+
+  @Field()
+  @Column()
+  daysToAuctionRegistrationEnd: number;
+
+  @Field()
+  @Column()
+  daysToAuctionRegistrationStart: number;
+
   @Field()
   @CreateDateColumn()
   createdAt: Date;
+
   @Field()
   @UpdateDateColumn()
   updatedAt: Date;

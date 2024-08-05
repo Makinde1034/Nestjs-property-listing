@@ -88,4 +88,15 @@ export const AppStrings = {
     'Cannot edit auction after it has started',
   START_DATE_CANNOT_BE_LESS_THAN_DATE_0F_CREATION:
     'Start date cannot be less than data of creation.',
+
+  AUCTION_DURATION_IS_BETWEEN_4_TO_24_HOURS:
+    'Auction duration is between 4 to 24 hours',
+
+  AUCTION_NOT_FOUND: 'Auction not found',
+
+  AUCTION_IS_NOT_COMPLETELY_SET_UP:
+    'Listing cannot be fully configured because auction is not fully configured',
+
+  AUCTION_REGISTRATION_HAS_NOT_STARTED: 'Auction registration has not started',
+  AUCTION_REGISTATION_HAS_ENDED: 'Auction registration has ended',
 };

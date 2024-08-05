@@ -11,6 +11,8 @@ export const AdminPlatformDefaultFactory: Partial<AdminDefault> = {
   city: 'cario',
   state: 'cario',
   country: 'Egypt',
-  countryISOCode: 'EG',
+  countryISOCode: 'SAR',
+  daysToAuctionRegistrationStart: 7,
+  daysToAuctionRegistrationEnd: 7,
   postcode: '4240111',
 };

@@ -839,6 +839,8 @@ export class ListingService {
         throw new BadRequestException(error.messages || error.data || error);
     }
   }
+
+  //
   async updateListing(editListingDto: UpdateListingDto, user: User) {
     try {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars

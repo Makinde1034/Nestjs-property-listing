@@ -26,6 +26,7 @@ export class JobService {
 
     private offerRepository: OfferRepository,
   ) {}
+
   @Cron(CronExpression.EVERY_DAY_AT_8PM)
   async sendNotificationForNewListingBasedOnSearchHistory() {
     const listingArrayMails: string[] = [];
@@ -35,14 +36,13 @@ export class JobService {
       relations: ['user'],
     });
     searchHistory.map(async (element) => {
-      const listing = await this.listingRepository.findOne({
+      const listing = await this.listingRepository.findOneOrFail({
         where: {
           price: element.price,
           purpose: element.type, //TODO: add more conditions
         },
         relations: ['user'],
       });
-
       if (listing) {
         listingArrayMails.push(element.user.email);
         this.searchHistoryRepository.update(element.id, {
@@ -65,8 +65,7 @@ export class JobService {
     /**************************
      * Update expired offers
      *
-     ***************************/
-
+     **************************/
     await this.offerRepository
       .queryBuilder('offer')
       .update(Offer)
