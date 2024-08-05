@@ -78,7 +78,7 @@ export function addDaysToDate(dateString: string | Date, days: number): string {
   }
 }
 
-export function removeDaysToDate(
+export function removeDaysFromDate(
   dateString: string | Date,
   days: number,
 ): string {

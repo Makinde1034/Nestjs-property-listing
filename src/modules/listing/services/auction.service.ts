@@ -14,7 +14,7 @@ import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { AuctionParticipantRepository } from '../repositories/auction-participant.repository';
 import { AppStrings } from '../../../common/messages/app.strings';
 import { AdminRepository } from '../../admin/repositories/admin.repository';
-import { addDaysToDate } from '../../../common/utils/helper';
+import { removeDaysFromDate } from '../../../common/utils/helper';
 
 @Injectable()
 export class AuctionService {
@@ -26,7 +26,7 @@ export class AuctionService {
   logger = new Logger(AuctionService.name);
   async create(auctionInput: CreateAuctionInput) {
     try {
-      if (auctionInput.startDate < new Date()) {
+      if (auctionInput.startDate > new Date()) {
         throw new BadRequestException(
           AppStrings.START_DATE_CANNOT_BE_LESS_THAN_DATE_0F_CREATION,
         );
@@ -130,18 +130,23 @@ export class AuctionService {
     }
     const date = new Date();
     if (
-      auction.startDate >
+      auction.startDate <=
       new Date(
-        addDaysToDate(date, adminDefault[0].daysToAuctionRegistrationStart),
+        removeDaysFromDate(
+          date,
+          adminDefault[0].daysToAuctionRegistrationStart,
+        ),
       )
     ) {
-      throw new BadRequestException(AppStrings.AUCTION_REGISTATION_HAS_ENDED);
+      throw new BadRequestException(
+        AppStrings.AUCTION_REGISTRATION_HAS_NOT_STARTED,
+      );
     }
 
     if (
-      auction.startDate <
+      auction.startDate <=
       new Date(
-        addDaysToDate(date, adminDefault[0].daysToAuctionRegistrationEnd),
+        removeDaysFromDate(date, adminDefault[0].daysToAuctionRegistrationEnd),
       )
     ) {
       throw new BadRequestException(AppStrings.AUCTION_REGISTATION_HAS_ENDED);
