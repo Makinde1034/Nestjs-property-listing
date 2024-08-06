@@ -304,8 +304,8 @@ export class ListingService {
               isListingFeatured: true,
             });
         } else {
-          query.andWhere('listing.isListingPromoted = :isListingPromoted', {
-            isListingPromoted: true,
+          query.andWhere('listing.isListingFeatured = :isListingFeatured', {
+            isListingFeatured: false,
           });
         }
 
@@ -408,14 +408,17 @@ export class ListingService {
       // Combine results
 
       if (featuredListings.length < featuredTake) {
-        regularTake = regularTake + featuredTake - featuredListings.length;
+        regularTake += featuredTake - featuredListings.length;
       }
+
       const regularQuery = baseQuery(false);
       regularQuery.take(regularTake).skip(skip);
 
       const [regularListings, regularCount] =
         await regularQuery.getManyAndCount();
-      const listing = [...featuredListings, ...regularListings];
+
+      const listing = [...featuredListings, ...regularListings].slice(0, take);
+
       const total = featuredCount + regularCount;
 
       return { listing, total };
@@ -505,7 +508,7 @@ export class ListingService {
             });
         } else {
           query.andWhere('listing.isListingPromoted = :isListingPromoted', {
-            isListingPromoted: true,
+            isListingPromoted: false,
           });
         }
 
@@ -607,8 +610,9 @@ export class ListingService {
       // Combine results
 
       if (featuredListings.length < featuredTake) {
-        regularTake = regularTake + featuredTake - featuredListings.length;
+        regularTake += featuredTake - featuredListings.length;
       }
+
       const regularQuery = baseQuery(false);
       regularQuery.take(regularTake).skip(skip);
 
