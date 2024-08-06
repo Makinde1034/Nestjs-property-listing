@@ -114,7 +114,6 @@ export class Listing extends BaseEntity {
   @Field(() => [Promotion], { nullable: true })
   @OneToMany(() => Promotion, (promotion) => promotion.listing, {
     cascade: true,
-
     onDelete: 'CASCADE',
   })
   promotion: Promotion[];
@@ -122,7 +121,6 @@ export class Listing extends BaseEntity {
   @Field(() => [Feature], { nullable: true })
   @OneToMany(() => Feature, (promotion) => promotion.listing, {
     cascade: true,
-
     onDelete: 'CASCADE',
   })
   feature: Feature[];

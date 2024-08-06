@@ -391,7 +391,7 @@ export class ListingService {
       featuredQuery.take(featuredTake).skip(skip);
 
       const [featuredListings, featuredCount] = await featuredQuery
-        .leftJoinAndSelect('listing.user', 'user')
+
         .leftJoinAndSelect('listing.listingAttributes', 'attributes')
         .leftJoinAndSelect('listing.listingType', 'listingType')
 
@@ -406,7 +406,7 @@ export class ListingService {
       regularQuery.take(regularTake).skip(skip);
 
       const [regularListings, regularCount] = await regularQuery
-        .leftJoinAndSelect('listing.user', 'user')
+
         .leftJoinAndSelect('listing.listingAttributes', 'attributes')
         .leftJoinAndSelect('listing.listingType', 'listingType')
 
@@ -588,11 +588,10 @@ export class ListingService {
 
       const [featuredListings, featuredCount] = await featuredQuery
         .leftJoinAndSelect('listing.user', 'user')
-        .leftJoinAndSelect('listing.listingAttributes', 'attributes')
+        .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
+        .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
         .leftJoinAndSelect('listing.listingType', 'listingType')
-
         .getManyAndCount();
-
       // Combine results
 
       if (featuredListings.length < featuredTake) {
@@ -603,7 +602,8 @@ export class ListingService {
 
       const [regularListings, regularCount] = await regularQuery
         .leftJoinAndSelect('listing.user', 'user')
-        .leftJoinAndSelect('listing.listingAttributes', 'attributes')
+        .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
+        .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
         .leftJoinAndSelect('listing.listingType', 'listingType')
 
         .getManyAndCount();

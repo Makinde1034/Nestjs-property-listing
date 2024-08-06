@@ -36,7 +36,7 @@ export class ListingType extends BaseEntity {
   @OneToMany(() => Listing, (listing) => listing.listingType)
   listing: Listing;
 
-  @Field(() => [AttributeSet])
+  @Field(() => [AttributeSet], { nullable: true })
   @ManyToMany(() => AttributeSet, (attribute) => attribute.listingTypes, {
     cascade: true,
     eager: true,
