@@ -158,7 +158,7 @@ type Wishlist {
 type ListingAttributes {
   id: ID!
   listing: Listing!
-  attribute: Attribute!
+  attribute: Attribute
   name: String!
   attributeId: String!
   value: String!
@@ -188,7 +188,7 @@ type AttributeSet {
   id: ID!
   arabicName: String
   englishName: String
-  attributes: [Attribute!]!
+  attributes: [Attribute!]
   listingTypes: [ListingType!]!
   createdAt: DateTime!
   updatedAt: DateTime!
@@ -200,7 +200,7 @@ type ListingType {
   arabicName: String!
   icon: String
   listing: Listing!
-  attributeSets: [AttributeSet!]!
+  attributeSets: [AttributeSet!]
   createdAt: DateTime!
   updatedAt: DateTime!
 }

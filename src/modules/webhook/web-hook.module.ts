@@ -4,11 +4,11 @@
  */
 
 import { Module } from '@nestjs/common';
-// import { WebHookController } from './web-hook.controller';
+// Import { WebHookController } from './web-hook.controller';
 import { WebhookService } from './services/web-hook.services';
 
 @Module({
-  // controllers: [WebHookController],
+  // Controllers: [WebHookController],
   providers: [WebhookService],
 })
 export class WebHookModule {}

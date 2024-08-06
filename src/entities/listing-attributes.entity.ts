@@ -16,7 +16,7 @@ export class ListingAttributes extends BaseEntity {
   @ManyToOne(() => Listing, (listing) => listing.listingAttributes)
   listing: Listing;
 
-  @Field(() => Attribute)
+  @Field(() => Attribute, { nullable: true })
   @JoinColumn({ name: 'attributeId' })
   @Index()
   @ManyToOne(() => Attribute, (attribute) => attribute.listingAttribute, {
