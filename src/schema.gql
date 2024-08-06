@@ -642,6 +642,7 @@ input CreateSearchHistoryInput {
   numberOfRooms: [String!]
   floor: String
   type: String
+  rentingOption: String
   listingId: String
 }
 

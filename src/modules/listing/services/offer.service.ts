@@ -45,10 +45,6 @@ export class OfferService {
 
   async createAnOffer(createOfferDto: CreateOfferDto, user: User) {
     try {
-      await this.listingService.findOneListingForBuyer(
-        createOfferDto.listingId,
-      );
-
       const offer = await this.offerRepository.findAll({
         where: {
           price: MoreThanOrEqual(createOfferDto.price),
@@ -59,7 +55,7 @@ export class OfferService {
 
       const offerExpiry = new Date(createOfferDto.expireAt);
 
-      const maxExpiry = new Date(addDaysToDate(new Date(), 2));
+      const maxExpiry = new Date(addDaysToDate(new Date(), 2)); //TODO: add this to admin default value
 
       if (offerExpiry > maxExpiry) {
         throw new BadRequestException('Max expiry is 2 days');
@@ -72,6 +68,11 @@ export class OfferService {
 
       const [minimumPrice, listing] =
         await this.getMinimumOfferForAListingAndUser(createOfferDto.listingId);
+
+      if (!listing.negotiable) {
+        throw new BadRequestException(AppStrings.LISTING_IS_NOT_NEGOTIABLE);
+      }
+
       if (minimumPrice > createOfferDto.price) {
         throw new BadRequestException(
           `Minimum Offer must be greater than  ${minimumPrice}`,
@@ -157,6 +158,7 @@ export class OfferService {
           text: mailMessageForSeller[0]['Body'],
         });
       }
+
       return offerPayload;
     } catch (error) {
       this.logger.log(error);
