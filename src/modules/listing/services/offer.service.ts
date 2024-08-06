@@ -158,6 +158,7 @@ export class OfferService {
           text: mailMessageForSeller[0]['Body'],
         });
       }
+
       return offerPayload;
     } catch (error) {
       this.logger.log(error);
