@@ -249,6 +249,7 @@ export class ListingService {
       );
       // Destructure input parameters
       const {
+        rentingOption,
         attributes,
         type,
         listingId,
@@ -303,8 +304,8 @@ export class ListingService {
               isListingFeatured: true,
             });
         } else {
-          query.andWhere('listing.isListingFeatured = :isListingFeatured', {
-            isListingFeatured: false,
+          query.andWhere('listing.isListingPromoted = :isListingPromoted', {
+            isListingPromoted: true,
           });
         }
 
@@ -312,6 +313,12 @@ export class ListingService {
           query.andWhere('listing.price BETWEEN :minPrice AND :maxPrice', {
             minPrice,
             maxPrice,
+          });
+        }
+
+        if (rentingOption !== undefined) {
+          query.andWhere('listing.rentingOption = :rentingOption ', {
+            rentingOption,
           });
         }
 
@@ -440,6 +447,7 @@ export class ListingService {
       );
       // Destructure input parameters
       const {
+        rentingOption,
         attributes,
         type,
         listingId,
@@ -496,8 +504,14 @@ export class ListingService {
               isListingFeatured: true,
             });
         } else {
-          query.andWhere('listing.isListingFeatured = :isListingFeatured', {
-            isListingFeatured: false,
+          query.andWhere('listing.isListingPromoted = :isListingPromoted', {
+            isListingPromoted: true,
+          });
+        }
+
+        if (rentingOption !== undefined) {
+          query.andWhere('listing.rentingOption  =:rentingOption ', {
+            rentingOption,
           });
         }
 

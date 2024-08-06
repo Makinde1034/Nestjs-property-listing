@@ -7,7 +7,7 @@ import { Field, InputType } from '@nestjs/graphql';
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 
 import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
-import { FurnishingStatusEnum } from '../../../../common/enums';
+import { FurnishingStatusEnum, RentingOption } from '../../../../common/enums';
 @InputType()
 export class CreateSearchHistoryInput extends PaginateAndSort {
   @IsOptional()
@@ -62,6 +62,12 @@ export class CreateSearchHistoryInput extends PaginateAndSort {
   @IsString()
   @Field({ nullable: true })
   type: string;
+
+  @IsOptional()
+  @IsString()
+  @IsEnum(RentingOption)
+  @Field({ nullable: true })
+  rentingOption: string;
 
   @IsOptional()
   @Field({ nullable: true })
