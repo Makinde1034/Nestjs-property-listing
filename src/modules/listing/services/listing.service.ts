@@ -280,8 +280,13 @@ export class ListingService {
           .createQueryBuilder('listing')
 
           .select(columnsToSelect)
+          .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
+          .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
+          .leftJoinAndSelect('listing.listingType', 'listingType')
+          .leftJoinAndSelect('listingType.attributeSets', 'attributeSets')
           .where(
             'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented',
+
             {
               isListingDisabled: false,
               isListingSold: false,
@@ -390,12 +395,8 @@ export class ListingService {
       const featuredQuery = baseQuery(true);
       featuredQuery.take(featuredTake).skip(skip);
 
-      const [featuredListings, featuredCount] = await featuredQuery
-
-        .leftJoinAndSelect('listing.listingAttributes', 'attributes')
-        .leftJoinAndSelect('listing.listingType', 'listingType')
-
-        .getManyAndCount();
+      const [featuredListings, featuredCount] =
+        await featuredQuery.getManyAndCount();
 
       // Combine results
 
@@ -405,12 +406,8 @@ export class ListingService {
       const regularQuery = baseQuery(false);
       regularQuery.take(regularTake).skip(skip);
 
-      const [regularListings, regularCount] = await regularQuery
-
-        .leftJoinAndSelect('listing.listingAttributes', 'attributes')
-        .leftJoinAndSelect('listing.listingType', 'listingType')
-
-        .getManyAndCount();
+      const [regularListings, regularCount] =
+        await regularQuery.getManyAndCount();
       const listing = [...featuredListings, ...regularListings];
       const total = featuredCount + regularCount;
 
@@ -476,6 +473,11 @@ export class ListingService {
           .createQueryBuilder('listing')
 
           .select(columnsToSelect)
+          .leftJoinAndSelect('listing.user', 'user')
+          .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
+          .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
+          .leftJoinAndSelect('listing.listingType', 'listingType')
+
           .where(
             'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented',
             {
@@ -586,12 +588,8 @@ export class ListingService {
       const featuredQuery = baseQuery(true);
       featuredQuery.take(featuredTake).skip(skip);
 
-      const [featuredListings, featuredCount] = await featuredQuery
-        .leftJoinAndSelect('listing.user', 'user')
-        .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
-        .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
-        .leftJoinAndSelect('listing.listingType', 'listingType')
-        .getManyAndCount();
+      const [featuredListings, featuredCount] =
+        await featuredQuery.getManyAndCount();
       // Combine results
 
       if (featuredListings.length < featuredTake) {
@@ -600,13 +598,9 @@ export class ListingService {
       const regularQuery = baseQuery(false);
       regularQuery.take(regularTake).skip(skip);
 
-      const [regularListings, regularCount] = await regularQuery
-        .leftJoinAndSelect('listing.user', 'user')
-        .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
-        .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
-        .leftJoinAndSelect('listing.listingType', 'listingType')
+      const [regularListings, regularCount] =
+        await regularQuery.getManyAndCount();
 
-        .getManyAndCount();
       const listing = [...featuredListings, ...regularListings];
       const total = featuredCount + regularCount;
 

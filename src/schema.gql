@@ -188,7 +188,7 @@ type AttributeSet {
   id: ID!
   arabicName: String
   englishName: String
-  attributes: [Attribute!]!
+  attributes: [Attribute!]
   listingTypes: [ListingType!]!
   createdAt: DateTime!
   updatedAt: DateTime!

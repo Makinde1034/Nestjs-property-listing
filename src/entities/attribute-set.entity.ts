@@ -27,7 +27,7 @@ export class AttributeSet extends BaseEntity {
   @Field({ nullable: true })
   englishName: string;
 
-  @Field(() => [Attribute])
+  @Field(() => [Attribute], { nullable: true })
   @ManyToMany(() => Attribute, (attribute) => attribute.attributeSets, {
     cascade: true,
     eager: true,
