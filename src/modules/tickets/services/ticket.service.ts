@@ -32,16 +32,12 @@ export class TicketService {
    * @returns {Promise<string>}
    */
   async raiseTicket(user: User, input: CreateTicketInput): Promise<string> {
-    const { issuCategoryId, issueId } = input;
+    const { issueId } = input;
     const issue = await this.issueRepository.findByIdOrFail(issueId);
-    const category =
-      await this.issueCategoryRepository.findByIdOrFail(issuCategoryId);
 
     const data: Partial<Ticket> = {
       openedAt: new Date(),
       reporter: user,
-      type: category.placement,
-      issueCategory: category,
       issue,
       isOpen: true,
       status: TicketStatus.OPEN,
@@ -53,7 +49,6 @@ export class TicketService {
 
   /**
    * Get ticket by id
-   *
    * @async
    * @param {string} id
    * @returns {Promise<Ticket>}
@@ -61,22 +56,24 @@ export class TicketService {
   async getTicket(id: string): Promise<Ticket> {
     return await this.ticketRepository.findByIdOrFail(id);
   }
-
   /**
    * List tickets
-   *
    * @async
    * @param {ListTicketInput} input
    * @returns {Promise<Ticket[]>}
    */
-  async listTickets(input?: ListTicketInput): Promise<Ticket[]> {
+  async listTickets(user: User, input?: ListTicketInput): Promise<Ticket[]> {
     try {
       const options: FindManyOptions<Ticket> = {};
       if (input.status) {
         options.where = { status: input.status };
+      } else {
+        options.where = {
+          reporter: { id: user.id },
+        };
+        const tickets = await this.ticketRepository.findAll(options);
+        return tickets;
       }
-      const tickets = await this.ticketRepository.findAll(options);
-      return tickets;
     } catch (error) {
       throw new BadRequestException(error);
     }

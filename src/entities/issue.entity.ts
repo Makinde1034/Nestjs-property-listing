@@ -11,44 +11,32 @@ import BaseEntity from './base.entity';
 @ObjectType()
 export class Issue extends BaseEntity {
   @Column({ nullable: true })
-  @Field()
+  @Field({ nullable: true })
   message: string;
 
   @Column({ nullable: true })
-  @Field()
+  @Field({ nullable: true })
   category: string;
 
   @Column({ nullable: true })
-  @Field()
+  @Field({ nullable: true })
   parentReason: string;
 
   @Column({ nullable: true })
-  @Field()
-  parentArabicName: string;
+  @Field({ nullable: true })
+  parentArabicReason: string;
 
   @Column({ nullable: true })
-  @Field()
+  @Field({ nullable: true })
   childReason: string;
 
   @Column({ nullable: true })
-  @Field()
-  childArabicName: string;
-
-  @Column({ default: false })
-  @Field()
-  isClosed: string;
-
   @Field({ nullable: true })
-  @Column({ nullable: true })
-  closedAt: Date;
+  childArabicReason: string;
 
   @Field()
   @CreateDateColumn()
   createdAt: Date;
-
-  @Field({ nullable: true })
-  @Column({ nullable: true })
-  reviewedAt: Date;
 
   @Field()
   @UpdateDateColumn()
