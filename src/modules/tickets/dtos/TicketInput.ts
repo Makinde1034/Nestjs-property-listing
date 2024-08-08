@@ -6,6 +6,7 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { TicketStatus } from 'src/common/enums';
+import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 
 @InputType()
 export class CreateTicketInput {
@@ -13,11 +14,6 @@ export class CreateTicketInput {
   @IsString()
   @IsNotEmpty()
   issueId: string;
-
-  @Field()
-  @IsString()
-  @IsNotEmpty()
-  issuCategoryId: string;
 }
 
 @InputType()
@@ -34,7 +30,7 @@ export class UpdateTicketInput {
 }
 
 @InputType()
-export class ListTicketInput {
+export class ListTicketInput extends PaginateAndSort {
   @Field({ nullable: true })
   @IsEnum(TicketStatus)
   @IsOptional()

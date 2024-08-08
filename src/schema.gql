@@ -265,6 +265,43 @@ type SearchHistory {
   updatedAt: DateTime!
 }
 
+type Issue {
+  id: ID!
+  message: String
+  category: String
+  parentReason: String
+  parentArabicReason: String
+  childReason: String
+  childArabicReason: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Ticket {
+  id: ID!
+  reporter: User!
+  support: User
+  issue: Issue!
+  status: String!
+  type: String
+  openedAt: DateTime!
+  isOpen: Boolean!
+  closedAt: DateTime
+  assignedAt: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+}
+
+type Chat {
+  id: ID!
+  message: Messages
+}
+
+type Messages {
+  id: ID!
+}
+
 type User {
   id: ID!
   userType: String!
@@ -292,6 +329,8 @@ type User {
   listing: [Listing!]
   offer: [Offer!]
   status: String
+  messages: [Messages!]!
+  chat: Chat!
   nationality: String
   city: String
   nationalIdentity: NationalIdentity
@@ -322,44 +361,12 @@ type Notification {
   updatedAt: DateTime!
 }
 
-type Issue {
-  id: ID!
-  message: String!
-  category: String!
-  parentReason: String!
-  parentArabicName: String!
-  childReason: String!
-  childArabicName: String!
-  isClosed: String!
-  closedAt: DateTime
-  createdAt: DateTime!
-  reviewedAt: DateTime
-  updatedAt: DateTime!
-}
-
 type IssueCategory {
   id: ID!
   name: String!
   placement: String!
   createdAt: DateTime!
   updatedAt: DateTime!
-}
-
-type Ticket {
-  id: ID!
-  reporter: User!
-  support: User
-  issueCategory: IssueCategory!
-  issue: Issue!
-  status: String!
-  type: String
-  openedAt: DateTime!
-  isOpen: Boolean!
-  closedAt: DateTime
-  assignedAt: DateTime
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  deletedAt: DateTime
 }
 
 type CityEntitity {
@@ -583,7 +590,7 @@ type Query {
   fetchIssueCategories: [IssueCategory!]!
   fetchIssues: [Issue!]!
   getTicket(ticketId: String!): Ticket!
-  listTickets(QueryInput: ListTicketInput): [Ticket!]!
+  listTickets(findOptions: ListTicketInput): [Ticket!]!
   findOneReview(id: String!): Review!
   findManyReviews(findMayOptions: FindManyReviewDto): ReviewResponse!
   findCities(findCities: PaginateAndSort): CityResponse!
@@ -685,6 +692,11 @@ input FindOfferInput {
 }
 
 input ListTicketInput {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
   status: String
 }
 
@@ -1116,7 +1128,6 @@ input DeleteIssueInput {
 
 input CreateTicketInput {
   issueId: String!
-  issuCategoryId: String!
 }
 
 input UpdateTicketInput {

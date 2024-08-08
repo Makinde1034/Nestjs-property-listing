@@ -53,13 +53,14 @@ export class TicketsResolver {
    * @returns {Promise<Ticket>}
    */
   @Query(() => [Ticket])
-  @Permissions('read-support-tickets')
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  // @Permissions('read-support-tickets')
+  @UseGuards(AccessTokenGuard)
   async listTickets(
-    @Args({ name: 'QueryInput', nullable: true, type: () => ListTicketInput })
+    @Context() ctx: any,
+    @Args({ name: 'findOptions', nullable: true, type: () => ListTicketInput })
     input: ListTicketInput,
   ): Promise<Ticket[]> {
-    return await this.ticketService.listTickets(input);
+    return await this.ticketService.listTickets(ctx.req.user, input);
   }
 
   /**

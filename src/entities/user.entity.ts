@@ -13,6 +13,7 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  ManyToOne,
   OneToMany,
   OneToOne,
   UpdateDateColumn,
@@ -33,6 +34,8 @@ import { Listing } from './listing.entity';
 import { Offer } from './offer.entity';
 import { SearchHistory } from './search-history.entity';
 import { Wishlist } from './wishlist.entity';
+import { Messages } from './message.entity';
+import { Chat } from './chat.entity';
 
 @Entity()
 @ObjectType()
@@ -136,6 +139,14 @@ export class User extends BaseEntity {
   @Field({ nullable: true, defaultValue: UserStatus.PENDING })
   @Column({ nullable: true, default: UserStatus.PENDING })
   status: UserStatus;
+
+  @Field(() => [Messages])
+  @OneToMany(() => Messages, (messages) => messages.user)
+  messages: Messages[];
+
+  @Field(() => Chat)
+  @OneToMany(() => Chat, (chat) => chat.user)
+  chat: Chat;
 
   @Column({ nullable: true })
   @Field({ nullable: true })

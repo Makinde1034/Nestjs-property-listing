@@ -10,6 +10,7 @@ import {
   DeleteDateColumn,
   Entity,
   ManyToOne,
+  OneToOne,
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
@@ -18,6 +19,7 @@ import { IssueCategory } from './issue-category.entity';
 import { Issue } from './issue.entity';
 import { TicketStatus } from 'src/common/enums';
 import { Exclude } from 'class-transformer';
+import { Chat } from './chat.entity';
 
 @ObjectType()
 @Entity()
@@ -30,10 +32,6 @@ export class Ticket extends BaseEntity {
   @ManyToOne(() => User, { cascade: true, eager: true })
   support: User;
 
-  @Field(() => IssueCategory)
-  @ManyToOne(() => IssueCategory, { cascade: true, eager: true })
-  issueCategory: IssueCategory;
-
   @Field(() => Issue)
   @ManyToOne(() => Issue, { cascade: true, eager: true })
   issue: Issue;
@@ -45,6 +43,9 @@ export class Ticket extends BaseEntity {
   @Field({ nullable: true })
   @Column({ nullable: true })
   type: string;
+
+  @OneToOne(() => Chat, (chat) => chat.ticket)
+  chat: Chat;
 
   @Field()
   @Column()

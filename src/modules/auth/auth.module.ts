@@ -37,6 +37,8 @@ import { AuthMiddleware } from '../../common/interceptors/auth-middleware';
     RecaptchaValidator,
     TwoFactorAuthenticationService,
   ],
+
+  exports: [AuthService],
 })
 export class AuthModule {
   configure(consumer: MiddlewareConsumer) {

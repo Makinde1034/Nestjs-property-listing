@@ -536,4 +536,14 @@ export class AuthService {
     const token = await this.issueTokens(support);
     return { user: support, token };
   }
+
+  public async getUserFromAuthenticationToken(token: string) {
+    const payload: JWTPayload = this.jwtService.verify(token, {
+      secret: this.configService.get('JWT_ACCESS_SECRET'),
+    });
+
+    if (payload.sub.userId) {
+      return this.userService.findUserById(payload.sub.userId);
+    }
+  }
 }
