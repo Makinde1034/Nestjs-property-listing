@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { BadGatewayException, Injectable, Logger } from '@nestjs/common';
 import { ChatRepository } from '../repository/chat.repository';
 import { MessageRepository } from '../repository/message.repository';
@@ -42,7 +47,7 @@ export class ChatService {
   }
 
   /********************************
-   * findChat
+   * FindChat
    ********************************/
 
   async findAllChat(findOptions: PaginateAndSort) {
@@ -79,7 +84,7 @@ export class ChatService {
   }
 
   /***********************************
-   * messages
+   * Messages
    *
    ***********************************/
 
@@ -105,13 +110,34 @@ export class ChatService {
         skip = findOption.skip;
       }
 
-      return await this.messageRepository.findAndCount({
-        take: take,
-        skip: skip,
+      const [messages, count] = await this.messageRepository.findAndCount({
         where: {
           chat: { id: chatId },
         },
+        relations: ['user'],
+        select: {
+          id: true,
+          message: true,
+          createdAt: true,
+        },
+        take: take,
+        skip: skip,
       });
+
+      const transformedMessages = messages.map((message) => ({
+        id: message.id,
+        message: message.message,
+        createdAt: message.createdAt,
+        user: {
+          id: message.user.id,
+          firstName: message.user.firstName,
+          lastName: message.user.lastName,
+          arabicFirstName: message.user.arabicFirstName,
+          arabicLastName: message.user.arabicLastName,
+        },
+      }));
+
+      return { messages: transformedMessages, count };
     } catch (error) {
       this.logger.log(error);
       throw new BadGatewayException(error);

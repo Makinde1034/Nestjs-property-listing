@@ -543,7 +543,7 @@ export class AuthService {
     });
 
     if (payload.sub.userId) {
-      return this.userService.findUserById(payload.sub.userId);
+      return await this.userService.findUserById(payload.sub.userId);
     }
   }
 }

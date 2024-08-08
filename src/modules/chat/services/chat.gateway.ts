@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import {
   ConnectedSocket,
   MessageBody,
@@ -92,7 +97,13 @@ export class ChatGateway implements OnGatewayConnection {
       await this.chatService.chat(content, user);
       this.server.to(chatId).emit('receive_message', {
         content,
-        user,
+        user: {
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          arabicFirstName: user.arabicFirstName,
+          arabicLastName: user.arabicLastName,
+        },
       });
     } catch (error) {
       this.logger.error(`Error handling message: ${error.message}`);
@@ -118,7 +129,7 @@ export class ChatGateway implements OnGatewayConnection {
       const chatId = socket.data.chatId;
       const messages = await this.chatService.findMessages(findOptions, chatId);
 
-      socket.emit('receive_message', messages.length > 0 ? messages : []);
+      socket.emit('receive_message', messages);
     } catch (error) {
       this.logger.error(`Error handling fetch_message: ${error.message}`);
       socket.emit('error', error.message);

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { Module } from '@nestjs/common';
 import { ChatGateway } from './services/chat.gateway';
 import { ChatService } from './services/chat.service';
