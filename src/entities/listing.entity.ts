@@ -88,6 +88,7 @@ export class Listing extends BaseEntity {
     { onDelete: 'CASCADE' },
   )
   listingAttributes: ListingAttributes[];
+
   @Column({ type: 'jsonb', nullable: true })
   @Field({ nullable: true })
   images: string;
@@ -97,7 +98,6 @@ export class Listing extends BaseEntity {
   panoramaView: string[];
 
   @Field(() => User, { nullable: true })
-  @Index()
   @JoinColumn({ name: 'userId' })
   @ManyToOne(() => User, (user) => user.listing)
   user: User;
@@ -110,6 +110,7 @@ export class Listing extends BaseEntity {
   offer: Offer[];
 
   @Column()
+  @Index()
   @Field({ nullable: true })
   userId: string;
 
