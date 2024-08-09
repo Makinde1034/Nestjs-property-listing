@@ -67,9 +67,7 @@ export class Listing extends BaseEntity {
 
   @Field(() => ListingType, { nullable: true })
   @JoinColumn({ name: 'listingTypeId' })
-  @ManyToOne(() => ListingType, (listingType) => listingType.listing, {
-    eager: true,
-  })
+  @ManyToOne(() => ListingType, (listingType) => listingType.listing, {})
   @Index()
   listingType: ListingType;
 
