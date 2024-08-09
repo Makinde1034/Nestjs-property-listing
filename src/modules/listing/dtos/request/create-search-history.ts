@@ -33,7 +33,7 @@ export class CreateSearchHistoryInput extends PaginateAndSort {
 
   // @IsOptional()
   // @Field(() => [String], { nullable: true })
-  // numberOfBathrooms: string[];
+  // NumberOfBathrooms: string[];
 
   @IsOptional()
   @Field(() => [Attributes], { nullable: true })
