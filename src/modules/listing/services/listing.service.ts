@@ -236,6 +236,7 @@ export class ListingService {
       const allColumns = this.listingRepository.metadata.columns.map(
         (column) => `listing.${column.propertyName}`,
       );
+
       const columnsToExclude = [
         'listing.price',
         'listing.deedNumber',
@@ -247,7 +248,7 @@ export class ListingService {
       const columnsToSelect = allColumns.filter(
         (column) => !columnsToExclude.includes(column),
       );
-      // Destructure input parameters
+
       const {
         rentingOption,
         attributes,
@@ -256,19 +257,22 @@ export class ListingService {
         sortField,
         directionToSort,
         skip,
-        numberOfRooms,
-        numberOfBathrooms,
         minPrice,
         maxPrice,
         minArea,
         maxArea,
-        location,
-        floor,
-        furnishing,
         take: initialTake,
       } = paginateAndSort;
 
-      // Ensures the take value does not exceed 20
+      // Extract attribute IDs and values if attributes are provided
+      let attributeId = [];
+      let attributeValue = [];
+      if (attributes) {
+        attributeId = attributes.map((attr) => attr.attributeId);
+        attributeValue = attributes.map((attr) => attr.value);
+      }
+
+      // Ensure the take value does not exceed 20
       const take = Math.min(initialTake, 20);
       const featuredTake = Math.ceil(take / 3);
       let regularTake = take - featuredTake;
@@ -276,10 +280,10 @@ export class ListingService {
       const sortDirections = ['ASC', 'DESC'] as const;
       type SortDirection = (typeof sortDirections)[number];
 
+      // Base query construction function
       const baseQuery = (isFeatured: boolean) => {
         const query = this.listingRepository
           .createQueryBuilder('listing')
-
           .select(columnsToSelect)
           .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
           .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
@@ -287,7 +291,6 @@ export class ListingService {
           .leftJoinAndSelect('listingType.attributeSets', 'attributeSets')
           .where(
             'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented',
-
             {
               isListingDisabled: false,
               isListingSold: false,
@@ -317,7 +320,7 @@ export class ListingService {
         }
 
         if (rentingOption !== undefined) {
-          query.andWhere('listing.rentingOption = :rentingOption ', {
+          query.andWhere('listing.rentingOption = :rentingOption', {
             rentingOption,
           });
         }
@@ -326,57 +329,26 @@ export class ListingService {
           query.andWhere('listing.purpose = :type', { type });
         }
 
-        if (furnishing !== undefined) {
-          query.andWhere('listing.furnished = :furnished', { furnishing });
-        }
-
         if (listingId !== undefined) {
-          query.andWhere('listing.listingTypeid = :listingTypeId', {
+          query.andWhere('listing.listingTypeId = :listingTypeId', {
             listingTypeId: listingId,
           });
         }
 
-        if (numberOfRooms !== undefined) {
-          query.andWhere(
-            'attributes.name = :attributeName AND attributes.value IN (:...numberOfRooms)',
-            { attributeName: 'Number of Rooms', numberOfRooms },
-          );
-        }
-
         if (attributes !== undefined && attributes.length > 0) {
-          query.andWhere('attributes.id IN (:...attributeIds)', {
-            attributeIds: attributes,
-          });
-        }
-
-        if (numberOfBathrooms !== undefined) {
           query.andWhere(
-            'attributes.name = :attributeName AND attributes.value IN (:...numberOfBathrooms)',
+            'listingAttributes.id IN (:...attributeIds) AND listingAttributes.value IN (:...attributeValues)',
             {
-              attributeName: 'Number of Bathrooms',
-              numberOfBathrooms,
+              attributeIds: attributeId,
+              attributeValues: attributeValue,
             },
           );
         }
 
         if (minArea !== undefined && maxArea !== undefined) {
           query.andWhere(
-            'attributes.name = :attributeName AND attributes.value BETWEEN :minArea AND :maxArea',
+            'listingAttributes.name = :attributeName AND listingAttributes.value BETWEEN :minArea AND :maxArea',
             { attributeName: 'Area', minArea, maxArea },
-          );
-        }
-
-        if (floor !== undefined) {
-          query.andWhere(
-            'attributes.name = :attributeName AND attributes.value IN (:...floor)',
-            { attributeName: 'Level', floor },
-          );
-        }
-
-        if (location !== undefined) {
-          query.andWhere(
-            'attributes.name = :attributeName AND attributes.value IN (:...location)',
-            { attributeName: 'Address', location },
           );
         }
 
@@ -404,8 +376,6 @@ export class ListingService {
 
       const [featuredListings, featuredCount] =
         await featuredQuery.getManyAndCount();
-
-      // Combine results
 
       if (featuredListings.length < featuredTake) {
         regularTake += featuredTake - featuredListings.length;
@@ -457,17 +427,25 @@ export class ListingService {
         sortField,
         directionToSort,
         skip,
-        numberOfRooms,
-        numberOfBathrooms,
+        // numberOfRooms,
+        // numberOfBathrooms,
         minPrice,
         maxPrice,
         minArea,
         maxArea,
-        location,
-        floor,
-        furnishing,
+        // location,
+        // floor,
+        // furnishing,
         take: initialTake,
       } = paginateAndSort;
+
+      let attributeId = [];
+      let attributeValue = [];
+
+      attributes.map((value) => {
+        attributeId.push(value.attributeId);
+        attributeValue.push(value.value);
+      });
 
       // Ensures the take value does not exceed 20
       const take = Math.min(initialTake, 20);
@@ -529,9 +507,9 @@ export class ListingService {
           query.andWhere('listing.purpose = :type', { type });
         }
 
-        if (furnishing !== undefined) {
-          query.andWhere('listing.furnished = :furnished', { furnishing });
-        }
+        // if (furnishing !== undefined) {
+        //   query.andWhere('listing.furnished = :furnished', { furnishing });
+        // }
 
         if (listingId !== undefined) {
           query.andWhere('listing.listingTypeid = :listingTypeId', {
@@ -539,27 +517,31 @@ export class ListingService {
           });
         }
 
-        if (numberOfRooms !== undefined) {
-          query.andWhere(
-            'attributes.name = :attributeName AND attributes.value IN (:...numberOfRooms)',
-            { attributeName: 'Number of Rooms', numberOfRooms },
-          );
-        }
+        // if (numberOfRooms !== undefined) {
+        //   query.andWhere(
+        //     'attributes.name = :attributeName AND attributes.value IN (:...numberOfRooms)',
+        //     { attributeName: 'Number of Rooms', numberOfRooms },
+        //   );
+        // }
 
-        if (numberOfBathrooms !== undefined) {
-          query.andWhere(
-            'attributes.name = :attributeName AND attributes.value IN (:...numberOfBathrooms)',
-            {
-              attributeName: 'Number of Bathrooms',
-              numberOfBathrooms,
-            },
-          );
-        }
+        // if (numberOfBathrooms !== undefined) {
+        //   query.andWhere(
+        //     'attributes.name = :attributeName AND attributes.value IN (:...numberOfBathrooms)',
+        //     {
+        //       attributeName: 'Number of Bathrooms',
+        //       numberOfBathrooms,
+        //     },
+        //   );
+        // }
 
         if (attributes !== undefined && attributes.length > 0) {
-          query.andWhere('attributes.id IN (:...attributeIds)', {
-            attributeIds: attributes,
-          });
+          query.andWhere(
+            'listingAttributes.id IN (:...attributeIds) AND listingAttributes.value IN (:...attributeValues)',
+            {
+              attributeIds: attributeId,
+              attributeValues: attributeValue,
+            },
+          );
         }
 
         if (minArea !== undefined && maxArea !== undefined) {
@@ -569,12 +551,12 @@ export class ListingService {
           );
         }
 
-        if (floor !== undefined) {
-          query.andWhere(
-            'attributes.name = :attributeName AND attributes.value IN (:...floor)',
-            { attributeName: 'Level', floor },
-          );
-        }
+        // if (floor !== undefined) {
+        //   query.andWhere(
+        //     'attributes.name = :attributeName AND attributes.value IN (:...floor)',
+        //     { attributeName: 'Level', floor },
+        //   );
+        // }
 
         if (location !== undefined) {
           query.andWhere(

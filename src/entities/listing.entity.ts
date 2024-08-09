@@ -126,7 +126,7 @@ export class Listing extends BaseEntity {
   })
   feature: Feature[];
 
-  @Field({ defaultValue: 0 })
+  @Field({ defaultValue: 0, nullable: true })
   @Column({ default: 0 })
   impressions: number;
 

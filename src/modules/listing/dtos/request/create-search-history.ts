@@ -7,14 +7,10 @@ import { Field, InputType } from '@nestjs/graphql';
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 
 import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
-import { FurnishingStatusEnum, RentingOption } from '../../../../common/enums';
+import { RentingOption } from '../../../../common/enums';
+import { Attributes } from './listing.dto';
 @InputType()
 export class CreateSearchHistoryInput extends PaginateAndSort {
-  @IsOptional()
-  @IsString()
-  @Field({ nullable: true })
-  location: string;
-
   @IsOptional()
   @IsNumber()
   @Field({ nullable: true })
@@ -35,28 +31,13 @@ export class CreateSearchHistoryInput extends PaginateAndSort {
   @Field({ nullable: true })
   maxArea: number;
 
-  @IsOptional()
-  @Field(() => [String], { nullable: true })
-  numberOfBathrooms: string[];
+  // @IsOptional()
+  // @Field(() => [String], { nullable: true })
+  // numberOfBathrooms: string[];
 
   @IsOptional()
-  @Field(() => [String], { nullable: true })
-  attributes: string[];
-
-  @IsOptional()
-  @IsString()
-  @IsEnum(FurnishingStatusEnum)
-  @Field({ nullable: true })
-  furnishing: string;
-
-  @IsOptional()
-  @Field(() => [String], { nullable: true })
-  numberOfRooms: string[];
-
-  @IsOptional()
-  @IsString()
-  @Field({ nullable: true })
-  floor: string;
+  @Field(() => [Attributes], { nullable: true })
+  attributes: Attributes[];
 
   @IsOptional()
   @IsString()
