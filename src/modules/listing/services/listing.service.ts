@@ -675,7 +675,7 @@ export class ListingService {
       };
 
       // Perform queries
-      const [listing, counts] = await Promise.all([
+      const [listingResult, countsResult] = await Promise.all([
         this.listingRepository.find({
           where: whereCondition,
           relations: ['user', 'listingType'],
@@ -718,13 +718,17 @@ export class ListingService {
 
       // Extract counts from the result
       const analysis = {
-        flagged: Number(counts.flagged),
-        promoted: Number(counts.promoted),
-        sold: Number(counts.sold),
-        rented: Number(counts.rented),
+        flagged: Number(countsResult.flagged),
+        promoted: Number(countsResult.promoted),
+        sold: Number(countsResult.sold),
+        rented: Number(countsResult.rented),
       };
 
-      return { listing, analysis, total: Number(counts.total) };
+      return {
+        listing: listingResult,
+        analysis,
+        total: Number(countsResult.total),
+      };
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
