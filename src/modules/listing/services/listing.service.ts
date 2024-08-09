@@ -645,6 +645,7 @@ export class ListingService {
       // Specific field to filter by time period
       const dateField = 'createdAt';
 
+      // Apply time period filter
       switch (paginateAndSort.timePeriod) {
         case 'today':
           whereCondition[dateField] = Between(startOfDay(now), endOfDay(now));
@@ -662,16 +663,16 @@ export class ListingService {
           whereCondition[dateField] = Between(startOfYear(now), endOfYear(now));
           break;
         default:
-          whereCondition = {};
+          whereCondition = {}; // No date filter applied
       }
 
-      // Apply filters
+      // Apply other filters
       whereCondition = {
         ...whereCondition,
         isListingPromoted: paginateAndSort.isListingPromoted,
         isListingSold: paginateAndSort.isListingSold,
         isListingFlagged: paginateAndSort.isListingFlagged,
-        isListingRented: paginateAndSort.isListingRented, // Fixed from isListingSold
+        isListingRented: paginateAndSort.isListingRented,
       };
 
       // Perform queries
