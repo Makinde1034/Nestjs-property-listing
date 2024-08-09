@@ -227,7 +227,7 @@ type Listing {
   userId: String
   promotion: [Promotion!]
   feature: [Feature!]
-  impressions: Float!
+  impressions: Float
   isListingPromoted: Boolean!
   isListingFlagged: Boolean!
   isListingSold: Boolean!
@@ -658,19 +658,19 @@ input CreateSearchHistoryInput {
   sortField: String
   directionToSort: SortOrder
   where: WhereOption
-  location: String
   minPrice: Float
   maxPrice: Float
   minArea: Float
   maxArea: Float
-  numberOfBathrooms: [String!]
-  attributes: [String!]
-  furnishing: String
-  numberOfRooms: [String!]
-  floor: String
+  attributes: [Attributes!]
   type: String
   rentingOption: String
   listingId: String
+}
+
+input Attributes {
+  value: String!
+  attributeId: String!
 }
 
 input AttributeDto {
@@ -1017,11 +1017,6 @@ input CreateListingDto {
   gpsCoordinate: LocationDto
   panoramaView: [String!]
   negotiable: Boolean = false
-}
-
-input Attributes {
-  value: String!
-  attributeId: String!
 }
 
 input LocationDto {
