@@ -70,6 +70,7 @@ export class Listing extends BaseEntity {
   @ManyToOne(() => ListingType, (listingType) => listingType.listing, {
     eager: true,
   })
+  @Index()
   listingType: ListingType;
 
   @Field({ nullable: true })
@@ -96,6 +97,7 @@ export class Listing extends BaseEntity {
   panoramaView: string[];
 
   @Field(() => User, { nullable: true })
+  @Index()
   @JoinColumn({ name: 'userId' })
   @ManyToOne(() => User, (user) => user.listing)
   user: User;
@@ -130,26 +132,32 @@ export class Listing extends BaseEntity {
   impressions: number;
 
   @Field({ defaultValue: false })
+  @Index()
   @Column({ default: false })
   isListingPromoted: boolean;
 
   @Field({ defaultValue: false })
+  @Index()
   @Column({ default: false })
   isListingFlagged: boolean;
 
   @Field({ defaultValue: false })
+  @Index()
   @Column({ default: false })
   isListingSold: boolean;
 
   @Field({ defaultValue: false })
+  @Index()
   @Column({ default: false })
   isListingRented: boolean;
 
   @Field({ defaultValue: false })
+  @Index()
   @Column({ default: false })
   isListingFeatured: boolean;
 
   @Field({ defaultValue: false })
+  @Index()
   @Column({ default: false })
   isListingDisabled: boolean;
 
@@ -202,6 +210,7 @@ export class Listing extends BaseEntity {
   promotionExpiration: Date;
 
   @Field({ nullable: true })
+  @Index()
   @CreateDateColumn()
   createdAt: Date;
 

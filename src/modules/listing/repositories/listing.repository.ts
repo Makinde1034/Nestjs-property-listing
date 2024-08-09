@@ -14,3 +14,4 @@ export class ListingRepository extends Repository<Listing> {
     super(Listing, dataSource.createEntityManager());
   }
 }
+//

@@ -126,7 +126,7 @@ export class ListingResolver {
     );
     return listing;
   }
-
+  //
   @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard)
   @Query(() => AdminListingResponse, { name: 'findListingsForAdmin' })
@@ -134,7 +134,9 @@ export class ListingResolver {
     @Args('paginateAndSort', { nullable: true })
     paginateAndSort: AdminFilterAndSort,
   ) {
-    return await this.listingService.getListingForAdmin(paginateAndSort);
+    const data = await this.listingService.getListingForAdmin(paginateAndSort);
+
+    return data;
   }
 
   @UseGuards(AdminGuard)

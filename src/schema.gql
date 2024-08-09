@@ -553,6 +553,26 @@ type FinancialVsOrder {
   totalOrdered: Float
 }
 
+type ChildIssue {
+  id: ID!
+  parentIssue: ParentIssue!
+  childReason: String
+  childArabicReason: String
+  sequentialId: Float
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type ParentIssue {
+  id: ID!
+  childIssue: [ChildIssue!]!
+  parentReason: String
+  sequentialId: Float
+  parentArabicReason: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type Query {
   app: String!
   activateTwoFa: TwoFaResult!
@@ -667,11 +687,11 @@ input AdminFilterAndSort {
   sortField: String
   directionToSort: SortOrder
   where: WhereOption
-  timePeriod: String! = "false"
-  isListinPromoted: Boolean! = false
-  isListingSold: Boolean! = false
-  isListingFlagged: Boolean! = false
-  isListingRented: Boolean! = false
+  timePeriod: String = "false"
+  isListingPromoted: Boolean = false
+  isListingSold: Boolean = false
+  isListingFlagged: Boolean = false
+  isListingRented: Boolean = false
 }
 
 input PaginateAndSort {
