@@ -39,7 +39,6 @@ export class ListingType extends BaseEntity {
   @Field(() => [AttributeSet], { nullable: true })
   @ManyToMany(() => AttributeSet, (attribute) => attribute.listingTypes, {
     cascade: true,
-    eager: true,
   })
   @JoinTable({ name: 'listing_types_attribute_sets' })
   attributeSets: AttributeSet[];
