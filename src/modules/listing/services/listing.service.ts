@@ -665,53 +665,66 @@ export class ListingService {
           whereCondition = {};
       }
 
+      // Apply filters
       whereCondition = {
         ...whereCondition,
-        isListingPromoted: paginateAndSort.isListinPromoted,
+        isListingPromoted: paginateAndSort.isListingPromoted,
         isListingSold: paginateAndSort.isListingSold,
         isListingFlagged: paginateAndSort.isListingFlagged,
-        isListingRented: paginateAndSort.isListingSold,
+        isListingRented: paginateAndSort.isListingRented, // Fixed from isListingSold
       };
-      const [listing, total, flagged, promoted, sold, rented] =
-        await Promise.all([
-          this.listingRepository.find({
-            where: whereCondition,
-            relations: ['user', 'listingType'],
 
-            select: {
-              user: {
-                firstName: true,
-                lastName: true,
-                language: true,
-                arabicFirstName: true,
-                arabicLastName: true,
-                userType: true,
-              },
+      // Perform queries
+      const [listing, counts] = await Promise.all([
+        this.listingRepository.find({
+          where: whereCondition,
+          relations: ['user', 'listingType'],
+          select: {
+            user: {
+              firstName: true,
+              lastName: true,
+              language: true,
+              arabicFirstName: true,
+              arabicLastName: true,
+              userType: true,
             },
+          },
+          order: orderOptions,
+          skip: paginateAndSort.skip,
+          take: paginateAndSort.take,
+        }),
+        this.listingRepository
+          .createQueryBuilder('listing')
+          .select('COUNT(*)', 'total')
+          .addSelect(
+            'SUM(CASE WHEN listing.isListingFlagged = true THEN 1 ELSE 0 END)',
+            'flagged',
+          )
+          .addSelect(
+            'SUM(CASE WHEN listing.isListingPromoted = true THEN 1 ELSE 0 END)',
+            'promoted',
+          )
+          .addSelect(
+            'SUM(CASE WHEN listing.isListingSold = true THEN 1 ELSE 0 END)',
+            'sold',
+          )
+          .addSelect(
+            'SUM(CASE WHEN listing.isListingRented = true THEN 1 ELSE 0 END)',
+            'rented',
+          )
+          .where(whereCondition)
+          .getRawOne(),
+      ]);
 
-            order: orderOptions,
-            skip: paginateAndSort.skip,
-            take: paginateAndSort.take,
-          }),
-          this.listingRepository.count({ where: whereCondition }),
-          this.listingRepository.count({ where: { isListingFlagged: true } }),
-          this.listingRepository.count({ where: { isListingPromoted: true } }),
-          this.listingRepository.count({
-            where: { isListingSold: true },
-          }),
-          this.listingRepository.count({
-            where: { isListingRented: true },
-          }),
-        ]);
-
+      // Extract counts from the result
       const analysis = {
-        flagged,
-        promoted,
-        sold,
-        rented,
+        flagged: Number(counts.flagged),
+        promoted: Number(counts.promoted),
+        sold: Number(counts.sold),
+        rented: Number(counts.rented),
       };
 
-      return { listing, analysis, total };
+      return { listing, analysis, total: Number(counts.total) };
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);

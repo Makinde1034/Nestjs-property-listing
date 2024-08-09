@@ -149,7 +149,7 @@ export class UserFilterAndSort extends PaginateAndSort {
   @Field({ defaultValue: false })
   @IsOptional()
   @IsBoolean()
-  isListinPromoted: boolean;
+  isListingPromoted: boolean;
 
   @Field({ defaultValue: false })
   @IsOptional()
@@ -168,4 +168,4 @@ export class UserFilterAndSort extends PaginateAndSort {
 }
 
 @InputType()
-export class AdminFilterAndSort extends UserFilterAndSort {}
+export class AdminFilterAndSort extends PartialType(UserFilterAndSort) {}
