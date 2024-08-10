@@ -12,8 +12,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
-import { IssuePlacement } from 'src/common/enums';
-import { Issue } from './issue.entity';
+import { ParentIssue } from './child-issue.entity';
 
 @Entity()
 @ObjectType()
@@ -22,12 +21,12 @@ export class IssueCategory extends BaseEntity {
   @Field()
   name: string;
 
-  @Column()
-  @Field()
-  placement: IssuePlacement;
-
-  @OneToMany(() => Issue, (issue) => issue.category, { eager: true })
-  issues: Issue[];
+  // @Column()
+  // @Field()
+  // placement: IssuePlacement;
+  @Field(() => [ParentIssue])
+  @OneToMany(() => ParentIssue, (issue) => issue.category, { eager: true })
+  parentIssues: ParentIssue[];
 
   @Field()
   @CreateDateColumn()

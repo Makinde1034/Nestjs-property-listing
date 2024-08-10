@@ -11,7 +11,7 @@ import {
   DeleteIssueInput,
   UpdateIssueCategoryInput,
 } from '../dtos';
-import { Issue, IssueCategory } from '../../../entities';
+import { IssueCategory, ParentIssue } from '../../../entities';
 import { IssueService } from '../services';
 import { Permissions } from 'src/common/decorator/permission';
 
@@ -86,9 +86,9 @@ export class IssueResolver {
    * @async
    * @returns {Promise<Issue[]>}
    */
-  @Query(() => [Issue])
+  @Query(() => [ParentIssue])
   @UseGuards(AccessTokenGuard)
-  async fetchIssues(): Promise<Issue[]> {
+  async fetchIssues(): Promise<ParentIssue[]> {
     return await this.issueService.findAllIssues();
   }
 
@@ -102,15 +102,14 @@ export class IssueResolver {
   // @Mutation(() => Issue)
   // @Permissions('create-issues-categories')
   // @UseGuards(AccessTokenGuard, PermissionsGuard)
-  // Async createIssue(
+  // async createIssue(
   //   @Args('RequestInput') RequestInput: CreateIssueInput,
   // ): Promise<Issue> {
-  //   Return await this.issueService.createIssue(RequestInput);
+  //   return await this.issueService.createIssue(RequestInput);
   // }
 
   /**
    * Update Issue
-   *
    * @async
    * @param {UpdateIssueInput} RequestInput
    * @returns {Promise<Issue>}

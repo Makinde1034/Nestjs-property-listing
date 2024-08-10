@@ -5,7 +5,7 @@
 
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { IssueCategoryRepository, IssueRepository } from '../repositories';
-import { Issue, IssueCategory } from 'src/entities';
+import { IssueCategory, ParentIssue } from 'src/entities';
 import {
   CreateIssueCategoryInput,
   UpdateIssueCategoryInput,
@@ -61,7 +61,7 @@ export class IssueService {
    */
   async deleteCategory(data: DeleteIssueInput): Promise<string> {
     const category = await this.issueCategoryRepository.findByIdOrFail(data.id);
-    if (category.issues && category.issues.length > 0) {
+    if (category.parentIssues && category.parentIssues.length > 0) {
       throw new BadRequestException(AppStrings.UNABLE_TO_DELETE_ISSUE_CATEGORY);
     }
     await this.issueCategoryRepository.delete(data.id);
@@ -74,7 +74,7 @@ export class IssueService {
    * @async
    * @returns {Promise<Issue[]>}
    */
-  async findAllIssues(): Promise<Issue[]> {
+  async findAllIssues(): Promise<ParentIssue[]> {
     return await this.issueRepository.findAll();
   }
 

@@ -265,14 +265,31 @@ type SearchHistory {
   updatedAt: DateTime!
 }
 
-type Issue {
+type ChildIssue {
   id: ID!
-  message: String
-  category: String
-  parentReason: String
-  parentArabicReason: String
+  parentIssue: ParentIssue!
   childReason: String
   childArabicReason: String
+  sequentialId: Float
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type IssueCategory {
+  id: ID!
+  name: String!
+  parentIssues: [ParentIssue!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type ParentIssue {
+  id: ID!
+  childIssue: [ChildIssue!]!
+  category: IssueCategory!
+  parentReason: String
+  sequentialId: Float
+  parentArabicReason: String
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -281,7 +298,7 @@ type Ticket {
   id: ID!
   reporter: User!
   support: User
-  issue: Issue!
+  issue: ParentIssue!
   status: String!
   type: String
   openedAt: DateTime!
@@ -357,14 +374,6 @@ type Notification {
   type: String
   expiredAt: DateTime
   recipient: User!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type IssueCategory {
-  id: ID!
-  name: String!
-  placement: String!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -608,7 +617,7 @@ type Query {
   adPackages: [AdPackage!]!
   adPackage(id: String!): AdPackage!
   fetchIssueCategories: [IssueCategory!]!
-  fetchIssues: [Issue!]!
+  fetchIssues: [ParentIssue!]!
   getTicket(ticketId: String!): Ticket!
   listTickets(findOptions: ListTicketInput): [Ticket!]!
   findOneReview(id: String!): Review!

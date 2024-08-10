@@ -7,7 +7,7 @@ import { Module } from '@nestjs/common';
 import { ListingRepository } from '../listing/repositories/listing.repository';
 import { UserRepository } from '../user/repositories';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Issue, Listing, User } from '../../entities';
+import { ParentIssue, Listing, User } from '../../entities';
 import { OfferRepository } from '../listing/repositories';
 import { Offer } from '../../entities/offer.entity';
 import { AdminResolver } from './resolver/admin.resolver';
@@ -20,7 +20,7 @@ import { AdminDefault } from '../../entities/admin-table.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Offer, Listing, User, Issue, AdminDefault]),
+    TypeOrmModule.forFeature([Offer, Listing, User, ParentIssue, AdminDefault]),
   ],
   providers: [
     AdminResolver,
