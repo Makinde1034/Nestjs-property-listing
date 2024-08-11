@@ -14,6 +14,7 @@ import {
 import { IssueCategory, ParentIssue } from '../../../entities';
 import { IssueService } from '../services';
 import { Permissions } from 'src/common/decorator/permission';
+import { AdminGuard } from '../../auth/guards/admin.guard';
 
 @Resolver()
 export class IssueResolver {
@@ -26,8 +27,8 @@ export class IssueResolver {
    * @returns {Promise<IssueCategory[]>}
    */
   @Query(() => [IssueCategory])
-  @Permissions('create-issues-categories')
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  // @Permissions('create-issues-categories')
+  @UseGuards(AccessTokenGuard)
   async fetchIssueCategories(): Promise<IssueCategory[]> {
     return await this.issueService.findAllIssueCategories();
   }
@@ -40,8 +41,8 @@ export class IssueResolver {
    * @returns {Promise<IssueCategory>}
    */
   @Mutation(() => IssueCategory)
-  @Permissions('create-issues-categories')
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  // @Permissions('create-issues-categories')
+  @UseGuards(AccessTokenGuard, AdminGuard)
   async createIssueCategory(
     @Args('RequestInput') RequestInput: CreateIssueCategoryInput,
   ): Promise<IssueCategory> {
@@ -56,8 +57,8 @@ export class IssueResolver {
    * @returns {Promise<IssueCatgeory>}
    */
   @Mutation(() => IssueCategory)
-  @Permissions('update-issues-categories')
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  // @Permissions('update-issues-categories')
+  @UseGuards(AdminGuard, AccessTokenGuard)
   async updateIssueCatgeory(
     @Args('RequestInput') RequestInput: UpdateIssueCategoryInput,
   ): Promise<IssueCategory> {

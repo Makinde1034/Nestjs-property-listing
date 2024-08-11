@@ -1,19 +1,14 @@
-/*
- * Copyright (c) 2024, Waseet LLC. All rights reserved.
- * For license. See license.txt
- */
-
 import { Logger } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { DataSource, DeepPartial } from 'typeorm';
 import { Seeder, SeederFactoryManager } from 'typeorm-extension';
-import { ChildIssueFactory } from '../factories/child.factory';
 import { ChildIssue, IssueCategory, ParentIssue } from '../../entities';
-import { ParentIssueFactory } from '../factories/parent-issue';
+import { IssueFactory } from '../factories/issue.factory';
 import { IssuesCategoryFactory } from '../factories/issue-category';
 
 export class Issue1720110596406 implements Seeder {
   track = false;
   private logger = new Logger(Issue1720110596406.name);
+
   public async run(
     dataSource: DataSource,
     factoryManager: SeederFactoryManager,
@@ -23,45 +18,88 @@ export class Issue1720110596406 implements Seeder {
     const childIssueRepository = dataSource.getRepository(ChildIssue);
     const categoryRepository = dataSource.getRepository(IssueCategory);
 
-    let parentIssues;
-    let childIssue;
+    const parentIssues: DeepPartial<ParentIssue>[] = [];
+    const childIssues: DeepPartial<ChildIssue>[] = [];
 
-    const category = await categoryRepository.find();
+    try {
+      // Fetch categories and prepare a map
+      const categories = await categoryRepository.find();
 
-    if (category.length > 0) {
-      this.logger.debug(`Seeding for: ${IssueCategory.name} Already completed`);
-    } else {
-      await parentRepository.save(
-        IssuesCategoryFactory as Partial<IssueCategory>,
-      );
-      const [createdCategory, parent] = await Promise.all([
-        await categoryRepository.find(),
-        await parentRepository.find(),
-      ]);
-
-      if (parent.length > 0) {
+      if (categories.length > 0) {
         this.logger.debug(
-          `Seeding for: ${ParentIssue.name} Already completed. If you want to  update Issues, you need to delete category table, child_issue table and parent_issue table`,
+          `Seeding for: ${IssueCategory.name} already completed`,
         );
       } else {
-        createdCategory.map((category) => {
-          parentIssues = ParentIssueFactory.map(() => {});
+        // Save categories if not present
+        const categories = await categoryRepository.save(IssuesCategoryFactory);
+        const categoryMap = new Map(categories.map((cat) => [cat.name, cat]));
+
+        this.logger.debug('Seeding Parent Issues');
+
+        // Create parent issues
+        IssueFactory.forEach((element, index) => {
+          const category = categoryMap.get(element.category);
+
+          if (category) {
+            const issue: DeepPartial<ParentIssue> = {
+              issueCategoryId: category.id,
+              issueCategory: category,
+              parentReason: element.parentReason,
+              parentArabicReason: element.parentArabicName,
+              sequentialId: index + 1,
+            };
+
+            parentIssues.push(issue);
+          } else {
+            this.logger.warn(
+              `Category ${element.category} not found for ParentIssue`,
+            );
+          }
         });
 
-        await parentRepository.save(parentIssues as Partial<ParentIssue>);
+        if (parentIssues.length > 0) {
+          // Save parent issues and check the result
+          const savedParentIssues = await parentRepository.save(parentIssues);
+          this.logger.debug('Saved ParentIssues:', savedParentIssues);
 
-        const childIssue = await childIssueRepository.find();
-
-        if (childIssue.length > 0) {
-          this.logger.debug(
-            `Seeding for: ${ChildIssue.name} Already completed`,
+          // Fetch existing child issues
+          const existingChildIssues = await childIssueRepository.find();
+          const existingChildMap = new Map(
+            existingChildIssues.map((child) => [
+              child.parentIssue.id + '-' + child.sequentialId,
+              child,
+            ]),
           );
-        } else {
-          await parentRepository.save(ChildIssueFactory as Partial<ChildIssue>);
+
+          // Create child issues
+          IssueFactory.forEach((element, index) => {
+            const parentIssue = savedParentIssues.find(
+              (issue) => issue.parentReason === element.parentReason,
+            );
+            if (parentIssue) {
+              const childKey = parentIssue.id + '-' + (index + 1);
+              if (!existingChildMap.has(childKey)) {
+                const childIssue: DeepPartial<ChildIssue> = {
+                  parentIssue,
+                  sequentialId: index + 1,
+                  childArabicReason: element.childArabicName,
+                  childReason: element.childReason,
+                };
+                childIssues.push(childIssue);
+              }
+            }
+          });
+          if (childIssues.length > 0) {
+            // Save child issues
+            await childIssueRepository.save(childIssues);
+          }
         }
       }
-
-      this.logger.debug(`Seeding for: ${Issue1720110596406.name} finished`);
+    } catch (error) {
+      this.logger.error('Error during seeding', error);
+      throw error;
     }
+
+    this.logger.debug(`Seeding for: ${Issue1720110596406.name} finished`);
   }
 }

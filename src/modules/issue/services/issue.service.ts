@@ -75,7 +75,7 @@ export class IssueService {
    * @returns {Promise<Issue[]>}
    */
   async findAllIssues(): Promise<ParentIssue[]> {
-    return await this.issueRepository.findAll();
+    return await this.issueRepository.find();
   }
 
   /**

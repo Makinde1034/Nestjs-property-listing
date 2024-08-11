@@ -4,17 +4,13 @@
  */
 
 import { Injectable } from '@nestjs/common';
-import { EntityRepository } from '../../core/base.class/entity.repository';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+
+import { DataSource, Repository } from 'typeorm';
 import { ParentIssue } from '../../../entities';
 
 @Injectable()
-export class IssueRepository extends EntityRepository<ParentIssue> {
-  constructor(
-    @InjectRepository(ParentIssue)
-    private readonly repository: Repository<ParentIssue>,
-  ) {
-    super(repository);
+export class IssueRepository extends Repository<ParentIssue> {
+  constructor(private dataSource: DataSource) {
+    super(ParentIssue, dataSource.createEntityManager());
   }
 }

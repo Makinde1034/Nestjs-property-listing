@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-export const ChildIssueFactory = [
+export const IssueFactory = [
   {
     category: 'Support',
     parentReason: 'Account Issues',

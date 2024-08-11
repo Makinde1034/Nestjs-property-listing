@@ -268,6 +268,7 @@ type SearchHistory {
 type ChildIssue {
   id: ID!
   parentIssue: ParentIssue!
+  childIssueId: String
   childReason: String
   childArabicReason: String
   sequentialId: Float
@@ -275,18 +276,11 @@ type ChildIssue {
   updatedAt: DateTime!
 }
 
-type IssueCategory {
-  id: ID!
-  name: String!
-  parentIssues: [ParentIssue!]!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
 type ParentIssue {
   id: ID!
+  issueCategory: [ChildIssue!]!
+  issueCategoryId: String!
   childIssue: [ChildIssue!]!
-  category: IssueCategory!
   parentReason: String
   sequentialId: Float
   parentArabicReason: String
@@ -374,6 +368,14 @@ type Notification {
   type: String
   expiredAt: DateTime
   recipient: User!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type IssueCategory {
+  id: ID!
+  name: String!
+  parentIssues: [ParentIssue!]
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -560,26 +562,6 @@ type FinancialVsOrder {
   quarter: Float
   totalSold: Float
   totalOrdered: Float
-}
-
-type ChildIssue {
-  id: ID!
-  parentIssue: ParentIssue!
-  childReason: String
-  childArabicReason: String
-  sequentialId: Float
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type ParentIssue {
-  id: ID!
-  childIssue: [ChildIssue!]!
-  parentReason: String
-  sequentialId: Float
-  parentArabicReason: String
-  createdAt: DateTime!
-  updatedAt: DateTime!
 }
 
 type Query {

@@ -8,11 +8,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   OneToMany,
+  OneToOne,
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
-import { ParentIssue } from './child-issue.entity';
+import { ParentIssue } from './parent-issue.entity';
 
 @Entity()
 @ObjectType()
@@ -21,11 +23,8 @@ export class IssueCategory extends BaseEntity {
   @Field()
   name: string;
 
-  // @Column()
-  // @Field()
-  // placement: IssuePlacement;
-  @Field(() => [ParentIssue])
-  @OneToMany(() => ParentIssue, (issue) => issue.category, { eager: true })
+  @Field(() => [ParentIssue], { nullable: true })
+  @OneToOne(() => ParentIssue, (parentIssue) => parentIssue.issueCategory, {})
   parentIssues: ParentIssue[];
 
   @Field()
