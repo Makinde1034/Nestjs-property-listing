@@ -67,16 +67,16 @@ export class Attribute extends BaseEntity {
   @Field()
   showInFilters: boolean;
 
-  @Column({ nullable: true })
-  @Field({ nullable: true })
+  @Column({ nullable: true, default: 0 })
+  @Field({ defaultValue: 0 })
   filterIndex: number;
 
-  @Column({ nullable: true })
-  @Field({ nullable: true })
+  @Column({ nullable: true, default: 0 })
+  @Field({ defaultValue: 0 })
   summaryIndex: number;
 
-  @Column({ nullable: true })
-  @Field({ nullable: true })
+  @Column({ nullable: true, default: 0 })
+  @Field({ defaultValue: 0 })
   createListingIndex: number;
 
   @Column({ type: 'simple-array', nullable: true })
