@@ -8,9 +8,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
   OneToMany,
-  OneToOne,
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
@@ -24,7 +22,7 @@ export class IssueCategory extends BaseEntity {
   name: string;
 
   @Field(() => [ParentIssue], { nullable: true })
-  @OneToOne(() => ParentIssue, (parentIssue) => parentIssue.issueCategory, {})
+  @OneToMany(() => ParentIssue, (parentIssue) => parentIssue.issueCategory, {})
   parentIssues: ParentIssue[];
 
   @Field()

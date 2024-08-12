@@ -9,8 +9,8 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToMany,
-  OneToOne,
   UpdateDateColumn,
 } from 'typeorm';
 import { ChildIssue } from './child-issue.entity';
@@ -22,7 +22,7 @@ import { IssueCategory } from '.';
 export class ParentIssue extends BaseEntity {
   @Field(() => [ChildIssue])
   @JoinColumn({ name: 'issueCategoryId' })
-  @OneToOne(() => IssueCategory, (issueCategory) => issueCategory, {
+  @ManyToOne(() => IssueCategory, (issueCategory) => issueCategory, {
     eager: true,
   })
   issueCategory: IssueCategory;

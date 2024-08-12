@@ -8,10 +8,12 @@ import { UseGuards } from '@nestjs/common';
 import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
 import {
   CreateIssueCategoryInput,
+  CreateIssueInput,
   DeleteIssueInput,
   UpdateIssueCategoryInput,
+  UpdateIssueInput,
 } from '../dtos';
-import { IssueCategory, ParentIssue } from '../../../entities';
+import { ChildIssue, IssueCategory, ParentIssue } from '../../../entities';
 import { IssueService } from '../services';
 import { Permissions } from 'src/common/decorator/permission';
 import { AdminGuard } from '../../auth/guards/admin.guard';
@@ -40,6 +42,7 @@ export class IssueResolver {
    * @param {IssueCategory} RequestInput
    * @returns {Promise<IssueCategory>}
    */
+
   @Mutation(() => IssueCategory)
   // @Permissions('create-issues-categories')
   @UseGuards(AccessTokenGuard, AdminGuard)
@@ -81,16 +84,31 @@ export class IssueResolver {
     return await this.issueService.deleteCategory(RequestInput);
   }
 
+  /*********************************
+   * Issues
+   *********************************/
+
   /**
    * Fetch Issues
    *
    * @async
    * @returns {Promise<Issue[]>}
    */
+
   @Query(() => [ParentIssue])
   @UseGuards(AccessTokenGuard)
-  async fetchIssues(): Promise<ParentIssue[]> {
-    return await this.issueService.findAllIssues();
+  async fetchIssues(
+    @Args('categoryId') categoryId: string,
+  ): Promise<ParentIssue[]> {
+    return await this.issueService.findAllIssuesByCategory(categoryId);
+  }
+
+  @Query(() => [ChildIssue])
+  @UseGuards(AccessTokenGuard)
+  async fetchChildIssues(
+    @Args('parentId') parentId: string,
+  ): Promise<ChildIssue[]> {
+    return await this.issueService.findAllChildIssues(parentId);
   }
 
   /**
@@ -100,14 +118,14 @@ export class IssueResolver {
    * @param {CreateIssueInput} RequestInput
    * @returns {Promise<Issue>}
    */
-  // @Mutation(() => Issue)
-  // @Permissions('create-issues-categories')
-  // @UseGuards(AccessTokenGuard, PermissionsGuard)
-  // async createIssue(
-  //   @Args('RequestInput') RequestInput: CreateIssueInput,
-  // ): Promise<Issue> {
-  //   return await this.issueService.createIssue(RequestInput);
-  // }
+  @Mutation(() => ParentIssue)
+  @Permissions('create-issues-categories')
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  async createIssue(
+    @Args('RequestInput') RequestInput: CreateIssueInput,
+  ): Promise<ParentIssue> {
+    return await this.issueService.createIssue(RequestInput);
+  }
 
   /**
    * Update Issue
@@ -115,14 +133,13 @@ export class IssueResolver {
    * @param {UpdateIssueInput} RequestInput
    * @returns {Promise<Issue>}
    */
-  // @Mutation(() => Issue)
-  // @Permissions('update-issues-categories')
-  // @UseGuards(AccessTokenGuard, PermissionsGuard)
-  // Async updateIssue(
-  //   @Args('RequestInput') RequestInput: UpdateIssueInput,
-  // ): Promise<Issue> {
-  //   Return await this.issueService.updateIssue(RequestInput);
-  // }
+  @Mutation(() => ParentIssue)
+  @UseGuards(AccessTokenGuard, AdminGuard)
+  async updateIssue(
+    @Args('RequestInput') RequestInput: UpdateIssueInput,
+  ): Promise<ParentIssue> {
+    return await this.issueService.updateParentIssue(RequestInput);
+  }
 
   /**
    * Delete Issue

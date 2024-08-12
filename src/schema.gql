@@ -599,7 +599,8 @@ type Query {
   adPackages: [AdPackage!]!
   adPackage(id: String!): AdPackage!
   fetchIssueCategories: [IssueCategory!]!
-  fetchIssues: [ParentIssue!]!
+  fetchIssues(categoryId: String!): [ParentIssue!]!
+  fetchChildIssues(parentId: String!): [ChildIssue!]!
   getTicket(ticketId: String!): Ticket!
   listTickets(findOptions: ListTicketInput): [Ticket!]!
   findOneReview(id: String!): Review!
@@ -782,6 +783,8 @@ type Mutation {
   createIssueCategory(RequestInput: CreateIssueCategoryInput!): IssueCategory!
   updateIssueCatgeory(RequestInput: UpdateIssueCategoryInput!): IssueCategory!
   deleteIssueCategory(RequestInput: DeleteIssueInput!): String!
+  createIssue(RequestInput: CreateIssueInput!): ParentIssue!
+  updateIssue(RequestInput: UpdateIssueInput!): ParentIssue!
   deleteIssue(RequestInput: DeleteIssueInput!): String!
   createTicket(RequestInput: CreateTicketInput!): String!
   manageTicket(RequestInput: UpdateTicketInput!): Ticket!
@@ -1120,16 +1123,31 @@ input UpdateAdPackageInput {
 
 input CreateIssueCategoryInput {
   name: String!
-  placement: String!
 }
 
 input UpdateIssueCategoryInput {
   name: String!
-  placement: String!
   id: String!
 }
 
 input DeleteIssueInput {
+  id: String!
+}
+
+input CreateIssueInput {
+  issue: String!
+  categoryId: String!
+  parentReason: String!
+  parentArabicReason: String!
+  sequentialId: Float!
+}
+
+input UpdateIssueInput {
+  issue: String
+  categoryId: String
+  parentReason: String
+  parentArabicReason: String
+  sequentialId: Float
   id: String!
 }
 
