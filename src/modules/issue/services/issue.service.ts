@@ -8,14 +8,13 @@ import { IssueCategoryRepository, IssueRepository } from '../repositories';
 import { ChildIssue, IssueCategory, ParentIssue } from 'src/entities';
 import {
   CreateIssueCategoryInput,
-  UpdateIssueCategoryInput,
   DeleteIssueInput,
   CreateIssueInput,
   UpdateIssueInput,
 } from '../dtos';
 import { AppStrings } from 'src/common/messages/app.strings';
 import { ChildIssueRepository } from '../repositories/child-issue.repository';
-import { MoreThan } from 'typeorm';
+import { EntityManager, MoreThanOrEqual } from 'typeorm';
 
 @Injectable()
 export class IssueService {
@@ -54,8 +53,62 @@ export class IssueService {
    * @param {UpdateIssueCategoryInput} data
    * @returns {Promise<IssueCategory>}
    */
-  async updateCategory(data: UpdateIssueCategoryInput): Promise<IssueCategory> {
-    return await this.issueCategoryRepository.update(data.id, data);
+  async updateIssue(input: UpdateIssueInput): Promise<ParentIssue> {
+    const { id, sequentialId, ...data } = input;
+
+    if (sequentialId !== undefined && sequentialId <= 0) {
+      throw new BadRequestException('SequentialId must be greater than 0');
+    }
+
+    // Validate that the issue exists
+    const issue = await this.issueRepository.findOneByOrFail({ id });
+
+    return await this.issueRepository.manager.transaction(
+      async (transactionalEntityManager: EntityManager) => {
+        // Update the issue with the provided data
+        await transactionalEntityManager.update(ParentIssue, id, data);
+
+        if (sequentialId !== undefined) {
+          // Fetch records with a sequentialId greater than or equal to the input's sequentialId
+          const records = await transactionalEntityManager.find(ParentIssue, {
+            where: {
+              sequentialId: MoreThanOrEqual(sequentialId),
+              issueCategoryId: issue.issueCategoryId,
+            },
+            order: { sequentialId: 'ASC' },
+          });
+
+          // Update the sequentialId for the current issue
+          await transactionalEntityManager.update(ParentIssue, id, {
+            sequentialId: sequentialId,
+          });
+          let newSequentialId = sequentialId + 1;
+
+          // Prepare records for update
+          const updatedRecords = records
+            .filter(
+              (record) =>
+                record.id !== id && record.sequentialId >= sequentialId,
+            )
+            .map((record) => {
+              record.sequentialId = newSequentialId;
+              newSequentialId += 1;
+              return record;
+            });
+
+          // Save updated records if any
+          if (updatedRecords.length > 0) {
+            await transactionalEntityManager.save(ParentIssue, updatedRecords);
+          }
+        }
+
+        // Return the updated issue
+        return await transactionalEntityManager.findOneOrFail(ParentIssue, {
+          where: { id },
+          order: { sequentialId: 'ASC' },
+        });
+      },
+    );
   }
 
   /**
@@ -84,6 +137,7 @@ export class IssueService {
   async findAllIssuesByCategory(id: string): Promise<ParentIssue[]> {
     return await this.issueRepository.find({
       where: { issueCategoryId: id },
+      order: { sequentialId: 'ASC' },
     });
   }
 
@@ -135,36 +189,36 @@ export class IssueService {
    * @param {UpdateIssueInput} input
    * @returns {Promise<Issue>}
    */
-  async updateParentIssue(input: UpdateIssueInput): Promise<ParentIssue> {
-    const data: Partial<ParentIssue> = {
-      ...input,
-    };
-    const result = await this.issueRepository.update(input.id, data);
+  // Async updateParentIssue(input: UpdateIssueInput): Promise<ParentIssue> {
+  // Const data: Partial<ParentIssue> = {
+  //   ...input,
+  // };
+  // Const result = await this.issueRepository.update(input.id, data);
 
-    if (result.affected > 0) {
-      return await this.issueRepository.findOneBy({ id: input.id });
-    }
+  // If (result.affected > 0) {
+  //   Return await this.issueRepository.findOneBy({ id: input.id });
+  // }
 
-    if (input.sequentialId) {
-      const records = await this.issueRepository.find({
-        order: { sequentialId: 'ASC' },
-        where: {
-          sequentialId: MoreThan(input.sequentialId),
-        },
-      });
-      let newValue = input.sequentialId;
+  // If (input.sequentialId) {
+  //   Const records = await this.issueRepository.find({
+  //     Order: { sequentialId: 'ASC' },
+  //     Where: {
+  //       SequentialId: MoreThan(input.sequentialId),
+  //     },
+  //   });
+  //   Let newValue = input.sequentialId;
 
-      // Update the value of each record
-      const updatedRecords = records.map((record) => {
-        newValue = newValue + 1;
-        record.sequentialId = newValue;
-        return record;
-      });
+  //   // Update the value of each record
+  //   Const updatedRecords = records.map((record) => {
+  //     NewValue = newValue + 1;
+  //     Record.sequentialId = newValue;
+  //     Return record;
+  //   });
 
-      // Save the updated records back to the database
-      await this.issueRepository.save(updatedRecords);
-    }
-  }
+  //   // Save the updated records back to the database
+  //   Await this.issueRepository.save(updatedRecords);
+  // }
+  // }
 
   /**
    * Delete issue

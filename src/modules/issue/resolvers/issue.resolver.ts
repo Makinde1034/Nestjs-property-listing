@@ -10,7 +10,6 @@ import {
   CreateIssueCategoryInput,
   CreateIssueInput,
   DeleteIssueInput,
-  UpdateIssueCategoryInput,
   UpdateIssueInput,
 } from '../dtos';
 import { ChildIssue, IssueCategory, ParentIssue } from '../../../entities';
@@ -59,13 +58,13 @@ export class IssueResolver {
    * @param {UpdateIssueCategoryInput} RequestInput
    * @returns {Promise<IssueCatgeory>}
    */
-  @Mutation(() => IssueCategory)
+  @Mutation(() => ParentIssue)
   // @Permissions('update-issues-categories')
   @UseGuards(AdminGuard, AccessTokenGuard)
   async updateIssueCatgeory(
-    @Args('RequestInput') RequestInput: UpdateIssueCategoryInput,
-  ): Promise<IssueCategory> {
-    return await this.issueService.updateCategory(RequestInput);
+    @Args('RequestInput') RequestInput: UpdateIssueInput,
+  ): Promise<ParentIssue> {
+    return await this.issueService.updateIssue(RequestInput);
   }
 
   /**
@@ -138,7 +137,7 @@ export class IssueResolver {
   async updateIssue(
     @Args('RequestInput') RequestInput: UpdateIssueInput,
   ): Promise<ParentIssue> {
-    return await this.issueService.updateParentIssue(RequestInput);
+    return await this.issueService.updateIssue(RequestInput);
   }
 
   /**

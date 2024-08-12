@@ -14,12 +14,15 @@ import {
 } from '../../issue/repositories';
 import { TicketStatus } from 'src/common/enums';
 import { FindManyOptions } from 'typeorm';
+import { ChildIssueRepository } from '../../issue/repositories/child-issue.repository';
 
 @Injectable()
 export class TicketService {
   constructor(
     private readonly ticketRepository: TicketRepository,
     private readonly issueCategoryRepository: IssueCategoryRepository,
+
+    private childIssueRepository: ChildIssueRepository,
     private readonly issueRepository: IssueRepository,
   ) {}
 
@@ -32,13 +35,20 @@ export class TicketService {
    * @returns {Promise<string>}
    */
   async raiseTicket(user: User, input: CreateTicketInput): Promise<string> {
-    const { issueId } = input;
-    const issue = await this.issueRepository.findOneByOrFail({ id: issueId });
+    const { issueId, childIssueId } = input;
+    const parentIssue = await this.issueRepository.findOneByOrFail({
+      id: issueId,
+    });
+
+    const childIssue = await this.childIssueRepository.findOneByOrFail({
+      id: childIssueId,
+    });
 
     const data: Partial<Ticket> = {
       openedAt: new Date(),
       reporter: user,
-      issue,
+      parentIssue,
+      childIssue: childIssue,
       isOpen: true,
       status: TicketStatus.OPEN,
     };
