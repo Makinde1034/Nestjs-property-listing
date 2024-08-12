@@ -68,7 +68,7 @@ export class Attribute extends BaseEntity {
   showInFilters: boolean;
 
   @Column({ nullable: true, default: 0 })
-  @Field({ defaultValue: 0 })
+  @Field({ nullable: true, defaultValue: 0 })
   filterIndex: number;
 
   @Column({ nullable: true, default: 0 })

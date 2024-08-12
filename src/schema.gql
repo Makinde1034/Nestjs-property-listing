@@ -178,7 +178,7 @@ type Attribute {
   isAddress: Boolean
   showInComparison: Boolean!
   showInFilters: Boolean!
-  filterIndex: Float!
+  filterIndex: Float
   summaryIndex: Float!
   createListingIndex: Float!
   thiqaIntegration: [String!]

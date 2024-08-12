@@ -442,10 +442,12 @@ export class ListingService {
       const attributeId = [];
       const attributeValue = [];
 
-      attributes.map((value) => {
-        attributeId.push(value.attributeId);
-        attributeValue.push(value.value);
-      });
+      if (attributes) {
+        attributes.map((value) => {
+          attributeId.push(value.attributeId);
+          attributeValue.push(value.value);
+        });
+      }
 
       // Ensures the take value does not exceed 20
       const take = Math.min(initialTake, 20);
@@ -558,12 +560,12 @@ export class ListingService {
         //   );
         // }
 
-        if (location !== undefined) {
-          query.andWhere(
-            'attributes.name = :attributeName AND attributes.value IN (:...location)',
-            { attributeName: 'Address', location },
-          );
-        }
+        // If (location !== undefined) {
+        //   Query.andWhere(
+        //     'attributes.name = :attributeName AND attributes.value IN (:...location)',
+        //     { attributeName: 'Address', location },
+        //   );
+        // }
 
         if (
           sortField &&
