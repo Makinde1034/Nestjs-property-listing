@@ -9,7 +9,9 @@ import {
   IsBoolean,
   IsEnum,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
+  IsPositive,
   IsString,
   ValidateIf,
 } from 'class-validator';
@@ -67,6 +69,20 @@ export class AttributeInput {
   @IsArray()
   @IsOptional()
   dropDownOptions: string[];
+
+  @IsNumber()
+  @IsPositive()
+  @Field()
+  summaryIndex: number;
+
+  @Field()
+  @IsNumber()
+  @IsPositive()
+  createListingIndex: number;
+
+  @Field(() => [String])
+  @IsString()
+  thiqaIntegration: string[];
 }
 
 @InputType()

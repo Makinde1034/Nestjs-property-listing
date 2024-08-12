@@ -99,6 +99,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     hiddenToBuyers: false,
     isAmenity: false,
     isAddress: true,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
 
   {
@@ -111,6 +115,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     hiddenToBuyers: false,
     isAmenity: false,
     isAddress: true,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
 
   {
@@ -123,6 +131,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     hiddenToBuyers: false,
     isAmenity: false,
     isAddress: true,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
 
   {
@@ -135,6 +147,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     hiddenToBuyers: false,
     isAmenity: false,
     isAddress: true,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
 
   {
@@ -147,6 +163,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     hiddenToBuyers: true,
     isAmenity: false,
     isAddress: false,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
 
   {
@@ -175,6 +195,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
       '13',
       'More than 13',
     ],
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
 
   {
@@ -203,6 +227,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
       '13',
       'More than 13',
     ],
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
 
   {
@@ -215,6 +243,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     hiddenToBuyers: false,
     isAmenity: false,
     isAddress: false,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
 
   {
@@ -227,6 +259,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     hiddenToBuyers: false,
     isAmenity: false,
     isAddress: false,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
 
   {
@@ -239,6 +275,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     hiddenToBuyers: false,
     isAmenity: false,
     isAddress: false,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
   {
     englishName: 'Rented apartments',
@@ -266,6 +306,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
       '13',
       'More than 13',
     ],
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
 
   {
@@ -294,6 +338,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
       '13',
       'More than 13',
     ],
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
 
   {
@@ -322,6 +370,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
       '13',
       'More than 13',
     ],
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
 
   {
@@ -350,6 +402,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
       '13',
       'More than 13',
     ],
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
 
   {
@@ -378,6 +434,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
       '13',
       'More than 13',
     ],
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
 
   {
@@ -406,6 +466,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
       '13',
       'More than 13',
     ],
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
 
   {
@@ -434,6 +498,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
       '13',
       'More than 13',
     ],
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
 
   /////////////////////////////////////////////
@@ -451,6 +519,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     hiddenToBuyers: false,
     isAmenity: false,
     isAddress: false,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
   {
     englishName: 'Purpose',
@@ -462,6 +534,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     hiddenToBuyers: false,
     isAmenity: false,
     isAddress: false,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
   {
     englishName: 'Images',
@@ -473,6 +549,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     hiddenToBuyers: false,
     isAmenity: false,
     isAddress: false,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
 
   {
@@ -501,6 +581,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
       '13',
       'More than 13',
     ],
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
 
   {
@@ -512,6 +596,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isAmenity: true,
     showInComparison: true,
     showInFilters: false,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
 
   {
@@ -523,6 +611,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isAmenity: true,
     showInComparison: true,
     showInFilters: true,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
   {
     englishName: 'Outdoor kitchen',
@@ -533,6 +625,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isAmenity: true,
     showInComparison: true,
     showInFilters: false,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
 
   {
@@ -544,6 +640,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isAmenity: true,
     showInComparison: true,
     showInFilters: true,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
 
   {
@@ -555,6 +655,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isAmenity: true,
     showInComparison: true,
     showInFilters: true,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
 
   {
@@ -566,6 +670,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isAmenity: true,
     showInComparison: true,
     showInFilters: false,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
   {
     englishName: 'Basketball court',
@@ -576,6 +684,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isAmenity: true,
     showInComparison: true,
     showInFilters: false,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
   {
     englishName: 'Jacuzzi',
@@ -586,6 +698,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isAmenity: true,
     showInComparison: true,
     showInFilters: false,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
   {
     englishName: 'BBQ area',
@@ -596,6 +712,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isAmenity: true,
     showInComparison: true,
     showInFilters: true,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
 
   {
@@ -607,6 +727,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isAmenity: true,
     showInComparison: true,
     showInFilters: true,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
   {
     englishName: 'Pets allowed',
@@ -617,6 +741,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isAmenity: true,
     showInComparison: true,
     showInFilters: true,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
   {
     englishName: 'Balcony',
@@ -627,6 +755,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isAmenity: true,
     showInComparison: true,
     showInFilters: false,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
   {
     englishName: 'Gym',
@@ -637,6 +769,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isAmenity: true,
     showInComparison: true,
     showInFilters: true,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
   {
     englishName: 'Playground',
@@ -647,6 +783,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isAmenity: true,
     showInComparison: true,
     showInFilters: false,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
   {
     englishName: 'Parking',
@@ -657,6 +797,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isAmenity: true,
     showInComparison: true,
     showInFilters: true,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
   {
     englishName: 'Security',
@@ -667,6 +811,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isAmenity: true,
     showInComparison: true,
     showInFilters: true,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
   {
     englishName: 'Air conditioning',
@@ -677,6 +825,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isAmenity: true,
     showInComparison: true,
     showInFilters: true,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
   {
     englishName: 'Storage room',
@@ -687,6 +839,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isAmenity: true,
     showInComparison: true,
     showInFilters: false,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
   {
     englishName: 'Laundry room',
@@ -697,6 +853,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isAmenity: true,
     showInComparison: true,
     showInFilters: false,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
   {
     englishName: 'Conference room',
@@ -707,6 +867,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isAmenity: true,
     showInComparison: true,
     showInFilters: false,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
   {
     englishName: 'Gated community',
@@ -717,6 +881,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isAmenity: true,
     showInComparison: true,
     showInFilters: true,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
   {
     englishName: 'Indoor play area',
@@ -727,6 +895,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isAmenity: true,
     showInComparison: true,
     showInFilters: false,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
   {
     englishName: 'Covered parking',
@@ -737,6 +909,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isAmenity: true,
     showInComparison: true,
     showInFilters: false,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
   {
     englishName: 'Wifi',
@@ -747,6 +923,10 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isAmenity: true,
     showInComparison: true,
     showInFilters: true,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
   {
     englishName: 'Elevator',
@@ -757,5 +937,9 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
     isAmenity: true,
     showInComparison: true,
     showInFilters: true,
+    summaryIndex: 1,
+    createListingIndex: 1,
+    filterIndex: 1,
+    thiqaIntegration: [''],
   },
 ];

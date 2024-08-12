@@ -178,6 +178,10 @@ type Attribute {
   isAddress: Boolean
   showInComparison: Boolean!
   showInFilters: Boolean!
+  filterIndex: Float
+  summaryIndex: Float
+  createListingIndex: Float
+  thiqaIntegration: [String!]
   attributeSets: [AttributeSet!]!
   listingAttribute: Attribute!
   createdAt: DateTime!
@@ -963,6 +967,9 @@ input AttributeInput {
   showInComparison: Boolean!
   showInFilters: Boolean!
   dropDownOptions: [String!]
+  summaryIndex: Float!
+  createListingIndex: Float!
+  thiqaIntegration: [String!]!
 }
 
 input AttributeUpdateInput {
@@ -976,6 +983,9 @@ input AttributeUpdateInput {
   showInComparison: Boolean
   showInFilters: Boolean
   dropDownOptions: [String!]
+  summaryIndex: Float
+  createListingIndex: Float
+  thiqaIntegration: [String!]
   id: String!
 }
 

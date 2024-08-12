@@ -67,6 +67,22 @@ export class Attribute extends BaseEntity {
   @Field()
   showInFilters: boolean;
 
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  filterIndex: number;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  summaryIndex: number;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  createListingIndex: number;
+
+  @Column({ type: 'simple-array', nullable: true })
+  @Field(() => [String], { nullable: true })
+  thiqaIntegration: string[];
+
   @Field(() => [AttributeSet])
   @ManyToMany(() => AttributeSet, (set) => set.attributes)
   attributeSets: AttributeSet[];
