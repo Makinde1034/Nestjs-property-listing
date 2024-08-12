@@ -14,6 +14,11 @@ export class CreateTicketInput {
   @IsString()
   @IsNotEmpty()
   issueId: string;
+
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  childIssueId: string;
 }
 
 @InputType()

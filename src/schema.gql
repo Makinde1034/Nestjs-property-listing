@@ -272,7 +272,8 @@ type SearchHistory {
 type ChildIssue {
   id: ID!
   parentIssue: ParentIssue!
-  childIssueId: String
+  parentIssueId: String
+  ticket: Ticket!
   childReason: String
   childArabicReason: String
   sequentialId: Float
@@ -282,9 +283,10 @@ type ChildIssue {
 
 type ParentIssue {
   id: ID!
-  issueCategory: [ChildIssue!]!
+  issueCategory: IssueCategory
   issueCategoryId: String!
-  childIssue: [ChildIssue!]!
+  ticket: [Ticket!]
+  childIssue: [ChildIssue!]
   parentReason: String
   sequentialId: Float
   parentArabicReason: String
@@ -296,9 +298,11 @@ type Ticket {
   id: ID!
   reporter: User!
   support: User
-  issue: ParentIssue!
+  parentIssue: ParentIssue
+  childIssue: ChildIssue
   status: String!
   type: String
+  chat: Chat
   openedAt: DateTime!
   isOpen: Boolean!
   closedAt: DateTime
@@ -785,7 +789,7 @@ type Mutation {
   removeAdPackage(id: Int!): AdPackage!
   verify: Payment!
   createIssueCategory(RequestInput: CreateIssueCategoryInput!): IssueCategory!
-  updateIssueCatgeory(RequestInput: UpdateIssueCategoryInput!): IssueCategory!
+  updateIssueCatgeory(RequestInput: UpdateIssueInput!): ParentIssue!
   deleteIssueCategory(RequestInput: DeleteIssueInput!): String!
   createIssue(RequestInput: CreateIssueInput!): ParentIssue!
   updateIssue(RequestInput: UpdateIssueInput!): ParentIssue!
@@ -1135,8 +1139,12 @@ input CreateIssueCategoryInput {
   name: String!
 }
 
-input UpdateIssueCategoryInput {
-  name: String!
+input UpdateIssueInput {
+  issue: String
+  categoryId: String
+  parentReason: String
+  parentArabicReason: String
+  sequentialId: Float
   id: String!
 }
 
@@ -1152,17 +1160,9 @@ input CreateIssueInput {
   sequentialId: Float!
 }
 
-input UpdateIssueInput {
-  issue: String
-  categoryId: String
-  parentReason: String
-  parentArabicReason: String
-  sequentialId: Float
-  id: String!
-}
-
 input CreateTicketInput {
   issueId: String!
+  childIssueId: String!
 }
 
 input UpdateTicketInput {

@@ -10,22 +10,28 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
 import { ParentIssue } from './parent-issue.entity';
+import { Ticket } from './ticket.entity';
 
 @Entity()
 @ObjectType()
 export class ChildIssue extends BaseEntity {
   @Field(() => ParentIssue)
-  // @JoinColumn({ name: 'childIssueId' })
+  @JoinColumn({ name: 'parentIssueId' })
   @ManyToOne(() => ParentIssue, (parent) => parent)
   parentIssue: ParentIssue;
 
   @Column({ nullable: true })
   @Field({ nullable: true })
-  childIssueId: string;
+  parentIssueId: string;
+
+  @Field(() => Ticket)
+  @OneToMany(() => Ticket, (ticket) => ticket.childIssue)
+  ticket: Ticket;
 
   @Column({ nullable: true })
   @Field({ nullable: true })

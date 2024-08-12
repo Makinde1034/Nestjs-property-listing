@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { Logger } from '@nestjs/common';
 import { DataSource, DeepPartial } from 'typeorm';
 import { Seeder, SeederFactoryManager } from 'typeorm-extension';
@@ -23,9 +28,9 @@ export class Issue1720110596406 implements Seeder {
 
     try {
       // Fetch categories and prepare a map
-      const categories = await categoryRepository.find();
+      const allCategories = await categoryRepository.find();
 
-      if (categories.length > 0) {
+      if (allCategories.length > 0) {
         this.logger.debug(
           `Seeding for: ${IssueCategory.name} already completed`,
         );

@@ -19,6 +19,7 @@ import { TicketStatus } from 'src/common/enums';
 import { Exclude } from 'class-transformer';
 import { Chat } from './chat.entity';
 import { ParentIssue } from './parent-issue.entity';
+import { ChildIssue } from './child-issue.entity';
 
 @ObjectType()
 @Entity()
@@ -31,9 +32,19 @@ export class Ticket extends BaseEntity {
   @ManyToOne(() => User, { cascade: true, eager: true })
   support: User;
 
-  @Field(() => ParentIssue)
-  @ManyToOne(() => ParentIssue, { cascade: true, eager: true })
-  issue: ParentIssue;
+  @Field(() => ParentIssue, { nullable: true })
+  @ManyToOne(() => ParentIssue, (parentIssue) => parentIssue.ticket, {
+    cascade: true,
+    eager: true,
+  })
+  parentIssue: ParentIssue;
+
+  @Field(() => ChildIssue, { nullable: true })
+  @ManyToOne(() => ChildIssue, (childIssue) => childIssue.ticket, {
+    cascade: true,
+    eager: true,
+  })
+  childIssue: ChildIssue;
 
   @Field()
   @Column({ default: TicketStatus.OPEN })
@@ -43,7 +54,8 @@ export class Ticket extends BaseEntity {
   @Column({ nullable: true })
   type: string;
 
-  @OneToOne(() => Chat, (chat) => chat.ticket)
+  @Field(() => Chat, { nullable: true })
+  @OneToOne(() => Chat, (chat) => chat.ticket, { eager: true })
   chat: Chat;
 
   @Field()
