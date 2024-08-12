@@ -8,6 +8,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   UpdateDateColumn,
 } from 'typeorm';
@@ -18,8 +19,13 @@ import { ParentIssue } from './parent-issue.entity';
 @ObjectType()
 export class ChildIssue extends BaseEntity {
   @Field(() => ParentIssue)
+  // @JoinColumn({ name: 'childIssueId' })
   @ManyToOne(() => ParentIssue, (parent) => parent)
   parentIssue: ParentIssue;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  childIssueId: string;
 
   @Column({ nullable: true })
   @Field({ nullable: true })
@@ -41,4 +47,3 @@ export class ChildIssue extends BaseEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-export { ParentIssue };

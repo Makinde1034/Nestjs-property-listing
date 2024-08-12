@@ -8,15 +8,28 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
   UpdateDateColumn,
 } from 'typeorm';
 import { ChildIssue } from './child-issue.entity';
 import BaseEntity from './base.entity';
+import { IssueCategory } from '.';
 
 @Entity()
 @ObjectType()
 export class ParentIssue extends BaseEntity {
+  @Field(() => [ChildIssue])
+  @JoinColumn({ name: 'issueCategoryId' })
+  @ManyToOne(() => IssueCategory, (issueCategory) => issueCategory, {
+    eager: true,
+  })
+  issueCategory: IssueCategory;
+  @Column()
+  @Field()
+  issueCategoryId: string;
+
   @Field(() => [ChildIssue])
   @OneToMany(() => ChildIssue, (childIssue) => childIssue)
   childIssue: ChildIssue[];

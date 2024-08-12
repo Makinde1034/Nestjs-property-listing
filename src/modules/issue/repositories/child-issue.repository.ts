@@ -6,11 +6,11 @@
 import { Injectable } from '@nestjs/common';
 
 import { DataSource, Repository } from 'typeorm';
-import { ParentIssue } from '../../../entities';
+import { ChildIssue } from '../../../entities';
 
 @Injectable()
-export class IssueRepository extends Repository<ParentIssue> {
+export class ChildIssueRepository extends Repository<ChildIssue> {
   constructor(private dataSource: DataSource) {
-    super(ParentIssue, dataSource.createEntityManager());
+    super(ChildIssue, dataSource.createEntityManager());
   }
 }

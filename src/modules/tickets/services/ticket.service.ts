@@ -33,7 +33,7 @@ export class TicketService {
    */
   async raiseTicket(user: User, input: CreateTicketInput): Promise<string> {
     const { issueId } = input;
-    const issue = await this.issueRepository.findByIdOrFail(issueId);
+    const issue = await this.issueRepository.findOneByOrFail({ id: issueId });
 
     const data: Partial<Ticket> = {
       openedAt: new Date(),

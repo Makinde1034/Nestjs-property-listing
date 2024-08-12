@@ -41,7 +41,9 @@ export class ListingTypeService {
    * @returns {Promise<ListingType[]>}
    */
   async findAllListingTypes(): Promise<ListingType[]> {
-    return await this.listingTypeRepository.findAll();
+    return await this.listingTypeRepository.findAll({
+      relations: ['attributeSets'],
+    });
   }
 
   /**

@@ -3,9 +3,8 @@
  * For license. See license.txt
  */
 
-import { Field, InputType } from '@nestjs/graphql';
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
-import { IssuePlacement } from 'src/common/enums';
+import { Field, InputType, PartialType } from '@nestjs/graphql';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 @InputType()
 export class CreateIssueCategoryInput {
@@ -13,11 +12,6 @@ export class CreateIssueCategoryInput {
   @IsString()
   @IsNotEmpty()
   name: string;
-
-  @Field()
-  @IsEnum(IssuePlacement)
-  @IsNotEmpty()
-  placement: IssuePlacement;
 }
 
 @InputType()
@@ -47,10 +41,24 @@ export class CreateIssueInput {
   @IsString()
   @IsNotEmpty()
   categoryId: string;
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  parentReason: string;
+
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  parentArabicReason: string;
+
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  sequentialId: number;
 }
 
 @InputType()
-export class UpdateIssueInput extends CreateIssueInput {
+export class UpdateIssueInput extends PartialType(CreateIssueInput) {
   @Field()
   @IsString()
   @IsNotEmpty()

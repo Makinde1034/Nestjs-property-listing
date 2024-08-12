@@ -65,7 +65,7 @@ export class AdminService {
 
   async averageSupportTime() {
     const result = await this.issuesRepository
-      .queryBuilder('issue')
+      .createQueryBuilder('issue')
       .select(
         'AVG(EXTRACT(EPOCH FROM (issue.reviewedAt - issue.closedAt)))',
         'avgTimeDifference',
@@ -84,7 +84,7 @@ export class AdminService {
 
   async averageCloseTime() {
     const result = await this.issuesRepository
-      .queryBuilder('issue')
+      .createQueryBuilder('issue')
       .select(
         'AVG(EXTRACT(EPOCH FROM (issue.createdAt - issue.closedAt)))',
         'avgTimeDifference',

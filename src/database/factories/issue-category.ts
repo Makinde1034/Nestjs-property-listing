@@ -8,6 +8,6 @@ export const IssuesCategoryFactory = [
     name: 'Support',
   },
   {
-    name: 'Flag',
+    name: 'Flagging Listings',
   },
 ];
