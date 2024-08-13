@@ -121,17 +121,15 @@ export class ListingTypeService {
     const listingType = await this.listingTypeRepository.findOne({
       where: { id: id },
     });
-    let result;
+    let result: ListingType;
     if (!listingType) {
       throw new BadRequestException(AppStrings.LISTING_TYPE_NOT_FOUND);
     }
-    console.log(icon);
 
     if (icon) {
       // Upload icon image
       const imageurl = await this.storageService.upload(icon);
       result = await this.listingTypeRepository.update(id, { icon: imageurl });
-      console.log(imageurl);
     }
 
     return result;
