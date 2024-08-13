@@ -118,10 +118,10 @@ export class ListingTypeService {
     id: string,
     icon?: Express.Multer.File,
   ): Promise<ListingType> {
-    const listingType = await this.listingTypeRepository.findAll({
+    const listingType = await this.listingTypeRepository.findOne({
       where: { id: id },
     });
-    let result;
+    let result: ListingType;
     if (!listingType) {
       throw new BadRequestException(AppStrings.LISTING_TYPE_NOT_FOUND);
     }
@@ -131,6 +131,7 @@ export class ListingTypeService {
       const imageurl = await this.storageService.upload(icon);
       result = await this.listingTypeRepository.update(id, { icon: imageurl });
     }
+
     return result;
   }
 }
