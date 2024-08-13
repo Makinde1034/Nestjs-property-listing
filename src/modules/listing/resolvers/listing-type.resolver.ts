@@ -62,7 +62,7 @@ export class ListingTypeResolver {
    */
   @Mutation(() => ListingType)
   @Permissions('update-listing-type')
-  // @UseGuards(AccessTokenGuard, AdminGuard)
+  @UseGuards(AccessTokenGuard, AdminGuard)
   async updateListingType(
     @Args('RequestInput') RequestInput: ListingTypeUpdateInput,
   ): Promise<ListingType> {
