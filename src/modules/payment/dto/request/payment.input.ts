@@ -10,14 +10,18 @@ export class InitiatePaymentInput {
   @IsString()
   amount: string;
   currency?: string;
-
+  shopperUrl?: string;
   paymentType?: string;
 }
 
 export class PerformCopyAndPayInput {
   entityId: string;
   amount: string;
+
   currency: string;
+
+  shopperUrl?: string;
+
   paymentType: string;
 }
 
