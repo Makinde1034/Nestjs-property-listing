@@ -83,23 +83,19 @@ export class ListingTypeService {
    * @param {Express.Multer.File?} icon
    * @returns {Promise<ListingType>}
    */
-  async updateListingType(
-    input: ListingTypeUpdateInput,
-    icon?: Express.Multer.File,
-  ): Promise<ListingType> {
-    const attributeSets = await this.attributeSetRepository.findAll({
-      where: { id: In([...input.attributeSets]) },
-    });
-    const data: Partial<ListingType> = {
-      englishName: input.englishName,
-      attributeSets,
-    };
-    if (icon) {
-      // Upload icon image
-      const imageurl = await this.storageService.upload(icon);
-      data.icon = imageurl;
+  async updateListingType(input: ListingTypeUpdateInput): Promise<ListingType> {
+    const { attributeSets, ...rest } = input;
+
+    if (attributeSets) {
+      const attributeSetsPayload = await this.attributeSetRepository.findAll({
+        where: { id: In([...input.attributeSets]) },
+      });
+      return await this.listingTypeRepository.update(input.id, {
+        ...rest,
+        attributeSets: attributeSetsPayload,
+      });
     }
-    return await this.listingTypeRepository.update(input.id, data);
+    return await this.listingTypeRepository.update(input.id, { ...rest });
   }
 
   /**

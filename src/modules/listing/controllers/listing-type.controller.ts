@@ -50,7 +50,7 @@ export class ListingTypeController {
    */
   @UseInterceptors(FileInterceptor('icon'))
   @Post('/upload-icon')
-  // @UseGuards(RestAccessTokenGuard, AdminGuard)
+  @UseGuards(RestAccessTokenGuard, AdminGuard)
   async uploadListingTypeIcon(
     @Query('listingTypeId') listingTypeId: string,
     @UploadedFile() icon: Express.Multer.File,

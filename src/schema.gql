@@ -950,9 +950,9 @@ input ListingTypeInput {
 }
 
 input ListingTypeUpdateInput {
-  englishName: String!
-  arabicName: String!
-  attributeSets: [String!]!
+  englishName: String
+  arabicName: String
+  attributeSets: [String!]
   id: String!
 }
 

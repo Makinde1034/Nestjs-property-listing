@@ -14,6 +14,7 @@ import {
 } from '../dtos/request';
 import { ListingType } from '../../../entities';
 import { Permissions } from 'src/common/decorator/permission';
+import { AdminGuard } from '../../auth/guards/admin.guard';
 
 @Resolver()
 export class ListingTypeResolver {
@@ -61,7 +62,7 @@ export class ListingTypeResolver {
    */
   @Mutation(() => ListingType)
   @Permissions('update-listing-type')
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  // @UseGuards(AccessTokenGuard, AdminGuard)
   async updateListingType(
     @Args('RequestInput') RequestInput: ListingTypeUpdateInput,
   ): Promise<ListingType> {
