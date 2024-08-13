@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, PartialType } from '@nestjs/graphql';
 import { IsArray, IsNotEmpty, IsString } from 'class-validator';
 
 @InputType()
@@ -33,7 +33,7 @@ export class ListingTypeInput {
 }
 
 @InputType()
-export class ListingTypeUpdateInput extends ListingTypeInput {
+export class ListingTypeUpdateInput extends PartialType(ListingTypeInput) {
   @Field()
   @IsString()
   @IsNotEmpty()
