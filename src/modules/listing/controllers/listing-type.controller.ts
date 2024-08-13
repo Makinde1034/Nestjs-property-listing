@@ -16,7 +16,8 @@ import { PermissionsGuard, RestAccessTokenGuard } from '../../auth/guards';
 import { AttributeService, ListingTypeService } from '../services';
 import { Permissions } from 'src/common/decorator/permission';
 
-import { Attribute } from 'src/entities';
+import { Attribute, ListingType } from 'src/entities';
+import { AdminGuard } from '../../auth/guards/admin.guard';
 
 @Controller('listing-type')
 export class ListingTypeController {
@@ -40,5 +41,23 @@ export class ListingTypeController {
     @UploadedFile() icon: Express.Multer.File,
   ): Promise<Attribute> {
     return await this.attributeService.uploadAttributeIcon(attributId, icon);
+  }
+  /**
+   * Upload Attribute with Icon
+   *
+   * @async
+   * @returns {Promise<Attribute>}
+   */
+  @UseInterceptors(FileInterceptor('icon'))
+  @Post('/listing-type/upload')
+  @UseGuards(RestAccessTokenGuard, AdminGuard)
+  async uploadListingTypeIcon(
+    @Query('listingTypeId') listingTypeId: string,
+    @UploadedFile() icon: Express.Multer.File,
+  ): Promise<ListingType> {
+    return await this.listingTypeService.updateListingTypeIcon(
+      listingTypeId,
+      icon,
+    );
   }
 }
