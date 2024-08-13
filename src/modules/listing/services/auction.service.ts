@@ -26,7 +26,7 @@ export class AuctionService {
   logger = new Logger(AuctionService.name);
   async create(auctionInput: CreateAuctionInput) {
     try {
-      if (auctionInput.startDate > new Date()) {
+      if (auctionInput.startDate < new Date()) {
         throw new BadRequestException(
           AppStrings.START_DATE_CANNOT_BE_LESS_THAN_DATE_0F_CREATION,
         );
