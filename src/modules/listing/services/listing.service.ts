@@ -236,7 +236,6 @@ export class ListingService {
       const allColumns = this.listingRepository.metadata.columns.map(
         (column) => `listing.${column.propertyName}`,
       );
-
       const columnsToExclude = [
         'listing.price',
         'listing.deedNumber',
@@ -244,7 +243,6 @@ export class ListingService {
         'listing.iban',
         'listing.zatcaNumber',
       ];
-
       const columnsToSelect = allColumns.filter(
         (column) => !columnsToExclude.includes(column),
       );
@@ -264,15 +262,32 @@ export class ListingService {
         take: initialTake,
       } = paginateAndSort;
 
-      // Extract attribute IDs and values if attributes are provided
-      let attributeId = [];
-      let attributeValue = [];
+      const attributeId: string[] = [];
+      const attributeValue: string[] = [];
+      const attributeIdRange: string[] = [];
+      const attributeValueRange: [string, string][] = [];
+
       if (attributes) {
-        attributeId = attributes.map((attr) => attr.attributeId);
-        attributeValue = attributes.map((attr) => attr.value);
+        attributes.forEach(({ attributeId: id, value }) => {
+          try {
+            const data: [string, string] | string[] = JSON.parse(value);
+            if (Array.isArray(data)) {
+              if (data.length === 2) {
+                attributeIdRange.push(id);
+                attributeValueRange.push(data as [string, string]);
+              } else if (data.length === 1) {
+                attributeId.push(id);
+                attributeValue.push(data[0]);
+              }
+            }
+          } catch (error) {
+            this.logger.warn(
+              `Invalid JSON format for attribute value: ${value}`,
+            );
+          }
+        });
       }
 
-      // Ensure the take value does not exceed 20
       const take = Math.min(initialTake, 20);
       const featuredTake = Math.ceil(take / 3);
       let regularTake = take - featuredTake;
@@ -280,7 +295,6 @@ export class ListingService {
       const sortDirections = ['ASC', 'DESC'] as const;
       type SortDirection = (typeof sortDirections)[number];
 
-      // Base query construction function
       const baseQuery = (isFeatured: boolean) => {
         const query = this.listingRepository
           .createQueryBuilder('listing')
@@ -299,13 +313,13 @@ export class ListingService {
           );
 
         if (isFeatured) {
-          query
-            .andWhere('listing.isListingPromoted = :isListingPromoted', {
+          query.andWhere(
+            'listing.isListingPromoted = :isListingPromoted AND listing.isListingFeatured = :isListingFeatured',
+            {
               isListingPromoted: true,
-            })
-            .andWhere('listing.isListingFeatured = :isListingFeatured', {
               isListingFeatured: true,
-            });
+            },
+          );
         } else {
           query.andWhere('listing.isListingFeatured = :isListingFeatured', {
             isListingFeatured: false,
@@ -335,14 +349,26 @@ export class ListingService {
           });
         }
 
-        if (attributes !== undefined && attributes.length > 0) {
-          query.andWhere(
-            'listingAttributes.id IN (:...attributeIds) AND listingAttributes.value IN (:...attributeValues)',
-            {
-              attributeIds: attributeId,
-              attributeValues: attributeValue,
-            },
-          );
+        if (attributes && attributes.length > 0) {
+          if (attributeId.length > 0) {
+            query.andWhere(
+              'listingAttributes.id IN (:...attributeIds) AND listingAttributes.value IN (:...attributeValues)',
+              {
+                attributeIds: attributeId,
+                attributeValues: attributeValue,
+              },
+            );
+          }
+          if (attributeIdRange.length > 0) {
+            query.andWhere(
+              'listingAttributes.id IN (:...attributeIdRange) AND listingAttributes.value BETWEEN :minValue AND :maxValue',
+              {
+                attributeIdRange,
+                minValue: attributeValueRange[0]?.[0] || null,
+                maxValue: attributeValueRange[0]?.[1] || null,
+              },
+            );
+          }
         }
 
         if (minArea !== undefined && maxArea !== undefined) {
@@ -388,12 +414,11 @@ export class ListingService {
         await regularQuery.getManyAndCount();
 
       const listing = [...featuredListings, ...regularListings].slice(0, take);
-
       const total = featuredCount + regularCount;
 
       return { listing, total };
     } catch (error) {
-      this.logger.log(error);
+      this.logger.error('Error finding listings:', error);
       throw error instanceof HttpException
         ? error
         : new BadRequestException(error.message);
@@ -414,11 +439,10 @@ export class ListingService {
         'listing.iban',
         'listing.zatcaNumber',
       ];
-
       const columnsToSelect = allColumns.filter(
         (column) => !columnsToExclude.includes(column),
       );
-      // Destructure input parameters
+
       const {
         rentingOption,
         attributes,
@@ -427,48 +451,52 @@ export class ListingService {
         sortField,
         directionToSort,
         skip,
-        // NumberOfRooms,
-        // NumberOfBathrooms,
         minPrice,
         maxPrice,
         minArea,
         maxArea,
-        // Location,
-        // Floor,
-        // Furnishing,
         take: initialTake,
       } = paginateAndSort;
 
-      const attributeId = [];
-      const attributeValue = [];
+      const attributeId: string[] = [];
+      const attributeValue: (string | [string, string])[] = [];
 
       if (attributes) {
-        attributes.map((value) => {
-          attributeId.push(value.attributeId);
-          attributeValue.push(value.value);
+        attributes.forEach(({ attributeId: id, value }) => {
+          attributeId.push(id);
+
+          try {
+            const data: [string, string] | string[] = JSON.parse(value);
+            if (Array.isArray(data)) {
+              if (data.length === 2) {
+                attributeValue.push(data as [string, string]);
+              } else if (data.length === 1) {
+                attributeValue.push(data[0]);
+              }
+            }
+          } catch (error) {
+            this.logger.warn(
+              `Invalid JSON format for attribute value: ${value}`,
+            );
+          }
         });
       }
 
-      // Ensures the take value does not exceed 20
       const take = Math.min(initialTake, 20);
       const featuredTake = Math.ceil(take / 3);
-      let regularTake = take - featuredTake;
+      const regularTake = take - featuredTake;
 
-      // Determine sorting options
       const sortDirections = ['ASC', 'DESC'] as const;
       type SortDirection = (typeof sortDirections)[number];
 
-      // Common query setup
       const baseQuery = (isFeatured: boolean) => {
         const query = this.listingRepository
           .createQueryBuilder('listing')
-
           .select(columnsToSelect)
           .leftJoinAndSelect('listing.user', 'user')
           .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
           .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
           .leftJoinAndSelect('listing.listingType', 'listingType')
-
           .where(
             'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented',
             {
@@ -493,7 +521,7 @@ export class ListingService {
         }
 
         if (rentingOption !== undefined) {
-          query.andWhere('listing.rentingOption  =:rentingOption ', {
+          query.andWhere('listing.rentingOption = :rentingOption', {
             rentingOption,
           });
         }
@@ -509,63 +537,54 @@ export class ListingService {
           query.andWhere('listing.purpose = :type', { type });
         }
 
-        // If (furnishing !== undefined) {
-        //   Query.andWhere('listing.furnished = :furnished', { furnishing });
-        // }
-
         if (listingId !== undefined) {
-          query.andWhere('listing.listingTypeid = :listingTypeId', {
+          query.andWhere('listing.listingTypeId = :listingTypeId', {
             listingTypeId: listingId,
           });
         }
 
-        // If (numberOfRooms !== undefined) {
-        //   Query.andWhere(
-        //     'attributes.name = :attributeName AND attributes.value IN (:...numberOfRooms)',
-        //     { attributeName: 'Number of Rooms', numberOfRooms },
-        //   );
-        // }
-
-        // If (numberOfBathrooms !== undefined) {
-        //   Query.andWhere(
-        //     'attributes.name = :attributeName AND attributes.value IN (:...numberOfBathrooms)',
-        //     {
-        //       AttributeName: 'Number of Bathrooms',
-        //       NumberOfBathrooms,
-        //     },
-        //   );
-        // }
-
-        if (attributes !== undefined && attributes.length > 0) {
-          query.andWhere(
-            'listingAttributes.id IN (:...attributeIds) AND listingAttributes.value IN (:...attributeValues)',
-            {
+        if (attributes && attributes.length > 0) {
+          if (attributeId.length > 0) {
+            query.andWhere('listingAttributes.id IN (:...attributeIds)', {
               attributeIds: attributeId,
-              attributeValues: attributeValue,
-            },
-          );
+            });
+          }
+
+          if (attributeValue.length > 0) {
+            const [exactValues, rangeValues] = attributeValue.reduce(
+              ([exact, range], value) => {
+                if (Array.isArray(value) && value.length === 2) {
+                  range.push(value);
+                } else {
+                  exact.push(value);
+                }
+                return [exact, range];
+              },
+              [[], []] as [string[], [string, string][]],
+            );
+
+            if (exactValues.length > 0) {
+              query.andWhere('listingAttributes.value IN (:...exactValues)', {
+                exactValues,
+              });
+            }
+
+            if (rangeValues.length > 0) {
+              const [minValue, maxValue] = rangeValues[0];
+              query.andWhere(
+                'listingAttributes.value BETWEEN :minValue AND :maxValue',
+                { minValue, maxValue },
+              );
+            }
+          }
         }
 
         if (minArea !== undefined && maxArea !== undefined) {
           query.andWhere(
-            'attributes.name = :attributeName AND attributes.value BETWEEN :minArea AND :maxArea',
+            'listingAttributes.name = :attributeName AND listingAttributes.value BETWEEN :minArea AND :maxArea',
             { attributeName: 'Area', minArea, maxArea },
           );
         }
-
-        // If (floor !== undefined) {
-        //   Query.andWhere(
-        //     'attributes.name = :attributeName AND attributes.value IN (:...floor)',
-        //     { attributeName: 'Level', floor },
-        //   );
-        // }
-
-        // If (location !== undefined) {
-        //   Query.andWhere(
-        //     'attributes.name = :attributeName AND attributes.value IN (:...location)',
-        //     { attributeName: 'Address', location },
-        //   );
-        // }
 
         if (
           sortField &&
@@ -591,11 +610,6 @@ export class ListingService {
 
       const [featuredListings, featuredCount] =
         await featuredQuery.getManyAndCount();
-      // Combine results
-
-      if (featuredListings.length < featuredTake) {
-        regularTake += featuredTake - featuredListings.length;
-      }
 
       const regularQuery = baseQuery(false);
       regularQuery.take(regularTake).skip(skip);
@@ -610,7 +624,7 @@ export class ListingService {
 
       return { listing, total };
     } catch (error) {
-      this.logger.log(error);
+      this.logger.error('Error in findListingForBuyerAuthenticated:', error);
       throw error instanceof HttpException
         ? error
         : new BadRequestException(error.message);

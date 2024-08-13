@@ -31,10 +31,6 @@ export class CreateSearchHistoryInput extends PaginateAndSort {
   @Field({ nullable: true })
   maxArea: number;
 
-  // @IsOptional()
-  // @Field(() => [String], { nullable: true })
-  // NumberOfBathrooms: string[];
-
   @IsOptional()
   @Field(() => [Attributes], { nullable: true })
   attributes: Attributes[];
