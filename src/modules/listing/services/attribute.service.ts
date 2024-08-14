@@ -67,15 +67,20 @@ export class AttributeService {
     data: AttributeInput,
     icon?: Express.Multer.File,
   ): Promise<Attribute> {
-    const attributeData: Partial<Attribute> = {
-      ...data,
-    };
-    if (icon) {
-      // Upload icon image
-      const imageurl = await this.storageService.upload(icon);
-      attributeData.icon = imageurl;
+    try {
+      const attributeData: Partial<Attribute> = {
+        ...data,
+      };
+      if (icon) {
+        // Upload icon image
+        const imageurl = await this.storageService.upload(icon);
+        attributeData.icon = imageurl;
+      }
+      return await this.attributeRepository.save(attributeData);
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
     }
-    return this.attributeRepository.create(attributeData);
   }
 
   async uploadAttributeIcon(
