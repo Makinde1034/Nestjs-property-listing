@@ -756,7 +756,7 @@ export class ListingService {
           featureDate: true,
           promotedDate: true,
           listingTypeId: true,
-
+          userId: true,
           gpsCoordinate: true,
           listingAttributes: true,
           images: true,
@@ -805,16 +805,8 @@ export class ListingService {
     try {
       const listing = await this.listingRepository.findOne({
         where: { id: id },
-        relations: ['user', 'listingType', 'listingAttributes'],
+        relations: ['listingType', 'listingAttributes'],
         select: {
-          user: {
-            id: true,
-            phone: true,
-            firstName: true,
-            lastName: true,
-            arabicFirstName: true,
-            arabicLastName: true,
-          },
           id: true,
           title: true,
 
@@ -963,7 +955,7 @@ export class ListingService {
       if (update.affected > 0) {
         return await this.listingRepository.findOneOrFail({
           where: { id },
-          relations: ['listingType', 'listingAttributes'],
+          relations: ['user', 'listingType', 'listingAttributes'],
         });
       }
     } catch (error) {
@@ -979,19 +971,20 @@ export class ListingService {
   async uploadListingImage(id: string, files: Express.Multer.File[]) {
     try {
       let uploadUrls: string[] = [];
-      const urlsToUpload: string[] = [];
-      const uploadObject = {};
+
+      const listing = await this.listingRepository.findOne({
+        where: { id: id },
+      });
+
+      const images: string[] = listing.images ? JSON.parse(listing.images) : [];
 
       const uploadPromises = files.map((file) =>
         this.storageService.upload(file),
       );
       uploadUrls = await Promise.all(uploadPromises);
 
-      uploadUrls.forEach((value, index) => {
-        const imageUrl = (uploadObject[index] = value);
-        urlsToUpload.push(imageUrl);
-      });
-      const stringifiedUploadObject = JSON.stringify(urlsToUpload);
+      const updatedImages = images.concat(uploadUrls);
+      const stringifiedUploadObject = JSON.stringify(updatedImages);
 
       await this.listingRepository.update(id, {
         images: stringifiedUploadObject,
@@ -1005,7 +998,9 @@ export class ListingService {
       this.logger.log(error);
       if (error instanceof HttpException) {
         throw error;
-      } else throw new BadRequestException(error.message || error.data);
+      } else {
+        throw new BadRequestException(error.message || error.data);
+      }
     }
   }
 
