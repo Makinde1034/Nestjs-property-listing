@@ -20,7 +20,7 @@ export class ListingController {
   constructor(private listingService: ListingService) {}
 
   @Post('listing-image-upload')
-  // @UseGuards(RestAccessTokenGuard)
+  @UseGuards(RestAccessTokenGuard)
   @UseInterceptors(AnyFilesInterceptor())
   async uploadListingImage(
     @Query('listingId') listingId: string,
