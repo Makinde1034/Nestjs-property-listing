@@ -63,8 +63,8 @@ export class OfferResponse {
 
 @ObjectType()
 export class AuctionResponse {
-  @Field(() => [Auction], { nullable: true })
-  auction: Auction[];
+  @Field(() => [Auction])
+  auctions: Auction[];
 
   @Field(() => Int)
   total: number;

@@ -66,7 +66,7 @@ export class AuctionService {
         paginateAndSort.take = 20;
       }
 
-      const auctions = await this.auctionRepository
+      const [auctions, total] = await this.auctionRepository
         .createQueryBuilder('auction')
         .where("CURRENT_DATE < auction.startDate - INTERVAL '3 days'")
         .take(paginateAndSort.take)
@@ -74,7 +74,7 @@ export class AuctionService {
         .orderBy(`auction.${sortField}`, sortDirection)
         .getManyAndCount();
 
-      return { auctions: auctions[0], total: auctions[1] };
+      return { auctions, total };
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
