@@ -53,6 +53,28 @@ export class CreateIssueInput {
   sequentialId: number;
 }
 
+export class CreateChildIssueInput {
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  parentId: string;
+
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  childReason: string;
+
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  childArabicReason: string;
+
+  @Field()
+  @IsNumber()
+  @IsOptional()
+  sequentialId: number;
+}
+
 @InputType()
 export class UpdateIssueInput extends PartialType(CreateIssueInput) {
   @Field()

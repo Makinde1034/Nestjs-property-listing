@@ -11,6 +11,7 @@ import {
   DeleteIssueInput,
   CreateIssueInput,
   UpdateIssueInput,
+  CreateChildIssueInput,
 } from '../dtos';
 import { AppStrings } from 'src/common/messages/app.strings';
 import { ChildIssueRepository } from '../repositories/child-issue.repository';
@@ -44,6 +45,15 @@ export class IssueService {
    */
   async createCategory(data: CreateIssueCategoryInput): Promise<IssueCategory> {
     return await this.issueCategoryRepository.create(data);
+  }
+
+  async createChildIssue(payload: CreateChildIssueInput): Promise<ChildIssue> {
+    const { parentId, ...data } = payload;
+    const parentIssue = await this.issueCategoryRepository.findById(parentId);
+    if (!parentIssue) {
+      throw new BadRequestException('Parent Issue not found');
+    }
+    return await this.childIssueRepository.save({ ...data, parentIssue });
   }
 
   /**
