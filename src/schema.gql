@@ -965,6 +965,7 @@ input AttributeInput {
   arabicName: String
   type: String!
   isAmenity: Boolean
+  isAddress: Boolean
   isRequired: Boolean!
   showInSummary: Boolean!
   hiddenToBuyers: Boolean!
@@ -981,6 +982,7 @@ input AttributeUpdateInput {
   arabicName: String
   type: String
   isAmenity: Boolean
+  isAddress: Boolean
   isRequired: Boolean
   showInSummary: Boolean
   hiddenToBuyers: Boolean

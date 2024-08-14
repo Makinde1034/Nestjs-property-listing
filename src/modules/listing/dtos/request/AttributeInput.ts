@@ -40,6 +40,10 @@ export class AttributeInput {
   @IsBoolean()
   isAmenity: boolean;
 
+  @Field({ nullable: true })
+  @IsBoolean()
+  isAddress: boolean;
+
   @Field()
   @IsBoolean()
   @IsNotEmpty()
