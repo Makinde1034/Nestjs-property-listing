@@ -491,7 +491,7 @@ type OfferResponse {
 }
 
 type AuctionResponse {
-  auction: [Auction!]
+  auctions: [Auction!]!
   total: Int!
 }
 
