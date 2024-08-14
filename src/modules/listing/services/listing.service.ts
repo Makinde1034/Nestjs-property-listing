@@ -963,7 +963,7 @@ export class ListingService {
       if (update.affected > 0) {
         return await this.listingRepository.findOneOrFail({
           where: { id },
-          relations: ['listingAttributes'],
+          relations: ['listingType', 'listingAttributes'],
         });
       }
     } catch (error) {
