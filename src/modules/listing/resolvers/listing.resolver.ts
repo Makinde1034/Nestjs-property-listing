@@ -393,13 +393,12 @@ export class ListingResolver {
   ) {
     return await this.auctionService.update(updateAuctionInput);
   }
-  @UseGuards(AdminGuard)
+
   @UseGuards(AccessTokenGuard)
   @Query(() => Auction, { name: 'getAuction' })
   async findOneAuction(@Args('id') id: string) {
     return await this.auctionService.findOne(id);
   }
-  @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard)
   @Query(() => AuctionResponse, { name: 'getAllAuction' })
   async findManyAuction(
