@@ -73,6 +73,11 @@ export class AttributeInput {
   @IsNumber()
   @IsPositive()
   @Field()
+  filterIndex: number;
+
+  @IsNumber()
+  @IsPositive()
+  @Field()
   summaryIndex: number;
 
   @Field()

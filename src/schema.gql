@@ -971,6 +971,7 @@ input AttributeInput {
   showInComparison: Boolean!
   showInFilters: Boolean!
   dropDownOptions: [String!]
+  filterIndex: Float!
   summaryIndex: Float!
   createListingIndex: Float!
   thiqaIntegration: [String!]!
@@ -987,6 +988,7 @@ input AttributeUpdateInput {
   showInComparison: Boolean
   showInFilters: Boolean
   dropDownOptions: [String!]
+  filterIndex: Float
   summaryIndex: Float
   createListingIndex: Float
   thiqaIntegration: [String!]
