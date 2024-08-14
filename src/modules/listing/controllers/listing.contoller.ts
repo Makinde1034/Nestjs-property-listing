@@ -30,7 +30,7 @@ export class ListingController {
   }
 
   @Post('panorama-listing-image-upload')
-  @UseGuards(RestAccessTokenGuard)
+  // @UseGuards(RestAccessTokenGuard)
   @UseInterceptors(AnyFilesInterceptor())
   async uploadPanoramaListingImage(
     @Query('listingId') listingId: string,

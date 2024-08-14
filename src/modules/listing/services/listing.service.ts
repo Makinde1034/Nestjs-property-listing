@@ -970,8 +970,6 @@ export class ListingService {
 
   async uploadListingImage(id: string, files: Express.Multer.File[]) {
     try {
-      // let finalImages = [];
-
       const listing = await this.listingRepository.findOne({
         where: { id },
       });
@@ -1023,12 +1021,45 @@ export class ListingService {
 
   async uploadPanoramaImage(id: string, file: Express.Multer.File) {
     try {
-      const url = await this.storageService.upload(file);
-      await this.listingRepository.update(id, {
-        images: url,
+      const listing = await this.listingRepository.findOne({
+        where: { id },
       });
 
-      return new SuccessResponse('Upload successful', url);
+      if (!listing) {
+        throw new BadRequestException('Listing not found');
+      }
+
+      const existingImages: any[] = listing.images
+        ? JSON.parse(listing.images)
+        : [];
+
+      // Upload the new files
+      const uploadedUrl = await this.storageService.upload(file);
+
+      // Combine existing images with the newly uploaded ones
+      const updatedImages = [...existingImages];
+
+      const image = {
+        id: updatedImages.length, // Increment ID based on the length of updatedImages
+        uploadedUrl,
+        isPanorama: true, // Default value, can be modified later
+      };
+      updatedImages.push(image);
+
+      // Stringify the updated images array for storage
+      const stringifiedImages = JSON.stringify(updatedImages);
+
+      // Save the updated images to the database
+      await this.listingRepository.update(id, {
+        images: stringifiedImages,
+      });
+
+      await this.storageService.upload(file);
+      await this.listingRepository.update(id, {
+        images: stringifiedImages,
+      });
+
+      return new SuccessResponse('Upload successful', stringifiedImages);
     } catch (error) {
       this.logger.log(error);
       if (error instanceof HttpException) {
