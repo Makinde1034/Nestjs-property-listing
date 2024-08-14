@@ -156,8 +156,9 @@ export class IssueService {
    * @param {CreateIssueInput} input
    * @returns {Promise<Issue>}
    */
-  async createIssue(input: CreateIssueInput): Promise<ParentIssue> {
+  async createIssue(payload: CreateIssueInput): Promise<ParentIssue> {
     try {
+      const { sequentialId, ...input } = payload;
       const count = await this.issueRepository.count({
         where: { issueCategoryId: input.categoryId },
       });
@@ -167,7 +168,6 @@ export class IssueService {
       if (category) {
         throw new BadRequestException(AppStrings.ISSUE_CATEGORY_NOT_FOUND);
       }
-
       const data: Partial<ParentIssue> = {
         parentReason: input.parentReason,
         parentArabicReason: input.parentArabicReason,
@@ -175,7 +175,72 @@ export class IssueService {
         issueCategoryId: input.categoryId,
       };
 
-      return await this.issueRepository.save(data);
+      const createdIssue = await this.issueRepository.save(data);
+
+      if (sequentialId !== undefined && sequentialId <= 0) {
+        throw new BadRequestException('SequentialId must be greater than 0');
+      }
+
+      // Validate that the issue exists
+
+      return await this.issueRepository.manager.transaction(
+        async (transactionalEntityManager: EntityManager) => {
+          // Update the issue with the provided data
+          await transactionalEntityManager.update(
+            ParentIssue,
+            createdIssue.id,
+            data,
+          );
+
+          if (sequentialId !== undefined) {
+            // Fetch records with a sequentialId greater than or equal to the input's sequentialId
+            const records = await transactionalEntityManager.find(ParentIssue, {
+              where: {
+                sequentialId: MoreThanOrEqual(sequentialId),
+                issueCategoryId: createdIssue.issueCategoryId,
+              },
+              order: { sequentialId: 'ASC' },
+            });
+
+            // Update the sequentialId for the current issue
+            await transactionalEntityManager.update(
+              ParentIssue,
+              createdIssue.id,
+              {
+                sequentialId: sequentialId,
+              },
+            );
+            let newSequentialId = sequentialId + 1;
+
+            // Prepare records for update
+            const updatedRecords = records
+              .filter(
+                (record) =>
+                  record.id !== createdIssue.id &&
+                  record.sequentialId >= sequentialId,
+              )
+              .map((record) => {
+                record.sequentialId = newSequentialId;
+                newSequentialId += 1;
+                return record;
+              });
+
+            // Save updated records if any
+            if (updatedRecords.length > 0) {
+              await transactionalEntityManager.save(
+                ParentIssue,
+                updatedRecords,
+              );
+            }
+          }
+
+          // Return the updated issue
+          return await transactionalEntityManager.findOneOrFail(ParentIssue, {
+            where: { id: createdIssue.id },
+            order: { sequentialId: 'ASC' },
+          });
+        },
+      );
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -189,6 +254,7 @@ export class IssueService {
    * @param {UpdateIssueInput} input
    * @returns {Promise<Issue>}
    */
+
   // Async updateParentIssue(input: UpdateIssueInput): Promise<ParentIssue> {
   // Const data: Partial<ParentIssue> = {
   //   ...input,
