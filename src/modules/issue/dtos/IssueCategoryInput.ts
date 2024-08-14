@@ -4,7 +4,7 @@
  */
 
 import { Field, InputType, PartialType } from '@nestjs/graphql';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 @InputType()
 export class CreateIssueCategoryInput {
@@ -35,12 +35,8 @@ export class CreateIssueInput {
   @Field()
   @IsString()
   @IsNotEmpty()
-  issue: string;
-
-  @Field()
-  @IsString()
-  @IsNotEmpty()
   categoryId: string;
+
   @Field()
   @IsString()
   @IsNotEmpty()
@@ -53,7 +49,29 @@ export class CreateIssueInput {
 
   @Field()
   @IsNumber()
+  @IsOptional()
+  sequentialId: number;
+}
+
+export class CreateChildIssueInput {
+  @Field()
+  @IsString()
   @IsNotEmpty()
+  parentId: string;
+
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  childReason: string;
+
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  childArabicReason: string;
+
+  @Field()
+  @IsNumber()
+  @IsOptional()
   sequentialId: number;
 }
 

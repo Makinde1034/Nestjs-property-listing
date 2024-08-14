@@ -1144,7 +1144,6 @@ input CreateIssueCategoryInput {
 }
 
 input UpdateIssueInput {
-  issue: String
   categoryId: String
   parentReason: String
   parentArabicReason: String
@@ -1157,7 +1156,6 @@ input DeleteIssueInput {
 }
 
 input CreateIssueInput {
-  issue: String!
   categoryId: String!
   parentReason: String!
   parentArabicReason: String!
