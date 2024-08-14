@@ -81,7 +81,7 @@ export class AttributeInput {
   createListingIndex: number;
 
   @Field(() => [String])
-  @IsString()
+  @IsArray()
   thiqaIntegration: string[];
 }
 
