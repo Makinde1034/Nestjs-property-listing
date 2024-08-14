@@ -37,6 +37,7 @@ import {
   UserGenderCount,
   UserAgeRange,
 } from '../dto/admin-response';
+import { TicketRepository } from '../../tickets/repositories';
 
 @Injectable()
 export class AdminService {
@@ -46,6 +47,7 @@ export class AdminService {
     private userRepository: UserRepository,
     private userTracking: UserTrackingRepository,
     private issuesRepository: IssueRepository,
+    private ticketsRepository: TicketRepository,
   ) {}
 
   logger = new Logger(AdminService.name);
