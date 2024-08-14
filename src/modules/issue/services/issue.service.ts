@@ -153,7 +153,7 @@ export class IssueService {
    * Create Issue
    *
    * @async
-   * @param {CreateIssueInput} input
+   * @param {CreateIssueInput} payload
    * @returns {Promise<Issue>}
    */
   async createIssue(payload: CreateIssueInput): Promise<ParentIssue> {
@@ -165,7 +165,7 @@ export class IssueService {
       const category = await this.issueCategoryRepository.findByIdOrFail(
         input.categoryId,
       );
-      if (category) {
+      if (!category) {
         throw new BadRequestException(AppStrings.ISSUE_CATEGORY_NOT_FOUND);
       }
       const data: Partial<ParentIssue> = {
