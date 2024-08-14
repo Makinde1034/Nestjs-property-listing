@@ -970,37 +970,54 @@ export class ListingService {
 
   async uploadListingImage(id: string, files: Express.Multer.File[]) {
     try {
-      let uploadUrls: string[] = [];
+      // let finalImages = [];
 
       const listing = await this.listingRepository.findOne({
-        where: { id: id },
+        where: { id },
       });
 
-      const images: string[] = listing.images ? JSON.parse(listing.images) : [];
+      if (!listing) {
+        throw new BadRequestException('Listing not found');
+      }
 
+      const existingImages: any[] = listing.images
+        ? JSON.parse(listing.images)
+        : [];
+
+      // Upload the new files
       const uploadPromises = files.map((file) =>
         this.storageService.upload(file),
       );
-      uploadUrls = await Promise.all(uploadPromises);
+      const uploadedUrls = await Promise.all(uploadPromises);
 
-      const updatedImages = images.concat(uploadUrls);
-      const stringifiedUploadObject = JSON.stringify(updatedImages);
+      // Combine existing images with the newly uploaded ones
+      const updatedImages = [...existingImages];
 
-      await this.listingRepository.update(id, {
-        images: stringifiedUploadObject,
+      uploadedUrls.forEach((url) => {
+        const image = {
+          id: updatedImages.length, // Increment ID based on the length of updatedImages
+          url,
+          isPanorama: false, // Default value, can be modified later
+        };
+        updatedImages.push(image);
       });
+
+      // Stringify the updated images array for storage
+      const stringifiedImages = JSON.stringify(updatedImages);
+
+      // Save the updated images to the database
+      await this.listingRepository.update(id, { images: stringifiedImages });
 
       return new SuccessResponse(
         AppStrings.UPLOAD_SUCCESSFUL,
-        stringifiedUploadObject,
+        stringifiedImages,
       );
     } catch (error) {
       this.logger.log(error);
       if (error instanceof HttpException) {
         throw error;
-      } else {
-        throw new BadRequestException(error.message || error.data);
       }
+      throw new BadRequestException(error.message || error.data);
     }
   }
 
