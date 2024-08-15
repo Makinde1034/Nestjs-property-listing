@@ -47,7 +47,7 @@ export class ChatGateway implements OnGatewayConnection {
 
       if (!token || !ticketId) {
         this.logger.warn('Missing token or chatId');
-        socket.emit('error', 'Authentication or chatId missing');
+        socket.emit('error', 'Authentication or ticketId missing');
         socket.disconnect();
         return;
       }
@@ -68,7 +68,7 @@ export class ChatGateway implements OnGatewayConnection {
 
       // Store user and chatId in socket data if needed
       socket.data.user = user;
-      socket.data.chatId = ticketId;
+      socket.data.ticketId = ticketId;
     } catch (error) {
       this.logger.error(`Error handling connection: ${error.message}`);
       socket.emit('error', error.message);
@@ -92,10 +92,10 @@ export class ChatGateway implements OnGatewayConnection {
       }
 
       const user = socket.data.user as User;
-      const chatId = socket.data.chatId;
+      const ticketId = socket.data.ticketId;
 
       await this.chatService.chat(content, user);
-      this.server.to(chatId).emit('receive_message', {
+      this.server.to(ticketId).emit('receive_message', {
         content,
         user: {
           id: user.id,
@@ -126,8 +126,11 @@ export class ChatGateway implements OnGatewayConnection {
         return;
       }
 
-      const chatId = socket.data.chatId;
-      const messages = await this.chatService.findMessages(findOptions, chatId);
+      const ticketId = socket.data.ticketId;
+      const messages = await this.chatService.findMessages(
+        findOptions,
+        ticketId,
+      );
 
       socket.emit('receive_message', messages);
     } catch (error) {

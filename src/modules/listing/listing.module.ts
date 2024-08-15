@@ -41,6 +41,8 @@ import { AuctionRepository } from './repositories/auction.repository';
 import { AuctionParticipantRepository } from './repositories/auction-participant.repository';
 import { ListingAttributeRepository } from './repositories/listing-attributes.repository';
 import { AdminRepository } from '../admin/repositories/admin.repository';
+import { GpsCoordinateRepository } from './repositories/gps-coordinate.repository';
+import { GpsCoordinate } from '../../entities/gps-coordinates.entity';
 
 @Module({
   imports: [
@@ -52,6 +54,7 @@ import { AdminRepository } from '../admin/repositories/admin.repository';
       Offer,
       Amenities,
       Promotion,
+      GpsCoordinate,
     ]),
     AdPackageModule,
     PaymentModule,
@@ -86,6 +89,7 @@ import { AdminRepository } from '../admin/repositories/admin.repository';
     AuctionParticipantRepository,
     ListingAttributeRepository,
     AdminRepository,
+    GpsCoordinateRepository,
   ],
   exports: [ListingTypeService],
 })

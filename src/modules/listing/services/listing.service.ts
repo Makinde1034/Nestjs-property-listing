@@ -56,6 +56,8 @@ import { ListingAttributeRepository } from '../repositories/listing-attributes.r
 import { ListingTypeService } from './listing-type.service';
 import { FurnishingStatusEnum } from '../../../common/enums';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
+import { GpsCoordinate } from '../../../entities/gps-coordinates.entity';
+import { GpsCoordinateRepository } from '../repositories/gps-coordinate.repository';
 
 @Injectable()
 export class ListingService {
@@ -72,16 +74,18 @@ export class ListingService {
     private pushNotification: NotificationService,
     private listingTypeService: ListingTypeService,
     private readonly listingAttributesRepository: ListingAttributeRepository,
+    private gpsCoordinateRepository: GpsCoordinateRepository,
   ) {}
   logger = new Logger(ListingService.name);
 
   async createListing(user: User, createListingDto: CreateListingDto) {
     try {
       createListingDto.userId = user.id;
-      const { attributes, ...rest } = createListingDto;
+      const { attributes, gpsCoordinate, ...rest } = createListingDto;
       const listingType = await this.listingTypeService.findOne(
         createListingDto.listingTypeId,
       );
+
       if (!listingType) {
         throw new BadRequestException(AppStrings.LISTING_TYPE_NOT_FOUND);
       }
@@ -105,11 +109,11 @@ export class ListingService {
         }
       });
 
-      const gpsCoordinate = JSON.stringify(createListingDto.gpsCoordinate);
+      const gps = await this.gpsCoordinateRepository.save(gpsCoordinate);
 
       const listing = await this.listingRepository.save({
         ...rest,
-        gpsCoordinate: gpsCoordinate,
+        gpsCoordinate: gps,
         userId: user.id,
       });
 
@@ -171,6 +175,7 @@ export class ListingService {
       return listing;
     } catch (error) {
       this.logger.log(error);
+      console.log(error);
       if (error instanceof HttpException) {
         throw error;
       } else {
@@ -248,6 +253,7 @@ export class ListingService {
       );
 
       const {
+        gpsCoordinate,
         rentingOption,
         attributes,
         type,
@@ -331,6 +337,18 @@ export class ListingService {
             minPrice,
             maxPrice,
           });
+        }
+
+        if (gpsCoordinate) {
+          const { lng, lat } = gpsCoordinate;
+
+          // Join the gpsCoordinate relation
+          query
+            .leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate')
+            .andWhere('gpsCoordinate.lng = :lng AND gpsCoordinate.lat = :lat', {
+              lng,
+              lat,
+            });
         }
 
         if (rentingOption !== undefined) {
@@ -444,6 +462,7 @@ export class ListingService {
       );
 
       const {
+        gpsCoordinate,
         rentingOption,
         attributes,
         type,
@@ -524,6 +543,17 @@ export class ListingService {
           query.andWhere('listing.rentingOption = :rentingOption', {
             rentingOption,
           });
+        }
+        if (gpsCoordinate) {
+          const { lng, lat } = gpsCoordinate;
+
+          // Join the gpsCoordinate relation
+          query
+            .leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate')
+            .andWhere('gpsCoordinate.lng = :lng AND gpsCoordinate.lat = :lat', {
+              lng,
+              lat,
+            });
         }
 
         if (minPrice !== undefined && maxPrice !== undefined) {
@@ -738,7 +768,12 @@ export class ListingService {
     try {
       const listing = await this.listingRepository.findOne({
         where: { id: id },
-        relations: ['user', 'listingType', 'listingAttributes'],
+        relations: [
+          'user',
+          'listingType',
+          'listingAttributes',
+          'gpsCoordinate',
+        ],
         select: {
           user: {
             id: true,
@@ -757,7 +792,6 @@ export class ListingService {
           promotedDate: true,
           listingTypeId: true,
           userId: true,
-          gpsCoordinate: true,
           listingAttributes: true,
           images: true,
           panoramaView: true,
@@ -805,7 +839,7 @@ export class ListingService {
     try {
       const listing = await this.listingRepository.findOne({
         where: { id: id },
-        relations: ['listingType', 'listingAttributes'],
+        relations: ['gpsCoordinate', 'listingType', 'listingAttributes'],
         select: {
           id: true,
           title: true,
@@ -815,8 +849,6 @@ export class ListingService {
           featureDate: true,
           promotedDate: true,
           listingTypeId: true,
-
-          gpsCoordinate: true,
           listingAttributes: true,
           images: true,
           panoramaView: true,
