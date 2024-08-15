@@ -22,6 +22,7 @@ import {
   FlaggedListingResponse,
   ListingResponse,
   OfferResponse,
+  SearchHistoryResponse,
 } from '../dtos/response/listing.response';
 import { OfferService } from '../services/offer.service';
 import {
@@ -229,12 +230,18 @@ export class ListingResolver {
   }
 
   @UseGuards(AccessTokenGuard)
-  @Query(() => [SearchHistory], {
+  @Query(() => SearchHistoryResponse, {
     nullable: true,
     name: 'getSearchHistory',
   })
-  async getSearchHistory(@Context() ctx: any) {
-    return await this.listingService.getSearchHistory(ctx.req.user.id);
+  async getSearchHistory(
+    @Args('paginateAndSort') paginateAndSort: PaginateAndSort,
+    @Context() ctx: any,
+  ) {
+    return await this.listingService.getSearchHistory(
+      ctx.req.user.id,
+      paginateAndSort,
+    );
   }
 
   /*************************

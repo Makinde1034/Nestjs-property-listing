@@ -1301,12 +1301,24 @@ export class ListingService {
     }
   }
 
-  async getSearchHistory(id: string) {
+  async getSearchHistory(id: string, paginateAndSort: PaginateAndSort) {
     try {
-      const history = await this.searchHistoryRepository.find({
-        where: { userId: id },
-      });
-      return history;
+      const orderOptions = {
+        [paginateAndSort.sortField]: paginateAndSort.directionToSort,
+      };
+
+      if (paginateAndSort.take && paginateAndSort.skip) {
+        paginateAndSort.skip = 0;
+        paginateAndSort.take = 20;
+      }
+      const [searchHistory, total] =
+        await this.searchHistoryRepository.findAndCount({
+          where: { userId: id },
+          take: paginateAndSort.take,
+          skip: paginateAndSort.skip,
+          order: orderOptions,
+        });
+      return { searchHistory, total };
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -1319,7 +1331,6 @@ export class ListingService {
         .createQueryBuilder('listing')
         .leftJoinAndSelect('listing.user', 'user')
         .leftJoinAndSelect('listing.listingType', 'listingType')
-
         .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
         .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
         .leftJoinAndSelect('listing.promotion', 'promotion')
