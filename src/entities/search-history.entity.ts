@@ -13,48 +13,12 @@ import {
 } from 'typeorm';
 import BaseEntity from './base.entity';
 import { Field, ObjectType } from '@nestjs/graphql';
-import { IsEnum } from 'class-validator';
-import { ListingType } from './listing-type.entity';
-import { Purpose } from '../common/enums';
+
 import { User } from './user.entity';
 
 @Entity()
 @ObjectType()
 export class SearchHistory extends BaseEntity {
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  location: string;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  price: number;
-
-  @Column({ type: 'simple-array', nullable: true })
-  @Field(() => [String])
-  numberOfBathrooms: string[];
-
-  @Column({ type: 'simple-array', nullable: true })
-  @Field(() => [String])
-  numberOfRooms: string[];
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  @IsEnum(Purpose)
-  type: string;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  @IsEnum(ListingType)
-  listingType: string;
-
-  @Column({ default: true })
-  @Field({ defaultValue: true })
-  isValid: boolean;
-
-  @Field()
-  @CreateDateColumn()
-  createdAt: Date;
-
   @Column({ nullable: true })
   @Field({ nullable: true })
   userId: string;
@@ -63,6 +27,49 @@ export class SearchHistory extends BaseEntity {
   @JoinColumn({ name: 'userId' })
   @ManyToOne(() => User, (user) => user.searchHistory)
   user: User;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  minPrice: number;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  maxPrice: number;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  minArea: number;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  maxArea: number;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  gpsCoordinate: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  attributes: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  type: string;
+
+  @Column({ default: false })
+  @Field({ defaultValue: false })
+  isValid: boolean;
+
+  @Field({ nullable: true })
+  rentingOption: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  listingId: string;
+
+  @Field()
+  @CreateDateColumn()
+  createdAt: Date;
 
   @Field()
   @UpdateDateColumn()

@@ -264,16 +264,19 @@ type Listing {
 
 type SearchHistory {
   id: ID!
-  location: String
-  price: Float
-  numberOfBathrooms: [String!]!
-  numberOfRooms: [String!]!
-  type: String
-  listingType: String
-  isValid: Boolean!
-  createdAt: DateTime!
   userId: String
   user: [User!]!
+  minPrice: Float
+  maxPrice: Float
+  minArea: Float
+  maxArea: Float
+  gpsCoordinate: String
+  attributes: String
+  type: String
+  isValid: Boolean!
+  rentingOption: String
+  listingId: String
+  createdAt: DateTime!
   updatedAt: DateTime!
 }
 
