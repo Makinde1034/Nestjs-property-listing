@@ -8,6 +8,7 @@ import { Listing } from '../../../../entities';
 import { FlagListing } from '../../../../entities/flag-listing.entity';
 import { Offer } from '../../../../entities/offer.entity';
 import { Auction } from '../../../../entities/auction-table.entity';
+import { SearchHistory } from '../../../../entities/search-history.entity';
 
 @ObjectType()
 export class ListingResponse {
@@ -65,6 +66,15 @@ export class OfferResponse {
 export class AuctionResponse {
   @Field(() => [Auction])
   auctions: Auction[];
+
+  @Field(() => Int)
+  total: number;
+}
+
+@ObjectType()
+export class SearchHistoryResponse {
+  @Field(() => [SearchHistory], { nullable: true })
+  searchHistory: SearchHistory[];
 
   @Field(() => Int)
   total: number;

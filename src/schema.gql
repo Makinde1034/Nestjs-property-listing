@@ -506,6 +506,11 @@ type AuctionResponse {
   total: Int!
 }
 
+type SearchHistoryResponse {
+  searchHistory: [SearchHistory!]
+  total: Int!
+}
+
 type Payment {
   id: String!
   amount: Float!
@@ -608,7 +613,7 @@ type Query {
   findListingForBuyerAuthenticated(findManyOptions: CreateSearchHistoryInput): ListingResponse!
   viewFlaggedListings(findManyOptions: PaginateAndSort): FlaggedListingResponse
   getMessageInLocalLanguage: SuccessResponse
-  getSearchHistory: [SearchHistory!]
+  getSearchHistory(paginateAndSort: PaginateAndSort!): SearchHistoryResponse
   findOneOffer(id: String!): Offer!
   findOffers(findOptions: FindOfferInput!): OfferResponse!
   getWishlist: [Wishlist!]!
