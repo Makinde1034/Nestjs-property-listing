@@ -1318,10 +1318,10 @@ export class ListingService {
       const listing = await this.listingRepository
         .createQueryBuilder('listing')
         .leftJoinAndSelect('listing.user', 'user')
-        .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
         .leftJoinAndSelect('listing.listingType', 'listingType')
-        .leftJoinAndSelect('listingType.attribute', 'attribute')
 
+        .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
+        .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
         .leftJoinAndSelect('listing.promotion', 'promotion')
         .leftJoinAndSelect('listing.feature', 'feature')
         .where('listing.id = :id', { id })
