@@ -38,7 +38,10 @@ export class JobService {
     searchHistory.map(async (element) => {
       const listing = await this.listingRepository.findOneOrFail({
         where: {
-          price: element.price,
+          price: element.minPrice,
+
+          rentingOption: element.rentingOption,
+
           purpose: element.type, //TODO: add more conditions
         },
         relations: ['user'],

@@ -656,8 +656,28 @@ export class ListingService {
 
       const listing = [...featuredListings, ...regularListings];
       const total = featuredCount + regularCount;
+      const attribute = JSON.stringify(attributes);
+      const location = JSON.stringify(gpsCoordinate);
 
-      await this.searchHistoryRepository.save({ ...paginateAndSort, user });
+      await this.searchHistoryRepository.save({
+        attributes: attribute,
+        gpsCoordinate: location,
+        minPrice,
+
+        maxPrice,
+
+        minArea,
+
+        maxArea,
+
+        type,
+
+        rentingOption,
+
+        listingId,
+
+        user,
+      });
 
       return { listing, total };
     } catch (error) {
@@ -1295,33 +1315,38 @@ export class ListingService {
 
   async getOneListingForAdmin(id: string) {
     try {
-      const listing = await this.listingRepository.findOne({
-        where: { id: id },
-        relations: [
-          'user',
-          'listingAttributes',
-          'listingType',
+      const listing = await this.listingRepository
+        .createQueryBuilder('listing')
+        .leftJoinAndSelect('listing.user', 'user')
+        .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
+        .leftJoinAndSelect('listing.listingType', 'listingType')
+        .leftJoinAndSelect('listing.promotion', 'promotion')
+        .leftJoinAndSelect('listing.feature', 'feature')
+        .where('listing.id = :id', { id })
+        .addSelect('listing.impressions')
+        .getOne();
 
-          'promotion',
-          'feature',
-        ],
-      });
+      if (!listing) {
+        throw new BadRequestException('Listing not found');
+      }
 
+      // Batch update impressions and return the listing in one go
       const newImpression = listing.impressions + 1;
 
-      await this.listingRepository.update(listing.id, {
-        impressions: newImpression,
-      });
+      await this.listingRepository
+        .createQueryBuilder()
+        .update()
+        .set({ impressions: newImpression })
+        .where('id = :id', { id: listing.id })
+        .execute();
 
       return listing;
     } catch (error) {
       this.logger.log(error);
       if (error instanceof HttpException) {
-        this.logger.log(error);
-
         throw error;
-      } else
-        throw new BadRequestException(error.messages || error.data || error);
+      }
+      throw new BadRequestException(error.message || error);
     }
   }
 
