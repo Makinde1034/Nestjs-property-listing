@@ -19,16 +19,16 @@ export class ChatService {
   ) {}
 
   logger = new Logger(ChatService.name);
-  async chat(chatInput: CreateMessageInput, user: User) {
+  async chat(chatInput: CreateMessageInput, ticketId: string, user: User) {
     try {
       let chat: Chat;
       const existingChat = await this.chatRepository.findOneBy({
-        ticketId: chatInput.ticketId,
+        ticketId: ticketId,
       });
 
       if (!existingChat) {
         chat = await this.chatRepository.save({
-          ticketId: chatInput.ticketId,
+          ticketId: ticketId,
           user,
         });
       } else {

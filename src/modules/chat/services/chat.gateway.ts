@@ -46,7 +46,7 @@ export class ChatGateway implements OnGatewayConnection {
       const ticketId = socket.handshake.query.ticketId as string;
 
       if (!token || !ticketId) {
-        this.logger.warn('Missing token or chatId');
+        this.logger.warn('Missing token or ticketId');
         socket.emit('error', 'Authentication or ticketId missing');
         socket.disconnect();
         return;
@@ -66,7 +66,7 @@ export class ChatGateway implements OnGatewayConnection {
       socket.join(ticketId);
       this.logger.log(`Client ${socket.id} joined room: ${ticketId}`);
 
-      // Store user and chatId in socket data if needed
+      // Store user and ticketId in socket data
       socket.data.user = user;
       socket.data.ticketId = ticketId;
     } catch (error) {
@@ -82,6 +82,10 @@ export class ChatGateway implements OnGatewayConnection {
     @ConnectedSocket() socket: Socket,
   ) {
     try {
+      this.logger.log(content, 'Chat service executed successfully');
+
+      this.logger.log(`Received message content: ${JSON.stringify(content)}`);
+
       const messageDto = plainToInstance(CreateMessageInput, content);
       const errors = await validate(messageDto);
 
@@ -90,11 +94,16 @@ export class ChatGateway implements OnGatewayConnection {
         socket.emit('error', { message: errors });
         return;
       }
+      this.logger.log('Chat service executed successfully');
 
       const user = socket.data.user as User;
       const ticketId = socket.data.ticketId;
 
-      await this.chatService.chat(content, user);
+      this.logger.log(`User: ${JSON.stringify(user)}, Ticket ID: ${ticketId}`);
+
+      await this.chatService.chat(content, ticketId, user);
+      this.logger.log('Chat service executed successfully');
+
       this.server.to(ticketId).emit('receive_message', {
         content,
         user: {
@@ -105,6 +114,8 @@ export class ChatGateway implements OnGatewayConnection {
           arabicLastName: user.arabicLastName,
         },
       });
+
+      this.logger.log(`Message emitted to room: ${ticketId}`);
     } catch (error) {
       this.logger.error(`Error handling message: ${error.message}`);
       socket.emit('error', error.message);
@@ -117,6 +128,10 @@ export class ChatGateway implements OnGatewayConnection {
     @ConnectedSocket() socket: Socket,
   ) {
     try {
+      this.logger.log(
+        `Fetching messages with content: ${JSON.stringify(content)}`,
+      );
+
       const findOptions = plainToInstance(PaginateAndSort, content);
       const errors = await validate(findOptions);
 
@@ -127,12 +142,15 @@ export class ChatGateway implements OnGatewayConnection {
       }
 
       const ticketId = socket.data.ticketId;
+      this.logger.log(`Fetching messages for room: ${ticketId}`);
+
       const messages = await this.chatService.findMessages(
         findOptions,
         ticketId,
       );
 
       socket.emit('receive_message', messages);
+      this.logger.log(`Messages sent to client for room: ${ticketId}`);
     } catch (error) {
       this.logger.error(`Error handling fetch_message: ${error.message}`);
       socket.emit('error', error.message);

@@ -106,7 +106,7 @@ export class ListingTypeService {
    * @returns {Promise<string>}
    */
   async deleteListingType(data: ListingTypeDeleteInput): Promise<string> {
-    await this.listingTypeRepository.delete(data.id);
+    await this.listingTypeRepository.softDelete(data.id);
     return AppStrings.LISTINGTYPE_DELETED_SUCCESSFULLY;
   }
 

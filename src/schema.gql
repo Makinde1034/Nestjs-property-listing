@@ -206,6 +206,7 @@ type ListingType {
   listing: Listing!
   attributeSets: [AttributeSet!]
   createdAt: DateTime!
+  deletedAt: DateTime!
   updatedAt: DateTime!
 }
 

@@ -33,9 +33,9 @@ export class ListingTypeController {
    * @returns {Promise<Attribute>}
    */
   @UseInterceptors(FileInterceptor('icon'))
-  // @Permissions('create-attribute-set')
+  @Permissions('create-attribute-set')
   @Post('/attribute/upload')
-  // @UseGuards(RestAccessTokenGuard, PermissionsGuard)
+  @UseGuards(RestAccessTokenGuard, PermissionsGuard)
   async uploadAttributeIcon(
     @Query('attributId') attributId: string,
     @UploadedFile() icon: Express.Multer.File,
