@@ -20,17 +20,23 @@ export class ListingController {
   constructor(private listingService: ListingService) {}
 
   @Post('listing-image-upload')
-  // @UseGuards(RestAccessTokenGuard)
+  @UseGuards(RestAccessTokenGuard)
   @UseInterceptors(AnyFilesInterceptor())
   async uploadListingImage(
     @Query('listingId') listingId: string,
+    @Query('imageId') imageId: string,
+
     @UploadedFiles() files: Express.Multer.File[],
   ) {
-    return await this.listingService.uploadListingImage(listingId, files);
+    return await this.listingService.uploadListingImage(
+      listingId,
+      imageId,
+      files,
+    );
   }
 
   @Post('panorama-listing-image-upload')
-  // @UseGuards(RestAccessTokenGuard)
+  @UseGuards(RestAccessTokenGuard)
   @UseInterceptors(AnyFilesInterceptor())
   async uploadPanoramaListingImage(
     @Query('listingId') listingId: string,

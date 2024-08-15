@@ -55,7 +55,6 @@ import {
 import { AuctionService } from '../services/auction.service';
 import { Auction } from '../../../entities/auction-table.entity';
 import { AuctionParticipant } from '../../../entities/auction-participant.entity';
-import { Timeout } from '@nestjs/schedule';
 
 @Resolver()
 export class ListingResolver {

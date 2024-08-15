@@ -119,7 +119,6 @@ export class AttributeService {
 
       return attribute;
     } catch (error) {
-      console.log(error);
       this.logger.error('Error uploading attribute icon:', error);
       throw new BadRequestException(
         error.message || 'Failed to upload attribute icon',

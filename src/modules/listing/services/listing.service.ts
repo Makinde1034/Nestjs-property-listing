@@ -56,7 +56,6 @@ import { ListingAttributeRepository } from '../repositories/listing-attributes.r
 import { ListingTypeService } from './listing-type.service';
 import { FurnishingStatusEnum } from '../../../common/enums';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
-import { GpsCoordinate } from '../../../entities/gps-coordinates.entity';
 import { GpsCoordinateRepository } from '../repositories/gps-coordinate.repository';
 
 @Injectable()
@@ -175,7 +174,7 @@ export class ListingService {
       return listing;
     } catch (error) {
       this.logger.log(error);
-      console.log(error);
+
       if (error instanceof HttpException) {
         throw error;
       } else {
@@ -1000,11 +999,13 @@ export class ListingService {
     }
   }
 
-  async uploadListingImage(id: string, files: Express.Multer.File[]) {
+  async uploadListingImage(
+    id: string,
+    imageId: string,
+    files: Express.Multer.File[],
+  ) {
     try {
-      const listing = await this.listingRepository.findOne({
-        where: { id },
-      });
+      const listing = await this.listingRepository.findOne({ where: { id } });
 
       if (!listing) {
         throw new BadRequestException('Listing not found');
@@ -1013,6 +1014,7 @@ export class ListingService {
       const existingImages: any[] = listing.images
         ? JSON.parse(listing.images)
         : [];
+      // This.logger.log('Existing images:', existingImages);
 
       // Upload the new files
       const uploadPromises = files.map((file) =>
@@ -1020,34 +1022,46 @@ export class ListingService {
       );
       const uploadedUrls = await Promise.all(uploadPromises);
 
-      // Combine existing images with the newly uploaded ones
-      const updatedImages = [...existingImages];
+      if (imageId) {
+        // Update existing image
+        let imageUpdated = false;
+        existingImages.map((image, index) => {
+          if (image.id == imageId) {
+            existingImages[index].url = uploadedUrls[0]; // Assuming single file upload
+            imageUpdated = true;
+          }
+        });
 
-      uploadedUrls.forEach((url) => {
-        const image = {
-          id: updatedImages.length, // Increment ID based on the length of updatedImages
+        if (!imageUpdated) {
+          throw new BadRequestException('Image ID not found');
+        }
+      } else {
+        // Add new images
+        const newImages = uploadedUrls.map((url, index) => ({
+          id: (existingImages.length + index).toString(), // Generate unique ID
           url,
-          isPanorama: false, // Default value, can be modified later
-        };
-        updatedImages.push(image);
-      });
+          isPanorama: false, // Default value
+        }));
+
+        existingImages.push(...newImages);
+      }
 
       // Stringify the updated images array for storage
-      const stringifiedImages = JSON.stringify(updatedImages);
+      const stringifiedImages = JSON.stringify(existingImages);
+      this.logger.log('Updated images:', stringifiedImages);
 
       // Save the updated images to the database
       await this.listingRepository.update(id, { images: stringifiedImages });
 
-      return new SuccessResponse(
-        AppStrings.UPLOAD_SUCCESSFUL,
-        stringifiedImages,
-      );
+      return new SuccessResponse(AppStrings.UPLOAD_SUCCESSFUL, existingImages);
     } catch (error) {
-      this.logger.log(error);
+      this.logger.error(error.message || error);
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new BadRequestException(error.message || error.data);
+      throw new BadRequestException(
+        error.message || 'Unexpected error occurred',
+      );
     }
   }
 
