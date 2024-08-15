@@ -88,13 +88,13 @@ export class AttributeService {
     icon?: Express.Multer.File,
   ): Promise<Attribute> {
     try {
+      let imageUrl: string;
       const attribute = await this.attributeRepository.findOneBy({ id });
 
       if (!attribute) {
         throw new BadRequestException(AppStrings.NOT_FOUND);
       }
 
-      let imageUrl: string | undefined;
       if (icon) {
         // Upload icon image only if provided
         imageUrl = await this.storageService.upload(icon);
@@ -102,18 +102,24 @@ export class AttributeService {
 
       // Perform update only if the image URL exists
       if (imageUrl) {
-        const { affected } = await this.attributeRepository.update(id, {
-          icon: imageUrl,
-        });
+        const { affected } = await this.attributeRepository.update(
+          attribute.id,
+          {
+            icon: imageUrl,
+          },
+        );
 
         // Fetch updated entity only if update was successful
         if (affected > 0) {
-          return this.attributeRepository.findOneOrFail({ where: { id } });
+          return this.attributeRepository.findOneOrFail({
+            where: { id: attribute.id },
+          });
         }
       }
 
-      return attribute; // Return original attribute if no update was needed
+      return attribute;
     } catch (error) {
+      console.log(error);
       this.logger.error('Error uploading attribute icon:', error);
       throw new BadRequestException(
         error.message || 'Failed to upload attribute icon',

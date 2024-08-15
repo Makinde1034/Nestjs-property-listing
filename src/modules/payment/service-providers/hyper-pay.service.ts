@@ -68,7 +68,7 @@ export class HyperPayService {
       const data: CheckoutResponse = await (await lastValueFrom(response)).data;
       return data;
     } catch (error) {
-      this.logger.error('Error creating chackout', error);
+      this.logger.error('Error creating checkout', error);
       if (error instanceof HttpException) {
         throw error;
       } else {

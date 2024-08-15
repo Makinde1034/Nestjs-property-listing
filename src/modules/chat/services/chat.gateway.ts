@@ -43,11 +43,11 @@ export class ChatGateway implements OnGatewayConnection {
     try {
       this.logger.log(`Client connected: ${socket.id}`);
       const token = socket.handshake.headers.authorization;
-      const chatId = socket.handshake.query.chatId as string;
+      const ticketId = socket.handshake.query.ticketId as string;
 
-      if (!token || !chatId) {
+      if (!token || !ticketId) {
         this.logger.warn('Missing token or chatId');
-        socket.emit('error', 'Authentication or chatId missing');
+        socket.emit('error', 'Authentication or ticketId missing');
         socket.disconnect();
         return;
       }
@@ -63,12 +63,12 @@ export class ChatGateway implements OnGatewayConnection {
       }
 
       // Join the chat room
-      socket.join(chatId);
-      this.logger.log(`Client ${socket.id} joined room: ${chatId}`);
+      socket.join(ticketId);
+      this.logger.log(`Client ${socket.id} joined room: ${ticketId}`);
 
       // Store user and chatId in socket data if needed
       socket.data.user = user;
-      socket.data.chatId = chatId;
+      socket.data.ticketId = ticketId;
     } catch (error) {
       this.logger.error(`Error handling connection: ${error.message}`);
       socket.emit('error', error.message);
@@ -92,10 +92,10 @@ export class ChatGateway implements OnGatewayConnection {
       }
 
       const user = socket.data.user as User;
-      const chatId = socket.data.chatId;
+      const ticketId = socket.data.ticketId;
 
       await this.chatService.chat(content, user);
-      this.server.to(chatId).emit('receive_message', {
+      this.server.to(ticketId).emit('receive_message', {
         content,
         user: {
           id: user.id,
@@ -126,8 +126,11 @@ export class ChatGateway implements OnGatewayConnection {
         return;
       }
 
-      const chatId = socket.data.chatId;
-      const messages = await this.chatService.findMessages(findOptions, chatId);
+      const ticketId = socket.data.ticketId;
+      const messages = await this.chatService.findMessages(
+        findOptions,
+        ticketId,
+      );
 
       socket.emit('receive_message', messages);
     } catch (error) {

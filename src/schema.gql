@@ -209,6 +209,13 @@ type ListingType {
   updatedAt: DateTime!
 }
 
+type GpsCoordinate {
+  id: ID!
+  lat: Float!
+  lng: Float!
+  listing: GpsCoordinate!
+}
+
 type Listing {
   id: ID!
   ownership: String
@@ -222,7 +229,7 @@ type Listing {
   zatcaNumber: String
   listingType: ListingType
   listingTypeId: String
-  gpsCoordinate: String
+  gpsCoordinate: GpsCoordinate
   listingAttributes: [ListingAttributes!]
   images: String
   panoramaView: [String!]
@@ -662,10 +669,16 @@ input CreateSearchHistoryInput {
   maxPrice: Float
   minArea: Float
   maxArea: Float
+  gpsCoordinate: LocationDto
   attributes: [Attributes!]
   type: String
   rentingOption: String
   listingId: String
+}
+
+input LocationDto {
+  lng: Float!
+  lat: Float!
 }
 
 input Attributes {
@@ -1029,11 +1042,6 @@ input CreateListingDto {
   gpsCoordinate: LocationDto
   panoramaView: [String!]
   negotiable: Boolean = false
-}
-
-input LocationDto {
-  lng: String!
-  lat: String!
 }
 
 input UpdateListingDto {
