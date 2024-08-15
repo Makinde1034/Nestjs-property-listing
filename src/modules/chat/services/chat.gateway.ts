@@ -43,9 +43,9 @@ export class ChatGateway implements OnGatewayConnection {
     try {
       this.logger.log(`Client connected: ${socket.id}`);
       const token = socket.handshake.headers.authorization;
-      const chatId = socket.handshake.query.chatId as string;
+      const ticketId = socket.handshake.query.ticketId as string;
 
-      if (!token || !chatId) {
+      if (!token || !ticketId) {
         this.logger.warn('Missing token or chatId');
         socket.emit('error', 'Authentication or chatId missing');
         socket.disconnect();
@@ -63,12 +63,12 @@ export class ChatGateway implements OnGatewayConnection {
       }
 
       // Join the chat room
-      socket.join(chatId);
-      this.logger.log(`Client ${socket.id} joined room: ${chatId}`);
+      socket.join(ticketId);
+      this.logger.log(`Client ${socket.id} joined room: ${ticketId}`);
 
       // Store user and chatId in socket data if needed
       socket.data.user = user;
-      socket.data.chatId = chatId;
+      socket.data.chatId = ticketId;
     } catch (error) {
       this.logger.error(`Error handling connection: ${error.message}`);
       socket.emit('error', error.message);
