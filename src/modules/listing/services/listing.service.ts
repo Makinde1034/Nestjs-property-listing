@@ -306,8 +306,13 @@ export class ListingService {
           .select(columnsToSelect)
           .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
           .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
-          .leftJoinAndSelect('listing.listingType', 'listingType')
+          .innerJoinAndSelect('listing.listingType', 'listingType')
           .leftJoinAndSelect('listingType.attributeSets', 'attributeSets')
+          .where('listing.deletedAt IS NULL')
+
+          // Ensure listingType is not soft-deleted
+          .andWhere('listingType.deletedAt IS NULL')
+
           .where(
             'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented',
             {
@@ -316,6 +321,7 @@ export class ListingService {
               isListingRented: false,
             },
           );
+        // Exclude soft-deleted listingType records
 
         if (isFeatured) {
           query.andWhere(
@@ -514,7 +520,8 @@ export class ListingService {
           .leftJoinAndSelect('listing.user', 'user')
           .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
           .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
-          .leftJoinAndSelect('listing.listingType', 'listingType')
+          .innerJoinAndSelect('listing.listingType', 'listingType')
+          .where('listing.listingType IS NOT NULL')
           .where(
             'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented',
             {
@@ -522,7 +529,8 @@ export class ListingService {
               isListingSold: false,
               isListingRented: false,
             },
-          );
+          )
+          .andWhere('listingType.deletedAt IS NULL');
 
         if (isFeatured) {
           query
@@ -696,6 +704,7 @@ export class ListingService {
       // Apply other filters
       whereCondition = {
         ...whereCondition,
+
         isListingPromoted: paginateAndSort.isListingPromoted,
         isListingSold: paginateAndSort.isListingSold,
         isListingFlagged: paginateAndSort.isListingFlagged,
