@@ -31,7 +31,6 @@ services:
     restart: always
     networks:
       - app-network
-
 volumes:
   db:
 
