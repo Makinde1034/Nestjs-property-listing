@@ -14,11 +14,10 @@ import type {
   TokenConfirmation,
   User,
   UserNotificationPreference,
-} from 'src/entities';
+} from '../../../entities';
 import { DeepPartial, FindOptionsWhere, In, LessThan } from 'typeorm';
 import { PostgresError } from 'pg-error-enum';
 import { addHours, isPast } from 'date-fns';
-import { generateOtp, generateRandomToken } from 'src/common/utils/functions';
 import {
   CreateStaffInput,
   ImageResponse,
@@ -31,13 +30,12 @@ import {
   PasswordInput,
 } from '../dtos';
 import { StorageService } from '../../file-handler/services/storage.service';
-import { AppStrings } from 'src/common/messages/app.strings';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   NationalIdentityType,
   RegisterEventAction,
   UserStatus,
-} from 'src/common/enums';
+} from '../../../common/enums';
 import { MailgunEmailService } from '../../mail/services/implementations';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
@@ -45,6 +43,11 @@ import {
   NotificationScopeRepository,
   UserNotificationRepository,
 } from '../repositories/notification.repository';
+import {
+  generateOtp,
+  generateRandomToken,
+} from '../../../common/utils/functions';
+import { AppStrings } from '../../../common/messages/app.strings';
 
 @Injectable()
 export class UserService {
@@ -72,7 +75,7 @@ export class UserService {
    * @returns {Promise<User>}
    */
   async createUser(userData: Partial<User>): Promise<User> {
-    const user = await this.usersRepository.create(userData);
+    const user = await this.usersRepository.save(userData);
     return user;
   }
 
@@ -109,7 +112,10 @@ export class UserService {
    * @returns {Promise<User>}
    */
   async findUserById(id: string, relations?: string[]): Promise<User> {
-    const user = await this.usersRepository.findById(id, relations);
+    const user = await this.usersRepository.findOneOrFail({
+      where: { id },
+      relations,
+    });
     return user;
   }
 
@@ -229,7 +235,10 @@ export class UserService {
    * @returns {Promise<User>}
    */
   async updateUser(id: string, data: DeepPartial<User>): Promise<User> {
-    return await this.usersRepository.update(id, data);
+    const { affected } = await this.usersRepository.update(id, data);
+    if (affected) {
+      return this.usersRepository.findOneBy({ id });
+    }
   }
 
   /**
@@ -264,10 +273,10 @@ export class UserService {
       if (isInvalidIdentityNumber) {
         throw new BadRequestException(AppStrings.INVALID_NATIONAL_ID);
       }
-
-      const userData = await this.usersRepository.findById(user.id, [
-        'nationalIdentity',
-      ]);
+      const userData = await this.usersRepository.findOne({
+        where: { id: user.id },
+        relations: ['nationalIdentity'],
+      });
 
       if (userData.nationalIdentity) {
         await this.nationalIdentityRepository.update(
@@ -289,7 +298,7 @@ export class UserService {
     await this.usersRepository.update(user.id, updateData);
 
     // Return the updated user
-    return this.usersRepository.findById(user.id);
+    return await this.usersRepository.findOneByOrFail({ id: user.id });
   }
 
   /**
@@ -309,10 +318,12 @@ export class UserService {
       throw new BadRequestException(AppStrings.INCORRECT_OLD_PASSWORD);
     }
 
-    const update = await this.usersRepository.update(user.id, {
+    const { affected } = await this.usersRepository.update(user.id, {
       password: newPassword,
     });
-    return update;
+    if (affected) {
+      return await this.usersRepository.findOneByOrFail({ id: user.id });
+    }
   }
 
   /**
@@ -370,10 +381,12 @@ export class UserService {
       .filter((item) => item !== null);
 
     // Save preferences
-    const update = await this.usersRepository.update(user.id, {
+    const { affected } = await this.usersRepository.update(user.id, {
       notificationPreference: preferencesData,
     });
-    return update;
+    if (affected) {
+      return await this.usersRepository.findOneByOrFail({ id: user.id });
+    }
   }
 
   /**
@@ -421,7 +434,7 @@ export class UserService {
         userType: 'staff',
         twoFaRequired: true,
       };
-      const staff = await this.usersRepository.create(staffData);
+      const staff = await this.usersRepository.save(staffData);
       this.eventEmitter.emit(
         RegisterEventAction.STAFF_CREATED,
         new StaffCreatedEventDto({ staff }),
@@ -491,16 +504,25 @@ export class UserService {
    * @returns {Promise<User>}
    */
   async blockUser(requestInput: UserActionInput): Promise<User> {
-    const user = await this.usersRepository.findByIdOrFail(requestInput.userId);
+    const user = await this.usersRepository.findOneByOrFail({
+      id: requestInput.userId,
+    });
     if (requestInput.action) {
-      return await this.usersRepository.update(user.id, {
+      const { affected } = await this.usersRepository.update(user.id, {
         status: UserStatus.DISABLED,
         disabledAt: new Date(),
       });
+      if (affected) {
+        return await this.usersRepository.findOneByOrFail({ id: user.id });
+      }
     }
-    return await this.usersRepository.update(user.id, {
+    const { affected } = await this.usersRepository.update(user.id, {
       status: UserStatus.ACTIVE,
       disabledAt: null,
     });
+
+    if (affected) {
+      return await this.usersRepository.findOneByOrFail({ id: user.id });
+    }
   }
 }

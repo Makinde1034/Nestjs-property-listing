@@ -13,7 +13,7 @@ import {
 } from 'typeorm';
 import BaseEntity from './base.entity';
 import { User } from './user.entity';
-import { NotificationType } from 'src/common/enums';
+import { NotificationType } from '../common/enums';
 
 @Entity()
 @ObjectType()

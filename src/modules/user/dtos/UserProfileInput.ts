@@ -14,8 +14,8 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { Gender, MaritalStatus } from 'src/common/enums';
 import { IdentityInput } from './ProfileInput';
+import { Gender, MaritalStatus } from '../../../common/enums';
 
 @InputType()
 export class UserProfileInput {

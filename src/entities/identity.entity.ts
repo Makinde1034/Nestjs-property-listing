@@ -7,7 +7,7 @@ import { Field, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 import BaseEntity from './base.entity';
 import { User } from './user.entity';
-import { NationalIdentityType } from 'src/common/enums';
+import { NationalIdentityType } from '../common/enums';
 
 @Entity()
 @ObjectType()

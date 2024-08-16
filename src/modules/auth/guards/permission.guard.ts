@@ -10,10 +10,10 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { PERMISSION_KEY } from 'src/common/decorator/permission';
 import { User } from 'src/entities';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { RoleService } from '../../user/services';
+import { PERMISSION_KEY } from '../../../common/decorator/permission';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {

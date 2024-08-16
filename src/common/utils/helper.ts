@@ -4,7 +4,7 @@
  */
 
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { AppStrings } from 'src/common/messages/app.strings';
+import { AppStrings } from '../../common/messages/app.strings';
 import { v4 as uuidv4 } from 'uuid';
 
 /**

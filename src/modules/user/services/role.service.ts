@@ -20,7 +20,7 @@ import {
 } from '../dtos';
 import { DeepPartial, In } from 'typeorm';
 import slugify from 'slugify';
-import { AppStrings } from 'src/common/messages/app.strings';
+import { AppStrings } from '../../../common/messages/app.strings';
 
 @Injectable()
 export class RoleService {
@@ -194,7 +194,10 @@ export class RoleService {
    * @returns {Promise<string>}
    */
   async fetchUserRoles(user: User): Promise<Role[]> {
-    const userData = await this.staffRepository.findById(user.id, ['roles']);
+    const userData = await this.staffRepository.findOneOrFail({
+      where: { id: user.id },
+      relations: ['roles'],
+    });
     return userData.roles;
   }
 
@@ -211,7 +214,11 @@ export class RoleService {
     user: User,
     requiredPermissions: string[],
   ): Promise<boolean> {
-    const staff = await this.staffRepository.findById(user.id, ['roles']);
+    const staff = await this.staffRepository.findOneOrFail({
+      where: { id: user.id },
+      relations: ['roles'],
+    });
+
     const permissions = staff.roles.map((role) => role.permissions).flat();
     return permissions.some((permission) =>
       requiredPermissions.includes(permission.slug),

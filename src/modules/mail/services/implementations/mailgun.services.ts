@@ -13,12 +13,12 @@ import {
   FORGOT_PASSWORD_TEMPLATE_NAME,
   REGISTER_CONFIRMATION_TEMPLATE_NAME,
   STAFF_CONFIRMATION_TEMPLATE_NAME,
-} from 'src/common/constants';
+} from '../../../../common/constants';
 import { EmailNotificationPayload } from 'src/common/interface';
 import { User } from 'src/entities';
 import { MailSendService } from '../mail-service';
-import { AppInfo } from 'src/common/utils/AppInfo';
-import { loadUserName } from 'src/common/utils/class-loader';
+import { AppInfo } from '../../../../common/utils/AppInfo';
+import { loadUserName } from '../../../../common/utils/class-loader';
 
 import { MailInput } from '../../mail.dto';
 

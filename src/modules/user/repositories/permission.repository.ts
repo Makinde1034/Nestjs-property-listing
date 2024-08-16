@@ -7,7 +7,7 @@ import { Injectable } from '@nestjs/common';
 import { Permission } from '../../../entities';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import BaseRepository from 'src/modules/core/base.class/base.repository';
+import BaseRepository from '../../core/base.class/base.repository';
 
 @Injectable()
 export class PermissionRepository extends BaseRepository<Permission> {
