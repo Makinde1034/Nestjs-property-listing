@@ -17,7 +17,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { AuthService } from '../../auth/services';
 import { User } from '../../../entities';
 import { CreateMessageInput } from '../dto/request/chat.dto';
-import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 
@@ -83,7 +82,6 @@ export class ChatGateway implements OnGatewayConnection {
   ) {
     try {
       this.logger.log(content, 'Chat service executed successfully');
-
       this.logger.log(`Received message content: ${JSON.stringify(content)}`);
 
       const messageDto = plainToInstance(CreateMessageInput, content);
@@ -124,32 +122,28 @@ export class ChatGateway implements OnGatewayConnection {
 
   @SubscribeMessage('fetch_message')
   async handleFetchMessages(
-    @MessageBody() content: PaginateAndSort,
     @ConnectedSocket() socket: Socket,
+    // @MessageBody() content?: PaginateAndSort,
   ) {
     try {
-      this.logger.log(
-        `Fetching messages with content: ${JSON.stringify(content)}`,
-      );
-
-      const findOptions = plainToInstance(PaginateAndSort, content);
-      const errors = await validate(findOptions);
-
-      if (errors.length > 0) {
-        this.logger.error('Validation failed:', errors);
-        socket.emit('error', { message: errors });
-        return;
-      }
+      //Uncomment to enable and add  class validation to paginateAndSort
+      // Const findOptions = plainToInstance(PaginateAndSort, content);
+      // Const errors = await validate(findOptions);
+      // If (errors.length > 0) {
+      //   This.logger.error('Validation failed:', errors);
+      //   Socket.emit('error', { message: errors });
+      //   Return;
+      // }
 
       const ticketId = socket.data.ticketId;
       this.logger.log(`Fetching messages for room: ${ticketId}`);
 
       const messages = await this.chatService.findMessages(
-        findOptions,
+        // FindOptions,
         ticketId,
       );
 
-      socket.emit('receive_message', messages);
+      socket.emit('fetch_message', messages);
       this.logger.log(`Messages sent to client for room: ${ticketId}`);
     } catch (error) {
       this.logger.error(`Error handling fetch_message: ${error.message}`);
