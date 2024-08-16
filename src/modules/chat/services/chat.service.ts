@@ -97,50 +97,57 @@ export class ChatService {
     }
   }
 
-  async findMessages(findOption?: PaginateAndSort, chatId?: string) {
+  async findMessages(findOption?: PaginateAndSort, ticketId?: string) {
     try {
-      let take: number;
-      let skip: number;
+      // Default pagination and sorting options
+      const take = findOption?.take || 20;
+      const skip = findOption?.skip || 0;
 
-      if (findOption == null) {
-        take = 20;
-        skip = 0;
-      } else {
-        take = findOption.take;
-        skip = findOption.skip;
-      }
-
-      const [messages, count] = await this.messageRepository.findAndCount({
+      // Fetch messages with related user entity
+      const messages = await this.messageRepository.find({
         where: {
-          chat: { id: chatId },
+          chat: { ticketId: ticketId },
         },
         relations: ['user'],
         select: {
           id: true,
           message: true,
           createdAt: true,
+          user: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            arabicFirstName: true,
+            arabicLastName: true,
+          },
         },
         take: take,
         skip: skip,
+        order: { createdAt: 'DESC' },
       });
 
-      const transformedMessages = messages.map((message) => ({
-        id: message.id,
-        message: message.message,
-        createdAt: message.createdAt,
-        user: {
-          id: message.user.id,
-          firstName: message.user.firstName,
-          lastName: message.user.lastName,
-          arabicFirstName: message.user.arabicFirstName,
-          arabicLastName: message.user.arabicLastName,
-        },
+      // Transform the message data with a null check for user
+      const transformedMessages = messages.map((msg) => ({
+        id: msg.id,
+        message: msg.message,
+        createdAt: msg.createdAt,
+        user: msg.user
+          ? {
+              id: msg.user.id,
+              firstName: msg.user.firstName,
+              lastName: msg.user.lastName,
+              arabicFirstName: msg.user.arabicFirstName,
+              arabicLastName: msg.user.arabicLastName,
+            }
+          : null, // Handle null user case
       }));
 
-      return { messages: transformedMessages, count };
+      // Return transformed message data
+      return transformedMessages;
     } catch (error) {
-      this.logger.log(error);
-      throw new BadGatewayException(error);
+      // Improved error logging
+      this.logger.error('Failed to fetch messages', error);
+      throw new BadGatewayException('Unable to fetch messages', error.message);
     }
   }
 }

@@ -40,7 +40,6 @@ import { AdminGuard } from '../../auth/guards/admin.guard';
 
 import { SuccessResponse } from '../../../common/response';
 import { CreateSearchHistoryInput } from '../dtos/request/create-search-history';
-import { SearchHistory } from '../../../entities/search-history.entity';
 
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { CreateFeatureInput } from '../dtos/request/feature-input';
