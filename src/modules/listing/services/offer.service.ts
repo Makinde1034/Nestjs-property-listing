@@ -45,7 +45,7 @@ export class OfferService {
 
   async createAnOffer(createOfferDto: CreateOfferDto, user: User) {
     try {
-      const offer = await this.offerRepository.findAll({
+      const offer = await this.offerRepository.find({
         where: {
           price: MoreThanOrEqual(createOfferDto.price),
           listingId: createOfferDto.listingId,
@@ -88,7 +88,7 @@ export class OfferService {
       createOfferDto.userId = user.id;
       createOfferDto.expireAt = new Date(addDaysToDate(new Date(), 1));
 
-      const offerPayload = await this.offerRepository.create(createOfferDto);
+      const offerPayload = await this.offerRepository.save(createOfferDto);
 
       const data: PdfInput = {
         createdDate: `${offerPayload.createdAt.getDate()}-${offerPayload.createdAt.getMonth() + 1}-${offerPayload.createdAt.getFullYear()}`,
@@ -104,9 +104,10 @@ export class OfferService {
 
       this.paymentService.invoice(data, user, listing);
 
-      const seller = await this.userRepository.findById(listing.userId, [
-        'notificationPreference',
-      ]);
+      const seller = await this.userRepository.findOneOrFail({
+        where: { id: listing.userId },
+        relations: ['notificationPreference'],
+      });
 
       const notificationPreference = await this.notificationRepository.find();
 
@@ -187,7 +188,10 @@ export class OfferService {
 
   async findOne(id: string) {
     try {
-      return await this.offerRepository.findByIdOrFail(id, ['listing']);
+      return await this.offerRepository.findOneOrFail({
+        where: { id: id },
+        relations: ['listing'],
+      });
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException();
@@ -220,7 +224,7 @@ export class OfferService {
           },
         }),
 
-        await this.offerRepository.findAll({
+        await this.offerRepository.find({
           where: {
             price: MoreThanOrEqual(updateOfferInput.price),
             listingId: updateOfferInput.listingId,

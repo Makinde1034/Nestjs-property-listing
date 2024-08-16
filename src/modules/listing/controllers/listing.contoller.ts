@@ -40,8 +40,14 @@ export class ListingController {
   @UseInterceptors(AnyFilesInterceptor())
   async uploadPanoramaListingImage(
     @Query('listingId') listingId: string,
+    @Query('imageId') imageId: string,
     @UploadedFiles() file: Express.Multer.File,
   ) {
-    return await this.listingService.uploadPanoramaImage(listingId, file);
+    console.log(file);
+    return await this.listingService.uploadPanoramaImage(
+      listingId,
+      file,
+      imageId,
+    );
   }
 }

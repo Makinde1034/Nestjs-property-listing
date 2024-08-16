@@ -70,7 +70,7 @@ export class JobService {
      *
      **************************/
     await this.offerRepository
-      .queryBuilder('offer')
+      .createQueryBuilder('offer')
       .update(Offer)
       .set({ status: 'expired' })
       .where('offer.expireAt > :date', { date: new Date() })
@@ -88,7 +88,7 @@ export class JobService {
       },
     });
     const records = await this.offerRepository
-      .queryBuilder('offer')
+      .createQueryBuilder('offer')
       .leftJoinAndSelect('offer.user', 'user')
       .leftJoinAndSelect('offer.listing', 'listing')
       .where('offer.createdAt = :targetDate', {

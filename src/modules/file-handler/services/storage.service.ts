@@ -6,7 +6,7 @@
 import { Storage, UploadResponse } from '@google-cloud/storage';
 import { Injectable, Logger } from '@nestjs/common';
 import StorageConfig from '../../../database/seeders/config/serviceAccount/storage-config';
-import { generatereference } from 'src/common/utils/functions';
+import { generatereference } from '../../../common/utils/functions';
 
 @Injectable()
 export class StorageService {

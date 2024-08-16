@@ -52,7 +52,7 @@ export class TicketService {
       isOpen: true,
       status: TicketStatus.OPEN,
     };
-    await this.ticketRepository.create(data);
+    await this.ticketRepository.save(data);
 
     return AppStrings.TICKET_RAISED_SUCCESSFULLY;
   }
@@ -64,7 +64,7 @@ export class TicketService {
    * @returns {Promise<Ticket>}
    */
   async getTicket(id: string): Promise<Ticket> {
-    return await this.ticketRepository.findByIdOrFail(id);
+    return await this.ticketRepository.findOneByOrFail({ id: id });
   }
   /**
    * List tickets
@@ -81,7 +81,7 @@ export class TicketService {
         options.where = {
           reporter: { id: user.id },
         };
-        const tickets = await this.ticketRepository.findAll(options);
+        const tickets = await this.ticketRepository.find(options);
         return tickets;
       }
     } catch (error) {
@@ -99,13 +99,18 @@ export class TicketService {
    */
   async updateTicket(user: User, input: UpdateTicketInput): Promise<Ticket> {
     const { ticketId, status } = input;
-    const ticket = await this.ticketRepository.findByIdOrFail(ticketId);
+    const ticket = await this.ticketRepository.findOneByOrFail({
+      id: ticketId,
+    });
 
     const data: Partial<Ticket> = {
       status,
       assignedAt: ticket.assignedAt ?? new Date(),
       support: user,
     };
-    return await this.ticketRepository.update(ticketId, data);
+    const { affected } = await this.ticketRepository.update(ticketId, data);
+    if (affected) {
+      return this.ticketRepository.findOneByOrFail({ id: ticketId });
+    }
   }
 }

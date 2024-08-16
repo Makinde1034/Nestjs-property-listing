@@ -1093,12 +1093,13 @@ export class ListingService {
       );
     }
   }
-
-  async uploadPanoramaImage(id: string, file: Express.Multer.File) {
+  async uploadPanoramaImage(
+    id: string,
+    file: Express.Multer.File,
+    imageId: string,
+  ) {
     try {
-      const listing = await this.listingRepository.findOne({
-        where: { id },
-      });
+      const listing = await this.listingRepository.findOne({ where: { id } });
 
       if (!listing) {
         throw new BadRequestException('Listing not found');
@@ -1108,39 +1109,50 @@ export class ListingService {
         ? JSON.parse(listing.images)
         : [];
 
-      // Upload the new files
+      // Upload the new file
       const uploadedUrl = await this.storageService.upload(file);
+      this.logger.log(`Uploaded URL: ${uploadedUrl}`);
 
-      // Combine existing images with the newly uploaded ones
-      const updatedImages = [...existingImages];
+      if (imageId) {
+        // Update existing image
+        let imageUpdated = false;
+        existingImages.forEach((image, index) => {
+          if (image.id === imageId && image.isPanorama) {
+            existingImages[index].url = uploadedUrl;
+            imageUpdated = true;
+            this.logger.log(`Updated panorama image with ID: ${imageId}`);
+          }
+        });
 
-      const image = {
-        id: updatedImages.length, // Increment ID based on the length of updatedImages
-        uploadedUrl,
-        isPanorama: true, // Default value, can be modified later
-      };
-      updatedImages.push(image);
+        if (!imageUpdated) {
+          throw new BadRequestException('Image ID not found');
+        }
+      } else {
+        const image = {
+          id: (existingImages.length + 1).toString(), // Simple ID generation
+          url: uploadedUrl,
+          isPanorama: true,
+        };
+        existingImages.push(image);
+        this.logger.log(`Added new panorama image: ${JSON.stringify(image)}`);
+      }
 
       // Stringify the updated images array for storage
-      const stringifiedImages = JSON.stringify(updatedImages);
+      const stringifiedImages = JSON.stringify(existingImages);
+      this.logger.log(`Updated images array: ${stringifiedImages}`);
 
       // Save the updated images to the database
-      await this.listingRepository.update(id, {
-        images: stringifiedImages,
-      });
+      await this.listingRepository.update(id, { images: stringifiedImages });
 
-      await this.storageService.upload(file);
-      await this.listingRepository.update(id, {
-        images: stringifiedImages,
-      });
-
-      return new SuccessResponse('Upload successful', stringifiedImages);
+      return new SuccessResponse(AppStrings.UPLOAD_SUCCESSFUL, existingImages);
     } catch (error) {
-      this.logger.log(error);
+      this.logger.error('Error during panorama image upload', error);
       if (error instanceof HttpException) {
         throw error;
       } else {
-        throw new BadRequestException(error.messages || error.data);
+        throw new BadRequestException(
+          error.message || 'An unexpected error occurred during image upload',
+        );
       }
     }
   }

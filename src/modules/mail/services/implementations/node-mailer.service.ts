@@ -6,10 +6,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { User } from 'src/entities';
-import { AppInfo } from 'src/common/utils/AppInfo';
+import { AppInfo } from '../../../../common/utils/AppInfo';
 import { EmailNotificationPayload } from 'src/common/interface';
 import { MailSendService } from '../mail-service';
-import { loadUserName } from 'src/common/utils/class-loader';
+import { loadUserName } from '../../../../common/utils/class-loader';
 
 @Injectable()
 export class NodeMailerEmailService implements MailSendService {
