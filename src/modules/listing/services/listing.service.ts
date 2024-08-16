@@ -955,42 +955,45 @@ export class ListingService {
       const updatePromises = [];
       const newAttributesPromises = [];
 
-      for (const element of attributes) {
-        const existingAttribute = existingAttributesMap.get(
-          element.attributeId,
-        );
+      if (attributes?.length > 0) {
+        for (const element of attributes) {
+          const existingAttribute = existingAttributesMap.get(
+            element.attributeId,
+          );
 
-        if (existingAttribute) {
-          if (element.value !== existingAttribute.value) {
-            updatePromises.push(
-              this.listingAttributesRepository.update(existingAttribute.id, {
-                value: element.value,
-              }),
+          if (existingAttribute) {
+            if (element.value !== existingAttribute.value) {
+              updatePromises.push(
+                this.listingAttributesRepository.update(existingAttribute.id, {
+                  value: element.value,
+                }),
+              );
+            }
+          } else {
+            // Fetch attribute details only if needed
+            newAttributesPromises.push(
+              this.attributeService
+                .findOneAttribute(element.attributeId)
+                .then((attribute) => ({
+                  ...element,
+                  name: attribute.englishName,
+                  listing,
+                })),
             );
           }
-        } else {
-          // Fetch attribute details only if needed
-          newAttributesPromises.push(
-            this.attributeService
-              .findOneAttribute(element.attributeId)
-              .then((attribute) => ({
-                ...element,
-                name: attribute.englishName,
-                listing,
-              })),
-          );
         }
+
+        // Wait for all attribute updates to complete
+        await Promise.all(updatePromises);
+
+        // Save new attributes
+        const newAttributes = await Promise.all(newAttributesPromises);
+        await this.listingAttributesRepository.save(newAttributes);
       }
-
-      // Wait for all attribute updates to complete
-      await Promise.all(updatePromises);
-
-      // Save new attributes
-      const newAttributes = await Promise.all(newAttributesPromises);
-      await this.listingAttributesRepository.save(newAttributes);
-
       // Prepare notifications
-      const wishlistUserIds = listing.wishlist.map((w) => w.userId);
+      const wishlistUserIds = listing.wishlist.map(
+        (wishlist) => wishlist.userId,
+      );
       const notificationPromises = [];
 
       if (partialUpdatePayload.price != undefined) {
