@@ -28,7 +28,6 @@ export class ListingTypeController {
 
   /**
    * Upload Attribute with Icon
-   *
    * @async
    * @returns {Promise<Attribute>}
    */
@@ -42,9 +41,9 @@ export class ListingTypeController {
   ): Promise<Attribute> {
     return await this.attributeService.uploadAttributeIcon(attributId, icon);
   }
+
   /**
    * Upload Attribute with Icon
-   *
    * @async
    * @returns {Promise<Attribute>}
    */

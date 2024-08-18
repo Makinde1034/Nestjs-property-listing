@@ -141,20 +141,24 @@ export class AttributeService {
     const attributeData: Partial<Attribute> = {
       ...data,
     };
+
     if (icon) {
       // Upload icon image
       const imageurl = await this.storageService.upload(icon);
       attributeData.icon = imageurl;
+    }
 
-      const update = await this.attributeRepository.update(
-        data.id,
-        attributeData,
-      );
-      if (update.affected > 0) {
-        return this.attributeRepository.findOneOrFail({
-          where: { id: data.id },
-        });
-      }
+    const update = await this.attributeRepository.update(
+      data.id,
+      attributeData,
+    );
+
+    if (update.affected > 0) {
+      const payload = await this.attributeRepository.findOneOrFail({
+        where: { id: data.id },
+      });
+
+      return payload;
     }
   }
 
