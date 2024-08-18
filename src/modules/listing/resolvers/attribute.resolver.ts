@@ -127,6 +127,7 @@ export class AttributeResolver {
    * @param {AttributeSetUpdateInput} RequestInput
    * @returns {Promise<AttributeSet>}
    */
+
   @Mutation(() => AttributeSet)
   @Permissions('update-attribute-set')
   @UseGuards(AccessTokenGuard, PermissionsGuard)

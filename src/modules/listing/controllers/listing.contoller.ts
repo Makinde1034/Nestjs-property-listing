@@ -18,14 +18,12 @@ import { RestAccessTokenGuard } from '../../auth/guards';
 @Controller('listing')
 export class ListingController {
   constructor(private listingService: ListingService) {}
-
   @Post('listing-image-upload')
   @UseGuards(RestAccessTokenGuard)
   @UseInterceptors(AnyFilesInterceptor())
   async uploadListingImage(
     @Query('listingId') listingId: string,
     @Query('imageId') imageId: string,
-
     @UploadedFiles() files: Express.Multer.File[],
   ) {
     return await this.listingService.uploadListingImage(
