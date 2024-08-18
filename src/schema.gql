@@ -184,6 +184,7 @@ type Attribute {
   thiqaIntegration: [String!]
   attributeSets: [AttributeSet!]!
   listingAttribute: Attribute!
+  deletedAt: DateTime!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -194,6 +195,7 @@ type AttributeSet {
   englishName: String
   attributes: [Attribute!]
   listingTypes: [ListingType!]!
+  deletedAt: DateTime!
   createdAt: DateTime!
   updatedAt: DateTime!
 }

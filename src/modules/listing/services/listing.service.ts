@@ -312,6 +312,7 @@ export class ListingService {
 
           // Ensure listingType is not soft-deleted
           .andWhere('listingType.deletedAt IS NULL')
+          .andWhere('attributeSets.deletedAt IS NULL')
 
           .where(
             'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented',
@@ -530,7 +531,8 @@ export class ListingService {
               isListingRented: false,
             },
           )
-          .andWhere('listingType.deletedAt IS NULL');
+          .andWhere('listingType.deletedAt IS NULL')
+          .andWhere('attributeSets.deletedAt IS NULL');
 
         if (isFeatured) {
           query
@@ -718,7 +720,7 @@ export class ListingService {
           whereCondition[dateField] = Between(startOfYear(now), endOfYear(now));
           break;
         default:
-          whereCondition = {}; // No date filter applied
+          whereCondition = {};
       }
 
       // Apply other filters

@@ -69,7 +69,10 @@ export class Listing extends BaseEntity {
 
   @Field(() => ListingType, { nullable: true })
   @JoinColumn({ name: 'listingTypeId' })
-  @ManyToOne(() => ListingType, (listingType) => listingType.listing, {})
+  @ManyToOne(() => ListingType, (listingType) => listingType.listing, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   @Index()
   listingType: ListingType;
 
@@ -78,7 +81,9 @@ export class Listing extends BaseEntity {
   listingTypeId: string;
 
   @Field(() => GpsCoordinate, { nullable: true })
-  @OneToOne(() => GpsCoordinate, (gpsCoordinate) => gpsCoordinate.listing)
+  @OneToOne(() => GpsCoordinate, (gpsCoordinate) => gpsCoordinate.listing, {
+    onDelete: 'CASCADE',
+  })
   gpsCoordinate: GpsCoordinate;
 
   @Field(() => [ListingAttributes], { nullable: true })

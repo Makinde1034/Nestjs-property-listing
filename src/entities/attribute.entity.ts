@@ -7,6 +7,7 @@ import { Field, ObjectType } from '@nestjs/graphql';
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   ManyToMany,
   OneToMany,
@@ -93,6 +94,10 @@ export class Attribute extends BaseEntity {
     (listingAttributes) => listingAttributes.attribute,
   )
   listingAttribute: ListingAttributes;
+
+  @Field()
+  @DeleteDateColumn()
+  deletedAt: Date;
 
   @Field()
   @CreateDateColumn()
