@@ -173,7 +173,7 @@ export class AttributeService {
     if (attribute.attributeSets && attribute.attributeSets.length > 0) {
       throw new BadRequestException(AppStrings.UNABLE_TO_DELETE_ATTRIBUTE);
     }
-    await this.attributeRepository.delete(data.id);
+    await this.attributeRepository.softDelete(data.id);
     return AppStrings.ATTRIBUTE_DELETED_SUCCESSFULLY;
   }
 
@@ -246,7 +246,7 @@ export class AttributeService {
    * @returns {Promise<string>}
    */
   async deleteAttributeSet(data: AttributeDeleteInput): Promise<string> {
-    await this.attributeSetRepository.delete(data.id);
+    await this.attributeSetRepository.softDelete(data.id);
     return AppStrings.ATTRIBUTESET_DELETED_SUCCESSFULLY;
   }
 }
