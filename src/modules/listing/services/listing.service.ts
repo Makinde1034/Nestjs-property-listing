@@ -1398,14 +1398,11 @@ export class ListingService {
           adPackage: { ...adPackage },
           listing: { ...listing },
         });
-        const expirationDate = addDaysToDate(
-          new Date(),
-          createFeatureInput.duration,
-        );
+
         await this.listingRepository.update(listing.id, {
-          featureExpiration: expirationDate,
+          featureExpiration: createFeatureInput.endDate,
           isListingFeatured: true,
-          featureDate: new Date(),
+          featureDate: createFeatureInput.startDate,
         });
       }
 

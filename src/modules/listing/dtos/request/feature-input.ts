@@ -4,7 +4,7 @@
  */
 
 import { Field, InputType } from '@nestjs/graphql';
-import { IsNumber, IsPositive, IsString } from 'class-validator';
+import { IsDate, IsString } from 'class-validator';
 @InputType()
 export class CreateFeatureInput {
   @Field()
@@ -16,7 +16,10 @@ export class CreateFeatureInput {
   adPackageId: string;
 
   @Field()
-  @IsNumber()
-  @IsPositive()
-  duration: number;
+  @IsDate()
+  startDate: Date;
+
+  @Field()
+  @IsDate()
+  endDate: Date;
 }

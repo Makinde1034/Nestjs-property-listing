@@ -138,7 +138,8 @@ type FlagListing {
 type Feature {
   id: String!
   listingId: String!
-  expiredAt: DateTime
+  endDate: DateTime
+  startDate: DateTime
   adPackage: AdPackage!
   listing: Listing!
   createdAt: DateTime!
@@ -1111,7 +1112,8 @@ input CreateWishlistInput {
 input CreateFeatureInput {
   listingId: String!
   adPackageId: String!
-  duration: Float!
+  startDate: DateTime!
+  endDate: DateTime!
 }
 
 input CreateAuctionInput {
