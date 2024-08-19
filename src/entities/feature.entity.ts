@@ -29,7 +29,11 @@ export class Feature {
 
   @Field({ nullable: true })
   @Column({ nullable: true })
-  expiredAt: Date;
+  endDate: Date;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  startDate: Date;
 
   @Field(() => AdPackage)
   @ManyToOne(() => AdPackage, (adPackage) => adPackage.promotion, {})
