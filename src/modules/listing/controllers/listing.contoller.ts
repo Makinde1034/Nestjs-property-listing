@@ -39,7 +39,7 @@ export class ListingController {
   async uploadPanoramaListingImage(
     @Query('listingId') listingId: string,
     @Query('imageId') imageId: string,
-    @UploadedFiles() file: Express.Multer.File,
+    @UploadedFiles() file: Express.Multer.File[],
   ) {
     return await this.listingService.uploadPanoramaImage(
       listingId,

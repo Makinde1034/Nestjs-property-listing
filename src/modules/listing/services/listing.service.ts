@@ -28,7 +28,7 @@ import { CreatePromotionInput } from '../dtos/request/promotion-input';
 import { PromotionRepository } from '../repositories/promotion.repository';
 
 import { AdPackageService } from '../../ad-package/services/ad-package.service';
-import { Between, QueryFailedError } from 'typeorm';
+import { Between, In, QueryFailedError } from 'typeorm';
 
 import { addDaysToDate } from '../../../common/utils/helper';
 import { FlagListingRepository } from '../repositories/flag-listing.repository';
@@ -57,6 +57,7 @@ import { ListingTypeService } from './listing-type.service';
 import { FurnishingStatusEnum } from '../../../common/enums';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { GpsCoordinateRepository } from '../repositories/gps-coordinate.repository';
+import { AttributeRepository } from '../repositories';
 
 @Injectable()
 export class ListingService {
@@ -74,6 +75,7 @@ export class ListingService {
     private listingTypeService: ListingTypeService,
     private readonly listingAttributesRepository: ListingAttributeRepository,
     private gpsCoordinateRepository: GpsCoordinateRepository,
+    private attributeRepository: AttributeRepository,
   ) {}
   logger = new Logger(ListingService.name);
 
@@ -308,6 +310,7 @@ export class ListingService {
           .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
           .innerJoinAndSelect('listing.listingType', 'listingType')
           .leftJoinAndSelect('listingType.attributeSets', 'attributeSets')
+
           .where('listing.deletedAt IS NULL')
 
           // Ensure listingType is not soft-deleted
@@ -322,7 +325,6 @@ export class ListingService {
               isListingRented: false,
             },
           );
-        // Exclude soft-deleted listingType records
 
         if (isFeatured) {
           query.andWhere(
@@ -518,10 +520,10 @@ export class ListingService {
         const query = this.listingRepository
           .createQueryBuilder('listing')
           .select(columnsToSelect)
-          .leftJoinAndSelect('listing.user', 'user')
           .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
           .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
           .innerJoinAndSelect('listing.listingType', 'listingType')
+          .leftJoinAndSelect('listingType.attributeSets', 'attributeSets')
           .where('listing.listingType IS NOT NULL')
           .where(
             'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented',
@@ -658,28 +660,21 @@ export class ListingService {
 
       const listing = [...featuredListings, ...regularListings];
       const total = featuredCount + regularCount;
-      const attribute = JSON.stringify(attributes);
-      const location = JSON.stringify(gpsCoordinate);
 
-      await this.searchHistoryRepository.save({
-        attributes: attribute,
-        gpsCoordinate: location,
-        minPrice,
-
-        maxPrice,
-
-        minArea,
-
-        maxArea,
-
-        type,
-
-        rentingOption,
-
-        listingId,
-
+      this.saveSearchHistory(
+        {
+          attributes,
+          gpsCoordinate,
+          minPrice,
+          maxPrice,
+          minArea,
+          maxArea,
+          type,
+          rentingOption,
+          listingId,
+        },
         user,
-      });
+      );
 
       return { listing, total };
     } catch (error) {
@@ -1100,7 +1095,7 @@ export class ListingService {
   }
   async uploadPanoramaImage(
     id: string,
-    file: Express.Multer.File,
+    files: Express.Multer.File[],
     imageId: string,
   ) {
     try {
@@ -1114,18 +1109,19 @@ export class ListingService {
         ? JSON.parse(listing.images)
         : [];
 
-      // Upload the new file
-      const uploadedUrl = await this.storageService.upload(file);
-      this.logger.log(`Uploaded URL: ${uploadedUrl}`);
+      // Upload the new files
+      const uploadPromises = files.map((file) =>
+        this.storageService.upload(file),
+      );
+      const uploadedUrls = await Promise.all(uploadPromises);
 
       if (imageId) {
         // Update existing image
         let imageUpdated = false;
-        existingImages.forEach((image, index) => {
-          if (image.id === imageId && image.isPanorama) {
-            existingImages[index].url = uploadedUrl;
+        existingImages.map((image, index) => {
+          if (image.id == imageId) {
+            existingImages[index].url = uploadedUrls[0]; // Assuming single file upload
             imageUpdated = true;
-            this.logger.log(`Updated panorama image with ID: ${imageId}`);
           }
         });
 
@@ -1133,18 +1129,19 @@ export class ListingService {
           throw new BadRequestException('Image ID not found');
         }
       } else {
-        const image = {
-          id: (existingImages.length + 1).toString(), // Simple ID generation
-          url: uploadedUrl,
+        // Add new images
+        const newImages = uploadedUrls.map((url, index) => ({
+          id: (existingImages.length + index).toString(), // Generate unique ID
+          url,
           isPanorama: true,
-        };
-        existingImages.push(image);
-        this.logger.log(`Added new panorama image: ${JSON.stringify(image)}`);
+        }));
+
+        existingImages.push(...newImages);
       }
 
       // Stringify the updated images array for storage
       const stringifiedImages = JSON.stringify(existingImages);
-      this.logger.log(`Updated images array: ${stringifiedImages}`);
+      // This.logger.log('Updated images:', stringifiedImages);
 
       // Save the updated images to the database
       await this.listingRepository.update(id, { images: stringifiedImages });
@@ -1418,5 +1415,54 @@ export class ListingService {
       this.logger.log(error);
       throw new BadRequestException(error);
     }
+  }
+
+  /**
+   * Search history
+   */
+
+  async saveSearchHistory(
+    searchHistory: Partial<CreateSearchHistoryInput>,
+    user: User,
+  ) {
+    let attributes;
+    if (searchHistory.attributes) {
+      const attribute = await this.attributeRepository.find({
+        where: { id: In(searchHistory.attributes.map((a) => a.attributeId)) },
+      });
+
+      attributes = searchHistory.attributes
+        .map((element) => {
+          const foundAttribute = attribute.find(
+            (value) => value.id === element.attributeId,
+          );
+
+          if (foundAttribute) {
+            return {
+              id: foundAttribute.id,
+              englishName: foundAttribute.englishName,
+              arabicName: foundAttribute.arabicName,
+              value: element.value,
+            };
+          }
+          return null;
+        })
+        .filter((attr) => attr !== null);
+    } else {
+      attributes = [];
+    }
+
+    await this.searchHistoryRepository.save({
+      attributes: JSON.stringify(attributes),
+      gpsCoordinate: JSON.stringify(searchHistory.gpsCoordinate),
+      minPrice: searchHistory.minPrice,
+      maxPrice: searchHistory.maxPrice,
+      minArea: searchHistory.minArea,
+      maxArea: searchHistory.maxArea,
+      type: searchHistory.type,
+      rentingOption: searchHistory.rentingOption,
+      listingId: searchHistory.listingId,
+      user: user,
+    });
   }
 }

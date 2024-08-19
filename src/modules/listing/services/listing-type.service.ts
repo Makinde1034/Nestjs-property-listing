@@ -58,9 +58,11 @@ export class ListingTypeService {
     input: ListingTypeInput,
     icon?: Express.Multer.File,
   ): Promise<ListingType> {
+    console.log(input.attributeSets);
     const attributeSets = await this.attributeSetRepository.findAll({
       where: { id: In([...input.attributeSets]) },
     });
+    console.log(attributeSets);
 
     const data: Partial<ListingType> = {
       englishName: input.englishName,
