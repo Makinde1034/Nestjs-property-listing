@@ -4,7 +4,7 @@
  */
 
 import { Field, InputType } from '@nestjs/graphql';
-import { IsString } from 'class-validator';
+import { IsNumber, IsPositive, IsString } from 'class-validator';
 @InputType()
 export class CreateFeatureInput {
   @Field()
@@ -14,4 +14,9 @@ export class CreateFeatureInput {
   @Field()
   @IsString()
   adPackageId: string;
+
+  @Field()
+  @IsNumber()
+  @IsPositive()
+  duration: number;
 }

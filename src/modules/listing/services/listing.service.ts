@@ -525,7 +525,7 @@ export class ListingService {
           .innerJoinAndSelect('listing.listingType', 'listingType')
           .leftJoinAndSelect('listingType.attributeSets', 'attributeSets')
           .where('listing.listingType IS NOT NULL')
-          .where(
+          .andWhere(
             'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented',
             {
               isListingDisabled: false,
@@ -558,7 +558,6 @@ export class ListingService {
         if (gpsCoordinate) {
           const { lng, lat } = gpsCoordinate;
 
-          // Join the gpsCoordinate relation
           query
             .leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate')
             .andWhere('gpsCoordinate.lng = :lng AND gpsCoordinate.lat = :lat', {
@@ -591,32 +590,30 @@ export class ListingService {
             });
           }
 
-          if (attributeValue.length > 0) {
-            const [exactValues, rangeValues] = attributeValue.reduce(
-              ([exact, range], value) => {
-                if (Array.isArray(value) && value.length === 2) {
-                  range.push(value);
-                } else {
-                  exact.push(value);
-                }
-                return [exact, range];
-              },
-              [[], []] as [string[], [string, string][]],
+          const [exactValues, rangeValues] = attributeValue.reduce(
+            ([exact, range], value) => {
+              if (Array.isArray(value) && value.length === 2) {
+                range.push(value);
+              } else {
+                exact.push(value);
+              }
+              return [exact, range];
+            },
+            [[], []] as [string[], [string, string][]],
+          );
+
+          if (exactValues.length > 0) {
+            query.andWhere('listingAttributes.value IN (:...exactValues)', {
+              exactValues,
+            });
+          }
+
+          if (rangeValues.length > 0) {
+            const [minValue, maxValue] = rangeValues[0];
+            query.andWhere(
+              'listingAttributes.value BETWEEN :minValue AND :maxValue',
+              { minValue, maxValue },
             );
-
-            if (exactValues.length > 0) {
-              query.andWhere('listingAttributes.value IN (:...exactValues)', {
-                exactValues,
-              });
-            }
-
-            if (rangeValues.length > 0) {
-              const [minValue, maxValue] = rangeValues[0];
-              query.andWhere(
-                'listingAttributes.value BETWEEN :minValue AND :maxValue',
-                { minValue, maxValue },
-              );
-            }
           }
         }
 
@@ -1401,8 +1398,10 @@ export class ListingService {
           adPackage: { ...adPackage },
           listing: { ...listing },
         });
-        const formatedDays = parseInt(adPackage.duration);
-        const expirationDate = addDaysToDate(new Date(), formatedDays);
+        const expirationDate = addDaysToDate(
+          new Date(),
+          createFeatureInput.duration,
+        );
         await this.listingRepository.update(listing.id, {
           featureExpiration: expirationDate,
           isListingFeatured: true,
