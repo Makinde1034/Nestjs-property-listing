@@ -8,4 +8,6 @@ export enum AttributeType {
   NUMBER = 'Number',
   DROPDOWN = 'Dropdown',
   DATE = 'Date',
+  STRING = 'String',
+  ADDRESS = 'Address',
 }
