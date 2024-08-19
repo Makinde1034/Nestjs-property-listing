@@ -1111,6 +1111,7 @@ input CreateWishlistInput {
 input CreateFeatureInput {
   listingId: String!
   adPackageId: String!
+  duration: Float!
 }
 
 input CreateAuctionInput {
