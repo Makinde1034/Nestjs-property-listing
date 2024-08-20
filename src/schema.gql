@@ -399,6 +399,7 @@ type IssueCategory {
   name: String!
   parentIssues: [ParentIssue!]
   createdAt: DateTime!
+  deletedAt: DateTime!
   updatedAt: DateTime!
 }
 
@@ -472,6 +473,7 @@ type Auction {
   maxListing: Float!
   auctionParticipant: [AuctionParticipant!]!
   status: Boolean!
+  deletedAt: DateTime!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -809,6 +811,7 @@ type Mutation {
   updateAuction(updateAuctionInput: UpdateAuctionInput!): Auction!
   id(id: String!): Auction!
   addAuctionParticipant(createAuctionParticipantInput: CreateAuctionParticipantInput!): AuctionParticipant!
+  deleteSavedHistory: SuccessResponse!
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!

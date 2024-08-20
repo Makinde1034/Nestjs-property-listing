@@ -5,6 +5,7 @@
 
 import {
   Controller,
+  Delete,
   Post,
   Query,
   UploadedFiles,
@@ -46,5 +47,14 @@ export class ListingController {
       file,
       imageId,
     );
+  }
+
+  @Delete('delete-listing-image')
+  @UseGuards(RestAccessTokenGuard)
+  async deleteListingImage(
+    @Query('listingId') listingId: string,
+    @Query('imageId') imageId: string,
+  ) {
+    return await this.listingService.deleteListingImage(listingId, imageId);
   }
 }

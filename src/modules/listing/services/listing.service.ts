@@ -1066,6 +1066,7 @@ export class ListingService {
         const newImages = uploadedUrls.map((url, index) => ({
           id: (existingImages.length + index).toString(), // Generate unique ID
           url,
+          isDeleted: false,
           isPanorama: false, // Default value
         }));
 
@@ -1130,6 +1131,7 @@ export class ListingService {
         const newImages = uploadedUrls.map((url, index) => ({
           id: (existingImages.length + index).toString(), // Generate unique ID
           url,
+          isDeleted: false,
           isPanorama: true,
         }));
 
@@ -1461,5 +1463,63 @@ export class ListingService {
       listingId: searchHistory.listingId,
       user: user,
     });
+  }
+
+  async deleteSavedHistory(id: string) {
+    const { affected } = await this.searchHistoryRepository.softDelete(id);
+    if (affected) {
+      return new SuccessResponse(AppStrings.LISTING_DELETED_SUCCESSFULLY);
+    }
+  }
+
+  async deleteListingImage(listingId: string, imageId: string) {
+    try {
+      const listing = await this.listingRepository.findOne({
+        where: { id: listingId },
+      });
+
+      if (!listing) {
+        throw new BadRequestException('Listing not found');
+      }
+
+      const existingImages: any[] = listing.images
+        ? JSON.parse(listing.images)
+        : [];
+
+      if (imageId) {
+        // Update the isDeleted flag for the specified imageId
+        let imageUpdated = false;
+        existingImages.forEach((image) => {
+          if (image.id === imageId) {
+            image.isDeleted = true; // Mark the image as deleted
+            imageUpdated = true;
+          }
+        });
+
+        if (!imageUpdated) {
+          throw new BadRequestException('Image ID not found');
+        }
+      } else {
+        // If no imageId is provided, mark all images as deleted
+        existingImages.forEach((image) => {
+          image.isDeleted = true;
+        });
+      }
+
+      const stringifiedImages = JSON.stringify(existingImages);
+
+      // Update the listing with the modified images array
+      await this.listingRepository.update(listingId, {
+        images: stringifiedImages,
+      });
+
+      return new SuccessResponse(
+        AppStrings.DELETED_SUCCESSFULLY,
+        existingImages,
+      );
+    } catch (error) {
+      // Handle errors appropriately
+      throw new BadRequestException(error.message || 'An error occurred');
+    }
   }
 }

@@ -133,7 +133,7 @@ export class IssueService {
     if (category.parentIssues && category.parentIssues.length > 0) {
       throw new BadRequestException(AppStrings.UNABLE_TO_DELETE_ISSUE_CATEGORY);
     }
-    await this.issueCategoryRepository.delete(data.id);
+    await this.issueCategoryRepository.softDelete(data.id);
     return AppStrings.ISSUE_CATEGORY_DELETED_SUCCESSFULLY;
   }
 

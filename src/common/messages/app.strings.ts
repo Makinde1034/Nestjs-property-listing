@@ -73,6 +73,8 @@ export const AppStrings = {
 
   LISTING_DELETED_SUCCESSFULLY: 'Listing has been deleted',
 
+  DELETED_SUCCESSFULLY: 'Successfully deleted',
+
   LISTING_NOT_FOUND: 'Listing not found',
 
   LISTING_TYPE_NOT_FOUND: 'Listing Type  was not found.',

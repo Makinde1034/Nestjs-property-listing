@@ -69,7 +69,6 @@ export class UserService {
 
   /**
    * Create User
-   *
    * @async
    * @param {Partial<User>} userData
    * @returns {Promise<User>}
