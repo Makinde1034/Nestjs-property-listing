@@ -681,55 +681,44 @@ export class ListingService {
         : new BadRequestException(error.message);
     }
   }
-
   async getListingForAdmin(paginateAndSort: AdminFilterAndSort) {
+    const orderOptions = {
+      [paginateAndSort.sortField]: paginateAndSort.directionToSort,
+    };
+
+    const now = new Date();
+    let whereCondition: any = {};
+    const dateField = 'createdAt';
+
+    switch (paginateAndSort.timePeriod) {
+      case 'today':
+        whereCondition[dateField] = Between(startOfDay(now), endOfDay(now));
+        break;
+      case 'week':
+        whereCondition[dateField] = Between(startOfWeek(now), endOfWeek(now));
+        break;
+      case 'month':
+        whereCondition[dateField] = Between(startOfMonth(now), endOfMonth(now));
+        break;
+      case 'year':
+        whereCondition[dateField] = Between(startOfYear(now), endOfYear(now));
+        break;
+    }
+
+    whereCondition = {
+      ...whereCondition,
+      isListingPromoted: paginateAndSort.isListingPromoted,
+      isListingSold: paginateAndSort.isListingSold,
+      // IsListingFlagged: paginateAndSort.isListingFlagged,
+      isListingRented: paginateAndSort.isListingRented,
+    };
+    const quotedColumnName = (column: string) => `"listing"."${column}"`;
+
     try {
-      const orderOptions = {
-        [paginateAndSort.sortField]: paginateAndSort.directionToSort,
-      };
-
-      const now = new Date();
-      let whereCondition: any = {};
-
-      // Specific field to filter by time period
-      const dateField = 'createdAt';
-
-      // Apply time period filter
-      switch (paginateAndSort.timePeriod) {
-        case 'today':
-          whereCondition[dateField] = Between(startOfDay(now), endOfDay(now));
-          break;
-        case 'week':
-          whereCondition[dateField] = Between(startOfWeek(now), endOfWeek(now));
-          break;
-        case 'month':
-          whereCondition[dateField] = Between(
-            startOfMonth(now),
-            endOfMonth(now),
-          );
-          break;
-        case 'year':
-          whereCondition[dateField] = Between(startOfYear(now), endOfYear(now));
-          break;
-        default:
-          whereCondition = {};
-      }
-
-      // Apply other filters
-      whereCondition = {
-        ...whereCondition,
-
-        isListingPromoted: paginateAndSort.isListingPromoted,
-        isListingSold: paginateAndSort.isListingSold,
-        isListingFlagged: paginateAndSort.isListingFlagged,
-        isListingRented: paginateAndSort.isListingRented,
-      };
-
-      // Perform queries
       const [listingResult, countsResult] = await Promise.all([
         this.listingRepository.find({
           where: whereCondition,
-          relations: ['user', 'listingType'],
+          relations: ['user'],
           select: {
             user: {
               firstName: true,
@@ -744,30 +733,27 @@ export class ListingService {
           skip: paginateAndSort.skip,
           take: paginateAndSort.take,
         }),
+
         this.listingRepository
           .createQueryBuilder('listing')
           .select('COUNT(*)', 'total')
           .addSelect(
-            'SUM(CASE WHEN listing.isListingFlagged = true THEN 1 ELSE 0 END)',
+            `SUM(${quotedColumnName('isListingFlagged')}::int)`,
             'flagged',
           )
           .addSelect(
-            'SUM(CASE WHEN listing.isListingPromoted = true THEN 1 ELSE 0 END)',
+            `SUM(${quotedColumnName('isListingPromoted')}::int)`,
             'promoted',
           )
+          .addSelect(`SUM(${quotedColumnName('isListingSold')}::int)`, 'sold')
           .addSelect(
-            'SUM(CASE WHEN listing.isListingSold = true THEN 1 ELSE 0 END)',
-            'sold',
-          )
-          .addSelect(
-            'SUM(CASE WHEN listing.isListingRented = true THEN 1 ELSE 0 END)',
+            `SUM(${quotedColumnName('isListingRented')}::int)`,
             'rented',
           )
           .where(whereCondition)
           .getRawOne(),
       ]);
 
-      // Extract counts from the result
       const analysis = {
         flagged: Number(countsResult.flagged),
         promoted: Number(countsResult.promoted),
@@ -1343,11 +1329,21 @@ export class ListingService {
       const listing = await this.listingRepository
         .createQueryBuilder('listing')
         .leftJoinAndSelect('listing.user', 'user')
-        .leftJoinAndSelect('listing.listingType', 'listingType')
-        .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
-        .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
+        .leftJoinAndMapMany(
+          'listing.listingAttributes',
+          'listing.listingAttributes',
+          'listingAttributes',
+        )
+        .leftJoinAndMapOne(
+          'listingAttributes.attribute',
+          'listingAttributes.attribute',
+          'attribute',
+        )
+
         .leftJoinAndSelect('listing.promotion', 'promotion')
         .leftJoinAndSelect('listing.feature', 'feature')
+        .leftJoinAndSelect('listing.flag', 'flag')
+
         .where('listing.id = :id', { id })
         .addSelect('listing.impressions')
         .getOne();
@@ -1359,7 +1355,7 @@ export class ListingService {
       // Batch update impressions and return the listing in one go
       const newImpression = listing.impressions + 1;
 
-      await this.listingRepository
+      this.listingRepository
         .createQueryBuilder()
         .update()
         .set({ impressions: newImpression })
