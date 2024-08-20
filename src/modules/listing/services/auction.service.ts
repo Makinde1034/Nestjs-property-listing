@@ -155,7 +155,7 @@ export class AuctionService {
   }
 
   async delete(id: string) {
-    const deleteAuction = await this.auctionRepository.delete(id);
+    const deleteAuction = await this.auctionRepository.softDelete(id);
     return deleteAuction;
   }
 }
