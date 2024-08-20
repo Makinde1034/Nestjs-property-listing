@@ -63,7 +63,9 @@ export class ListingTypeController {
 
   @Delete('delete-attributeSet-icon')
   @UseGuards(RestAccessTokenGuard)
-  async deleteAttributeSetIcon(@Query('attributeId') attributeSetId: string) {
+  async deleteAttributeSetIcon(
+    @Query('attributeSetId') attributeSetId: string,
+  ) {
     return await this.attributeService.deleteAttributeIcon(attributeSetId);
   }
 
