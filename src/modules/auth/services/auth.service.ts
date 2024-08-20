@@ -13,7 +13,23 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UserService } from '../../user/services/user.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+
+import { Company, User } from 'src/entities';
+import { AppDetail, RegisterEventAction, UserStatus } from 'src/common/enums';
+
+import { I18nService } from 'nestjs-i18n';
+
+import * as bcrypt from 'bcrypt';
+
+import * as crypto from 'crypto';
+
+import { JWTPayload } from 'src/common/interface';
+import { AppStrings } from 'src/common/messages/app.strings';
+import { SuccessResponse } from 'src/common/response';
+
 import {
   RegisterEventDto,
   RegisterInput,
@@ -29,21 +45,12 @@ import {
   TwoFaLoginInput,
   ConfirmationInput,
 } from '../dtos';
-import { Company, User } from 'src/entities';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { AppDetail, RegisterEventAction, UserStatus } from 'src/common/enums';
+import { UserRepository } from '../../user/repositories';
 import { MailgunEmailService } from '../../mail/services/implementations';
-import { ConfigService } from '@nestjs/config';
-import { I18nService } from 'nestjs-i18n';
-import * as bcrypt from 'bcrypt';
-import * as crypto from 'crypto';
-import { JwtService } from '@nestjs/jwt';
-import { JWTPayload } from 'src/common/interface';
-import { AppStrings } from 'src/common/messages/app.strings';
-import { SuccessResponse } from 'src/common/response';
+import { UserService } from '../../user/services/user.service';
+
 import { RecaptchaValidator } from './recaptcha.validator';
 import { TwoFactorAuthenticationService } from './two-fa-auth.service';
-import { UserRepository } from '../../user/repositories';
 
 @Injectable()
 export class AuthService {

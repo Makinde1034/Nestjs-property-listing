@@ -399,6 +399,26 @@ type CityEntitity {
   admin_name: String!
 }
 
+type SuccessResponse {
+  message: String!
+  data: String!
+}
+
+type TokenType {
+  accessToken: String!
+  refreshToken: String!
+}
+
+type LoginResponse {
+  user: User!
+  token: TokenType
+}
+
+type TwoFaResult {
+  user: User!
+  qrcodeImage: String!
+}
+
 type PermissionData {
   id: Float!
   slug: String!
@@ -418,26 +438,6 @@ type RoleData {
   name: String!
   slug: String!
   permissions: [PermissionData!]!
-}
-
-type TokenType {
-  accessToken: String!
-  refreshToken: String!
-}
-
-type LoginResponse {
-  user: User!
-  token: TokenType
-}
-
-type TwoFaResult {
-  user: User!
-  qrcodeImage: String!
-}
-
-type SuccessResponse {
-  message: String!
-  data: String!
 }
 
 type AuctionParticipant {
@@ -495,9 +495,15 @@ type AuctionResponse {
   total: Int!
 }
 
-type Payment {
-  id: String!
-  amount: Float!
+type InitiatePaymentResponse {
+  checkoutId: String
+  referenceId: String
+  timeStamp: String
+}
+
+type verifyPaymentResponse {
+  status: String
+  message: String!
 }
 
 type ReviewResponse {
@@ -787,7 +793,8 @@ type Mutation {
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!
-  verify: Payment!
+  initializePayment(paymentInput: InitiatePaymentInput!): InitiatePaymentResponse!
+  verifyPayment(verifyPaymentInput: verifyPaymentInput!): verifyPaymentResponse!
   createIssueCategory(RequestInput: CreateIssueCategoryInput!): IssueCategory!
   updateIssueCatgeory(RequestInput: UpdateIssueInput!): ParentIssue!
   deleteIssueCategory(RequestInput: DeleteIssueInput!): String!
@@ -1137,6 +1144,14 @@ input UpdateAdPackageInput {
   coverageRadius: String
   duration: String
   id: Int!
+}
+
+input InitiatePaymentInput {
+  amount: String
+}
+
+input verifyPaymentInput {
+  checkoutId: String
 }
 
 input CreateIssueCategoryInput {

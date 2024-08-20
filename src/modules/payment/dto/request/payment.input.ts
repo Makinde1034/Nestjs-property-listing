@@ -3,15 +3,24 @@
  * For license. See license.txt
  */
 
-import { IsString } from 'class-validator';
+import { Field, InputType } from '@nestjs/graphql';
 
+import { IsNotEmpty, IsString } from 'class-validator';
+
+@InputType()
 export class InitiatePaymentInput {
-  entityId?: string;
+  @Field({ nullable: true })
+  @IsNotEmpty()
   @IsString()
   amount: string;
-  currency?: string;
-  shopperUrl?: string;
-  paymentType?: string;
+}
+
+@InputType()
+export class verifyPaymentInput {
+  @Field({ nullable: true })
+  @IsNotEmpty()
+  @IsString()
+  checkoutId: string;
 }
 
 export class PerformCopyAndPayInput {

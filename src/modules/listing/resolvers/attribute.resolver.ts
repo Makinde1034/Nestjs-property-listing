@@ -5,7 +5,10 @@
 
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
-import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
+
+import { Permissions } from 'src/common/decorator/permission';
+
+import { AttributeService } from '../services';
 import {
   AttributeSetInput,
   AttributeDeleteInput,
@@ -14,8 +17,7 @@ import {
   AttributeUpdateInput,
 } from '../dtos/request';
 import { Attribute, AttributeSet } from '../../../entities';
-import { AttributeService } from '../services';
-import { Permissions } from 'src/common/decorator/permission';
+import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
 import { AttributeFilter } from '../dtos/request/attributes.dto';
 
 @Resolver()
