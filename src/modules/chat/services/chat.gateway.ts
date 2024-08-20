@@ -17,7 +17,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { AuthService } from '../../auth/services';
 import { User } from '../../../entities';
 import { CreateMessageInput } from '../dto/request/chat.dto';
-import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 
@@ -43,11 +42,11 @@ export class ChatGateway implements OnGatewayConnection {
     try {
       this.logger.log(`Client connected: ${socket.id}`);
       const token = socket.handshake.headers.authorization;
-      const chatId = socket.handshake.query.chatId as string;
+      const ticketId = socket.handshake.query.ticketId as string;
 
-      if (!token || !chatId) {
-        this.logger.warn('Missing token or chatId');
-        socket.emit('error', 'Authentication or chatId missing');
+      if (!token || !ticketId) {
+        this.logger.warn('Missing token or ticketId');
+        socket.emit('error', 'Authentication or ticketId missing');
         socket.disconnect();
         return;
       }
@@ -63,12 +62,12 @@ export class ChatGateway implements OnGatewayConnection {
       }
 
       // Join the chat room
-      socket.join(chatId);
-      this.logger.log(`Client ${socket.id} joined room: ${chatId}`);
+      socket.join(ticketId);
+      this.logger.log(`Client ${socket.id} joined room: ${ticketId}`);
 
-      // Store user and chatId in socket data if needed
+      // Store user and ticketId in socket data
       socket.data.user = user;
-      socket.data.chatId = chatId;
+      socket.data.ticketId = ticketId;
     } catch (error) {
       this.logger.error(`Error handling connection: ${error.message}`);
       socket.emit('error', error.message);
@@ -82,6 +81,9 @@ export class ChatGateway implements OnGatewayConnection {
     @ConnectedSocket() socket: Socket,
   ) {
     try {
+      this.logger.log(content, 'Chat service executed successfully');
+      this.logger.log(`Received message content: ${JSON.stringify(content)}`);
+
       const messageDto = plainToInstance(CreateMessageInput, content);
       const errors = await validate(messageDto);
 
@@ -90,12 +92,17 @@ export class ChatGateway implements OnGatewayConnection {
         socket.emit('error', { message: errors });
         return;
       }
+      this.logger.log('Chat service executed successfully');
 
       const user = socket.data.user as User;
-      const chatId = socket.data.chatId;
+      const ticketId = socket.data.ticketId;
 
-      await this.chatService.chat(content, user);
-      this.server.to(chatId).emit('receive_message', {
+      this.logger.log(`User: ${JSON.stringify(user)}, Ticket ID: ${ticketId}`);
+
+      await this.chatService.chat(content, ticketId, user);
+      this.logger.log('Chat service executed successfully');
+
+      this.server.to(ticketId).emit('receive_message', {
         content,
         user: {
           id: user.id,
@@ -105,6 +112,8 @@ export class ChatGateway implements OnGatewayConnection {
           arabicLastName: user.arabicLastName,
         },
       });
+
+      this.logger.log(`Message emitted to room: ${ticketId}`);
     } catch (error) {
       this.logger.error(`Error handling message: ${error.message}`);
       socket.emit('error', error.message);
@@ -113,23 +122,29 @@ export class ChatGateway implements OnGatewayConnection {
 
   @SubscribeMessage('fetch_message')
   async handleFetchMessages(
-    @MessageBody() content: PaginateAndSort,
     @ConnectedSocket() socket: Socket,
+    // @MessageBody() content?: PaginateAndSort,
   ) {
     try {
-      const findOptions = plainToInstance(PaginateAndSort, content);
-      const errors = await validate(findOptions);
+      //Uncomment to enable and add  class validation to paginateAndSort
+      // Const findOptions = plainToInstance(PaginateAndSort, content);
+      // Const errors = await validate(findOptions);
+      // If (errors.length > 0) {
+      //   This.logger.error('Validation failed:', errors);
+      //   Socket.emit('error', { message: errors });
+      //   Return;
+      // }
 
-      if (errors.length > 0) {
-        this.logger.error('Validation failed:', errors);
-        socket.emit('error', { message: errors });
-        return;
-      }
+      const ticketId = socket.data.ticketId;
+      this.logger.log(`Fetching messages for room: ${ticketId}`);
 
-      const chatId = socket.data.chatId;
-      const messages = await this.chatService.findMessages(findOptions, chatId);
+      const messages = await this.chatService.findMessages(
+        // FindOptions,
+        ticketId,
+      );
 
-      socket.emit('receive_message', messages);
+      socket.emit('fetch_message', messages);
+      this.logger.log(`Messages sent to client for room: ${ticketId}`);
     } catch (error) {
       this.logger.error(`Error handling fetch_message: ${error.message}`);
       socket.emit('error', error.message);

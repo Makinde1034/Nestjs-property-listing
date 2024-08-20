@@ -28,7 +28,7 @@ import { CreatePromotionInput } from '../dtos/request/promotion-input';
 import { PromotionRepository } from '../repositories/promotion.repository';
 
 import { AdPackageService } from '../../ad-package/services/ad-package.service';
-import { Between, QueryFailedError } from 'typeorm';
+import { Between, In, QueryFailedError } from 'typeorm';
 
 import { addDaysToDate } from '../../../common/utils/helper';
 import { FlagListingRepository } from '../repositories/flag-listing.repository';
@@ -56,6 +56,8 @@ import { ListingAttributeRepository } from '../repositories/listing-attributes.r
 import { ListingTypeService } from './listing-type.service';
 import { FurnishingStatusEnum } from '../../../common/enums';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
+import { GpsCoordinateRepository } from '../repositories/gps-coordinate.repository';
+import { AttributeRepository } from '../repositories';
 
 @Injectable()
 export class ListingService {
@@ -72,16 +74,19 @@ export class ListingService {
     private pushNotification: NotificationService,
     private listingTypeService: ListingTypeService,
     private readonly listingAttributesRepository: ListingAttributeRepository,
+    private gpsCoordinateRepository: GpsCoordinateRepository,
+    private attributeRepository: AttributeRepository,
   ) {}
   logger = new Logger(ListingService.name);
 
   async createListing(user: User, createListingDto: CreateListingDto) {
     try {
       createListingDto.userId = user.id;
-      const { attributes, ...rest } = createListingDto;
+      const { attributes, gpsCoordinate, ...rest } = createListingDto;
       const listingType = await this.listingTypeService.findOne(
         createListingDto.listingTypeId,
       );
+
       if (!listingType) {
         throw new BadRequestException(AppStrings.LISTING_TYPE_NOT_FOUND);
       }
@@ -105,11 +110,11 @@ export class ListingService {
         }
       });
 
-      const gpsCoordinate = JSON.stringify(createListingDto.gpsCoordinate);
+      const gps = await this.gpsCoordinateRepository.save(gpsCoordinate);
 
       const listing = await this.listingRepository.save({
         ...rest,
-        gpsCoordinate: gpsCoordinate,
+        gpsCoordinate: gps,
         userId: user.id,
       });
 
@@ -171,6 +176,7 @@ export class ListingService {
       return listing;
     } catch (error) {
       this.logger.log(error);
+
       if (error instanceof HttpException) {
         throw error;
       } else {
@@ -248,6 +254,7 @@ export class ListingService {
       );
 
       const {
+        gpsCoordinate,
         rentingOption,
         attributes,
         type,
@@ -301,8 +308,15 @@ export class ListingService {
           .select(columnsToSelect)
           .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
           .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
-          .leftJoinAndSelect('listing.listingType', 'listingType')
+          .innerJoinAndSelect('listing.listingType', 'listingType')
           .leftJoinAndSelect('listingType.attributeSets', 'attributeSets')
+
+          .where('listing.deletedAt IS NULL')
+
+          // Ensure listingType is not soft-deleted
+          .andWhere('listingType.deletedAt IS NULL')
+          .andWhere('attributeSets.deletedAt IS NULL')
+
           .where(
             'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented',
             {
@@ -331,6 +345,18 @@ export class ListingService {
             minPrice,
             maxPrice,
           });
+        }
+
+        if (gpsCoordinate) {
+          const { lng, lat } = gpsCoordinate;
+
+          // Join the gpsCoordinate relation
+          query
+            .leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate')
+            .andWhere('gpsCoordinate.lng = :lng AND gpsCoordinate.lat = :lat', {
+              lng,
+              lat,
+            });
         }
 
         if (rentingOption !== undefined) {
@@ -444,6 +470,7 @@ export class ListingService {
       );
 
       const {
+        gpsCoordinate,
         rentingOption,
         attributes,
         type,
@@ -493,18 +520,21 @@ export class ListingService {
         const query = this.listingRepository
           .createQueryBuilder('listing')
           .select(columnsToSelect)
-          .leftJoinAndSelect('listing.user', 'user')
           .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
           .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
-          .leftJoinAndSelect('listing.listingType', 'listingType')
-          .where(
+          .innerJoinAndSelect('listing.listingType', 'listingType')
+          .leftJoinAndSelect('listingType.attributeSets', 'attributeSets')
+          .where('listing.listingType IS NOT NULL')
+          .andWhere(
             'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented',
             {
               isListingDisabled: false,
               isListingSold: false,
               isListingRented: false,
             },
-          );
+          )
+          .andWhere('listingType.deletedAt IS NULL')
+          .andWhere('attributeSets.deletedAt IS NULL');
 
         if (isFeatured) {
           query
@@ -524,6 +554,16 @@ export class ListingService {
           query.andWhere('listing.rentingOption = :rentingOption', {
             rentingOption,
           });
+        }
+        if (gpsCoordinate) {
+          const { lng, lat } = gpsCoordinate;
+
+          query
+            .leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate')
+            .andWhere('gpsCoordinate.lng = :lng AND gpsCoordinate.lat = :lat', {
+              lng,
+              lat,
+            });
         }
 
         if (minPrice !== undefined && maxPrice !== undefined) {
@@ -550,32 +590,30 @@ export class ListingService {
             });
           }
 
-          if (attributeValue.length > 0) {
-            const [exactValues, rangeValues] = attributeValue.reduce(
-              ([exact, range], value) => {
-                if (Array.isArray(value) && value.length === 2) {
-                  range.push(value);
-                } else {
-                  exact.push(value);
-                }
-                return [exact, range];
-              },
-              [[], []] as [string[], [string, string][]],
+          const [exactValues, rangeValues] = attributeValue.reduce(
+            ([exact, range], value) => {
+              if (Array.isArray(value) && value.length === 2) {
+                range.push(value);
+              } else {
+                exact.push(value);
+              }
+              return [exact, range];
+            },
+            [[], []] as [string[], [string, string][]],
+          );
+
+          if (exactValues.length > 0) {
+            query.andWhere('listingAttributes.value IN (:...exactValues)', {
+              exactValues,
+            });
+          }
+
+          if (rangeValues.length > 0) {
+            const [minValue, maxValue] = rangeValues[0];
+            query.andWhere(
+              'listingAttributes.value BETWEEN :minValue AND :maxValue',
+              { minValue, maxValue },
             );
-
-            if (exactValues.length > 0) {
-              query.andWhere('listingAttributes.value IN (:...exactValues)', {
-                exactValues,
-              });
-            }
-
-            if (rangeValues.length > 0) {
-              const [minValue, maxValue] = rangeValues[0];
-              query.andWhere(
-                'listingAttributes.value BETWEEN :minValue AND :maxValue',
-                { minValue, maxValue },
-              );
-            }
           }
         }
 
@@ -620,7 +658,20 @@ export class ListingService {
       const listing = [...featuredListings, ...regularListings];
       const total = featuredCount + regularCount;
 
-      await this.searchHistoryRepository.save({ ...paginateAndSort, user });
+      this.saveSearchHistory(
+        {
+          attributes,
+          gpsCoordinate,
+          minPrice,
+          maxPrice,
+          minArea,
+          maxArea,
+          type,
+          rentingOption,
+          listingId,
+        },
+        user,
+      );
 
       return { listing, total };
     } catch (error) {
@@ -661,12 +712,13 @@ export class ListingService {
           whereCondition[dateField] = Between(startOfYear(now), endOfYear(now));
           break;
         default:
-          whereCondition = {}; // No date filter applied
+          whereCondition = {};
       }
 
       // Apply other filters
       whereCondition = {
         ...whereCondition,
+
         isListingPromoted: paginateAndSort.isListingPromoted,
         isListingSold: paginateAndSort.isListingSold,
         isListingFlagged: paginateAndSort.isListingFlagged,
@@ -738,7 +790,12 @@ export class ListingService {
     try {
       const listing = await this.listingRepository.findOne({
         where: { id: id },
-        relations: ['user', 'listingType', 'listingAttributes'],
+        relations: [
+          'user',
+          'listingType',
+          'listingAttributes',
+          'gpsCoordinate',
+        ],
         select: {
           user: {
             id: true,
@@ -757,7 +814,6 @@ export class ListingService {
           promotedDate: true,
           listingTypeId: true,
           userId: true,
-          gpsCoordinate: true,
           listingAttributes: true,
           images: true,
           panoramaView: true,
@@ -805,7 +861,7 @@ export class ListingService {
     try {
       const listing = await this.listingRepository.findOne({
         where: { id: id },
-        relations: ['listingType', 'listingAttributes'],
+        relations: ['gpsCoordinate', 'listingType', 'listingAttributes'],
         select: {
           id: true,
           title: true,
@@ -815,8 +871,6 @@ export class ListingService {
           featureDate: true,
           promotedDate: true,
           listingTypeId: true,
-
-          gpsCoordinate: true,
           listingAttributes: true,
           images: true,
           panoramaView: true,
@@ -895,42 +949,45 @@ export class ListingService {
       const updatePromises = [];
       const newAttributesPromises = [];
 
-      for (const element of attributes) {
-        const existingAttribute = existingAttributesMap.get(
-          element.attributeId,
-        );
+      if (attributes?.length > 0) {
+        for (const element of attributes) {
+          const existingAttribute = existingAttributesMap.get(
+            element.attributeId,
+          );
 
-        if (existingAttribute) {
-          if (element.value !== existingAttribute.value) {
-            updatePromises.push(
-              this.listingAttributesRepository.update(existingAttribute.id, {
-                value: element.value,
-              }),
+          if (existingAttribute) {
+            if (element.value !== existingAttribute.value) {
+              updatePromises.push(
+                this.listingAttributesRepository.update(existingAttribute.id, {
+                  value: element.value,
+                }),
+              );
+            }
+          } else {
+            // Fetch attribute details only if needed
+            newAttributesPromises.push(
+              this.attributeService
+                .findOneAttribute(element.attributeId)
+                .then((attribute) => ({
+                  ...element,
+                  name: attribute.englishName,
+                  listing,
+                })),
             );
           }
-        } else {
-          // Fetch attribute details only if needed
-          newAttributesPromises.push(
-            this.attributeService
-              .findOneAttribute(element.attributeId)
-              .then((attribute) => ({
-                ...element,
-                name: attribute.englishName,
-                listing,
-              })),
-          );
         }
+
+        // Wait for all attribute updates to complete
+        await Promise.all(updatePromises);
+
+        // Save new attributes
+        const newAttributes = await Promise.all(newAttributesPromises);
+        await this.listingAttributesRepository.save(newAttributes);
       }
-
-      // Wait for all attribute updates to complete
-      await Promise.all(updatePromises);
-
-      // Save new attributes
-      const newAttributes = await Promise.all(newAttributesPromises);
-      await this.listingAttributesRepository.save(newAttributes);
-
       // Prepare notifications
-      const wishlistUserIds = listing.wishlist.map((w) => w.userId);
+      const wishlistUserIds = listing.wishlist.map(
+        (wishlist) => wishlist.userId,
+      );
       const notificationPromises = [];
 
       if (partialUpdatePayload.price != undefined) {
@@ -968,11 +1025,79 @@ export class ListingService {
     }
   }
 
-  async uploadListingImage(id: string, files: Express.Multer.File[]) {
+  async uploadListingImage(
+    id: string,
+    imageId: string,
+    files: Express.Multer.File[],
+  ) {
     try {
-      const listing = await this.listingRepository.findOne({
-        where: { id },
-      });
+      const listing = await this.listingRepository.findOne({ where: { id } });
+
+      if (!listing) {
+        throw new BadRequestException('Listing not found');
+      }
+
+      const existingImages: any[] = listing.images
+        ? JSON.parse(listing.images)
+        : [];
+      // This.logger.log('Existing images:', existingImages);
+
+      // Upload the new files
+      const uploadPromises = files.map((file) =>
+        this.storageService.upload(file),
+      );
+      const uploadedUrls = await Promise.all(uploadPromises);
+
+      if (imageId) {
+        // Update existing image
+        let imageUpdated = false;
+        existingImages.map((image, index) => {
+          if (image.id == imageId) {
+            existingImages[index].url = uploadedUrls[0]; // Assuming single file upload
+            imageUpdated = true;
+          }
+        });
+
+        if (!imageUpdated) {
+          throw new BadRequestException('Image ID not found');
+        }
+      } else {
+        // Add new images
+        const newImages = uploadedUrls.map((url, index) => ({
+          id: (existingImages.length + index).toString(), // Generate unique ID
+          url,
+          isDeleted: false,
+          isPanorama: false, // Default value
+        }));
+
+        existingImages.push(...newImages);
+      }
+
+      // Stringify the updated images array for storage
+      const stringifiedImages = JSON.stringify(existingImages);
+      this.logger.log('Updated images:', stringifiedImages);
+
+      // Save the updated images to the database
+      await this.listingRepository.update(id, { images: stringifiedImages });
+
+      return new SuccessResponse(AppStrings.UPLOAD_SUCCESSFUL, existingImages);
+    } catch (error) {
+      this.logger.error(error.message || error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new BadRequestException(
+        error.message || 'Unexpected error occurred',
+      );
+    }
+  }
+  async uploadPanoramaImage(
+    id: string,
+    files: Express.Multer.File[],
+    imageId: string,
+  ) {
+    try {
+      const listing = await this.listingRepository.findOne({ where: { id } });
 
       if (!listing) {
         throw new BadRequestException('Listing not found');
@@ -988,84 +1113,47 @@ export class ListingService {
       );
       const uploadedUrls = await Promise.all(uploadPromises);
 
-      // Combine existing images with the newly uploaded ones
-      const updatedImages = [...existingImages];
+      if (imageId) {
+        // Update existing image
+        let imageUpdated = false;
+        existingImages.map((image, index) => {
+          if (image.id == imageId) {
+            existingImages[index].url = uploadedUrls[0]; // Assuming single file upload
+            imageUpdated = true;
+          }
+        });
 
-      uploadedUrls.forEach((url) => {
-        const image = {
-          id: updatedImages.length, // Increment ID based on the length of updatedImages
+        if (!imageUpdated) {
+          throw new BadRequestException('Image ID not found');
+        }
+      } else {
+        // Add new images
+        const newImages = uploadedUrls.map((url, index) => ({
+          id: (existingImages.length + index).toString(), // Generate unique ID
           url,
-          isPanorama: false, // Default value, can be modified later
-        };
-        updatedImages.push(image);
-      });
+          isDeleted: false,
+          isPanorama: true,
+        }));
+
+        existingImages.push(...newImages);
+      }
 
       // Stringify the updated images array for storage
-      const stringifiedImages = JSON.stringify(updatedImages);
+      const stringifiedImages = JSON.stringify(existingImages);
+      // This.logger.log('Updated images:', stringifiedImages);
 
       // Save the updated images to the database
       await this.listingRepository.update(id, { images: stringifiedImages });
 
-      return new SuccessResponse(
-        AppStrings.UPLOAD_SUCCESSFUL,
-        stringifiedImages,
-      );
+      return new SuccessResponse(AppStrings.UPLOAD_SUCCESSFUL, existingImages);
     } catch (error) {
-      this.logger.log(error);
-      if (error instanceof HttpException) {
-        throw error;
-      }
-      throw new BadRequestException(error.message || error.data);
-    }
-  }
-
-  async uploadPanoramaImage(id: string, file: Express.Multer.File) {
-    try {
-      const listing = await this.listingRepository.findOne({
-        where: { id },
-      });
-
-      if (!listing) {
-        throw new BadRequestException('Listing not found');
-      }
-
-      const existingImages: any[] = listing.images
-        ? JSON.parse(listing.images)
-        : [];
-
-      // Upload the new files
-      const uploadedUrl = await this.storageService.upload(file);
-
-      // Combine existing images with the newly uploaded ones
-      const updatedImages = [...existingImages];
-
-      const image = {
-        id: updatedImages.length, // Increment ID based on the length of updatedImages
-        uploadedUrl,
-        isPanorama: true, // Default value, can be modified later
-      };
-      updatedImages.push(image);
-
-      // Stringify the updated images array for storage
-      const stringifiedImages = JSON.stringify(updatedImages);
-
-      // Save the updated images to the database
-      await this.listingRepository.update(id, {
-        images: stringifiedImages,
-      });
-
-      await this.storageService.upload(file);
-      await this.listingRepository.update(id, {
-        images: stringifiedImages,
-      });
-
-      return new SuccessResponse('Upload successful', stringifiedImages);
-    } catch (error) {
-      this.logger.log(error);
+      this.logger.error('Error during panorama image upload', error);
       if (error instanceof HttpException) {
         throw error;
       } else {
-        throw new BadRequestException(error.messages || error.data);
+        throw new BadRequestException(
+          error.message || 'An unexpected error occurred during image upload',
+        );
       }
     }
   }
@@ -1226,12 +1314,24 @@ export class ListingService {
     }
   }
 
-  async getSearchHistory(id: string) {
+  async getSearchHistory(id: string, paginateAndSort: PaginateAndSort) {
     try {
-      const history = await this.searchHistoryRepository.find({
-        where: { userId: id },
-      });
-      return history;
+      const orderOptions = {
+        [paginateAndSort.sortField]: paginateAndSort.directionToSort,
+      };
+
+      if (paginateAndSort.take && paginateAndSort.skip) {
+        paginateAndSort.skip = 0;
+        paginateAndSort.take = 20;
+      }
+      const [searchHistory, total] =
+        await this.searchHistoryRepository.findAndCount({
+          where: { userId: id },
+          take: paginateAndSort.take,
+          skip: paginateAndSort.skip,
+          order: orderOptions,
+        });
+      return { searchHistory, total };
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -1240,33 +1340,39 @@ export class ListingService {
 
   async getOneListingForAdmin(id: string) {
     try {
-      const listing = await this.listingRepository.findOne({
-        where: { id: id },
-        relations: [
-          'user',
-          'listingAttributes',
-          'listingType',
+      const listing = await this.listingRepository
+        .createQueryBuilder('listing')
+        .leftJoinAndSelect('listing.user', 'user')
+        .leftJoinAndSelect('listing.listingType', 'listingType')
+        .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
+        .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
+        .leftJoinAndSelect('listing.promotion', 'promotion')
+        .leftJoinAndSelect('listing.feature', 'feature')
+        .where('listing.id = :id', { id })
+        .addSelect('listing.impressions')
+        .getOne();
 
-          'promotion',
-          'feature',
-        ],
-      });
+      if (!listing) {
+        throw new BadRequestException('Listing not found');
+      }
 
+      // Batch update impressions and return the listing in one go
       const newImpression = listing.impressions + 1;
 
-      await this.listingRepository.update(listing.id, {
-        impressions: newImpression,
-      });
+      await this.listingRepository
+        .createQueryBuilder()
+        .update()
+        .set({ impressions: newImpression })
+        .where('id = :id', { id: listing.id })
+        .execute();
 
       return listing;
     } catch (error) {
       this.logger.log(error);
       if (error instanceof HttpException) {
-        this.logger.log(error);
-
         throw error;
-      } else
-        throw new BadRequestException(error.messages || error.data || error);
+      }
+      throw new BadRequestException(error.message || error);
     }
   }
 
@@ -1294,12 +1400,11 @@ export class ListingService {
           adPackage: { ...adPackage },
           listing: { ...listing },
         });
-        const formatedDays = parseInt(adPackage.duration);
-        const expirationDate = addDaysToDate(new Date(), formatedDays);
+
         await this.listingRepository.update(listing.id, {
-          featureExpiration: expirationDate,
+          featureExpiration: createFeatureInput.endDate,
           isListingFeatured: true,
-          featureDate: new Date(),
+          featureDate: createFeatureInput.startDate,
         });
       }
 
@@ -1307,6 +1412,114 @@ export class ListingService {
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
+    }
+  }
+
+  /**
+   * Search history
+   */
+
+  async saveSearchHistory(
+    searchHistory: Partial<CreateSearchHistoryInput>,
+    user: User,
+  ) {
+    let attributes = [];
+
+    if (searchHistory.attributes) {
+      const attributeList = await this.attributeRepository.find({
+        where: { id: In(searchHistory.attributes.map((a) => a.attributeId)) },
+      });
+
+      const attributeMap = new Map(
+        attributeList.map((attr) => [attr.id, attr]),
+      );
+
+      attributes = searchHistory.attributes
+        .map((element) => {
+          const foundAttribute = attributeMap.get(element.attributeId);
+
+          if (foundAttribute) {
+            return {
+              id: foundAttribute.id,
+              englishName: foundAttribute.englishName,
+              arabicName: foundAttribute.arabicName,
+              value: element.value,
+            };
+          }
+          return null; // Or throw an error if all attributes should be found
+        })
+        .filter((attr) => attr !== null);
+    }
+
+    await this.searchHistoryRepository.save({
+      attributes: JSON.stringify(attributes),
+      gpsCoordinate: JSON.stringify(searchHistory.gpsCoordinate),
+      minPrice: searchHistory.minPrice,
+      maxPrice: searchHistory.maxPrice,
+      minArea: searchHistory.minArea,
+      maxArea: searchHistory.maxArea,
+      type: searchHistory.type,
+      rentingOption: searchHistory.rentingOption,
+      listingId: searchHistory.listingId,
+      user: user,
+    });
+  }
+
+  async deleteSavedHistory(id: string) {
+    const { affected } = await this.searchHistoryRepository.softDelete(id);
+    if (affected) {
+      return new SuccessResponse(AppStrings.LISTING_DELETED_SUCCESSFULLY);
+    }
+  }
+
+  async deleteListingImage(listingId: string, imageId: string) {
+    try {
+      const listing = await this.listingRepository.findOne({
+        where: { id: listingId },
+      });
+
+      if (!listing) {
+        throw new BadRequestException('Listing not found');
+      }
+
+      const existingImages: any[] = listing.images
+        ? JSON.parse(listing.images)
+        : [];
+
+      if (imageId) {
+        // Update the isDeleted flag for the specified imageId
+        let imageUpdated = false;
+        existingImages.forEach((image) => {
+          if (image.id === imageId) {
+            image.isDeleted = true; // Mark the image as deleted
+            imageUpdated = true;
+          }
+        });
+
+        if (!imageUpdated) {
+          throw new BadRequestException('Image ID not found');
+        }
+      } else {
+        // If no imageId is provided, mark all images as deleted
+        existingImages.forEach((image) => {
+          image.isDeleted = true;
+        });
+      }
+
+      const stringifiedImages = JSON.stringify(existingImages);
+
+      // Update the listing with the modified images array
+      await this.listingRepository.update(listingId, {
+        images: stringifiedImages,
+      });
+
+      return new SuccessResponse(
+        AppStrings.DELETED_SUCCESSFULLY,
+        existingImages,
+      );
+    } catch (error) {
+      // Handle errors appropriately
+      throw new BadRequestException(error.message || 'An error occurred');
     }
   }
 }

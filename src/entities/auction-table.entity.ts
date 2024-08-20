@@ -6,6 +6,7 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   OneToMany,
   UpdateDateColumn,
@@ -58,6 +59,10 @@ export class Auction extends BaseEntity {
   @Column({ default: false })
   @Field({ defaultValue: false })
   status: boolean;
+
+  @Field()
+  @DeleteDateColumn()
+  deletedAt: Date;
 
   @CreateDateColumn()
   @Field()

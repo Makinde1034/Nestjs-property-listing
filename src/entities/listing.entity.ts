@@ -12,6 +12,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
@@ -25,6 +26,7 @@ import { Feature } from './feature.entity';
 import { Wishlist } from './wishlist.entity';
 import { ListingType } from './listing-type.entity';
 import { ListingAttributes } from './listing-attributes.entity';
+import { GpsCoordinate } from './gps-coordinates.entity';
 
 @Entity()
 @ObjectType()
@@ -67,7 +69,10 @@ export class Listing extends BaseEntity {
 
   @Field(() => ListingType, { nullable: true })
   @JoinColumn({ name: 'listingTypeId' })
-  @ManyToOne(() => ListingType, (listingType) => listingType.listing, {})
+  @ManyToOne(() => ListingType, (listingType) => listingType.listing, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   @Index()
   listingType: ListingType;
 
@@ -75,9 +80,11 @@ export class Listing extends BaseEntity {
   @Column()
   listingTypeId: string;
 
-  @Field({ nullable: true })
-  @Column({ type: 'jsonb', nullable: true })
-  gpsCoordinate: string;
+  @Field(() => GpsCoordinate, { nullable: true })
+  @OneToOne(() => GpsCoordinate, (gpsCoordinate) => gpsCoordinate.listing, {
+    onDelete: 'CASCADE',
+  })
+  gpsCoordinate: GpsCoordinate;
 
   @Field(() => [ListingAttributes], { nullable: true })
   @OneToMany(

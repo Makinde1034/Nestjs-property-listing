@@ -105,7 +105,7 @@ export class AuthService {
         ...inputDto,
         company,
       };
-      const newUser = await this.userRepository.create(data);
+      const newUser = await this.userRepository.save(data);
       this.eventEmitter.emit(
         RegisterEventAction.USER_CREATED,
         new RegisterEventDto(newUser),
@@ -261,7 +261,10 @@ export class AuthService {
     this.validateApp(user, app);
 
     if (user.userType === 'admin') {
-      user = await this.userRepository.findById(user.id, ['roles']);
+      user = await this.userRepository.findOneOrFail({
+        where: { id: user.id },
+        relations: ['roles'],
+      });
     }
 
     // Return the user and the access tokens
@@ -538,7 +541,10 @@ export class AuthService {
       });
     }
 
-    const support = await this.userRepository.findById(user.id, ['roles']);
+    const support = await this.userRepository.findOneOrFail({
+      where: { id: user.id },
+      relations: ['roles'],
+    });
 
     const token = await this.issueTokens(support);
     return { user: support, token };

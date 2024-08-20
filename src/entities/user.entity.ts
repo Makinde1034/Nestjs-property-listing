@@ -28,7 +28,7 @@ import { Role } from './role.entity';
 import { Company } from './company.entity';
 import { UserNotificationPreference } from './notification-preference.entity';
 import { Review } from './review.entity';
-import { loadUserName } from 'src/common/utils/class-loader';
+import { loadUserName } from '../common/utils/class-loader';
 import { Listing } from './listing.entity';
 import { Offer } from './offer.entity';
 import { SearchHistory } from './search-history.entity';

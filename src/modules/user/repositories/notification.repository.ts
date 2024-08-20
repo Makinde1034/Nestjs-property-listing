@@ -11,7 +11,7 @@ import {
 import { EntityRepository } from '../../core/base.class/entity.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import BaseRepository from 'src/modules/core/base.class/base.repository';
+import BaseRepository from '../../core/base.class/base.repository';
 
 @Injectable()
 export class UserNotificationRepository extends EntityRepository<UserNotificationPreference> {

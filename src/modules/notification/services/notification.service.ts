@@ -82,7 +82,7 @@ export class NotificationService {
       message,
       deepLink,
     } = notification;
-    const users = await this.userRepository.findAll({
+    const users = await this.userRepository.find({
       where: { id: In([...recipients]) },
     });
     await Promise.all(

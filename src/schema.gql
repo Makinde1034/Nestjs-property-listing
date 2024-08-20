@@ -138,7 +138,8 @@ type FlagListing {
 type Feature {
   id: String!
   listingId: String!
-  expiredAt: DateTime
+  endDate: DateTime
+  startDate: DateTime
   adPackage: AdPackage!
   listing: Listing!
   createdAt: DateTime!
@@ -184,6 +185,7 @@ type Attribute {
   thiqaIntegration: [String!]
   attributeSets: [AttributeSet!]!
   listingAttribute: Attribute!
+  deletedAt: DateTime!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -194,6 +196,7 @@ type AttributeSet {
   englishName: String
   attributes: [Attribute!]
   listingTypes: [ListingType!]!
+  deletedAt: DateTime!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -206,7 +209,15 @@ type ListingType {
   listing: Listing!
   attributeSets: [AttributeSet!]
   createdAt: DateTime!
+  deletedAt: DateTime!
   updatedAt: DateTime!
+}
+
+type GpsCoordinate {
+  id: ID!
+  lat: Float!
+  lng: Float!
+  listing: GpsCoordinate!
 }
 
 type Listing {
@@ -222,7 +233,7 @@ type Listing {
   zatcaNumber: String
   listingType: ListingType
   listingTypeId: String
-  gpsCoordinate: String
+  gpsCoordinate: GpsCoordinate
   listingAttributes: [ListingAttributes!]
   images: String
   panoramaView: [String!]
@@ -256,16 +267,19 @@ type Listing {
 
 type SearchHistory {
   id: ID!
-  location: String
-  price: Float
-  numberOfBathrooms: [String!]!
-  numberOfRooms: [String!]!
-  type: String
-  listingType: String
-  isValid: Boolean!
-  createdAt: DateTime!
   userId: String
   user: [User!]!
+  minPrice: Float
+  maxPrice: Float
+  minArea: Float
+  maxArea: Float
+  gpsCoordinate: String
+  attributes: String
+  type: String
+  isValid: Boolean!
+  rentingOption: String
+  listingId: String
+  createdAt: DateTime!
   updatedAt: DateTime!
 }
 
@@ -385,6 +399,7 @@ type IssueCategory {
   name: String!
   parentIssues: [ParentIssue!]
   createdAt: DateTime!
+  deletedAt: DateTime!
   updatedAt: DateTime!
 }
 
@@ -458,6 +473,7 @@ type Auction {
   maxListing: Float!
   auctionParticipant: [AuctionParticipant!]!
   status: Boolean!
+  deletedAt: DateTime!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -492,6 +508,11 @@ type OfferResponse {
 
 type AuctionResponse {
   auctions: [Auction!]!
+  total: Int!
+}
+
+type SearchHistoryResponse {
+  searchHistory: [SearchHistory!]
   total: Int!
 }
 
@@ -603,7 +624,7 @@ type Query {
   findListingForBuyerAuthenticated(findManyOptions: CreateSearchHistoryInput): ListingResponse!
   viewFlaggedListings(findManyOptions: PaginateAndSort): FlaggedListingResponse
   getMessageInLocalLanguage: SuccessResponse
-  getSearchHistory: [SearchHistory!]
+  getSearchHistory(paginateAndSort: PaginateAndSort!): SearchHistoryResponse
   findOneOffer(id: String!): Offer!
   findOffers(findOptions: FindOfferInput!): OfferResponse!
   getWishlist: [Wishlist!]!
@@ -668,10 +689,16 @@ input CreateSearchHistoryInput {
   maxPrice: Float
   minArea: Float
   maxArea: Float
+  gpsCoordinate: LocationDto
   attributes: [Attributes!]
   type: String
   rentingOption: String
   listingId: String
+}
+
+input LocationDto {
+  lng: Float!
+  lat: Float!
 }
 
 input Attributes {
@@ -790,6 +817,7 @@ type Mutation {
   updateAuction(updateAuctionInput: UpdateAuctionInput!): Auction!
   id(id: String!): Auction!
   addAuctionParticipant(createAuctionParticipantInput: CreateAuctionParticipantInput!): AuctionParticipant!
+  deleteSavedHistory: SuccessResponse!
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!
@@ -1038,11 +1066,6 @@ input CreateListingDto {
   negotiable: Boolean = false
 }
 
-input LocationDto {
-  lng: String!
-  lat: String!
-}
-
 input UpdateListingDto {
   title: String
   purpose: String
@@ -1099,6 +1122,8 @@ input CreateWishlistInput {
 input CreateFeatureInput {
   listingId: String!
   adPackageId: String!
+  startDate: DateTime!
+  endDate: DateTime!
 }
 
 input CreateAuctionInput {

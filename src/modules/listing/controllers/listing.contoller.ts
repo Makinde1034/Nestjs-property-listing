@@ -5,6 +5,7 @@
 
 import {
   Controller,
+  Delete,
   Post,
   Query,
   UploadedFiles,
@@ -18,24 +19,42 @@ import { RestAccessTokenGuard } from '../../auth/guards';
 @Controller('listing')
 export class ListingController {
   constructor(private listingService: ListingService) {}
-
   @Post('listing-image-upload')
-  // @UseGuards(RestAccessTokenGuard)
+  @UseGuards(RestAccessTokenGuard)
   @UseInterceptors(AnyFilesInterceptor())
   async uploadListingImage(
     @Query('listingId') listingId: string,
+    @Query('imageId') imageId: string,
     @UploadedFiles() files: Express.Multer.File[],
   ) {
-    return await this.listingService.uploadListingImage(listingId, files);
+    return await this.listingService.uploadListingImage(
+      listingId,
+      imageId,
+      files,
+    );
   }
 
   @Post('panorama-listing-image-upload')
-  // @UseGuards(RestAccessTokenGuard)
+  @UseGuards(RestAccessTokenGuard)
   @UseInterceptors(AnyFilesInterceptor())
   async uploadPanoramaListingImage(
     @Query('listingId') listingId: string,
-    @UploadedFiles() file: Express.Multer.File,
+    @Query('imageId') imageId: string,
+    @UploadedFiles() file: Express.Multer.File[],
   ) {
-    return await this.listingService.uploadPanoramaImage(listingId, file);
+    return await this.listingService.uploadPanoramaImage(
+      listingId,
+      file,
+      imageId,
+    );
+  }
+
+  @Delete('delete-listing-image')
+  @UseGuards(RestAccessTokenGuard)
+  async deleteListingImage(
+    @Query('listingId') listingId: string,
+    @Query('imageId') imageId: string,
+  ) {
+    return await this.listingService.deleteListingImage(listingId, imageId);
   }
 }

@@ -4,11 +4,18 @@
  */
 
 import { Field, InputType } from '@nestjs/graphql';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsNumber,
+  IsObject,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
 import { RentingOption } from '../../../../common/enums';
 import { Attributes } from './listing.dto';
+import { LocationDto } from '../../../location/dto/request/location.dto';
 @InputType()
 export class CreateSearchHistoryInput extends PaginateAndSort {
   @IsOptional()
@@ -30,6 +37,11 @@ export class CreateSearchHistoryInput extends PaginateAndSort {
   @IsNumber()
   @Field({ nullable: true })
   maxArea: number;
+
+  @IsOptional()
+  @IsObject()
+  @Field({ nullable: true })
+  gpsCoordinate: LocationDto;
 
   @IsOptional()
   @Field(() => [Attributes], { nullable: true })

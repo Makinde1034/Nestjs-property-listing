@@ -5,16 +5,12 @@
 
 import { Injectable } from '@nestjs/common';
 import { Ticket } from '../../../entities';
-import { EntityRepository } from '../../core/base.class/entity.repository';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+
+import { DataSource, Repository } from 'typeorm';
 
 @Injectable()
-export class TicketRepository extends EntityRepository<Ticket> {
-  constructor(
-    @InjectRepository(Ticket)
-    private readonly repository: Repository<Ticket>,
-  ) {
-    super(repository);
+export class TicketRepository extends Repository<Ticket> {
+  constructor(private dataSource: DataSource) {
+    super(Ticket, dataSource.createEntityManager());
   }
 }

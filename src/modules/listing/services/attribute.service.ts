@@ -88,13 +88,13 @@ export class AttributeService {
     icon?: Express.Multer.File,
   ): Promise<Attribute> {
     try {
+      let imageUrl: string;
       const attribute = await this.attributeRepository.findOneBy({ id });
 
       if (!attribute) {
         throw new BadRequestException(AppStrings.NOT_FOUND);
       }
 
-      let imageUrl: string | undefined;
       if (icon) {
         // Upload icon image only if provided
         imageUrl = await this.storageService.upload(icon);
@@ -102,17 +102,22 @@ export class AttributeService {
 
       // Perform update only if the image URL exists
       if (imageUrl) {
-        const { affected } = await this.attributeRepository.update(id, {
-          icon: imageUrl,
-        });
+        const { affected } = await this.attributeRepository.update(
+          attribute.id,
+          {
+            icon: imageUrl,
+          },
+        );
 
         // Fetch updated entity only if update was successful
         if (affected > 0) {
-          return this.attributeRepository.findOneOrFail({ where: { id } });
+          return this.attributeRepository.findOneOrFail({
+            where: { id: attribute.id },
+          });
         }
       }
 
-      return attribute; // Return original attribute if no update was needed
+      return attribute;
     } catch (error) {
       this.logger.error('Error uploading attribute icon:', error);
       throw new BadRequestException(
@@ -136,20 +141,24 @@ export class AttributeService {
     const attributeData: Partial<Attribute> = {
       ...data,
     };
+
     if (icon) {
       // Upload icon image
       const imageurl = await this.storageService.upload(icon);
       attributeData.icon = imageurl;
+    }
 
-      const update = await this.attributeRepository.update(
-        data.id,
-        attributeData,
-      );
-      if (update.affected > 0) {
-        return this.attributeRepository.findOneOrFail({
-          where: { id: data.id },
-        });
-      }
+    const update = await this.attributeRepository.update(
+      data.id,
+      attributeData,
+    );
+
+    if (update.affected > 0) {
+      const payload = await this.attributeRepository.findOneOrFail({
+        where: { id: data.id },
+      });
+
+      return payload;
     }
   }
 
@@ -168,7 +177,7 @@ export class AttributeService {
     if (attribute.attributeSets && attribute.attributeSets.length > 0) {
       throw new BadRequestException(AppStrings.UNABLE_TO_DELETE_ATTRIBUTE);
     }
-    await this.attributeRepository.delete(data.id);
+    await this.attributeRepository.softDelete(data.id);
     return AppStrings.ATTRIBUTE_DELETED_SUCCESSFULLY;
   }
 
@@ -241,7 +250,7 @@ export class AttributeService {
    * @returns {Promise<string>}
    */
   async deleteAttributeSet(data: AttributeDeleteInput): Promise<string> {
-    await this.attributeSetRepository.delete(data.id);
+    await this.attributeSetRepository.softDelete(data.id);
     return AppStrings.ATTRIBUTESET_DELETED_SUCCESSFULLY;
   }
 }

@@ -15,7 +15,7 @@ import {
 } from 'typeorm';
 import BaseEntity from './base.entity';
 import { User } from './user.entity';
-import { TicketStatus } from 'src/common/enums';
+import { TicketStatus } from '../common/enums';
 import { Exclude } from 'class-transformer';
 import { Chat } from './chat.entity';
 import { ParentIssue } from './parent-issue.entity';

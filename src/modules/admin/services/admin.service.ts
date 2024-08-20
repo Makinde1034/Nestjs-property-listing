@@ -103,6 +103,8 @@ export class AdminService {
     return avgTimeDifference;
   }
 
+  //TODO implement when payment gateway is completed
+
   saiiFees(findOptions: AdminDashboardSort) {
     const saiiFees: SaiiFees = {
       total: 95000 + findOptions.value,
@@ -149,7 +151,7 @@ export class AdminService {
 
     // Query for placed orders in the past year
     const placedOrders = await this.offerRepository
-      .queryBuilder('offer')
+      .createQueryBuilder('offer')
       .select('EXTRACT(YEAR FROM offer.createdAt)::int', 'year')
       .addSelect('EXTRACT(QUARTER FROM offer.createdAt)::int', 'quarter')
       .addSelect('SUM(offer.offerPrice)::float', 'totalOrdered')
@@ -250,7 +252,7 @@ export class AdminService {
     try {
       // Count users within the specified date range
       const users = await this.userRepository
-        .queryBuilder('user')
+        .createQueryBuilder('user')
         .where('user.createdAt BETWEEN :startOfRange AND :endOfRange', {
           startOfRange,
           endOfRange,
@@ -338,7 +340,7 @@ export class AdminService {
     try {
       const [userDemographyResult, totalListings] = await Promise.all([
         this.userRepository
-          .queryBuilder('user')
+          .createQueryBuilder('user')
           .select('user.city')
           .addSelect('COUNT(*)', 'total')
           .where('user.createdAt BETWEEN :startOfRange AND :endOfRange', {
@@ -380,7 +382,7 @@ export class AdminService {
 
     try {
       const result = await this.userRepository
-        .queryBuilder('user')
+        .createQueryBuilder('user')
         .select('user.nationality')
         .addSelect('COUNT(*)', 'count')
         .where('user.createdAt BETWEEN :startOfRange AND :endOfRange', {
@@ -416,7 +418,7 @@ export class AdminService {
 
     try {
       const result = await this.userRepository
-        .queryBuilder('user')
+        .createQueryBuilder('user')
         .select('user.gender')
         .addSelect('COUNT(*)', 'count')
         .where('user.createdAt BETWEEN :startOfRange AND :endOfRange', {
@@ -451,7 +453,7 @@ export class AdminService {
 
     try {
       const result = await this.userRepository
-        .queryBuilder('user')
+        .createQueryBuilder('user')
         .select(
           `
           CASE

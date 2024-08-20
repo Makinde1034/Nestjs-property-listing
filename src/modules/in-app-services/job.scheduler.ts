@@ -38,7 +38,10 @@ export class JobService {
     searchHistory.map(async (element) => {
       const listing = await this.listingRepository.findOneOrFail({
         where: {
-          price: element.price,
+          price: element.minPrice,
+
+          rentingOption: element.rentingOption,
+
           purpose: element.type, //TODO: add more conditions
         },
         relations: ['user'],
@@ -67,7 +70,7 @@ export class JobService {
      *
      **************************/
     await this.offerRepository
-      .queryBuilder('offer')
+      .createQueryBuilder('offer')
       .update(Offer)
       .set({ status: 'expired' })
       .where('offer.expireAt > :date', { date: new Date() })
@@ -85,7 +88,7 @@ export class JobService {
       },
     });
     const records = await this.offerRepository
-      .queryBuilder('offer')
+      .createQueryBuilder('offer')
       .leftJoinAndSelect('offer.user', 'user')
       .leftJoinAndSelect('offer.listing', 'listing')
       .where('offer.createdAt = :targetDate', {

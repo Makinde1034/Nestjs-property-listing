@@ -28,23 +28,22 @@ export class ListingTypeController {
 
   /**
    * Upload Attribute with Icon
-   *
    * @async
    * @returns {Promise<Attribute>}
    */
   @UseInterceptors(FileInterceptor('icon'))
   @Permissions('create-attribute-set')
   @Post('/attribute/upload')
-  // @UseGuards(RestAccessTokenGuard, PermissionsGuard)
+  @UseGuards(RestAccessTokenGuard, PermissionsGuard)
   async uploadAttributeIcon(
     @Query('attributId') attributId: string,
     @UploadedFile() icon: Express.Multer.File,
   ): Promise<Attribute> {
     return await this.attributeService.uploadAttributeIcon(attributId, icon);
   }
+
   /**
    * Upload Attribute with Icon
-   *
    * @async
    * @returns {Promise<Attribute>}
    */
