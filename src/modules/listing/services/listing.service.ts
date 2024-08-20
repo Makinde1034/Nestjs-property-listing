@@ -1421,17 +1421,20 @@ export class ListingService {
     searchHistory: Partial<CreateSearchHistoryInput>,
     user: User,
   ) {
-    let attributes;
+    let attributes = [];
+
     if (searchHistory.attributes) {
-      const attribute = await this.attributeRepository.find({
+      const attributeList = await this.attributeRepository.find({
         where: { id: In(searchHistory.attributes.map((a) => a.attributeId)) },
       });
 
+      const attributeMap = new Map(
+        attributeList.map((attr) => [attr.id, attr]),
+      );
+
       attributes = searchHistory.attributes
         .map((element) => {
-          const foundAttribute = attribute.find(
-            (value) => value.id === element.attributeId,
-          );
+          const foundAttribute = attributeMap.get(element.attributeId);
 
           if (foundAttribute) {
             return {
@@ -1441,11 +1444,9 @@ export class ListingService {
               value: element.value,
             };
           }
-          return null;
+          return null; // Or throw an error if all attributes should be found
         })
         .filter((attr) => attr !== null);
-    } else {
-      attributes = [];
     }
 
     await this.searchHistoryRepository.save({
