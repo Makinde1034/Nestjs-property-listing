@@ -473,7 +473,6 @@ export class ListingService {
         gpsCoordinate,
         rentingOption,
         attributes,
-        type,
         listingId,
         sortField,
         directionToSort,
