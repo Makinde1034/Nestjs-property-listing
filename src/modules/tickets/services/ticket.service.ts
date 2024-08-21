@@ -8,10 +8,7 @@ import { TicketRepository } from '../repositories';
 import { CreateTicketInput, ListTicketInput, UpdateTicketInput } from '../dtos';
 import { AppStrings } from 'src/common/messages/app.strings';
 import { Ticket, User } from 'src/entities';
-import {
-  IssueCategoryRepository,
-  IssueRepository,
-} from '../../issue/repositories';
+import { IssueRepository } from '../../issue/repositories';
 import { TicketStatus } from 'src/common/enums';
 import { FindManyOptions } from 'typeorm';
 import { ChildIssueRepository } from '../../issue/repositories/child-issue.repository';
@@ -20,7 +17,6 @@ import { ChildIssueRepository } from '../../issue/repositories/child-issue.repos
 export class TicketService {
   constructor(
     private readonly ticketRepository: TicketRepository,
-    private readonly issueCategoryRepository: IssueCategoryRepository,
 
     private childIssueRepository: ChildIssueRepository,
     private readonly issueRepository: IssueRepository,

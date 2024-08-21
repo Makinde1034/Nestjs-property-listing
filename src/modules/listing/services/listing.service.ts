@@ -1001,7 +1001,12 @@ export class ListingService {
       if (update.affected > 0) {
         return await this.listingRepository.findOneOrFail({
           where: { id },
-          relations: ['user', 'listingType', 'listingAttributes'],
+          relations: [
+            'user',
+            'listingType',
+            'listingAttributes',
+            'gpsCoordinate',
+          ],
         });
       }
     } catch (error) {
@@ -1208,7 +1213,10 @@ export class ListingService {
         });
         const date = new Date();
 
-        await this.listingRepository.update(listing.id, { flaggedDate: date });
+        await this.listingRepository.update(listing.id, {
+          isListingFlagged: true,
+          flaggedDate: date,
+        });
 
         return new SuccessResponse(AppStrings.LISTING_FLAG_SUCCESSFULL);
       }

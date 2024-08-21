@@ -130,11 +130,12 @@ export class FlagListingInput {
   listingId: string;
 
   @Field()
-  @IsEnum(ListingFlagType)
-  parentIssue: string;
+  @IsUUID()
+  @IsNotEmpty()
+  parentIssueId: string;
 
   @Field()
-  @IsString()
+  @IsUUID()
   @IsNotEmpty()
   childIssue: string;
 }

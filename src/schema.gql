@@ -298,8 +298,7 @@ type ChildIssue {
 
 type ParentIssue {
   id: ID!
-  issueCategory: IssueCategory
-  issueCategoryId: String!
+  placement: String!
   ticket: [Ticket!]
   childIssue: [ChildIssue!]
   parentReason: String
@@ -392,15 +391,6 @@ type Notification {
   expiredAt: DateTime
   recipient: User!
   createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type IssueCategory {
-  id: ID!
-  name: String!
-  parentIssues: [ParentIssue!]
-  createdAt: DateTime!
-  deletedAt: DateTime!
   updatedAt: DateTime!
 }
 
@@ -634,8 +624,7 @@ type Query {
   getAllAuction(findManyOptions: PaginateAndSort!): AuctionResponse!
   adPackages: [AdPackage!]!
   adPackage(id: String!): AdPackage!
-  fetchIssueCategories: [IssueCategory!]!
-  fetchIssues(categoryId: String!): [ParentIssue!]!
+  fetchIssues(placement: String!): [ParentIssue!]!
   fetchChildIssues(parentId: String!): [ChildIssue!]!
   getTicket(ticketId: String!): Ticket!
   listTickets(findOptions: ListTicketInput): [Ticket!]!
@@ -825,12 +814,12 @@ type Mutation {
   removeAdPackage(id: Int!): AdPackage!
   initializePayment(paymentInput: InitiatePaymentInput!): InitiatePaymentResponse!
   verifyPayment(verifyPaymentInput: verifyPaymentInput!): verifyPaymentResponse!
-  createIssueCategory(RequestInput: CreateIssueCategoryInput!): IssueCategory!
-  updateIssueCatgeory(RequestInput: UpdateIssueInput!): ParentIssue!
-  deleteIssueCategory(RequestInput: DeleteIssueInput!): String!
   createIssue(RequestInput: CreateIssueInput!): ParentIssue!
   updateIssue(RequestInput: UpdateIssueInput!): ParentIssue!
-  deleteIssue(RequestInput: DeleteIssueInput!): String!
+  deleteIssue(id: String!): String!
+  createChildIssue(input: CreateChildIssueInput!): ParentIssue!
+  updateChildIssue(RequestInput: UpdateIssueInput!): ParentIssue!
+  deleteChildIssue(id: String!): String!
   createTicket(RequestInput: CreateTicketInput!): String!
   manageTicket(RequestInput: UpdateTicketInput!): Ticket!
   createReview(createReviewDto: CreateReviewDto!): Review!
@@ -1088,7 +1077,7 @@ input UpdateListingDto {
 
 input FlagListingInput {
   listingId: String!
-  parentIssue: String!
+  parentIssueId: String!
   childIssue: String!
 }
 
@@ -1181,26 +1170,25 @@ input verifyPaymentInput {
   checkoutId: String
 }
 
-input CreateIssueCategoryInput {
-  name: String!
+input CreateIssueInput {
+  placement: String!
+  parentReason: String!
+  parentArabicReason: String!
+  sequentialId: Float!
 }
 
 input UpdateIssueInput {
-  categoryId: String
+  placement: String
   parentReason: String
   parentArabicReason: String
   sequentialId: Float
   id: String!
 }
 
-input DeleteIssueInput {
-  id: String!
-}
-
-input CreateIssueInput {
-  categoryId: String!
-  parentReason: String!
-  parentArabicReason: String!
+input CreateChildIssueInput {
+  parentId: String!
+  childReason: String!
+  childArabicReason: String!
   sequentialId: Float!
 }
 

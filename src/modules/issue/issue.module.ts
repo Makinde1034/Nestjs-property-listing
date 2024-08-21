@@ -7,19 +7,20 @@ import { Module } from '@nestjs/common';
 import { IssueResolver } from './resolvers';
 import { IssueService } from './services';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ParentIssue, IssueCategory, ChildIssue } from 'src/entities';
-import { IssueCategoryRepository, IssueRepository } from './repositories';
+import { ParentIssue, ChildIssue } from 'src/entities';
+
 import { ChildIssueRepository } from './repositories/child-issue.repository';
+import { IssueRepository } from './repositories';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ParentIssue, IssueCategory, ChildIssue])],
+  imports: [TypeOrmModule.forFeature([ParentIssue, ChildIssue])],
   providers: [
     IssueResolver,
     IssueService,
+    ParentIssue,
     IssueRepository,
-    IssueCategoryRepository,
     ChildIssueRepository,
   ],
-  exports: [IssueRepository, IssueCategoryRepository, ChildIssueRepository],
+  exports: [IssueRepository, ChildIssueRepository],
 })
 export class IssueModule {}

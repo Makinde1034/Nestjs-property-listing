@@ -14,7 +14,6 @@ export * from './attribute-set.entity';
 export * from './listing-type.entity';
 export * from './role.entity';
 export * from './permission.entity';
-export * from './issue-category.entity';
 export * from './child-issue.entity';
 export * from './ticket.entity';
 export * from './notification-preference.entity';
