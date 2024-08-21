@@ -484,6 +484,7 @@ export class ListingService {
         maxArea,
         searchHistory,
         take: initialTake,
+        purpose,
       } = paginateAndSort;
 
       const attributeId: string[] = [];
@@ -575,8 +576,8 @@ export class ListingService {
           });
         }
 
-        if (type !== undefined) {
-          query.andWhere('listing.purpose = :type', { type });
+        if (purpose !== undefined) {
+          query.andWhere('listing.purpose =:purpose', { purpose });
         }
 
         if (listingId !== undefined) {
@@ -672,6 +673,7 @@ export class ListingService {
             type: JSON.stringify(listing[0].listingType),
             rentingOption,
             listingId,
+            purpose,
           },
           user,
         );
@@ -1453,6 +1455,7 @@ export class ListingService {
 
     await this.searchHistoryRepository.save({
       attributes: JSON.stringify(attributes),
+      purpose: searchHistory.purpose,
       gpsCoordinate: JSON.stringify(searchHistory.gpsCoordinate),
       minPrice: searchHistory.minPrice,
       maxPrice: searchHistory.maxPrice,

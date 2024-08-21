@@ -14,7 +14,7 @@ import {
 } from 'class-validator';
 
 import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
-import { RentingOption } from '../../../../common/enums';
+import { Purpose, RentingOption } from '../../../../common/enums';
 import { Attributes } from './listing.dto';
 import { LocationDto } from '../../../location/dto/request/location.dto';
 
@@ -29,6 +29,11 @@ export class CreateSearchHistoryInput extends PaginateAndSort {
   @IsNumber()
   @Field({ nullable: true })
   maxPrice: number;
+
+  @IsOptional()
+  @Field({ nullable: true })
+  @IsEnum(Purpose)
+  purpose: string;
 
   @IsOptional()
   @IsNumber()

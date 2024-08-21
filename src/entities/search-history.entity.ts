@@ -34,6 +34,10 @@ export class SearchHistory extends BaseEntity {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
+  purpose: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   maxPrice: number;
 
   @Column({ nullable: true })
