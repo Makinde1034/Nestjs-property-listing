@@ -258,7 +258,7 @@ export class ListingService {
         rentingOption,
         attributes,
         purpose,
-        listingId,
+        listingTypeId,
         sortField,
         directionToSort,
         skip,
@@ -368,9 +368,9 @@ export class ListingService {
           query.andWhere('listing.purpose = :type', { purpose });
         }
 
-        if (listingId !== undefined) {
+        if (listingTypeId !== undefined) {
           query.andWhere('listing.listingTypeId = :listingTypeId', {
-            listingTypeId: listingId,
+            listingTypeId: listingTypeId,
           });
         }
 
@@ -472,7 +472,7 @@ export class ListingService {
         gpsCoordinate,
         rentingOption,
         attributes,
-        listingId,
+        listingTypeId,
         sortField,
         directionToSort,
         skip,
@@ -577,9 +577,9 @@ export class ListingService {
           query.andWhere('listing.purpose =:purpose', { purpose });
         }
 
-        if (listingId !== undefined) {
+        if (listingTypeId !== undefined) {
           query.andWhere('listing.listingTypeId = :listingTypeId', {
-            listingTypeId: listingId,
+            listingTypeId: listingTypeId,
           });
         }
 
@@ -667,9 +667,7 @@ export class ListingService {
             maxPrice,
             minArea,
             maxArea,
-            type: JSON.stringify(listing[0].listingType),
             rentingOption,
-            listingId,
             purpose,
           },
           user,
@@ -1457,6 +1455,9 @@ export class ListingService {
         })
         .filter((attr) => attr !== null);
     }
+    const type = await this.listingTypeService.findOne(
+      searchHistory.listingTypeId,
+    );
 
     await this.searchHistoryRepository.save({
       attributes: JSON.stringify(attributes),
@@ -1466,9 +1467,8 @@ export class ListingService {
       maxPrice: searchHistory.maxPrice,
       minArea: searchHistory.minArea,
       maxArea: searchHistory.maxArea,
-      type: searchHistory.type,
+      type: JSON.stringify(type),
       rentingOption: searchHistory.rentingOption,
-      listingId: searchHistory.listingId,
       user: user,
     });
   }

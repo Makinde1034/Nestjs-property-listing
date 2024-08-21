@@ -62,9 +62,10 @@ export class IssueResolver {
    */
 
   @Query(() => [ParentIssue])
-  @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions('create-issues-categories')
   async fetchIssues(
-    @Args('placement') placement: string,
+    @Args('placement', { nullable: true }) placement: string,
   ): Promise<ParentIssue[]> {
     return await this.issueService.findAllIssuesByPlacement(placement);
   }

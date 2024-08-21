@@ -121,10 +121,21 @@ export class IssueService {
   }
 
   async findAllIssuesByPlacement(placement: string): Promise<ParentIssue[]> {
-    return await this.issueRepository.find({
-      where: { placement: placement },
-      order: { sequentialId: 'ASC' },
-    });
+    try {
+      if (placement) {
+        return await this.issueRepository.find({
+          where: { placement: placement },
+          order: { sequentialId: 'ASC' },
+        });
+      } else {
+        return await this.issueRepository.find({
+          order: { sequentialId: 'ASC' },
+        });
+      }
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
   }
 
   async updateIssue(input: UpdateIssueInput): Promise<ParentIssue> {

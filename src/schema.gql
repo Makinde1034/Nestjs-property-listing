@@ -624,7 +624,7 @@ type Query {
   getAllAuction(findManyOptions: PaginateAndSort!): AuctionResponse!
   adPackages: [AdPackage!]!
   adPackage(id: String!): AdPackage!
-  fetchIssues(placement: String!): [ParentIssue!]!
+  fetchIssues(placement: String): [ParentIssue!]!
   fetchChildIssues(parentId: String!): [ChildIssue!]!
   getTicket(ticketId: String!): Ticket!
   listTickets(findOptions: ListTicketInput): [Ticket!]!
@@ -684,7 +684,7 @@ input CreateSearchHistoryInput {
   attributes: [Attributes!]
   searchHistory: Boolean
   rentingOption: String
-  listingId: String
+  listingTypeId: String
 }
 
 input LocationDto {
