@@ -270,6 +270,7 @@ type SearchHistory {
   userId: String
   user: [User!]!
   minPrice: Float
+  purpose: String
   maxPrice: Float
   minArea: Float
   maxArea: Float
@@ -687,11 +688,11 @@ input CreateSearchHistoryInput {
   where: WhereOption
   minPrice: Float
   maxPrice: Float
+  purpose: String
   minArea: Float
   maxArea: Float
   gpsCoordinate: LocationDto
   attributes: [Attributes!]
-  type: String
   searchHistory: Boolean
   rentingOption: String
   listingId: String
