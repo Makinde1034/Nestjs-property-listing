@@ -1458,7 +1458,7 @@ export class ListingService {
       maxPrice: searchHistory.maxPrice,
       minArea: searchHistory.minArea,
       maxArea: searchHistory.maxArea,
-      type: searchHistory.purpose,
+      type: searchHistory.type,
       rentingOption: searchHistory.rentingOption,
       listingId: searchHistory.listingId,
       user: user,
