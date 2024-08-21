@@ -257,7 +257,7 @@ export class ListingService {
         gpsCoordinate,
         rentingOption,
         attributes,
-        type,
+        purpose,
         listingId,
         sortField,
         directionToSort,
@@ -365,8 +365,8 @@ export class ListingService {
           });
         }
 
-        if (type !== undefined) {
-          query.andWhere('listing.purpose = :type', { type });
+        if (purpose !== undefined) {
+          query.andWhere('listing.purpose = :type', { purpose });
         }
 
         if (listingId !== undefined) {
@@ -1460,7 +1460,7 @@ export class ListingService {
       maxPrice: searchHistory.maxPrice,
       minArea: searchHistory.minArea,
       maxArea: searchHistory.maxArea,
-      type: searchHistory.type,
+      type: searchHistory.purpose,
       rentingOption: searchHistory.rentingOption,
       listingId: searchHistory.listingId,
       user: user,

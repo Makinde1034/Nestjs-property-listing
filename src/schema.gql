@@ -693,7 +693,6 @@ input CreateSearchHistoryInput {
   maxArea: Float
   gpsCoordinate: LocationDto
   attributes: [Attributes!]
-  type: String
   searchHistory: Boolean
   rentingOption: String
   listingId: String

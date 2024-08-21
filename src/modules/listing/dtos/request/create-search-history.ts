@@ -56,7 +56,6 @@ export class CreateSearchHistoryInput extends PaginateAndSort {
 
   @IsOptional()
   @IsString()
-  @Field({ nullable: true })
   type: string;
 
   @IsOptional()
