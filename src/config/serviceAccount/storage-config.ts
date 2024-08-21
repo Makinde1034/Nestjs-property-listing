@@ -13,7 +13,7 @@ const StorageConfig = {
   baseUrl: process.env.GC_BUCKET_URL,
   privateKeyId: process.env.GC_PRIVATE_KEY_ID,
   privateKey: process.env.GC_PRIVATE_KEY
-    ? process.env.GC_PRIVATE_KEY.replace(/\\n/g, '\n')
+    ? process.env.GC_PRIVATE_KEY?.replace(/\\n/g, '\n')
     : undefined,
   clientEmail: process.env.GC_CLIENT_EMAIL,
   clientID: process.env.GC_CLIENT_ID,
