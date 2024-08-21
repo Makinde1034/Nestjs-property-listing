@@ -3,6 +3,8 @@
  * For license. See license.txt
  */
 
+import { Field, ObjectType } from '@nestjs/graphql';
+
 export interface CapturePaymentResponse {
   result: CapturePaymentData;
   buildNumber: string;
@@ -44,4 +46,25 @@ export interface PreAuthorisedPaymentCard {
 export interface PreAuthorisedPaymentResult {
   code: string;
   description: string;
+}
+
+@ObjectType()
+export class InitiatePaymentResponse {
+  @Field(() => String, { nullable: true })
+  checkoutId?: string;
+
+  @Field(() => String, { nullable: true })
+  referenceId?: string;
+
+  @Field(() => String, { nullable: true })
+  timeStamp?: string;
+}
+
+@ObjectType()
+export class verifyPaymentResponse {
+  @Field(() => String, { nullable: true })
+  status: string;
+
+  @Field()
+  message: string;
 }

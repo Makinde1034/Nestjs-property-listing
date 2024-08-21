@@ -5,17 +5,19 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 
-import { Listing, User } from '../../../entities';
-
-import { MailgunEmailService } from '../../mail/services/implementations';
-import { PdfInput } from '../../file-handler/dto/pdf.dto';
-import { InvoiceRepository } from '../repositories/invoice.repository';
-import { CreateInvoiceInput } from '../dto/invoice';
 import { addDays } from 'date-fns';
-import { PdfService } from '../../file-handler/services/pdf.service';
+
+import { CreateInvoiceInput } from '../dto/invoice';
+import { InvoiceRepository } from '../repositories/invoice.repository';
 import { HyperPayService } from '../service-providers/hyper-pay.service';
-import { InitiatePaymentInput } from '../dto/request/payment.input';
-import { SuccessResponse } from '../../../common/utils/success.response';
+import { Listing, User } from '../../../entities';
+import {
+  InitiatePaymentInput,
+  verifyPaymentInput,
+} from '../dto/request/payment.input';
+import { PdfInput } from '../../file-handler/dto/pdf.dto';
+import { PdfService } from '../../file-handler/services/pdf.service';
+import { MailgunEmailService } from '../../mail/services/implementations';
 import { generateRandomString } from '../../../common/utils/helper';
 
 @Injectable()
@@ -27,19 +29,29 @@ export class PaymentService {
     private readonly hyperPayService: HyperPayService,
   ) {}
   logger = new Logger(PaymentService.name);
-  async initializePayment(createPaymentInput: InitiatePaymentInput) {
-    const checkout =
-      await this.hyperPayService.createCheckout(createPaymentInput);
+  async initializePayment(
+    createPaymentInput: InitiatePaymentInput,
+    user: User,
+  ) {
+    const checkout = await this.hyperPayService.createCheckout(
+      createPaymentInput,
+      user,
+    );
 
-    return new SuccessResponse(checkout.result.description, {
+    return {
       checkoutId: checkout.id,
       referenceId: generateRandomString(),
       timeStamp: checkout.timestamp,
-    });
+    };
   }
 
-  verifyPayment() {
-    return new SuccessResponse();
+  async verifyPayment(data: verifyPaymentInput) {
+    const response = await this.hyperPayService.verifyPayment(data.checkoutId);
+
+    return {
+      status: response.result.code,
+      message: response.result.description,
+    };
   }
 
   async invoice(data?: PdfInput, user?: User, listing?: Listing) {

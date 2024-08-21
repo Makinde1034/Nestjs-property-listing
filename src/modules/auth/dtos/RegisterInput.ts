@@ -4,6 +4,7 @@
  */
 
 import { Field, InputType } from '@nestjs/graphql';
+
 import {
   IsEmail,
   IsEnum,
@@ -15,10 +16,13 @@ import {
   ValidateIf,
   ValidateNested,
 } from 'class-validator';
+
 import { UserProfileTypeEnum } from 'src/common/enums';
 import { UserProfileType } from 'src/common/types';
-import { CompanyInput } from './CompanyInput';
+
 import { Type } from 'class-transformer';
+
+import { CompanyInput } from './CompanyInput';
 
 @InputType()
 export class RegisterInput {

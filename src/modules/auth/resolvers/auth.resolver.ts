@@ -4,7 +4,12 @@
  */
 
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { AuthService } from '../services/auth.service';
+import { Throttle } from '@nestjs/throttler';
+import { UseGuards } from '@nestjs/common';
+
+import { User } from 'src/entities';
+import { SuccessResponse } from 'src/common/response';
+
 import {
   RegisterInput,
   AuthRegisterConfirmDto,
@@ -18,11 +23,8 @@ import {
   TwoFaLoginInput,
   ConfirmationInput,
 } from '../dtos';
-import { User } from 'src/entities';
-import { Throttle } from '@nestjs/throttler';
-import { SuccessResponse } from 'src/common/response';
-import { UseGuards } from '@nestjs/common';
 import { AccessTokenGuard } from '../guards';
+import { AuthService } from '../services/auth.service';
 
 @Resolver()
 export class AuthResolver {
