@@ -437,7 +437,7 @@ export class ListingResolver {
 
   @UseGuards(AccessTokenGuard)
   @Mutation(() => SuccessResponse, { name: 'deleteSavedHistory' })
-  async deleteSavedHistory(id: string) {
+  async deleteSavedHistory(@Args('id') id: string) {
     return await this.listingService.deleteSavedHistory(id);
   }
 }
