@@ -310,7 +310,6 @@ export class ListingService {
           .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
           .innerJoinAndSelect('listing.listingType', 'listingType')
           .leftJoinAndSelect('listingType.attributeSets', 'attributeSets')
-          .leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate')
           .where('listing.deletedAt IS NULL')
 
           // Ensure listingType is not soft-deleted
@@ -525,7 +524,6 @@ export class ListingService {
           .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
           .innerJoinAndSelect('listing.listingType', 'listingType')
           .leftJoinAndSelect('listingType.attributeSets', 'attributeSets')
-          .leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate')
           .where('listing.listingType IS NOT NULL')
           .andWhere(
             'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented',
