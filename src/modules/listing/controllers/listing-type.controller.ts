@@ -5,6 +5,7 @@
 
 import {
   Controller,
+  Delete,
   Post,
   Query,
   UploadedFile,
@@ -58,5 +59,19 @@ export class ListingTypeController {
       listingTypeId,
       icon,
     );
+  }
+
+  @Delete('delete-attributeSet-icon')
+  @UseGuards(RestAccessTokenGuard)
+  async deleteAttributeSetIcon(
+    @Query('attributeSetId') attributeSetId: string,
+  ) {
+    return await this.attributeService.deleteAttributeIcon(attributeSetId);
+  }
+
+  @Delete('delete-attribute-icon')
+  @UseGuards(RestAccessTokenGuard)
+  async deleteAttributeIcon(@Query('attributeId') attributeId: string) {
+    return await this.attributeService.deleteAttributeSetIcon(attributeId);
   }
 }

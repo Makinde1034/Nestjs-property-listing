@@ -126,6 +126,61 @@ export class AttributeService {
     }
   }
 
+  async deleteAttributeIcon(id: string): Promise<Attribute> {
+    try {
+      const attribute = await this.attributeRepository.findOneBy({ id });
+
+      if (!attribute) {
+        throw new BadRequestException(AppStrings.NOT_FOUND);
+      }
+
+      const { affected } = await this.attributeRepository.update(attribute.id, {
+        icon: null,
+      });
+
+      // Fetch updated entity only if update was successful
+      if (affected > 0) {
+        return this.attributeRepository.findOneOrFail({
+          where: { id: attribute.id },
+        });
+      }
+    } catch (error) {
+      this.logger.error('Error uploading attribute icon:', error);
+      throw new BadRequestException(
+        error.message || 'Failed to upload attribute icon',
+      );
+    }
+  }
+
+  async deleteAttributeSetIcon(id: string): Promise<AttributeSet> {
+    try {
+      const attributeSet = await this.attributeSetRepository.findByIdOrFail(id);
+
+      if (!attributeSet) {
+        throw new BadRequestException(AppStrings.NOT_FOUND);
+      }
+
+      const { affected } = await this.attributeRepository.update(
+        attributeSet.id,
+        {
+          icon: null,
+        },
+      );
+
+      // Fetch updated entity only if update was successful
+      if (affected > 0) {
+        return await this.attributeSetRepository.findByIdOrFail(
+          attributeSet.id,
+        );
+      }
+    } catch (error) {
+      this.logger.error('Error uploading attribute icon:', error);
+      throw new BadRequestException(
+        error.message || 'Failed to upload attribute icon',
+      );
+    }
+  }
+
   /**
    * Update Attribute
    *
