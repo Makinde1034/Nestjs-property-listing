@@ -310,7 +310,7 @@ export class ListingService {
           .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
           .innerJoinAndSelect('listing.listingType', 'listingType')
           .leftJoinAndSelect('listingType.attributeSets', 'attributeSets')
-
+          .leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate')
           .where('listing.deletedAt IS NULL')
 
           // Ensure listingType is not soft-deleted
@@ -482,6 +482,7 @@ export class ListingService {
         maxPrice,
         minArea,
         maxArea,
+        searchHistory,
         take: initialTake,
       } = paginateAndSort;
 
@@ -524,6 +525,7 @@ export class ListingService {
           .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
           .innerJoinAndSelect('listing.listingType', 'listingType')
           .leftJoinAndSelect('listingType.attributeSets', 'attributeSets')
+          .leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate')
           .where('listing.listingType IS NOT NULL')
           .andWhere(
             'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented',
@@ -658,21 +660,22 @@ export class ListingService {
       const listing = [...featuredListings, ...regularListings];
       const total = featuredCount + regularCount;
 
-      this.saveSearchHistory(
-        {
-          attributes,
-          gpsCoordinate,
-          minPrice,
-          maxPrice,
-          minArea,
-          maxArea,
-          type,
-          rentingOption,
-          listingId,
-        },
-        user,
-      );
-
+      if (searchHistory) {
+        this.saveSearchHistory(
+          {
+            attributes,
+            gpsCoordinate,
+            minPrice,
+            maxPrice,
+            minArea,
+            maxArea,
+            type: JSON.stringify(listing[0].listingType),
+            rentingOption,
+            listingId,
+          },
+          user,
+        );
+      }
       return { listing, total };
     } catch (error) {
       this.logger.error('Error in findListingForBuyerAuthenticated:', error);
@@ -681,6 +684,7 @@ export class ListingService {
         : new BadRequestException(error.message);
     }
   }
+
   async getListingForAdmin(paginateAndSort: AdminFilterAndSort) {
     const orderOptions = {
       [paginateAndSort.sortField]: paginateAndSort.directionToSort,

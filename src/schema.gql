@@ -692,6 +692,7 @@ input CreateSearchHistoryInput {
   gpsCoordinate: LocationDto
   attributes: [Attributes!]
   type: String
+  searchHistory: Boolean
   rentingOption: String
   listingId: String
 }
