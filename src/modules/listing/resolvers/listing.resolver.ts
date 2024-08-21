@@ -244,10 +244,8 @@ export class ListingResolver {
   }
 
   /*************************
-   *
    *Offer
-   *
-   * ************************/
+   ************************/
 
   @UseGuards(AccessTokenGuard)
   @Mutation(() => Offer, { name: 'createOffer', nullable: true })

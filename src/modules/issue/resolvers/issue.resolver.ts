@@ -7,12 +7,12 @@ import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
 import {
-  CreateIssueCategoryInput,
+  CreateChildIssueInput,
   CreateIssueInput,
   DeleteIssueInput,
   UpdateIssueInput,
 } from '../dtos';
-import { ChildIssue, IssueCategory, ParentIssue } from '../../../entities';
+import { ChildIssue, ParentIssue } from '../../../entities';
 import { IssueService } from '../services';
 import { Permissions } from 'src/common/decorator/permission';
 import { AdminGuard } from '../../auth/guards/admin.guard';
@@ -21,95 +21,9 @@ import { AdminGuard } from '../../auth/guards/admin.guard';
 export class IssueResolver {
   constructor(private readonly issueService: IssueService) {}
 
-  /**
-   * Fetch Issue categories
-   *
-   * @async
-   * @returns {Promise<IssueCategory[]>}
-   */
-  @Query(() => [IssueCategory])
-  // @Permissions('create-issues-categories')
-  @UseGuards(AccessTokenGuard)
-  async fetchIssueCategories(): Promise<IssueCategory[]> {
-    return await this.issueService.findAllIssueCategories();
-  }
-
-  /**
-   * Create Issue category
-   *
-   * @async
-   * @param {IssueCategory} RequestInput
-   * @returns {Promise<IssueCategory>}
-   */
-
-  @Mutation(() => IssueCategory)
-  // @Permissions('create-issues-categories')
-  @UseGuards(AccessTokenGuard, AdminGuard)
-  async createIssueCategory(
-    @Args('RequestInput') RequestInput: CreateIssueCategoryInput,
-  ): Promise<IssueCategory> {
-    return await this.issueService.createCategory(RequestInput);
-  }
-
-  /**
-   * Update Issue Catgeory
-   *
-   * @async
-   * @param {UpdateIssueCategoryInput} RequestInput
-   * @returns {Promise<IssueCatgeory>}
-   */
-  @Mutation(() => ParentIssue)
-  // @Permissions('update-issues-categories')
-  @UseGuards(AdminGuard, AccessTokenGuard)
-  async updateIssueCatgeory(
-    @Args('RequestInput') RequestInput: UpdateIssueInput,
-  ): Promise<ParentIssue> {
-    return await this.issueService.updateIssue(RequestInput);
-  }
-
-  /**
-   * Delete Issue Category
-   *
-   * @async
-   * @param {DeleteIssueInput} RequestInput
-   * @returns {Promise<string>}
-   */
-  @Mutation(() => String)
-  @Permissions('delete-issues-categories')
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
-  async deleteIssueCategory(
-    @Args('RequestInput') RequestInput: DeleteIssueInput,
-  ): Promise<string> {
-    return await this.issueService.deleteCategory(RequestInput);
-  }
-
   /*********************************
    * Issues
    *********************************/
-
-  /**
-   * Fetch Issues
-   *
-   * @async
-   * @returns {Promise<Issue[]>}
-   */
-
-  @Query(() => [ParentIssue])
-  @UseGuards(AccessTokenGuard)
-  async fetchIssues(
-    @Args('categoryId') categoryId: string,
-  ): Promise<ParentIssue[]> {
-    return await this.issueService.findAllIssuesByCategory(categoryId);
-  }
-
-  @Query(() => [ChildIssue])
-  @UseGuards(AccessTokenGuard)
-  async fetchChildIssues(
-    @Args('parentId') parentId: string,
-  ): Promise<ChildIssue[]> {
-    return await this.issueService.findAllChildIssues(parentId);
-  }
-
   /**
    * Create Issue
    *
@@ -141,6 +55,22 @@ export class IssueResolver {
   }
 
   /**
+   * Fetch Issues
+   *
+   * @async
+   * @returns {Promise<Issue[]>}
+   */
+
+  @Query(() => [ParentIssue])
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions('create-issues-categories')
+  async fetchIssues(
+    @Args('placement', { nullable: true }) placement: string,
+  ): Promise<ParentIssue[]> {
+    return await this.issueService.findAllIssuesByPlacement(placement);
+  }
+
+  /**
    * Delete Issue
    *
    * @async
@@ -150,9 +80,38 @@ export class IssueResolver {
   @Mutation(() => String)
   @Permissions('delete-issues-categories')
   @UseGuards(AccessTokenGuard, PermissionsGuard)
-  async deleteIssue(
-    @Args('RequestInput') RequestInput: DeleteIssueInput,
-  ): Promise<string> {
-    return await this.issueService.deleteIssue(RequestInput);
+  async deleteIssue(@Args('id') id: string): Promise<string> {
+    return await this.issueService.deleteIssue(id);
+  }
+
+  @Mutation(() => ParentIssue)
+  @Permissions('create-issues-categories')
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  async createChildIssue(
+    @Args('input') input: CreateChildIssueInput,
+  ): Promise<ChildIssue> {
+    return await this.issueService.createChildIssue(input);
+  }
+
+  @Mutation(() => ParentIssue)
+  @UseGuards(AccessTokenGuard, AdminGuard)
+  async updateChildIssue(
+    @Args('RequestInput') RequestInput: UpdateIssueInput,
+  ): Promise<ChildIssue> {
+    return await this.issueService.updateChildIssue(RequestInput);
+  }
+
+  @Query(() => [ChildIssue])
+  @UseGuards(AccessTokenGuard)
+  async fetchChildIssues(
+    @Args('parentId') parentId: string,
+  ): Promise<ChildIssue[]> {
+    return await this.issueService.findAllChildIssues(parentId);
+  }
+  @Mutation(() => String)
+  @Permissions('delete-issues-categories')
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  async deleteChildIssue(@Args('id') id: string): Promise<string> {
+    return await this.issueService.deleteIssue(id);
   }
 }

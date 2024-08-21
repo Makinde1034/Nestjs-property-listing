@@ -4,23 +4,14 @@
  */
 
 import { Field, InputType, PartialType } from '@nestjs/graphql';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
-
-@InputType()
-export class CreateIssueCategoryInput {
-  @Field()
-  @IsString()
-  @IsNotEmpty()
-  name: string;
-}
-
-@InputType()
-export class UpdateIssueCategoryInput extends CreateIssueCategoryInput {
-  @Field()
-  @IsString()
-  @IsNotEmpty()
-  id: string;
-}
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
+import { IssuePlacement } from '../../../common/enums';
 
 @InputType()
 export class DeleteIssueInput {
@@ -35,7 +26,8 @@ export class CreateIssueInput {
   @Field()
   @IsString()
   @IsNotEmpty()
-  categoryId: string;
+  @IsEnum(IssuePlacement)
+  placement: string;
 
   @Field()
   @IsString()
@@ -52,7 +44,7 @@ export class CreateIssueInput {
   @IsOptional()
   sequentialId: number;
 }
-
+@InputType()
 export class CreateChildIssueInput {
   @Field()
   @IsString()
@@ -73,6 +65,13 @@ export class CreateChildIssueInput {
   @IsNumber()
   @IsOptional()
   sequentialId: number;
+}
+@InputType()
+export class UpdateChildIssueInput extends PartialType(CreateChildIssueInput) {
+  @Field()
+  @IsNumber()
+  @IsOptional()
+  id: string;
 }
 
 @InputType()

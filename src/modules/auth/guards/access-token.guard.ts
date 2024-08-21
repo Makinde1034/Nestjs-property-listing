@@ -3,7 +3,11 @@
  * For license. See license.txt
  */
 
-import { ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -16,7 +20,7 @@ export class AccessTokenGuard extends AuthGuard('jwt') {
 
   handleRequest(err, user, info, context: ExecutionContext) {
     if (err || !user) {
-      throw err || new Error('Unauthorized');
+      throw err || new UnauthorizedException();
     }
     const ctx = GqlExecutionContext.create(context);
     ctx.getContext().req.user = user;
