@@ -36,11 +36,11 @@ export class ChildIssue extends BaseEntity {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
-  childReason: string;
+  englishName: string;
 
   @Column({ nullable: true })
   @Field({ nullable: true })
-  childArabicReason: string;
+  arabicName: string;
 
   @Column({ nullable: true })
   @Field({ nullable: true })

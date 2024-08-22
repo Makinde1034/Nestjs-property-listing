@@ -40,7 +40,6 @@ import { AdminGuard } from '../../auth/guards/admin.guard';
 
 import { SuccessResponse } from '../../../common/response';
 import { CreateSearchHistoryInput } from '../dtos/request/create-search-history';
-import { SearchHistory } from '../../../entities/search-history.entity';
 
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { CreateFeatureInput } from '../dtos/request/feature-input';
@@ -56,6 +55,8 @@ import {
 import { AuctionService } from '../services/auction.service';
 import { Auction } from '../../../entities/auction-table.entity';
 import { AuctionParticipant } from '../../../entities/auction-participant.entity';
+import { ListingAttributes } from '../../../entities/listing-attributes.entity';
+import { ListingAttributeService } from '../services/listing-attributes.service';
 
 @Resolver()
 export class ListingResolver {
@@ -64,6 +65,7 @@ export class ListingResolver {
     private readonly offerService: OfferService,
     private readonly wishlistService: WishlistService,
     private readonly auctionService: AuctionService,
+    private readonly listingAttributeService: ListingAttributeService,
   ) {}
 
   /*************************
@@ -183,6 +185,12 @@ export class ListingResolver {
       updateListingDto,
       ctx.req.user,
     );
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Query(() => [ListingAttributes], { name: 'fetchOneListingAttribute' })
+  async fetchOneListingAttribute(@Args('listingId') listingId: string) {
+    return await this.listingAttributeService.findListingAttribute(listingId);
   }
 
   @UseGuards(AccessTokenGuard)

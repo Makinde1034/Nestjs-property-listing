@@ -49,8 +49,8 @@ export class Issue1720110596406 implements Seeder {
             }
             acc[category].push({
               placement: category,
-              parentReason: parentReason,
-              parentArabicReason: parentArabicName,
+              englishName: parentReason,
+              arabicName: parentArabicName,
               sequentialId: acc[category].length + 1, // SequentialId restarts for each placement
             });
             return acc;
@@ -88,8 +88,8 @@ export class Issue1720110596406 implements Seeder {
               const childIssue: DeepPartial<ChildIssue> = {
                 parentIssue,
                 sequentialId: childIndex + 1,
-                childArabicReason: element.childArabicName,
-                childReason: element.childReason,
+                arabicName: element.childArabicName,
+                englishName: element.childReason,
               };
               childIssueMap.set(childKey, childIssue);
               childIssues.push(childIssue);

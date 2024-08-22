@@ -40,8 +40,8 @@ export class IssueService {
       });
 
       const data: Partial<ParentIssue> = {
-        parentReason: input.parentReason,
-        parentArabicReason: input.parentArabicReason,
+        englishName: input.englishName,
+        arabicName: input.arabicName,
         sequentialId: count,
         placement: input.placement,
       };

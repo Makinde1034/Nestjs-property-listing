@@ -781,12 +781,7 @@ export class ListingService {
     try {
       const listing = await this.listingRepository.findOne({
         where: { id: id },
-        relations: [
-          'user',
-          'listingType',
-          'listingAttributes',
-          'gpsCoordinate',
-        ],
+        relations: ['user', 'gpsCoordinate'],
         select: {
           user: {
             id: true,
@@ -852,7 +847,7 @@ export class ListingService {
     try {
       const listing = await this.listingRepository.findOne({
         where: { id: id },
-        relations: ['gpsCoordinate', 'listingType', 'listingAttributes'],
+        relations: ['gpsCoordinate'],
         select: {
           id: true,
           title: true,
@@ -1003,12 +998,7 @@ export class ListingService {
       if (update.affected > 0) {
         return await this.listingRepository.findOneOrFail({
           where: { id },
-          relations: [
-            'user',
-            'listingType',
-            'listingAttributes',
-            'gpsCoordinate',
-          ],
+          relations: ['user', 'gpsCoordinate'],
         });
       }
     } catch (error) {
@@ -1075,7 +1065,6 @@ export class ListingService {
 
       // Save the updated images to the database
       await this.listingRepository.update(id, { images: stringifiedImages });
-
       return new SuccessResponse(AppStrings.UPLOAD_SUCCESSFUL, existingImages);
     } catch (error) {
       this.logger.error(error.message || error);
@@ -1358,17 +1347,6 @@ export class ListingService {
       const listing = await this.listingRepository
         .createQueryBuilder('listing')
         .leftJoinAndSelect('listing.user', 'user')
-        .leftJoinAndMapMany(
-          'listing.listingAttributes',
-          'listing.listingAttributes',
-          'listingAttributes',
-        )
-        .leftJoinAndMapOne(
-          'listingAttributes.attribute',
-          'listingAttributes.attribute',
-          'attribute',
-        )
-
         .leftJoinAndSelect('listing.promotion', 'promotion')
         .leftJoinAndSelect('listing.feature', 'feature')
         .leftJoinAndSelect('listing.flag', 'flag')

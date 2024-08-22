@@ -33,7 +33,7 @@ export class ParentIssue extends BaseEntity {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
-  parentReason: string;
+  englishName: string;
 
   @Column({ nullable: true })
   @Field({ nullable: true })
@@ -41,7 +41,7 @@ export class ParentIssue extends BaseEntity {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
-  parentArabicReason: string;
+  arabicName: string;
 
   @Field()
   @CreateDateColumn()
