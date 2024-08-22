@@ -433,4 +433,10 @@ export class ListingResolver {
       addParticipantToAuctionInput,
     );
   }
+
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => SuccessResponse, { name: 'deleteSavedHistory' })
+  async deleteSavedHistory(@Args('id') id: string) {
+    return await this.listingService.deleteSavedHistory(id);
+  }
 }

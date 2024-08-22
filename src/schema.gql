@@ -806,6 +806,7 @@ type Mutation {
   updateAuction(updateAuctionInput: UpdateAuctionInput!): Auction!
   id(id: String!): Auction!
   addAuctionParticipant(createAuctionParticipantInput: CreateAuctionParticipantInput!): AuctionParticipant!
+  deleteSavedHistory(id: String!): SuccessResponse!
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!
