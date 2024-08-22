@@ -16,21 +16,17 @@ export class Issue1720110596406 implements Seeder {
     dataSource: DataSource,
     factoryManager: SeederFactoryManager,
   ): Promise<any> {
-    this.logger.debug(`Seeding for: ${ParentIssue.name}...`, factoryManager);
+    this.logger.debug(`Seeding for: ${ParentIssue.name}...`);
 
-    // Start a transaction to ensure all seeding operations are atomic
     await dataSource.transaction(async (transactionalEntityManager) => {
       const parentRepository =
         transactionalEntityManager.getRepository(ParentIssue);
       const childIssueRepository =
         transactionalEntityManager.getRepository(ChildIssue);
 
-      const parentIssues: DeepPartial<ParentIssue>[] = [];
-      const childIssues: DeepPartial<ChildIssue>[] = [];
-
       try {
-        // Check if parent issues already exist
         const existingParentIssues = await parentRepository.find();
+
         if (existingParentIssues.length > 0) {
           this.logger.warn(
             `Seeding for: ${ParentIssue.name} already completed...`,
@@ -40,7 +36,6 @@ export class Issue1720110596406 implements Seeder {
 
         this.logger.debug('Seeding Parent Issues');
 
-        // Group parent issues by placement and reset sequentialId for each placement
         const groupedIssues = IssueFactory.reduce(
           (acc, element) => {
             const { category, parentReason, parentArabicName } = element;
@@ -51,51 +46,50 @@ export class Issue1720110596406 implements Seeder {
               placement: category,
               englishName: parentReason,
               arabicName: parentArabicName,
-              sequentialId: acc[category].length + 1, // SequentialId restarts for each placement
+              sequentialId: acc[category].length + 1,
             });
             return acc;
           },
           {} as Record<string, DeepPartial<ParentIssue>[]>,
         );
 
-        // Save parent issues to the database
-        const savePromises = Object.keys(groupedIssues).map(
-          async (placement) => {
-            const savedParentIssues = await parentRepository.save(
-              groupedIssues[placement],
-            );
-            parentIssues.push(...savedParentIssues);
-          },
-        );
+        // Save parent issues in a batch to reduce potential race conditions
+        const savedParentIssues = await Promise.all(
+          Object.keys(groupedIssues).map((placement) =>
+            parentRepository.save(groupedIssues[placement]),
+          ),
+        ).then((results) => results.flat());
 
-        await Promise.all(savePromises);
-
-        this.logger.debug('Saved Parent Issues:');
+        this.logger.debug('Saved Parent Issues:', savedParentIssues.length);
 
         this.logger.debug('Seeding Child Issues');
 
-        // Create and save child issues
-        const childIssueMap = new Map<string, DeepPartial<ChildIssue>>();
+        const childIssues = [];
 
-        parentIssues.forEach((parentIssue) => {
+        // Ensure unique child issues by associating them correctly with their parent issue
+        for (const parentIssue of savedParentIssues) {
           const issueData = IssueFactory.filter(
             (element) => element.category === parentIssue.placement,
           );
 
           issueData.forEach((element, childIndex) => {
-            const childKey = `${parentIssue.id}-${element.childReason}`;
-            if (!childIssueMap.has(childKey)) {
+            const existingChildIssue = childIssues.find(
+              (ci) =>
+                ci.parentIssue.id === parentIssue.id &&
+                ci.englishName === element.childReason,
+            );
+
+            if (!existingChildIssue) {
               const childIssue: DeepPartial<ChildIssue> = {
                 parentIssue,
                 sequentialId: childIndex + 1,
                 arabicName: element.childArabicName,
                 englishName: element.childReason,
               };
-              childIssueMap.set(childKey, childIssue);
               childIssues.push(childIssue);
             }
           });
-        });
+        }
 
         if (childIssues.length > 0) {
           await childIssueRepository.save(childIssues);
