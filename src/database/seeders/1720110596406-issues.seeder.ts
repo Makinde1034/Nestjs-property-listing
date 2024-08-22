@@ -36,29 +36,25 @@ export class Issue1720110596406 implements Seeder {
 
         this.logger.debug('Seeding Parent Issues');
 
-        const groupedIssues = IssueFactory.reduce(
-          (acc, element) => {
-            const { category, parentReason, parentArabicName } = element;
-            if (!acc[category]) {
-              acc[category] = [];
-            }
-            acc[category].push({
-              placement: category,
-              englishName: parentReason,
-              arabicName: parentArabicName,
-              sequentialId: acc[category].length + 1,
-            });
-            return acc;
-          },
-          {} as Record<string, DeepPartial<ParentIssue>[]>,
-        );
+        // Create a map to track unique ParentIssues by their key attributes
+        const parentIssueMap = new Map<string, Partial<ParentIssue>>();
 
-        // Save parent issues in a batch to reduce potential race conditions
-        const savedParentIssues = await Promise.all(
-          Object.keys(groupedIssues).map((placement) =>
-            parentRepository.save(groupedIssues[placement]),
-          ),
-        ).then((results) => results.flat());
+        IssueFactory.forEach((element) => {
+          const key = `${element.category}-${element.parentReason}-${element.parentArabicName}`;
+          if (!parentIssueMap.has(key)) {
+            parentIssueMap.set(key, {
+              placement: element.category,
+              englishName: element.parentReason,
+              arabicName: element.parentArabicName,
+              sequentialId: parentIssueMap.size + 1, // SequentialId restarts for each placement
+            });
+          }
+        });
+
+        // Convert the map values to an array and save all unique parent issues
+        const uniqueParentIssues = Array.from(parentIssueMap.values());
+        const savedParentIssues =
+          await parentRepository.save(uniqueParentIssues);
 
         this.logger.debug('Saved Parent Issues:', savedParentIssues.length);
 
