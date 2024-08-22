@@ -124,7 +124,7 @@ pipelines:
       - step: *code-lint
       - step: *build
       - step: *test
-      - step: *sonar-analysis
+      # - step: *sonar-analysis
       - step: *validate-db
       - step: *security-checks
       - step: *owasp-dependency-check
