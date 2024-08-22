@@ -188,8 +188,8 @@ export class ListingResolver {
   }
 
   @UseGuards(AccessTokenGuard)
-  @Query(() => [ListingAttributes], { name: 'fetchOneListingAttribute' })
-  async fetchOneListingAttribute(@Args('listingId') listingId: string) {
+  @Query(() => [ListingAttributes], { name: 'fetchListingAttribute' })
+  async fetchListingAttribute(@Args('listingId') listingId: string) {
     return await this.listingAttributeService.findListingAttribute(listingId);
   }
 
