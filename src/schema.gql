@@ -505,6 +505,11 @@ type AuctionResponse {
   total: Int!
 }
 
+type SearchHistoryResponse {
+  searchHistory: [SearchHistory!]
+  total: Int!
+}
+
 type InitiatePaymentResponse {
   checkoutId: String
   referenceId: String
@@ -613,7 +618,7 @@ type Query {
   findListingForBuyerAuthenticated(findManyOptions: CreateSearchHistoryInput): ListingResponse!
   viewFlaggedListings(findManyOptions: PaginateAndSort): FlaggedListingResponse
   getMessageInLocalLanguage: SuccessResponse
-  getSearchHistory(paginateAndSort: PaginateAndSort): [SearchHistory!]
+  getSearchHistory(paginateAndSort: PaginateAndSort): SearchHistoryResponse
   findOneOffer(id: String!): Offer!
   findOffers(findOptions: FindOfferInput!): OfferResponse!
   getWishlist: [Wishlist!]!
@@ -806,6 +811,7 @@ type Mutation {
   updateAuction(updateAuctionInput: UpdateAuctionInput!): Auction!
   id(id: String!): Auction!
   addAuctionParticipant(createAuctionParticipantInput: CreateAuctionParticipantInput!): AuctionParticipant!
+  deleteSavedHistory(id: String!): SuccessResponse!
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!

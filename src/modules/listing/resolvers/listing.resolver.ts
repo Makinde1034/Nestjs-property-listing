@@ -22,6 +22,7 @@ import {
   FlaggedListingResponse,
   ListingResponse,
   OfferResponse,
+  SearchHistoryResponse,
 } from '../dtos/response/listing.response';
 import { OfferService } from '../services/offer.service';
 import {
@@ -229,7 +230,7 @@ export class ListingResolver {
   }
 
   @UseGuards(AccessTokenGuard)
-  @Query(() => [SearchHistory], {
+  @Query(() => SearchHistoryResponse, {
     nullable: true,
     name: 'getSearchHistory',
   })
@@ -432,5 +433,11 @@ export class ListingResolver {
     return await this.auctionService.addListingToAuction(
       addParticipantToAuctionInput,
     );
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => SuccessResponse, { name: 'deleteSavedHistory' })
+  async deleteSavedHistory(@Args('id') id: string) {
+    return await this.listingService.deleteSavedHistory(id);
   }
 }
