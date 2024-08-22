@@ -17,12 +17,7 @@ import {
   IsUUID,
   ValidateIf,
 } from 'class-validator';
-import {
-  ListingFlagType,
-  Ownership,
-  Purpose,
-  RentingOption,
-} from '../../../../common/enums';
+import { Ownership, Purpose, RentingOption } from '../../../../common/enums';
 
 import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
 import { TimePeriod } from '../../../../common/enums/sort.enum';
@@ -137,7 +132,7 @@ export class FlagListingInput {
   @Field()
   @IsUUID()
   @IsNotEmpty()
-  childIssue: string;
+  childIssueId: string;
 }
 
 @InputType()

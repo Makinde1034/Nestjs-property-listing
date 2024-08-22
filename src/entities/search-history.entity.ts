@@ -6,6 +6,7 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -74,6 +75,10 @@ export class SearchHistory extends BaseEntity {
   @Field()
   @CreateDateColumn()
   createdAt: Date;
+
+  @Field()
+  @DeleteDateColumn()
+  deletedAt: Date;
 
   @Field()
   @UpdateDateColumn()

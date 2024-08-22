@@ -7,6 +7,7 @@ import { Field, ObjectType } from '@nestjs/graphql';
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -48,6 +49,10 @@ export class ChildIssue extends BaseEntity {
   @Field()
   @CreateDateColumn()
   createdAt: Date;
+
+  @Field()
+  @DeleteDateColumn()
+  deletedAt: Date;
 
   @Field()
   @UpdateDateColumn()
