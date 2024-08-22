@@ -45,6 +45,7 @@ import { GpsCoordinateRepository } from './repositories/gps-coordinate.repositor
 import { GpsCoordinate } from '../../entities/gps-coordinates.entity';
 import { IssueRepository } from '../issue/repositories';
 import { ChildIssueRepository } from '../issue/repositories/child-issue.repository';
+import { ListingAttributeService } from './services/listing-attributes.service';
 
 @Module({
   imports: [
@@ -94,6 +95,7 @@ import { ChildIssueRepository } from '../issue/repositories/child-issue.reposito
     GpsCoordinateRepository,
     IssueRepository,
     ChildIssueRepository,
+    ListingAttributeService,
   ],
   exports: [ListingTypeService],
 })

@@ -32,12 +32,12 @@ export class CreateIssueInput {
   @Field()
   @IsString()
   @IsNotEmpty()
-  parentReason: string;
+  englishName: string;
 
   @Field()
   @IsString()
   @IsNotEmpty()
-  parentArabicReason: string;
+  arabicName: string;
 
   @Field()
   @IsNumber()
@@ -54,12 +54,12 @@ export class CreateChildIssueInput {
   @Field()
   @IsString()
   @IsNotEmpty()
-  childReason: string;
+  englishName: string;
 
   @Field()
   @IsString()
   @IsNotEmpty()
-  childArabicReason: string;
+  arabicName: string;
 
   @Field()
   @IsNumber()

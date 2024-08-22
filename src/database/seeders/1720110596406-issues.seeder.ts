@@ -16,21 +16,17 @@ export class Issue1720110596406 implements Seeder {
     dataSource: DataSource,
     factoryManager: SeederFactoryManager,
   ): Promise<any> {
-    this.logger.debug(`Seeding for: ${ParentIssue.name}...`, factoryManager);
+    this.logger.debug(`Seeding for: ${ParentIssue.name}...`);
 
-    // Start a transaction to ensure all seeding operations are atomic
     await dataSource.transaction(async (transactionalEntityManager) => {
       const parentRepository =
         transactionalEntityManager.getRepository(ParentIssue);
       const childIssueRepository =
         transactionalEntityManager.getRepository(ChildIssue);
 
-      const parentIssues: DeepPartial<ParentIssue>[] = [];
-      const childIssues: DeepPartial<ChildIssue>[] = [];
-
       try {
-        // Check if parent issues already exist
         const existingParentIssues = await parentRepository.find();
+
         if (existingParentIssues.length > 0) {
           this.logger.warn(
             `Seeding for: ${ParentIssue.name} already completed...`,
@@ -40,62 +36,56 @@ export class Issue1720110596406 implements Seeder {
 
         this.logger.debug('Seeding Parent Issues');
 
-        // Group parent issues by placement and reset sequentialId for each placement
-        const groupedIssues = IssueFactory.reduce(
-          (acc, element) => {
-            const { category, parentReason, parentArabicName } = element;
-            if (!acc[category]) {
-              acc[category] = [];
-            }
-            acc[category].push({
-              placement: category,
-              parentReason: parentReason,
-              parentArabicReason: parentArabicName,
-              sequentialId: acc[category].length + 1, // SequentialId restarts for each placement
+        // Create a map to track unique ParentIssues by their key attributes
+        const parentIssueMap = new Map<string, Partial<ParentIssue>>();
+
+        IssueFactory.forEach((element) => {
+          const key = `${element.category}-${element.parentReason}-${element.parentArabicName}`;
+          if (!parentIssueMap.has(key)) {
+            parentIssueMap.set(key, {
+              placement: element.category,
+              englishName: element.parentReason,
+              arabicName: element.parentArabicName,
+              sequentialId: parentIssueMap.size + 1, // SequentialId restarts for each placement
             });
-            return acc;
-          },
-          {} as Record<string, DeepPartial<ParentIssue>[]>,
-        );
+          }
+        });
 
-        // Save parent issues to the database
-        const savePromises = Object.keys(groupedIssues).map(
-          async (placement) => {
-            const savedParentIssues = await parentRepository.save(
-              groupedIssues[placement],
-            );
-            parentIssues.push(...savedParentIssues);
-          },
-        );
+        // Convert the map values to an array and save all unique parent issues
+        const uniqueParentIssues = Array.from(parentIssueMap.values());
+        const savedParentIssues =
+          await parentRepository.save(uniqueParentIssues);
 
-        await Promise.all(savePromises);
-
-        this.logger.debug('Saved Parent Issues:');
+        this.logger.debug('Saved Parent Issues:', savedParentIssues.length);
 
         this.logger.debug('Seeding Child Issues');
 
-        // Create and save child issues
-        const childIssueMap = new Map<string, DeepPartial<ChildIssue>>();
+        const childIssues = [];
 
-        parentIssues.forEach((parentIssue) => {
+        // Ensure unique child issues by associating them correctly with their parent issue
+        for (const parentIssue of savedParentIssues) {
           const issueData = IssueFactory.filter(
             (element) => element.category === parentIssue.placement,
           );
 
           issueData.forEach((element, childIndex) => {
-            const childKey = `${parentIssue.id}-${element.childReason}`;
-            if (!childIssueMap.has(childKey)) {
+            const existingChildIssue = childIssues.find(
+              (ci) =>
+                ci.parentIssue.id === parentIssue.id &&
+                ci.englishName === element.childReason,
+            );
+
+            if (!existingChildIssue) {
               const childIssue: DeepPartial<ChildIssue> = {
                 parentIssue,
                 sequentialId: childIndex + 1,
-                childArabicReason: element.childArabicName,
-                childReason: element.childReason,
+                arabicName: element.childArabicName,
+                englishName: element.childReason,
               };
-              childIssueMap.set(childKey, childIssue);
               childIssues.push(childIssue);
             }
           });
-        });
+        }
 
         if (childIssues.length > 0) {
           await childIssueRepository.save(childIssues);
