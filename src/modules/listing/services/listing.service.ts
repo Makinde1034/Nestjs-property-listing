@@ -58,6 +58,8 @@ import { FurnishingStatusEnum } from '../../../common/enums';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { GpsCoordinateRepository } from '../repositories/gps-coordinate.repository';
 import { AttributeRepository } from '../repositories';
+import { ChildIssueRepository } from '../../issue/repositories/child-issue.repository';
+import { IssueRepository } from '../../issue/repositories';
 
 @Injectable()
 export class ListingService {
@@ -76,6 +78,8 @@ export class ListingService {
     private readonly listingAttributesRepository: ListingAttributeRepository,
     private gpsCoordinateRepository: GpsCoordinateRepository,
     private attributeRepository: AttributeRepository,
+    private childIssueRepository: ChildIssueRepository,
+    private issueRepository: IssueRepository,
   ) {}
   logger = new Logger(ListingService.name);
 
@@ -1200,14 +1204,30 @@ export class ListingService {
       const listing = await this.listingRepository.findOneOrFail({
         where: { id: flaglistingInput.listingId },
       });
+      const childIssue = await this.childIssueRepository.findOneByOrFail({
+        id: flaglistingInput.childIssueId,
+      });
+
+      if (!childIssue) {
+        throw new BadRequestException(`ChildIssue ${AppStrings.NOT_FOUND}`);
+      }
+
+      const parentIssue = await this.issueRepository.findOneByOrFail({
+        id: flaglistingInput.parentIssueId,
+      });
+
+      if (!parentIssue) {
+        throw new BadRequestException(`parentIssue ${AppStrings.NOT_FOUND}`);
+      }
 
       if (!listing) {
         throw new BadRequestException(AppStrings.LISTING_NOT_FOUND);
       } else {
         await this.flagListingRepository.save({
-          userId,
-          ...flaglistingInput,
+          parentIssue: parentIssue.id,
+          childIssue: childIssue.id,
           listing,
+          userId,
         });
         const date = new Date();
 
@@ -1309,7 +1329,7 @@ export class ListingService {
     }
   }
 
-  async getSearchHistory(id: string, paginateAndSort: PaginateAndSort) {
+  async getSearchHistory(id: string, paginateAndSort?: PaginateAndSort) {
     try {
       const orderOptions = {
         [paginateAndSort.sortField]: paginateAndSort.directionToSort,

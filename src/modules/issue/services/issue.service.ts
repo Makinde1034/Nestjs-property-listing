@@ -7,7 +7,6 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 
 import { ChildIssue, ParentIssue } from 'src/entities';
 import {
-  DeleteIssueInput,
   CreateIssueInput,
   UpdateIssueInput,
   CreateChildIssueInput,
@@ -17,7 +16,6 @@ import { AppStrings } from 'src/common/messages/app.strings';
 import { ChildIssueRepository } from '../repositories/child-issue.repository';
 import { EntityManager, MoreThanOrEqual } from 'typeorm';
 import { IssueRepository } from '../repositories';
-import { SuccessResponse } from '../../../common/utils/success.response';
 
 @Injectable()
 export class IssueService {
@@ -127,11 +125,10 @@ export class IssueService {
           where: { placement: placement },
           order: { sequentialId: 'ASC' },
         });
-      } else {
-        return await this.issueRepository.find({
-          order: { sequentialId: 'ASC' },
-        });
       }
+      return await this.issueRepository.find({
+        order: { sequentialId: 'ASC' },
+      });
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -204,8 +201,42 @@ export class IssueService {
    * @returns {Promise<string>}
    */
   async deleteIssue(id: string): Promise<string> {
+    const issue = await this.issueRepository.findOneByOrFail({ id });
+
+    if (!issue) {
+      throw new BadRequestException(AppStrings.NOT_FOUND);
+    }
+
     await this.issueRepository.softDelete(id);
-    return AppStrings.ISSUE_DELETED_SUCCESSFULLY;
+
+    const { sequentialId, placement } = issue;
+
+    return await this.issueRepository.manager.transaction(
+      async (transactionalEntityManager: EntityManager) => {
+        if (sequentialId !== undefined) {
+          // Fetch records with a sequentialId greater than or equal to the input's sequentialId
+          const records = await transactionalEntityManager.find(ParentIssue, {
+            where: {
+              sequentialId: MoreThanOrEqual(sequentialId),
+              placement: placement,
+            },
+            order: { sequentialId: 'ASC' },
+          });
+
+          // Update the sequentialId for the subsequent issues
+          let newSequentialId = sequentialId;
+
+          records.forEach((record) => {
+            record.sequentialId = newSequentialId;
+            newSequentialId += 1;
+          });
+
+          // Save updated records
+          await transactionalEntityManager.save(ParentIssue, records);
+        }
+        return AppStrings.ISSUE_DELETED_SUCCESSFULLY;
+      },
+    );
   }
 
   /*********************************
@@ -254,20 +285,54 @@ export class IssueService {
     }
   }
 
-  async deleteChildIssue(id: string) {
+  async deleteChildIssue(id: string): Promise<string> {
     try {
-      const issue = await this.childIssueRepository.findOneByOrFail({ id });
+      const issue = await this.childIssueRepository.findOneOrFail({
+        where: { id },
+        relations: ['parentIssue'],
+      });
 
-      if (!issue) {
-        throw new BadRequestException(AppStrings.NOT_FOUND);
-      }
+      const { sequentialId, parentIssueId } = issue;
 
-      const { affected } = await this.childIssueRepository.softDelete(id);
-      if (affected > 0) {
-        throw new SuccessResponse(AppStrings.DELETED_SUCCESSFULLY);
-      }
+      return await this.issueRepository.manager.transaction(
+        async (transactionalEntityManager: EntityManager) => {
+          if (sequentialId !== undefined) {
+            this.logger.debug(
+              'Fetching records with sequentialId >=',
+              sequentialId,
+            );
+            const records = await transactionalEntityManager.find(ChildIssue, {
+              where: {
+                sequentialId: MoreThanOrEqual(sequentialId),
+                parentIssueId: parentIssueId,
+              },
+              order: { sequentialId: 'ASC' },
+            });
+
+            if (records.length > 0) {
+              this.logger.debug('Updating sequentialIds for subsequent issues');
+              let newSequentialId = sequentialId;
+
+              records.forEach((record) => {
+                record.sequentialId = newSequentialId;
+                newSequentialId += 1;
+              });
+
+              await transactionalEntityManager.save(ChildIssue, records);
+              this.logger.debug('SequentialIds updated successfully');
+            }
+          }
+
+          // Perform the soft delete of the issue
+          this.logger.debug('Soft deleting the child issue with id:', id);
+          await transactionalEntityManager.softDelete(ChildIssue, id);
+          this.logger.debug('Child issue deleted successfully');
+
+          return AppStrings.ISSUE_DELETED_SUCCESSFULLY;
+        },
+      );
     } catch (error) {
-      this.logger.log(error);
+      this.logger.error('Failed to delete child issue:', error);
       throw new BadRequestException(error);
     }
   }

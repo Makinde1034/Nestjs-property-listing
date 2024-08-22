@@ -9,7 +9,6 @@ import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
 import {
   CreateChildIssueInput,
   CreateIssueInput,
-  DeleteIssueInput,
   UpdateIssueInput,
 } from '../dtos';
 import { ChildIssue, ParentIssue } from '../../../entities';
@@ -35,7 +34,7 @@ export class IssueResolver {
   @Permissions('create-issues-categories')
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async createIssue(
-    @Args('RequestInput') RequestInput: CreateIssueInput,
+    @Args('input') RequestInput: CreateIssueInput,
   ): Promise<ParentIssue> {
     return await this.issueService.createIssue(RequestInput);
   }
@@ -62,8 +61,7 @@ export class IssueResolver {
    */
 
   @Query(() => [ParentIssue])
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
-  @Permissions('create-issues-categories')
+  @UseGuards(AccessTokenGuard)
   async fetchIssues(
     @Args('placement', { nullable: true }) placement: string,
   ): Promise<ParentIssue[]> {
@@ -74,7 +72,7 @@ export class IssueResolver {
    * Delete Issue
    *
    * @async
-   * @param {DeleteIssueInput} RequestInput
+   * @param {String}
    * @returns {Promise<string>}
    */
   @Mutation(() => String)
@@ -112,6 +110,6 @@ export class IssueResolver {
   @Permissions('delete-issues-categories')
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async deleteChildIssue(@Args('id') id: string): Promise<string> {
-    return await this.issueService.deleteIssue(id);
+    return await this.issueService.deleteChildIssue(id);
   }
 }

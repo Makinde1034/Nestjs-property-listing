@@ -22,7 +22,6 @@ import {
   FlaggedListingResponse,
   ListingResponse,
   OfferResponse,
-  SearchHistoryResponse,
 } from '../dtos/response/listing.response';
 import { OfferService } from '../services/offer.service';
 import {
@@ -40,6 +39,7 @@ import { AdminGuard } from '../../auth/guards/admin.guard';
 
 import { SuccessResponse } from '../../../common/response';
 import { CreateSearchHistoryInput } from '../dtos/request/create-search-history';
+import { SearchHistory } from '../../../entities/search-history.entity';
 
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { CreateFeatureInput } from '../dtos/request/feature-input';
@@ -229,13 +229,14 @@ export class ListingResolver {
   }
 
   @UseGuards(AccessTokenGuard)
-  @Query(() => SearchHistoryResponse, {
+  @Query(() => [SearchHistory], {
     nullable: true,
     name: 'getSearchHistory',
   })
   async getSearchHistory(
-    @Args('paginateAndSort') paginateAndSort: PaginateAndSort,
     @Context() ctx: any,
+    @Args('paginateAndSort', { nullable: true })
+    paginateAndSort: PaginateAndSort,
   ) {
     return await this.listingService.getSearchHistory(
       ctx.req.user.id,
@@ -245,7 +246,7 @@ export class ListingResolver {
 
   /*************************
    *Offer
-   ************************/
+   * ************************/
 
   @UseGuards(AccessTokenGuard)
   @Mutation(() => Offer, { name: 'createOffer', nullable: true })
@@ -431,11 +432,5 @@ export class ListingResolver {
     return await this.auctionService.addListingToAuction(
       addParticipantToAuctionInput,
     );
-  }
-
-  @UseGuards(AccessTokenGuard)
-  @Mutation(() => SuccessResponse, { name: 'deleteSavedHistory' })
-  async deleteSavedHistory(@Args('id') id: string) {
-    return await this.listingService.deleteSavedHistory(id);
   }
 }
