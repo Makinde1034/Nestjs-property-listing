@@ -33,6 +33,7 @@ import { GpsCoordinate } from './gps-coordinates.entity';
 export class Listing extends BaseEntity {
   @Column()
   @Field({ nullable: true })
+  @Index()
   ownership: string;
 
   @Column()
@@ -41,10 +42,12 @@ export class Listing extends BaseEntity {
 
   @Column()
   @Field({ nullable: true })
+  @Index()
   purpose: string;
 
   @Column('decimal', { precision: 10, scale: 2 })
   @Field({ nullable: true })
+  @Index()
   price: number;
 
   @Field({ nullable: true })
@@ -57,6 +60,7 @@ export class Listing extends BaseEntity {
 
   @Column()
   @Field({ nullable: true })
+  @Index()
   rentingOption: string;
 
   @Column()
@@ -167,7 +171,7 @@ export class Listing extends BaseEntity {
   @Column({ default: false })
   isListingDisabled: boolean;
 
-  @Field({ defaultValue: false })
+  @Field({ nullable: true })
   @Column({ default: false })
   negotiable: boolean;
 

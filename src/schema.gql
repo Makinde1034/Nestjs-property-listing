@@ -249,7 +249,7 @@ type Listing {
   isListingRented: Boolean!
   isListingFeatured: Boolean!
   isListingDisabled: Boolean!
-  negotiable: Boolean!
+  negotiable: Boolean
   flag: [FlagListing!]
   wishlist: [Wishlist!]
   rentDate: DateTime

@@ -16,7 +16,7 @@ export class Issue1720110596406 implements Seeder {
     dataSource: DataSource,
     factoryManager: SeederFactoryManager,
   ): Promise<any> {
-    this.logger.debug(`Seeding for: ${ParentIssue.name}...`);
+    this.logger.debug(`Seeding for: ${ParentIssue.name}...`, factoryManager);
 
     await dataSource.transaction(async (transactionalEntityManager) => {
       const parentRepository =
