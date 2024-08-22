@@ -105,11 +105,17 @@ export class AuthService {
         ...inputDto,
         company,
       };
+
+      const salt = await bcrypt.genSalt();
+      data.password = await bcrypt.hash(data.password, salt);
+
       const newUser = await this.userRepository.save(data);
       this.eventEmitter.emit(
         RegisterEventAction.USER_CREATED,
         new RegisterEventDto(newUser),
       );
+
+      newUser.password = null;
       return newUser;
     } catch (error) {
       this.logger.log({ error });
