@@ -64,6 +64,24 @@ export class TicketsResolver {
   }
 
   /**
+   * Get Ticket
+   *
+   * @async
+   * @param {ListTicketInput} input
+   * @returns {Promise<Ticket>}
+   */
+  @Query(() => [Ticket])
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions('read-support-tickets')
+  async listTicketsForAdminAndStaff(
+    @Context() ctx: any,
+    @Args({ name: 'findOptions', nullable: true, type: () => ListTicketInput })
+    input: ListTicketInput,
+  ): Promise<Ticket[]> {
+    return await this.ticketService.listTicketsForAdminAndStaff(input);
+  }
+
+  /**
    * Update Ticket
    *
    * @async

@@ -75,7 +75,6 @@ export class UserService {
    */
   async createUser(userData: Partial<User>): Promise<User> {
     const user = await this.usersRepository.save(userData);
-
     return user;
   }
 

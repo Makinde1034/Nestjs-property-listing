@@ -109,7 +109,7 @@ export class AuthService {
       const salt = await bcrypt.genSalt();
       data.password = await bcrypt.hash(data.password, salt);
 
-      const newUser = await this.userRepository.save(data);
+      const newUser = await this.userService.createUser(data);
       this.eventEmitter.emit(
         RegisterEventAction.USER_CREATED,
         new RegisterEventDto(newUser),
