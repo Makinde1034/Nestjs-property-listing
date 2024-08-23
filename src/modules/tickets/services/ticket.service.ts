@@ -86,16 +86,41 @@ export class TicketService {
     }
   }
 
-  async listTicketsForAdminAndStaff(
-    input?: ListTicketInput,
-  ): Promise<Ticket[]> {
+  async listTicketsForAdminAndStaff(input?: ListTicketInput) {
     try {
       const options: FindManyOptions<Ticket> = {};
       if (input.status) {
         options.where = { status: input.status };
       }
-      const tickets = await this.ticketRepository.find(options);
-      return tickets;
+      const quotedColumnName = (column: string) => `"ticket"."${column}"`;
+
+      const [tickets, countsResult] = await Promise.all([
+        this.ticketRepository.find(options),
+
+        this.ticketRepository
+          .createQueryBuilder('ticket')
+          .select('COUNT(*)', 'total')
+          .addSelect(
+            `SUM(CASE WHEN ${quotedColumnName('closedAt')} IS NULL THEN 1 ELSE 0 END)`,
+            'open',
+          )
+          .addSelect(
+            `SUM(CASE WHEN ${quotedColumnName('closedAt')} IS NOT NULL THEN 1 ELSE 0 END)`,
+            'closed',
+          )
+          .addSelect(
+            `SUM(CASE WHEN ${quotedColumnName('createdAt')} < CURRENT_DATE - INTERVAL '4 days' THEN 1 ELSE 0 END)`,
+            'aging',
+          )
+          .getRawOne(),
+      ]);
+
+      const analysis = {
+        open: Number(countsResult.open),
+        closed: Number(countsResult.closed),
+        aging: Number(countsResult.aging),
+      };
+      return { ticket: tickets, analysis };
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
