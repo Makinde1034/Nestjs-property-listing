@@ -521,6 +521,17 @@ type verifyPaymentResponse {
   message: String!
 }
 
+type TicketAnalysisResponse {
+  open: Float!
+  closed: Float!
+  aging: Float!
+}
+
+type TicketResponse {
+  ticket: [Ticket!]!
+  analysis: TicketAnalysisResponse!
+}
+
 type ReviewResponse {
   reviews: [Review!]!
   total: Float!
@@ -632,7 +643,7 @@ type Query {
   fetchChildIssues(parentId: String!): [ChildIssue!]!
   getTicket(ticketId: String!): Ticket!
   listTickets(findOptions: ListTicketInput): [Ticket!]!
-  listTicketsForAdminAndStaff(findOptions: ListTicketInput): [Ticket!]!
+  listTicketsForAdminAndStaff(findOptions: ListTicketInput): TicketResponse!
   findOneReview(id: String!): Review!
   findManyReviews(findMayOptions: FindManyReviewDto): ReviewResponse!
   findCities(findCities: PaginateAndSort): CityResponse!

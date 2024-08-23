@@ -10,6 +10,7 @@ import { UseGuards } from '@nestjs/common';
 import { CreateTicketInput, ListTicketInput, UpdateTicketInput } from '../dtos';
 import { Ticket } from 'src/entities';
 import { Permissions } from 'src/common/decorator/permission';
+import { TicketResponse } from '../dtos/response/ticket-response';
 
 @Resolver()
 export class TicketsResolver {
@@ -70,14 +71,14 @@ export class TicketsResolver {
    * @param {ListTicketInput} input
    * @returns {Promise<Ticket>}
    */
-  @Query(() => [Ticket])
+  @Query(() => TicketResponse)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions('read-support-tickets')
   async listTicketsForAdminAndStaff(
     @Context() ctx: any,
     @Args({ name: 'findOptions', nullable: true, type: () => ListTicketInput })
     input: ListTicketInput,
-  ): Promise<Ticket[]> {
+  ) {
     return await this.ticketService.listTicketsForAdminAndStaff(input);
   }
 
