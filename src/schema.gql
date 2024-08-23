@@ -249,7 +249,7 @@ type Listing {
   isListingRented: Boolean!
   isListingFeatured: Boolean!
   isListingDisabled: Boolean!
-  negotiable: Boolean!
+  negotiable: Boolean
   flag: [FlagListing!]
   wishlist: [Wishlist!]
   rentDate: DateTime
@@ -632,6 +632,7 @@ type Query {
   fetchChildIssues(parentId: String!): [ChildIssue!]!
   getTicket(ticketId: String!): Ticket!
   listTickets(findOptions: ListTicketInput): [Ticket!]!
+  listTicketsForAdminAndStaff(findOptions: ListTicketInput): [Ticket!]!
   findOneReview(id: String!): Review!
   findManyReviews(findMayOptions: FindManyReviewDto): ReviewResponse!
   findCities(findCities: PaginateAndSort): CityResponse!

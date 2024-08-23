@@ -89,6 +89,7 @@ export class User extends BaseEntity {
 
   @Field({ nullable: true })
   @Column({ nullable: true })
+  @Exclude()
   password: string;
 
   @Field({ nullable: true })

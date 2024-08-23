@@ -226,6 +226,14 @@ export class ListingService {
       if (listing.userId != user.id) {
         throw new BadRequestException('Listing does not belong to this user');
       }
+      const newImpression = listing.impressions + 1;
+
+      this.listingRepository
+        .createQueryBuilder()
+        .update()
+        .set({ impressions: newImpression })
+        .where('id = :id', { id: listing.id })
+        .execute();
 
       return listing;
     } catch (error) {
@@ -313,7 +321,7 @@ export class ListingService {
           .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
           .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
           .innerJoinAndSelect('listing.listingType', 'listingType')
-          .leftJoinAndSelect('listingType.attributeSets', 'attributeSets')
+          .leftJoin('listingType.attributeSets', 'attributeSets')
           .where('listing.deletedAt IS NULL')
 
           // Ensure listingType is not soft-deleted
@@ -459,19 +467,7 @@ export class ListingService {
     user: User,
   ) {
     try {
-      const allColumns = this.listingRepository.metadata.columns.map(
-        (column) => `listing.${column.propertyName}`,
-      );
-      const columnsToExclude = [
-        'listing.deedNumber',
-        'listing.poaNumber',
-        'listing.iban',
-        'listing.zatcaNumber',
-      ];
-      const columnsToSelect = allColumns.filter(
-        (column) => !columnsToExclude.includes(column),
-      );
-
+      // Extract parameters from input
       const {
         gpsCoordinate,
         rentingOption,
@@ -489,56 +485,46 @@ export class ListingService {
         purpose,
       } = paginateAndSort;
 
-      const attributeId: string[] = [];
-      const attributeValue: (string | [string, string])[] = [];
+      // Define columns to exclude from selection
+      const columnsToExclude = [
+        'deedNumber',
+        'poaNumber',
+        'iban',
+        'zatcaNumber',
+      ];
 
-      if (attributes) {
-        attributes.forEach(({ attributeId: id, value }) => {
-          attributeId.push(id);
-
-          try {
-            const data: [string, string] | string[] = JSON.parse(value);
-            if (Array.isArray(data)) {
-              if (data.length === 2) {
-                attributeValue.push(data as [string, string]);
-              } else if (data.length === 1) {
-                attributeValue.push(data[0]);
-              }
-            }
-          } catch (error) {
-            this.logger.warn(
-              `Invalid JSON format for attribute value: ${value}`,
-            );
-          }
-        });
-      }
+      // Select only the necessary columns
+      const columnsToSelect = this.listingRepository.metadata.columns
+        .map((column) => `listing.${column.propertyName}`)
+        .filter((column) => !columnsToExclude.includes(column.split('.')[1]));
 
       const take = Math.min(initialTake, 20);
       const featuredTake = Math.ceil(take / 3);
       const regularTake = take - featuredTake;
 
-      const sortDirections = ['ASC', 'DESC'] as const;
-      type SortDirection = (typeof sortDirections)[number];
-
+      // Construct base query
       const baseQuery = (isFeatured: boolean) => {
         const query = this.listingRepository
           .createQueryBuilder('listing')
           .select(columnsToSelect)
           .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
           .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
-          .innerJoinAndSelect('listing.listingType', 'listingType')
-          .leftJoinAndSelect('listingType.attributeSets', 'attributeSets')
-          .where('listing.listingType IS NOT NULL')
-          .andWhere(
+          .leftJoinAndSelect('listing.listingType', 'listingType')
+          .leftJoin('listingType.attributeSets', 'attributeSets')
+          .leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate')
+
+          .where('listing.deletedAt IS NULL')
+          .andWhere('listingType.deletedAt IS NULL')
+          .andWhere('attributeSets.deletedAt IS NULL')
+
+          .where(
             'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented',
             {
               isListingDisabled: false,
               isListingSold: false,
               isListingRented: false,
             },
-          )
-          .andWhere('listingType.deletedAt IS NULL')
-          .andWhere('attributeSets.deletedAt IS NULL');
+          );
 
         if (isFeatured) {
           query
@@ -559,11 +545,11 @@ export class ListingService {
             rentingOption,
           });
         }
+
         if (gpsCoordinate) {
           const { lng, lat } = gpsCoordinate;
-
           query
-            .leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate')
+            .leftJoin('listing.gpsCoordinate', 'gpsCoordinate')
             .andWhere('gpsCoordinate.lng = :lng AND gpsCoordinate.lat = :lat', {
               lng,
               lat,
@@ -578,23 +564,35 @@ export class ListingService {
         }
 
         if (purpose !== undefined) {
-          query.andWhere('listing.purpose =:purpose', { purpose });
+          query.andWhere('listing.purpose = :purpose', { purpose });
         }
 
         if (listingTypeId !== undefined) {
           query.andWhere('listing.listingTypeId = :listingTypeId', {
-            listingTypeId: listingTypeId,
+            listingTypeId,
           });
         }
 
         if (attributes && attributes.length > 0) {
-          if (attributeId.length > 0) {
+          const attributeIds = attributes.map(({ attributeId }) => attributeId);
+          const attributeValues = attributes.map(({ value }) => {
+            try {
+              return JSON.parse(value);
+            } catch {
+              this.logger.warn(
+                `Invalid JSON format for attribute value: ${value}`,
+              );
+              return value;
+            }
+          });
+
+          if (attributeIds.length > 0) {
             query.andWhere('listingAttributes.id IN (:...attributeIds)', {
-              attributeIds: attributeId,
+              attributeIds: attributeIds,
             });
           }
 
-          const [exactValues, rangeValues] = attributeValue.reduce(
+          const [exactValues, rangeValues] = attributeValues.reduce(
             ([exact, range], value) => {
               if (Array.isArray(value) && value.length === 2) {
                 range.push(value);
@@ -628,16 +626,18 @@ export class ListingService {
           );
         }
 
-        if (
-          sortField &&
-          sortDirections.includes(
-            directionToSort.toUpperCase() as SortDirection,
-          )
-        ) {
-          query.orderBy(
-            `listing.${sortField}`,
-            directionToSort.toUpperCase() as SortDirection,
-          );
+        if (sortField && directionToSort) {
+          const sortDirections = ['ASC', 'DESC'] as const;
+          if (
+            sortDirections.includes(
+              directionToSort.toUpperCase() as (typeof sortDirections)[number],
+            )
+          ) {
+            query.orderBy(
+              `listing.${sortField}`,
+              directionToSort.toUpperCase() as (typeof sortDirections)[number],
+            );
+          }
         } else {
           query
             .orderBy('listing.promotedDate', 'ASC')
@@ -647,21 +647,21 @@ export class ListingService {
         return query;
       };
 
-      const featuredQuery = baseQuery(true);
-      featuredQuery.take(featuredTake).skip(skip);
+      // Fetch featured and regular listings
+      const [featuredListings, featuredCount] = await baseQuery(true)
+        .take(featuredTake)
+        .skip(skip)
+        .getManyAndCount();
 
-      const [featuredListings, featuredCount] =
-        await featuredQuery.getManyAndCount();
-
-      const regularQuery = baseQuery(false);
-      regularQuery.take(regularTake).skip(skip);
-
-      const [regularListings, regularCount] =
-        await regularQuery.getManyAndCount();
+      const [regularListings, regularCount] = await baseQuery(false)
+        .take(regularTake)
+        .skip(skip)
+        .getManyAndCount();
 
       const listing = [...featuredListings, ...regularListings];
       const total = featuredCount + regularCount;
 
+      // Save search history if needed
       if (searchHistory) {
         this.saveSearchHistory(
           {
@@ -677,6 +677,7 @@ export class ListingService {
           user,
         );
       }
+
       return { listing, total };
     } catch (error) {
       this.logger.error('Error in findListingForBuyerAuthenticated:', error);
@@ -687,13 +688,22 @@ export class ListingService {
   }
 
   async getListingForAdmin(paginateAndSort: AdminFilterAndSort) {
-    const orderOptions = {
-      [paginateAndSort.sortField]: paginateAndSort.directionToSort,
-    };
-
     const now = new Date();
     let whereCondition: any = {};
     const dateField = 'createdAt';
+
+    let sortField;
+    let directionToSort;
+    if (paginateAndSort.sortField && paginateAndSort.directionToSort) {
+      sortField = paginateAndSort.sortField;
+      directionToSort = paginateAndSort.directionToSort.toUpperCase() as
+        | 'ASC'
+        | 'DESC';
+
+      if (!['ASC', 'DESC'].includes(directionToSort)) {
+        throw new Error(`Invalid sort direction: ${directionToSort}`);
+      }
+    }
 
     switch (paginateAndSort.timePeriod) {
       case 'today':
@@ -721,23 +731,32 @@ export class ListingService {
 
     try {
       const [listingResult, countsResult] = await Promise.all([
-        this.listingRepository.find({
-          where: whereCondition,
-          relations: ['user'],
-          select: {
-            user: {
-              firstName: true,
-              lastName: true,
-              language: true,
-              arabicFirstName: true,
-              arabicLastName: true,
-              userType: true,
-            },
-          },
-          order: orderOptions,
-          skip: paginateAndSort.skip,
-          take: paginateAndSort.take,
-        }),
+        this.listingRepository
+          .createQueryBuilder('listing')
+          .select([
+            'listing.id',
+            'listing.title',
+            'listing.isListingDisabled',
+            'listing.isListingFlagged',
+            'listing.price',
+          ])
+          .leftJoin('listing.listingType', 'listingType')
+          .leftJoin('listing.user', 'user')
+          .addSelect([
+            'listingType.id',
+            'listingType.englishName',
+            'user.firstName',
+            'user.lastName',
+            'user.language',
+            'user.arabicFirstName',
+            'user.arabicLastName',
+            'user.userType',
+          ])
+          .where(whereCondition)
+          .orderBy(sortField, directionToSort)
+          .skip(paginateAndSort.skip)
+          .take(paginateAndSort.take)
+          .getMany(),
 
         this.listingRepository
           .createQueryBuilder('listing')
@@ -823,9 +842,12 @@ export class ListingService {
 
       const newImpression = listing.impressions + 1;
 
-      await this.listingRepository.update(listing.id, {
-        impressions: newImpression,
-      });
+      this.listingRepository
+        .createQueryBuilder()
+        .update()
+        .set({ impressions: newImpression })
+        .where('id = :id', { id: listing.id })
+        .execute();
 
       listing.deedNumber = '';
       listing.zatcaNumber = '';
@@ -880,9 +902,12 @@ export class ListingService {
 
       const newImpression = listing.impressions + 1;
 
-      await this.listingRepository.update(listing.id, {
-        impressions: newImpression,
-      });
+      this.listingRepository
+        .createQueryBuilder()
+        .update()
+        .set({ impressions: newImpression })
+        .where('id = :id', { id: listing.id })
+        .execute();
 
       listing.deedNumber = '';
       listing.zatcaNumber = '';
@@ -1344,16 +1369,66 @@ export class ListingService {
 
   async getOneListingForAdmin(id: string) {
     try {
-      const listing = await this.listingRepository
-        .createQueryBuilder('listing')
-        .leftJoinAndSelect('listing.user', 'user')
-        .leftJoinAndSelect('listing.promotion', 'promotion')
-        .leftJoinAndSelect('listing.feature', 'feature')
-        .leftJoinAndSelect('listing.flag', 'flag')
+      const listing = await this.listingRepository.findOneOrFail({
+        where: { id },
+        relations: ['user', 'promotion', 'feature', 'flag'],
+        select: {
+          id: true,
+          title: true,
+          price: true,
+          purpose: true,
+          rentingOption: true,
+          impressions: true,
+          flaggedDate: true,
+          listingTypeId: true,
 
-        .where('listing.id = :id', { id })
-        .addSelect('listing.impressions')
-        .getOne();
+          isListingPromoted: true,
+          isListingFlagged: true,
+          isListingSold: true,
+          isListingRented: true,
+          isListingFeatured: true,
+          isListingDisabled: true,
+
+          listingType: {
+            id: true,
+            englishName: true,
+          },
+          user: {
+            id: true,
+            phone: true,
+            firstName: true,
+            lastName: true,
+            arabicFirstName: true,
+            arabicLastName: true,
+          },
+          feature: {
+            id: true,
+            endDate: true,
+            startDate: true,
+            adPackage: {
+              id: true,
+              name: true,
+            },
+          },
+          promotion: {
+            id: true,
+            expiredAt: true,
+            createdAt: true,
+            adPackage: {
+              id: true,
+              name: true,
+              price: true,
+            },
+          },
+          flag: {
+            id: true,
+            parentIssue: true,
+            childIssue: true,
+            userId: true,
+            createdAt: true,
+          },
+        },
+      });
 
       if (!listing) {
         throw new BadRequestException('Listing not found');

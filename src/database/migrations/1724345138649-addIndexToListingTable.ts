@@ -5,8 +5,8 @@
 
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class UpdateSeeder1724332622889 implements MigrationInterface {
-  name = 'UpdateSeeder1724332622889';
+export class AddIndexToListingTable1724345138649 implements MigrationInterface {
+  name = 'AddIndexToListingTable1724345138649';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
@@ -22,34 +22,22 @@ export class UpdateSeeder1724332622889 implements MigrationInterface {
       `DROP INDEX "public"."IDX_bfbc9e263d4cea6d7a8c9eb3ad"`,
     );
     await queryRunner.query(
-      `ALTER TABLE "child_issue" DROP COLUMN "childReason"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "child_issue" DROP COLUMN "childArabicReason"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "parent_issue" DROP COLUMN "parentReason"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "parent_issue" DROP COLUMN "parentArabicReason"`,
-    );
-    await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" DROP COLUMN "approve"`,
     );
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" ADD "approve" boolean DEFAULT false`,
     );
     await queryRunner.query(
-      `ALTER TABLE "child_issue" ADD "englishName" character varying`,
+      `CREATE INDEX "IDX_2316fce055eb6d1429c656cd1f" ON "listing" ("ownership") `,
     );
     await queryRunner.query(
-      `ALTER TABLE "child_issue" ADD "arabicName" character varying`,
+      `CREATE INDEX "IDX_ea78c0231e4479348664439207" ON "listing" ("purpose") `,
     );
     await queryRunner.query(
-      `ALTER TABLE "parent_issue" ADD "englishName" character varying`,
+      `CREATE INDEX "IDX_d371b513022e5cfe23db8c1b23" ON "listing" ("price") `,
     );
     await queryRunner.query(
-      `ALTER TABLE "parent_issue" ADD "arabicName" character varying`,
+      `CREATE INDEX "IDX_42a7f559e477f2b0f531c85bb2" ON "listing" ("rentingOption") `,
     );
     await queryRunner.query(
       `CREATE INDEX "IDX_b36cb2e04bc353ca4ede00d87b" ON "role_permissions_permission" ("roleId") `,
@@ -79,34 +67,22 @@ export class UpdateSeeder1724332622889 implements MigrationInterface {
       `DROP INDEX "public"."IDX_b36cb2e04bc353ca4ede00d87b"`,
     );
     await queryRunner.query(
-      `ALTER TABLE "parent_issue" DROP COLUMN "arabicName"`,
+      `DROP INDEX "public"."IDX_42a7f559e477f2b0f531c85bb2"`,
     );
     await queryRunner.query(
-      `ALTER TABLE "parent_issue" DROP COLUMN "englishName"`,
+      `DROP INDEX "public"."IDX_d371b513022e5cfe23db8c1b23"`,
     );
     await queryRunner.query(
-      `ALTER TABLE "child_issue" DROP COLUMN "arabicName"`,
+      `DROP INDEX "public"."IDX_ea78c0231e4479348664439207"`,
     );
     await queryRunner.query(
-      `ALTER TABLE "child_issue" DROP COLUMN "englishName"`,
+      `DROP INDEX "public"."IDX_2316fce055eb6d1429c656cd1f"`,
     );
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" DROP COLUMN "approve"`,
     );
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" ADD "approve" boolean DEFAULT false`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "parent_issue" ADD "parentArabicReason" character varying`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "parent_issue" ADD "parentReason" character varying`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "child_issue" ADD "childArabicReason" character varying`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "child_issue" ADD "childReason" character varying`,
     );
     await queryRunner.query(
       `CREATE INDEX "IDX_bfbc9e263d4cea6d7a8c9eb3ad" ON "role_permissions_permission" ("permissionId") `,

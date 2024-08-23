@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { TicketRepository } from '../repositories';
 import { CreateTicketInput, ListTicketInput, UpdateTicketInput } from '../dtos';
 import { AppStrings } from 'src/common/messages/app.strings';
@@ -21,6 +21,7 @@ export class TicketService {
     private childIssueRepository: ChildIssueRepository,
     private readonly issueRepository: IssueRepository,
   ) {}
+  logger = new Logger(TicketService.name);
 
   /**
    * Raise Issue/ Create ticket
@@ -81,6 +82,22 @@ export class TicketService {
         return tickets;
       }
     } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+
+  async listTicketsForAdminAndStaff(
+    input?: ListTicketInput,
+  ): Promise<Ticket[]> {
+    try {
+      const options: FindManyOptions<Ticket> = {};
+      if (input.status) {
+        options.where = { status: input.status };
+      }
+      const tickets = await this.ticketRepository.find(options);
+      return tickets;
+    } catch (error) {
+      this.logger.log(error);
       throw new BadRequestException(error);
     }
   }
