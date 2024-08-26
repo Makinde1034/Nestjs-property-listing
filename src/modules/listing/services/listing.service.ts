@@ -936,7 +936,7 @@ export class ListingService {
       // Fetch the listing with its relations
       const listing = await this.listingRepository.findOne({
         where: { id },
-        relations: ['listingAttributes', 'wishlist'],
+        relations: ['listingAttributes', 'wishlist', 'gpsCoordinate'],
       });
 
       // Check permission
@@ -945,12 +945,17 @@ export class ListingService {
           'This user does not have permission to update the record',
         );
       }
+      let update;
 
       // Update listing details
-      const update = await this.listingRepository.update(
-        id,
-        partialUpdatePayload,
-      );
+      update = await this.listingRepository.update(id, partialUpdatePayload);
+
+      if (gpsCoordinate) {
+        update = await this.gpsCoordinateRepository.update(
+          listing.gpsCoordinate.id,
+          gpsCoordinate,
+        );
+      }
 
       // Create a map for quick lookups of existing attributes
       const existingAttributesMap = new Map(
