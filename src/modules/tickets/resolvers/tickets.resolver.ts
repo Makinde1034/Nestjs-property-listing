@@ -7,10 +7,16 @@ import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { TicketService } from '../services';
 import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
 import { UseGuards } from '@nestjs/common';
-import { CreateTicketInput, ListTicketInput, UpdateTicketInput } from '../dtos';
+import {
+  CreateResponseTemplateInput,
+  CreateTicketInput,
+  ListTicketInput,
+  UpdateTicketInput,
+} from '../dtos';
 import { Ticket } from 'src/entities';
 import { Permissions } from 'src/common/decorator/permission';
 import { TicketResponse } from '../dtos/response/ticket-response';
+import { ResponseTemplate } from '../../../entities/response-template.entity';
 
 @Resolver()
 export class TicketsResolver {
@@ -24,7 +30,7 @@ export class TicketsResolver {
    * @returns {Promise<string>}
    */
   @Mutation(() => String)
-  @UseGuards(AccessTokenGuard)
+  @Permissions('create-support-tickets')
   async createTicket(
     @Args('RequestInput') RequestInput: CreateTicketInput,
     @Context() ctx: any,
@@ -97,5 +103,44 @@ export class TicketsResolver {
     @Context() ctx: any,
   ): Promise<Ticket> {
     return await this.ticketService.updateTicket(ctx.req.user, RequestInput);
+  }
+
+  @Permissions('create-support-tickets')
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Mutation(() => ResponseTemplate)
+  async createResponseTemplate(
+    @Args('createResponseTemplateInput')
+    createResponseTemplateInput: CreateResponseTemplateInput,
+  ) {
+    return await this.ticketService.createResponseTemplate(
+      createResponseTemplateInput,
+    );
+  }
+
+  @Permissions('create-support-tickets')
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Query(() => ResponseTemplate)
+  async fetchOneResponseTemplate(
+    @Args('id')
+    id: string,
+  ) {
+    return await this.ticketService.findOneResponseTemplate(id);
+  }
+
+  @Permissions('create-support-tickets')
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Query(() => [ResponseTemplate])
+  async fetchResponseTemplate() {
+    return await this.ticketService.findAllResponseTemplate();
+  }
+
+  @Permissions('create-support-tickets')
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Mutation(() => ResponseTemplate)
+  async deleteResponseTemplate(
+    @Args('id')
+    id: string,
+  ) {
+    return await this.ticketService.deleteResponseTemplate(id);
   }
 }

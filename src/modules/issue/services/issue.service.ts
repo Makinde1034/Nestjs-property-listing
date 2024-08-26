@@ -124,10 +124,12 @@ export class IssueService {
         return await this.issueRepository.find({
           where: { placement: placement },
           order: { sequentialId: 'ASC' },
+          relations: ['childIssue'],
         });
       }
       return await this.issueRepository.find({
         order: { sequentialId: 'ASC' },
+        relations: ['childIssue'],
       });
     } catch (error) {
       this.logger.log(error);

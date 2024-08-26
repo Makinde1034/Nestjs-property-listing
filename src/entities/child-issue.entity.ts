@@ -23,7 +23,7 @@ import { Ticket } from './ticket.entity';
 export class ChildIssue extends BaseEntity {
   @Field(() => ParentIssue)
   @JoinColumn({ name: 'parentIssueId' })
-  @ManyToOne(() => ParentIssue, (parent) => parent)
+  @ManyToOne(() => ParentIssue, (parent) => parent.childIssue)
   parentIssue: ParentIssue;
 
   @Column({ nullable: true })

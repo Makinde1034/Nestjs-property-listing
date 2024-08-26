@@ -5,18 +5,26 @@
 
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { TicketRepository } from '../repositories';
-import { CreateTicketInput, ListTicketInput, UpdateTicketInput } from '../dtos';
+import {
+  CreateResponseTemplateInput,
+  CreateTicketInput,
+  ListTicketInput,
+  UpdateTicketInput,
+} from '../dtos';
 import { AppStrings } from 'src/common/messages/app.strings';
 import { Ticket, User } from 'src/entities';
 import { IssueRepository } from '../../issue/repositories';
 import { TicketStatus } from 'src/common/enums';
 import { FindManyOptions } from 'typeorm';
 import { ChildIssueRepository } from '../../issue/repositories/child-issue.repository';
+import { ResponseTemplateRepository } from '../repositories/response-template.repository';
+import { ResponseTemplate } from '../../../entities/response-template.entity';
 
 @Injectable()
 export class TicketService {
   constructor(
     private readonly ticketRepository: TicketRepository,
+    private responseTemplateRepostiory: ResponseTemplateRepository,
 
     private childIssueRepository: ChildIssueRepository,
     private readonly issueRepository: IssueRepository,
@@ -149,6 +157,59 @@ export class TicketService {
     const { affected } = await this.ticketRepository.update(ticketId, data);
     if (affected) {
       return this.ticketRepository.findOneByOrFail({ id: ticketId });
+    }
+  }
+
+  /***************************
+   *Response template
+   ***************************/
+
+  async createResponseTemplate(
+    createResponseTemplateInput: CreateResponseTemplateInput,
+  ) {
+    try {
+      return await this.responseTemplateRepostiory.save(
+        createResponseTemplateInput,
+      );
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async findOneResponseTemplate(id: string) {
+    try {
+      return await this.responseTemplateRepostiory.findOneByOrFail({ id });
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException();
+    }
+  }
+
+  async findAllResponseTemplate(): Promise<ResponseTemplate[]> {
+    try {
+      return await this.responseTemplateRepostiory.find();
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException();
+    }
+  }
+
+  async deleteResponseTemplate(id: string) {
+    try {
+      const template = await this.responseTemplateRepostiory.findOneByOrFail({
+        id,
+      });
+      const result = await this.responseTemplateRepostiory.softDelete({
+        id: template.id,
+      });
+
+      if (result) {
+        return await this.responseTemplateRepostiory.findOneByOrFail({ id });
+      }
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException();
     }
   }
 }

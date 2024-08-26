@@ -521,6 +521,17 @@ type verifyPaymentResponse {
   message: String!
 }
 
+type ResponseTemplate {
+  id: ID!
+  templateName: String!
+  templateArabicName: String!
+  templateText: String!
+  templateArabicText: String!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type TicketAnalysisResponse {
   open: Float!
   closed: Float!
@@ -644,6 +655,8 @@ type Query {
   getTicket(ticketId: String!): Ticket!
   listTickets(findOptions: ListTicketInput): [Ticket!]!
   listTicketsForAdminAndStaff(findOptions: ListTicketInput): TicketResponse!
+  fetchOneResponseTemplate(id: String!): ResponseTemplate!
+  fetchResponseTemplate: [ResponseTemplate!]!
   findOneReview(id: String!): Review!
   findManyReviews(findMayOptions: FindManyReviewDto): ReviewResponse!
   findCities(findCities: PaginateAndSort): CityResponse!
@@ -838,6 +851,8 @@ type Mutation {
   deleteChildIssue(id: String!): String!
   createTicket(RequestInput: CreateTicketInput!): String!
   manageTicket(RequestInput: UpdateTicketInput!): Ticket!
+  createResponseTemplate(createResponseTemplateInput: CreateResponseTemplateInput!): ResponseTemplate!
+  deleteResponseTemplate(id: String!): ResponseTemplate!
   createReview(createReviewDto: CreateReviewDto!): Review!
 }
 
@@ -1216,6 +1231,13 @@ input CreateTicketInput {
 input UpdateTicketInput {
   ticketId: String!
   status: String!
+}
+
+input CreateResponseTemplateInput {
+  templateName: String!
+  templateArabicName: String!
+  templateText: String!
+  templateArabicText: String!
 }
 
 input CreateReviewDto {
