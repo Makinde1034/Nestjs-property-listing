@@ -377,7 +377,7 @@ export class ListingService {
         }
 
         if (purpose !== undefined) {
-          query.andWhere('listing.purpose = :type', { purpose });
+          query.andWhere('listing.purpose = :purpose', { purpose });
         }
 
         if (listingTypeId !== undefined) {
@@ -751,6 +751,7 @@ export class ListingService {
             'user.arabicFirstName',
             'user.arabicLastName',
             'user.userType',
+            'user.email',
           ])
           .where(whereCondition)
           .orderBy(sortField, directionToSort)
