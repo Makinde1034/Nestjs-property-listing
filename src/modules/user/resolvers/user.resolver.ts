@@ -68,7 +68,6 @@ export class UserResolver {
 
   /**
    * Confirm Staff And Set new Password
-   *
    * @async
    * @param {StaffConfirmDto} inputDto
    * @returns {Promise<User>}

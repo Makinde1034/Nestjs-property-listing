@@ -35,7 +35,7 @@ export class Feature {
   @Column({ nullable: true })
   startDate: Date;
 
-  @Field(() => AdPackage)
+  @Field(() => AdPackage, { nullable: true })
   @ManyToOne(() => AdPackage, (adPackage) => adPackage.promotion, {})
   @JoinColumn()
   adPackage: AdPackage;

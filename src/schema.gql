@@ -140,7 +140,7 @@ type Feature {
   listingId: String!
   endDate: DateTime
   startDate: DateTime
-  adPackage: AdPackage!
+  adPackage: AdPackage
   listing: Listing!
   createdAt: DateTime!
   updatedAt: DateTime!
@@ -203,8 +203,8 @@ type AttributeSet {
 
 type ListingType {
   id: ID!
-  englishName: String!
-  arabicName: String!
+  englishName: String
+  arabicName: String
   icon: String
   listing: Listing!
   attributeSets: [AttributeSet!]
