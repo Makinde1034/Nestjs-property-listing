@@ -202,7 +202,7 @@ export class ListingService {
       const listing = await this.listingRepository.findAndCount({
         take,
         skip,
-        where: { userId: user.id },
+        // where: { userId: user.id },
         relations: ['listingAttributes', 'listingType'],
         order: orderOptions,
       });
@@ -1389,6 +1389,7 @@ export class ListingService {
           isListingRented: true,
           isListingFeatured: true,
           isListingDisabled: true,
+          images: true,
 
           listingType: {
             id: true,
@@ -1401,6 +1402,7 @@ export class ListingService {
             lastName: true,
             arabicFirstName: true,
             arabicLastName: true,
+            email: true,
           },
           feature: {
             id: true,
