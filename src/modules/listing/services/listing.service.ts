@@ -202,7 +202,7 @@ export class ListingService {
       const listing = await this.listingRepository.findAndCount({
         take,
         skip,
-        // where: { userId: user.id },
+        where: { userId: user.id },
         relations: ['listingAttributes', 'listingType'],
         order: orderOptions,
       });
