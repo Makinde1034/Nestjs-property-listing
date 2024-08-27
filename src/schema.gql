@@ -243,12 +243,12 @@ type Listing {
   promotion: [Promotion!]
   feature: [Feature!]
   impressions: Float
-  isListingPromoted: Boolean
-  isListingFlagged: Boolean
-  isListingSold: Boolean
-  isListingRented: Boolean
-  isListingFeatured: Boolean
-  isListingDisabled: Boolean
+  isListingPromoted: Boolean!
+  isListingFlagged: Boolean!
+  isListingSold: Boolean!
+  isListingRented: Boolean!
+  isListingFeatured: Boolean!
+  isListingDisabled: Boolean!
   negotiable: Boolean
   flag: [FlagListing!]
   wishlist: [Wishlist!]

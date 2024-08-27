@@ -141,32 +141,32 @@ export class Listing extends BaseEntity {
   @Column({ default: 0 })
   impressions: number;
 
-  @Field({ nullable: true })
+  @Field()
   @Index()
   @Column({ default: false })
   isListingPromoted: boolean;
 
-  @Field({ nullable: true })
+  @Field()
   @Index()
   @Column({ default: false })
   isListingFlagged: boolean;
 
-  @Field({ nullable: true })
+  @Field()
   @Index()
   @Column({ default: false })
   isListingSold: boolean;
 
-  @Field({ nullable: true })
+  @Field()
   @Index()
   @Column({ default: false })
   isListingRented: boolean;
 
-  @Field({ nullable: true })
+  @Field()
   @Index()
   @Column({ default: false })
   isListingFeatured: boolean;
 
-  @Field({ nullable: true })
+  @Field()
   @Index()
   @Column({ default: false })
   isListingDisabled: boolean;
