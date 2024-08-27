@@ -724,7 +724,7 @@ export class ListingService {
       ...whereCondition,
       isListingPromoted: paginateAndSort.isListingPromoted,
       isListingSold: paginateAndSort.isListingSold,
-      // IsListingFlagged: paginateAndSort.isListingFlagged,
+      isListingFlagged: paginateAndSort.isListingFlagged,
       isListingRented: paginateAndSort.isListingRented,
     };
     const quotedColumnName = (column: string) => `"listing"."${column}"`;
@@ -738,6 +738,10 @@ export class ListingService {
             'listing.title',
             'listing.isListingDisabled',
             'listing.isListingFlagged',
+            'listing.isListingFeatured',
+            'listing.isListingSold',
+            'listing.isListingRented',
+            'listing.isListingPromoted',
             'listing.price',
           ])
           .leftJoin('listing.listingType', 'listingType')
@@ -792,6 +796,7 @@ export class ListingService {
         total: Number(countsResult.total),
       };
     } catch (error) {
+      console.log(error);
       this.logger.log(error);
       throw new BadRequestException(error);
     }
