@@ -336,6 +336,11 @@ type Chat {
 
 type Messages {
   id: ID!
+  chat: Chat!
+  user: User!
+  message: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type User {
@@ -521,6 +526,17 @@ type verifyPaymentResponse {
   message: String!
 }
 
+type ResponseTemplate {
+  id: ID!
+  templateName: String!
+  templateArabicName: String!
+  templateText: String!
+  templateArabicText: String!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type TicketAnalysisResponse {
   open: Float!
   closed: Float!
@@ -604,6 +620,11 @@ type FinancialVsOrder {
   totalOrdered: Float
 }
 
+type MessageResponse {
+  messages: [Messages!]!
+  total: Float!
+}
+
 type Query {
   app: String!
   activateTwoFa: TwoFaResult!
@@ -644,6 +665,8 @@ type Query {
   getTicket(ticketId: String!): Ticket!
   listTickets(findOptions: ListTicketInput): [Ticket!]!
   listTicketsForAdminAndStaff(findOptions: ListTicketInput): TicketResponse!
+  fetchOneResponseTemplate(id: String!): ResponseTemplate!
+  fetchResponseTemplate: [ResponseTemplate!]!
   findOneReview(id: String!): Review!
   findManyReviews(findMayOptions: FindManyReviewDto): ReviewResponse!
   findCities(findCities: PaginateAndSort): CityResponse!
@@ -656,6 +679,7 @@ type Query {
   averageResponse: ResponseTime!
   saiiFees(findOptions: AdminDashboardSort): SaiiFees!
   financialVsOrder(findOptions: AdminDashboardSort!): [FinancialVsOrder!]!
+  getChat(chatFilterInput: ChatFilterInput!): MessageResponse!
 }
 
 input AttributeFilter {
@@ -776,6 +800,15 @@ input AdminDashboardSort {
   value: Float! = 0
 }
 
+input ChatFilterInput {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
+  ticketId: String!
+}
+
 type Mutation {
   register(RegisterInput: RegisterInput!): User!
   registerConfirm(RegisterConfirmInput: AuthRegisterConfirmDto!): String!
@@ -838,6 +871,8 @@ type Mutation {
   deleteChildIssue(id: String!): String!
   createTicket(RequestInput: CreateTicketInput!): String!
   manageTicket(RequestInput: UpdateTicketInput!): Ticket!
+  createResponseTemplate(createResponseTemplateInput: CreateResponseTemplateInput!): ResponseTemplate!
+  deleteResponseTemplate(id: String!): ResponseTemplate!
   createReview(createReviewDto: CreateReviewDto!): Review!
 }
 
@@ -1216,6 +1251,13 @@ input CreateTicketInput {
 input UpdateTicketInput {
   ticketId: String!
   status: String!
+}
+
+input CreateResponseTemplateInput {
+  templateName: String!
+  templateArabicName: String!
+  templateText: String!
+  templateArabicText: String!
 }
 
 input CreateReviewDto {

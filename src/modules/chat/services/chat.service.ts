@@ -88,7 +88,7 @@ export class ChatService {
    *
    ***********************************/
 
-  async createMessage(createMessage) {
+  async createMessage(createMessage: CreateMessageInput) {
     try {
       return await this.messageRepository.save(createMessage);
     } catch (error) {
@@ -104,7 +104,7 @@ export class ChatService {
       const skip = findOption?.skip || 0;
 
       // Fetch messages with related user entity
-      const messages = await this.messageRepository.find({
+      const [messages, total] = await this.messageRepository.findAndCount({
         where: {
           chat: { ticketId: ticketId },
         },
@@ -126,24 +126,7 @@ export class ChatService {
         order: { createdAt: 'DESC' },
       });
 
-      // Transform the message data with a null check for user
-      const transformedMessages = messages.map((msg) => ({
-        id: msg.id,
-        message: msg.message,
-        createdAt: msg.createdAt,
-        user: msg.user
-          ? {
-              id: msg.user.id,
-              firstName: msg.user.firstName,
-              lastName: msg.user.lastName,
-              arabicFirstName: msg.user.arabicFirstName,
-              arabicLastName: msg.user.arabicLastName,
-            }
-          : null, // Handle null user case
-      }));
-
-      // Return transformed message data
-      return transformedMessages;
+      return { messages, total };
     } catch (error) {
       // Improved error logging
       this.logger.error('Failed to fetch messages', error);

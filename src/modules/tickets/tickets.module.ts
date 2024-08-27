@@ -10,9 +10,16 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Ticket } from 'src/entities';
 import { TicketRepository } from './repositories';
 import { IssueModule } from '../issue/issue.module';
+import { ResponseTemplate } from '../../entities/response-template.entity';
+import { ResponseTemplateRepository } from './repositories/response-template.repository';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Ticket]), IssueModule],
-  providers: [TicketsResolver, TicketService, TicketRepository],
+  imports: [TypeOrmModule.forFeature([Ticket, ResponseTemplate]), IssueModule],
+  providers: [
+    TicketsResolver,
+    TicketService,
+    TicketRepository,
+    ResponseTemplateRepository,
+  ],
 })
 export class TicketsModule {}

@@ -22,6 +22,25 @@ export class CreateTicketInput {
 }
 
 @InputType()
+export class CreateResponseTemplateInput {
+  @Field()
+  @IsString()
+  templateName: string;
+
+  @Field()
+  @IsString()
+  templateArabicName: string;
+
+  @Field()
+  @IsString()
+  templateText: string;
+
+  @Field()
+  @IsString()
+  templateArabicText: string;
+}
+
+@InputType()
 export class UpdateTicketInput {
   @Field()
   @IsString()

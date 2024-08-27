@@ -946,7 +946,6 @@ export class ListingService {
         );
       }
       let update;
-
       // Update listing details
       update = await this.listingRepository.update(id, partialUpdatePayload);
 

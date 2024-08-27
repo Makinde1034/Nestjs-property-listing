@@ -24,11 +24,11 @@ export class ParentIssue extends BaseEntity {
   placement: string;
 
   @Field(() => [Ticket], { nullable: true })
-  @OneToMany(() => Ticket, (childIssue) => childIssue)
+  @OneToMany(() => Ticket, (childIssue) => childIssue.parentIssue)
   ticket: Ticket[];
 
   @Field(() => [ChildIssue], { nullable: true })
-  @OneToMany(() => ChildIssue, (childIssue) => childIssue)
+  @OneToMany(() => ChildIssue, (childIssue) => childIssue.parentIssue)
   childIssue: ChildIssue[];
 
   @Column({ nullable: true })
