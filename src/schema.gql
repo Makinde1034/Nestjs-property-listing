@@ -336,6 +336,11 @@ type Chat {
 
 type Messages {
   id: ID!
+  chat: Chat!
+  user: User!
+  message: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type User {
@@ -615,6 +620,11 @@ type FinancialVsOrder {
   totalOrdered: Float
 }
 
+type MessageResponse {
+  messages: [Messages!]!
+  total: Float!
+}
+
 type Query {
   app: String!
   activateTwoFa: TwoFaResult!
@@ -669,6 +679,7 @@ type Query {
   averageResponse: ResponseTime!
   saiiFees(findOptions: AdminDashboardSort): SaiiFees!
   financialVsOrder(findOptions: AdminDashboardSort!): [FinancialVsOrder!]!
+  getChat(chatFilterInput: ChatFilterInput!): MessageResponse!
 }
 
 input AttributeFilter {
@@ -787,6 +798,15 @@ input FindManyReviewDto {
 input AdminDashboardSort {
   timePeriod: String! = "false"
   value: Float! = 0
+}
+
+input ChatFilterInput {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
+  ticketId: String!
 }
 
 type Mutation {

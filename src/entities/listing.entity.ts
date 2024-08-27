@@ -143,12 +143,12 @@ export class Listing extends BaseEntity {
 
   @Field({ nullable: true })
   @Index()
-  @Column()
+  @Column({ default: false })
   isListingPromoted: boolean;
 
   @Field({ nullable: true })
   @Index()
-  @Column()
+  @Column({ default: false })
   isListingFlagged: boolean;
 
   @Field({ nullable: true })

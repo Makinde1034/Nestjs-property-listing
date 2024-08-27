@@ -30,6 +30,7 @@ export class TicketsResolver {
    * @returns {Promise<string>}
    */
   @Mutation(() => String)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions('create-support-tickets')
   async createTicket(
     @Args('RequestInput') RequestInput: CreateTicketInput,
