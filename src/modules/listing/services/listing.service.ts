@@ -301,7 +301,7 @@ export class ListingService {
             }
           } catch (error) {
             this.logger.warn(
-              `Invalid JSON format for attribute value: ${value}`,
+              `Invalid JSON format for attribute value: ${value}, error: ${error.message}`,
             );
           }
         });
@@ -389,16 +389,17 @@ export class ListingService {
         if (attributes && attributes.length > 0) {
           if (attributeId.length > 0) {
             query.andWhere(
-              'listingAttributes.id IN (:...attributeIds) AND listingAttributes.value IN (:...attributeValues)',
+              'listingAttributes.attributeId IN (:...attributeIds) AND listingAttributes.value IN (:...attributeValues)',
               {
                 attributeIds: attributeId,
                 attributeValues: attributeValue,
               },
             );
           }
+
           if (attributeIdRange.length > 0) {
             query.andWhere(
-              'listingAttributes.id IN (:...attributeIdRange) AND listingAttributes.value BETWEEN :minValue AND :maxValue',
+              'listingAttributes.attributeId IN (:...attributeIdRange) AND listingAttributes.value BETWEEN :minValue AND :maxValue',
               {
                 attributeIdRange,
                 minValue: attributeValueRange[0]?.[0] || null,
@@ -493,6 +494,32 @@ export class ListingService {
         'zatcaNumber',
       ];
 
+      const attributeId: string[] = [];
+      const attributeValue: string[] = [];
+      const attributeIdRange: string[] = [];
+      const attributeValueRange: [string, string][] = [];
+
+      if (attributes) {
+        attributes.forEach(({ attributeId: id, value }) => {
+          try {
+            const data: [string, string] | string[] = JSON.parse(value);
+            if (Array.isArray(data)) {
+              if (data.length === 2) {
+                attributeIdRange.push(id);
+                attributeValueRange.push(data as [string, string]);
+              } else if (data.length === 1) {
+                attributeId.push(id);
+                attributeValue.push(data[0]);
+              }
+            }
+          } catch (error) {
+            this.logger.warn(
+              `Invalid JSON format for attribute value: ${value}, error: ${error.message}`,
+            );
+          }
+        });
+      }
+
       // Select only the necessary columns
       const columnsToSelect = this.listingRepository.metadata.columns
         .map((column) => `listing.${column.propertyName}`)
@@ -511,7 +538,6 @@ export class ListingService {
           .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
           .leftJoinAndSelect('listing.listingType', 'listingType')
           .leftJoin('listingType.attributeSets', 'attributeSets')
-          .leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate')
 
           .where('listing.deletedAt IS NULL')
           .andWhere('listingType.deletedAt IS NULL')
@@ -574,47 +600,24 @@ export class ListingService {
         }
 
         if (attributes && attributes.length > 0) {
-          const attributeIds = attributes.map(({ attributeId }) => attributeId);
-          const attributeValues = attributes.map(({ value }) => {
-            try {
-              return JSON.parse(value);
-            } catch {
-              this.logger.warn(
-                `Invalid JSON format for attribute value: ${value}`,
-              );
-              return value;
-            }
-          });
-
-          if (attributeIds.length > 0) {
-            query.andWhere('listingAttributes.id IN (:...attributeIds)', {
-              attributeIds: attributeIds,
-            });
-          }
-
-          const [exactValues, rangeValues] = attributeValues.reduce(
-            ([exact, range], value) => {
-              if (Array.isArray(value) && value.length === 2) {
-                range.push(value);
-              } else {
-                exact.push(value);
-              }
-              return [exact, range];
-            },
-            [[], []] as [string[], [string, string][]],
-          );
-
-          if (exactValues.length > 0) {
-            query.andWhere('listingAttributes.value IN (:...exactValues)', {
-              exactValues,
-            });
-          }
-
-          if (rangeValues.length > 0) {
-            const [minValue, maxValue] = rangeValues[0];
+          if (attributeId.length > 0) {
             query.andWhere(
-              'listingAttributes.value BETWEEN :minValue AND :maxValue',
-              { minValue, maxValue },
+              'listingAttributes.attributeId IN (:...attributeIds) AND listingAttributes.value IN (:...attributeValues)',
+              {
+                attributeIds: attributeId,
+                attributeValues: attributeValue,
+              },
+            );
+          }
+
+          if (attributeIdRange.length > 0) {
+            query.andWhere(
+              'listingAttributes.attributeId IN (:...attributeIdRange) AND listingAttributes.value BETWEEN :minValue AND :maxValue',
+              {
+                attributeIdRange,
+                minValue: attributeValueRange[0]?.[0] || null,
+                maxValue: attributeValueRange[0]?.[1] || null,
+              },
             );
           }
         }
