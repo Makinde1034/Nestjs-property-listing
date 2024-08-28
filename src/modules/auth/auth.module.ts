@@ -16,6 +16,7 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthEventHandler } from './events/auth.event';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { AuthMiddleware } from '../../common/interceptors/auth-middleware';
+import { StaffService } from '../user/services/staff.service';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { AuthMiddleware } from '../../common/interceptors/auth-middleware';
     JwtStrategy,
     RecaptchaValidator,
     TwoFactorAuthenticationService,
+    StaffService,
   ],
 
   exports: [AuthService],

@@ -1446,7 +1446,6 @@ export class ListingService {
         throw new BadRequestException('Listing not found');
       }
 
-      // Batch update impressions and return the listing in one go
       const newImpression = listing.impressions + 1;
 
       this.listingRepository

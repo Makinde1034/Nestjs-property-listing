@@ -51,6 +51,7 @@ import { UserService } from '../../user/services/user.service';
 
 import { RecaptchaValidator } from './recaptcha.validator';
 import { TwoFactorAuthenticationService } from './two-fa-auth.service';
+import { StaffService } from '../../user/services/staff.service';
 
 @Injectable()
 export class AuthService {
@@ -67,6 +68,7 @@ export class AuthService {
     private readonly recaptchaValidator: RecaptchaValidator,
     private readonly twoFactorAuthenticationService: TwoFactorAuthenticationService,
     private readonly userRepository: UserRepository,
+    private staffService: StaffService,
   ) {
     this.frontEndUrl = this.configService.get('FRONT_END_URL');
     this.adminUrl = this.configService.get('ADMIN_FRONTEND_URL');
@@ -106,16 +108,12 @@ export class AuthService {
         company,
       };
 
-      const salt = await bcrypt.genSalt();
-      data.password = await bcrypt.hash(data.password, salt);
-
       const newUser = await this.userService.createUser(data);
       this.eventEmitter.emit(
         RegisterEventAction.USER_CREATED,
         new RegisterEventDto(newUser),
       );
 
-      newUser.password = null;
       return newUser;
     } catch (error) {
       this.logger.log({ error });
@@ -182,7 +180,7 @@ export class AuthService {
     if (user.userType === 'company' || user.userType === 'individual') {
       await this.sendRegisterConfirmEmail(user);
     } else {
-      await this.userService.sendPasswordEmailToStaff({ staff: user });
+      await this.staffService.sendPasswordEmailToStaff({ staff: user });
     }
 
     return AppStrings.CONFIRMATION_SENT;

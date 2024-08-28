@@ -8,11 +8,15 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { RegisterEventAction } from 'src/common/enums';
 import { UserService } from '../services';
 import { StaffCreatedEventDto } from '../dtos';
+import { StaffService } from '../services/staff.service';
 
 @Injectable()
 export class UserEventHandler {
   private logger = new Logger(UserEventHandler.name);
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private staffService: StaffService,
+  ) {}
 
   @OnEvent(RegisterEventAction.STAFF_CREATED, { async: true })
   async handleUserCreatedEvent(payload: StaffCreatedEventDto) {
@@ -21,7 +25,7 @@ export class UserEventHandler {
       new Date(),
     );
     const { data } = payload;
-    await this.userService.sendPasswordEmailToStaff(data);
+    await this.staffService.sendPasswordEmailToStaff(data);
 
     this.logger.debug(
       `Finished Handling ${RegisterEventAction.STAFF_CREATED}`,

@@ -15,12 +15,21 @@ import {
   StaffConfirmDto,
   UserActionInput,
   PasswordInput,
+  StaffFilterInput,
 } from '../dtos';
 import { Permissions } from 'src/common/decorator/permission';
+import { EmployeeResponse } from '../dtos/response/staff.response';
+import { SuccessResponseWithDataPayload } from '../../../common/utils/success.response';
+import { StaffService } from '../services/staff.service';
+import { CustomerService } from '../services/customer.service';
 
 @Resolver()
 export class UserResolver {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private staffService: StaffService,
+    private customerService: CustomerService,
+  ) {}
 
   /**
    * User
@@ -63,7 +72,7 @@ export class UserResolver {
   async createStaff(
     @Args('RequestInput') inputDto: CreateStaffInput,
   ): Promise<User> {
-    return await this.userService.createStaff(inputDto);
+    return await this.staffService.createStaff(inputDto);
   }
 
   /**
@@ -76,7 +85,7 @@ export class UserResolver {
   async staffConfirmation(
     @Args('RequestInput') inputDto: StaffConfirmDto,
   ): Promise<string> {
-    return await this.userService.staffPasswordConfirmation(inputDto);
+    return await this.staffService.staffPasswordConfirmation(inputDto);
   }
 
   /**
@@ -86,12 +95,10 @@ export class UserResolver {
    * @param {UserActionInput} inputDto
    * @returns {Promise<User>}
    */
-  @Mutation(() => User)
+  @Mutation(() => SuccessResponseWithDataPayload)
   @Permissions('update-user')
   @UseGuards(AccessTokenGuard, PermissionsGuard)
-  async blockUser(
-    @Args('RequestInput') inputDto: UserActionInput,
-  ): Promise<User> {
+  async blockUser(@Args('RequestInput') inputDto: UserActionInput) {
     return await this.userService.blockUser(inputDto);
   }
 
@@ -131,4 +138,22 @@ export class UserResolver {
   ): Promise<User> {
     return await this.userService.changePassword(ctx.req.user, inputDto);
   }
+
+  @Query(() => EmployeeResponse)
+  @UseGuards(AccessTokenGuard)
+  async getEmployees(
+    @Args('staffFilterInput') staffFilterInput: StaffFilterInput,
+    @Context() ctx: any,
+  ) {
+    return await this.staffService.getEmployees(staffFilterInput, ctx.req.user);
+  }
+
+  @Query(() => User)
+  @UseGuards(AccessTokenGuard)
+  async getEmployee(@Args('id') id: string, @Context() ctx: any) {
+    return await this.staffService.getOneEmployee(id, ctx.req.user);
+  }
+  //update password for multiple employees
+
+  // delete multiple employees
 }

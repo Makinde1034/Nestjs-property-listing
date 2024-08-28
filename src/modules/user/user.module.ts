@@ -31,6 +31,8 @@ import { UserController } from './controllers';
 import { UserEventHandler } from './events';
 import { UserTrackingService } from './services/user.tracking.service';
 import { UserTrackingRepository } from './repositories/user-tracking-repository';
+import { CustomerService } from './services/customer.service';
+import { StaffService } from './services/staff.service';
 
 @Global()
 @Module({
@@ -63,11 +65,14 @@ import { UserTrackingRepository } from './repositories/user-tracking-repository'
     UserNotificationRepository,
     NotificationScopeRepository,
     RolePermissionRepository,
+    CustomerService,
+    StaffService,
   ],
   exports: [
     UserService,
     UserRepository,
     RoleService,
+    RoleRepository,
     NotificationScopeRepository,
   ],
 })
