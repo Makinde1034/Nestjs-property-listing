@@ -20,8 +20,7 @@ import { FindManyOptions } from 'typeorm';
 import { ChildIssueRepository } from '../../issue/repositories/child-issue.repository';
 import { ResponseTemplateRepository } from '../repositories/response-template.repository';
 import { ResponseTemplate } from '../../../entities/response-template.entity';
-import { SuccessResponse } from '../../../common/response';
-
+import { SuccessResponse } from '../../../common/utils/success.response';
 @Injectable()
 export class TicketService {
   constructor(
@@ -184,7 +183,7 @@ export class TicketService {
       return await this.responseTemplateRepostiory.findOneByOrFail({ id });
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException();
+      throw new BadRequestException(error);
     }
   }
 
@@ -199,19 +198,24 @@ export class TicketService {
 
   async deleteResponseTemplate(id: string) {
     try {
-      const template = await this.responseTemplateRepostiory.findOneByOrFail({
-        id,
+      const template = await this.responseTemplateRepostiory.findOneBy({
+        id: id,
       });
-      const result = await this.responseTemplateRepostiory.softDelete({
+
+      if (!template) {
+        throw new BadRequestException(AppStrings.NOT_FOUND);
+      }
+
+      const { affected } = await this.responseTemplateRepostiory.softDelete({
         id: template.id,
       });
 
-      if (result) {
-        return new SuccessResponse();
+      if (affected > 0) {
+        return new SuccessResponse(AppStrings.ATTRIBUTE_DELETED_SUCCESSFULLY);
       }
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException();
+      throw new BadRequestException(AppStrings.NOT_FOUND, error.error);
     }
   }
   async updateResponseTemplate(
@@ -238,6 +242,7 @@ export class TicketService {
       }
     } catch (error) {
       this.logger.log(error);
+
       throw new BadRequestException(error);
     }
   }

@@ -796,7 +796,6 @@ export class ListingService {
         total: Number(countsResult.total),
       };
     } catch (error) {
-      console.log(error);
       this.logger.log(error);
       throw new BadRequestException(error);
     }

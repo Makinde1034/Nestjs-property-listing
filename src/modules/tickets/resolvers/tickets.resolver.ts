@@ -18,7 +18,7 @@ import { Ticket } from 'src/entities';
 import { Permissions } from 'src/common/decorator/permission';
 import { TicketResponse } from '../dtos/response/ticket-response';
 import { ResponseTemplate } from '../../../entities/response-template.entity';
-import { SuccessResponse } from '../../../common/response';
+import { SuccessResponse } from '../../../common/utils/success.response';
 
 @Resolver()
 export class TicketsResolver {

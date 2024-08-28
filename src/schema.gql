@@ -413,11 +413,6 @@ type CityEntitity {
   admin_name: String!
 }
 
-type SuccessResponse {
-  message: String!
-  data: String!
-}
-
 type TokenType {
   accessToken: String!
   refreshToken: String!
@@ -453,6 +448,17 @@ type RoleData {
   slug: String!
   permissions: [PermissionData!]!
 }
+
+type SuccessResponse {
+  status: Float
+  message: String
+  data: JSON
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
 
 type AuctionParticipant {
   id: ID!
@@ -872,7 +878,8 @@ type Mutation {
   createTicket(RequestInput: CreateTicketInput!): String!
   manageTicket(RequestInput: UpdateTicketInput!): Ticket!
   createResponseTemplate(createResponseTemplateInput: CreateResponseTemplateInput!): ResponseTemplate!
-  deleteResponseTemplate(id: String!): ResponseTemplate!
+  deleteResponseTemplate(id: String!): SuccessResponse!
+  updateResponseTemplate(updateResponseTemplateInput: UpdateResponseTemplateInput!): ResponseTemplate!
   createReview(createReviewDto: CreateReviewDto!): Review!
 }
 
@@ -1258,6 +1265,14 @@ input CreateResponseTemplateInput {
   templateArabicName: String!
   templateText: String!
   templateArabicText: String!
+}
+
+input UpdateResponseTemplateInput {
+  templateName: String
+  templateArabicName: String
+  templateText: String
+  templateArabicText: String
+  id: String!
 }
 
 input CreateReviewDto {

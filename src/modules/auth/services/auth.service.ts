@@ -28,7 +28,6 @@ import * as crypto from 'crypto';
 
 import { JWTPayload } from 'src/common/interface';
 import { AppStrings } from 'src/common/messages/app.strings';
-import { SuccessResponse } from 'src/common/response';
 
 import {
   RegisterEventDto,
@@ -51,6 +50,7 @@ import { UserService } from '../../user/services/user.service';
 
 import { RecaptchaValidator } from './recaptcha.validator';
 import { TwoFactorAuthenticationService } from './two-fa-auth.service';
+import { SuccessResponse } from '../../../common/utils/success.response';
 
 @Injectable()
 export class AuthService {
@@ -168,7 +168,7 @@ export class AuthService {
    */
   async sendEmailConfirmationLink(
     emailConfirmDto: ConfirmationInput,
-  ): Promise<string> {
+  ): Promise<SuccessResponse> {
     const user = await this.userService.findByEmailOrPhone(
       emailConfirmDto.email,
     );
@@ -185,7 +185,7 @@ export class AuthService {
       await this.userService.sendPasswordEmailToStaff({ staff: user });
     }
 
-    return AppStrings.CONFIRMATION_SENT;
+    return new SuccessResponse(AppStrings.CONFIRMATION_SENT);
   }
 
   /**
@@ -432,9 +432,7 @@ export class AuthService {
       new RegisterEventDto(user),
     );
 
-    return {
-      message: AppStrings.PASSWORD_RESET_SENT,
-    };
+    return new SuccessResponse(AppStrings.PASSWORD_RESET_SENT);
   }
 
   /**
@@ -480,9 +478,7 @@ export class AuthService {
     });
 
     await this.userService.removeUserConfirmation(userConfirmation.id);
-    return {
-      message: AppStrings.PASSWORD_RESET_SUCCEEDED,
-    };
+    return new SuccessResponse(AppStrings.PASSWORD_RESET_SUCCEEDED);
   }
 
   /**
