@@ -9,6 +9,7 @@ import {
   CreateResponseTemplateInput,
   CreateTicketInput,
   ListTicketInput,
+  UpdateResponseTemplateInput,
   UpdateTicketInput,
 } from '../dtos';
 import { AppStrings } from 'src/common/messages/app.strings';
@@ -19,7 +20,7 @@ import { FindManyOptions } from 'typeorm';
 import { ChildIssueRepository } from '../../issue/repositories/child-issue.repository';
 import { ResponseTemplateRepository } from '../repositories/response-template.repository';
 import { ResponseTemplate } from '../../../entities/response-template.entity';
-
+import { SuccessResponse } from '../../../common/utils/success.response';
 @Injectable()
 export class TicketService {
   constructor(
@@ -182,7 +183,7 @@ export class TicketService {
       return await this.responseTemplateRepostiory.findOneByOrFail({ id });
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException();
+      throw new BadRequestException(error);
     }
   }
 
@@ -197,19 +198,52 @@ export class TicketService {
 
   async deleteResponseTemplate(id: string) {
     try {
-      const template = await this.responseTemplateRepostiory.findOneByOrFail({
-        id,
+      const template = await this.responseTemplateRepostiory.findOneBy({
+        id: id,
       });
-      const result = await this.responseTemplateRepostiory.softDelete({
+
+      if (!template) {
+        throw new BadRequestException(AppStrings.NOT_FOUND);
+      }
+
+      const { affected } = await this.responseTemplateRepostiory.softDelete({
         id: template.id,
       });
 
-      if (result) {
-        return await this.responseTemplateRepostiory.findOneByOrFail({ id });
+      if (affected > 0) {
+        return new SuccessResponse(AppStrings.ATTRIBUTE_DELETED_SUCCESSFULLY);
       }
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException();
+      throw new BadRequestException(AppStrings.NOT_FOUND, error.error);
+    }
+  }
+  async updateResponseTemplate(
+    updateResponseTemplate: UpdateResponseTemplateInput,
+  ) {
+    try {
+      const template = await this.responseTemplateRepostiory.findOneByOrFail({
+        id: updateResponseTemplate.id,
+      });
+      if (!template) {
+        throw new BadRequestException(AppStrings.NOT_FOUND);
+      }
+      const { affected } = await this.responseTemplateRepostiory.update(
+        template.id,
+        {
+          ...updateResponseTemplate,
+        },
+      );
+
+      if (affected > 0) {
+        return await this.responseTemplateRepostiory.findOneByOrFail({
+          id: template.id,
+        });
+      }
+    } catch (error) {
+      this.logger.log(error);
+
+      throw new BadRequestException(error);
     }
   }
 }

@@ -4,12 +4,21 @@
  */
 
 import { Logger } from '@nestjs/common';
+import { Field, ObjectType } from '@nestjs/graphql';
+
+import GraphQLJSON from 'graphql-type-json';
 
 const AppLogger = new Logger();
 
+@ObjectType()
 export class SuccessResponse {
+  @Field({ nullable: true })
   status: number;
+
+  @Field({ nullable: true })
   message: string;
+
+  @Field(() => GraphQLJSON, { nullable: true })
   data: unknown;
 
   constructor(message: string = 'successful', data: unknown = null) {
