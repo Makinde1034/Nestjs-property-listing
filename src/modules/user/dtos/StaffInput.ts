@@ -8,7 +8,6 @@ import {
   IsArray,
   IsDate,
   IsEmail,
-  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsPhoneNumber,
@@ -16,10 +15,6 @@ import {
   IsStrongPassword,
   ValidateIf,
 } from 'class-validator';
-import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
-import { UserLevelEnum } from '../../../common/enums/user.enum';
-import { UserProfileTypeEnum } from '../../../common/enums';
-import { UserStats } from '../../admin/dto/admin-response';
 
 @InputType()
 export class CreateStaffInput {
@@ -101,25 +96,4 @@ export class StaffConfirmDto {
     minUppercase: 1,
   })
   password: string;
-}
-
-@InputType()
-export class StaffFilterInput extends PaginateAndSort {
-  @Field({ nullable: true })
-  @IsString()
-  @IsOptional()
-  @IsEnum(UserLevelEnum)
-  level: string;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  @IsEnum(UserStats)
-  status: string;
-
-  @Field({ nullable: true })
-  @IsString()
-  @IsOptional()
-  @IsEnum(UserProfileTypeEnum)
-  type: string;
 }

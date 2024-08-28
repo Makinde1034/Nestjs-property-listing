@@ -3,9 +3,10 @@
  * For license. See license.txt
  */
 
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import {
   NationalIdentityRepository,
+  RoleRepository,
   UserConfirmationRepository,
   UserRepository,
 } from '../repositories';
@@ -18,28 +19,35 @@ import { DeepPartial, FindOptionsWhere, In, LessThan } from 'typeorm';
 import { PostgresError } from 'pg-error-enum';
 import { addHours, isPast } from 'date-fns';
 import {
+  CreateStaffInput,
   ImageResponse,
   NotificationPrefenceInput,
   UserProfileInput,
+  StaffConfirmDto,
+  StaffCreatedData,
+  StaffCreatedEventDto,
   UserActionInput,
   PasswordInput,
 } from '../dtos';
 import { StorageService } from '../../file-handler/services/storage.service';
-
-import { NationalIdentityType, UserStatus } from '../../../common/enums';
-
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import {
+  NationalIdentityType,
+  RegisterEventAction,
+  UserStatus,
+} from '../../../common/enums';
+import { MailgunEmailService } from '../../mail/services/implementations';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import {
   NotificationScopeRepository,
   UserNotificationRepository,
 } from '../repositories/notification.repository';
-import { generateRandomToken } from '../../../common/utils/functions';
-import { AppStrings } from '../../../common/messages/app.strings';
 import {
-  SuccessResponse,
-  SuccessResponseWithDataPayload,
-} from '../../../common/utils/success.response';
+  generateOtp,
+  generateRandomToken,
+} from '../../../common/utils/functions';
+import { AppStrings } from '../../../common/messages/app.strings';
 
 @Injectable()
 export class UserService {
@@ -49,13 +57,15 @@ export class UserService {
     private readonly tokenRepository: UserConfirmationRepository,
     private readonly nationalIdentityRepository: NationalIdentityRepository,
     private readonly storageService: StorageService,
+    private readonly roleRepository: RoleRepository,
     private readonly userNotificationRepository: UserNotificationRepository,
     private readonly notificationScopeRepository: NotificationScopeRepository,
+    private readonly eventEmitter: EventEmitter2,
+    private readonly mailService: MailgunEmailService,
     private readonly configService: ConfigService,
   ) {
     this.frontEndUrl = this.configService.get('ADMIN_FRONTEND_URL');
   }
-  logger = new Logger(UserService.name);
 
   /**
    * Create User
@@ -64,10 +74,7 @@ export class UserService {
    * @returns {Promise<User>}
    */
   async createUser(userData: Partial<User>): Promise<User> {
-    const salt = await bcrypt.genSalt();
-    userData.password = await bcrypt.hash(userData.password, salt);
     const user = await this.usersRepository.save(userData);
-    user.password = null;
     return user;
   }
 
@@ -96,7 +103,6 @@ export class UserService {
   ): Promise<User> {
     return await this.usersRepository.findOne({ where: userData });
   }
-
   /**
    * Find user
    *
@@ -406,40 +412,116 @@ export class UserService {
     return { url: imageurl };
   }
 
-  async blockUser(
-    requestInput: UserActionInput,
-  ): Promise<SuccessResponseWithDataPayload> {
-    const { userId, action } = requestInput;
-    const usersToUpdate: DeepPartial<User>[] = [];
-    const notFoundIds: string[] = [];
-
-    const users = await this.usersRepository.find({
-      where: { id: In(userId) },
-    });
-
-    if (users.length < userId.length) {
-      const foundUserIds = users.map((user) => user.id);
-      notFoundIds.push(...userId.filter((id) => !foundUserIds.includes(id)));
-    }
-
-    const status = action ? UserStatus.DISABLED : UserStatus.ACTIVE;
-    const disabledAt = action ? new Date() : null;
-
-    users.forEach((user) => {
-      usersToUpdate.push({ id: user.id, status, disabledAt });
-    });
-
-    const updatedUsers = await this.usersRepository.save(usersToUpdate);
-
-    if (notFoundIds.length > 0) {
-      throw new BadRequestException(
-        'There was a problem performing this action on some users',
+  /**
+   * Create Staff User
+   *
+   * @async
+   * @param {CreateStaffInput} input
+   * @returns {Promise<Staff>}
+   */
+  async createStaff(input: CreateStaffInput): Promise<User> {
+    try {
+      const roles = await this.roleRepository.find({
+        where: { id: In([...input.roles]) },
+      });
+      const password = generateRandomToken(8);
+      const staffData: Partial<User> = {
+        ...input,
+        roles,
+        password,
+        employeeId: `${generateOtp()}`,
+        userType: 'staff',
+        twoFaRequired: true,
+      };
+      const staff = await this.usersRepository.save(staffData);
+      this.eventEmitter.emit(
+        RegisterEventAction.STAFF_CREATED,
+        new StaffCreatedEventDto({ staff }),
       );
+      return staff;
+    } catch (error) {
+      throw new BadRequestException(error);
     }
+  }
 
-    return new SuccessResponse(
-      `You have successfully ${action ? 'blocked' : 'unblocked'} the selected users`,
-      updatedUsers,
-    );
+  /**
+   * Send password reset email to staff
+   * @async
+   * @param {StaffCreatedData} data
+   * @returns {Promise<void>}
+   */
+  async sendPasswordEmailToStaff(data: StaffCreatedData): Promise<void> {
+    const { staff } = data;
+    const { token } = await this.generateUserConfirmation(staff);
+
+    const link = `${this.frontEndUrl}/staff-confirmation?email=${staff.email}&token=${token}`;
+
+    await this.mailService.sendStaffConfirmation(staff, link);
+  }
+
+  /**
+   * Confirm registered staff
+   * Validate new password
+   *
+   * @async
+   * @param {StaffConfirmDto} requestInput
+   * @returns {string}
+   */
+  async staffPasswordConfirmation(
+    requestInput: StaffConfirmDto,
+  ): Promise<string> {
+    const { email, token, password } = requestInput;
+    const userConfirmation = await this.findTokenConfirmation(email, token);
+
+    if (userConfirmation) {
+      const { user } = userConfirmation;
+      // If user already complete account setup
+      // FE: need to redirect to /login
+      if (user.verifiedAt) {
+        throw new BadRequestException(AppStrings.ACCOUNT_ALREADY_CONFIRMED);
+      }
+
+      if (this.validateUserConfirmation(userConfirmation, token)) {
+        await this.usersRepository.update(user.id, {
+          verifiedAt: new Date(),
+          status: UserStatus.VERIFIED,
+          password,
+        });
+        await this.removeUserConfirmation(userConfirmation.id);
+        return AppStrings.ACCOUNT_CONFIRMED_SUCCESSFULLY;
+      }
+    }
+    throw new BadRequestException(AppStrings.WRONG_CONFIRM_CODE);
+  }
+
+  /**
+   * Confirm registered staff
+   * Validate new password
+   *
+   * @async
+   * @param {UserActionInput} requestInput
+   * @returns {Promise<User>}
+   */
+  async blockUser(requestInput: UserActionInput): Promise<User> {
+    const user = await this.usersRepository.findOneByOrFail({
+      id: requestInput.userId,
+    });
+    if (requestInput.action) {
+      const { affected } = await this.usersRepository.update(user.id, {
+        status: UserStatus.DISABLED,
+        disabledAt: new Date(),
+      });
+      if (affected) {
+        return await this.usersRepository.findOneByOrFail({ id: user.id });
+      }
+    }
+    const { affected } = await this.usersRepository.update(user.id, {
+      status: UserStatus.ACTIVE,
+      disabledAt: null,
+    });
+
+    if (affected) {
+      return await this.usersRepository.findOneByOrFail({ id: user.id });
+    }
   }
 }

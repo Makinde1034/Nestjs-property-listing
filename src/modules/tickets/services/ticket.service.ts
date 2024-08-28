@@ -209,7 +209,7 @@ export class TicketService {
       }
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException();
     }
   }
 }

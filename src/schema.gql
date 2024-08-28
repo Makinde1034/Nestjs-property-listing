@@ -433,17 +433,6 @@ type TwoFaResult {
   qrcodeImage: String!
 }
 
-type SuccessResponseWithDataPayload {
-  status: Float!
-  message: String!
-  data: JSON
-}
-
-"""
-The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
-"""
-scalar JSON
-
 type PermissionData {
   id: Float!
   slug: String!
@@ -463,72 +452,6 @@ type RoleData {
   name: String!
   slug: String!
   permissions: [PermissionData!]!
-}
-
-type UserCity {
-  user_city: String
-  total: Float
-}
-
-type ResponseTime {
-  averageCloseTime: Float
-  averageSupportTime: Float
-}
-
-type UserDemography {
-  total: Float
-  userDemography: [UserCity!]
-}
-
-type ListingStats {
-  offer: Float
-  listing: Float
-  acceptedOffer: Float
-  ownershipTransfer: Float
-}
-
-type Group {
-  type: String
-  fees: Float
-}
-
-type SaiiFees {
-  total: Float
-  group: [Group!]
-}
-
-type UserFunneling {
-  guest: Float
-  levelOne: Float
-  levelTwo: Float
-  converged: Float
-}
-
-type UserAgeRange {
-  age_range: String
-  count: Float
-}
-
-type UserCountryCount {
-  nationality: String
-  count: Float
-}
-
-type UserGenderCount {
-  gender: String
-  count: Float
-}
-
-type FinancialVsOrder {
-  year: Float
-  quarter: Float
-  totalSold: Float
-  totalOrdered: Float
-}
-
-type EmployeeResponse {
-  employees: [User!]!
-  total: Float!
 }
 
 type AuctionParticipant {
@@ -636,6 +559,67 @@ type CityResponse {
   total: Int!
 }
 
+type UserCity {
+  user_city: String
+  total: Float
+}
+
+type ResponseTime {
+  averageCloseTime: Float
+  averageSupportTime: Float
+}
+
+type UserDemography {
+  total: Float
+  userDemography: [UserCity!]
+}
+
+type ListingStats {
+  offer: Float
+  listing: Float
+  acceptedOffer: Float
+  ownershipTransfer: Float
+}
+
+type Group {
+  type: String
+  fees: Float
+}
+
+type SaiiFees {
+  total: Float
+  group: [Group!]
+}
+
+type UserFunneling {
+  guest: Float
+  levelOne: Float
+  levelTwo: Float
+  converged: Float
+}
+
+type UserAgeRange {
+  age_range: String
+  count: Float
+}
+
+type UserCountryCount {
+  nationality: String
+  count: Float
+}
+
+type UserGenderCount {
+  gender: String
+  count: Float
+}
+
+type FinancialVsOrder {
+  year: Float
+  quarter: Float
+  totalSold: Float
+  totalOrdered: Float
+}
+
 type MessageResponse {
   messages: [Messages!]!
   total: Float!
@@ -645,8 +629,6 @@ type Query {
   app: String!
   activateTwoFa: TwoFaResult!
   user: User!
-  getEmployees(staffFilterInput: StaffFilterInput!): EmployeeResponse!
-  getEmployee(id: String!): User!
   permissions: [Permission!]!
   roles: [RoleData!]!
   getUserRoles: [Role!]!
@@ -700,27 +682,6 @@ type Query {
   getChat(chatFilterInput: ChatFilterInput!): MessageResponse!
 }
 
-input StaffFilterInput {
-  take: Float
-  skip: Float
-  sortField: String
-  directionToSort: SortOrder
-  where: WhereOption
-  level: String
-  status: String
-  type: String
-}
-
-enum SortOrder {
-  ASC
-  DESC
-}
-
-input WhereOption {
-  fieldToChose: String!
-  whereParam: Boolean!
-}
-
 input AttributeFilter {
   take: Float
   skip: Float
@@ -736,6 +697,16 @@ input AttributeFilter {
   hiddenToBuyers: Boolean
   isAmenity: Boolean
   isAddress: Boolean
+}
+
+enum SortOrder {
+  ASC
+  DESC
+}
+
+input WhereOption {
+  fieldToChose: String!
+  whereParam: Boolean!
 }
 
 input CreateSearchHistoryInput {
@@ -851,7 +822,7 @@ type Mutation {
   profileUpdate(RequestInput: UserProfileInput!): User!
   createStaff(RequestInput: CreateStaffInput!): User!
   staffConfirmation(RequestInput: StaffConfirmDto!): String!
-  blockUser(RequestInput: UserActionInput!): SuccessResponseWithDataPayload!
+  blockUser(RequestInput: UserActionInput!): User!
   updateNotificationPreference(RequestInput: NotificationPrefenceInput!): User!
   changePassword(RequestInput: PasswordInput!): User!
   createRole(RequestInput: RoleInputDto!): Role!
@@ -1000,7 +971,7 @@ input StaffConfirmDto {
 }
 
 input UserActionInput {
-  userId: [String!]!
+  userId: String!
   action: Boolean!
 }
 
