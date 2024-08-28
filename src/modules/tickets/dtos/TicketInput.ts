@@ -3,8 +3,14 @@
  * For license. See license.txt
  */
 
-import { Field, InputType } from '@nestjs/graphql';
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { Field, InputType, PartialType } from '@nestjs/graphql';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from 'class-validator';
 import { TicketStatus } from 'src/common/enums';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 
@@ -38,6 +44,15 @@ export class CreateResponseTemplateInput {
   @Field()
   @IsString()
   templateArabicText: string;
+}
+
+@InputType()
+export class UpdateResponseTemplateInput extends PartialType(
+  CreateResponseTemplateInput,
+) {
+  @Field()
+  @IsUUID()
+  id: string;
 }
 
 @InputType()
