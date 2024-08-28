@@ -978,7 +978,7 @@ input StaffConfirmDto {
 }
 
 input UserActionInput {
-  userId: String!
+  userId: [String!]!
   action: Boolean!
 }
 

@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
   NationalIdentityRepository,
   RoleRepository,
@@ -20,7 +20,6 @@ import { PostgresError } from 'pg-error-enum';
 import { addHours, isPast } from 'date-fns';
 import {
   CreateStaffInput,
-  ImageResponse,
   NotificationPrefenceInput,
   UserProfileInput,
   StaffConfirmDto,
@@ -28,7 +27,8 @@ import {
   StaffCreatedEventDto,
   UserActionInput,
   PasswordInput,
-} from '../dtos';
+  ImageResponse,
+} from '../dtos/request';
 import { StorageService } from '../../file-handler/services/storage.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
@@ -49,6 +49,7 @@ import {
 } from '../../../common/utils/functions';
 import { AppStrings } from '../../../common/messages/app.strings';
 import { SuccessResponse } from '../../../common/utils/success.response';
+import { UserFilter } from '../dtos/request/user';
 
 @Injectable()
 export class UserService {
@@ -67,6 +68,7 @@ export class UserService {
   ) {
     this.frontEndUrl = this.configService.get('ADMIN_FRONTEND_URL');
   }
+  logger = new Logger(UserService.name);
 
   /**
    * Create User
@@ -75,6 +77,9 @@ export class UserService {
    * @returns {Promise<User>}
    */
   async createUser(userData: Partial<User>): Promise<User> {
+    const salt = await bcrypt.genSalt();
+    userData.password = await bcrypt.hash(userData.password, salt);
+
     const user = await this.usersRepository.save(userData);
     return user;
   }
@@ -412,6 +417,58 @@ export class UserService {
 
     return { url: imageurl };
   }
+  /********************************
+   *
+   * ADMIN
+   *
+   *********************************/
+
+  async findAllUser(userFilterInput: UserFilter) {
+    try {
+      const { level, status, type, sortField, directionToSort, take, skip } =
+        userFilterInput;
+
+      // Validate sort direction
+      const validSortDirections = ['ASC', 'DESC'];
+      const direction = directionToSort?.toUpperCase();
+      if (direction && !validSortDirections.includes(direction)) {
+        throw new Error(`Invalid sort direction: ${direction}`);
+      }
+
+      // Build where options
+      const whereOptions: any = {
+        level: level ?? undefined,
+        status: status ?? undefined,
+        type: type ?? undefined,
+      };
+
+      // Build order options
+      const orderOptions = sortField ? { [sortField]: direction || 'ASC' } : {};
+
+      // Set default pagination values if not provided
+      const paginationTake = take ?? 20;
+      const paginationSkip = skip ?? 0;
+
+      // Fetch employees with count
+      const [users, count] = await this.usersRepository.findAndCount({
+        order: orderOptions,
+        where: whereOptions,
+        take: paginationTake,
+        skip: paginationSkip,
+      });
+
+      return { employees: users, total: count };
+    } catch (error) {
+      this.logger.error('Failed to get customer', error.stack);
+      throw new BadRequestException('Failed to retrieve customer');
+    }
+  }
+
+  /********************
+   * STAFF
+   * SPECIFIC
+   * METHODS
+   ********************/
 
   /**
    * Create Staff User
@@ -434,7 +491,7 @@ export class UserService {
         userType: 'staff',
         twoFaRequired: true,
       };
-      const staff = await this.usersRepository.save(staffData);
+      const staff = await this.createUser(staffData);
       this.eventEmitter.emit(
         RegisterEventAction.STAFF_CREATED,
         new StaffCreatedEventDto({ staff }),
@@ -442,6 +499,46 @@ export class UserService {
       return staff;
     } catch (error) {
       throw new BadRequestException(error);
+    }
+  }
+  async getEmployees(userFilterInput: UserFilter, user: User) {
+    try {
+      const { level, status, type, sortField, directionToSort, take, skip } =
+        userFilterInput;
+
+      // Validate sort direction
+      const validSortDirections = ['ASC', 'DESC'];
+      const direction = directionToSort?.toUpperCase();
+      if (direction && !validSortDirections.includes(direction)) {
+        throw new Error(`Invalid sort direction: ${direction}`);
+      }
+
+      // Build where options
+      const whereOptions: any = {
+        level: level ?? undefined,
+        status: status ?? undefined,
+        type: type ?? undefined,
+      };
+
+      // Build order options
+      const orderOptions = sortField ? { [sortField]: direction || 'ASC' } : {};
+
+      // Set default pagination values if not provided
+      const paginationTake = take ?? 20;
+      const paginationSkip = skip ?? 0;
+
+      // Fetch employees with count
+      const [users, count] = await this.usersRepository.findAndCount({
+        order: orderOptions,
+        where: { ...whereOptions, company: { id: user.company.id } },
+        take: paginationTake,
+        skip: paginationSkip,
+      });
+
+      return { employees: users, total: count };
+    } catch (error) {
+      this.logger.error('Failed to get employees', error.stack);
+      throw new BadRequestException('Failed to retrieve employees');
     }
   }
 

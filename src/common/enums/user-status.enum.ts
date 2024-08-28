@@ -16,3 +16,9 @@ export enum UserActionEnum {
   DISABLE = 'disable',
   ENABLE = 'enable',
 }
+
+export enum UserLevelEnum {
+  LEVEL_1 = 'level_1',
+  LEVEL_2 = 'level_2',
+  GUEST = 'guest',
+}

@@ -17,7 +17,7 @@ import {
   RoleIdInputDto,
   RoleInputDto,
   RoleUpdateInputDto,
-} from '../dtos';
+} from '../dtos/request';
 import { DeepPartial, In } from 'typeorm';
 import slugify from 'slugify';
 import { AppStrings } from '../../../common/messages/app.strings';

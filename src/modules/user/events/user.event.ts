@@ -7,7 +7,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { RegisterEventAction } from 'src/common/enums';
 import { UserService } from '../services';
-import { StaffCreatedEventDto } from '../dtos';
+import { StaffCreatedEventDto } from '../dtos/request';
 
 @Injectable()
 export class UserEventHandler {

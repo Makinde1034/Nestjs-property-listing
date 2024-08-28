@@ -8,16 +8,17 @@ import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
 import { User } from 'src/entities';
 import { UserService } from '../services/user.service';
+
+import { Permissions } from 'src/common/decorator/permission';
+import { SuccessResponse } from '../../../common/utils/success.response';
 import {
   CreateStaffInput,
   NotificationPrefenceInput,
-  UserProfileInput,
+  PasswordInput,
   StaffConfirmDto,
   UserActionInput,
-  PasswordInput,
-} from '../dtos';
-import { Permissions } from 'src/common/decorator/permission';
-import { SuccessResponse } from '../../../common/utils/success.response';
+  UserProfileInput,
+} from '../dtos/request';
 
 @Resolver()
 export class UserResolver {
