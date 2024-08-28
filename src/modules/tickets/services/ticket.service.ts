@@ -9,6 +9,7 @@ import {
   CreateResponseTemplateInput,
   CreateTicketInput,
   ListTicketInput,
+  UpdateResponseTemplateInput,
   UpdateTicketInput,
 } from '../dtos';
 import { AppStrings } from 'src/common/messages/app.strings';
@@ -19,6 +20,7 @@ import { FindManyOptions } from 'typeorm';
 import { ChildIssueRepository } from '../../issue/repositories/child-issue.repository';
 import { ResponseTemplateRepository } from '../repositories/response-template.repository';
 import { ResponseTemplate } from '../../../entities/response-template.entity';
+import { SuccessResponse } from '../../../common/response';
 
 @Injectable()
 export class TicketService {
@@ -205,11 +207,38 @@ export class TicketService {
       });
 
       if (result) {
-        return await this.responseTemplateRepostiory.findOneByOrFail({ id });
+        return new SuccessResponse();
       }
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException();
+    }
+  }
+  async updateResponseTemplate(
+    updateResponseTemplate: UpdateResponseTemplateInput,
+  ) {
+    try {
+      const template = await this.responseTemplateRepostiory.findOneByOrFail({
+        id: updateResponseTemplate.id,
+      });
+      if (!template) {
+        throw new BadRequestException(AppStrings.NOT_FOUND);
+      }
+      const { affected } = await this.responseTemplateRepostiory.update(
+        template.id,
+        {
+          ...updateResponseTemplate,
+        },
+      );
+
+      if (affected > 0) {
+        return await this.responseTemplateRepostiory.findOneByOrFail({
+          id: template.id,
+        });
+      }
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
     }
   }
 }

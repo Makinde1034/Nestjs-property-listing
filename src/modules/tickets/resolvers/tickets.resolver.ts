@@ -11,12 +11,14 @@ import {
   CreateResponseTemplateInput,
   CreateTicketInput,
   ListTicketInput,
+  UpdateResponseTemplateInput,
   UpdateTicketInput,
 } from '../dtos';
 import { Ticket } from 'src/entities';
 import { Permissions } from 'src/common/decorator/permission';
 import { TicketResponse } from '../dtos/response/ticket-response';
 import { ResponseTemplate } from '../../../entities/response-template.entity';
+import { SuccessResponse } from '../../../common/response';
 
 @Resolver()
 export class TicketsResolver {
@@ -137,11 +139,23 @@ export class TicketsResolver {
 
   @Permissions('create-support-tickets')
   @UseGuards(AccessTokenGuard, PermissionsGuard)
-  @Mutation(() => ResponseTemplate)
+  @Mutation(() => SuccessResponse)
   async deleteResponseTemplate(
     @Args('id')
     id: string,
   ) {
     return await this.ticketService.deleteResponseTemplate(id);
+  }
+
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions('create-support-tickets')
+  @Mutation(() => ResponseTemplate)
+  async updateResponseTemplate(
+    @Args('updateResponseTemplateInput')
+    updateResponseTemplateInput: UpdateResponseTemplateInput,
+  ) {
+    return await this.ticketService.updateResponseTemplate(
+      updateResponseTemplateInput,
+    );
   }
 }
