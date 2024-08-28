@@ -17,6 +17,7 @@ import {
   PasswordInput,
 } from '../dtos';
 import { Permissions } from 'src/common/decorator/permission';
+import { SuccessResponse } from '../../../common/utils/success.response';
 
 @Resolver()
 export class UserResolver {
@@ -91,7 +92,7 @@ export class UserResolver {
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async blockUser(
     @Args('RequestInput') inputDto: UserActionInput,
-  ): Promise<User> {
+  ): Promise<SuccessResponse> {
     return await this.userService.blockUser(inputDto);
   }
 

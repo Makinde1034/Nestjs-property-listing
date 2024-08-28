@@ -48,6 +48,7 @@ import {
   generateRandomToken,
 } from '../../../common/utils/functions';
 import { AppStrings } from '../../../common/messages/app.strings';
+import { SuccessResponse } from '../../../common/utils/success.response';
 
 @Injectable()
 export class UserService {
@@ -502,26 +503,38 @@ export class UserService {
    * @param {UserActionInput} requestInput
    * @returns {Promise<User>}
    */
-  async blockUser(requestInput: UserActionInput): Promise<User> {
-    const user = await this.usersRepository.findOneByOrFail({
-      id: requestInput.userId,
-    });
-    if (requestInput.action) {
-      const { affected } = await this.usersRepository.update(user.id, {
-        status: UserStatus.DISABLED,
-        disabledAt: new Date(),
-      });
-      if (affected) {
-        return await this.usersRepository.findOneByOrFail({ id: user.id });
-      }
-    }
-    const { affected } = await this.usersRepository.update(user.id, {
-      status: UserStatus.ACTIVE,
-      disabledAt: null,
+  async blockUser(requestInput: UserActionInput): Promise<SuccessResponse> {
+    const { userId, action } = requestInput;
+    const usersToUpdate: DeepPartial<User>[] = [];
+    const notFoundIds: string[] = [];
+
+    const users = await this.usersRepository.find({
+      where: { id: In(userId) },
     });
 
-    if (affected) {
-      return await this.usersRepository.findOneByOrFail({ id: user.id });
+    if (users.length < userId.length) {
+      const foundUserIds = users.map((user) => user.id);
+      notFoundIds.push(...userId.filter((id) => !foundUserIds.includes(id)));
     }
+
+    const status = action ? UserStatus.DISABLED : UserStatus.ACTIVE;
+    const disabledAt = action ? new Date() : null;
+
+    users.forEach((user) => {
+      usersToUpdate.push({ id: user.id, status, disabledAt });
+    });
+
+    const updatedUsers = await this.usersRepository.save(usersToUpdate);
+
+    if (notFoundIds.length > 0) {
+      throw new BadRequestException(
+        'There was a problem performing this action on some users',
+      );
+    }
+
+    return new SuccessResponse(
+      `You have successfully ${action ? 'blocked' : 'unblocked'} the selected users`,
+      updatedUsers,
+    );
   }
 }
