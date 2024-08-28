@@ -287,20 +287,14 @@ export class ListingService {
       const attributeValueRange: [string, string][] = [];
 
       if (attributes) {
-        console.log('Attributes received:', attributes);
         attributes.forEach(({ attributeId: id, value }) => {
           try {
-            console.log(`Processing attribute: ${id}, value: ${value}`);
             const data: [string, string] | string[] = JSON.parse(value);
             if (Array.isArray(data)) {
               if (data.length === 2) {
-                console.log('here', data);
-
                 attributeIdRange.push(id);
                 attributeValueRange.push(data as [string, string]);
               } else if (data.length === 1) {
-                console.log('here 2', data);
-
                 attributeId.push(id);
                 attributeValue.push(data[0]);
               }
@@ -311,7 +305,6 @@ export class ListingService {
             );
           }
         });
-        console.log('Parsed attribute IDs:', attributeId, attributeValue);
       }
 
       const take = Math.min(initialTake, 20);
@@ -507,20 +500,14 @@ export class ListingService {
       const attributeValueRange: [string, string][] = [];
 
       if (attributes) {
-        console.log('Attributes received:', attributes);
         attributes.forEach(({ attributeId: id, value }) => {
           try {
-            console.log(`Processing attribute: ${id}, value: ${value}`);
             const data: [string, string] | string[] = JSON.parse(value);
             if (Array.isArray(data)) {
               if (data.length === 2) {
-                console.log('here', data);
-
                 attributeIdRange.push(id);
                 attributeValueRange.push(data as [string, string]);
               } else if (data.length === 1) {
-                console.log('here 2', data);
-
                 attributeId.push(id);
                 attributeValue.push(data[0]);
               }
@@ -531,7 +518,6 @@ export class ListingService {
             );
           }
         });
-        console.log('Parsed attribute IDs:', attributeId, attributeValue);
       }
 
       // Select only the necessary columns
