@@ -38,7 +38,7 @@ import { Promotion } from '../../../entities/promotion.entity';
 
 import { AdminGuard } from '../../auth/guards/admin.guard';
 
-import { SuccessResponse } from '../../../common/response';
+// Import { SuccessResponse } from '../../../common/response';
 import { CreateSearchHistoryInput } from '../dtos/request/create-search-history';
 
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
@@ -57,6 +57,7 @@ import { Auction } from '../../../entities/auction-table.entity';
 import { AuctionParticipant } from '../../../entities/auction-participant.entity';
 import { ListingAttributes } from '../../../entities/listing-attributes.entity';
 import { ListingAttributeService } from '../services/listing-attributes.service';
+import { SuccessResponse } from '../../../common/utils/success.response';
 
 @Resolver()
 export class ListingResolver {

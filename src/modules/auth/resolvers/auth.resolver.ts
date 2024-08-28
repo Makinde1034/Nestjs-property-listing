@@ -8,7 +8,6 @@ import { Throttle } from '@nestjs/throttler';
 import { UseGuards } from '@nestjs/common';
 
 import { User } from 'src/entities';
-import { SuccessResponse } from 'src/common/response';
 
 import {
   RegisterInput,
@@ -25,6 +24,7 @@ import {
 } from '../dtos';
 import { AccessTokenGuard } from '../guards';
 import { AuthService } from '../services/auth.service';
+import { SuccessResponse } from '../../../common/utils/success.response';
 
 @Resolver()
 export class AuthResolver {
@@ -166,7 +166,6 @@ export class AuthResolver {
 
   /**
    * Resend Email Confirmation
-   *
    * @async
    * @param {ConfirmationInput} RequestInput
    * @returns {Promise<SuccessResponse>}
@@ -176,8 +175,6 @@ export class AuthResolver {
   async resendEmailConfirmation(
     @Args('RequestInput') RequestInput: ConfirmationInput,
   ): Promise<SuccessResponse> {
-    return {
-      message: await this.authService.sendEmailConfirmationLink(RequestInput),
-    };
+    return await this.authService.sendEmailConfirmationLink(RequestInput);
   }
 }
