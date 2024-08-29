@@ -4,7 +4,7 @@
  */
 
 import { Field, InputType } from '@nestjs/graphql';
-import { IsArray, IsBoolean, IsNotEmpty } from 'class-validator';
+import { IsArray, IsBoolean, IsNotEmpty, IsOptional } from 'class-validator';
 
 @InputType()
 export class UserActionInput {
@@ -14,6 +14,7 @@ export class UserActionInput {
   userId: string[];
 
   @Field()
+  @IsOptional()
   @IsNotEmpty()
   @IsBoolean()
   action: boolean;

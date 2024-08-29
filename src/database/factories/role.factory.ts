@@ -6,7 +6,8 @@
 export const roleFactory = [
   {
     id: 1,
-    name: 'Super Admin',
+    englishName: 'Super Admin',
+    arabicName: 'مشرف عام',
     slug: 'super-admin',
     permissions: [],
   },

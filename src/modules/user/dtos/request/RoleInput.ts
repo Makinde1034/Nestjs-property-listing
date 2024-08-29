@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Field, InputType, ObjectType } from '@nestjs/graphql';
+import { Field, InputType, ObjectType, PartialType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
 import {
   IsBoolean,
@@ -31,7 +31,11 @@ export class RoleInputDto {
   @Field()
   @IsString()
   @IsNotEmpty()
-  name: string;
+  englishName: string;
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  arabiceName: string;
 
   @Field(() => [PermissionItem])
   @ValidateNested()
@@ -49,17 +53,11 @@ export class RoleIdInputDto {
 }
 
 @InputType()
-export class RoleUpdateInputDto extends RoleIdInputDto {
+export class RoleUpdateInputDto extends PartialType(RoleInputDto) {
   @Field()
   @IsString()
   @IsNotEmpty()
-  name: string;
-
-  @Field(() => [PermissionItem])
-  @ValidateNested()
-  @Type(() => PermissionItem)
-  @IsNotEmpty()
-  permissions: PermissionItem[];
+  id: number;
 }
 
 @ObjectType()

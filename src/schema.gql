@@ -42,7 +42,8 @@ type Permission {
 
 type Role {
   id: Float!
-  name: String!
+  englishName: String!
+  arabicName: String
   slug: String!
   permissions: [Permission!]!
   rolePermissions: [RolePermissions!]!
@@ -999,7 +1000,8 @@ input PasswordInput {
 }
 
 input RoleInputDto {
-  name: String!
+  englishName: String!
+  arabiceName: String!
   permissions: [PermissionItem!]!
 }
 
@@ -1009,9 +1011,10 @@ input PermissionItem {
 }
 
 input RoleUpdateInputDto {
-  roleId: Float!
-  name: String!
-  permissions: [PermissionItem!]!
+  englishName: String
+  arabiceName: String
+  permissions: [PermissionItem!]
+  id: Float!
 }
 
 input RoleIdInputDto {

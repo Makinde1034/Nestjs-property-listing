@@ -15,7 +15,7 @@ import type {
   User,
   UserNotificationPreference,
 } from '../../../entities';
-import { DeepPartial, FindOptionsWhere, In, LessThan } from 'typeorm';
+import { DeepPartial, FindOptionsWhere, In, LessThan, Like } from 'typeorm';
 import { PostgresError } from 'pg-error-enum';
 import { addHours, isPast } from 'date-fns';
 import {
@@ -50,6 +50,7 @@ import {
 import { AppStrings } from '../../../common/messages/app.strings';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { UserFilter } from '../dtos/request/user';
+import { checkIfEmailNameOrPhoneNumber } from '../../../common/utils/helper';
 
 @Injectable()
 export class UserService {
@@ -464,6 +465,95 @@ export class UserService {
     }
   }
 
+  async findOneUser(searchParam: string) {
+    try {
+      const valueToSearch = checkIfEmailNameOrPhoneNumber(searchParam);
+
+      switch (valueToSearch) {
+        case 'email': {
+          return await this.usersRepository.find({
+            where: { email: Like(searchParam) },
+          });
+        }
+
+        case 'name': {
+          return await this.usersRepository.find({
+            where: [
+              { firstName: Like(`%${searchParam}%`) },
+              { lastName: Like(`%${searchParam}%`) },
+              { arabicFirstName: Like(`%${searchParam}%`) },
+              { arabicLastName: Like(`%${searchParam}%`) },
+            ],
+          });
+        }
+
+        case 'phoneNumber': {
+          return await this.usersRepository.find({
+            where: { phone: Like(searchParam) },
+          });
+        }
+
+        default:
+          throw new BadRequestException(AppStrings.NOT_FOUND);
+      }
+    } catch (error) {
+      throw new BadRequestException(error.error);
+    }
+  }
+
+  async resetPassword(requestInput: UserActionInput): Promise<SuccessResponse> {
+    const { userId } = requestInput;
+    const notFoundIds: string[] = [];
+
+    // Ensure userId is an array of strings
+    if (!Array.isArray(userId)) {
+      throw new BadRequestException('Invalid user ID format');
+    }
+
+    // Fetch users with the provided IDs
+    const users = await this.usersRepository.find({
+      where: { id: In(userId) },
+    });
+
+    // Determine which user IDs were not found
+    if (users.length < userId.length) {
+      const foundUserIds = users.map((user) => user.id);
+      notFoundIds.push(...userId.filter((id) => !foundUserIds.includes(id)));
+    }
+
+    // Update each user
+    for (const user of users) {
+      // Remove the password property before saving
+      delete user.password;
+
+      // Save the user with a new password
+      await this.usersRepository.save({
+        ...user,
+        password: generateRandomToken(8), // Ensure this function generates a secure password
+      });
+
+      // Prepare the data for sending the email
+      const updatedUser: StaffCreatedData = {
+        staff: user,
+      };
+
+      // Send the password email
+      this.sendPasswordEmailToStaff(updatedUser);
+    }
+
+    // Handle not found IDs
+    if (notFoundIds.length > 0) {
+      throw new BadRequestException(
+        'There was a problem performing this action on some users',
+      );
+    }
+
+    // Return success response
+    return new SuccessResponse(
+      'You have successfully reset the passwords for the selected users',
+    );
+  }
+
   /********************
    * STAFF
    * SPECIFIC
@@ -631,6 +721,41 @@ export class UserService {
 
     return new SuccessResponse(
       `You have successfully ${action ? 'blocked' : 'unblocked'} the selected users`,
+      updatedUsers,
+    );
+  }
+
+  async deleteUser(requestInput: UserActionInput): Promise<SuccessResponse> {
+    const { userId, action } = requestInput;
+    const usersToUpdate: DeepPartial<User>[] = [];
+    const notFoundIds: string[] = [];
+
+    const users = await this.usersRepository.find({
+      where: { id: In(userId) },
+    });
+
+    if (users.length < userId.length) {
+      const foundUserIds = users.map((user) => user.id);
+      notFoundIds.push(...userId.filter((id) => !foundUserIds.includes(id)));
+    }
+
+    const status = action ? UserStatus.DISABLED : UserStatus.ACTIVE;
+    const deletedAt = action ? new Date() : null;
+
+    users.forEach((user) => {
+      usersToUpdate.push({ id: user.id, status, deletedAt });
+    });
+
+    const updatedUsers = await this.usersRepository.save(usersToUpdate);
+
+    if (notFoundIds.length > 0) {
+      throw new BadRequestException(
+        'There was a problem performing this action on some users',
+      );
+    }
+
+    return new SuccessResponse(
+      `You have successfully ${action ? 'deleted' : 'recovered'} the selected users`,
       updatedUsers,
     );
   }

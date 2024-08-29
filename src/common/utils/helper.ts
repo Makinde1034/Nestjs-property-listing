@@ -151,3 +151,19 @@ export const generateRandomArray = (length: number, key_length: number) => {
   }
   return keys;
 };
+
+export function checkIfEmailNameOrPhoneNumber(testStrings: string) {
+  const regex =
+    /^(?<email>[\w.%+-]+@[\w.-]+\.\w{2,})|(?<name>[A-Z][a-z]+\s[A-Z][a-z]+)|(?<phone>\+?\d{1,4}?[-.\s]?\(?\d{1,4}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4})$/;
+
+  const match = regex.exec(testStrings);
+  if (match?.groups?.email) {
+    return 'email';
+  } else if (match?.groups?.name) {
+    return 'name';
+  } else if (match?.groups?.phone) {
+    return 'phoneNumber';
+  } else {
+    return 'no match';
+  }
+}

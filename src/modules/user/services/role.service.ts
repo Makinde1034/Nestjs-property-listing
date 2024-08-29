@@ -79,7 +79,7 @@ export class RoleService {
         delete item.permissions;
         return {
           id: item.id,
-          name: item.name,
+          name: item.englishName,
           slug: item.slug,
           permissions: permissionData,
         };
@@ -101,9 +101,9 @@ export class RoleService {
       where: { id: In([...permissionIds]) },
     });
     const data: Partial<Role> = {
-      name: input.name,
+      englishName: input.englishName,
       permissions,
-      slug: slugify(input.name),
+      slug: slugify(input.englishName),
     };
     const roleData = this.roleRepository.create(data);
     const role = await this.roleRepository.save(roleData);
@@ -138,7 +138,7 @@ export class RoleService {
    */
   async updateRole(input: RoleUpdateInputDto): Promise<Role> {
     const role = await this.roleRepository.findOneByOrFail({
-      id: input.roleId,
+      id: input.id,
     });
     const permissionIds = input.permissions.map((item) => item.permissionId);
     const permissions = await this.permissionRepository.find({
@@ -146,9 +146,9 @@ export class RoleService {
     });
 
     const data: Partial<Role> = {
-      name: input.name,
+      englishName: input.englishName,
       permissions,
-      slug: slugify(input.name),
+      slug: slugify(input.englishName),
     };
 
     const rolePermissions: DeepPartial<RolePermissions[]> = permissions
