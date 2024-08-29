@@ -22,6 +22,7 @@ import {
 import { DeepPartial, In } from 'typeorm';
 import slugify from 'slugify';
 import { AppStrings } from '../../../common/messages/app.strings';
+import { SuccessResponse } from '../../../common/utils/success.response';
 
 @Injectable()
 export class RoleService {
@@ -52,8 +53,17 @@ export class RoleService {
 
   async deleteRoles(deleteRoleInput: DeleteRolesInput) {
     try {
-      return await this.roleRepository.softDelete(deleteRoleInput.id);
-    } catch (error) {}
+      const { affected } = await this.roleRepository.update(
+        { id: In(deleteRoleInput.id) },
+        { deletedAt: new Date() },
+      );
+
+      if (affected > 0) {
+        throw new SuccessResponse(AppStrings.ROLE_DELETED_SUCCESSFULLY);
+      }
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
   }
 
   listPermissions(items: RolePermissions[]): PermissionData[] {

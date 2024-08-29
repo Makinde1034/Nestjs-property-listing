@@ -35,6 +35,12 @@ export class UserResolver {
     return await this.userService.findUserById(ctx.req.user.id, ['roles']);
   }
 
+  @Query(() => User, { name: 'user' })
+  @UseGuards(AccessTokenGuard)
+  async getOneUser(@Args('id') id: string) {
+    return await this.userService.findUserById(id, ['roles']);
+  }
+
   /**
    * Update User Profile
    *
@@ -89,12 +95,19 @@ export class UserResolver {
    * @returns {Promise<User>}
    */
   @Mutation(() => User)
-  @Permissions('update-user')
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @UseGuards(AccessTokenGuard)
   async blockUser(
     @Args('RequestInput') inputDto: UserActionInput,
   ): Promise<SuccessResponse> {
     return await this.userService.blockUser(inputDto);
+  }
+
+  @Mutation(() => User)
+  @UseGuards(AccessTokenGuard)
+  async deleteUser(
+    @Args('RequestInput') inputDto: UserActionInput,
+  ): Promise<SuccessResponse> {
+    return await this.userService.deleteUser(inputDto);
   }
 
   /**

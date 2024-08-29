@@ -163,7 +163,6 @@ export function checkIfEmailNameOrPhoneNumber(testStrings: string) {
     return 'name';
   } else if (match?.groups?.phone) {
     return 'phoneNumber';
-  } else {
-    return 'no match';
   }
+  return 'no match';
 }

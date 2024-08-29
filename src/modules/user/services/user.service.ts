@@ -112,17 +112,21 @@ export class UserService {
   }
   /**
    * Find user
-   *
    * @async
    * @param {string} id
    * @returns {Promise<User>}
    */
   async findUserById(id: string, relations?: string[]): Promise<User> {
-    const user = await this.usersRepository.findOne({
-      where: { id },
-      relations,
-    });
-    return user;
+    try {
+      const user = await this.usersRepository.findOne({
+        where: { id },
+        relations,
+      });
+      return user;
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
   }
 
   /**
@@ -497,6 +501,7 @@ export class UserService {
           throw new BadRequestException(AppStrings.NOT_FOUND);
       }
     } catch (error) {
+      this.logger.log(error);
       throw new BadRequestException(error.error);
     }
   }
@@ -521,15 +526,15 @@ export class UserService {
       notFoundIds.push(...userId.filter((id) => !foundUserIds.includes(id)));
     }
 
-    // Update each user
-    for (const user of users) {
+    // Concurrently update each user
+    const updatePromises = users.map(async (user) => {
       // Remove the password property before saving
       delete user.password;
 
       // Save the user with a new password
       await this.usersRepository.save({
         ...user,
-        password: generateRandomToken(8), // Ensure this function generates a secure password
+        password: generateRandomToken(),
       });
 
       // Prepare the data for sending the email
@@ -539,6 +544,15 @@ export class UserService {
 
       // Send the password email
       this.sendPasswordEmailToStaff(updatedUser);
+    });
+
+    try {
+      // Execute all updates concurrently
+      await Promise.all(updatePromises);
+    } catch (error) {
+      // Log and handle any errors
+      this.logger.error('Error resetting passwords:', error);
+      throw new BadRequestException('Failed to reset passwords for some users');
     }
 
     // Handle not found IDs

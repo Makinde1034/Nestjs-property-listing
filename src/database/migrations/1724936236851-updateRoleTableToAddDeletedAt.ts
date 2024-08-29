@@ -5,8 +5,10 @@
 
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class UpdateRoleTable1724882127363 implements MigrationInterface {
-  name = 'UpdateRoleTable1724882127363';
+export class UpdateRoleTableToAddDeletedAt1724936236851
+  implements MigrationInterface
+{
+  name = 'UpdateRoleTableToAddDeletedAt1724936236851';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
@@ -21,19 +23,13 @@ export class UpdateRoleTable1724882127363 implements MigrationInterface {
     await queryRunner.query(
       `DROP INDEX "public"."IDX_bfbc9e263d4cea6d7a8c9eb3ad"`,
     );
-    await queryRunner.query(`ALTER TABLE "role" DROP COLUMN "name"`);
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" DROP COLUMN "approve"`,
     );
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" ADD "approve" boolean DEFAULT false`,
     );
-    await queryRunner.query(
-      `ALTER TABLE "role" ADD "englishName" character varying NOT NULL`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "role" ADD "arabicName" character varying`,
-    );
+    await queryRunner.query(`ALTER TABLE "role" ADD "deletedAt" TIMESTAMP`);
     await queryRunner.query(
       `CREATE INDEX "IDX_b36cb2e04bc353ca4ede00d87b" ON "role_permissions_permission" ("roleId") `,
     );
@@ -61,16 +57,12 @@ export class UpdateRoleTable1724882127363 implements MigrationInterface {
     await queryRunner.query(
       `DROP INDEX "public"."IDX_b36cb2e04bc353ca4ede00d87b"`,
     );
-    await queryRunner.query(`ALTER TABLE "role" DROP COLUMN "arabicName"`);
-    await queryRunner.query(`ALTER TABLE "role" DROP COLUMN "englishName"`);
+    await queryRunner.query(`ALTER TABLE "role" DROP COLUMN "deletedAt"`);
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" DROP COLUMN "approve"`,
     );
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" ADD "approve" boolean DEFAULT false`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "role" ADD "name" character varying NOT NULL`,
     );
     await queryRunner.query(
       `CREATE INDEX "IDX_bfbc9e263d4cea6d7a8c9eb3ad" ON "role_permissions_permission" ("permissionId") `,
