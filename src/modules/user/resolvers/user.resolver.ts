@@ -132,14 +132,6 @@ export class UserResolver {
     return await this.userService.deleteUser(inputDto);
   }
 
-  /**
-   * Update User Notification Preference
-   *
-   * @async
-   * @param {any} ctx
-   * @param {NotificationPrefenceInput} inputDto
-   * @returns {Promise<User>}
-   */
   @Mutation(() => User)
   @UseGuards(AccessTokenGuard)
   async updateNotificationPreference(
