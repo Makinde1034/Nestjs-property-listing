@@ -14,7 +14,7 @@ import {
   RoleIdInputDto,
   RoleInputDto,
   RoleUpdateInputDto,
-} from '../dtos';
+} from '../dtos/request';
 
 @Resolver()
 export class RoleResolver {

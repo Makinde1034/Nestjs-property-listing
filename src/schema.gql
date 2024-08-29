@@ -42,7 +42,8 @@ type Permission {
 
 type Role {
   id: Float!
-  name: String!
+  englishName: String!
+  arabicName: String
   slug: String!
   permissions: [Permission!]!
   rolePermissions: [RolePermissions!]!
@@ -875,7 +876,7 @@ type Mutation {
   createChildIssue(input: CreateChildIssueInput!): ParentIssue!
   updateChildIssue(RequestInput: UpdateIssueInput!): ParentIssue!
   deleteChildIssue(id: String!): String!
-  createTicket(RequestInput: CreateTicketInput!): String!
+  createTicket(RequestInput: CreateTicketInput!): Ticket!
   manageTicket(RequestInput: UpdateTicketInput!): Ticket!
   createResponseTemplate(createResponseTemplateInput: CreateResponseTemplateInput!): ResponseTemplate!
   deleteResponseTemplate(id: String!): SuccessResponse!
@@ -978,7 +979,7 @@ input StaffConfirmDto {
 }
 
 input UserActionInput {
-  userId: String!
+  userId: [String!]!
   action: Boolean!
 }
 
@@ -999,7 +1000,8 @@ input PasswordInput {
 }
 
 input RoleInputDto {
-  name: String!
+  englishName: String!
+  arabiceName: String!
   permissions: [PermissionItem!]!
 }
 
@@ -1009,9 +1011,10 @@ input PermissionItem {
 }
 
 input RoleUpdateInputDto {
-  roleId: Float!
-  name: String!
-  permissions: [PermissionItem!]!
+  englishName: String
+  arabiceName: String
+  permissions: [PermissionItem!]
+  id: Float!
 }
 
 input RoleIdInputDto {

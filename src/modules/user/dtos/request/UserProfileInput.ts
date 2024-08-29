@@ -15,7 +15,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { IdentityInput } from './ProfileInput';
-import { Gender, MaritalStatus } from '../../../common/enums';
+import { Gender, MaritalStatus } from '../../../../common/enums';
 
 @InputType()
 export class UserProfileInput {

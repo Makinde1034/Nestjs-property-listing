@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
   NationalIdentityRepository,
   RoleRepository,
@@ -15,12 +15,11 @@ import type {
   User,
   UserNotificationPreference,
 } from '../../../entities';
-import { DeepPartial, FindOptionsWhere, In, LessThan } from 'typeorm';
+import { DeepPartial, FindOptionsWhere, In, LessThan, Like } from 'typeorm';
 import { PostgresError } from 'pg-error-enum';
 import { addHours, isPast } from 'date-fns';
 import {
   CreateStaffInput,
-  ImageResponse,
   NotificationPrefenceInput,
   UserProfileInput,
   StaffConfirmDto,
@@ -28,7 +27,8 @@ import {
   StaffCreatedEventDto,
   UserActionInput,
   PasswordInput,
-} from '../dtos';
+  ImageResponse,
+} from '../dtos/request';
 import { StorageService } from '../../file-handler/services/storage.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
@@ -48,6 +48,9 @@ import {
   generateRandomToken,
 } from '../../../common/utils/functions';
 import { AppStrings } from '../../../common/messages/app.strings';
+import { SuccessResponse } from '../../../common/utils/success.response';
+import { UserFilter } from '../dtos/request/user';
+import { checkIfEmailNameOrPhoneNumber } from '../../../common/utils/helper';
 
 @Injectable()
 export class UserService {
@@ -66,6 +69,7 @@ export class UserService {
   ) {
     this.frontEndUrl = this.configService.get('ADMIN_FRONTEND_URL');
   }
+  logger = new Logger(UserService.name);
 
   /**
    * Create User
@@ -74,6 +78,9 @@ export class UserService {
    * @returns {Promise<User>}
    */
   async createUser(userData: Partial<User>): Promise<User> {
+    const salt = await bcrypt.genSalt();
+    userData.password = await bcrypt.hash(userData.password, salt);
+
     const user = await this.usersRepository.save(userData);
     return user;
   }
@@ -411,6 +418,147 @@ export class UserService {
 
     return { url: imageurl };
   }
+  /********************************
+   *
+   * ADMIN
+   *
+   *********************************/
+
+  async findAllUser(userFilterInput: UserFilter) {
+    try {
+      const { level, status, type, sortField, directionToSort, take, skip } =
+        userFilterInput;
+
+      // Validate sort direction
+      const validSortDirections = ['ASC', 'DESC'];
+      const direction = directionToSort?.toUpperCase();
+      if (direction && !validSortDirections.includes(direction)) {
+        throw new Error(`Invalid sort direction: ${direction}`);
+      }
+
+      // Build where options
+      const whereOptions: any = {
+        level: level ?? undefined,
+        status: status ?? undefined,
+        type: type ?? undefined,
+      };
+
+      // Build order options
+      const orderOptions = sortField ? { [sortField]: direction || 'ASC' } : {};
+
+      // Set default pagination values if not provided
+      const paginationTake = take ?? 20;
+      const paginationSkip = skip ?? 0;
+
+      // Fetch employees with count
+      const [users, count] = await this.usersRepository.findAndCount({
+        order: orderOptions,
+        where: whereOptions,
+        take: paginationTake,
+        skip: paginationSkip,
+      });
+
+      return { employees: users, total: count };
+    } catch (error) {
+      this.logger.error('Failed to get customer', error.stack);
+      throw new BadRequestException('Failed to retrieve customer');
+    }
+  }
+
+  async findOneUser(searchParam: string) {
+    try {
+      const valueToSearch = checkIfEmailNameOrPhoneNumber(searchParam);
+
+      switch (valueToSearch) {
+        case 'email': {
+          return await this.usersRepository.find({
+            where: { email: Like(searchParam) },
+          });
+        }
+
+        case 'name': {
+          return await this.usersRepository.find({
+            where: [
+              { firstName: Like(`%${searchParam}%`) },
+              { lastName: Like(`%${searchParam}%`) },
+              { arabicFirstName: Like(`%${searchParam}%`) },
+              { arabicLastName: Like(`%${searchParam}%`) },
+            ],
+          });
+        }
+
+        case 'phoneNumber': {
+          return await this.usersRepository.find({
+            where: { phone: Like(searchParam) },
+          });
+        }
+
+        default:
+          throw new BadRequestException(AppStrings.NOT_FOUND);
+      }
+    } catch (error) {
+      throw new BadRequestException(error.error);
+    }
+  }
+
+  async resetPassword(requestInput: UserActionInput): Promise<SuccessResponse> {
+    const { userId } = requestInput;
+    const notFoundIds: string[] = [];
+
+    // Ensure userId is an array of strings
+    if (!Array.isArray(userId)) {
+      throw new BadRequestException('Invalid user ID format');
+    }
+
+    // Fetch users with the provided IDs
+    const users = await this.usersRepository.find({
+      where: { id: In(userId) },
+    });
+
+    // Determine which user IDs were not found
+    if (users.length < userId.length) {
+      const foundUserIds = users.map((user) => user.id);
+      notFoundIds.push(...userId.filter((id) => !foundUserIds.includes(id)));
+    }
+
+    // Update each user
+    for (const user of users) {
+      // Remove the password property before saving
+      delete user.password;
+
+      // Save the user with a new password
+      await this.usersRepository.save({
+        ...user,
+        password: generateRandomToken(8), // Ensure this function generates a secure password
+      });
+
+      // Prepare the data for sending the email
+      const updatedUser: StaffCreatedData = {
+        staff: user,
+      };
+
+      // Send the password email
+      this.sendPasswordEmailToStaff(updatedUser);
+    }
+
+    // Handle not found IDs
+    if (notFoundIds.length > 0) {
+      throw new BadRequestException(
+        'There was a problem performing this action on some users',
+      );
+    }
+
+    // Return success response
+    return new SuccessResponse(
+      'You have successfully reset the passwords for the selected users',
+    );
+  }
+
+  /********************
+   * STAFF
+   * SPECIFIC
+   * METHODS
+   ********************/
 
   /**
    * Create Staff User
@@ -433,7 +581,7 @@ export class UserService {
         userType: 'staff',
         twoFaRequired: true,
       };
-      const staff = await this.usersRepository.save(staffData);
+      const staff = await this.createUser(staffData);
       this.eventEmitter.emit(
         RegisterEventAction.STAFF_CREATED,
         new StaffCreatedEventDto({ staff }),
@@ -441,6 +589,46 @@ export class UserService {
       return staff;
     } catch (error) {
       throw new BadRequestException(error);
+    }
+  }
+  async getEmployees(userFilterInput: UserFilter, user: User) {
+    try {
+      const { level, status, type, sortField, directionToSort, take, skip } =
+        userFilterInput;
+
+      // Validate sort direction
+      const validSortDirections = ['ASC', 'DESC'];
+      const direction = directionToSort?.toUpperCase();
+      if (direction && !validSortDirections.includes(direction)) {
+        throw new Error(`Invalid sort direction: ${direction}`);
+      }
+
+      // Build where options
+      const whereOptions: any = {
+        level: level ?? undefined,
+        status: status ?? undefined,
+        type: type ?? undefined,
+      };
+
+      // Build order options
+      const orderOptions = sortField ? { [sortField]: direction || 'ASC' } : {};
+
+      // Set default pagination values if not provided
+      const paginationTake = take ?? 20;
+      const paginationSkip = skip ?? 0;
+
+      // Fetch employees with count
+      const [users, count] = await this.usersRepository.findAndCount({
+        order: orderOptions,
+        where: { ...whereOptions, company: { id: user.company.id } },
+        take: paginationTake,
+        skip: paginationSkip,
+      });
+
+      return { employees: users, total: count };
+    } catch (error) {
+      this.logger.error('Failed to get employees', error.stack);
+      throw new BadRequestException('Failed to retrieve employees');
     }
   }
 
@@ -502,26 +690,73 @@ export class UserService {
    * @param {UserActionInput} requestInput
    * @returns {Promise<User>}
    */
-  async blockUser(requestInput: UserActionInput): Promise<User> {
-    const user = await this.usersRepository.findOneByOrFail({
-      id: requestInput.userId,
-    });
-    if (requestInput.action) {
-      const { affected } = await this.usersRepository.update(user.id, {
-        status: UserStatus.DISABLED,
-        disabledAt: new Date(),
-      });
-      if (affected) {
-        return await this.usersRepository.findOneByOrFail({ id: user.id });
-      }
-    }
-    const { affected } = await this.usersRepository.update(user.id, {
-      status: UserStatus.ACTIVE,
-      disabledAt: null,
+  async blockUser(requestInput: UserActionInput): Promise<SuccessResponse> {
+    const { userId, action } = requestInput;
+    const usersToUpdate: DeepPartial<User>[] = [];
+    const notFoundIds: string[] = [];
+
+    const users = await this.usersRepository.find({
+      where: { id: In(userId) },
     });
 
-    if (affected) {
-      return await this.usersRepository.findOneByOrFail({ id: user.id });
+    if (users.length < userId.length) {
+      const foundUserIds = users.map((user) => user.id);
+      notFoundIds.push(...userId.filter((id) => !foundUserIds.includes(id)));
     }
+
+    const status = action ? UserStatus.DISABLED : UserStatus.ACTIVE;
+    const disabledAt = action ? new Date() : null;
+
+    users.forEach((user) => {
+      usersToUpdate.push({ id: user.id, status, disabledAt });
+    });
+
+    const updatedUsers = await this.usersRepository.save(usersToUpdate);
+
+    if (notFoundIds.length > 0) {
+      throw new BadRequestException(
+        'There was a problem performing this action on some users',
+      );
+    }
+
+    return new SuccessResponse(
+      `You have successfully ${action ? 'blocked' : 'unblocked'} the selected users`,
+      updatedUsers,
+    );
+  }
+
+  async deleteUser(requestInput: UserActionInput): Promise<SuccessResponse> {
+    const { userId, action } = requestInput;
+    const usersToUpdate: DeepPartial<User>[] = [];
+    const notFoundIds: string[] = [];
+
+    const users = await this.usersRepository.find({
+      where: { id: In(userId) },
+    });
+
+    if (users.length < userId.length) {
+      const foundUserIds = users.map((user) => user.id);
+      notFoundIds.push(...userId.filter((id) => !foundUserIds.includes(id)));
+    }
+
+    const status = action ? UserStatus.DISABLED : UserStatus.ACTIVE;
+    const deletedAt = action ? new Date() : null;
+
+    users.forEach((user) => {
+      usersToUpdate.push({ id: user.id, status, deletedAt });
+    });
+
+    const updatedUsers = await this.usersRepository.save(usersToUpdate);
+
+    if (notFoundIds.length > 0) {
+      throw new BadRequestException(
+        'There was a problem performing this action on some users',
+      );
+    }
+
+    return new SuccessResponse(
+      `You have successfully ${action ? 'deleted' : 'recovered'} the selected users`,
+      updatedUsers,
+    );
   }
 }

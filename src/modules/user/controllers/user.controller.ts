@@ -14,7 +14,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { RestAccessTokenGuard } from '../../auth/guards';
 import { UserService } from '../services/user.service';
-import { ImageDataResponse } from '../dtos';
+import { ImageDataResponse } from '../dtos/request';
 
 @Controller('api/user')
 export class UserController {

@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
   PermissionRepository,
   RoleRepository,
@@ -12,12 +12,13 @@ import {
 } from '../repositories';
 import { Permission, Role, RolePermissions, User } from 'src/entities';
 import {
+  DeleteRolesInput,
   PermissionData,
   RoleData,
   RoleIdInputDto,
   RoleInputDto,
   RoleUpdateInputDto,
-} from '../dtos';
+} from '../dtos/request';
 import { DeepPartial, In } from 'typeorm';
 import slugify from 'slugify';
 import { AppStrings } from '../../../common/messages/app.strings';
@@ -31,6 +32,8 @@ export class RoleService {
     private readonly rolePermissionRepository: RolePermissionRepository,
   ) {}
 
+  logger = new Logger(RoleService.name);
+
   /**
    * List Permissions
    *
@@ -38,8 +41,19 @@ export class RoleService {
    * @returns {Promise<Permission[]>}
    */
   async findAllPermissions(): Promise<Permission[]> {
-    const result = await this.permissionRepository.find();
-    return result;
+    try {
+      const result = await this.permissionRepository.find();
+      return result;
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async deleteRoles(deleteRoleInput: DeleteRolesInput) {
+    try {
+      return await this.roleRepository.softDelete(deleteRoleInput.id);
+    } catch (error) {}
   }
 
   listPermissions(items: RolePermissions[]): PermissionData[] {
@@ -79,7 +93,7 @@ export class RoleService {
         delete item.permissions;
         return {
           id: item.id,
-          name: item.name,
+          name: item.englishName,
           slug: item.slug,
           permissions: permissionData,
         };
@@ -101,9 +115,9 @@ export class RoleService {
       where: { id: In([...permissionIds]) },
     });
     const data: Partial<Role> = {
-      name: input.name,
+      englishName: input.englishName,
       permissions,
-      slug: slugify(input.name),
+      slug: slugify(input.englishName),
     };
     const roleData = this.roleRepository.create(data);
     const role = await this.roleRepository.save(roleData);
@@ -138,7 +152,7 @@ export class RoleService {
    */
   async updateRole(input: RoleUpdateInputDto): Promise<Role> {
     const role = await this.roleRepository.findOneByOrFail({
-      id: input.roleId,
+      id: input.id,
     });
     const permissionIds = input.permissions.map((item) => item.permissionId);
     const permissions = await this.permissionRepository.find({
@@ -146,9 +160,9 @@ export class RoleService {
     });
 
     const data: Partial<Role> = {
-      name: input.name,
+      englishName: input.englishName,
       permissions,
-      slug: slugify(input.name),
+      slug: slugify(input.englishName),
     };
 
     const rolePermissions: DeepPartial<RolePermissions[]> = permissions

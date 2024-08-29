@@ -26,7 +26,11 @@ export class Role {
 
   @Column()
   @Field()
-  name: string;
+  englishName: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  arabicName: string;
 
   @Column()
   @Field()

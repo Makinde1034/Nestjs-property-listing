@@ -18,7 +18,7 @@ import {
   MinLength,
   ValidateNested,
 } from 'class-validator';
-import { NationalIdentityType } from '../../../common/enums';
+import { NationalIdentityType } from '../../../../common/enums';
 
 @InputType()
 export class IdentityInput {
