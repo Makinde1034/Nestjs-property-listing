@@ -10,11 +10,12 @@ import { UseGuards } from '@nestjs/common';
 import { AccessTokenGuard, PermissionsGuard } from 'src/modules/auth/guards';
 import { Permissions } from 'src/common/decorator/permission';
 import {
+  DeleteRolesInput,
   RoleData,
-  RoleIdInputDto,
   RoleInputDto,
   RoleUpdateInputDto,
 } from '../dtos/request';
+import { SuccessResponse } from '../../../common/utils/success.response';
 
 @Resolver()
 export class RoleResolver {
@@ -84,13 +85,11 @@ export class RoleResolver {
    * @param {RoleIdInputDto} RequestInput
    * @returns {Promise<string>}
    */
-  @Mutation(() => String)
+  @Mutation(() => SuccessResponse)
   @Permissions('delete-role')
   @UseGuards(AccessTokenGuard, PermissionsGuard)
-  async deleteRole(
-    @Args('RequestInput') RequestInput: RoleIdInputDto,
-  ): Promise<string> {
-    return await this.roleService.deleteRole(RequestInput);
+  async deleteRole(@Args('deleteRoleInput') deleteRoleInput: DeleteRolesInput) {
+    return await this.roleService.deleteRoles(deleteRoleInput);
   }
 
   /**
