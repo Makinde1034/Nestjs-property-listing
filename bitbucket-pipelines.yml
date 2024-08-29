@@ -15,8 +15,8 @@ definitions:
     - step: &code-lint
         name: Linting
         runs-on:
-          - self.hosted #Runner Label
-          - linux #Runner Label
+          - self.hosted # Runner Label
+          - linux # Runner Label
         caches:
           - npm
         script:
@@ -32,6 +32,7 @@ definitions:
             variables:
               SCAN_PATH: './package-lock.json'
               CVSS_FAIL_LEVEL: '1'
+
     - step: &build
         name: Build
         runs-on:
@@ -42,7 +43,6 @@ definitions:
         script:
           - npm ci
           - npm run test
-
           - npm run build
 
     - step: &test
@@ -82,6 +82,7 @@ definitions:
         script:
           - npm ci
           # - npm audit
+
     - step: &sonar-analysis
         name: SonarQube analysis
         runs-on:
@@ -92,6 +93,7 @@ definitions:
             variables:
               SONAR_HOST_URL: ${SONAR_HOST_URL}
               SONAR_TOKEN: ${SONAR_TOKEN}
+
     - step: &push-to-dockerhub
         name: Build and Push to Docker Hub
         runs-on:
@@ -101,8 +103,16 @@ definitions:
           - docker
         script:
           - echo $DOCKERHUB_PASSWORD | docker login --username $DOCKERHUB_USERNAME --password-stdin
-          - docker build -f Dockerfile -t $DOCKERHUB_USERNAME/$DOCKERHUB_REPO:$BITBUCKET_COMMIT .
-          - docker push $DOCKERHUB_USERNAME/$DOCKERHUB_REPO:$BITBUCKET_COMMIT
+          - |
+            for i in {1..3}; do
+              docker build -f Dockerfile -t $DOCKERHUB_USERNAME/$DOCKERHUB_REPO:$BITBUCKET_COMMIT .
+              if docker push $DOCKERHUB_USERNAME/$DOCKERHUB_REPO:$BITBUCKET_COMMIT; then
+                break
+              fi
+              echo "Retrying Docker push ($i/3)..."
+              sleep 10
+            done
+
     - step: &deploy-to-test
         name: Deploy to CapRover
         deployment: test
@@ -113,7 +123,7 @@ definitions:
           - docker
         image: caprover/cli-caprover:v2.1.1
         script:
-          - docker run caprover/cli-caprover:v2.1.1 caprover deploy --caproverUrl $CAPROVER_URL  --caproverPassword $CAPROVER_PASSWORD --caproverApp $CAPROVER_APP --imageName "$DOCKERHUB_USERNAME/$DOCKERHUB_REPO:$BITBUCKET_COMMIT"
+          - caprover deploy --caproverUrl $CAPROVER_URL --caproverPassword $CAPROVER_PASSWORD --caproverApp $CAPROVER_APP --imageName "$DOCKERHUB_USERNAME/$DOCKERHUB_REPO:$BITBUCKET_COMMIT"
 
 clone:
   depth: full
