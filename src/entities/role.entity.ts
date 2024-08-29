@@ -37,6 +37,10 @@ export class Role {
   @Field()
   slug: string;
 
+  @Column({ default: false })
+  @Field()
+  isDisabled: boolean;
+
   @Field(() => [Permission])
   @ManyToMany(() => Permission, { cascade: true, eager: true })
   @JoinTable({ name: 'role_permissions_permission' })

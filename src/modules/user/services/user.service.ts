@@ -469,7 +469,7 @@ export class UserService {
     }
   }
 
-  async findOneUser(searchParam: string) {
+  async findUserByEmailPhoneOrName(searchParam: string) {
     try {
       const valueToSearch = checkIfEmailNameOrPhoneNumber(searchParam);
 

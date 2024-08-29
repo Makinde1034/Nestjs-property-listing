@@ -19,6 +19,7 @@ import {
   UserActionInput,
   UserProfileInput,
 } from '../dtos/request';
+import { UserFilter } from '../dtos/request/user';
 
 @Resolver()
 export class UserResolver {
@@ -35,10 +36,31 @@ export class UserResolver {
     return await this.userService.findUserById(ctx.req.user.id, ['roles']);
   }
 
-  @Query(() => User, { name: 'user' })
+  @Query(() => User, { name: 'getOneUser' })
   @UseGuards(AccessTokenGuard)
   async getOneUser(@Args('id') id: string) {
     return await this.userService.findUserById(id, ['roles']);
+  }
+
+  @Query(() => [User], { name: 'searchForUser' })
+  @UseGuards(AccessTokenGuard)
+  async searchForUser(@Args('searchParam') searchParam: string) {
+    return await this.userService.findUserByEmailPhoneOrName(searchParam);
+  }
+
+  @Query(() => [User], { name: 'findAllUser' })
+  @UseGuards(AccessTokenGuard)
+  async findAllUser(@Args('userFilterInput') searchParam: UserFilter) {
+    return await this.userService.findAllUser(searchParam);
+  }
+
+  @Query(() => [User], { name: 'findAllUser' })
+  @UseGuards(AccessTokenGuard)
+  async getEmployees(
+    @Context() ctx: any,
+    @Args('userFilterInput') userFilterInput: UserFilter,
+  ) {
+    return await this.userService.getEmployees(userFilterInput, ctx.req.user);
   }
 
   /**

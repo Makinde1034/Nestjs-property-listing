@@ -45,6 +45,7 @@ type Role {
   englishName: String!
   arabicName: String
   slug: String!
+  isDisabled: Boolean!
   permissions: [Permission!]!
   rolePermissions: [RolePermissions!]!
   createdAt: DateTime!
@@ -636,7 +637,10 @@ type MessageResponse {
 type Query {
   app: String!
   activateTwoFa: TwoFaResult!
-  user(id: String!): User!
+  user: User!
+  getOneUser(id: String!): User!
+  searchForUser(searchParam: String!): [User!]!
+  findAllUser(userFilterInput: UserFilter!): [User!]!
   permissions: [Permission!]!
   roles: [RoleData!]!
   getUserRoles: [Role!]!
@@ -690,6 +694,27 @@ type Query {
   getChat(chatFilterInput: ChatFilterInput!): MessageResponse!
 }
 
+input UserFilter {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
+  level: String
+  status: String
+  type: String
+}
+
+enum SortOrder {
+  ASC
+  DESC
+}
+
+input WhereOption {
+  fieldToChose: String!
+  whereParam: Boolean!
+}
+
 input AttributeFilter {
   take: Float
   skip: Float
@@ -705,16 +730,6 @@ input AttributeFilter {
   hiddenToBuyers: Boolean
   isAmenity: Boolean
   isAddress: Boolean
-}
-
-enum SortOrder {
-  ASC
-  DESC
-}
-
-input WhereOption {
-  fieldToChose: String!
-  whereParam: Boolean!
 }
 
 input CreateSearchHistoryInput {
