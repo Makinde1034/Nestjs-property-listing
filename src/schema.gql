@@ -876,7 +876,7 @@ type Mutation {
   createChildIssue(input: CreateChildIssueInput!): ParentIssue!
   updateChildIssue(RequestInput: UpdateIssueInput!): ParentIssue!
   deleteChildIssue(id: String!): String!
-  createTicket(RequestInput: CreateTicketInput!): String!
+  createTicket(RequestInput: CreateTicketInput!): Ticket!
   manageTicket(RequestInput: UpdateTicketInput!): Ticket!
   createResponseTemplate(createResponseTemplateInput: CreateResponseTemplateInput!): ResponseTemplate!
   deleteResponseTemplate(id: String!): SuccessResponse!

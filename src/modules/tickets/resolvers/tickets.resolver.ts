@@ -31,13 +31,13 @@ export class TicketsResolver {
    * @param {CreateIssueInput} RequestInput
    * @returns {Promise<string>}
    */
-  @Mutation(() => String)
+  @Mutation(() => Ticket)
   @UseGuards(AccessTokenGuard)
   // @Permissions('create-support-tickets')
   async createTicket(
     @Args('RequestInput') RequestInput: CreateTicketInput,
     @Context() ctx: any,
-  ): Promise<string> {
+  ): Promise<Ticket> {
     return await this.ticketService.raiseTicket(ctx.req.user, RequestInput);
   }
 

@@ -59,6 +59,11 @@ export class RoleUpdateInputDto extends PartialType(RoleInputDto) {
   @IsNotEmpty()
   id: number;
 }
+@InputType()
+export class DeleteRolesInput {
+  @Field(() => [String])
+  id: string[];
+}
 
 @ObjectType()
 export class PermissionData {

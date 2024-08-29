@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
   PermissionRepository,
   RoleRepository,
@@ -12,6 +12,7 @@ import {
 } from '../repositories';
 import { Permission, Role, RolePermissions, User } from 'src/entities';
 import {
+  DeleteRolesInput,
   PermissionData,
   RoleData,
   RoleIdInputDto,
@@ -31,6 +32,8 @@ export class RoleService {
     private readonly rolePermissionRepository: RolePermissionRepository,
   ) {}
 
+  logger = new Logger(RoleService.name);
+
   /**
    * List Permissions
    *
@@ -38,8 +41,19 @@ export class RoleService {
    * @returns {Promise<Permission[]>}
    */
   async findAllPermissions(): Promise<Permission[]> {
-    const result = await this.permissionRepository.find();
-    return result;
+    try {
+      const result = await this.permissionRepository.find();
+      return result;
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async deleteRoles(deleteRoleInput: DeleteRolesInput) {
+    try {
+      return await this.roleRepository.softDelete(deleteRoleInput.id);
+    } catch (error) {}
   }
 
   listPermissions(items: RolePermissions[]): PermissionData[] {

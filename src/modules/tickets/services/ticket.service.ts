@@ -40,7 +40,7 @@ export class TicketService {
    * @param {CreateTicketInput} input
    * @returns {Promise<string>}
    */
-  async raiseTicket(user: User, input: CreateTicketInput): Promise<string> {
+  async raiseTicket(user: User, input: CreateTicketInput): Promise<Ticket> {
     const { issueId, childIssueId } = input;
     const parentIssue = await this.issueRepository.findOneByOrFail({
       id: issueId,
@@ -58,9 +58,9 @@ export class TicketService {
       isOpen: true,
       status: TicketStatus.OPEN,
     };
-    await this.ticketRepository.save(data);
+    const ticket = await this.ticketRepository.save(data);
 
-    return AppStrings.TICKET_RAISED_SUCCESSFULLY;
+    return ticket;
   }
 
   /**
