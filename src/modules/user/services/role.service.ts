@@ -202,12 +202,15 @@ export class RoleService {
    * @param {RoleIdInputDto} data
    * @returns {Promise<string>}
    */
-  async deleteRole(data: RoleIdInputDto): Promise<string> {
+  async disableRole(data: RoleIdInputDto): Promise<string> {
     const role = await this.roleRepository.findOneByOrFail({
       id: data.roleId,
     });
-    await this.roleRepository.remove(role);
-    return AppStrings.ROLE_DELETED_SUCCESSFULLY;
+
+    if (role) {
+      await this.roleRepository.update(data.roleId, { isDisabled: true });
+      return AppStrings.ROLE_DELETED_SUCCESSFULLY;
+    }
   }
 
   /**
