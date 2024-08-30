@@ -54,7 +54,7 @@ export class UserResolver {
     return await this.userService.findAllUser(searchParam);
   }
 
-  @Query(() => [User], { name: 'findAllUser' })
+  @Query(() => [User], { name: 'getEmployees' })
   @UseGuards(AccessTokenGuard)
   async getEmployees(
     @Context() ctx: any,

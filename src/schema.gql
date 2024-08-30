@@ -48,6 +48,7 @@ type Role {
   isDisabled: Boolean!
   permissions: [Permission!]!
   rolePermissions: [RolePermissions!]!
+  user: [User!]
   createdAt: DateTime!
   deletedAt: DateTime!
   updatedAt: DateTime!
@@ -641,8 +642,10 @@ type Query {
   getOneUser(id: String!): User!
   searchForUser(searchParam: String!): [User!]!
   findAllUser(userFilterInput: UserFilter!): [User!]!
+  getEmployees(userFilterInput: UserFilter!): [User!]!
   permissions: [Permission!]!
   roles: [RoleData!]!
+  rolesAndUser(paginateAndSort: PaginateAndSort!): [Role!]!
   getUserRoles: [Role!]!
   listNotifications: [Notification!]!
   listNotificationScopes: [NotificationScope!]!
@@ -715,6 +718,14 @@ input WhereOption {
   whereParam: Boolean!
 }
 
+input PaginateAndSort {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
+}
+
 input AttributeFilter {
   take: Float
   skip: Float
@@ -780,14 +791,6 @@ input AdminFilterAndSort {
   isListingSold: Boolean = false
   isListingFlagged: Boolean = false
   isListingRented: Boolean = false
-}
-
-input PaginateAndSort {
-  take: Float
-  skip: Float
-  sortField: String
-  directionToSort: SortOrder
-  where: WhereOption
 }
 
 input FindOfferInput {

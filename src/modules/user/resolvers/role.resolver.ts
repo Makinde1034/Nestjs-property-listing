@@ -16,6 +16,7 @@ import {
   RoleUpdateInputDto,
 } from '../dtos/request';
 import { SuccessResponse } from '../../../common/utils/success.response';
+import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 
 @Resolver()
 export class RoleResolver {
@@ -44,6 +45,15 @@ export class RoleResolver {
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async fetchRoles(): Promise<RoleData[]> {
     return await this.roleService.findAllRoles();
+  }
+
+  @Query(() => [Role], { name: 'rolesAndUser' })
+  // @Permissions('read-role')
+  // @UseGuards(AccessTokenGuard, PermissionsGuard)
+  async fetchRolesAndUsers(
+    @Args('paginateAndSort') paginateAndSort: PaginateAndSort,
+  ): Promise<Role[]> {
+    return await this.roleService.fetchRolesAndUser(paginateAndSort);
   }
 
   /**
