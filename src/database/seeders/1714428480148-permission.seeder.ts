@@ -28,12 +28,13 @@ export class Permission1714428480148 implements Seeder {
     } else {
       permissionFactory.map((value) => {
         const updatedPermission = {
-          ...permission,
+          ...value,
           slug: slugify(value.category + '-' + value.englishLabel, {
             remove: /[*+~./()'"!:@]/g,
             lower: true,
           }),
         };
+        console.log(updatedPermission);
         permisionToSave.push(updatedPermission);
       });
       await repository.save(permisionToSave as Partial<Permission>);

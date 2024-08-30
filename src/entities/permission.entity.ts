@@ -15,48 +15,48 @@ export class Permission {
   id: number;
 
   @Column({ nullable: true })
-  @Field({ nullable: true })
+  @Field()
   functionDescription: string;
 
   @Column({ nullable: true })
-  @Field({ nullable: true })
-  slug?: string;
+  @Field()
+  slug: string;
 
   @Column({ nullable: true })
-  @Field({ nullable: true })
+  @Field()
   category: string;
 
   @Column({ nullable: true })
-  @Field({ nullable: true })
-  remarks?: string;
+  @Field()
+  remarks: string;
 
   @Column({ nullable: true })
-  @Field({ nullable: true })
-  arabicLabel?: string;
+  @Field()
+  arabicLabel: string;
 
   @Column({ nullable: true })
-  @Field({ nullable: true })
-  englishLabel?: string;
+  @Field()
+  englishLabel: string;
 
-  @Column({ default: false, nullable: true })
+  @Column({ default: false })
   @Field({ defaultValue: false, nullable: true })
   approveFlag?: boolean;
 
   @Column({ default: true })
-  @Field({ defaultValue: true, nullable: true })
-  useFlag?: boolean;
+  @Field()
+  useFlag: boolean;
 
   @Column({ default: true })
-  @Field({ defaultValue: true })
-  staffAccess?: boolean;
+  @Field()
+  staffAccess: boolean;
 
   @Column({ default: false, nullable: true })
-  @Field({ defaultValue: false })
+  @Field()
   individualAccess?: boolean;
 
   @Column({ default: false, nullable: true })
-  @Field({ defaultValue: false, nullable: true })
-  companyAccess?: boolean;
+  @Field()
+  companyAccess: boolean;
 
   @Field(() => [RolePermissions])
   @OneToMany(

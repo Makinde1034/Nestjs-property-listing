@@ -428,6 +428,19 @@ export class UserService {
    *
    *********************************/
 
+  async assignRoleToUser(assignRoleInput) {
+    try {
+      const roles = await this.roleRepository.find({
+        where: { id: In(assignRoleInput.roleId) },
+      });
+      const user = await this.usersRepository.update(assignRoleInput.id, {
+        roles,
+      });
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
   async findAllUser(userFilterInput: UserFilter) {
     try {
       const { level, status, type, sortField, directionToSort, take, skip } =
