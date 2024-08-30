@@ -26,17 +26,17 @@ type RolePermissions {
 
 type Permission {
   id: Float!
-  functionDescription: String
-  slug: String
-  category: String
-  remarks: String
-  arabicLabel: String
-  englishLabel: String
+  functionDescription: String!
+  slug: String!
+  category: String!
+  remarks: String!
+  arabicLabel: String!
+  englishLabel: String!
   approveFlag: Boolean
-  useFlag: Boolean
+  useFlag: Boolean!
   staffAccess: Boolean!
   individualAccess: Boolean!
-  companyAccess: Boolean
+  companyAccess: Boolean!
   permissionRoles: [RolePermissions!]!
 }
 
