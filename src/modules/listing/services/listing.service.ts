@@ -321,7 +321,7 @@ export class ListingService {
           .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
           .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
           .innerJoinAndSelect('listing.listingType', 'listingType')
-          .leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate')
+
           .leftJoin('listingType.attributeSets', 'attributeSets')
           .where('listing.deletedAt IS NULL')
 
@@ -364,11 +364,13 @@ export class ListingService {
 
           // Join the gpsCoordinate relation
           query
-            .leftJoin('listing.gpsCoordinate', 'gpsCoordinate')
+            .leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate')
             .andWhere('gpsCoordinate.lng = :lng AND gpsCoordinate.lat = :lat', {
               lng,
               lat,
             });
+        } else {
+          query.leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate');
         }
 
         if (rentingOption !== undefined) {
@@ -538,7 +540,7 @@ export class ListingService {
           .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
           .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
           .leftJoinAndSelect('listing.listingType', 'listingType')
-          .leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate')
+
           .leftJoin('listingType.attributeSets', 'attributeSets')
 
           .where('listing.deletedAt IS NULL')
@@ -577,11 +579,13 @@ export class ListingService {
         if (gpsCoordinate) {
           const { lng, lat } = gpsCoordinate;
           query
-            .leftJoin('listing.gpsCoordinate', 'gpsCoordinate')
+            .leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate')
             .andWhere('gpsCoordinate.lng = :lng AND gpsCoordinate.lat = :lat', {
               lng,
               lat,
             });
+        } else {
+          query.leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate');
         }
 
         if (minPrice !== undefined && maxPrice !== undefined) {
