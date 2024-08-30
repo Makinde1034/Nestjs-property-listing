@@ -26,7 +26,7 @@ type RolePermissions {
 
 type Permission {
   id: Float!
-  functionDescription: String!
+  functionDescription: String
   slug: String
   category: String!
   remarks: String
