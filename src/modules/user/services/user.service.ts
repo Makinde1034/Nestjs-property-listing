@@ -78,11 +78,16 @@ export class UserService {
    * @returns {Promise<User>}
    */
   async createUser(userData: Partial<User>): Promise<User> {
-    const salt = await bcrypt.genSalt();
-    userData.password = await bcrypt.hash(userData.password, salt);
+    try {
+      const salt = await bcrypt.genSalt();
+      userData.password = await bcrypt.hash(userData.password, salt);
 
-    const user = await this.usersRepository.save(userData);
-    return user;
+      const user = await this.usersRepository.save(userData);
+      return user;
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
   }
 
   /**
