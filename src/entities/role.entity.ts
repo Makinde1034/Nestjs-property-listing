@@ -17,6 +17,7 @@ import {
 } from 'typeorm';
 import { Permission } from './permission.entity';
 import { RolePermissions } from './role-permission.entity';
+import { User } from './user.entity';
 
 @Entity()
 @ObjectType()
@@ -49,6 +50,10 @@ export class Role {
   @Field(() => [RolePermissions])
   @OneToMany(() => RolePermissions, (rolePermission) => rolePermission.role)
   rolePermissions: RolePermissions[];
+
+  @Field(() => [User], { nullable: true })
+  @ManyToMany(() => User, (user) => user.roles, { nullable: true })
+  user: User[];
 
   @Field()
   @CreateDateColumn()

@@ -197,9 +197,8 @@ export class User extends BaseEntity {
   @Column({ nullable: true, default: false })
   isTwoFactorAuthenticationEnabled: boolean;
 
-  @Exclude()
   @Field(() => [Role], { nullable: true })
-  @ManyToMany(() => Role, { cascade: true, eager: true })
+  @ManyToMany(() => Role, (role) => role.user, { cascade: true, eager: true })
   @JoinTable({ name: 'user_role_roles' })
   roles: Role[];
 

@@ -23,6 +23,7 @@ import { DeepPartial, In } from 'typeorm';
 import slugify from 'slugify';
 import { AppStrings } from '../../../common/messages/app.strings';
 import { SuccessResponse } from '../../../common/utils/success.response';
+import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 
 @Injectable()
 export class RoleService {
@@ -226,6 +227,24 @@ export class RoleService {
       relations: ['roles'],
     });
     return userData.roles;
+  }
+
+  async fetchRolesAndUser(paginateAndSort: PaginateAndSort): Promise<Role[]> {
+    try {
+      if (paginateAndSort.take && paginateAndSort.skip) {
+        paginateAndSort.skip = 0;
+        paginateAndSort.take = 20;
+      }
+      const roles = await this.roleRepository.find({
+        take: paginateAndSort.take,
+        skip: paginateAndSort.skip,
+        relations: ['user'],
+      });
+      return roles;
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
   }
 
   /**
