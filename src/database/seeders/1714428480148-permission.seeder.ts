@@ -8,6 +8,7 @@ import { Permission } from 'src/entities/permission.entity';
 import { DataSource } from 'typeorm';
 import { Seeder, SeederFactoryManager } from 'typeorm-extension';
 import { permissionFactory } from '../factories/permission.factory';
+import slugify from 'slugify';
 
 export class Permission1714428480148 implements Seeder {
   track = false;
@@ -16,6 +17,7 @@ export class Permission1714428480148 implements Seeder {
     dataSource: DataSource,
     factoryManager: SeederFactoryManager,
   ): Promise<any> {
+    const permisionToSave = [];
     this.logger.debug(`Seeding For : ${Permission.name}...`, factoryManager);
     const repository = dataSource.getRepository(Permission);
 
@@ -24,7 +26,17 @@ export class Permission1714428480148 implements Seeder {
     if (permission.length > 0) {
       this.logger.debug(`Seeding for: ${Permission.name} Already completed`);
     } else {
-      await repository.save(permissionFactory as Partial<Permission>);
+      permissionFactory.map((value) => {
+        const updatedPermission = {
+          ...permission,
+          slug: slugify(value.category + '-' + value.englishLabel, {
+            remove: /[*+~./()'"!:@]/g,
+            lower: true,
+          }),
+        };
+        permisionToSave.push(updatedPermission);
+      });
+      await repository.save(permisionToSave as Partial<Permission>);
     }
     this.logger.debug(`Seeding for: ${Permission.name} finished`);
   }
