@@ -28,7 +28,7 @@ type Permission {
   id: Float!
   functionDescription: String
   slug: String
-  category: String!
+  category: String
   remarks: String
   arabicLabel: String
   englishLabel: String!
