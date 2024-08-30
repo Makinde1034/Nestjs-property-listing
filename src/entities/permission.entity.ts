@@ -22,8 +22,8 @@ export class Permission {
   @Field({ nullable: true })
   slug?: string;
 
-  @Column()
-  @Field()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   category: string;
 
   @Column({ nullable: true })
