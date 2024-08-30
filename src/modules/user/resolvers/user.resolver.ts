@@ -20,6 +20,7 @@ import {
   UserProfileInput,
 } from '../dtos/request';
 import { UserFilter } from '../dtos/request/user';
+import { UserResponse } from '../dtos/response/user.response';
 
 @Resolver()
 export class UserResolver {
@@ -48,13 +49,13 @@ export class UserResolver {
     return await this.userService.findUserByEmailPhoneOrName(searchParam);
   }
 
-  @Query(() => [User], { name: 'findAllUser' })
+  @Query(() => UserResponse, { name: 'findAllUser' })
   @UseGuards(AccessTokenGuard)
-  async findAllUser(@Args('userFilterInput') searchParam: UserFilter) {
-    return await this.userService.findAllUser(searchParam);
+  async findAllUser(@Args('userFilterInput') userFilterInput: UserFilter) {
+    return await this.userService.findAllUser(userFilterInput);
   }
 
-  @Query(() => [User], { name: 'getEmployees' })
+  @Query(() => UserResponse, { name: 'getEmployees' })
   @UseGuards(AccessTokenGuard)
   async getEmployees(
     @Context() ctx: any,
