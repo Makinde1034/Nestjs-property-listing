@@ -321,6 +321,7 @@ export class ListingService {
           .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
           .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
           .innerJoinAndSelect('listing.listingType', 'listingType')
+          .leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate')
           .leftJoin('listingType.attributeSets', 'attributeSets')
           .where('listing.deletedAt IS NULL')
 
@@ -537,6 +538,7 @@ export class ListingService {
           .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
           .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
           .leftJoinAndSelect('listing.listingType', 'listingType')
+          .leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate')
           .leftJoin('listingType.attributeSets', 'attributeSets')
 
           .where('listing.deletedAt IS NULL')
