@@ -14,8 +14,8 @@ export class Permission {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  @Field()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   functionDescription: string;
 
   @Column({ nullable: true })
