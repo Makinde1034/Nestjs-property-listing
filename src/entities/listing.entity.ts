@@ -94,7 +94,7 @@ export class Listing extends BaseEntity {
   @OneToMany(
     () => ListingAttributes,
     (listingAttributes) => listingAttributes.listing,
-    { onDelete: 'CASCADE' },
+    { onDelete: 'CASCADE', eager: true },
   )
   listingAttributes: ListingAttributes[];
 

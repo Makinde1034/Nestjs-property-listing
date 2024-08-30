@@ -475,9 +475,9 @@ export class UserService {
         skip: paginationSkip,
       });
 
-      return { employees: users, total: count };
+      return { users, total: count };
     } catch (error) {
-      this.logger.error('Failed to get customer', error.stack);
+      this.logger.error('Failed to get customer', error);
       throw new BadRequestException('Failed to retrieve customer');
     }
   }
@@ -620,6 +620,9 @@ export class UserService {
   }
   async getEmployees(userFilterInput: UserFilter, user: User) {
     try {
+      if (!user.company) {
+        throw new BadRequestException('User does not belong to a company');
+      }
       const { level, status, type, sortField, directionToSort, take, skip } =
         userFilterInput;
 
@@ -647,15 +650,16 @@ export class UserService {
       // Fetch employees with count
       const [users, count] = await this.usersRepository.findAndCount({
         order: orderOptions,
-        where: { ...whereOptions, company: { id: user.company.id } },
+        where: { ...whereOptions, company: { id: user?.company?.id } },
         take: paginationTake,
         skip: paginationSkip,
       });
 
       return { employees: users, total: count };
     } catch (error) {
-      this.logger.error('Failed to get employees', error.stack);
-      throw new BadRequestException('Failed to retrieve employees');
+      console.log(error);
+      this.logger.error('Failed to get employees', error);
+      throw new BadRequestException(error);
     }
   }
 

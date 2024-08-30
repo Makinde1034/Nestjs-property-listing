@@ -164,9 +164,9 @@ type ListingAttributes {
   id: ID!
   listing: Listing!
   attribute: Attribute
-  name: String!
-  attributeId: String!
-  value: String!
+  name: String
+  attributeId: String
+  value: String
 }
 
 type Attribute {
@@ -464,6 +464,11 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 """
 scalar JSON
 
+type UserResponse {
+  users: [User!]!
+  total: Float!
+}
+
 type AuctionParticipant {
   id: ID!
   listingId: String!
@@ -641,8 +646,8 @@ type Query {
   user: User!
   getOneUser(id: String!): User!
   searchForUser(searchParam: String!): [User!]!
-  findAllUser(userFilterInput: UserFilter!): [User!]!
-  getEmployees(userFilterInput: UserFilter!): [User!]!
+  findAllUser(userFilterInput: UserFilter!): UserResponse!
+  getEmployees(userFilterInput: UserFilter!): UserResponse!
   permissions: [Permission!]!
   roles: [RoleData!]!
   rolesAndUser(paginateAndSort: PaginateAndSort!): [Role!]!
