@@ -364,7 +364,7 @@ export class ListingService {
 
           // Join the gpsCoordinate relation
           query
-            .leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate')
+            .leftJoin('listing.gpsCoordinate', 'gpsCoordinate')
             .andWhere('gpsCoordinate.lng = :lng AND gpsCoordinate.lat = :lat', {
               lng,
               lat,
