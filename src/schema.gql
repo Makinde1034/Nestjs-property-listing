@@ -164,9 +164,9 @@ type ListingAttributes {
   id: ID!
   listing: Listing!
   attribute: Attribute
-  name: String!
-  attributeId: String!
-  value: String!
+  name: String
+  attributeId: String
+  value: String
 }
 
 type Attribute {

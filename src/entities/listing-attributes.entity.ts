@@ -25,14 +25,14 @@ export class ListingAttributes extends BaseEntity {
   attribute: Attribute;
 
   @Column()
-  @Field()
+  @Field({ nullable: true })
   name: string;
 
   @Column()
-  @Field()
+  @Field({ nullable: true })
   attributeId: string;
 
   @Column()
-  @Field()
+  @Field({ nullable: true })
   value: string;
 }
