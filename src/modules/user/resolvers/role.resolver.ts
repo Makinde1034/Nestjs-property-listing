@@ -48,8 +48,8 @@ export class RoleResolver {
   }
 
   @Query(() => [Role], { name: 'rolesAndUser' })
-  // @Permissions('read-role')
-  // @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions('read-role')
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async fetchRolesAndUsers(
     @Args('paginateAndSort') paginateAndSort: PaginateAndSort,
   ): Promise<Role[]> {
