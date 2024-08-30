@@ -2,8 +2,9 @@
  * Copyright (c) 2024, Waseet LLC. All rights reserved.
  * For license. See license.txt
  */
+
 /******************************************************************
- *you have to refactor role seeder if any role is added here
+ *You have to refactor role seeder if any role is added here
  *******************************************************************/
 export const roleFactory = {
   id: 1,

@@ -17,7 +17,7 @@ export class Permission1714428480148 implements Seeder {
     dataSource: DataSource,
     factoryManager: SeederFactoryManager,
   ): Promise<any> {
-    let permisionToSave = [];
+    const permisionToSave = [];
     this.logger.debug(`Seeding For : ${Permission.name}...`, factoryManager);
     const repository = dataSource.getRepository(Permission);
 
@@ -26,10 +26,10 @@ export class Permission1714428480148 implements Seeder {
     if (permission.length > 0) {
       this.logger.debug(`Seeding for: ${Permission.name} Already completed`);
     } else {
-      permissionFactory.map((permission) => {
+      permissionFactory.map((value) => {
         const updatedPermission = {
           ...permission,
-          slug: slugify(permission.category + '-' + permission.englishLabel, {
+          slug: slugify(value.category + '-' + value.englishLabel, {
             remove: /[*+~./()'"!:@]/g,
             lower: true,
           }),
