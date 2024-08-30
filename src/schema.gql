@@ -31,7 +31,7 @@ type Permission {
   category: String
   remarks: String
   arabicLabel: String
-  englishLabel: String!
+  englishLabel: String
   approveFlag: Boolean
   useFlag: Boolean
   staffAccess: Boolean!

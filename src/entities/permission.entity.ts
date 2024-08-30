@@ -34,8 +34,8 @@ export class Permission {
   @Field({ nullable: true })
   arabicLabel?: string;
 
-  @Column()
-  @Field()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   englishLabel?: string;
 
   @Column({ default: false, nullable: true })
