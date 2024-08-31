@@ -9,6 +9,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   ManyToOne,
   OneToOne,
   UpdateDateColumn,
@@ -48,6 +49,7 @@ export class Ticket extends BaseEntity {
 
   @Field()
   @Column({ default: TicketStatus.OPEN })
+  @Index()
   status: TicketStatus;
 
   @Field({ nullable: true })
@@ -68,6 +70,7 @@ export class Ticket extends BaseEntity {
 
   @Field({ nullable: true })
   @Column({ nullable: true })
+  @Index()
   closedAt: Date;
 
   @Field({ nullable: true })
@@ -76,6 +79,7 @@ export class Ticket extends BaseEntity {
 
   @Field()
   @CreateDateColumn()
+  @Index()
   createdAt: Date;
 
   @Field()

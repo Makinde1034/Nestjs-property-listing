@@ -5,10 +5,8 @@
 
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class UpdateRoleAndUserTableToHaveManyToManyRelationsip1725026208095
-  implements MigrationInterface
-{
-  name = 'UpdateRoleAndUserTableToHaveManyToManyRelationsip1725026208095';
+export class AddIndexToTicketTable1725136231670 implements MigrationInterface {
+  name = 'AddIndexToTicketTable1725136231670';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
@@ -30,7 +28,7 @@ export class UpdateRoleAndUserTableToHaveManyToManyRelationsip1725026208095
       `ALTER TABLE "role_permissions_permission" ADD "approve" boolean DEFAULT false`,
     );
     await queryRunner.query(
-      `ALTER TABLE "permission" ALTER COLUMN "englishLabel" DROP NOT NULL`,
+      `ALTER TABLE "permission" ALTER COLUMN "approveFlag" DROP NOT NULL`,
     );
     await queryRunner.query(
       `CREATE INDEX "IDX_b36cb2e04bc353ca4ede00d87b" ON "role_permissions_permission" ("roleId") `,
@@ -60,7 +58,7 @@ export class UpdateRoleAndUserTableToHaveManyToManyRelationsip1725026208095
       `DROP INDEX "public"."IDX_b36cb2e04bc353ca4ede00d87b"`,
     );
     await queryRunner.query(
-      `ALTER TABLE "permission" ALTER COLUMN "englishLabel" SET NOT NULL`,
+      `ALTER TABLE "permission" ALTER COLUMN "approveFlag" SET NOT NULL`,
     );
     await queryRunner.query(
       `ALTER TABLE "role_permissions_permission" DROP COLUMN "approve"`,

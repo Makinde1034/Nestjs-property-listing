@@ -32,7 +32,7 @@ type Permission {
   remarks: String!
   arabicLabel: String!
   englishLabel: String!
-  approveFlag: Boolean
+  approveFlag: Boolean!
   useFlag: Boolean!
   staffAccess: Boolean!
   individualAccess: Boolean!
