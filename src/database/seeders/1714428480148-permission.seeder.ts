@@ -34,7 +34,6 @@ export class Permission1714428480148 implements Seeder {
             lower: true,
           }),
         };
-        console.log(updatedPermission);
         permisionToSave.push(updatedPermission);
       });
       await repository.save(permisionToSave as Partial<Permission>);

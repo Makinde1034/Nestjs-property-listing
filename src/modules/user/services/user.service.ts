@@ -438,7 +438,7 @@ export class UserService {
       const roles = await this.roleRepository.find({
         where: { id: In(assignRoleInput.roleId) },
       });
-      const user = await this.usersRepository.update(assignRoleInput.id, {
+      await this.usersRepository.update(assignRoleInput.id, {
         roles,
       });
     } catch (error) {
@@ -662,7 +662,7 @@ export class UserService {
 
       return { employees: users, total: count };
     } catch (error) {
-      console.log(error);
+      this.logger.log(error);
       this.logger.error('Failed to get employees', error);
       throw new BadRequestException(error);
     }

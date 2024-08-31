@@ -18,11 +18,11 @@ export class Permission {
   @Field()
   functionDescription: string;
 
-  @Column({ nullable: true })
+  @Column()
   @Field()
   slug: string;
 
-  @Column({ nullable: true })
+  @Column()
   @Field()
   category: string;
 
@@ -38,23 +38,23 @@ export class Permission {
   @Field()
   englishLabel: string;
 
-  @Column({ default: false })
-  @Field({ defaultValue: false, nullable: true })
-  approveFlag?: boolean;
+  @Column({ nullable: true })
+  @Field()
+  approveFlag: boolean;
 
-  @Column({ default: true })
+  @Column({ nullable: true })
   @Field()
   useFlag: boolean;
 
-  @Column({ default: true })
+  @Column({ nullable: true })
   @Field()
   staffAccess: boolean;
 
-  @Column({ default: false, nullable: true })
+  @Column({ nullable: true })
   @Field()
   individualAccess?: boolean;
 
-  @Column({ default: false, nullable: true })
+  @Column({ nullable: true })
   @Field()
   companyAccess: boolean;
 

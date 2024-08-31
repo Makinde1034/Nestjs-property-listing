@@ -97,39 +97,40 @@ export class TicketService {
 
   async listTicketsForAdminAndStaff(input?: ListTicketInput) {
     try {
-      const options: FindManyOptions<Ticket> = {};
+      const queryBuilder = this.ticketRepository.createQueryBuilder('ticket');
+
       if (input.status) {
-        options.where = { status: input.status };
+        queryBuilder.where('ticket.status = :status', { status: input.status });
       }
+
       const quotedColumnName = (column: string) => `"ticket"."${column}"`;
 
-      const [tickets, countsResult] = await Promise.all([
-        this.ticketRepository.find(options),
+      const result = await queryBuilder
+        .addSelect('COUNT(*) OVER()', 'total')
+        .addSelect(
+          `SUM(CASE WHEN ${quotedColumnName('closedAt')} IS NULL THEN 1 ELSE 0 END) OVER()`,
+          'open',
+        )
+        .addSelect(
+          `SUM(CASE WHEN ${quotedColumnName('closedAt')} IS NOT NULL THEN 1 ELSE 0 END) OVER()`,
+          'closed',
+        )
+        .addSelect(
+          `SUM(CASE WHEN ${quotedColumnName('createdAt')} < CURRENT_DATE - INTERVAL '4 days' THEN 1 ELSE 0 END) OVER()`,
+          'aging',
+        )
+        .getRawAndEntities();
 
-        this.ticketRepository
-          .createQueryBuilder('ticket')
-          .select('COUNT(*)', 'total')
-          .addSelect(
-            `SUM(CASE WHEN ${quotedColumnName('closedAt')} IS NULL THEN 1 ELSE 0 END)`,
-            'open',
-          )
-          .addSelect(
-            `SUM(CASE WHEN ${quotedColumnName('closedAt')} IS NOT NULL THEN 1 ELSE 0 END)`,
-            'closed',
-          )
-          .addSelect(
-            `SUM(CASE WHEN ${quotedColumnName('createdAt')} < CURRENT_DATE - INTERVAL '4 days' THEN 1 ELSE 0 END)`,
-            'aging',
-          )
-          .getRawOne(),
-      ]);
+      const tickets = result.entities;
+      const countsResult = result.raw[0];
 
       const analysis = {
         open: Number(countsResult.open),
         closed: Number(countsResult.closed),
         aging: Number(countsResult.aging),
       };
-      return { ticket: tickets, analysis };
+
+      return { tickets, analysis };
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);

@@ -308,24 +308,23 @@ export class ListingService {
       }
 
       const take = Math.min(initialTake, 20);
-      const featuredTake = Math.ceil(take / 3);
-      let regularTake = take - featuredTake;
 
       const sortDirections = ['ASC', 'DESC'] as const;
       type SortDirection = (typeof sortDirections)[number];
 
-      const baseQuery = (isFeatured: boolean) => {
+      const baseQuery = () => {
         const query = this.listingRepository
           .createQueryBuilder('listing')
           .select(columnsToSelect)
           .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
           .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
-          .innerJoinAndSelect('listing.listingType', 'listingType')
+          .leftJoinAndSelect('listing.listingType', 'listingType')
+          .leftJoin('listing.wishlist', 'wishlist')
+          .addSelect(['wishlist.id'])
 
           .leftJoin('listingType.attributeSets', 'attributeSets')
-          .where('listing.deletedAt IS NULL')
 
-          // Ensure listingType is not soft-deleted
+          .where('listing.deletedAt IS NULL')
           .andWhere('listingType.deletedAt IS NULL')
           .andWhere('attributeSets.deletedAt IS NULL')
 
@@ -338,31 +337,14 @@ export class ListingService {
             },
           );
 
-        if (isFeatured) {
-          query.andWhere(
-            'listing.isListingPromoted = :isListingPromoted AND listing.isListingFeatured = :isListingFeatured',
-            {
-              isListingPromoted: true,
-              isListingFeatured: true,
-            },
-          );
-        } else {
-          query.andWhere('listing.isListingFeatured = :isListingFeatured', {
-            isListingFeatured: false,
-          });
-        }
-
-        if (minPrice !== undefined && maxPrice !== undefined) {
-          query.andWhere('listing.price BETWEEN :minPrice AND :maxPrice', {
-            minPrice,
-            maxPrice,
+        if (rentingOption) {
+          query.andWhere('listing.rentingOption = :rentingOption', {
+            rentingOption,
           });
         }
 
         if (gpsCoordinate) {
           const { lng, lat } = gpsCoordinate;
-
-          // Join the gpsCoordinate relation
           query
             .leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate')
             .andWhere('gpsCoordinate.lng = :lng AND gpsCoordinate.lat = :lat', {
@@ -373,19 +355,20 @@ export class ListingService {
           query.leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate');
         }
 
-        if (rentingOption !== undefined) {
-          query.andWhere('listing.rentingOption = :rentingOption', {
-            rentingOption,
+        if (minPrice && maxPrice) {
+          query.andWhere('listing.price BETWEEN :minPrice AND :maxPrice', {
+            minPrice,
+            maxPrice,
           });
         }
 
-        if (purpose !== undefined) {
+        if (purpose) {
           query.andWhere('listing.purpose = :purpose', { purpose });
         }
 
-        if (listingTypeId !== undefined) {
+        if (listingTypeId) {
           query.andWhere('listing.listingTypeId = :listingTypeId', {
-            listingTypeId: listingTypeId,
+            listingTypeId,
           });
         }
 
@@ -412,53 +395,42 @@ export class ListingService {
           }
         }
 
-        if (minArea !== undefined && maxArea !== undefined) {
+        if (minArea && maxArea) {
           query.andWhere(
             'listingAttributes.name = :attributeName AND listingAttributes.value BETWEEN :minArea AND :maxArea',
             { attributeName: 'Area', minArea, maxArea },
           );
         }
 
-        if (
-          sortField &&
-          sortDirections.includes(
-            directionToSort.toUpperCase() as SortDirection,
-          )
-        ) {
-          query.orderBy(
-            `listing.${sortField}`,
-            directionToSort.toUpperCase() as SortDirection,
-          );
-        } else {
-          query
-            .orderBy('listing.promotedDate', 'ASC')
-            .addOrderBy('listing.isListingPromoted', 'DESC');
+        if (sortField && directionToSort) {
+          const sortDirections = ['ASC', 'DESC'] as const;
+          if (
+            sortDirections.includes(
+              directionToSort.toUpperCase() as (typeof sortDirections)[number],
+            )
+          ) {
+            query.orderBy(
+              `listing.${sortField}`,
+              directionToSort.toUpperCase() as (typeof sortDirections)[number],
+            );
+          }
         }
 
         return query;
       };
 
-      const featuredQuery = baseQuery(true);
-      featuredQuery.take(featuredTake).skip(skip);
+      // Fetch featured and regular listings
+      const [listings, total] = await baseQuery()
+        .take(take)
+        .skip(skip)
+        .orderBy('listing.featureDate', 'DESC')
+        .addOrderBy('listing.promotedDate', 'DESC')
+        .getManyAndCount();
 
-      const [featuredListings, featuredCount] =
-        await featuredQuery.getManyAndCount();
-
-      if (featuredListings.length < featuredTake) {
-        regularTake += featuredTake - featuredListings.length;
-      }
-
-      const regularQuery = baseQuery(false);
-      regularQuery.take(regularTake).skip(skip);
-
-      const [regularListings, regularCount] =
-        await regularQuery.getManyAndCount();
-
-      const listing = [...featuredListings, ...regularListings].slice(0, take);
-      const total = featuredCount + regularCount;
-
+      const listing = [...listings];
       return { listing, total };
     } catch (error) {
+      console.log(error);
       this.logger.error('Error finding listings:', error);
       throw error instanceof HttpException
         ? error
@@ -529,11 +501,9 @@ export class ListingService {
         .filter((column) => !columnsToExclude.includes(column.split('.')[1]));
 
       const take = Math.min(initialTake, 20);
-      const featuredTake = Math.ceil(take / 3);
-      const regularTake = take - featuredTake;
 
       // Construct base query
-      const baseQuery = (isFeatured: boolean) => {
+      const baseQuery = () => {
         const query = this.listingRepository
           .createQueryBuilder('listing')
           .select(columnsToSelect)
@@ -557,20 +527,6 @@ export class ListingService {
               isListingRented: false,
             },
           );
-
-        if (isFeatured) {
-          query
-            .andWhere('listing.isListingPromoted = :isListingPromoted', {
-              isListingPromoted: true,
-            })
-            .andWhere('listing.isListingFeatured = :isListingFeatured', {
-              isListingFeatured: true,
-            });
-        } else {
-          query.andWhere('listing.isListingPromoted = :isListingPromoted', {
-            isListingPromoted: false,
-          });
-        }
 
         if (rentingOption !== undefined) {
           query.andWhere('listing.rentingOption = :rentingOption', {
@@ -649,28 +605,19 @@ export class ListingService {
               directionToSort.toUpperCase() as (typeof sortDirections)[number],
             );
           }
-        } else {
-          query
-            .orderBy('listing.promotedDate', 'ASC')
-            .addOrderBy('listing.isListingPromoted', 'DESC');
         }
-
         return query;
       };
 
-      // Fetch featured and regular listings
-      const [featuredListings, featuredCount] = await baseQuery(true)
-        .take(featuredTake)
+      const [listings, total] = await baseQuery()
+        .take(take)
         .skip(skip)
+        .orderBy('listing.featureDate', 'DESC')
+        .addOrderBy('listing.promotedDate', 'DESC')
+
         .getManyAndCount();
 
-      const [regularListings, regularCount] = await baseQuery(false)
-        .take(regularTake)
-        .skip(skip)
-        .getManyAndCount();
-
-      const listing = [...featuredListings, ...regularListings];
-      const total = featuredCount + regularCount;
+      const listing = [...listings];
 
       // Save search history if needed
       if (searchHistory) {
