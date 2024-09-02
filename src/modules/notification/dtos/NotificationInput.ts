@@ -43,7 +43,7 @@ export class NotificationInput {
   @Field({ nullable: true })
   @IsString()
   @IsOptional()
-  deepLink: string;
+  deepLink?: string;
 }
 
 export class NotificationEventDto {

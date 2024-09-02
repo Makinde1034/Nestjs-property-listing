@@ -367,18 +367,19 @@ export class NotificationService {
         'Offers',
         'Offer Creator',
       );
-      console.log('here', mailMessageForBuyer);
-      // this.mailService.sendOfferMail({
-      //   email: buyer.email,
-      //   subject:
-      //     buyer.language == 'en'
-      //       ? mailMessageForBuyer[0]['title']
-      //       : mailMessageForBuyer[0]['arabicTitle'],
-      //   text:
-      //     buyer.language == 'en'
-      //       ? mailMessageForBuyer[0]['body']
-      //       : mailMessageForBuyer[0]['arabicBody'],
-      // });
+      this.sendUsersNotification({
+        recipients: [buyer.id],
+        isPushNotification: true,
+        isEmail: false,
+        title:
+          buyer.language == 'en'
+            ? mailMessageForBuyer[0]['title']
+            : mailMessageForBuyer[0]['arabicTitle'],
+        message:
+          buyer.language == 'en'
+            ? mailMessageForBuyer[0]['body']
+            : mailMessageForBuyer[0]['arabicBody'],
+      });
     }
 
     if (userPrefSeller?.email) {
@@ -389,13 +390,15 @@ export class NotificationService {
         'Seller',
       );
 
-      this.mailService.sendOfferMail({
-        email: buyer.email,
-        subject:
+      this.sendUsersNotification({
+        recipients: [seller.id],
+        isPushNotification: true,
+        isEmail: false,
+        title:
           buyer.language == 'en'
             ? mailMessageForSeller[0]['title']
             : mailMessageForSeller[0]['arabicBody'],
-        text:
+        message:
           buyer.language == 'en'
             ? mailMessageForSeller[0]['body']
             : mailMessageForSeller[0]['arabicBody'],
