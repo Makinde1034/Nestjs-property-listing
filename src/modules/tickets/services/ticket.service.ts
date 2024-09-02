@@ -193,7 +193,7 @@ export class TicketService {
       return await this.responseTemplateRepostiory.find();
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException();
+      throw new BadRequestException(error);
     }
   }
 

@@ -321,12 +321,10 @@ export class ListingService {
           .leftJoinAndSelect('listing.listingType', 'listingType')
           .leftJoin('listing.wishlist', 'wishlist')
           .addSelect(['wishlist.id'])
-
           .leftJoin('listingType.attributeSets', 'attributeSets')
-
           .where('listing.deletedAt IS NULL')
           .andWhere('listingType.deletedAt IS NULL')
-          .andWhere('attributeSets.deletedAt IS NULL')
+          .andWhere('listing.published IS true')
 
           .where(
             'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented',
@@ -517,7 +515,7 @@ export class ListingService {
 
           .where('listing.deletedAt IS NULL')
           .andWhere('listingType.deletedAt IS NULL')
-          .andWhere('attributeSets.deletedAt IS NULL')
+          .andWhere('listing.published IS true')
 
           .where(
             'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented',
@@ -716,6 +714,7 @@ export class ListingService {
             'user.email',
           ])
           .where(whereCondition)
+          .andWhere('listingType.deletedAt IS NULL')
           .orderBy(sortField, directionToSort)
           .skip(paginateAndSort.skip)
           .take(paginateAndSort.take)
@@ -1268,6 +1267,27 @@ export class ListingService {
     }
   }
 
+  async unPublishListing(listingId: string, user: User) {
+    try {
+      const listing = await this.listingRepository.findOneByOrFail({
+        id: listingId,
+      });
+
+      if (!listing) {
+        throw new BadRequestException(AppStrings.LISTING_NOT_FOUND);
+      }
+
+      await this.listingRepository.update(listing.id, {
+        published: true,
+      });
+
+      return new SuccessResponse(AppStrings.LISTING_UNPUBLISHED_SUCCESSFULLY);
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error?.messages | error.data);
+    }
+  }
+
   async enableListing(listingId: string) {
     try {
       await this.listingRepository.update(listingId, {
@@ -1522,11 +1542,12 @@ export class ListingService {
     }
   }
 
-  async deleteListingImage(listingId: string, imageId: string) {
+  async deleteListingImage(listingId: string, imageId: string[]) {
     try {
       const listing = await this.listingRepository.findOne({
         where: { id: listingId },
       });
+      const updatedImages = [];
 
       if (!listing) {
         throw new BadRequestException('Listing not found');
@@ -1536,14 +1557,17 @@ export class ListingService {
         ? JSON.parse(listing.images)
         : [];
 
-      if (imageId) {
+      if (imageId.length > 0) {
         // Update the isDeleted flag for the specified imageId
         let imageUpdated = false;
         existingImages.forEach((image) => {
-          if (image.id === imageId) {
-            image.isDeleted = true; // Mark the image as deleted
-            imageUpdated = true;
-          }
+          imageId.forEach((element) => {
+            if (image.id === element) {
+              image.isDeleted = true; // Mark the image as deleted
+              imageUpdated = true;
+            }
+            updatedImages.push(image);
+          });
         });
 
         if (!imageUpdated) {

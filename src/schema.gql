@@ -261,6 +261,7 @@ type Listing {
   furnished: String
   promotedDate: DateTime
   featureDate: DateTime
+  published: Boolean!
   flaggedDate: DateTime
   featureExpiration: DateTime
   promotionExpiration: DateTime
@@ -853,8 +854,8 @@ type Mutation {
   profileUpdate(RequestInput: UserProfileInput!): User!
   createStaff(RequestInput: CreateStaffInput!): User!
   staffConfirmation(RequestInput: StaffConfirmDto!): String!
-  blockUser(RequestInput: UserActionInput!): User!
-  deleteUser(RequestInput: UserActionInput!): User!
+  blockUser(RequestInput: UserActionInput!): SuccessResponse!
+  deleteUser(RequestInput: UserActionInput!): SuccessResponse!
   updateNotificationPreference(RequestInput: NotificationPrefenceInput!): User!
   changePassword(RequestInput: PasswordInput!): User!
   createRole(RequestInput: RoleInputDto!): Role!
@@ -890,6 +891,7 @@ type Mutation {
   id(id: String!): Auction!
   addAuctionParticipant(createAuctionParticipantInput: CreateAuctionParticipantInput!): AuctionParticipant!
   deleteSavedHistory(id: String!): SuccessResponse!
+  unpublishAListing(id: String!): SuccessResponse!
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!

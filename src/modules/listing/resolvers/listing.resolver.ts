@@ -448,4 +448,10 @@ export class ListingResolver {
   async deleteSavedHistory(@Args('id') id: string) {
     return await this.listingService.deleteSavedHistory(id);
   }
+
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => SuccessResponse, { name: 'unpublishAListing' })
+  async unPublishListing(@Args('id') id: string, @Context() ctx: any) {
+    return await this.listingService.unPublishListing(id, ctx.req.user);
+  }
 }

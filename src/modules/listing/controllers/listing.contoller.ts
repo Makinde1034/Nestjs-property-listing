@@ -53,7 +53,7 @@ export class ListingController {
   @UseGuards(RestAccessTokenGuard)
   async deleteListingImage(
     @Query('listingId') listingId: string,
-    @Query('imageId') imageId: string,
+    @Query('imageId') imageId: string[],
   ) {
     return await this.listingService.deleteListingImage(listingId, imageId);
   }
