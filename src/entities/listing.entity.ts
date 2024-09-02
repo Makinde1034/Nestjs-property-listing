@@ -206,6 +206,10 @@ export class Listing extends BaseEntity {
   @Field({ nullable: true })
   featureDate: Date;
 
+  @Column({ default: true })
+  @Field()
+  published: boolean;
+
   @Column({ nullable: true })
   @Field({ nullable: true })
   @Index()

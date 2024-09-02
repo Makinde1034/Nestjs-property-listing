@@ -261,6 +261,7 @@ type Listing {
   furnished: String
   promotedDate: DateTime
   featureDate: DateTime
+  published: Boolean!
   flaggedDate: DateTime
   featureExpiration: DateTime
   promotionExpiration: DateTime
@@ -890,6 +891,7 @@ type Mutation {
   id(id: String!): Auction!
   addAuctionParticipant(createAuctionParticipantInput: CreateAuctionParticipantInput!): AuctionParticipant!
   deleteSavedHistory(id: String!): SuccessResponse!
+  unpublishAListing(id: String!): SuccessResponse!
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!

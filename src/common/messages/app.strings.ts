@@ -72,6 +72,7 @@ export const AppStrings = {
   LISTING_ENABLED_SUCCESSFULLY: 'Listing has been enabled',
 
   LISTING_DELETED_SUCCESSFULLY: 'Listing has been deleted',
+  LISTING_UNPUBLISHED_SUCCESSFULLY: 'Listing has been unpublished',
 
   DELETED_SUCCESSFULLY: 'Successfully deleted',
 
