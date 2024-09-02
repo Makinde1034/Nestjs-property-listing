@@ -117,7 +117,7 @@ export class UserResolver {
    * @param {UserActionInput} inputDto
    * @returns {Promise<User>}
    */
-  @Mutation(() => User)
+  @Mutation(() => SuccessResponse)
   @UseGuards(AccessTokenGuard)
   async blockUser(
     @Args('RequestInput') inputDto: UserActionInput,
@@ -125,7 +125,7 @@ export class UserResolver {
     return await this.userService.blockUser(inputDto);
   }
 
-  @Mutation(() => User)
+  @Mutation(() => SuccessResponse)
   @UseGuards(AccessTokenGuard)
   async deleteUser(
     @Args('RequestInput') inputDto: UserActionInput,

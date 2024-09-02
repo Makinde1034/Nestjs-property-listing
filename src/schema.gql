@@ -854,8 +854,8 @@ type Mutation {
   profileUpdate(RequestInput: UserProfileInput!): User!
   createStaff(RequestInput: CreateStaffInput!): User!
   staffConfirmation(RequestInput: StaffConfirmDto!): String!
-  blockUser(RequestInput: UserActionInput!): User!
-  deleteUser(RequestInput: UserActionInput!): User!
+  blockUser(RequestInput: UserActionInput!): SuccessResponse!
+  deleteUser(RequestInput: UserActionInput!): SuccessResponse!
   updateNotificationPreference(RequestInput: NotificationPrefenceInput!): User!
   changePassword(RequestInput: PasswordInput!): User!
   createRole(RequestInput: RoleInputDto!): Role!
