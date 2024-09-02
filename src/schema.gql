@@ -364,7 +364,7 @@ type User {
   verifiedAt: DateTime
   password: String
   gender: String
-  language: String
+  language: String!
   maritalStatus: String
   occupation: String
   dateOfBirth: DateTime

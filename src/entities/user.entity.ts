@@ -96,8 +96,8 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   gender: Gender;
 
-  @Field({ nullable: true })
-  @Column({ nullable: true })
+  @Field()
+  @Column({ default: 'en' })
   language: string;
 
   @Field({ nullable: true })
