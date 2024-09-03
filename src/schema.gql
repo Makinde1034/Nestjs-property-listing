@@ -111,7 +111,7 @@ type AdPackage {
   name: String!
   impression: String!
   coverageRadius: String
-  price: String!
+  price: Float!
   duration: String!
   promotion: [Promotion!]!
   createdAt: DateTime!
@@ -259,7 +259,9 @@ type Listing {
   rentDate: DateTime
   soldDate: DateTime
   furnished: String
-  promotedDate: DateTime
+  promotedDate: DateTime!
+  promotionPrice: Float!
+  bundleType: String!
   featureDate: DateTime
   published: Boolean!
   flaggedDate: DateTime
@@ -1238,7 +1240,7 @@ input CreateAuctionParticipantInput {
 
 input CreateAdPackageInput {
   name: String!
-  price: String!
+  price: Float!
   impression: String!
   coverageRadius: String!
   duration: String!
@@ -1246,7 +1248,7 @@ input CreateAdPackageInput {
 
 input UpdateAdPackageInput {
   name: String
-  price: String
+  price: Float
   impression: String
   coverageRadius: String
   duration: String
