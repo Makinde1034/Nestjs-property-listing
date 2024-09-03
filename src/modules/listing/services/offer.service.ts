@@ -111,8 +111,8 @@ export class OfferService {
         where: { id: listing.userId },
         relations: ['notificationPreference'],
       });
-      // Find the Scope available
 
+      // Find the Scope available for application
       const notificationPreference =
         await this.notificationScopeRepository.find();
       //Filter out the correct scope

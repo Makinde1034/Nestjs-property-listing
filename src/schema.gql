@@ -1172,7 +1172,6 @@ input FlagListingInput {
 input CreateOfferDto {
   price: Float!
   expireAt: DateTime!
-  status: String
   coupon: Boolean
   couponCode: String
   listingId: String!
@@ -1181,7 +1180,6 @@ input CreateOfferDto {
 input UpdateOfferInput {
   price: Float
   expireAt: DateTime
-  status: String
   coupon: Boolean
   couponCode: String
   listingId: String

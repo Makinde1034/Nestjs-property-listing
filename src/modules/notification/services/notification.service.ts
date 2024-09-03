@@ -192,6 +192,12 @@ export class NotificationService {
         await this.mailService.sendOfferMail(mailInput);
         break;
 
+      case 'auction':
+        break;
+
+      case 'listing':
+        break;
+
       default:
         await this.mailService.sendEmailNotification(user, data);
 

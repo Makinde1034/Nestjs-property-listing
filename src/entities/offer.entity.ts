@@ -36,7 +36,7 @@ export class Offer extends BaseEntity {
 
   @Field({ defaultValue: 'inactive' })
   @IsEnum(OfferListEnum)
-  @Column({ default: 'inactive' })
+  @Column({ default: 'active' })
   status: string;
 
   @Field()
