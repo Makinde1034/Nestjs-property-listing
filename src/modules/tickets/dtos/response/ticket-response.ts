@@ -17,7 +17,7 @@ export class TicketAnalysisResponse {
 }
 @ObjectType()
 export class TicketResponse {
-  @Field(() => [Ticket])
+  @Field(() => [Ticket], { nullable: true })
   ticket: Ticket[];
 
   @Field()
