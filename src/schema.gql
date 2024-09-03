@@ -320,7 +320,7 @@ type Ticket {
   id: ID!
   reporter: User!
   support: User
-  parentIssue: ParentIssue
+  parentIssue: ParentIssue!
   childIssue: ChildIssue
   status: String!
   type: String

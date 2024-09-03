@@ -82,7 +82,7 @@ export class TicketService {
     try {
       const options: FindManyOptions<Ticket> = {};
       if (input.status) {
-        options.where = { status: input.status };
+        options.where = { status: input.status, reporter: { id: user.id } };
       } else {
         options.where = {
           reporter: { id: user.id },
@@ -106,6 +106,9 @@ export class TicketService {
       const quotedColumnName = (column: string) => `"ticket"."${column}"`;
 
       const result = await queryBuilder
+        .leftJoinAndSelect('ticket.parentIssue', 'parentIssue')
+        .leftJoinAndSelect('ticket.childIssue', 'childIssue')
+
         .addSelect('COUNT(*) OVER()', 'total')
         .addSelect(
           `SUM(CASE WHEN ${quotedColumnName('closedAt')} IS NULL THEN 1 ELSE 0 END) OVER()`,
