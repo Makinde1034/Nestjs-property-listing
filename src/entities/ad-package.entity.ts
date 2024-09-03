@@ -34,8 +34,8 @@ export class AdPackage {
   coverageRadius: string;
 
   @Field()
-  @Column()
-  price: string;
+  @Column({ nullable: true })
+  price: number;
 
   @Field()
   @Column()

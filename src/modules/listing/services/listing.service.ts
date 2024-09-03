@@ -29,7 +29,7 @@ import { CreatePromotionInput } from '../dtos/request/promotion-input';
 import { PromotionRepository } from '../repositories/promotion.repository';
 
 import { AdPackageService } from '../../ad-package/services/ad-package.service';
-import { Between, In, QueryFailedError } from 'typeorm';
+import { Between, In, LessThan, QueryFailedError } from 'typeorm';
 
 import { addDaysToDate } from '../../../common/utils/helper';
 import { FlagListingRepository } from '../repositories/flag-listing.repository';
@@ -1205,19 +1205,30 @@ export class ListingService {
       }
 
       if (adPackage && listing) {
+        const currentPromotion = await this.promotionRepository.find({
+          where: {
+            expiredAt: LessThan(new Date()),
+          },
+        });
+
+        if (currentPromotion.length > 0) {
+          throw new BadRequestException('A promotion is currently running');
+        }
         const promotion = await this.promotionRepository.save({
           ...createPromotionInput,
           adPackage: { ...adPackage },
           listing: { ...listing },
         });
+
         const formatedDays = parseInt(adPackage.duration);
         const expirationDate = addDaysToDate(new Date(), formatedDays);
         await this.listingRepository.update(listing.id, {
           promotionExpiration: expirationDate,
           isListingPromoted: true,
           promotedDate: new Date(),
+          bundleType: adPackage.name,
+          promotionPrice: adPackage.price,
         });
-
         return promotion;
       }
     } catch (error) {
@@ -1547,6 +1558,15 @@ export class ListingService {
       }
 
       if (adPackage && listing) {
+        const currentPromotion = await this.promotionRepository.find({
+          where: {
+            expiredAt: LessThan(new Date()),
+          },
+        });
+
+        if (currentPromotion.length > 0) {
+          throw new BadRequestException('A promotion is currently running');
+        }
         featured = await this.featureRepository.save({
           ...createFeatureInput,
           adPackage: { ...adPackage },
@@ -1557,6 +1577,7 @@ export class ListingService {
           featureExpiration: createFeatureInput.endDate,
           isListingFeatured: true,
           featureDate: createFeatureInput.startDate,
+          bundleType: adPackage.name,
         });
       }
 

@@ -16,7 +16,7 @@ export class CreateAdPackageInput {
   @Field()
   @IsNotEmpty()
   @IsString()
-  price: string;
+  price: number;
 
   @Field()
   @IsNotEmpty()
