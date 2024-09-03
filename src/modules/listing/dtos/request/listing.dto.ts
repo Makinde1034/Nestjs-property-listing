@@ -165,3 +165,10 @@ export class UserFilterAndSort extends PaginateAndSort {
 
 @InputType()
 export class AdminFilterAndSort extends PartialType(UserFilterAndSort) {}
+
+@InputType()
+export class ListingActionInput {
+  @Field(() => [String])
+  @IsArray()
+  listingId: string[];
+}

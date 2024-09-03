@@ -244,34 +244,34 @@ export class NotificationService {
     receiverId?: string;
     scope: NotificationScope;
   }) {
-    //get user information for buyer and their notification preference
+    //Get user information for buyer and their notification preference
     const buyer = await this.userRepository.findOneOrFail({
       where: { id: notificationInput.creatorId },
       relations: ['notificationPreference'],
     });
 
-    //get user information for seller and their notification preference
+    //Get user information for seller and their notification preference
 
     const seller = await this.userRepository.findOneOrFail({
       where: { id: notificationInput.receiverId },
       relations: ['notificationPreference'],
     });
 
-    //get the preference of a particular user
+    //Get the preference of a particular user
     const userPrefBuyer = buyer.notificationPreference.find((element) => {
       if (element.scope.id == notificationInput.scope.id) {
         return element;
       }
     });
 
-    //get the preference of a particular user
+    //Get the preference of a particular user
     const userPrefSeller = seller.notificationPreference.find((element) => {
       if (element.scope.id == notificationInput.scope.id) {
         return element;
       }
     });
 
-    //generate notification payload based on scope
+    //Generate notification payload based on scope
     switch (notificationInput.scope.name) {
       case NotificationScopesEnum.CREATE_OFFER:
         this.SendNotificationBasedOnPreference(
@@ -297,14 +297,14 @@ export class NotificationService {
   }
 
   //TODO: use Event emmiter
-  async SendNotificationBasedOnPreference(
+  SendNotificationBasedOnPreference(
     userPrefBuyer: UserNotificationPreference,
     userPrefSeller: UserNotificationPreference,
     seller: User,
     buyer: User,
   ) {
     /************************
-     * email notification
+     * Email notification
      ************************/
     if (userPrefBuyer?.email) {
       const mailMessageForBuyer = getMessageData(
@@ -314,8 +314,6 @@ export class NotificationService {
         'Offers',
         'Offer Creator',
       );
-
-      console.log('here', mailMessageForBuyer);
 
       this.sendEmailNotification(null, null, 'offer', {
         email: buyer.email,
@@ -363,7 +361,7 @@ export class NotificationService {
     }
 
     /************************
-     * push notification
+     * Push notification
      ************************/
 
     if (userPrefBuyer?.mobile) {
@@ -412,45 +410,45 @@ export class NotificationService {
     }
 
     /************************
-     * web notification
+     * Web notification
      ************************/
 
-    // if (userPrefBuyer?.desktop) {
-    //   const mailMessageForBuyer = getMessageData(
-    //     buyer.firstName,
+    // If (userPrefBuyer?.desktop) {
+    //   Const mailMessageForBuyer = getMessageData(
+    //     Buyer.firstName,
     //     'Create',
     //     'Offers',
     //     'Offer Creator',
     //   );
-    //   this.mailService.sendOfferMail({
-    //     email: buyer.email,
-    //     subject:
-    //       buyer.language == 'en'
+    //   This.mailService.sendOfferMail({
+    //     Email: buyer.email,
+    //     Subject:
+    //       Buyer.language == 'en'
     //         ? mailMessageForBuyer[0]['title']
     //         : mailMessageForBuyer[0]['arabicTitle'],
-    //     text:
-    //       buyer.language == 'en'
+    //     Text:
+    //       Buyer.language == 'en'
     //         ? mailMessageForBuyer[0]['body']
     //         : mailMessageForBuyer[0]['arabicBody'],
     //   });
     // }
 
-    // if (userPrefSeller?.desktop) {
-    //   const mailMessageForSeller = getMessageData(
-    //     seller.arabicFirstName,
+    // If (userPrefSeller?.desktop) {
+    //   Const mailMessageForSeller = getMessageData(
+    //     Seller.arabicFirstName,
     //     'Create',
     //     'Offers',
     //     'Seller',
     //   );
 
-    //   this.mailService.sendOfferMail({
-    //     email: buyer.email,
-    //     subject:
-    //       buyer.language == 'en'
+    //   This.mailService.sendOfferMail({
+    //     Email: buyer.email,
+    //     Subject:
+    //       Buyer.language == 'en'
     //         ? mailMessageForSeller[0]['title']
     //         : mailMessageForSeller[0]['arabicBody'],
-    //     text:
-    //       buyer.language == 'en'
+    //     Text:
+    //       Buyer.language == 'en'
     //         ? mailMessageForSeller[0]['body']
     //         : mailMessageForSeller[0]['arabicBody'],
     //   });

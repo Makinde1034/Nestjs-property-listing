@@ -16,6 +16,7 @@ import {
   AdminFilterAndSort,
   CreateListingDto,
   FlagListingInput,
+  ListingActionInput,
   UpdateListingDto,
 } from '../dtos/request/listing.dto';
 import { User } from '../../../entities';
@@ -265,14 +266,13 @@ export class ListingService {
         (column) => !columnsToExclude.includes(column),
       );
 
-      let {
+      const {
         gpsCoordinate,
         rentingOption,
         attributes,
         purpose,
         listingTypeId,
-        sortField,
-        directionToSort,
+
         skip,
         minPrice,
         maxPrice,
@@ -280,6 +280,7 @@ export class ListingService {
         maxArea,
         take: initialTake,
       } = paginateAndSort;
+      let { sortField, directionToSort } = paginateAndSort;
 
       const attributeId: string[] = [];
       const attributeValue: string[] = [];
@@ -310,9 +311,6 @@ export class ListingService {
       }
 
       const take = Math.min(initialTake, 20);
-
-      const sortDirections = ['ASC', 'DESC'] as const;
-      type SortDirection = (typeof sortDirections)[number];
 
       const baseQuery = () => {
         const query = this.listingRepository
@@ -455,7 +453,6 @@ export class ListingService {
 
       return { listing, total };
     } catch (error) {
-      console.log(error);
       this.logger.error('Error finding listings:', error);
       throw error instanceof HttpException
         ? error
@@ -469,13 +466,12 @@ export class ListingService {
   ) {
     try {
       // Extract parameters from input
-      let {
+      const {
         gpsCoordinate,
         rentingOption,
         attributes,
         listingTypeId,
-        sortField,
-        directionToSort,
+
         skip,
         minPrice,
         maxPrice,
@@ -485,6 +481,8 @@ export class ListingService {
         take: initialTake,
         purpose,
       } = paginateAndSort;
+
+      let { sortField, directionToSort } = paginateAndSort;
 
       // Define columns to exclude from selection
       const columnsToExclude = [
@@ -1308,11 +1306,14 @@ export class ListingService {
     }
   }
 
-  async disableListing(listingId: string) {
+  async disableListing(listingActionInput: ListingActionInput) {
     try {
-      await this.listingRepository.update(listingId, {
-        isListingDisabled: true,
-      });
+      await this.listingRepository.update(
+        { id: In(listingActionInput.listingId) },
+        {
+          isListingDisabled: true,
+        },
+      );
 
       return new SuccessResponse(AppStrings.LISTING_DISABLE_SUCCESSFULLY);
     } catch (error) {
@@ -1326,6 +1327,33 @@ export class ListingService {
       const listing = await this.listingRepository.findOneByOrFail({
         id: listingId,
       });
+      if (listing.userId != user.id) {
+        throw new BadRequestException('Only the owner can unpublish listing');
+      }
+
+      if (!listing) {
+        throw new BadRequestException(AppStrings.LISTING_NOT_FOUND);
+      }
+
+      await this.listingRepository.update(listing.id, {
+        published: false,
+      });
+
+      return new SuccessResponse(AppStrings.LISTING_UNPUBLISHED_SUCCESSFULLY);
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error?.messages | error.data);
+    }
+  }
+
+  async publishListing(listingId: string, user: User) {
+    try {
+      const listing = await this.listingRepository.findOneByOrFail({
+        id: listingId,
+      });
+      if (listing.userId != user.id) {
+        throw new BadRequestException('Only the owner can unpublish listing');
+      }
 
       if (!listing) {
         throw new BadRequestException(AppStrings.LISTING_NOT_FOUND);
@@ -1342,11 +1370,14 @@ export class ListingService {
     }
   }
 
-  async enableListing(listingId: string) {
+  async enableListing(listingActionInput: ListingActionInput) {
     try {
-      await this.listingRepository.update(listingId, {
-        isListingDisabled: false,
-      });
+      await this.listingRepository.update(
+        { id: In(listingActionInput.listingId) },
+        {
+          isListingDisabled: false,
+        },
+      );
 
       return new SuccessResponse(AppStrings.LISTING_ENABLED_SUCCESSFULLY);
     } catch (error) {
@@ -1590,9 +1621,24 @@ export class ListingService {
   }
 
   async deleteSavedHistory(id: string) {
-    const { affected } = await this.searchHistoryRepository.softDelete(id);
-    if (affected) {
-      return new SuccessResponse(AppStrings.LISTING_DELETED_SUCCESSFULLY);
+    try {
+      const searchHistory = await this.searchHistoryRepository.findOneByOrFail({
+        id,
+      });
+
+      if (!searchHistory) {
+        throw new BadRequestException(AppStrings.NOT_FOUND);
+      }
+
+      const { affected } = await this.searchHistoryRepository.softDelete(
+        searchHistory.id,
+      );
+      if (affected) {
+        return new SuccessResponse(AppStrings.LISTING_DELETED_SUCCESSFULLY);
+      }
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
     }
   }
 
@@ -1646,7 +1692,7 @@ export class ListingService {
         existingImages,
       );
     } catch (error) {
-      // Handle errors appropriately
+      this.logger.log(error);
       throw new BadRequestException(error.message || 'An error occurred');
     }
   }

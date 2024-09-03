@@ -29,7 +29,7 @@ export class CreateOfferDto {
   // @Field({ nullable: true })
   // @IsOptional()
   // // @IsEnum(StatusListEnum)
-  // status: string;
+  // Status: string;
 
   @Field({ nullable: true })
   @IsOptional()
