@@ -883,8 +883,8 @@ type Mutation {
   createPromotion(createPromotionInput: CreatePromotionInput!): Promotion!
   addToWishlist(createWishlistInput: CreateWishlistInput!): Wishlist!
   removeFromWishlist(wishlistId: String!): SuccessResponse!
-  adminDisableListing(listingId: String!): SuccessResponse!
-  enableListing(listingId: String!): SuccessResponse!
+  adminDisableListing(listingActionInput: ListingActionInput!): SuccessResponse!
+  enableListing(listingActionInput: ListingActionInput!): SuccessResponse!
   createFeature(createFeatureInput: CreateFeatureInput!): Feature!
   createAuction(createAuctionInput: CreateAuctionInput!): Auction!
   updateAuction(updateAuctionInput: UpdateAuctionInput!): Auction!
@@ -892,6 +892,7 @@ type Mutation {
   addAuctionParticipant(createAuctionParticipantInput: CreateAuctionParticipantInput!): AuctionParticipant!
   deleteSavedHistory(id: String!): SuccessResponse!
   unpublishAListing(id: String!): SuccessResponse!
+  publishAListing(id: String!): SuccessResponse!
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!
@@ -1194,6 +1195,10 @@ input CreatePromotionInput {
 
 input CreateWishlistInput {
   listingId: String!
+}
+
+input ListingActionInput {
+  listingId: [String!]!
 }
 
 input CreateFeatureInput {

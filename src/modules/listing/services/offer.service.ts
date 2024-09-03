@@ -151,7 +151,6 @@ export class OfferService {
       const price = (80 / listing.price) * 100 * listing.price;
 
       const minimumListingPrice = listing.price - price;
-      console.log(price);
       return [minimumListingPrice, listing];
     } catch (error) {
       this.logger.log(error);

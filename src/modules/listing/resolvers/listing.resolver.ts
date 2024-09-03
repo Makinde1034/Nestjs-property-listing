@@ -9,6 +9,7 @@ import {
   AdminFilterAndSort,
   CreateListingDto,
   FlagListingInput,
+  ListingActionInput,
   UpdateListingDto,
 } from '../dtos/request/';
 
@@ -358,14 +359,18 @@ export class ListingResolver {
   @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard)
   @Mutation(() => SuccessResponse, { name: 'adminDisableListing' })
-  async adminDisableListing(@Args('listingId') listingId: string) {
-    return await this.listingService.disableListing(listingId);
+  async adminDisableListing(
+    @Args('listingActionInput') listingActionInput: ListingActionInput,
+  ) {
+    return await this.listingService.disableListing(listingActionInput);
   }
   @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard)
   @Mutation(() => SuccessResponse, { name: 'enableListing' })
-  async adminEnableListing(@Args('listingId') listingId: string) {
-    return await this.listingService.enableListing(listingId);
+  async adminEnableListing(
+    @Args('listingActionInput') listingActionInput: ListingActionInput,
+  ) {
+    return await this.listingService.enableListing(listingActionInput);
   }
   @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard)
@@ -453,5 +458,10 @@ export class ListingResolver {
   @Mutation(() => SuccessResponse, { name: 'unpublishAListing' })
   async unPublishListing(@Args('id') id: string, @Context() ctx: any) {
     return await this.listingService.unPublishListing(id, ctx.req.user);
+  }
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => SuccessResponse, { name: 'publishAListing' })
+  async publishListing(@Args('id') id: string, @Context() ctx: any) {
+    return await this.listingService.publishListing(id, ctx.req.user);
   }
 }
