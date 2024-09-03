@@ -6,7 +6,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { NotificationRepository } from '../repositories';
 import { NotificationEventDto, NotificationInput } from '../dtos';
-import { Notification, NotificationScope, User } from 'src/entities';
+import {
+  Notification,
+  NotificationScope,
+  User,
+  UserNotificationPreference,
+} from 'src/entities';
 import {
   UserRepository,
   NotificationScopeRepository,
@@ -22,6 +27,9 @@ import { PushNotificationService } from './push-notification.service';
 import { NotificationEvent, NotificationType } from 'src/common/enums';
 import { In } from 'typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { getMessageData } from '../../../common/messages/alert-messages';
+import { NotificationScopesEnum } from '../../../common/enums/notification-scope.enum';
+import { MailInput } from '../../mail/mail.dto';
 
 @Injectable()
 export class NotificationService {
@@ -37,7 +45,6 @@ export class NotificationService {
 
   /**
    * Send Notification Message
-   *
    * @param {NotificationInput} notificationInput
    * @returns {Promise<string>}
    */
@@ -175,10 +182,27 @@ export class NotificationService {
    * @returns {Promise<void>}
    */
   async sendEmailNotification(
-    user: User,
-    data: EmailNotificationPayload,
+    user?: User,
+    data?: EmailNotificationPayload,
+    category?: string,
+    mailInput?: MailInput,
   ): Promise<void> {
-    await this.mailService.sendEmailNotification(user, data);
+    switch (category) {
+      case 'offer':
+        await this.mailService.sendOfferMail(mailInput);
+        break;
+
+      case 'auction':
+        break;
+
+      case 'listing':
+        break;
+
+      default:
+        await this.mailService.sendEmailNotification(user, data);
+
+        break;
+    }
   }
 
   /**
@@ -213,5 +237,223 @@ export class NotificationService {
    */
   async listNotificationScopes(): Promise<NotificationScope[]> {
     return await this.notificationScopeRepository.find();
+  }
+
+  async sendNotification(notificationInput: {
+    creatorId: string;
+    receiverId?: string;
+    scope: NotificationScope;
+  }) {
+    //get user information for buyer and their notification preference
+    const buyer = await this.userRepository.findOneOrFail({
+      where: { id: notificationInput.creatorId },
+      relations: ['notificationPreference'],
+    });
+
+    //get user information for seller and their notification preference
+
+    const seller = await this.userRepository.findOneOrFail({
+      where: { id: notificationInput.receiverId },
+      relations: ['notificationPreference'],
+    });
+
+    //get the preference of a particular user
+    const userPrefBuyer = buyer.notificationPreference.find((element) => {
+      if (element.scope.id == notificationInput.scope.id) {
+        return element;
+      }
+    });
+
+    //get the preference of a particular user
+    const userPrefSeller = seller.notificationPreference.find((element) => {
+      if (element.scope.id == notificationInput.scope.id) {
+        return element;
+      }
+    });
+
+    //generate notification payload based on scope
+    switch (notificationInput.scope.name) {
+      case NotificationScopesEnum.CREATE_OFFER:
+        this.SendNotificationBasedOnPreference(
+          userPrefBuyer,
+          userPrefSeller,
+          seller,
+          buyer,
+        );
+        break;
+
+      case NotificationScopesEnum.CREATED:
+        break;
+
+      case NotificationScopesEnum.UPDATE_OFFER:
+        break;
+
+      case NotificationScopesEnum.ACCEPTED:
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  //TODO: use Event emmiter
+  async SendNotificationBasedOnPreference(
+    userPrefBuyer: UserNotificationPreference,
+    userPrefSeller: UserNotificationPreference,
+    seller: User,
+    buyer: User,
+  ) {
+    /************************
+     * email notification
+     ************************/
+    if (userPrefBuyer?.email) {
+      const mailMessageForBuyer = getMessageData(
+        buyer.firstName,
+        buyer.arabicFirstName,
+        'Create',
+        'Offers',
+        'Offer Creator',
+      );
+
+      console.log('here', mailMessageForBuyer);
+
+      this.sendEmailNotification(null, null, 'offer', {
+        email: buyer.email,
+        subject:
+          buyer.language == 'en'
+            ? mailMessageForBuyer[0]?.title
+            : mailMessageForBuyer[0]['arabicTitle'],
+        text:
+          buyer.language == 'en'
+            ? mailMessageForBuyer[0]['body']
+            : mailMessageForBuyer[0]['arabicBody'],
+      });
+      this.mailService.sendOfferMail({
+        email: buyer.email,
+        subject:
+          buyer.language == 'en'
+            ? mailMessageForBuyer[0]['title']
+            : mailMessageForBuyer[0]['arabicTitle'],
+        text:
+          buyer.language == 'en'
+            ? mailMessageForBuyer[0]['body']
+            : mailMessageForBuyer[0]['arabicBody'],
+      });
+    }
+
+    if (userPrefSeller?.email) {
+      const mailMessageForSeller = getMessageData(
+        seller.arabicFirstName,
+        'Create',
+        'Offers',
+        'Seller',
+      );
+
+      this.sendEmailNotification(null, null, 'offer', {
+        email: buyer.email,
+        subject:
+          buyer.language == 'en'
+            ? mailMessageForSeller[0]['title']
+            : mailMessageForSeller[0]['arabicBody'],
+        text:
+          buyer.language == 'en'
+            ? mailMessageForSeller[0]['body']
+            : mailMessageForSeller[0]['arabicBody'],
+      });
+    }
+
+    /************************
+     * push notification
+     ************************/
+
+    if (userPrefBuyer?.mobile) {
+      const mailMessageForBuyer = getMessageData(
+        buyer.firstName,
+        'Create',
+        'Offers',
+        'Offer Creator',
+      );
+      this.sendUsersNotification({
+        recipients: [buyer.id],
+        isPushNotification: true,
+        isEmail: false,
+        title:
+          buyer.language == 'en'
+            ? mailMessageForBuyer[0]['title']
+            : mailMessageForBuyer[0]['arabicTitle'],
+        message:
+          buyer.language == 'en'
+            ? mailMessageForBuyer[0]['body']
+            : mailMessageForBuyer[0]['arabicBody'],
+      });
+    }
+
+    if (userPrefSeller?.email) {
+      const mailMessageForSeller = getMessageData(
+        seller.arabicFirstName,
+        'Create',
+        'Offers',
+        'Seller',
+      );
+
+      this.sendUsersNotification({
+        recipients: [seller.id],
+        isPushNotification: true,
+        isEmail: false,
+        title:
+          buyer.language == 'en'
+            ? mailMessageForSeller[0]['title']
+            : mailMessageForSeller[0]['arabicBody'],
+        message:
+          buyer.language == 'en'
+            ? mailMessageForSeller[0]['body']
+            : mailMessageForSeller[0]['arabicBody'],
+      });
+    }
+
+    /************************
+     * web notification
+     ************************/
+
+    // if (userPrefBuyer?.desktop) {
+    //   const mailMessageForBuyer = getMessageData(
+    //     buyer.firstName,
+    //     'Create',
+    //     'Offers',
+    //     'Offer Creator',
+    //   );
+    //   this.mailService.sendOfferMail({
+    //     email: buyer.email,
+    //     subject:
+    //       buyer.language == 'en'
+    //         ? mailMessageForBuyer[0]['title']
+    //         : mailMessageForBuyer[0]['arabicTitle'],
+    //     text:
+    //       buyer.language == 'en'
+    //         ? mailMessageForBuyer[0]['body']
+    //         : mailMessageForBuyer[0]['arabicBody'],
+    //   });
+    // }
+
+    // if (userPrefSeller?.desktop) {
+    //   const mailMessageForSeller = getMessageData(
+    //     seller.arabicFirstName,
+    //     'Create',
+    //     'Offers',
+    //     'Seller',
+    //   );
+
+    //   this.mailService.sendOfferMail({
+    //     email: buyer.email,
+    //     subject:
+    //       buyer.language == 'en'
+    //         ? mailMessageForSeller[0]['title']
+    //         : mailMessageForSeller[0]['arabicBody'],
+    //     text:
+    //       buyer.language == 'en'
+    //         ? mailMessageForSeller[0]['body']
+    //         : mailMessageForSeller[0]['arabicBody'],
+    //   });
+    // }
   }
 }

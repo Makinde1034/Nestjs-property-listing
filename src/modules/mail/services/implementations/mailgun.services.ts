@@ -122,8 +122,8 @@ export class MailgunEmailService implements MailSendService {
    * @returns {Promise<void>}
    */
   async sendEmailNotification(
-    user: User,
-    data: EmailNotificationPayload,
+    user?: User,
+    data?: EmailNotificationPayload,
   ): Promise<void> {
     const { message, title } = data;
 

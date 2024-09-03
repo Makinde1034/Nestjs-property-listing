@@ -26,10 +26,10 @@ export class CreateOfferDto {
   @IsNotEmpty()
   expireAt: Date;
 
-  @Field({ nullable: true })
-  @IsOptional()
-  // @IsEnum(StatusListEnum)
-  status: string;
+  // @Field({ nullable: true })
+  // @IsOptional()
+  // // @IsEnum(StatusListEnum)
+  // status: string;
 
   @Field({ nullable: true })
   @IsOptional()

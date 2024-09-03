@@ -30,6 +30,8 @@ import {
   UserRepository,
 } from '../../user/repositories';
 import { Purpose } from '../../../common/enums';
+import { NotificationScopesEnum } from '../../../common/enums/notification-scope.enum';
+import { NotificationService } from '../../notification/services';
 
 @Injectable()
 export class OfferService {
@@ -39,7 +41,8 @@ export class OfferService {
     private listingService: ListingService,
     private mailService: MailgunEmailService,
     private userRepository: UserRepository,
-    private notificationRepository: NotificationScopeRepository,
+    private notificationScopeRepository: NotificationScopeRepository,
+    private notificationService: NotificationService,
   ) {}
   logger = new Logger(OfferService.name);
 
@@ -73,7 +76,7 @@ export class OfferService {
         throw new BadRequestException(AppStrings.LISTING_IS_NOT_NEGOTIABLE);
       }
 
-      if (minimumPrice > createOfferDto.price) {
+      if (createOfferDto.price < minimumPrice) {
         throw new BadRequestException(
           `Minimum Offer must be greater than  ${minimumPrice}`,
         );
@@ -109,56 +112,24 @@ export class OfferService {
         relations: ['notificationPreference'],
       });
 
-      const notificationPreference = await this.notificationRepository.find();
-
+      // Find the Scope available for application
+      const notificationPreference =
+        await this.notificationScopeRepository.find();
+      //Filter out the correct scope
       const scope: NotificationScope = notificationPreference.find(
         (element) => {
-          if (element.name == 'Create Offer') {
+          if (element.name == NotificationScopesEnum.CREATE_OFFER) {
             return element;
           }
         },
       );
 
-      const userPrefBuyer = user.notificationPreference.find((element) => {
-        if (element.scope.id == scope.id) {
-          return element;
-        }
+      //TODO:switch to an event
+      this.notificationService.sendNotification({
+        creatorId: user.id,
+        receiverId: seller.id,
+        scope,
       });
-
-      const userPrefSeller = seller.notificationPreference.find((element) => {
-        if (element.scope.id == scope.id) {
-          return element;
-        }
-      });
-
-      if (userPrefBuyer?.email) {
-        const mailMessageForBuyer = getMessageData(
-          user.firstName,
-          'Create',
-          'Offers',
-          'Offer Creator',
-        );
-        this.mailService.sendOfferMail({
-          email: user.email,
-          subject: mailMessageForBuyer[0]['Title'],
-          text: mailMessageForBuyer[0]['Body'],
-        });
-      }
-
-      if (userPrefSeller?.email) {
-        const mailMessageForSeller = getMessageData(
-          listing.user.arabicFirstName,
-          'Create',
-          'Offers',
-          'Seller',
-        );
-
-        this.mailService.sendOfferMail({
-          email: listing.user.email,
-          subject: mailMessageForSeller[0]['Title'],
-          text: mailMessageForSeller[0]['Body'],
-        });
-      }
 
       return offerPayload;
     } catch (error) {
@@ -177,8 +148,10 @@ export class OfferService {
       if (!listing) {
         throw new NotFoundException(AppStrings.LISTING_NOT_FOUND);
       }
-      const minimumListingPrice = (80 / listing.price) * 100;
+      const price = (80 / listing.price) * 100 * listing.price;
 
+      const minimumListingPrice = listing.price - price;
+      console.log(price);
       return [minimumListingPrice, listing];
     } catch (error) {
       this.logger.log(error);
