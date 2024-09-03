@@ -470,6 +470,12 @@ export class AuthService {
       throw new BadRequestException(AppStrings.WRONG_CONFIRM_CODE);
     }
     const { user } = userConfirmation;
+
+    const salt = await bcrypt.genSalt();
+    passwordResetDto.password = await bcrypt.hash(
+      passwordResetDto.password,
+      salt,
+    );
     await this.userService.updateUser(user.id, {
       password: passwordResetDto.password,
     });
