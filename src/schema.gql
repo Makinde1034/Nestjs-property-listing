@@ -560,7 +560,7 @@ type TicketAnalysisResponse {
 }
 
 type TicketResponse {
-  ticket: [Ticket!]!
+  ticket: [Ticket!]
   analysis: TicketAnalysisResponse!
 }
 

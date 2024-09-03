@@ -265,7 +265,7 @@ export class ListingService {
         (column) => !columnsToExclude.includes(column),
       );
 
-      const {
+      let {
         gpsCoordinate,
         rentingOption,
         attributes,
@@ -285,6 +285,8 @@ export class ListingService {
       const attributeValue: string[] = [];
       const attributeIdRange: string[] = [];
       const attributeValueRange: [string, string][] = [];
+      let result;
+      let total;
 
       if (attributes) {
         attributes.forEach(({ attributeId: id, value }) => {
@@ -417,15 +419,40 @@ export class ListingService {
         return query;
       };
 
-      // Fetch featured and regular listings
-      const [listings, total] = await baseQuery()
-        .take(take)
-        .skip(skip)
-        .orderBy('listing.featureDate', 'DESC')
-        .addOrderBy('listing.promotedDate', 'DESC')
-        .getManyAndCount();
+      if (paginateAndSort.sortField && paginateAndSort.directionToSort) {
+        sortField = paginateAndSort.sortField;
+        directionToSort = paginateAndSort.directionToSort.toUpperCase() as
+          | 'ASC'
+          | 'DESC';
 
-      const listing = [...listings];
+        if (!['ASC', 'DESC'].includes(directionToSort)) {
+          throw new Error(`Invalid sort direction: ${directionToSort}`);
+        }
+      }
+
+      if (paginateAndSort.sortField) {
+        const [listings, count] = await baseQuery()
+          .take(take)
+          .skip(skip)
+          .getManyAndCount();
+
+        result = listings;
+        total = count;
+      } else {
+        const [listings, count] = await baseQuery()
+          .take(take)
+          .skip(skip)
+          .orderBy('listing.featureDate', 'DESC')
+          .addOrderBy('listing.promotedDate', 'DESC')
+
+          .getManyAndCount();
+
+        result = listings;
+        total = count;
+      }
+
+      const listing = [...result];
+
       return { listing, total };
     } catch (error) {
       console.log(error);
@@ -442,7 +469,7 @@ export class ListingService {
   ) {
     try {
       // Extract parameters from input
-      const {
+      let {
         gpsCoordinate,
         rentingOption,
         attributes,
@@ -471,6 +498,9 @@ export class ListingService {
       const attributeValue: string[] = [];
       const attributeIdRange: string[] = [];
       const attributeValueRange: [string, string][] = [];
+
+      let result;
+      let total;
 
       if (attributes) {
         attributes.forEach(({ attributeId: id, value }) => {
@@ -607,15 +637,39 @@ export class ListingService {
         return query;
       };
 
-      const [listings, total] = await baseQuery()
-        .take(take)
-        .skip(skip)
-        .orderBy('listing.featureDate', 'DESC')
-        .addOrderBy('listing.promotedDate', 'DESC')
+      if (paginateAndSort.sortField && paginateAndSort.directionToSort) {
+        sortField = paginateAndSort.sortField;
+        directionToSort = paginateAndSort.directionToSort.toUpperCase() as
+          | 'ASC'
+          | 'DESC';
 
-        .getManyAndCount();
+        if (!['ASC', 'DESC'].includes(directionToSort)) {
+          throw new Error(`Invalid sort direction: ${directionToSort}`);
+        }
+      }
 
-      const listing = [...listings];
+      if (paginateAndSort.sortField) {
+        const [listings, count] = await baseQuery()
+          .take(take)
+          .skip(skip)
+          .getManyAndCount();
+
+        result = listings;
+        total = count;
+      } else {
+        const [listings, count] = await baseQuery()
+          .take(take)
+          .skip(skip)
+          .orderBy('listing.featureDate', 'DESC')
+          .addOrderBy('listing.promotedDate', 'DESC')
+
+          .getManyAndCount();
+
+        result = listings;
+        total = count;
+      }
+
+      const listing = [...result];
 
       // Save search history if needed
       if (searchHistory) {

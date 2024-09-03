@@ -266,6 +266,7 @@ export class UserService {
    */
   async updateProfile(user: User, data: UserProfileInput): Promise<User> {
     const { nationalIdentity } = data;
+    //TODO: Add check to ensure only user and admin can update user
 
     // Check if the national identity has expired
     if (

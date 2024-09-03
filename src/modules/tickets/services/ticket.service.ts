@@ -121,7 +121,7 @@ export class TicketService {
         )
         .getRawAndEntities();
 
-      const tickets = result.entities;
+      const ticket = result.entities;
       const countsResult = result.raw[0];
 
       const analysis = {
@@ -130,7 +130,7 @@ export class TicketService {
         aging: Number(countsResult.aging),
       };
 
-      return { tickets, analysis };
+      return { ticket, analysis };
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
