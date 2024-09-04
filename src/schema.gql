@@ -346,7 +346,7 @@ type Messages {
   chat: Chat!
   user: User!
   message: String!
-  attachment: String!
+  attachment: String
   createdAt: DateTime!
   updatedAt: DateTime!
 }
