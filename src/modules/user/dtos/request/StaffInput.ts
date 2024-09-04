@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, PartialType } from '@nestjs/graphql';
 import {
   IsArray,
   IsDate,
@@ -96,4 +96,9 @@ export class StaffConfirmDto {
     minUppercase: 1,
   })
   password: string;
+}
+@InputType()
+export class UpdateUserData extends PartialType(CreateStaffInput) {
+  @Field()
+  id: string;
 }

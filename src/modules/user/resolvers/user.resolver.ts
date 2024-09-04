@@ -12,15 +12,18 @@ import { UserService } from '../services/user.service';
 import { Permissions } from 'src/common/decorator/permission';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import {
+  AssignRoleInput,
   CreateStaffInput,
   NotificationPrefenceInput,
   PasswordInput,
   StaffConfirmDto,
+  UpdateUserData,
   UserActionInput,
   UserProfileInput,
 } from '../dtos/request';
 import { UserFilter } from '../dtos/request/user';
 import { UserResponse } from '../dtos/response/user.response';
+import { AdminGuard } from '../../auth/guards/admin.guard';
 
 @Resolver()
 export class UserResolver {
@@ -160,5 +163,22 @@ export class UserResolver {
     @Context() ctx: any,
   ): Promise<User> {
     return await this.userService.changePassword(ctx.req.user, inputDto);
+  }
+  @Mutation(() => User, { name: 'updateUserData' })
+  @UseGuards(AccessTokenGuard)
+  @UseGuards(AdminGuard)
+  async updateUserData(
+    @Args('updateUserInput') updateUserInput: UpdateUserData,
+  ): Promise<User> {
+    return await this.userService.updateUserData(updateUserInput);
+  }
+
+  @Mutation(() => User, { name: 'assignRoleToUser' })
+  @UseGuards(AccessTokenGuard)
+  @UseGuards(AdminGuard)
+  async assignRoleToUser(
+    @Args('assignRoleInput') assignRoleInput: AssignRoleInput,
+  ): Promise<User> {
+    return await this.userService.assignRoleToUser(assignRoleInput);
   }
 }

@@ -22,6 +22,7 @@ type RolePermissions {
   role: Role!
   permission: Permission!
   approve: Boolean
+  use: Boolean
 }
 
 type Permission {
@@ -372,6 +373,7 @@ type User {
   occupation: String
   dateOfBirth: DateTime
   profilePhoto: String
+  address: String
   biometricKey: String
   twoFaRequired: Boolean
   review: [Review!]
@@ -862,6 +864,8 @@ type Mutation {
   deleteUser(RequestInput: UserActionInput!): SuccessResponse!
   updateNotificationPreference(RequestInput: NotificationPrefenceInput!): User!
   changePassword(RequestInput: PasswordInput!): User!
+  updateUserData(updateUserInput: UpdateUserData!): User!
+  assignRoleToUser(assignRoleInput: AssignRoleInput!): User!
   createRole(RequestInput: RoleInputDto!): Role!
   updateRole(RequestInput: RoleUpdateInputDto!): Role!
   deleteRole(deleteRoleInput: DeleteRolesInput!): SuccessResponse!
@@ -1031,6 +1035,25 @@ input PasswordInput {
   newPassword: String!
 }
 
+input UpdateUserData {
+  middleName: String
+  firstName: String
+  arabicFirstName: String
+  lastName: String
+  arabicLastName: String
+  arabicMiddleName: String
+  email: String
+  phone: String
+  dateOfBirth: DateTime
+  roles: [Float!]
+  id: String!
+}
+
+input AssignRoleInput {
+  userId: String!
+  roleId: [Float!]!
+}
+
 input RoleInputDto {
   englishName: String!
   arabiceName: String!
@@ -1039,6 +1062,7 @@ input RoleInputDto {
 
 input PermissionItem {
   permissionId: Float!
+  use: Boolean!
   approve: Boolean!
 }
 

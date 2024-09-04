@@ -116,6 +116,10 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   profilePhoto: string;
 
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  address: string;
+
   @Column({ nullable: true })
   @Field({ nullable: true })
   biometricKey: string;

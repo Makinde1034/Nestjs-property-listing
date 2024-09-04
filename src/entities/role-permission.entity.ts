@@ -36,4 +36,8 @@ export class RolePermissions {
   @Field({ nullable: true })
   @Column({ default: false, nullable: true })
   approve: boolean;
+
+  @Field({ nullable: true })
+  @Column({ default: false, nullable: true })
+  use: boolean;
 }

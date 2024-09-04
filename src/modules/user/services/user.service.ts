@@ -28,6 +28,8 @@ import {
   UserActionInput,
   PasswordInput,
   ImageResponse,
+  UpdateUserData,
+  AssignRoleInput,
 } from '../dtos/request';
 import { StorageService } from '../../file-handler/services/storage.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -81,6 +83,7 @@ export class UserService {
     try {
       const salt = await bcrypt.genSalt();
       userData.password = await bcrypt.hash(userData.password, salt);
+      userData.employeeId = JSON.stringify(generateOtp());
 
       const user = await this.usersRepository.save(userData);
       return user;
@@ -433,20 +436,41 @@ export class UserService {
    * ADMIN
    *
    *********************************/
-
-  async assignRoleToUser(assignRoleInput) {
+  async assignRoleToUser(assignRoleInput: AssignRoleInput) {
     try {
+      // Find the roles based on the provided role IDs
       const roles = await this.roleRepository.find({
-        where: { id: In(assignRoleInput.roleId) },
+        where: { id: In(assignRoleInput.roleId) }, // Use `In` to find all roles matching the IDs
       });
-      await this.usersRepository.update(assignRoleInput.id, {
-        roles,
+
+      // Find the user by the provided user ID
+      const user = await this.usersRepository.findOne({
+        where: { id: assignRoleInput.userId },
+        relations: ['roles'], // Include the current roles to manage them properly
+      });
+
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      // Assign the new roles to the user
+      user.roles = roles;
+
+      // Save the updated user entity with new roles
+      await this.usersRepository.save(user);
+
+      // Return the updated user with roles
+      return await this.usersRepository.findOneOrFail({
+        where: { id: assignRoleInput.userId },
+        relations: ['roles'], // Ensure to load the roles relation when returning the user
       });
     } catch (error) {
+      console.log(error);
       this.logger.log(error);
       throw new BadRequestException(error);
     }
   }
+
   async findAllUser(userFilterInput: UserFilter) {
     try {
       const { level, status, type, sortField, directionToSort, take, skip } =
@@ -621,6 +645,25 @@ export class UserService {
         new StaffCreatedEventDto({ staff }),
       );
       return staff;
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+  async updateUserData(input: UpdateUserData): Promise<User> {
+    try {
+      const roles = await this.roleRepository.find({
+        where: { id: In([...input.roles]) },
+      });
+      const { id, ...rest } = input;
+
+      const userData = {
+        ...rest,
+        roles,
+      };
+      const { affected } = await this.usersRepository.update(id, userData);
+      if (affected > 0) {
+        return await this.usersRepository.findOneByOrFail({ id });
+      }
     } catch (error) {
       throw new BadRequestException(error);
     }
