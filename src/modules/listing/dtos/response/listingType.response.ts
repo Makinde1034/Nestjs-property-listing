@@ -4,7 +4,7 @@ import { ListingType } from '../../../../entities';
 @ObjectType()
 export class ListingTypesResponse {
   @Field(() => [ListingType])
-  LlstingType: ListingType[];
+  listingType: ListingType[];
 
   @Field(() => Int)
   total: number;

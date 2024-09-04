@@ -45,16 +45,18 @@ export class AttributeService {
    * @async
    * @returns {Promise<Attribute[]>}
    */
-  async findAllAttributes(findOptions: AttributeFilter): Promise<Attribute[]> {
+  async findAllAttributes(findOptions: AttributeFilter) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { where, skip, take, directionToSort, sortField, ...rest } =
       findOptions;
 
-    return await this.attributeRepository.find({
+    const [attribute, total] = await this.attributeRepository.find({
       where: { ...rest },
       take,
       skip,
     });
+
+    return { attribute, total };
   }
 
   /**
