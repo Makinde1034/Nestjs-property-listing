@@ -465,7 +465,6 @@ export class UserService {
         relations: ['roles'], // Ensure to load the roles relation when returning the user
       });
     } catch (error) {
-      console.log(error);
       this.logger.log(error);
       throw new BadRequestException(error);
     }
