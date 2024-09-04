@@ -79,49 +79,49 @@ export class ChatGateway implements OnGatewayConnection {
   }
 
   // @SubscribeMessage('send_message')
-  // async handleMessage(
+  // Async handleMessage(
   //   @MessageBody() content: any,
   //   @ConnectedSocket() socket: Socket,
   // ) {
-  //   try {
-  //     this.logger.log(content, 'Chat service executed successfully');
-  //     this.logger.log(`Received message content: ${JSON.stringify(content)}`);
+  //   Try {
+  //     This.logger.log(content, 'Chat service executed successfully');
+  //     This.logger.log(`Received message content: ${JSON.stringify(content)}`);
 
-  //     const messageDto = plainToInstance(CreateMessageInput, {
-  //       message: content,
+  //     Const messageDto = plainToInstance(CreateMessageInput, {
+  //       Message: content,
   //     });
-  //     const errors = await validate(messageDto);
+  //     Const errors = await validate(messageDto);
 
-  //     if (errors.length > 0) {
-  //       this.logger.error('Validation failed:', errors);
-  //       socket.emit('error', { message: errors });
-  //       return;
+  //     If (errors.length > 0) {
+  //       This.logger.error('Validation failed:', errors);
+  //       Socket.emit('error', { message: errors });
+  //       Return;
   //     }
-  //     this.logger.log('Chat service executed successfully');
+  //     This.logger.log('Chat service executed successfully');
 
-  //     const user = socket.data.user as User;
-  //     const ticketId = socket.data.ticketId;
+  //     Const user = socket.data.user as User;
+  //     Const ticketId = socket.data.ticketId;
 
-  //     this.logger.log(`User: ${JSON.stringify(user)}, Ticket ID: ${ticketId}`);
+  //     This.logger.log(`User: ${JSON.stringify(user)}, Ticket ID: ${ticketId}`);
 
-  //     await this.chatService.chat(content, ticketId, user);
-  //     this.logger.log('Chat service executed successfully');
+  //     Await this.chatService.chat(content, ticketId, user);
+  //     This.logger.log('Chat service executed successfully');
 
-  //     this.server.to(ticketId).emit('receive_message', {
-  //       content,
-  //       user: {
-  //         id: user.id,
-  //         firstName: user.firstName,
-  //         lastName: user.lastName,
-  //         arabicFirstName: user.arabicFirstName,
-  //         arabicLastName: user.arabicLastName,
+  //     This.server.to(ticketId).emit('receive_message', {
+  //       Content,
+  //       User: {
+  //         Id: user.id,
+  //         FirstName: user.firstName,
+  //         LastName: user.lastName,
+  //         ArabicFirstName: user.arabicFirstName,
+  //         ArabicLastName: user.arabicLastName,
   //       },
   //     });
 
-  //     this.logger.log(`Message emitted to room: ${ticketId}`);
+  //     This.logger.log(`Message emitted to room: ${ticketId}`);
   //   } catch (error) {
-  //     this.logger.error(`Error handling message: ${error.message}`);
-  //     socket.emit('error', error.message);
+  //     This.logger.error(`Error handling message: ${error.message}`);
+  //     Socket.emit('error', error.message);
   //   }
   // }
 

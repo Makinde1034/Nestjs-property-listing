@@ -799,10 +799,10 @@ input AdminFilterAndSort {
   directionToSort: SortOrder
   where: WhereOption
   timePeriod: String = "false"
-  isListingPromoted: Boolean = false
-  isListingSold: Boolean = false
-  isListingFlagged: Boolean = false
-  isListingRented: Boolean = false
+  isListingPromoted: Boolean
+  isListingSold: Boolean
+  isListingFlagged: Boolean
+  isListingRented: Boolean
 }
 
 input FindOfferInput {

@@ -697,7 +697,7 @@ export class ListingService {
 
   async getListingForAdmin(paginateAndSort: AdminFilterAndSort) {
     const now = new Date();
-    let whereCondition: any = {};
+    const whereCondition: any = {};
     const dateField = 'createdAt';
 
     let sortField;
@@ -728,13 +728,18 @@ export class ListingService {
         break;
     }
 
-    whereCondition = {
-      ...whereCondition,
-      isListingPromoted: paginateAndSort.isListingPromoted,
-      isListingSold: paginateAndSort.isListingSold,
-      isListingFlagged: paginateAndSort.isListingFlagged,
-      isListingRented: paginateAndSort.isListingRented,
-    };
+    if (paginateAndSort.isListingPromoted !== undefined) {
+      whereCondition.isListingPromoted = paginateAndSort.isListingPromoted;
+    }
+    if (paginateAndSort.isListingSold !== undefined) {
+      whereCondition.isListingSold = paginateAndSort.isListingSold;
+    }
+    if (paginateAndSort.isListingFlagged !== undefined) {
+      whereCondition.isListingFlagged = paginateAndSort.isListingFlagged;
+    }
+    if (paginateAndSort.isListingRented !== undefined) {
+      whereCondition.isListingRented = paginateAndSort.isListingRented;
+    }
     const quotedColumnName = (column: string) => `"listing"."${column}"`;
 
     try {

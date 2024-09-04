@@ -142,22 +142,22 @@ export class UserFilterAndSort extends PaginateAndSort {
   @IsEnum(TimePeriod)
   timePeriod: string;
 
-  @Field({ defaultValue: false })
+  @Field()
   @IsOptional()
   @IsBoolean()
   isListingPromoted: boolean;
 
-  @Field({ defaultValue: false })
+  @Field()
   @IsOptional()
   @IsBoolean()
   isListingSold: boolean;
 
-  @Field({ defaultValue: false })
+  @Field()
   @IsOptional()
   @IsBoolean()
   isListingFlagged: boolean;
 
-  @Field({ defaultValue: false })
+  @Field()
   @IsOptional()
   @IsBoolean()
   isListingRented: boolean;
