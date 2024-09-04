@@ -5,9 +5,10 @@
 
 import { Injectable } from '@nestjs/common';
 import { ListingType } from '../../../entities';
-import { EntityRepository } from '../../core/base.class/entity.repository';
+
+import { DataSource, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityRepository } from '../../core/base.class/entity.repository';
 
 @Injectable()
 export class ListingTypeRepository extends EntityRepository<ListingType> {
@@ -18,3 +19,9 @@ export class ListingTypeRepository extends EntityRepository<ListingType> {
     super(repository);
   }
 }
+// @Injectable()
+// export class ListingTypeRepository extends Repository<ListingType> {
+//   constructor(private dataSource: DataSource) {
+//     super(ListingType, dataSource.createEntityManager());
+//   }
+// }

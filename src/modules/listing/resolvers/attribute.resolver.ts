@@ -20,6 +20,7 @@ import { Attribute, AttributeSet } from '../../../entities';
 import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
 import { AttributeFilter } from '../dtos/request/attributes.dto';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
+import { AttributeSetResponse } from '../dtos/response/attribute.response';
 
 @Resolver()
 export class AttributeResolver {
@@ -92,10 +93,8 @@ export class AttributeResolver {
    * @async
    * @returns {Promise<AttributeSet[]>}
    */
-  @Query(() => [AttributeSet])
-  async fetchAttributeSets(
-    @Args('findOptions') findOptions: PaginateAndSort,
-  ): Promise<AttributeSet[]> {
+  @Query(() => AttributeSetResponse)
+  async fetchAttributeSets(@Args('findOptions') findOptions: PaginateAndSort) {
     return await this.attributeService.findAllAttributeSets(findOptions);
   }
 
@@ -116,12 +115,12 @@ export class AttributeResolver {
    * @param {AttributeSetInput} RequestInput
    * @returns {Promise<AttributeSet>}
    */
-  @Mutation(() => AttributeSet)
+  @Mutation(() => AttributeSetResponse)
   @Permissions('create-attribute-set')
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async createAttributeSet(
     @Args('RequestInput') RequestInput: AttributeSetInput,
-  ): Promise<AttributeSet> {
+  ) {
     return await this.attributeService.createAttributeSet(RequestInput);
   }
 

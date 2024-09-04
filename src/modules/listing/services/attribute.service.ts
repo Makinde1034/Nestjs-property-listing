@@ -254,13 +254,13 @@ export class AttributeService {
    * @async
    * @returns {Promise<AttributeSet[]>}
    */
-  async findAllAttributeSets(
-    findOptions: PaginateAndSort,
-  ): Promise<AttributeSet[]> {
-    return await this.attributeSetRepository.findAll({
-      take: findOptions.take,
-      skip: findOptions.skip,
-    });
+  async findAllAttributeSets(findOptions: PaginateAndSort) {
+    const [attributeSet, total] =
+      await this.attributeSetRepository.findAndCount({
+        take: findOptions.take,
+        skip: findOptions.skip,
+      });
+    return { attributeSet, total };
   }
 
   /**
