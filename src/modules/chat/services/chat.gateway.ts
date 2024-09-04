@@ -19,6 +19,8 @@ import { User } from '../../../entities';
 import { CreateMessageInput } from '../dto/request/chat.dto';
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
+import { StorageService } from '../../file-handler/services/storage.service';
+import { Readable } from 'stream';
 
 @WebSocketGateway({
   cors: {
@@ -36,6 +38,7 @@ export class ChatGateway implements OnGatewayConnection {
   constructor(
     private chatService: ChatService,
     private readonly authenticationService: AuthService,
+    private storageService: StorageService,
   ) {}
 
   async handleConnection(socket: Socket) {
@@ -75,50 +78,52 @@ export class ChatGateway implements OnGatewayConnection {
     }
   }
 
-  @SubscribeMessage('send_message')
-  async handleMessage(
-    @MessageBody() content: any,
-    @ConnectedSocket() socket: Socket,
-  ) {
-    try {
-      this.logger.log(content, 'Chat service executed successfully');
-      this.logger.log(`Received message content: ${JSON.stringify(content)}`);
+  // @SubscribeMessage('send_message')
+  // async handleMessage(
+  //   @MessageBody() content: any,
+  //   @ConnectedSocket() socket: Socket,
+  // ) {
+  //   try {
+  //     this.logger.log(content, 'Chat service executed successfully');
+  //     this.logger.log(`Received message content: ${JSON.stringify(content)}`);
 
-      const messageDto = plainToInstance(CreateMessageInput, content);
-      const errors = await validate(messageDto);
+  //     const messageDto = plainToInstance(CreateMessageInput, {
+  //       message: content,
+  //     });
+  //     const errors = await validate(messageDto);
 
-      if (errors.length > 0) {
-        this.logger.error('Validation failed:', errors);
-        socket.emit('error', { message: errors });
-        return;
-      }
-      this.logger.log('Chat service executed successfully');
+  //     if (errors.length > 0) {
+  //       this.logger.error('Validation failed:', errors);
+  //       socket.emit('error', { message: errors });
+  //       return;
+  //     }
+  //     this.logger.log('Chat service executed successfully');
 
-      const user = socket.data.user as User;
-      const ticketId = socket.data.ticketId;
+  //     const user = socket.data.user as User;
+  //     const ticketId = socket.data.ticketId;
 
-      this.logger.log(`User: ${JSON.stringify(user)}, Ticket ID: ${ticketId}`);
+  //     this.logger.log(`User: ${JSON.stringify(user)}, Ticket ID: ${ticketId}`);
 
-      await this.chatService.chat(content, ticketId, user);
-      this.logger.log('Chat service executed successfully');
+  //     await this.chatService.chat(content, ticketId, user);
+  //     this.logger.log('Chat service executed successfully');
 
-      this.server.to(ticketId).emit('receive_message', {
-        content,
-        user: {
-          id: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          arabicFirstName: user.arabicFirstName,
-          arabicLastName: user.arabicLastName,
-        },
-      });
+  //     this.server.to(ticketId).emit('receive_message', {
+  //       content,
+  //       user: {
+  //         id: user.id,
+  //         firstName: user.firstName,
+  //         lastName: user.lastName,
+  //         arabicFirstName: user.arabicFirstName,
+  //         arabicLastName: user.arabicLastName,
+  //       },
+  //     });
 
-      this.logger.log(`Message emitted to room: ${ticketId}`);
-    } catch (error) {
-      this.logger.error(`Error handling message: ${error.message}`);
-      socket.emit('error', error.message);
-    }
-  }
+  //     this.logger.log(`Message emitted to room: ${ticketId}`);
+  //   } catch (error) {
+  //     this.logger.error(`Error handling message: ${error.message}`);
+  //     socket.emit('error', error.message);
+  //   }
+  // }
 
   @SubscribeMessage('fetch_message')
   async handleFetchMessages(
@@ -149,5 +154,106 @@ export class ChatGateway implements OnGatewayConnection {
       this.logger.error(`Error handling fetch_message: ${error.message}`);
       socket.emit('error', error.message);
     }
+  }
+
+  @SubscribeMessage('send_message')
+  async handleFileUpload(
+    @MessageBody() content: any,
+    @ConnectedSocket() socket: Socket,
+    @MessageBody('file') file?: Buffer,
+  ) {
+    const user = socket.data.user as User;
+    const ticketId = socket.data.ticketId;
+
+    this.logger.log(content, 'Chat service executed successfully');
+    this.logger.log(`Received message content: ${JSON.stringify(content)}`);
+
+    // Helper function to create Express.Multer.File-like object
+    function createMulterFile(
+      buffer: Buffer,
+      originalname: string,
+      mimetype: string,
+    ): Express.Multer.File {
+      const multerFile: Express.Multer.File = {
+        fieldname: 'file', // Name of the form field associated with the file
+        originalname, // The original name of the uploaded file
+        encoding: '7bit', // Encoding type (e.g., 7bit, utf8); default is '7bit'
+        mimetype, // The MIME type of the file (e.g., image/jpeg, image/png)
+        buffer, // The file's buffer content
+        size: buffer.length, // The size of the file in bytes
+        stream: Readable.from(buffer), // Create a readable stream from the buffer
+        destination: '', // Optional: file destination path on disk
+        filename: originalname, // Optional: file name in the destination
+        path: '', // Optional: full path to the file on disk
+      };
+
+      return multerFile;
+    }
+
+    let multerFile: Express.Multer.File | undefined = undefined;
+
+    if (file) {
+      try {
+        const fileBuffer = Buffer.from(content.file, 'base64');
+        multerFile = createMulterFile(
+          fileBuffer,
+          `${ticketId}.jpg`,
+          'image/jpeg',
+        );
+      } catch (error) {
+        this.logger.error('Failed to create file buffer:', error);
+        socket.emit('error', { message: 'Failed to process file' });
+        return;
+      }
+    }
+
+    let result;
+    if (multerFile) {
+      try {
+        result = await this.storageService.upload(multerFile);
+      } catch (error) {
+        this.logger.error('File upload failed:', error);
+        socket.emit('error', { message: 'File upload failed' });
+        return;
+      }
+    }
+
+    const message: CreateMessageInput = {
+      message: content.message,
+      attachment: result, // Attach result if available
+    };
+
+    const messageDto = plainToInstance(CreateMessageInput, message);
+    const errors = await validate(messageDto);
+
+    if (errors.length > 0) {
+      this.logger.error('Validation failed:', errors);
+      socket.emit('error', { message: errors });
+      return;
+    }
+
+    this.logger.log('Chat service executed successfully');
+    this.logger.log(`User: ${JSON.stringify(user)}, Ticket ID: ${ticketId}`);
+
+    try {
+      await this.chatService.chat(message, ticketId, user);
+    } catch (error) {
+      this.logger.error('Failed to send chat message:', error);
+      socket.emit('error', { message: 'Failed to send chat message' });
+      return;
+    }
+
+    this.server.to(ticketId).emit('receive_message', {
+      message,
+      user: {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        arabicFirstName: user.arabicFirstName,
+        arabicLastName: user.arabicLastName,
+      },
+    });
+
+    this.logger.log(`Message emitted to room: ${ticketId}`);
   }
 }

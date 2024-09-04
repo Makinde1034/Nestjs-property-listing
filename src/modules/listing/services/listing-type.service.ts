@@ -14,6 +14,7 @@ import {
 import { In } from 'typeorm';
 import { AppStrings } from 'src/common/messages/app.strings';
 import { StorageService } from '../../file-handler/services/storage.service';
+import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 
 @Injectable()
 export class ListingTypeService {
@@ -40,8 +41,12 @@ export class ListingTypeService {
    * @async
    * @returns {Promise<ListingType[]>}
    */
-  async findAllListingTypes(): Promise<ListingType[]> {
+  async findAllListingTypes(
+    findOptions: PaginateAndSort,
+  ): Promise<ListingType[]> {
     return await this.listingTypeRepository.findAll({
+      take: findOptions.take,
+      skip: findOptions.skip,
       relations: ['attributeSets'],
     });
   }
