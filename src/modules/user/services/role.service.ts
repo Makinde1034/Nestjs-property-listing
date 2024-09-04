@@ -114,11 +114,17 @@ export class RoleService {
   }
 
   async findRole(id: number): Promise<Role> {
-    const role = await this.roleRepository.findOneOrFail({
-      where: { id: id },
-      relations: ['permissions'],
-    });
-    return role;
+    try {
+      const role = await this.roleRepository.findOneOrFail({
+        where: { id: id },
+        relations: ['permissions', 'user'],
+      });
+      return role;
+    } catch (error) {
+      this.logger.log(error);
+
+      throw new BadRequestException(AppStrings.NOT_FOUND);
+    }
   }
 
   /**
@@ -152,6 +158,7 @@ export class RoleService {
         return {
           permission: permissionItem,
           approve: inputItem.approve,
+          use: inputItem.use,
           role,
         };
       })

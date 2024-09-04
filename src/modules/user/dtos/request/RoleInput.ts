@@ -6,6 +6,7 @@
 import { Field, InputType, ObjectType, PartialType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
 import {
+  IsArray,
   IsBoolean,
   IsNotEmpty,
   IsNumber,
@@ -19,6 +20,10 @@ export class PermissionItem {
   @IsNumber()
   @IsNotEmpty()
   permissionId: number;
+  @Field()
+  @IsBoolean()
+  @IsNotEmpty()
+  use: boolean;
 
   @Field()
   @IsBoolean()
@@ -114,4 +119,15 @@ export class RoleData {
 
   @Field(() => [PermissionData])
   permissions: PermissionData[];
+}
+
+@InputType()
+export class AssignRoleInput {
+  @Field()
+  @IsString()
+  userId: string;
+
+  @Field(() => [Number])
+  @IsArray()
+  roleId: number[];
 }

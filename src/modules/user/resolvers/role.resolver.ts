@@ -112,7 +112,6 @@ export class RoleResolver {
   async getUserRoles(@Context() ctx): Promise<Role[]> {
     return await this.roleService.fetchUserRoles(ctx.req.user);
   }
-
   @Query(() => Role)
   @UseGuards(AccessTokenGuard)
   async getRole(@Args('id') id: number): Promise<Role> {
