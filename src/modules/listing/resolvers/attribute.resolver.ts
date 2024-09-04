@@ -20,7 +20,10 @@ import { Attribute, AttributeSet } from '../../../entities';
 import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
 import { AttributeFilter } from '../dtos/request/attributes.dto';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
-import { AttributeSetResponse } from '../dtos/response/attribute.response';
+import {
+  AttributeResponse,
+  AttributeSetResponse,
+} from '../dtos/response/attribute.response';
 
 @Resolver()
 export class AttributeResolver {
@@ -32,10 +35,10 @@ export class AttributeResolver {
    * @async
    * @returns {Promise<Attribute[]>}
    */
-  @Query(() => [Attribute])
+  @Query(() => AttributeResponse)
   async fetchAttributes(
     @Args('findOptions', { nullable: true }) findOptions: AttributeFilter,
-  ): Promise<Attribute[]> {
+  ) {
     return await this.attributeService.findAllAttributes(findOptions);
   }
 

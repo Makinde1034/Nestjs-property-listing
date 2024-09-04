@@ -485,6 +485,11 @@ type AttributeSetResponse {
   total: Int!
 }
 
+type AttributeResponse {
+  attribute: [Attribute!]!
+  total: Int!
+}
+
 type AuctionParticipant {
   id: ID!
   listingId: String!
@@ -673,7 +678,7 @@ type Query {
   listNotificationScopes: [NotificationScope!]!
   fetchListingTypes(findOptions: PaginateAndSort!): ListingTypesResponse!
   fetchOneListingTypes(id: String!): ListingType!
-  fetchAttributes(findOptions: AttributeFilter): [Attribute!]!
+  fetchAttributes(findOptions: AttributeFilter): AttributeResponse!
   fetchAttributeSets(findOptions: PaginateAndSort!): AttributeSetResponse!
   fetchOneAttributeSets(id: String!): AttributeSet!
   fetchOneAttribute(id: String!): Attribute!
