@@ -26,9 +26,9 @@ export class ListingTypeService {
 
   async findOne(id: string) {
     try {
-      const listingType = await this.listingTypeRepository.findByIdOrFail(id, [
-        'attributeSets',
-      ]);
+      const listingType = await this.listingTypeRepository.findById(
+        id['attributeSets'],
+      );
       return listingType;
     } catch (error) {
       throw new BadRequestException(AppStrings.LISTING_TYPE_NOT_FOUND);
@@ -39,16 +39,15 @@ export class ListingTypeService {
    * List Listing Types
    *
    * @async
-   * @returns {Promise<ListingType[]>}
+   * @returns {Promise<ListingTypesResponse>}
    */
-  async findAllListingTypes(
-    findOptions: PaginateAndSort,
-  ): Promise<ListingType[]> {
-    return await this.listingTypeRepository.findAll({
+  async findAllListingTypes(findOptions: PaginateAndSort) {
+    const [listingType, total] = await this.listingTypeRepository.findAndCount({
       take: findOptions.take,
       skip: findOptions.skip,
       relations: ['attributeSets'],
     });
+    return { listingType, total };
   }
 
   /**

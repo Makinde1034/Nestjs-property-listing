@@ -475,6 +475,16 @@ type UserResponse {
   total: Float!
 }
 
+type ListingTypesResponse {
+  LlstingType: [ListingType!]!
+  total: Int!
+}
+
+type AttributeSetResponse {
+  attributeSet: [AttributeSet!]!
+  total: Int!
+}
+
 type AuctionParticipant {
   id: ID!
   listingId: String!
@@ -661,10 +671,10 @@ type Query {
   getRole(id: Float!): Role!
   listNotifications: [Notification!]!
   listNotificationScopes: [NotificationScope!]!
-  fetchListingTypes(findOptions: PaginateAndSort!): [ListingType!]!
+  fetchListingTypes(findOptions: PaginateAndSort!): ListingTypesResponse!
   fetchOneListingTypes(id: String!): ListingType!
   fetchAttributes(findOptions: AttributeFilter): [Attribute!]!
-  fetchAttributeSets(findOptions: PaginateAndSort!): [AttributeSet!]!
+  fetchAttributeSets(findOptions: PaginateAndSort!): AttributeSetResponse!
   fetchOneAttributeSets(id: String!): AttributeSet!
   fetchOneAttribute(id: String!): Attribute!
   findAllListingForBuyerUnauthenticated(findManyOptions: CreateSearchHistoryInput): ListingResponse!
@@ -877,7 +887,7 @@ type Mutation {
   createAttribute(RequestInput: AttributeInput!): Attribute!
   updateAttribute(RequestInput: AttributeUpdateInput!): Attribute!
   deleteAttribute(RequestInput: AttributeDeleteInput!): String!
-  createAttributeSet(RequestInput: AttributeSetInput!): AttributeSet!
+  createAttributeSet(RequestInput: AttributeSetInput!): AttributeSetResponse!
   updateAttributeSet(RequestInput: AttributeSetUpdateInput!): AttributeSet!
   deleteAttributeSet(RequestInput: AttributeDeleteInput!): String!
   createListing(createListing: CreateListingDto!): Listing!
