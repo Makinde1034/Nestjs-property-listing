@@ -30,7 +30,7 @@ export class Messages extends BaseEntity {
   message: string;
 
   @Column({ nullable: true })
-  @Field()
+  @Field({ nullable: true })
   attachment: string;
 
   @CreateDateColumn()
