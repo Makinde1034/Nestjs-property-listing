@@ -464,6 +464,7 @@ export class UserService {
         level: level ?? undefined,
         status: status ?? undefined,
         type: type ?? undefined,
+        employeeId: null,
       };
 
       // Build order options

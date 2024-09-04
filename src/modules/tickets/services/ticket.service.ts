@@ -108,6 +108,7 @@ export class TicketService {
       const result = await queryBuilder
         .leftJoinAndSelect('ticket.parentIssue', 'parentIssue')
         .leftJoinAndSelect('ticket.childIssue', 'childIssue')
+        .leftJoinAndSelect('ticket.reporter', 'reporter')
 
         .addSelect('COUNT(*) OVER()', 'total')
         .addSelect(
