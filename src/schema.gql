@@ -476,7 +476,7 @@ type UserResponse {
 }
 
 type ListingTypesResponse {
-  LlstingType: [ListingType!]!
+  ListingType: [ListingType!]!
   total: Int!
 }
 
