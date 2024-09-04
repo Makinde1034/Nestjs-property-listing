@@ -29,6 +29,10 @@ export class Messages extends BaseEntity {
   @Field()
   message: string;
 
+  @Column({ nullable: true })
+  @Field()
+  attachment: string;
+
   @CreateDateColumn()
   @Field()
   createdAt: Date;

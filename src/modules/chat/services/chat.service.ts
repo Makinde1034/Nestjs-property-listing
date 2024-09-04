@@ -38,6 +38,7 @@ export class ChatService {
         chat,
         user,
         message: chatInput.message,
+        attachment: chatInput.attachment,
       });
       return chat;
     } catch (error) {

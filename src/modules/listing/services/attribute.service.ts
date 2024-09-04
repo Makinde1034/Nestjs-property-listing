@@ -18,6 +18,7 @@ import { In } from 'typeorm';
 import { AppStrings } from 'src/common/messages/app.strings';
 import { StorageService } from '../../file-handler/services/storage.service';
 import { AttributeFilter } from '../dtos/request/attributes.dto';
+import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 
 @Injectable()
 export class AttributeService {
@@ -253,8 +254,13 @@ export class AttributeService {
    * @async
    * @returns {Promise<AttributeSet[]>}
    */
-  async findAllAttributeSets(): Promise<AttributeSet[]> {
-    return await this.attributeSetRepository.findAll();
+  async findAllAttributeSets(
+    findOptions: PaginateAndSort,
+  ): Promise<AttributeSet[]> {
+    return await this.attributeSetRepository.findAll({
+      take: findOptions.take,
+      skip: findOptions.skip,
+    });
   }
 
   /**
