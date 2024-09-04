@@ -97,7 +97,9 @@ export class AttributeResolver {
    * @returns {Promise<AttributeSet[]>}
    */
   @Query(() => AttributeSetResponse)
-  async fetchAttributeSets(@Args('findOptions') findOptions: PaginateAndSort) {
+  async fetchAttributeSets(
+    @Args('findOptions', { nullable: true }) findOptions: PaginateAndSort,
+  ) {
     return await this.attributeService.findAllAttributeSets(findOptions);
   }
 

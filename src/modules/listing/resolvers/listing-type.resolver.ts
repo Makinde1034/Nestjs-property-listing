@@ -29,7 +29,9 @@ export class ListingTypeResolver {
    * @returns {Promise<ListingType[]>}
    */
   @Query(() => ListingTypesResponse)
-  async fetchListingTypes(@Args('findOptions') findOptions: PaginateAndSort) {
+  async fetchListingTypes(
+    @Args('findOptions', { nullable: true }) findOptions: PaginateAndSort,
+  ) {
     return await this.listingTypeService.findAllListingTypes(findOptions);
   }
 
