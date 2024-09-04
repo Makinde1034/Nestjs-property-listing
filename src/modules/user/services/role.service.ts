@@ -113,6 +113,14 @@ export class RoleService {
     return roleData;
   }
 
+  async findRole(id: number): Promise<Role> {
+    const role = await this.roleRepository.findOneOrFail({
+      where: { id: id },
+      relations: ['permissions'],
+    });
+    return role;
+  }
+
   /**
    * Create Role
    *
