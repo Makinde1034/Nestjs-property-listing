@@ -1735,7 +1735,7 @@ export class ListingService {
 
       return new SuccessResponse(
         AppStrings.DELETED_SUCCESSFULLY,
-        stringifiedImages,
+        updatedImages,
       );
     } catch (error) {
       console.log(error);
