@@ -14,6 +14,8 @@ import {
 import BaseEntity from './base.entity';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { AuctionParticipant } from './auction-participant.entity';
+import { IsEnum } from 'class-validator';
+import { AuctionEnum } from '../common/enums/status.enum';
 @ObjectType()
 @Entity()
 export class Auction extends BaseEntity {
@@ -56,9 +58,10 @@ export class Auction extends BaseEntity {
   )
   auctionParticipant: AuctionParticipant[];
 
-  @Column({ default: false })
+  @Column({ default: 'inactive' })
   @Field({ defaultValue: false })
-  status: boolean;
+  @IsEnum(AuctionEnum)
+  status: string;
 
   @Field()
   @DeleteDateColumn()

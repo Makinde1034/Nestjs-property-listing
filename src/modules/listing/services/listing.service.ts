@@ -31,7 +31,7 @@ import { PromotionRepository } from '../repositories/promotion.repository';
 import { AdPackageService } from '../../ad-package/services/ad-package.service';
 import { Between, In, LessThan, QueryFailedError } from 'typeorm';
 
-import { addDaysToDate } from '../../../common/utils/helper';
+import { addDaysToDate, haversine } from '../../../common/utils/helper';
 import { FlagListingRepository } from '../repositories/flag-listing.repository';
 import { AppStrings } from '../../../common/messages/app.strings';
 import { SuccessResponse } from '../../../common/utils/success.response';
@@ -61,6 +61,7 @@ import { GpsCoordinateRepository } from '../repositories/gps-coordinate.reposito
 import { AttributeRepository } from '../repositories';
 import { ChildIssueRepository } from '../../issue/repositories/child-issue.repository';
 import { IssueRepository } from '../../issue/repositories';
+import { LocationDto } from '../../location/dto/request/location.dto';
 
 @Injectable()
 export class ListingService {
@@ -1063,18 +1064,34 @@ export class ListingService {
     id: string,
     imageId: string,
     files: Express.Multer.File[],
+    gpsCoordinate: LocationDto,
   ) {
     try {
-      const listing = await this.listingRepository.findOne({ where: { id } });
+      let verified: boolean;
+      const listing = await this.listingRepository.findOne({
+        where: { id },
+        relations: ['gpsCoordinate'],
+      });
 
       if (!listing) {
         throw new BadRequestException('Listing not found');
       }
 
+      // Example usage
+
+      const distance = haversine(
+        gpsCoordinate?.lat,
+        gpsCoordinate?.lng,
+        listing.gpsCoordinate?.lat,
+        listing.gpsCoordinate?.lng,
+      );
+      if (distance * 1000 < 500) {
+        verified = true;
+      }
+
       const existingImages: any[] = listing.images
         ? JSON.parse(listing.images)
         : [];
-      // This.logger.log('Existing images:', existingImages);
 
       // Upload the new files
       const uploadPromises = files.map((file) =>
@@ -1087,7 +1104,9 @@ export class ListingService {
         let imageUpdated = false;
         existingImages.map((image, index) => {
           if (image.id == imageId) {
-            existingImages[index].url = uploadedUrls[0]; // Assuming single file upload
+            existingImages[index].url = uploadedUrls[0];
+            existingImages[index].verified = verified;
+            // Assuming single file upload
             imageUpdated = true;
           }
         });
@@ -1102,6 +1121,7 @@ export class ListingService {
           url,
           isDeleted: false,
           isPanorama: false, // Default value
+          verified: verified,
         }));
 
         existingImages.push(...newImages);
@@ -1667,47 +1687,46 @@ export class ListingService {
       throw new BadRequestException(error);
     }
   }
-
-  async deleteListingImage(listingId: string, imageId: string[]) {
+  async deleteListingImage(listingId: string, imageIds: string[]) {
     try {
-      console.log(imageId);
+      console.log(imageIds);
       const listing = await this.listingRepository.findOne({
         where: { id: listingId },
       });
-      const updatedImages = [];
 
       if (!listing) {
         throw new BadRequestException('Listing not found');
       }
 
-      const existingImages: any[] = listing.images
+      let existingImages: any[] = listing.images
         ? JSON.parse(listing.images)
         : [];
+      let updatedImages = [...existingImages];
 
-      if (imageId.length > 0) {
-        // Update the isDeleted flag for the specified imageId
+      if (imageIds.length > 0) {
+        // Update the isDeleted flag for the specified imageIds
         let imageUpdated = false;
-        existingImages.forEach((image) => {
-          imageId.forEach((element) => {
-            if (image.id === element) {
-              image.isDeleted = true; // Mark the image as deleted
-              imageUpdated = true;
-            }
-            updatedImages.push(image);
-          });
+
+        updatedImages = existingImages.map((image) => {
+          if (imageIds.includes(image.id)) {
+            image.isDeleted = true; // Mark the image as deleted
+            imageUpdated = true;
+          }
+          return image; // Return the image (updated or not) to form the new array
         });
 
         if (!imageUpdated) {
-          throw new BadRequestException('Image ID not found');
+          throw new BadRequestException('One or more Image IDs not found');
         }
       } else {
-        // If no imageId is provided, mark all images as deleted
-        existingImages.forEach((image) => {
+        // If no imageIds are provided, mark all images as deleted
+        updatedImages = existingImages.map((image) => {
           image.isDeleted = true;
+          return image;
         });
       }
 
-      const stringifiedImages = JSON.stringify(existingImages);
+      const stringifiedImages = JSON.stringify(updatedImages);
 
       // Update the listing with the modified images array
       await this.listingRepository.update(listingId, {
@@ -1716,7 +1735,7 @@ export class ListingService {
 
       return new SuccessResponse(
         AppStrings.DELETED_SUCCESSFULLY,
-        existingImages,
+        stringifiedImages,
       );
     } catch (error) {
       console.log(error);

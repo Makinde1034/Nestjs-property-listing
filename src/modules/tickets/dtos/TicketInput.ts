@@ -5,6 +5,7 @@
 
 import { Field, InputType, PartialType } from '@nestjs/graphql';
 import {
+  IsArray,
   IsEnum,
   IsNotEmpty,
   IsOptional,
@@ -74,4 +75,11 @@ export class ListTicketInput extends PaginateAndSort {
   @IsEnum(TicketStatus)
   @IsOptional()
   status: TicketStatus;
+}
+
+@InputType()
+export class DeleteResponsetemplate {
+  @Field(() => [String])
+  @IsArray()
+  id: string[];
 }

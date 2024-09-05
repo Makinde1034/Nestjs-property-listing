@@ -10,6 +10,7 @@ import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { CreateMessageInput } from '../dto/request/chat.dto';
 import { User } from '../../../entities';
 import { Chat } from '../../../entities/chat.entity';
+import { ChatFilterInput } from '../dto/request/chat-filter.dto';
 
 @Injectable()
 export class ChatService {
@@ -98,16 +99,16 @@ export class ChatService {
     }
   }
 
-  async findMessages(findOption?: PaginateAndSort, ticketId?: string) {
+  async findMessages(chatFilterInput?: ChatFilterInput) {
     try {
       // Default pagination and sorting options
-      const take = findOption?.take || 20;
-      const skip = findOption?.skip || 0;
+      const take = chatFilterInput?.take || 20;
+      const skip = chatFilterInput?.skip || 0;
 
       // Fetch messages with related user entity
       const [messages, total] = await this.messageRepository.findAndCount({
         where: {
-          chat: { ticketId: ticketId },
+          chat: { ticketId: chatFilterInput.ticketId },
         },
         relations: ['user'],
         select: {
