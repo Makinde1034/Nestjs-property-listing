@@ -50,7 +50,7 @@ export class AttributeService {
     const { where, skip, take, directionToSort, sortField, ...rest } =
       findOptions;
 
-    const [attribute, total] = await this.attributeRepository.find({
+    const [attribute, total] = await this.attributeRepository.findAndCount({
       where: { ...rest },
       take,
       skip,
