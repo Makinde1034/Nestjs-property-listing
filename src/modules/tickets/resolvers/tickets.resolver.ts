@@ -10,6 +10,7 @@ import { UseGuards } from '@nestjs/common';
 import {
   CreateResponseTemplateInput,
   CreateTicketInput,
+  DeleteResponsetemplate,
   ListTicketInput,
   UpdateResponseTemplateInput,
   UpdateTicketInput,
@@ -141,10 +142,12 @@ export class TicketsResolver {
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Mutation(() => SuccessResponse)
   async deleteResponseTemplate(
-    @Args('id')
-    id: string,
+    @Args('deleteResponseTemplate')
+    deleteResponseTemplate: DeleteResponsetemplate,
   ) {
-    return await this.ticketService.deleteResponseTemplate(id);
+    return await this.ticketService.deleteResponseTemplate(
+      deleteResponseTemplate,
+    );
   }
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)

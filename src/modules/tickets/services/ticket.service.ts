@@ -8,6 +8,7 @@ import { TicketRepository } from '../repositories';
 import {
   CreateResponseTemplateInput,
   CreateTicketInput,
+  DeleteResponsetemplate,
   ListTicketInput,
   UpdateResponseTemplateInput,
   UpdateTicketInput,
@@ -16,7 +17,7 @@ import { AppStrings } from 'src/common/messages/app.strings';
 import { Ticket, User } from 'src/entities';
 import { IssueRepository } from '../../issue/repositories';
 import { TicketStatus } from 'src/common/enums';
-import { FindManyOptions } from 'typeorm';
+import { FindManyOptions, In } from 'typeorm';
 import { ChildIssueRepository } from '../../issue/repositories/child-issue.repository';
 import { ResponseTemplateRepository } from '../repositories/response-template.repository';
 import { ResponseTemplate } from '../../../entities/response-template.entity';
@@ -201,19 +202,24 @@ export class TicketService {
     }
   }
 
-  async deleteResponseTemplate(id: string) {
+  async deleteResponseTemplate(deleteResponseTemplate: DeleteResponsetemplate) {
     try {
-      const template = await this.responseTemplateRepostiory.findOneBy({
-        id: id,
+      let idsToUpdate: Array<string>;
+      const template = await this.responseTemplateRepostiory.find({
+        where: {
+          id: In(deleteResponseTemplate.id),
+        },
+      });
+      template.map((element) => {
+        idsToUpdate.push(element.id);
       });
 
       if (!template) {
         throw new BadRequestException(AppStrings.NOT_FOUND);
       }
 
-      const { affected } = await this.responseTemplateRepostiory.softDelete({
-        id: template.id,
-      });
+      const { affected } =
+        await this.responseTemplateRepostiory.softDelete(idsToUpdate);
 
       if (affected > 0) {
         return new SuccessResponse(AppStrings.ATTRIBUTE_DELETED_SUCCESSFULLY);

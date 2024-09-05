@@ -3,18 +3,23 @@
  * For license. See license.txt
  */
 
-export enum StatusEnum {
-  PENDING = 'PENDING',
-  FAILED = 'FAILED',
-  VERIFIED = 'VERIFIED',
-}
-export enum StatusListEnum {
-  ACTIVE = 'active',
-  EXPIRED = 'expired',
-  CANCLED = 'cancled',
-  CLOSED = 'closed',
-  REJECTED = 'rejected',
-}
+// export enum StatusEnum {
+//   PENDING = 'PENDING',
+//   FAILED = 'FAILED',
+//   VERIFIED = 'VERIFIED',
+// }
+// export enum StatusListEnum {
+//   ACTIVE = 'active',
+//   EXPIRED = 'expired',
+//   CANCLED = 'cancled',
+//   CLOSED = 'closed',
+//   REJECTED = 'rejected',
+// }
+
+// export enum ListingStatus {
+//   ACTIVE = 'active',
+//   REMOVED = 'removed',
+// }
 
 export enum OfferListEnum {
   INACTIVE = 'inactive',
@@ -24,13 +29,14 @@ export enum OfferListEnum {
   REJECTED = 'rejected',
 }
 
-export enum ListingStatus {
+export enum AuctionEnum {
+  INACTIVE = 'inactive',
   ACTIVE = 'active',
-
-  REMOVED = 'removed',
+  ACCEPTED = 'completed',
 }
+
 export enum PaymentStatus {
-  PENDING = 'PENDING',
-  COMPLETED = 'COMPLETED',
-  FAILED = 'FAILED',
+  PENDING = 'pending',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
 }
