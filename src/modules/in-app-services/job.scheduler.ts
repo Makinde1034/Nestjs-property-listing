@@ -20,14 +20,17 @@ export class JobService {
     private userRepository: UserRepository,
     private listingRepository: ListingRepository,
     private searchHistoryRepository: SearchHistoryRepository,
-
     private mailService: MailgunEmailService,
     private pushNotification: NotificationService,
-
     private offerRepository: OfferRepository,
   ) {}
 
-  @Cron(CronExpression.EVERY_DAY_AT_8PM)
+  @Cron(CronExpression.EVERY_DAY_AT_8PM, { timeZone: 'Africa/Cairo' })
+  async handleCron() {
+    await this.sendAlertOnIncompleteOffers();
+    await this.sendNotificationForNewListingBasedOnSearchHistory();
+  }
+
   async sendNotificationForNewListingBasedOnSearchHistory() {
     const listingArrayMails: string[] = [];
     const listingArrayUserId: string[] = [];
@@ -77,16 +80,17 @@ export class JobService {
       .execute();
   }
 
-  @Cron(CronExpression.EVERY_DAY_AT_8PM)
   async sendAlertOnIncompleteOffers() {
     const currentDate = new Date();
     const targetDate = new Date();
     targetDate.setDate(currentDate.getDate() + 1);
+
     const user = await this.userRepository.findOne({
       where: {
         userType: 'admin',
       },
     });
+
     const records = await this.offerRepository
       .createQueryBuilder('offer')
       .leftJoinAndSelect('offer.user', 'user')
