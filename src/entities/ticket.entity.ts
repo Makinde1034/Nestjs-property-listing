@@ -26,11 +26,11 @@ import { ChildIssue } from './child-issue.entity';
 @Entity()
 export class Ticket extends BaseEntity {
   @Field(() => User)
-  @ManyToOne(() => User, { cascade: true, eager: true })
+  @ManyToOne(() => User, { cascade: true })
   reporter: User;
 
   @Field(() => User, { nullable: true })
-  @ManyToOne(() => User, { cascade: true, eager: true })
+  @ManyToOne(() => User, { cascade: true })
   support: User;
 
   @Field(() => ParentIssue)
@@ -57,7 +57,7 @@ export class Ticket extends BaseEntity {
   type: string;
 
   @Field(() => Chat, { nullable: true })
-  @OneToOne(() => Chat, (chat) => chat.ticket, { eager: true })
+  @OneToOne(() => Chat, (chat) => chat.ticket)
   chat: Chat;
 
   @Field()

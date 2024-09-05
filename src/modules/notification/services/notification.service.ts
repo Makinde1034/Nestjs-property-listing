@@ -244,55 +244,59 @@ export class NotificationService {
     receiverId?: string;
     scope: NotificationScope;
   }) {
-    //Get user information for buyer and their notification preference
-    const buyer = await this.userRepository.findOneOrFail({
-      where: { id: notificationInput.creatorId },
-      relations: ['notificationPreference'],
-    });
+    try {
+      //Get user information for buyer and their notification preference
+      const buyer = await this.userRepository.findOneOrFail({
+        where: { id: notificationInput.creatorId },
+        relations: ['notificationPreference'],
+      });
 
-    //Get user information for seller and their notification preference
+      //Get user information for seller and their notification preference
 
-    const seller = await this.userRepository.findOneOrFail({
-      where: { id: notificationInput.receiverId },
-      relations: ['notificationPreference'],
-    });
+      const seller = await this.userRepository.findOneOrFail({
+        where: { id: notificationInput.receiverId },
+        relations: ['notificationPreference'],
+      });
 
-    //Get the preference of a particular user
-    const userPrefBuyer = buyer.notificationPreference.find((element) => {
-      if (element.scope.id == notificationInput.scope.id) {
-        return element;
+      //Get the preference of a particular user
+      const userPrefBuyer = buyer.notificationPreference.find((element) => {
+        if (element.scope.id == notificationInput.scope.id) {
+          return element;
+        }
+      });
+
+      //Get the preference of a particular user
+      const userPrefSeller = seller.notificationPreference.find((element) => {
+        if (element.scope.id == notificationInput.scope.id) {
+          return element;
+        }
+      });
+
+      //Generate notification payload based on scope
+      switch (notificationInput.scope.name) {
+        case NotificationScopesEnum.CREATE_OFFER:
+          this.SendNotificationBasedOnPreference(
+            userPrefBuyer,
+            userPrefSeller,
+            seller,
+            buyer,
+          );
+          break;
+
+        case NotificationScopesEnum.CREATED:
+          break;
+
+        case NotificationScopesEnum.UPDATE_OFFER:
+          break;
+
+        case NotificationScopesEnum.ACCEPTED:
+          break;
+
+        default:
+          break;
       }
-    });
-
-    //Get the preference of a particular user
-    const userPrefSeller = seller.notificationPreference.find((element) => {
-      if (element.scope.id == notificationInput.scope.id) {
-        return element;
-      }
-    });
-
-    //Generate notification payload based on scope
-    switch (notificationInput.scope.name) {
-      case NotificationScopesEnum.CREATE_OFFER:
-        this.SendNotificationBasedOnPreference(
-          userPrefBuyer,
-          userPrefSeller,
-          seller,
-          buyer,
-        );
-        break;
-
-      case NotificationScopesEnum.CREATED:
-        break;
-
-      case NotificationScopesEnum.UPDATE_OFFER:
-        break;
-
-      case NotificationScopesEnum.ACCEPTED:
-        break;
-
-      default:
-        break;
+    } catch (error) {
+      this.logger.log(error);
     }
   }
 
@@ -320,22 +324,22 @@ export class NotificationService {
         subject:
           buyer.language == 'en'
             ? mailMessageForBuyer[0]?.title
-            : mailMessageForBuyer[0]['arabicTitle'],
+            : mailMessageForBuyer[0]?.arabicTitle,
         text:
           buyer.language == 'en'
-            ? mailMessageForBuyer[0]['body']
-            : mailMessageForBuyer[0]['arabicBody'],
+            ? mailMessageForBuyer[0]?.body
+            : mailMessageForBuyer[0]?.arabicBody,
       });
       this.mailService.sendOfferMail({
         email: buyer.email,
         subject:
           buyer.language == 'en'
-            ? mailMessageForBuyer[0]['title']
-            : mailMessageForBuyer[0]['arabicTitle'],
+            ? mailMessageForBuyer[0]?.title
+            : mailMessageForBuyer[0]?.arabicTitle,
         text:
           buyer.language == 'en'
-            ? mailMessageForBuyer[0]['body']
-            : mailMessageForBuyer[0]['arabicBody'],
+            ? mailMessageForBuyer[0]?.body
+            : mailMessageForBuyer[0]?.arabicBody,
       });
     }
 
@@ -351,12 +355,12 @@ export class NotificationService {
         email: buyer.email,
         subject:
           buyer.language == 'en'
-            ? mailMessageForSeller[0]['title']
-            : mailMessageForSeller[0]['arabicBody'],
+            ? mailMessageForSeller[0]?.title
+            : mailMessageForSeller[0]?.arabicBody,
         text:
           buyer.language == 'en'
-            ? mailMessageForSeller[0]['body']
-            : mailMessageForSeller[0]['arabicBody'],
+            ? mailMessageForSeller[0]?.body
+            : mailMessageForSeller[0]?.arabicBody,
       });
     }
 
