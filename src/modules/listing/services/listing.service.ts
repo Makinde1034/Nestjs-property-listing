@@ -1687,9 +1687,9 @@ export class ListingService {
       throw new BadRequestException(error);
     }
   }
-  async deleteListingImage(listingId: string, imageIds: string[]) {
+  async deleteListingImage(listingId: string, imageId: string[]) {
     try {
-      console.log(imageIds);
+      let imageIds;
       const listing = await this.listingRepository.findOne({
         where: { id: listingId },
       });
@@ -1697,15 +1697,19 @@ export class ListingService {
       if (!listing) {
         throw new BadRequestException('Listing not found');
       }
-
+      if (imageId?.length) {
+        imageIds = [...imageId];
+      } else {
+        imageIds = [imageId];
+      }
       let existingImages: any[] = listing.images
         ? JSON.parse(listing.images)
         : [];
-      let updatedImages = [...existingImages];
+      let updatedImages;
+      let imageUpdated = false;
 
       if (imageIds.length > 0) {
         // Update the isDeleted flag for the specified imageIds
-        let imageUpdated = false;
 
         updatedImages = existingImages.map((image) => {
           if (imageIds.includes(image.id)) {
@@ -1714,10 +1718,6 @@ export class ListingService {
           }
           return image; // Return the image (updated or not) to form the new array
         });
-
-        if (!imageUpdated) {
-          throw new BadRequestException('One or more Image IDs not found');
-        }
       } else {
         // If no imageIds are provided, mark all images as deleted
         updatedImages = existingImages.map((image) => {
