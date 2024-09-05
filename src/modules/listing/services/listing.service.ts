@@ -1670,6 +1670,7 @@ export class ListingService {
 
   async deleteListingImage(listingId: string, imageId: string[]) {
     try {
+      console.log(imageId);
       const listing = await this.listingRepository.findOne({
         where: { id: listingId },
       });
@@ -1718,6 +1719,7 @@ export class ListingService {
         existingImages,
       );
     } catch (error) {
+      console.log(error);
       this.logger.log(error);
       throw new BadRequestException(error.message || 'An error occurred');
     }

@@ -50,11 +50,13 @@ export class ListingController {
   }
 
   @Delete('delete-listing-image')
-  @UseGuards(RestAccessTokenGuard)
+  // @UseGuards(RestAccessTokenGuard)
   async deleteListingImage(
     @Query('listingId') listingId: string,
     @Query('imageId') imageId: string[],
   ) {
-    return await this.listingService.deleteListingImage(listingId, imageId);
+    const image = [...imageId];
+
+    return await this.listingService.deleteListingImage(listingId, image);
   }
 }
