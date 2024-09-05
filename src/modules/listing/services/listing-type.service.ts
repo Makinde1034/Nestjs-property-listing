@@ -26,9 +26,10 @@ export class ListingTypeService {
 
   async findOne(id: string) {
     try {
-      const listingType = await this.listingTypeRepository.findById(
-        id['attributeSets'],
-      );
+      const listingType = await this.listingTypeRepository.findByIdOrFail(id, [
+        'attributeSets',
+      ]);
+
       return listingType;
     } catch (error) {
       throw new BadRequestException(AppStrings.LISTING_TYPE_NOT_FOUND);
