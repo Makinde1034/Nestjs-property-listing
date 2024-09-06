@@ -377,34 +377,38 @@ export class UserService {
     user: User,
     data: NotificationPrefenceInput,
   ): Promise<User> {
-    const { notificationPreferences } = data;
-    const scopeIds = notificationPreferences.map((item) => item.scopeId);
-    const scopes = await this.notificationScopeRepository.find({
-      where: { id: In([...scopeIds]) },
-    });
-    const preferencesData = scopes
-      .map((scope) => {
-        const scopeItem = notificationPreferences.find(
-          (item) => item.scopeId === scope.id,
-        );
-        if (!scopeItem) {
-          return null;
-        }
-        delete scopeItem.scopeId;
-        return {
-          scope,
-          user,
-          ...scopeItem,
-        };
-      })
-      .filter((item) => item !== null);
+    try {
+      const { notificationPreferences } = data;
+      const scopeIds = notificationPreferences.map((item) => item.scopeId);
+      const scopes = await this.notificationScopeRepository.find({
+        where: { id: In([...scopeIds]) },
+      });
 
-    // Save preferences
-    const { affected } = await this.usersRepository.update(user.id, {
-      notificationPreference: preferencesData,
-    });
-    if (affected) {
-      return await this.usersRepository.findOneByOrFail({ id: user.id });
+      const preferencesData = scopes
+        .map((scope) => {
+          const scopeItem = notificationPreferences.find(
+            (item) => item.scopeId === scope.id,
+          );
+          if (!scopeItem) {
+            return null;
+          }
+          delete scopeItem.scopeId;
+          return {
+            scope,
+            user,
+            ...scopeItem,
+          };
+        })
+        .filter((item) => item !== null);
+
+      // Save preferences
+      return await this.usersRepository.save({
+        id: user.id,
+        notificationPreference: preferencesData,
+      });
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error);
     }
   }
 

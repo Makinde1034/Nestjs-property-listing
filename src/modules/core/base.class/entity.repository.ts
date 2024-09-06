@@ -134,6 +134,10 @@ export abstract class EntityRepository<T extends BaseEntity> {
     }
   }
 
+  async save(data: DeepPartial<T>): Promise<T> {
+    return await this.baseRepository.save(data);
+  }
+
   /**
    * Find Or Create
    *
