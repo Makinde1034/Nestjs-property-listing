@@ -22,6 +22,7 @@ import { ChildIssueRepository } from '../../issue/repositories/child-issue.repos
 import { ResponseTemplateRepository } from '../repositories/response-template.repository';
 import { ResponseTemplate } from '../../../entities/response-template.entity';
 import { SuccessResponse } from '../../../common/utils/success.response';
+import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 @Injectable()
 export class TicketService {
   constructor(
@@ -98,6 +99,7 @@ export class TicketService {
 
   async listTicketsForAdminAndStaff(input?: ListTicketInput) {
     try {
+      const take = input.take <= 20 ? input.take : 20;
       const queryBuilder = this.ticketRepository.createQueryBuilder('ticket');
 
       if (input.status) {
@@ -110,6 +112,8 @@ export class TicketService {
         .leftJoinAndSelect('ticket.parentIssue', 'parentIssue')
         .leftJoinAndSelect('ticket.childIssue', 'childIssue')
         .leftJoinAndSelect('ticket.reporter', 'reporter')
+        .take(take)
+        .skip(input.skip)
 
         .addSelect('COUNT(*) OVER()', 'total')
         .addSelect(
@@ -135,7 +139,7 @@ export class TicketService {
         aging: Number(countsResult.aging),
       };
 
-      return { ticket, analysis };
+      return { ticket, total: countsResult.total, analysis };
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -193,9 +197,14 @@ export class TicketService {
     }
   }
 
-  async findAllResponseTemplate(): Promise<ResponseTemplate[]> {
+  async findAllResponseTemplate(findOption: PaginateAndSort) {
     try {
-      return await this.responseTemplateRepostiory.find();
+      const [responseTemplate, total] =
+        await this.responseTemplateRepostiory.findAndCount({
+          take: findOption.take,
+          skip: findOption.skip,
+        });
+      return { responseTemplate, total };
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -229,6 +238,7 @@ export class TicketService {
       throw new BadRequestException(AppStrings.NOT_FOUND, error.error);
     }
   }
+
   async updateResponseTemplate(
     updateResponseTemplate: UpdateResponseTemplateInput,
   ) {

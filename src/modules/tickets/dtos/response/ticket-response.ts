@@ -5,6 +5,7 @@
 
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Ticket } from '../../../../entities';
+import { ResponseTemplate } from '../../../../entities/response-template.entity';
 
 @ObjectType()
 export class TicketAnalysisResponse {
@@ -21,5 +22,17 @@ export class TicketResponse {
   ticket: Ticket[];
 
   @Field()
+  total: number;
+
+  @Field()
   analysis: TicketAnalysisResponse;
+}
+
+@ObjectType()
+export class ResponseTemplateResponse {
+  @Field(() => [ResponseTemplate], { nullable: true })
+  responseTemplate: ResponseTemplate[];
+
+  @Field()
+  total: number;
 }

@@ -581,7 +581,13 @@ type TicketAnalysisResponse {
 
 type TicketResponse {
   ticket: [Ticket!]
+  total: Float!
   analysis: TicketAnalysisResponse!
+}
+
+type ResponseTemplateResponse {
+  responseTemplate: [ResponseTemplate!]
+  total: Float!
 }
 
 type ReviewResponse {
@@ -708,7 +714,7 @@ type Query {
   listTickets(findOptions: ListTicketInput): [Ticket!]!
   listTicketsForAdminAndStaff(findOptions: ListTicketInput): TicketResponse!
   fetchOneResponseTemplate(id: String!): ResponseTemplate!
-  fetchResponseTemplate: [ResponseTemplate!]!
+  fetchResponseTemplate(findOption: PaginateAndSort): ResponseTemplateResponse!
   findOneReview(id: String!): Review!
   findManyReviews(findMayOptions: FindManyReviewDto): ReviewResponse!
   findCities(findCities: PaginateAndSort): CityResponse!
