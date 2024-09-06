@@ -17,9 +17,13 @@ import {
 } from '../dtos';
 import { Ticket } from 'src/entities';
 import { Permissions } from 'src/common/decorator/permission';
-import { TicketResponse } from '../dtos/response/ticket-response';
+import {
+  ResponseTemplateResponse,
+  TicketResponse,
+} from '../dtos/response/ticket-response';
 import { ResponseTemplate } from '../../../entities/response-template.entity';
 import { SuccessResponse } from '../../../common/utils/success.response';
+import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 
 @Resolver()
 export class TicketsResolver {
@@ -133,9 +137,11 @@ export class TicketsResolver {
 
   @Permissions('create-support-tickets')
   @UseGuards(AccessTokenGuard, PermissionsGuard)
-  @Query(() => [ResponseTemplate])
-  async fetchResponseTemplate() {
-    return await this.ticketService.findAllResponseTemplate();
+  @Query(() => ResponseTemplateResponse)
+  async fetchResponseTemplate(
+    @Args('findOption', { nullable: true }) findOption: PaginateAndSort,
+  ) {
+    return await this.ticketService.findAllResponseTemplate(findOption);
   }
 
   @Permissions('create-support-tickets')
