@@ -55,7 +55,11 @@ export class WishlistService {
   async getWishList(user: User) {
     return await this.wishlistRepository.find({
       where: { userId: user.id },
-      relations: ['listing', 'listing.listingAttributes.attribute'],
+      relations: [
+        'listing',
+        'listing.listingAttributes.attribute',
+        'listing.listingType',
+      ],
     });
   }
 }
