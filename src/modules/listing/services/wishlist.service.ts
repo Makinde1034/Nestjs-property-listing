@@ -56,7 +56,7 @@ export class WishlistService {
     return await this.wishlistRepository.find({
       where: { userId: user.id },
 
-      relations: ['listing', 'listing.listingType'],
+      relations: ['listing', 'listing.listingAttributes.attribute'],
     });
   }
 }
