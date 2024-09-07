@@ -67,7 +67,7 @@ export class UserResolver {
     return await this.userService.getEmployees(userFilterInput, ctx.req.user);
   }
 
-  @Query(() => UserResponse, { name: 'getEmployees' })
+  @Query(() => UserResponse, { name: 'findAllCustomers' })
   @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard)
   async findAllCustomers(@Args('userFilterInput') userFilterInput: UserFilter) {
