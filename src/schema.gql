@@ -679,6 +679,7 @@ type Query {
   searchForUser(searchParam: String!): [User!]!
   findAllUser(userFilterInput: UserFilter!): UserResponse!
   getEmployees(userFilterInput: UserFilter!): UserResponse!
+  findAllCustomers(userFilterInput: UserFilter!): UserResponse!
   permissions: [Permission!]!
   roles: [RoleData!]!
   rolesAndUser(paginateAndSort: PaginateAndSort!): [Role!]!
