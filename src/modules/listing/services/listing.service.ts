@@ -1193,7 +1193,6 @@ export class ListingService {
 
       // Stringify the updated images array for storage
       const stringifiedImages = JSON.stringify(existingImages);
-      // This.logger.log('Updated images:', stringifiedImages);
 
       // Save the updated images to the database
       await this.listingRepository.update(id, { images: stringifiedImages });

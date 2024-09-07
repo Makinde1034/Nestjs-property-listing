@@ -8,12 +8,14 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Listing } from './listing.entity';
+import { User } from './user.entity';
 @Entity()
 @ObjectType()
 export class FlagListing extends BaseEntity {
@@ -24,6 +26,11 @@ export class FlagListing extends BaseEntity {
   @Field()
   @Column()
   userId: string;
+
+  @Field(() => User, { nullable: true })
+  @JoinColumn({ name: 'userId' })
+  @ManyToOne(() => User, (reporter) => reporter.flagListing, { eager: true })
+  reporter: User;
 
   @Field()
   @Column()

@@ -35,6 +35,7 @@ import { SearchHistory } from './search-history.entity';
 import { Wishlist } from './wishlist.entity';
 import { Messages } from './message.entity';
 import { Chat } from './chat.entity';
+import { FlagListing } from './flag-listing.entity';
 
 @Entity()
 @ObjectType()
@@ -209,6 +210,10 @@ export class User extends BaseEntity {
   @Field(() => Wishlist)
   @OneToMany(() => Wishlist, (wishlist) => wishlist.user)
   wishlist: Wishlist;
+
+  @Field(() => FlagListing)
+  @OneToMany(() => FlagListing, (flagListing) => flagListing.reporter)
+  flagListing: FlagListing;
 
   @Field({ nullable: true })
   @Column({ nullable: true, unique: true })

@@ -133,6 +133,7 @@ type FlagListing {
   id: ID!
   parentIssue: String!
   userId: String!
+  reporter: User
   childIssue: String!
   listing: Listing
   createdAt: DateTime!
@@ -392,6 +393,7 @@ type User {
   isTwoFactorAuthenticationEnabled: Boolean
   roles: [Role!]
   wishlist: Wishlist!
+  flagListing: FlagListing!
   employeeId: String
   disabledAt: DateTime
   createdAt: DateTime!
