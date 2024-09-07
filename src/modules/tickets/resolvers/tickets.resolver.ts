@@ -54,8 +54,8 @@ export class TicketsResolver {
    * @returns {Promise<Ticket>}
    */
   @Query(() => Ticket)
-  @Permissions('read-support-tickets')
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  // @Permissions('read-support-tickets')
+  @UseGuards(AccessTokenGuard)
   async getTicket(@Args('ticketId') ticketId: string): Promise<Ticket> {
     return await this.ticketService.getTicket(ticketId);
   }

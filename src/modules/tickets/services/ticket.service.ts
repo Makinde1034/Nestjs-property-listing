@@ -72,8 +72,15 @@ export class TicketService {
    * @returns {Promise<Ticket>}
    */
   async getTicket(id: string): Promise<Ticket> {
-    return await this.ticketRepository.findOneByOrFail({ id: id });
+    try {
+      return await this.ticketRepository.findOneByOrFail({ id: id });
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
   }
+
+  
   /**
    * List tickets
    * @async
