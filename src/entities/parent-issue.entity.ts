@@ -15,6 +15,7 @@ import {
 import { ChildIssue } from './child-issue.entity';
 import BaseEntity from './base.entity';
 import { Ticket } from '.';
+import { FlagListing } from './flag-listing.entity';
 
 @Entity()
 @ObjectType()
@@ -30,6 +31,10 @@ export class ParentIssue extends BaseEntity {
   @Field(() => [ChildIssue], { nullable: true })
   @OneToMany(() => ChildIssue, (childIssue) => childIssue.parentIssue)
   childIssue: ChildIssue[];
+
+  @Field(() => [FlagListing], { nullable: true })
+  @OneToMany(() => FlagListing, (flagListing) => flagListing.parentIssue)
+  flagListing: FlagListing[];
 
   @Column({ nullable: true })
   @Field({ nullable: true })
