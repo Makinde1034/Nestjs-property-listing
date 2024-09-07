@@ -20,7 +20,6 @@ import { TicketStatus } from 'src/common/enums';
 import { FindManyOptions, In } from 'typeorm';
 import { ChildIssueRepository } from '../../issue/repositories/child-issue.repository';
 import { ResponseTemplateRepository } from '../repositories/response-template.repository';
-import { ResponseTemplate } from '../../../entities/response-template.entity';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 @Injectable()
@@ -73,14 +72,16 @@ export class TicketService {
    */
   async getTicket(id: string): Promise<Ticket> {
     try {
-      return await this.ticketRepository.findOneByOrFail({ id: id });
+      return await this.ticketRepository.findOneOrFail({
+        where: { id: id },
+        relations: ['reporter'],
+      });
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
     }
   }
 
-  
   /**
    * List tickets
    * @async
@@ -220,15 +221,19 @@ export class TicketService {
 
   async deleteResponseTemplate(deleteResponseTemplate: DeleteResponsetemplate) {
     try {
-      let idsToUpdate: Array<string>;
+      let idsToUpdate: Array<string> = [];
       const template = await this.responseTemplateRepostiory.find({
         where: {
           id: In(deleteResponseTemplate.id),
         },
       });
+
       template.map((element) => {
+        console.log(element.id);
         idsToUpdate.push(element.id);
       });
+
+      console.log(idsToUpdate);
 
       if (!template) {
         throw new BadRequestException(AppStrings.NOT_FOUND);
@@ -238,7 +243,7 @@ export class TicketService {
         await this.responseTemplateRepostiory.softDelete(idsToUpdate);
 
       if (affected > 0) {
-        return new SuccessResponse(AppStrings.ATTRIBUTE_DELETED_SUCCESSFULLY);
+        return new SuccessResponse(AppStrings.DELETED_SUCCESSFULLY);
       }
     } catch (error) {
       this.logger.log(error);

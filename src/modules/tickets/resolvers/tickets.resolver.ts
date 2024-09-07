@@ -98,7 +98,6 @@ export class TicketsResolver {
 
   /**
    * Update Ticket
-   *
    * @async
    * @param {UpdateTicketInput} RequestInput
    * @returns {Promise<Ticket>}
