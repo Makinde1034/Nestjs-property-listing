@@ -129,12 +129,73 @@ type Promotion {
   updatedAt: DateTime!
 }
 
+type ParentIssue {
+  id: ID!
+  placement: String!
+  ticket: [Ticket!]
+  childIssue: [ChildIssue!]
+  flagListing: [FlagListing!]
+  englishName: String
+  sequentialId: Float
+  arabicName: String
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Messages {
+  id: ID!
+  chat: Chat!
+  user: User!
+  message: String!
+  attachment: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Chat {
+  id: ID!
+  message: Messages
+}
+
+type Ticket {
+  id: ID!
+  reporter: User!
+  support: User
+  parentIssue: ParentIssue!
+  childIssue: ChildIssue
+  status: String!
+  type: String
+  chat: Chat
+  openedAt: DateTime!
+  isOpen: Boolean!
+  closedAt: DateTime
+  assignedAt: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+}
+
+type ChildIssue {
+  id: ID!
+  parentIssue: ParentIssue!
+  parentIssueId: String
+  ticket: Ticket!
+  flagListing: Ticket!
+  englishName: String
+  arabicName: String
+  sequentialId: Float
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type FlagListing {
   id: ID!
-  parentIssue: String!
   userId: String!
   reporter: User
-  childIssue: String!
+  parentIssue: ParentIssue!
+  childIssue: ChildIssue
   listing: Listing
   createdAt: DateTime!
   deletedAt: DateTime!
@@ -291,65 +352,6 @@ type SearchHistory {
   listingId: String
   createdAt: DateTime!
   deletedAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type ChildIssue {
-  id: ID!
-  parentIssue: ParentIssue!
-  parentIssueId: String
-  ticket: Ticket!
-  englishName: String
-  arabicName: String
-  sequentialId: Float
-  createdAt: DateTime!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type ParentIssue {
-  id: ID!
-  placement: String!
-  ticket: [Ticket!]
-  childIssue: [ChildIssue!]
-  englishName: String
-  sequentialId: Float
-  arabicName: String
-  createdAt: DateTime!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type Ticket {
-  id: ID!
-  reporter: User!
-  support: User
-  parentIssue: ParentIssue!
-  childIssue: ChildIssue
-  status: String!
-  type: String
-  chat: Chat
-  openedAt: DateTime!
-  isOpen: Boolean!
-  closedAt: DateTime
-  assignedAt: DateTime
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  deletedAt: DateTime
-}
-
-type Chat {
-  id: ID!
-  message: Messages
-}
-
-type Messages {
-  id: ID!
-  chat: Chat!
-  user: User!
-  message: String!
-  attachment: String
-  createdAt: DateTime!
   updatedAt: DateTime!
 }
 

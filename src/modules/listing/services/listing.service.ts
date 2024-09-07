@@ -1291,8 +1291,8 @@ export class ListingService {
         throw new BadRequestException(AppStrings.LISTING_NOT_FOUND);
       } else {
         await this.flagListingRepository.save({
-          parentIssue: parentIssue.id,
-          childIssue: childIssue.id,
+          parentIssueId: parentIssue.id,
+          childIssueId: childIssue.id,
           listing,
           userId,
         });
@@ -1332,6 +1332,7 @@ export class ListingService {
           take: paginateAndSort.take,
           skip: paginateAndSort.skip,
           order: orderOptions,
+          relations: ['childIssue', 'parentIssue'],
         });
 
       return { flaggedListing, total };
@@ -1531,8 +1532,7 @@ export class ListingService {
           },
           flag: {
             id: true,
-            parentIssue: true,
-            childIssue: true,
+
             userId: true,
             createdAt: true,
           },

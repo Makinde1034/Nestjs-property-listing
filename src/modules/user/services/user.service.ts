@@ -15,7 +15,14 @@ import type {
   User,
   UserNotificationPreference,
 } from '../../../entities';
-import { DeepPartial, FindOptionsWhere, In, LessThan, Like } from 'typeorm';
+import {
+  DeepPartial,
+  FindOptionsWhere,
+  In,
+  LessThan,
+  Like,
+  Not,
+} from 'typeorm';
 import { PostgresError } from 'pg-error-enum';
 import { addHours, isPast } from 'date-fns';
 import {
@@ -36,6 +43,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   NationalIdentityType,
   RegisterEventAction,
+  UserProfileTypeEnum,
   UserStatus,
 } from '../../../common/enums';
 import { MailgunEmailService } from '../../mail/services/implementations';
@@ -492,6 +500,49 @@ export class UserService {
         status: status ?? undefined,
         type: type ?? undefined,
         employeeId: null,
+      };
+
+      // Build order options
+      const orderOptions = sortField ? { [sortField]: direction || 'ASC' } : {};
+
+      // Set default pagination values if not provided
+      const paginationTake = take ?? 20;
+      const paginationSkip = skip ?? 0;
+
+      // Fetch employees with count
+      const [users, count] = await this.usersRepository.findAndCount({
+        order: orderOptions,
+        where: whereOptions,
+        take: paginationTake,
+        skip: paginationSkip,
+      });
+
+      return { users, total: count };
+    } catch (error) {
+      this.logger.error('Failed to get customer', error);
+      throw new BadRequestException('Failed to retrieve customer');
+    }
+  }
+
+  async findAllCustomers(userFilterInput: UserFilter) {
+    try {
+      const { level, status, type, sortField, directionToSort, take, skip } =
+        userFilterInput;
+
+      // Validate sort direction
+      const validSortDirections = ['ASC', 'DESC'];
+      const direction = directionToSort?.toUpperCase();
+      if (direction && !validSortDirections.includes(direction)) {
+        throw new Error(`Invalid sort direction: ${direction}`);
+      }
+
+      // Build where options
+      const whereOptions: any = {
+        level: level ?? undefined,
+        status: status ?? undefined,
+        type: type ?? undefined,
+        employeeId: null,
+        userType: UserProfileTypeEnum.INDIVIDUAL,
       };
 
       // Build order options
