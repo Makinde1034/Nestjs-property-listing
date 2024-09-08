@@ -344,9 +344,11 @@ export class UserService {
     if (!isMatch) {
       throw new BadRequestException(AppStrings.INCORRECT_OLD_PASSWORD);
     }
+    const salt = await bcrypt.genSalt();
+    const passwordToUpdate = await bcrypt.hash(newPassword, salt);
 
     const { affected } = await this.usersRepository.update(user.id, {
-      password: newPassword,
+      password: passwordToUpdate,
     });
     if (affected) {
       return await this.usersRepository.findOneByOrFail({ id: user.id });
