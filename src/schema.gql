@@ -877,7 +877,7 @@ type Mutation {
   register(RegisterInput: RegisterInput!): User!
   registerConfirm(RegisterConfirmInput: AuthRegisterConfirmDto!): String!
   login(loginInput: LoginInput!): LoginResponse!
-  biometricRegister(RequestInput: BiometricRegister!): String!
+  biometricRegister(RequestInput: BiometricRegister!): LoginResponse!
   biometricLogin(LoginInput: BiometricLogin!): LoginResponse!
   resetPasswordRequest(RequestInput: PasswordResetRequestDto!): SuccessResponse!
   resetPassword(ResetInput: PasswordResetDto!): SuccessResponse!

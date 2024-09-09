@@ -80,7 +80,7 @@ export class AuthResolver {
    * @param {LoginInput} inputDto
    * @returns {Promise<LoginResponse>}
    */
-  @Mutation(() => String, { name: 'biometricRegister' })
+  @Mutation(() => LoginResponse, { name: 'biometricRegister' })
   @Throttle({ default: { limit: 2, ttl: 60000 } })
   async biometricRegister(
     @Args('RequestInput') inputDto: BiometricRegister,
