@@ -724,11 +724,8 @@ export class UserService {
       throw new BadRequestException(error);
     }
   }
-  async getEmployees(userFilterInput: UserFilter, user: User) {
+  async getEmployees(userFilterInput: UserFilter) {
     try {
-      if (!user.company) {
-        throw new BadRequestException('User does not belong to a company');
-      }
       const { level, status, type, sortField, directionToSort, take, skip } =
         userFilterInput;
 
@@ -741,7 +738,7 @@ export class UserService {
 
       // Build where options
       const whereOptions: any = {
-        level: level ?? undefined,
+        userLevel: level ?? undefined,
         status: status ?? undefined,
         type: type ?? undefined,
       };
@@ -756,12 +753,12 @@ export class UserService {
       // Fetch employees with count
       const [users, count] = await this.usersRepository.findAndCount({
         order: orderOptions,
-        where: { ...whereOptions, company: { id: user?.company?.id } },
+        where: { ...whereOptions, company: { id: Not(null) } },
         take: paginationTake,
         skip: paginationSkip,
       });
 
-      return { employees: users, total: count };
+      return { users: users, total: count };
     } catch (error) {
       this.logger.log(error);
       this.logger.error('Failed to get employees', error);
