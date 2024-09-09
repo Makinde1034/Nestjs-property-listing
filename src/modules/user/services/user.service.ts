@@ -11,6 +11,7 @@ import {
   UserRepository,
 } from '../repositories';
 import type {
+  Role,
   TokenConfirmation,
   User,
   UserNotificationPreference,
@@ -704,7 +705,7 @@ export class UserService {
   }
   async updateUserData(input: UpdateUserData): Promise<User> {
     try {
-      let roles;
+      let roles: Array<Role>;
       if (input.roles?.length) {
         roles = await this.roleRepository.find({
           where: { id: In([...input.roles]) },
@@ -717,10 +718,7 @@ export class UserService {
         ...rest,
         roles,
       };
-      const { affected } = await this.usersRepository.update(id, userData);
-      if (affected > 0) {
-        return await this.usersRepository.findOneByOrFail({ id });
-      }
+      return await this.usersRepository.save({ id, ...userData });
     } catch (error) {
       throw new BadRequestException(error);
     }
@@ -877,8 +875,8 @@ export class UserService {
       notFoundIds.push(...userId.filter((id) => !foundUserIds.includes(id)));
     }
 
-    const status = action ? UserStatus.DISABLED : UserStatus.ACTIVE;
-    const deletedAt = action ? new Date() : null;
+    const status = UserStatus.DELETED;
+    const deletedAt = new Date();
 
     users.forEach((user) => {
       usersToUpdate.push({ id: user.id, status, deletedAt });
