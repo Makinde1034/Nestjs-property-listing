@@ -11,6 +11,7 @@ import {
   UserRepository,
 } from '../repositories';
 import type {
+  Role,
   TokenConfirmation,
   User,
   UserNotificationPreference,
@@ -37,6 +38,7 @@ import {
   ImageResponse,
   UpdateUserData,
   AssignRoleInput,
+  DeleteUserInput,
 } from '../dtos/request';
 import { StorageService } from '../../file-handler/services/storage.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -704,7 +706,7 @@ export class UserService {
   }
   async updateUserData(input: UpdateUserData): Promise<User> {
     try {
-      let roles;
+      let roles: Array<Role>;
       if (input.roles?.length) {
         roles = await this.roleRepository.find({
           where: { id: In([...input.roles]) },
@@ -717,10 +719,7 @@ export class UserService {
         ...rest,
         roles,
       };
-      const { affected } = await this.usersRepository.update(id, userData);
-      if (affected > 0) {
-        return await this.usersRepository.findOneByOrFail({ id });
-      }
+      return await this.usersRepository.save({ id, ...userData });
     } catch (error) {
       throw new BadRequestException(error);
     }
@@ -863,8 +862,8 @@ export class UserService {
     );
   }
 
-  async deleteUser(requestInput: UserActionInput): Promise<SuccessResponse> {
-    const { userId, action } = requestInput;
+  async deleteUser(requestInput: DeleteUserInput): Promise<SuccessResponse> {
+    const { userId } = requestInput;
     const usersToUpdate: DeepPartial<User>[] = [];
     const notFoundIds: string[] = [];
 
@@ -877,8 +876,8 @@ export class UserService {
       notFoundIds.push(...userId.filter((id) => !foundUserIds.includes(id)));
     }
 
-    const status = action ? UserStatus.DISABLED : UserStatus.ACTIVE;
-    const deletedAt = action ? new Date() : null;
+    const status = UserStatus.DELETED;
+    const deletedAt = new Date();
 
     users.forEach((user) => {
       usersToUpdate.push({ id: user.id, status, deletedAt });
@@ -886,14 +885,14 @@ export class UserService {
 
     const updatedUsers = await this.usersRepository.save(usersToUpdate);
 
-    if (notFoundIds.length > 0) {
-      throw new BadRequestException(
-        'There was a problem performing this action on some users',
-      );
-    }
+    // if (notFoundIds.length > 0) {
+    //   throw new BadRequestException(
+    //     'There was a problem performing this action on some users',
+    //   );
+    // }
 
     return new SuccessResponse(
-      `You have successfully ${action ? 'deleted' : 'recovered'} the selected users`,
+      `You have successfully deleted the selected users`,
       updatedUsers,
     );
   }
