@@ -14,6 +14,7 @@ import { SuccessResponse } from '../../../common/utils/success.response';
 import {
   AssignRoleInput,
   CreateStaffInput,
+  DeleteUserInput,
   NotificationPrefenceInput,
   PasswordInput,
   StaffConfirmDto,
@@ -138,7 +139,7 @@ export class UserResolver {
   @Mutation(() => SuccessResponse)
   @UseGuards(AccessTokenGuard)
   async deleteUser(
-    @Args('RequestInput') inputDto: UserActionInput,
+    @Args('RequestInput') inputDto: DeleteUserInput,
   ): Promise<SuccessResponse> {
     return await this.userService.deleteUser(inputDto);
   }

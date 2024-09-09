@@ -887,7 +887,7 @@ type Mutation {
   createStaff(RequestInput: CreateStaffInput!): User!
   staffConfirmation(RequestInput: StaffConfirmDto!): String!
   blockUser(RequestInput: UserActionInput!): SuccessResponse!
-  deleteUser(RequestInput: UserActionInput!): SuccessResponse!
+  deleteUser(RequestInput: DeleteUserInput!): SuccessResponse!
   updateNotificationPreference(RequestInput: NotificationPrefenceInput!): User!
   changePassword(RequestInput: PasswordInput!): User!
   updateUserData(updateUserInput: UpdateUserData!): User!
@@ -1043,6 +1043,10 @@ input StaffConfirmDto {
 input UserActionInput {
   userId: [String!]!
   action: Boolean!
+}
+
+input DeleteUserInput {
+  userId: [String!]!
 }
 
 input NotificationPrefenceInput {

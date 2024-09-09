@@ -19,3 +19,11 @@ export class UserActionInput {
   @IsBoolean()
   action: boolean;
 }
+
+@InputType()
+export class DeleteUserInput {
+  @Field(() => [String])
+  @IsNotEmpty()
+  @IsArray()
+  userId: string[];
+}

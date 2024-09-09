@@ -38,6 +38,7 @@ import {
   ImageResponse,
   UpdateUserData,
   AssignRoleInput,
+  DeleteUserInput,
 } from '../dtos/request';
 import { StorageService } from '../../file-handler/services/storage.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -861,8 +862,8 @@ export class UserService {
     );
   }
 
-  async deleteUser(requestInput: UserActionInput): Promise<SuccessResponse> {
-    const { userId, action } = requestInput;
+  async deleteUser(requestInput: DeleteUserInput): Promise<SuccessResponse> {
+    const { userId } = requestInput;
     const usersToUpdate: DeepPartial<User>[] = [];
     const notFoundIds: string[] = [];
 
@@ -891,7 +892,7 @@ export class UserService {
     }
 
     return new SuccessResponse(
-      `You have successfully ${action ? 'deleted' : 'recovered'} the selected users`,
+      `You have successfully ${'deleted'} the selected users`,
       updatedUsers,
     );
   }
