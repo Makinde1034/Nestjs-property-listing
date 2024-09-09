@@ -885,14 +885,14 @@ export class UserService {
 
     const updatedUsers = await this.usersRepository.save(usersToUpdate);
 
-    if (notFoundIds.length > 0) {
-      throw new BadRequestException(
-        'There was a problem performing this action on some users',
-      );
-    }
+    // if (notFoundIds.length > 0) {
+    //   throw new BadRequestException(
+    //     'There was a problem performing this action on some users',
+    //   );
+    // }
 
     return new SuccessResponse(
-      `You have successfully ${'deleted'} the selected users`,
+      `You have successfully deleted the selected users`,
       updatedUsers,
     );
   }
