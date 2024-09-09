@@ -704,9 +704,13 @@ export class UserService {
   }
   async updateUserData(input: UpdateUserData): Promise<User> {
     try {
-      const roles = await this.roleRepository.find({
-        where: { id: In([...input.roles]) },
-      });
+      let roles;
+      if (input.roles?.length) {
+        roles = await this.roleRepository.find({
+          where: { id: In([...input.roles]) },
+        });
+      }
+
       const { id, ...rest } = input;
 
       const userData = {

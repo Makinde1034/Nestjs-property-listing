@@ -68,6 +68,7 @@ export class CreateStaffInput {
   dateOfBirth: Date;
 
   @Field(() => [Number])
+  @IsOptional()
   @IsArray()
   @IsNotEmpty()
   roles: number[];
@@ -100,5 +101,6 @@ export class StaffConfirmDto {
 @InputType()
 export class UpdateUserData extends PartialType(CreateStaffInput) {
   @Field()
+  @IsString()
   id: string;
 }
