@@ -4,7 +4,6 @@
  */
 
 import {
-  Body,
   Controller,
   Delete,
   Post,
@@ -16,7 +15,6 @@ import {
 import { ListingService } from '../services/listing.service';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { RestAccessTokenGuard } from '../../auth/guards';
-import { LocationDto } from '../../location/dto/request/location.dto';
 
 @Controller('listing')
 export class ListingController {

@@ -235,14 +235,6 @@ export class ChatGateway implements OnGatewayConnection {
     this.logger.log('Chat service executed successfully');
     this.logger.log(`User: ${JSON.stringify(user)}, Ticket ID: ${ticketId}`);
 
-    try {
-      await this.chatService.chat(message, ticketId, user);
-    } catch (error) {
-      this.logger.error('Failed to send chat message:', error);
-      socket.emit('error', { message: 'Failed to send chat message' });
-      return;
-    }
-
     this.server.to(ticketId).emit('receive_message', {
       message,
       user: {
@@ -253,6 +245,15 @@ export class ChatGateway implements OnGatewayConnection {
         arabicLastName: user.arabicLastName,
       },
     });
+
+    try {
+      await this.chatService.chat(message, ticketId, user);
+      socket.emit('message_sent', { message: 200 });
+    } catch (error) {
+      this.logger.error('Failed to send chat message:', error);
+      socket.emit('message_not_sent', { message: 400 });
+      return;
+    }
 
     this.logger.log(`Message emitted to room: ${ticketId}`);
   }

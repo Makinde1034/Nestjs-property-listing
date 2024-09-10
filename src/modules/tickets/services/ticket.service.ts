@@ -221,7 +221,7 @@ export class TicketService {
 
   async deleteResponseTemplate(deleteResponseTemplate: DeleteResponsetemplate) {
     try {
-      let idsToUpdate: Array<string> = [];
+      const idsToUpdate: string[] = [];
       const template = await this.responseTemplateRepostiory.find({
         where: {
           id: In(deleteResponseTemplate.id),
@@ -229,11 +229,8 @@ export class TicketService {
       });
 
       template.map((element) => {
-        console.log(element.id);
         idsToUpdate.push(element.id);
       });
-
-      console.log(idsToUpdate);
 
       if (!template) {
         throw new BadRequestException(AppStrings.NOT_FOUND);

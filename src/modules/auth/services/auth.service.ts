@@ -381,25 +381,39 @@ export class AuthService {
     const { signature, payload } = loginDto;
     const userId = payload.split('__')[0];
     const user = await this.userService.findUserById(userId);
+
     if (!user) {
       throw new NotFoundException(
         'Something went wrong during your Face ID authentication.',
       );
     }
+
     // This is the public key that was saved earlier
     const { biometricKey } = user;
-    const verifier = crypto.createVerify('RSA-SHA256');
+
+    // Create the public key object from the PEM string
+    const publicKeyObject = crypto.createPublicKey({
+      key: `-----BEGIN PUBLIC KEY-----\n${biometricKey}\n-----END PUBLIC KEY-----`,
+      format: 'pem',
+    });
+
+    // Convert the base64-encoded signature to a buffer
+    const signatureBuffer = Buffer.from(signature, 'base64');
+
+    // Create a verifier object
+    const verifier = crypto.createVerify('SHA256');
     verifier.update(payload);
-    const isVerified = verifier.verify(
-      `-----BEGIN PUBLIC KEY-----\n${biometricKey}\n-----END PUBLIC KEY-----`,
-      signature,
-      'base64',
-    );
+    verifier.end();
+
+    // Verify the signature using the public key
+    const isVerified = verifier.verify(publicKeyObject, signatureBuffer);
+
     if (!isVerified) {
       throw new UnauthorizedException(
-        'Unfortunetely we could not verify your Face ID authentication',
+        'Unfortunately, we could not verify your Face ID authentication.',
       );
     }
+
     // Return the user and the access tokens
     return {
       user,

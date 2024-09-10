@@ -1701,11 +1701,10 @@ export class ListingService {
       } else {
         imageIds = [imageId];
       }
-      let existingImages: any[] = listing.images
+      const existingImages: any[] = listing.images
         ? JSON.parse(listing.images)
         : [];
-      let updatedImages;
-      let imageUpdated = false;
+      let updatedImages = [];
 
       if (imageIds.length > 0) {
         // Update the isDeleted flag for the specified imageIds
@@ -1713,7 +1712,6 @@ export class ListingService {
         updatedImages = existingImages.map((image) => {
           if (imageIds.includes(image.id)) {
             image.isDeleted = true; // Mark the image as deleted
-            imageUpdated = true;
           }
           return image; // Return the image (updated or not) to form the new array
         });
@@ -1737,7 +1735,6 @@ export class ListingService {
         updatedImages,
       );
     } catch (error) {
-      console.log(error);
       this.logger.log(error);
       throw new BadRequestException(error.message || 'An error occurred');
     }

@@ -6,7 +6,7 @@
 import { Injectable } from '@nestjs/common';
 import { ListingType } from '../../../entities';
 
-import { DataSource, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityRepository } from '../../core/base.class/entity.repository';
 
@@ -20,8 +20,8 @@ export class ListingTypeRepository extends EntityRepository<ListingType> {
   }
 }
 // @Injectable()
-// export class ListingTypeRepository extends Repository<ListingType> {
-//   constructor(private dataSource: DataSource) {
-//     super(ListingType, dataSource.createEntityManager());
+// Export class ListingTypeRepository extends Repository<ListingType> {
+//   Constructor(private dataSource: DataSource) {
+//     Super(ListingType, dataSource.createEntityManager());
 //   }
 // }

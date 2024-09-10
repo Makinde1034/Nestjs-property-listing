@@ -419,7 +419,6 @@ export class UserService {
         notificationPreference: preferencesData,
       });
     } catch (error) {
-      console.log(error);
       throw new BadRequestException(error);
     }
   }
@@ -529,7 +528,7 @@ export class UserService {
 
   async findAllCustomers(userFilterInput: UserFilter) {
     try {
-      const { level, status, type, sortField, directionToSort, take, skip } =
+      const { level, status, sortField, directionToSort, take, skip } =
         userFilterInput;
 
       // Validate sort direction
@@ -706,7 +705,7 @@ export class UserService {
   }
   async updateUserData(input: UpdateUserData): Promise<User> {
     try {
-      let roles: Array<Role>;
+      let roles: Role[];
       if (input.roles?.length) {
         roles = await this.roleRepository.find({
           where: { id: In([...input.roles]) },
@@ -882,8 +881,8 @@ export class UserService {
 
     const updatedUsers = await this.usersRepository.save(usersToUpdate);
 
-    // if (notFoundIds.length > 0) {
-    //   throw new BadRequestException(
+    // If (notFoundIds.length > 0) {
+    //   Throw new BadRequestException(
     //     'There was a problem performing this action on some users',
     //   );
     // }
