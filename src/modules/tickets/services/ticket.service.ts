@@ -107,50 +107,66 @@ export class TicketService {
 
   async listTicketsForAdminAndStaff(input?: ListTicketInput) {
     try {
-      const take = input.take <= 20 ? input.take : 20;
+      // Validate and limit the number of results per request
+      const take = input.take && input.take <= 20 ? input.take : 20;
+      const skip = input.skip || 0;
+
+      // Create a query builder instance for the Ticket entity
       const queryBuilder = this.ticketRepository.createQueryBuilder('ticket');
 
+      // Dynamically add WHERE clause if status is provided in input
       if (input.status) {
         queryBuilder.where('ticket.status = :status', { status: input.status });
       }
 
+      // Utility function to quote column names to prevent SQL injection
       const quotedColumnName = (column: string) => `"ticket"."${column}"`;
 
-      const result = await queryBuilder
+      // Build the main query to fetch ticket entities with pagination and joins
+      const [tickets, count] = await queryBuilder
         .leftJoinAndSelect('ticket.parentIssue', 'parentIssue')
         .leftJoinAndSelect('ticket.childIssue', 'childIssue')
         .leftJoinAndSelect('ticket.reporter', 'reporter')
         .take(take)
-        .skip(input.skip)
+        .skip(skip)
+        .getManyAndCount();
 
-        .addSelect('COUNT(*) OVER()', 'total')
-        .addSelect(
-          `SUM(CASE WHEN ${quotedColumnName('closedAt')} IS NULL THEN 1 ELSE 0 END) OVER()`,
-          'open',
-        )
-        .addSelect(
-          `SUM(CASE WHEN ${quotedColumnName('closedAt')} IS NOT NULL THEN 1 ELSE 0 END) OVER()`,
-          'closed',
-        )
-        .addSelect(
-          `SUM(CASE WHEN ${quotedColumnName('createdAt')} < CURRENT_DATE - INTERVAL '4 days' THEN 1 ELSE 0 END) OVER()`,
-          'aging',
-        )
-        .getRawAndEntities();
+      // Calculate counts for open and closed tickets using separate subqueries
+      const openCount = await this.ticketRepository
+        .createQueryBuilder('ticket')
+        .where(`${quotedColumnName('closedAt')} IS NULL`)
+        .getCount();
 
-      const ticket = result.entities;
-      const countsResult = result.raw[0];
+      const closedCount = await this.ticketRepository
+        .createQueryBuilder('ticket')
+        .where(`${quotedColumnName('closedAt')} IS NOT NULL`)
+        .getCount();
 
+      const agingCount = await this.ticketRepository
+        .createQueryBuilder('ticket')
+        .where(
+          `${quotedColumnName('createdAt')} < CURRENT_DATE - INTERVAL '4 days'`,
+        )
+        .getCount();
+
+      // Construct analysis object for open, closed, and aging tickets
       const analysis = {
-        open: Number(countsResult.open),
-        closed: Number(countsResult.closed),
-        aging: Number(countsResult.aging),
+        open: openCount,
+        closed: closedCount,
+        aging: agingCount,
       };
 
-      return { ticket, total: countsResult.total, analysis };
+      // Return the results including the ticket list, total count, and analysis
+      return { ticket: tickets, total: count, analysis };
     } catch (error) {
-      this.logger.log(error);
-      throw new BadRequestException(error);
+      // Log the error for debugging and throw a user-friendly exception
+      this.logger.error(
+        `Error fetching tickets: ${error.message}`,
+        error.stack,
+      );
+      throw new BadRequestException(
+        'Failed to fetch tickets. Please try again later.',
+      );
     }
   }
 
