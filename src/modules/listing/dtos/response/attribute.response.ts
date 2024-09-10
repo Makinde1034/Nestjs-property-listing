@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Attribute, AttributeSet } from '../../../../entities';
 

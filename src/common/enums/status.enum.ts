@@ -3,12 +3,12 @@
  * For license. See license.txt
  */
 
-// export enum StatusEnum {
+// Export enum StatusEnum {
 //   PENDING = 'PENDING',
 //   FAILED = 'FAILED',
 //   VERIFIED = 'VERIFIED',
 // }
-// export enum StatusListEnum {
+// Export enum StatusListEnum {
 //   ACTIVE = 'active',
 //   EXPIRED = 'expired',
 //   CANCLED = 'cancled',
@@ -16,7 +16,7 @@
 //   REJECTED = 'rejected',
 // }
 
-// export enum ListingStatus {
+// Export enum ListingStatus {
 //   ACTIVE = 'active',
 //   REMOVED = 'removed',
 // }

@@ -44,8 +44,7 @@ export class PermissionsGuard implements CanActivate {
      **********************/
     if (user.userType === 'admin' || hasPermission) {
       return true;
-    } else {
-      throw new ForbiddenException();
     }
+    throw new ForbiddenException();
   }
 }
