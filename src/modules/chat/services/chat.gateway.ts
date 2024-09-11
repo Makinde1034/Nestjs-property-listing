@@ -121,9 +121,6 @@ export class ChatGateway implements OnGatewayConnection {
     const user = socket.data.user as User;
     const ticketId = socket.data.ticketId;
 
-    this.logger.log(content, 'Chat service executed successfully');
-    this.logger.log(`Received message content: ${JSON.stringify(content)}`);
-
     // Helper function to create Express.Multer.File-like object
     function createMulterFile(
       buffer: Buffer,
