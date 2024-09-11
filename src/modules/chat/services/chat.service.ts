@@ -114,6 +114,7 @@ export class ChatService {
         select: {
           id: true,
           message: true,
+          attachment: true,
           createdAt: true,
           user: {
             id: true,
