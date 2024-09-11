@@ -207,7 +207,7 @@ export class ChatGateway implements OnGatewayConnection {
       }
     }
 
-    let result;
+    let result: string;
     if (multerFile) {
       try {
         result = await this.storageService.upload(multerFile);

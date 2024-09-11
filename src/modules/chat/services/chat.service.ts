@@ -121,6 +121,7 @@ export class ChatService {
             lastName: true,
             arabicFirstName: true,
             arabicLastName: true,
+            profilePhoto: true,
           },
         },
         take: take,
