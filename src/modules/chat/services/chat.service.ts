@@ -114,6 +114,7 @@ export class ChatService {
         select: {
           id: true,
           message: true,
+          attachment: true,
           createdAt: true,
           user: {
             id: true,
@@ -121,6 +122,7 @@ export class ChatService {
             lastName: true,
             arabicFirstName: true,
             arabicLastName: true,
+            profilePhoto: true,
           },
         },
         take: take,

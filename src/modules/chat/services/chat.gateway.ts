@@ -78,60 +78,16 @@ export class ChatGateway implements OnGatewayConnection {
     }
   }
 
-  // @SubscribeMessage('send_message')
-  // Async handleMessage(
-  //   @MessageBody() content: any,
-  //   @ConnectedSocket() socket: Socket,
-  // ) {
-  //   Try {
-  //     This.logger.log(content, 'Chat service executed successfully');
-  //     This.logger.log(`Received message content: ${JSON.stringify(content)}`);
-
-  //     Const messageDto = plainToInstance(CreateMessageInput, {
-  //       Message: content,
-  //     });
-  //     Const errors = await validate(messageDto);
-
-  //     If (errors.length > 0) {
-  //       This.logger.error('Validation failed:', errors);
-  //       Socket.emit('error', { message: errors });
-  //       Return;
-  //     }
-  //     This.logger.log('Chat service executed successfully');
-
-  //     Const user = socket.data.user as User;
-  //     Const ticketId = socket.data.ticketId;
-
-  //     This.logger.log(`User: ${JSON.stringify(user)}, Ticket ID: ${ticketId}`);
-
-  //     Await this.chatService.chat(content, ticketId, user);
-  //     This.logger.log('Chat service executed successfully');
-
-  //     This.server.to(ticketId).emit('receive_message', {
-  //       Content,
-  //       User: {
-  //         Id: user.id,
-  //         FirstName: user.firstName,
-  //         LastName: user.lastName,
-  //         ArabicFirstName: user.arabicFirstName,
-  //         ArabicLastName: user.arabicLastName,
-  //       },
-  //     });
-
-  //     This.logger.log(`Message emitted to room: ${ticketId}`);
-  //   } catch (error) {
-  //     This.logger.error(`Error handling message: ${error.message}`);
-  //     Socket.emit('error', error.message);
-  //   }
-  // }
-
   @SubscribeMessage('fetch_message')
   async handleFetchMessages(
     @ConnectedSocket() socket: Socket,
     // @MessageBody() content?: PaginateAndSort,
   ) {
     try {
-      //Uncomment to enable and add  class validation to paginateAndSort
+      /******************************************************************
+      Uncomment the code below to enable and add  class validation to paginateAndSort
+      ******************************************************************/
+
       // Const findOptions = plainToInstance(PaginateAndSort, content);
       // Const errors = await validate(findOptions);
       // If (errors.length > 0) {
@@ -207,7 +163,7 @@ export class ChatGateway implements OnGatewayConnection {
       }
     }
 
-    let result;
+    let result: string;
     if (multerFile) {
       try {
         result = await this.storageService.upload(multerFile);
@@ -233,7 +189,6 @@ export class ChatGateway implements OnGatewayConnection {
     }
 
     this.logger.log('Chat service executed successfully');
-    this.logger.log(`User: ${JSON.stringify(user)}, Ticket ID: ${ticketId}`);
 
     this.server.to(ticketId).emit('receive_message', {
       message,
