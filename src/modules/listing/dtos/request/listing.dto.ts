@@ -9,6 +9,7 @@ import {
   IsBoolean,
   IsEnum,
   IsNotEmpty,
+  IsNumber,
   IsNumberString,
   IsObject,
   IsOptional,
@@ -171,4 +172,18 @@ export class ListingActionInput {
   @Field(() => [String])
   @IsArray()
   listingId: string[];
+}
+
+export class ListingImageInput {
+  @IsUUID()
+  listingId: string;
+  @IsNumber()
+  @IsOptional()
+  imageId: number;
+  @IsNumber()
+  @IsOptional()
+  lng?: number;
+  @IsNumber()
+  @IsOptional()
+  lat?: number;
 }

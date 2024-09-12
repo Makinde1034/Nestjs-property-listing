@@ -17,6 +17,7 @@ import {
   CreateListingDto,
   FlagListingInput,
   ListingActionInput,
+  ListingImageInput,
   UpdateListingDto,
 } from '../dtos/request/listing.dto';
 import { User } from '../../../entities';
@@ -1061,15 +1062,14 @@ export class ListingService {
   }
 
   async uploadListingImage(
-    id: string,
-    imageId: string,
+    query: ListingImageInput,
     files: Express.Multer.File[],
     gpsCoordinate: LocationDto,
   ) {
     try {
-      let verified: boolean;
+      let verified: boolean = false;
       const listing = await this.listingRepository.findOne({
-        where: { id },
+        where: { id: query.listingId },
         relations: ['gpsCoordinate'],
       });
 
@@ -1085,6 +1085,8 @@ export class ListingService {
         listing.gpsCoordinate?.lat,
         listing.gpsCoordinate?.lng,
       );
+      //convert distance in kilometer to meter
+
       if (distance * 1000 < 500) {
         verified = true;
       }
@@ -1098,12 +1100,12 @@ export class ListingService {
         this.storageService.upload(file),
       );
       const uploadedUrls = await Promise.all(uploadPromises);
-
-      if (imageId) {
+      console.log(verified);
+      if (query.imageId) {
         // Update existing image
         let imageUpdated = false;
         existingImages.map((image, index) => {
-          if (image.id == imageId) {
+          if (image.id == query.imageId) {
             existingImages[index].url = uploadedUrls[0];
             existingImages[index].verified = verified;
             // Assuming single file upload
@@ -1123,7 +1125,6 @@ export class ListingService {
           isPanorama: false, // Default value
           verified: verified,
         }));
-
         existingImages.push(...newImages);
       }
 
@@ -1131,7 +1132,9 @@ export class ListingService {
       const stringifiedImages = JSON.stringify(existingImages);
 
       // Save the updated images to the database
-      await this.listingRepository.update(id, { images: stringifiedImages });
+      await this.listingRepository.update(query.listingId, {
+        images: stringifiedImages,
+      });
       return new SuccessResponse(AppStrings.UPLOAD_SUCCESSFUL, existingImages);
     } catch (error) {
       this.logger.error(error.message || error);
