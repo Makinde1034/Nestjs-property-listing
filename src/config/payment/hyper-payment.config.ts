@@ -9,12 +9,14 @@ const token = process.env.HYPERPAY_TOKEN;
 const baseUrl = process.env.HYPERPAY_BASE_URL;
 const entityId = process.env.HYPERPAY_ENTITY_ID;
 const frontendUrl = process.env.FRONT_END_URL;
+const merchantToken = process.env.HYPERPAY_MERCHANT_TOKEN;
 
 export type HyperpayConfig = {
   token: string;
   baseUrl: string;
   entityId: string;
   frontendUrl: string;
+  merchantToken: string;
 };
 
 // If (!token || !baseUrl) {
@@ -28,6 +30,7 @@ const getHyperpayConfig = (): HyperpayConfig => ({
   baseUrl: baseUrl,
   entityId: entityId,
   frontendUrl: frontendUrl,
+  merchantToken: merchantToken,
 });
 
 export const getHyperpayConfigName = () => 'hyperpayConfig';
