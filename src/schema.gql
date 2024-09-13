@@ -1086,7 +1086,7 @@ input AssignRoleInput {
 
 input RoleInputDto {
   englishName: String!
-  arabiceName: String!
+  arabicName: String!
   permissions: [PermissionItem!]!
 }
 
@@ -1098,7 +1098,7 @@ input PermissionItem {
 
 input RoleUpdateInputDto {
   englishName: String
-  arabiceName: String
+  arabicName: String
   permissions: [PermissionItem!]
   id: Float!
 }

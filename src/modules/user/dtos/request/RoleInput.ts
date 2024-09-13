@@ -40,7 +40,7 @@ export class RoleInputDto {
   @Field()
   @IsString()
   @IsNotEmpty()
-  arabiceName: string;
+  arabicName: string;
 
   @Field(() => [PermissionItem])
   @ValidateNested()
@@ -67,6 +67,7 @@ export class RoleUpdateInputDto extends PartialType(RoleInputDto) {
 @InputType()
 export class DeleteRolesInput {
   @Field(() => [String])
+  @IsArray()
   id: string[];
 }
 
