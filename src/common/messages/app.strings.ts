@@ -105,4 +105,5 @@ export const AppStrings = {
 
   AUCTION_REGISTRATION_HAS_NOT_STARTED: 'Auction registration has not started',
   AUCTION_REGISTATION_HAS_ENDED: 'Auction registration has ended',
+  SUCCESSFULLY_DISABLED: 'Successfully disabled',
 };
