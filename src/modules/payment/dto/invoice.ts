@@ -7,6 +7,8 @@ import { Field } from '@nestjs/graphql';
 
 export class CreateInvoiceInput {
   @Field()
+  qrcode: string;
+  @Field()
   price: number;
 
   @Field()
