@@ -60,7 +60,7 @@ export class RoleService {
       );
 
       if (affected > 0) {
-        throw new SuccessResponse(AppStrings.ROLE_DELETED_SUCCESSFULLY);
+        return new SuccessResponse(AppStrings.ROLE_DELETED_SUCCESSFULLY);
       }
     } catch (error) {
       throw new BadRequestException(error);
@@ -226,7 +226,7 @@ export class RoleService {
 
     if (role) {
       await this.roleRepository.update(data.roleId, { isDisabled: true });
-      return AppStrings.ROLE_DELETED_SUCCESSFULLY;
+      return AppStrings.SUCCESSFULLY_DISABLED;
     }
   }
 

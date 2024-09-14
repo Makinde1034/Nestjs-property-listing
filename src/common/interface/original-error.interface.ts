@@ -4,7 +4,7 @@
  */
 
 export interface OriginalError {
-  message: string | string[];
+  message: string;
   error: string;
   statusCode: number;
 }

@@ -60,15 +60,15 @@ export class RoleIdInputDto {
 @InputType()
 export class RoleUpdateInputDto extends PartialType(RoleInputDto) {
   @Field()
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
   id: number;
 }
 @InputType()
 export class DeleteRolesInput {
-  @Field(() => [String])
+  @Field(() => [Number])
   @IsArray()
-  id: string[];
+  id: number[];
 }
 
 @ObjectType()

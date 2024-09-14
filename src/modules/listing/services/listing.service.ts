@@ -1085,7 +1085,7 @@ export class ListingService {
         listing.gpsCoordinate?.lat,
         listing.gpsCoordinate?.lng,
       );
-      //convert distance in kilometer to meter
+      //Convert distance in kilometer to meter
 
       if (distance * 1000 < 500) {
         verified = true;
@@ -1100,7 +1100,6 @@ export class ListingService {
         this.storageService.upload(file),
       );
       const uploadedUrls = await Promise.all(uploadPromises);
-      console.log(verified);
       if (query.imageId) {
         // Update existing image
         let imageUpdated = false;
