@@ -188,6 +188,7 @@ export class RoleService {
 
     const data: Partial<Role> = {
       englishName: input.englishName,
+      arabicName: input.arabicName,
       permissions,
       slug: slugify(input.englishName),
     };
