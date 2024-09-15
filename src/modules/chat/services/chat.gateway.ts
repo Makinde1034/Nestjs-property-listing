@@ -191,9 +191,7 @@ export class ChatGateway implements OnGatewayConnection {
       socket.emit('error', { message: errors });
       return;
     }
-
     this.logger.log('Chat service executed successfully');
-
     this.server.to(ticketId).emit('receive_message', {
       message,
       user: {
@@ -202,6 +200,7 @@ export class ChatGateway implements OnGatewayConnection {
         lastName: user.lastName,
         arabicFirstName: user.arabicFirstName,
         arabicLastName: user.arabicLastName,
+        profilePhoto: user.profilePhoto,
       },
     });
 
