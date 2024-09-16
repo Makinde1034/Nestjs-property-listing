@@ -180,7 +180,7 @@ export class OfferService {
       return { offer, total };
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException();
+      throw new BadRequestException(error);
     }
   }
   async updateOffer(user: User, updateOfferInput: UpdateOfferInput) {
@@ -204,6 +204,9 @@ export class OfferService {
           order: { price: 'DESC' },
         }),
       ]);
+      if (!offer) {
+        throw new BadRequestException(AppStrings.NOT_FOUND);
+      }
 
       if (allOffers.length > 0) {
         throw new BadRequestException(

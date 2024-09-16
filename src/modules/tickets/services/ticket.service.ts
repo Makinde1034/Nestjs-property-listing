@@ -81,7 +81,6 @@ export class TicketService {
       throw new BadRequestException(error);
     }
   }
-
   /**
    * List tickets
    * @async

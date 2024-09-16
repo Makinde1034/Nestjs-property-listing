@@ -66,13 +66,13 @@ export class AdminService {
   }
 
   async averageSupportTime() {
-    const result = await this.issuesRepository
-      .createQueryBuilder('issue')
+    const result = await this.ticketsRepository
+      .createQueryBuilder('ticket')
       .select(
-        'AVG(EXTRACT(EPOCH FROM (issue.reviewedAt - issue.closedAt)))',
+        'AVG(EXTRACT(EPOCH FROM (ticket.assignedAt - ticket.closedAt)))',
         'avgTimeDifference',
       )
-      .where('issue.reviewedAt IS NOT NULL AND issue.closedAt IS NOT NULL')
+      .where('ticket.assignedAt IS NOT NULL AND ticket.closedAt IS NOT NULL')
       .getRawOne();
 
     const avgTimeDifference = parseFloat(result.avgTimeDifference);
@@ -85,13 +85,13 @@ export class AdminService {
   }
 
   async averageCloseTime() {
-    const result = await this.issuesRepository
-      .createQueryBuilder('issue')
+    const result = await this.ticketsRepository
+      .createQueryBuilder('ticket')
       .select(
-        'AVG(EXTRACT(EPOCH FROM (issue.createdAt - issue.closedAt)))',
+        'AVG(EXTRACT(EPOCH FROM (ticket.createdAt - ticket."closedAt")))',
         'avgTimeDifference',
       )
-      .where('issue.createdAt IS NOT NULL AND issue.closedAt IS NOT NULL')
+      .where('ticket.createdAt IS NOT NULL AND ticket.closedAt IS NOT NULL')
       .getRawOne();
 
     const avgTimeDifference = parseFloat(result.avgTimeDifference);
