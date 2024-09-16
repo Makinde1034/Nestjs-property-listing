@@ -326,7 +326,7 @@ export class ListingService {
           .leftJoin('listingType.attributeSets', 'attributeSets')
           .where('listing.deletedAt IS NULL')
           .andWhere('listingType.deletedAt IS NULL')
-          .andWhere('listing.published IS true')
+          .where('listing.published IS true')
 
           .where(
             'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented',
@@ -540,12 +540,10 @@ export class ListingService {
           .leftJoinAndSelect('listing.listingType', 'listingType')
           .leftJoin('listing.wishlist', 'wishlist')
           .addSelect(['wishlist.id'])
-
           .leftJoin('listingType.attributeSets', 'attributeSets')
-
           .where('listing.deletedAt IS NULL')
           .andWhere('listingType.deletedAt IS NULL')
-          .andWhere('listing.published IS true')
+          .where('listing.published IS true')
 
           .where(
             'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented',
@@ -774,6 +772,7 @@ export class ListingService {
           ])
           .where(whereCondition)
           .andWhere('listingType.deletedAt IS NULL')
+          .where('listing.published IS true')
           .orderBy(sortField, directionToSort)
           .skip(paginateAndSort.skip)
           .take(paginateAndSort.take)
