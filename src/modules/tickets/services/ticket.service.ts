@@ -179,19 +179,52 @@ export class TicketService {
    * @returns {Promise<Ticket>}
    */
   async updateTicket(user: User, input: UpdateTicketInput): Promise<Ticket> {
-    const { ticketId, status } = input;
-    const ticket = await this.ticketRepository.findOneByOrFail({
-      id: ticketId,
-    });
+    try {
+      const { ticketId, status } = input;
+      const ticket = await this.ticketRepository.findOneByOrFail({
+        id: ticketId,
+      });
+      let data: Partial<Ticket>;
+      switch (status) {
+        case TicketStatus.IN_PROGRESS:
+          {
+            data = {
+              status,
+              assignedAt: ticket.assignedAt ?? new Date(),
+              isOpen: true,
+              support: user,
+            };
+            const { affected } = await this.ticketRepository.update(
+              ticketId,
+              data,
+            );
+            if (affected) {
+              return this.ticketRepository.findOneByOrFail({ id: ticketId });
+            }
+          }
+          break;
 
-    const data: Partial<Ticket> = {
-      status,
-      assignedAt: ticket.assignedAt ?? new Date(),
-      support: user,
-    };
-    const { affected } = await this.ticketRepository.update(ticketId, data);
-    if (affected) {
-      return this.ticketRepository.findOneByOrFail({ id: ticketId });
+        case TicketStatus.CLOSE: {
+          data = {
+            status,
+            isOpen: false,
+            closedAt: new Date(),
+          };
+          const { affected } = await this.ticketRepository.update(
+            ticketId,
+            data,
+          );
+          if (affected) {
+            return this.ticketRepository.findOneByOrFail({ id: ticketId });
+          }
+          break;
+        }
+        default:
+          break;
+      }
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
     }
   }
 
