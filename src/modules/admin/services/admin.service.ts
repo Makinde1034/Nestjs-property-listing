@@ -24,7 +24,6 @@ import {
 
 import { Between } from 'typeorm';
 import { OfferListEnum } from '../../../common/enums/status.enum';
-import { AdminDashboardSort } from '../dto/admin-request';
 import {
   SaiiFees,
   FinancialVsOrder,
@@ -36,8 +35,9 @@ import {
   UserCountryCount,
   UserGenderCount,
   UserAgeRange,
-} from '../dto/admin-response';
+} from '../dto/response/admin-response';
 import { TicketRepository } from '../../tickets/repositories';
+import { AdminDashboardSort } from '../dto/request/admin-request';
 
 @Injectable()
 export class AdminService {

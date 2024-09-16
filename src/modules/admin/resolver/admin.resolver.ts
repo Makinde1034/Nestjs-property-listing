@@ -14,11 +14,11 @@ import {
   UserDemography,
   UserFunneling,
   UserGenderCount,
-} from '../dto/admin-response';
+} from '../dto/response/admin-response';
 
 import { Args, Query, Resolver } from '@nestjs/graphql';
 
-import { AdminDashboardSort } from '../dto/admin-request';
+import { AdminDashboardSort } from '../dto/request/admin-request';
 import { UseGuards } from '@nestjs/common';
 import { AccessTokenGuard } from '../../auth/guards';
 import { AdminGuard } from '../../auth/guards/admin.guard';

@@ -39,6 +39,7 @@ import { WebHookModule } from './modules/webhook/web-hook.module';
 
 import { AdminModule } from './modules/admin/admin.module';
 import { ChatModule } from './modules/chat/chat.module';
+import { SplashScreenResolver } from './modules/admin/resolver/splash-screen.resolver';
 
 @Module({
   imports: [
@@ -100,6 +101,6 @@ import { ChatModule } from './modules/chat/chat.module';
     ChatModule,
   ],
   controllers: [],
-  providers: [AppResolver, JobService],
+  providers: [AppResolver, JobService, SplashScreenResolver],
 })
 export class AppModule {}
