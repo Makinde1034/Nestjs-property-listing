@@ -18,6 +18,9 @@ import { AdminService } from './services/admin.service';
 import { AdminRepository } from './repositories/admin.repository';
 import { AdminDefault } from '../../entities/admin-table.entity';
 import { TicketRepository } from '../tickets/repositories';
+import { SplashScreenService } from './services/splash-screen.service';
+import { SplashScreen } from '../../entities/splash-screen.entity';
+import { SplashScreenRepository } from './repositories/splash-screen.repository';
 
 @Module({
   imports: [
@@ -28,6 +31,7 @@ import { TicketRepository } from '../tickets/repositories';
       ParentIssue,
       AdminDefault,
       Ticket,
+      SplashScreen,
     ]),
   ],
   providers: [
@@ -41,7 +45,9 @@ import { TicketRepository } from '../tickets/repositories';
     TransactionRepository,
     AdminRepository,
     TicketRepository,
+    SplashScreenService,
+    SplashScreenRepository,
   ],
-  exports: [AdminService, AdminRepository],
+  exports: [AdminService, AdminRepository, SplashScreenService],
 })
 export class AdminModule {}
