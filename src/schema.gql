@@ -322,9 +322,9 @@ type Listing {
   rentDate: DateTime
   soldDate: DateTime
   furnished: String
-  promotedDate: DateTime!
-  promotionPrice: Float!
-  bundleType: String!
+  promotedDate: DateTime
+  promotionPrice: Float
+  bundleType: String
   featureDate: DateTime
   published: Boolean!
   flaggedDate: DateTime

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import {
   BadGatewayException,
   BadRequestException,
@@ -29,7 +34,6 @@ export class SplashScreenService {
     try {
       return await this.splashScreenRepository.save(createSplashScreen);
     } catch (error) {
-      console.log(error);
       this.logger.error(error);
       throw new BadGatewayException(error);
     }
