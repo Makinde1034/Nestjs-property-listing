@@ -1,7 +1,9 @@
-// import { Entity, PrimaryGeneratedColumn } from "typeorm";
-// import { SplashScreen } from "../modules/admin/services/splash-screen.service";
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
 
 // @Entity()
-// export class SplashScreen{
+// Export class SplashScreen{
 //     @PrimaryGeneratedColumn()
 // }

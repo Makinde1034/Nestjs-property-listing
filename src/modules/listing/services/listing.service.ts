@@ -816,6 +816,94 @@ export class ListingService {
     }
   }
 
+  async getOneListingForAdmin(id: string) {
+    try {
+      const listing = await this.listingRepository.findOneOrFail({
+        where: { id },
+        relations: ['user', 'promotion', 'feature', 'flag'],
+        select: {
+          id: true,
+          title: true,
+          price: true,
+          purpose: true,
+          rentingOption: true,
+          impressions: true,
+          flaggedDate: true,
+          listingTypeId: true,
+
+          isListingPromoted: true,
+          isListingFlagged: true,
+          isListingSold: true,
+          isListingRented: true,
+          isListingFeatured: true,
+          isListingDisabled: true,
+          images: true,
+
+          listingType: {
+            id: true,
+            englishName: true,
+          },
+          user: {
+            id: true,
+            phone: true,
+            firstName: true,
+            lastName: true,
+            arabicFirstName: true,
+            arabicLastName: true,
+            email: true,
+          },
+          feature: {
+            id: true,
+            endDate: true,
+            startDate: true,
+            adPackage: {
+              id: true,
+              name: true,
+            },
+          },
+          promotion: {
+            id: true,
+            expiredAt: true,
+            createdAt: true,
+            adPackage: {
+              id: true,
+              name: true,
+              price: true,
+            },
+          },
+          flag: {
+            id: true,
+
+            userId: true,
+            createdAt: true,
+          },
+        },
+      });
+
+      if (!listing) {
+        throw new BadRequestException('Listing not found');
+      }
+
+      // Batch update impressions and return the listing in one go
+      const newImpression = listing.impressions + 1;
+
+      this.listingRepository
+        .createQueryBuilder()
+        .update()
+        .set({ impressions: newImpression })
+        .where('id = :id', { id: listing.id })
+        .execute();
+
+      return listing;
+    } catch (error) {
+      this.logger.log(error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new BadRequestException(error.message || error);
+    }
+  }
+
   async findOneListingForBuyer(id: string) {
     try {
       const listing = await this.listingRepository.findOne({
@@ -1341,6 +1429,19 @@ export class ListingService {
       throw new BadRequestException(error?.messages | error.data);
     }
   }
+  async flaggedListing(id: string) {
+    try {
+      return await this.flagListingRepository.findOneOrFail({
+        where: {
+          listing: { id: id },
+        },
+        relations: ['parentIssue', 'reporter', 'childIssue'],
+      });
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error?.messages | error.data);
+    }
+  }
 
   async disableListing(listingActionInput: ListingActionInput) {
     try {
@@ -1472,94 +1573,6 @@ export class ListingService {
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
-    }
-  }
-
-  async getOneListingForAdmin(id: string) {
-    try {
-      const listing = await this.listingRepository.findOneOrFail({
-        where: { id },
-        relations: ['user', 'promotion', 'feature', 'flag'],
-        select: {
-          id: true,
-          title: true,
-          price: true,
-          purpose: true,
-          rentingOption: true,
-          impressions: true,
-          flaggedDate: true,
-          listingTypeId: true,
-
-          isListingPromoted: true,
-          isListingFlagged: true,
-          isListingSold: true,
-          isListingRented: true,
-          isListingFeatured: true,
-          isListingDisabled: true,
-          images: true,
-
-          listingType: {
-            id: true,
-            englishName: true,
-          },
-          user: {
-            id: true,
-            phone: true,
-            firstName: true,
-            lastName: true,
-            arabicFirstName: true,
-            arabicLastName: true,
-            email: true,
-          },
-          feature: {
-            id: true,
-            endDate: true,
-            startDate: true,
-            adPackage: {
-              id: true,
-              name: true,
-            },
-          },
-          promotion: {
-            id: true,
-            expiredAt: true,
-            createdAt: true,
-            adPackage: {
-              id: true,
-              name: true,
-              price: true,
-            },
-          },
-          flag: {
-            id: true,
-
-            userId: true,
-            createdAt: true,
-          },
-        },
-      });
-
-      if (!listing) {
-        throw new BadRequestException('Listing not found');
-      }
-
-      // Batch update impressions and return the listing in one go
-      const newImpression = listing.impressions + 1;
-
-      this.listingRepository
-        .createQueryBuilder()
-        .update()
-        .set({ impressions: newImpression })
-        .where('id = :id', { id: listing.id })
-        .execute();
-
-      return listing;
-    } catch (error) {
-      this.logger.log(error);
-      if (error instanceof HttpException) {
-        throw error;
-      }
-      throw new BadRequestException(error.message || error);
     }
   }
 
