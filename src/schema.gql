@@ -687,11 +687,6 @@ type MessageResponse {
   total: Float!
 }
 
-type SplashScreenResponse {
-  splashScreen: [SplashScreen!]!
-  total: Float!
-}
-
 type Query {
   app: String!
   findAllSplashScreen(findOption: PaginateAndSort): SplashScreenResponse!
@@ -717,20 +712,14 @@ type Query {
   fetchAttributeSets(findOptions: PaginateAndSort): AttributeSetResponse!
   fetchOneAttributeSets(id: String!): AttributeSet!
   fetchOneAttribute(id: String!): Attribute!
-  findAllListingForBuyerUnauthenticated(
-    findManyOptions: CreateSearchHistoryInput
-  ): ListingResponse!
+  findAllListingForBuyerUnauthenticated(findManyOptions: CreateSearchHistoryInput): ListingResponse!
   findListingsForOwner(findManyOptions: AttributeDto): ListingResponse!
   findOneListingForOwner(id: String!): Listing!
-  findListingsForAdmin(
-    paginateAndSort: AdminFilterAndSort
-  ): AdminListingResponse!
+  findListingsForAdmin(paginateAndSort: AdminFilterAndSort): AdminListingResponse!
   findOneListingForAdmin(id: String!): Listing!
   findOneListingForAuthenticatedBuyer(id: String!): Listing!
   findOneForUnauthenticatedBuyer(id: String!): Listing!
-  findListingForBuyerAuthenticated(
-    findManyOptions: CreateSearchHistoryInput
-  ): ListingResponse!
+  findListingForBuyerAuthenticated(findManyOptions: CreateSearchHistoryInput): ListingResponse!
   fetchListingAttribute(listingId: String!): [ListingAttributes!]!
   viewFlaggedListings(findManyOptions: PaginateAndSort): FlaggedListingResponse
   flaggedListing(listingId: String!): FlagListing
@@ -905,9 +894,7 @@ input ChatFilterInput {
 }
 
 type Mutation {
-  createSplashScreen(
-    createSplashScreenInput: CreateSplashScreenInput!
-  ): SplashScreen!
+  createSplashScreen(createSplashScreenInput: CreateSplashScreenInput!): SplashScreen!
   updateSplashScreen: SplashScreen!
   deleteSplashScreen: SplashScreen!
   register(RegisterInput: RegisterInput!): User!
@@ -959,18 +946,14 @@ type Mutation {
   createAuction(createAuctionInput: CreateAuctionInput!): Auction!
   updateAuction(updateAuctionInput: UpdateAuctionInput!): Auction!
   id(id: String!): Auction!
-  addAuctionParticipant(
-    createAuctionParticipantInput: CreateAuctionParticipantInput!
-  ): AuctionParticipant!
+  addAuctionParticipant(createAuctionParticipantInput: CreateAuctionParticipantInput!): AuctionParticipant!
   deleteSavedHistory(id: String!): SuccessResponse!
   unpublishAListing(id: String!): SuccessResponse!
   publishAListing(id: String!): SuccessResponse!
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!
-  initializePayment(
-    paymentInput: InitiatePaymentInput!
-  ): InitiatePaymentResponse!
+  initializePayment(paymentInput: InitiatePaymentInput!): InitiatePaymentResponse!
   verifyPayment(verifyPaymentInput: verifyPaymentInput!): verifyPaymentResponse!
   createIssue(input: CreateIssueInput!): ParentIssue!
   updateIssue(RequestInput: UpdateIssueInput!): ParentIssue!
@@ -980,15 +963,9 @@ type Mutation {
   deleteChildIssue(id: String!): String!
   createTicket(RequestInput: CreateTicketInput!): Ticket!
   manageTicket(RequestInput: UpdateTicketInput!): Ticket!
-  createResponseTemplate(
-    createResponseTemplateInput: CreateResponseTemplateInput!
-  ): ResponseTemplate!
-  deleteResponseTemplate(
-    deleteResponseTemplate: DeleteResponsetemplate!
-  ): SuccessResponse!
-  updateResponseTemplate(
-    updateResponseTemplateInput: UpdateResponseTemplateInput!
-  ): ResponseTemplate!
+  createResponseTemplate(createResponseTemplateInput: CreateResponseTemplateInput!): ResponseTemplate!
+  deleteResponseTemplate(deleteResponseTemplate: DeleteResponsetemplate!): SuccessResponse!
+  updateResponseTemplate(updateResponseTemplateInput: UpdateResponseTemplateInput!): ResponseTemplate!
   createReview(createReviewDto: CreateReviewDto!): Review!
 }
 
