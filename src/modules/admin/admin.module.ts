@@ -33,6 +33,7 @@ import { SplashScreenResolver } from './resolver/splash-screen.resolver';
       AdminDefault,
       Ticket,
       SplashScreen,
+      SplashScreen,
     ]),
   ],
   providers: [
