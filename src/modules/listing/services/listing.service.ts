@@ -327,10 +327,10 @@ export class ListingService {
           .leftJoin('listingType.attributeSets', 'attributeSets')
           .where('listing.deletedAt IS NULL')
           .andWhere('listingType.deletedAt IS NULL')
-          .where('listing.published IS true')
+          .andWhere('listing.published = true')
 
           .where(
-            'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented',
+            'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented AND listing.published IS true',
             {
               isListingDisabled: false,
               isListingSold: false,
@@ -544,7 +544,7 @@ export class ListingService {
           .leftJoin('listingType.attributeSets', 'attributeSets')
           .where('listing.deletedAt IS NULL')
           .andWhere('listingType.deletedAt IS NULL')
-          .where('listing.published IS true')
+          .andWhere('listing.published = true')
 
           .where(
             'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented',
@@ -729,19 +729,33 @@ export class ListingService {
         break;
     }
 
-    if (paginateAndSort.isListingPromoted !== undefined) {
+    if (
+      paginateAndSort.isListingPromoted !== undefined &&
+      paginateAndSort.isListingPromoted !== null
+    ) {
       whereCondition.isListingPromoted = paginateAndSort.isListingPromoted;
     }
-    if (paginateAndSort.isListingSold !== undefined) {
+    if (
+      paginateAndSort.isListingSold !== undefined &&
+      paginateAndSort.isListingSold !== null
+    ) {
       whereCondition.isListingSold = paginateAndSort.isListingSold;
     }
-    if (paginateAndSort.isListingFlagged !== undefined) {
+    if (
+      paginateAndSort.isListingFlagged !== undefined &&
+      paginateAndSort.isListingFlagged !== null
+    ) {
       whereCondition.isListingFlagged = paginateAndSort.isListingFlagged;
     }
-    if (paginateAndSort.isListingRented !== undefined) {
+    if (
+      paginateAndSort.isListingRented !== undefined &&
+      paginateAndSort.isListingRented !== null
+    ) {
       whereCondition.isListingRented = paginateAndSort.isListingRented;
     }
+
     const quotedColumnName = (column: string) => `"listing"."${column}"`;
+    console.log(whereCondition);
 
     try {
       const [listingResult, countsResult] = await Promise.all([
@@ -772,8 +786,9 @@ export class ListingService {
             'user.email',
           ])
           .where(whereCondition)
+          .andWhere('listing.published = true')
           .andWhere('listingType.deletedAt IS NULL')
-          .where('listing.published IS true')
+
           .orderBy(sortField, directionToSort)
           .skip(paginateAndSort.skip)
           .take(paginateAndSort.take)
