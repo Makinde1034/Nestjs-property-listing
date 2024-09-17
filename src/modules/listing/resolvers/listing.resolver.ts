@@ -59,6 +59,7 @@ import { AuctionParticipant } from '../../../entities/auction-participant.entity
 import { ListingAttributes } from '../../../entities/listing-attributes.entity';
 import { ListingAttributeService } from '../services/listing-attributes.service';
 import { SuccessResponse } from '../../../common/utils/success.response';
+import { FlagListing } from '../../../entities/flag-listing.entity';
 
 @Resolver()
 export class ListingResolver {
@@ -205,6 +206,19 @@ export class ListingResolver {
     findManyOptions?: PaginateAndSort,
   ) {
     return await this.listingService.viewFlaggedListing(findManyOptions);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @UseGuards(AdminGuard)
+  @Query(() => FlagListing, {
+    nullable: true,
+    name: 'flaggedListing',
+  })
+  async flaggedListings(
+    @Args('listingId')
+    listingId: string,
+  ) {
+    return await this.listingService.flaggedListing(listingId);
   }
 
   @UseGuards(AccessTokenGuard)

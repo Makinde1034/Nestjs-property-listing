@@ -703,6 +703,7 @@ type Query {
   findListingForBuyerAuthenticated(findManyOptions: CreateSearchHistoryInput): ListingResponse!
   fetchListingAttribute(listingId: String!): [ListingAttributes!]!
   viewFlaggedListings(findManyOptions: PaginateAndSort): FlaggedListingResponse
+  flaggedListing(listingId: String!): FlagListing
   getMessageInLocalLanguage: SuccessResponse
   getSearchHistory(paginateAndSort: PaginateAndSort): SearchHistoryResponse
   findOneOffer(id: String!): Offer!
