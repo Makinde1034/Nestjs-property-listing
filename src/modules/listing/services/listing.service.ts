@@ -830,6 +830,11 @@ export class ListingService {
           impressions: true,
           flaggedDate: true,
           listingTypeId: true,
+          bundleType: true,
+          promotedDate: true,
+          promotionExpiration: true,
+          featureDate: true,
+          featureExpiration: true,
 
           isListingPromoted: true,
           isListingFlagged: true,
