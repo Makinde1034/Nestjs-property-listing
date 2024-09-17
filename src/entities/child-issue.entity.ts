@@ -24,7 +24,7 @@ import { FlagListing } from './flag-listing.entity';
 export class ChildIssue extends BaseEntity {
   @Field(() => ParentIssue)
   @JoinColumn({ name: 'parentIssueId' })
-  @ManyToOne(() => ParentIssue, (parent) => parent.childIssue)
+  @ManyToOne(() => ParentIssue, (parent) => parent.childIssue, { eager: true })
   parentIssue: ParentIssue;
 
   @Column({ nullable: true })

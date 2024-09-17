@@ -10,6 +10,7 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { ListingRepository } from '../repositories/listing.repository';
 import {
@@ -1384,11 +1385,12 @@ export class ListingService {
         throw new BadRequestException(AppStrings.LISTING_NOT_FOUND);
       } else {
         await this.flagListingRepository.save({
-          parentIssueId: parentIssue.id,
-          childIssueId: childIssue.id,
+          parentIssue,
+          childIssue,
           listing,
           userId,
         });
+
         const date = new Date();
 
         await this.listingRepository.update(listing.id, {
@@ -1425,7 +1427,7 @@ export class ListingService {
           take: paginateAndSort.take,
           skip: paginateAndSort.skip,
           order: orderOptions,
-          relations: ['childIssue', 'parentIssue'],
+          relations: ['childIssue'],
         });
 
       return { flaggedListing, total };
@@ -1436,15 +1438,23 @@ export class ListingService {
   }
   async flaggedListing(id: string) {
     try {
-      return await this.flagListingRepository.findOneOrFail({
+      const flaggedListing = await this.flagListingRepository.findOne({
         where: {
           listing: { id: id },
         },
-        relations: ['parentIssue', 'reporter', 'childIssue'],
+        relations: ['reporter', 'childIssue'],
       });
+      if (!flaggedListing) {
+        throw new NotFoundException(AppStrings.NOT_FOUND);
+      }
+      return flaggedListing;
     } catch (error) {
-      this.logger.log(error);
-      throw new BadRequestException(error?.messages | error.data);
+      this.logger.error(error);
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new BadRequestException(error?.messages || error.data);
+      }
     }
   }
 

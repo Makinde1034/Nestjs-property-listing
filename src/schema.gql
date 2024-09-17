@@ -322,9 +322,9 @@ type Listing {
   rentDate: DateTime
   soldDate: DateTime
   furnished: String
-  promotedDate: DateTime!
-  promotionPrice: Float!
-  bundleType: String!
+  promotedDate: DateTime
+  promotionPrice: Float
+  bundleType: String
   featureDate: DateTime
   published: Boolean!
   flaggedDate: DateTime
@@ -666,6 +666,22 @@ type FinancialVsOrder {
   totalOrdered: Float
 }
 
+type SplashScreen {
+  id: String!
+  image: String
+  default: Boolean!
+  startDate: DateTime!
+  endDate: DateTime!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type SplashScreenResponse {
+  splashScreen: [SplashScreen!]!
+  total: Float!
+}
+
 type MessageResponse {
   messages: [Messages!]!
   total: Float!
@@ -673,6 +689,9 @@ type MessageResponse {
 
 type Query {
   app: String!
+  findAllSplashScreen(findOption: PaginateAndSort): SplashScreenResponse!
+  findOneSplashScreen(id: String): SplashScreenResponse!
+  findDefaultSplashScreen: SplashScreenResponse!
   activateTwoFa: TwoFaResult!
   user: User!
   getOneUser(id: String!): User!
@@ -736,15 +755,12 @@ type Query {
   getChat(chatFilterInput: ChatFilterInput!): MessageResponse!
 }
 
-input UserFilter {
+input PaginateAndSort {
   take: Float
   skip: Float
   sortField: String
   directionToSort: SortOrder
   where: WhereOption
-  level: String
-  status: String
-  type: String
 }
 
 enum SortOrder {
@@ -757,12 +773,15 @@ input WhereOption {
   whereParam: Boolean!
 }
 
-input PaginateAndSort {
+input UserFilter {
   take: Float
   skip: Float
   sortField: String
   directionToSort: SortOrder
   where: WhereOption
+  level: String
+  status: String
+  type: String
 }
 
 input AttributeFilter {
@@ -875,6 +894,9 @@ input ChatFilterInput {
 }
 
 type Mutation {
+  createSplashScreen(createSplashScreenInput: CreateSplashScreenInput!): SplashScreen!
+  updateSplashScreen: SplashScreen!
+  deleteSplashScreen: SplashScreen!
   register(RegisterInput: RegisterInput!): User!
   registerConfirm(RegisterConfirmInput: AuthRegisterConfirmDto!): String!
   login(loginInput: LoginInput!): LoginResponse!
@@ -945,6 +967,12 @@ type Mutation {
   deleteResponseTemplate(deleteResponseTemplate: DeleteResponsetemplate!): SuccessResponse!
   updateResponseTemplate(updateResponseTemplateInput: UpdateResponseTemplateInput!): ResponseTemplate!
   createReview(createReviewDto: CreateReviewDto!): Review!
+}
+
+input CreateSplashScreenInput {
+  default: Boolean!
+  startDate: DateTime!
+  endDate: DateTime!
 }
 
 input RegisterInput {

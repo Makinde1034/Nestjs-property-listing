@@ -199,15 +199,15 @@ export class Listing extends BaseEntity {
   furnished: string;
 
   @Column({ nullable: true })
-  @Field()
+  @Field({ nullable: true })
   promotedDate: Date;
 
   @Column({ nullable: true })
-  @Field()
+  @Field({ nullable: true })
   promotionPrice: number;
 
   @Column({ nullable: true })
-  @Field()
+  @Field({ nullable: true })
   bundleType: string;
 
   @Column({ nullable: true })

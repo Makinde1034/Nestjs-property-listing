@@ -5,7 +5,7 @@
 
 import { InputType, Field } from '@nestjs/graphql';
 import { IsOptional, IsEnum } from 'class-validator';
-import { TimePeriodForDashboard } from '../../../common/enums/sort.enum';
+import { TimePeriodForDashboard } from '../../../../common/enums/sort.enum';
 
 @InputType()
 export class AdminDashboardSort {
