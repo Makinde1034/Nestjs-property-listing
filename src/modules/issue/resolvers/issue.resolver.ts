@@ -15,6 +15,7 @@ import { ChildIssue, ParentIssue } from '../../../entities';
 import { IssueService } from '../services';
 import { Permissions } from 'src/common/decorator/permission';
 import { AdminGuard } from '../../auth/guards/admin.guard';
+import { SuccessResponse } from '../../../common/utils/success.response';
 
 @Resolver()
 export class IssueResolver {
@@ -75,10 +76,10 @@ export class IssueResolver {
    * @param {String}
    * @returns {Promise<string>}
    */
-  @Mutation(() => String)
+  @Mutation(() => SuccessResponse)
   @Permissions('delete-issues-categories')
   @UseGuards(AccessTokenGuard, PermissionsGuard)
-  async deleteIssue(@Args('id') id: string): Promise<string> {
+  async deleteIssue(@Args('id') id: string) {
     return await this.issueService.deleteIssue(id);
   }
 
@@ -106,10 +107,10 @@ export class IssueResolver {
   ): Promise<ChildIssue[]> {
     return await this.issueService.findAllChildIssues(parentId);
   }
-  @Mutation(() => String)
+  @Mutation(() => SuccessResponse)
   @Permissions('delete-issues-categories')
   @UseGuards(AccessTokenGuard, PermissionsGuard)
-  async deleteChildIssue(@Args('id') id: string): Promise<string> {
+  async deleteChildIssue(@Args('id') id: string) {
     return await this.issueService.deleteChildIssue(id);
   }
 }
