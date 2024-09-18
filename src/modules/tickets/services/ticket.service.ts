@@ -87,6 +87,7 @@ export class TicketService {
    * @param {ListTicketInput} input
    * @returns {Promise<Ticket[]>}
    */
+
   async listTickets(user: User, input?: ListTicketInput): Promise<Ticket[]> {
     try {
       const options: FindManyOptions<Ticket> = {};
