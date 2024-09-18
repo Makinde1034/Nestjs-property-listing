@@ -5,5 +5,5 @@
 
 export enum IssuePlacement {
   SUPPORT = 'Support',
-  FLAG = 'Flag',
+  FLAG = 'Flagging Listings',
 }
