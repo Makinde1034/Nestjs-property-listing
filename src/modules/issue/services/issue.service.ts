@@ -14,8 +14,9 @@ import {
 } from '../dtos';
 import { AppStrings } from 'src/common/messages/app.strings';
 import { ChildIssueRepository } from '../repositories/child-issue.repository';
-import { EntityManager, MoreThanOrEqual } from 'typeorm';
+import { EntityManager, MoreThanOrEqual, Not } from 'typeorm';
 import { IssueRepository } from '../repositories';
+import { SuccessResponse } from '../../../common/utils/success.response';
 
 @Injectable()
 export class IssueService {
@@ -122,13 +123,13 @@ export class IssueService {
     try {
       if (placement) {
         return await this.issueRepository.find({
-          where: { placement: placement },
+          where: { placement: placement, deletedAt: null },
           order: { sequentialId: 'ASC' },
           relations: ['childIssue'],
         });
       }
       return await this.issueRepository.find({
-        order: { sequentialId: 'ASC' },
+        order: { sequentialId: 'ASC', deletedAt: null },
         relations: ['childIssue'],
       });
     } catch (error) {
@@ -202,7 +203,7 @@ export class IssueService {
    * @param {String} id
    * @returns {Promise<string>}
    */
-  async deleteIssue(id: string): Promise<string> {
+  async deleteIssue(id: string) {
     const issue = await this.issueRepository.findOneByOrFail({ id });
 
     if (!issue) {
@@ -213,7 +214,7 @@ export class IssueService {
 
     const { sequentialId, placement } = issue;
 
-    return await this.issueRepository.manager.transaction(
+    await this.issueRepository.manager.transaction(
       async (transactionalEntityManager: EntityManager) => {
         if (sequentialId !== undefined) {
           // Fetch records with a sequentialId greater than or equal to the input's sequentialId
@@ -236,7 +237,7 @@ export class IssueService {
           // Save updated records
           await transactionalEntityManager.save(ParentIssue, records);
         }
-        return AppStrings.ISSUE_DELETED_SUCCESSFULLY;
+        return new SuccessResponse(AppStrings.ISSUE_DELETED_SUCCESSFULLY);
       },
     );
   }
@@ -287,7 +288,7 @@ export class IssueService {
     }
   }
 
-  async deleteChildIssue(id: string): Promise<string> {
+  async deleteChildIssue(id: string) {
     try {
       const issue = await this.childIssueRepository.findOneOrFail({
         where: { id },
@@ -330,7 +331,7 @@ export class IssueService {
           await transactionalEntityManager.softDelete(ChildIssue, id);
           this.logger.debug('Child issue deleted successfully');
 
-          return AppStrings.ISSUE_DELETED_SUCCESSFULLY;
+          return new SuccessResponse(AppStrings.ISSUE_DELETED_SUCCESSFULLY);
         },
       );
     } catch (error) {

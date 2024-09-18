@@ -958,10 +958,10 @@ type Mutation {
   verifyPayment(verifyPaymentInput: verifyPaymentInput!): verifyPaymentResponse!
   createIssue(input: CreateIssueInput!): ParentIssue!
   updateIssue(RequestInput: UpdateIssueInput!): ParentIssue!
-  deleteIssue(id: String!): String!
+  deleteIssue(id: String!): SuccessResponse!
   createChildIssue(input: CreateChildIssueInput!): ParentIssue!
   updateChildIssue(RequestInput: UpdateIssueInput!): ParentIssue!
-  deleteChildIssue(id: String!): String!
+  deleteChildIssue(id: String!): SuccessResponse!
   createTicket(RequestInput: CreateTicketInput!): Ticket!
   manageTicket(RequestInput: UpdateTicketInput!): Ticket!
   createResponseTemplate(createResponseTemplateInput: CreateResponseTemplateInput!): ResponseTemplate!
