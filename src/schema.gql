@@ -685,6 +685,7 @@ type SplashScreenResponse {
 type MessageResponse {
   messages: [Messages!]!
   total: Float!
+  lastMessage: Messages
 }
 
 type Query {

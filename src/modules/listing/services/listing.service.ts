@@ -755,7 +755,6 @@ export class ListingService {
     }
 
     const quotedColumnName = (column: string) => `"listing"."${column}"`;
-    console.log(whereCondition);
 
     try {
       const [listingResult, countsResult] = await Promise.all([

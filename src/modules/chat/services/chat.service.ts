@@ -3,7 +3,12 @@
  * For license. See license.txt
  */
 
-import { BadGatewayException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadGatewayException,
+  BadRequestException,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { ChatRepository } from '../repository/chat.repository';
 import { MessageRepository } from '../repository/message.repository';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
@@ -20,6 +25,7 @@ export class ChatService {
   ) {}
 
   logger = new Logger(ChatService.name);
+
   async chat(chatInput: CreateMessageInput, ticketId: string, user: User) {
     try {
       let chat: Chat;
@@ -33,6 +39,9 @@ export class ChatService {
           user,
         });
       } else {
+        if (!existingChat.ticket.isOpen) {
+          throw new BadRequestException('Ticket already closed');
+        }
         chat = existingChat;
       }
       await this.messageRepository.save({
@@ -130,9 +139,16 @@ export class ChatService {
         order: { createdAt: 'DESC' },
       });
 
-      return { messages, total };
+      const lastMessage = await this.messageRepository.find({
+        where: {
+          chat: { ticketId: chatFilterInput.ticketId },
+        },
+        order: { createdAt: 'DESC' },
+        take: 1,
+      });
+
+      return { messages, total, lastMessage: lastMessage[0] };
     } catch (error) {
-      // Improved error logging
       this.logger.error('Failed to fetch messages', error);
       throw new BadGatewayException('Unable to fetch messages', error.message);
     }
