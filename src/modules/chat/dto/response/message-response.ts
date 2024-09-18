@@ -12,4 +12,7 @@ export class MessageResponse {
 
   @Field()
   total: number;
+
+  @Field({ nullable: true })
+  lastMessage: Messages;
 }

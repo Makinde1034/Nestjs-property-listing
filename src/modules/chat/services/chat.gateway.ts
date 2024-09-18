@@ -21,6 +21,7 @@ import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 import { StorageService } from '../../file-handler/services/storage.service';
 import { Readable } from 'stream';
+import { TicketService } from '../../tickets/services';
 
 @WebSocketGateway({
   cors: {
@@ -39,6 +40,7 @@ export class ChatGateway implements OnGatewayConnection {
     private chatService: ChatService,
     private readonly authenticationService: AuthService,
     private storageService: StorageService,
+    private ticketService: TicketService,
   ) {}
 
   async handleConnection(socket: Socket) {
@@ -113,7 +115,7 @@ export class ChatGateway implements OnGatewayConnection {
   }
 
   @SubscribeMessage('send_message')
-  async handleFileUpload(
+  async handleSendMessage(
     @MessageBody() content: any,
     @ConnectedSocket() socket: Socket,
     @MessageBody('file') file?: Buffer,
@@ -141,6 +143,11 @@ export class ChatGateway implements OnGatewayConnection {
       };
 
       return multerFile;
+    }
+    const ticket = await this.ticketService.checkIfTicketStillOpen(ticketId);
+    if (!ticket) {
+      socket.emit('error', { message: 'Ticket Closed' });
+      return;
     }
 
     let multerFile: Express.Multer.File | undefined = undefined;

@@ -13,15 +13,22 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Messages } from '../../entities/message.entity';
 import { Chat } from '../../entities/chat.entity';
 import { ChatResolver } from './resolver/chat.resolver';
+import { TicketsModule } from '../tickets/tickets.module';
+import { TicketService } from '../tickets/services';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Messages, Chat]), AuthModule],
+  imports: [
+    TypeOrmModule.forFeature([Messages, Chat]),
+    AuthModule,
+    TicketsModule,
+  ],
   providers: [
     ChatService,
     ChatGateway,
     ChatRepository,
     MessageRepository,
     ChatResolver,
+    TicketService,
   ],
 })
 export class ChatModule {}

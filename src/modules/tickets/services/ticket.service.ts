@@ -324,4 +324,18 @@ export class TicketService {
       throw new BadRequestException(error);
     }
   }
+
+  async checkIfTicketStillOpen(id: string) {
+    try {
+      const ticket = await this.ticketRepository.findOneByOrFail({ id });
+
+      if (!ticket.isOpen) {
+        return false;
+      }
+      return true;
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
 }
