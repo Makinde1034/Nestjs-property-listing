@@ -728,6 +728,7 @@ type Query {
   getSearchHistory(paginateAndSort: PaginateAndSort): SearchHistoryResponse
   findOneOffer(id: String!): Offer!
   findOffers(findOptions: FindOfferInput!): OfferResponse!
+  findManyForOwner(findOptions: FindOfferInput!): OfferResponse!
   getWishlist: [Wishlist!]!
   findOneListingsForAdmin(listingId: String!): Listing!
   getAuction(id: String!): Auction!
@@ -935,6 +936,7 @@ type Mutation {
   flagListing(flagListingInput: FlagListingInput!): SuccessResponse!
   deleteListing(listingId: String!): SuccessResponse!
   createOffer(createOfferDto: CreateOfferDto!): Offer
+  finalizeOffer(id: String!): Offer
   updateOffer(updateOfferInput: UpdateOfferInput!): Offer
   acceptOffer(updateOfferInput: UpdateOfferInput!): Offer
   rejectOffer(updateOfferInput: UpdateOfferInput!): Offer

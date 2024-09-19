@@ -34,9 +34,9 @@ export class Offer extends BaseEntity {
   @Column({ nullable: true })
   acceptedAt: Date;
 
-  @Field({ defaultValue: 'inactive' })
+  @Field({ defaultValue: OfferListEnum.INACTIVE })
   @IsEnum(OfferListEnum)
-  @Column({ default: 'active' })
+  @Column({ default: OfferListEnum.ACTIVE })
   status: string;
 
   @Field()
