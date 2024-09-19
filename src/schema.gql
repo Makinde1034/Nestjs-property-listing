@@ -743,6 +743,7 @@ type Query {
   flaggedListing(listingId: String!): FlagListing
   getMessageInLocalLanguage: SuccessResponse
   getSearchHistory(paginateAndSort: PaginateAndSort): SearchHistoryResponse
+  getLastOfferPrice(listingId: String!): Offer
   findOneOffer(id: String!): Offer!
   findOffers(findOptions: FindOfferInput!): OfferResponse!
   findManyForOwner(findOptions: FindOfferInput!): OfferResponse!
@@ -955,7 +956,6 @@ type Mutation {
   deleteListing(listingId: String!): SuccessResponse!
   createOffer(createOfferDto: CreateOfferDto!): Offer
   finalizeOffer(id: String!): Offer
-  getLastOfferPrice(listingId: String!): Offer
   updateOffer(updateOfferInput: UpdateOfferInput!): Offer
   acceptOffer(updateOfferInput: UpdateOfferInput!): Offer
   rejectOffer(updateOfferInput: UpdateOfferInput!): Offer
