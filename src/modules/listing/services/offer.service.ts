@@ -124,7 +124,7 @@ export class OfferService {
         },
       );
 
-      //TODO:switch to an event
+      //TODO:switch to an emited event
       this.notificationService.sendNotification({
         creatorId: user.id,
         receiverId: seller.id,

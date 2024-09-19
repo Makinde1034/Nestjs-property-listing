@@ -30,7 +30,7 @@ export class SuccessResponse {
   toJSON() {
     AppLogger.log(`(LOGS) Success - ${this.message}`);
 
-    if (this.data) {
+    if (this.message) {
       return {
         status: 200,
         message: this.message,

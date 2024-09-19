@@ -19,6 +19,9 @@ import { PdfInput } from '../../file-handler/dto/pdf.dto';
 import { PdfService } from '../../file-handler/services/pdf.service';
 import { MailgunEmailService } from '../../mail/services/implementations';
 import { generateRandomString } from '../../../common/utils/helper';
+import { StorageService } from '../../file-handler/services/storage.service';
+import { Readable } from 'stream';
+import { QrCodeService } from '../../file-handler/services/qrcode.service';
 
 @Injectable()
 export class PaymentService {
@@ -27,6 +30,8 @@ export class PaymentService {
     private mailService: MailgunEmailService,
     private invoiceRepository: InvoiceRepository,
     private readonly hyperPayService: HyperPayService,
+    private storageService: StorageService,
+    private readonly qrcodeService: QrCodeService,
   ) {}
   logger = new Logger(PaymentService.name);
   async initializePayment(
@@ -56,7 +61,9 @@ export class PaymentService {
 
   async invoice(data?: PdfInput, user?: User, listing?: Listing) {
     try {
+      const qrcode = await this.qrcodeService.generateQrCode('');
       const payload: CreateInvoiceInput = {
+        qrcode: qrcode,
         expiredAt: addDays(new Date(), 4),
         price: data.price,
         userId: user.id,
@@ -68,7 +75,20 @@ export class PaymentService {
       data.invoiceNumber = invoice.id;
       const invoicePdf =
         await this.pdfGeneratorService.generatePdfForInvoice(data);
+      const multerFile: Express.Multer.File = {
+        fieldname: invoice.id.toString(),
+        originalname: invoice.id.toString(),
+        encoding: '7bit',
+        mimetype: 'image/jpeg',
+        buffer: invoicePdf,
+        size: invoicePdf.length,
+        stream: Readable.from(invoicePdf),
+        destination: '',
+        filename: invoice.id.toString(),
+        path: '',
+      };
 
+      await this.storageService.uploadFile(multerFile);
       await this.mailService.sendEmailInvoice(user, invoicePdf);
       return invoice;
     } catch (error) {

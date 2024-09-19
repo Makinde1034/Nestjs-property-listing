@@ -14,7 +14,7 @@ import {
 } from '../dtos';
 import { AppStrings } from 'src/common/messages/app.strings';
 import { ChildIssueRepository } from '../repositories/child-issue.repository';
-import { EntityManager, MoreThanOrEqual, Not } from 'typeorm';
+import { EntityManager, MoreThanOrEqual } from 'typeorm';
 import { IssueRepository } from '../repositories';
 import { SuccessResponse } from '../../../common/utils/success.response';
 
@@ -204,13 +204,13 @@ export class IssueService {
    * @returns {Promise<string>}
    */
   async deleteIssue(id: string) {
-    const issue = await this.issueRepository.findOneByOrFail({ id });
+    const issue = await this.issueRepository.findOneBy({ id });
 
     if (!issue) {
       throw new BadRequestException(AppStrings.NOT_FOUND);
     }
 
-    await this.issueRepository.softDelete(id);
+    // await this.issueRepository.softDelete(id);
 
     const { sequentialId, placement } = issue;
 
@@ -237,9 +237,9 @@ export class IssueService {
           // Save updated records
           await transactionalEntityManager.save(ParentIssue, records);
         }
-        return new SuccessResponse(AppStrings.ISSUE_DELETED_SUCCESSFULLY);
       },
     );
+    return new SuccessResponse(AppStrings.ISSUE_DELETED_SUCCESSFULLY);
   }
 
   /*********************************
@@ -290,14 +290,17 @@ export class IssueService {
 
   async deleteChildIssue(id: string) {
     try {
-      const issue = await this.childIssueRepository.findOneOrFail({
+      const issue = await this.childIssueRepository.findOne({
         where: { id },
         relations: ['parentIssue'],
       });
+      if (!issue) {
+        throw new BadRequestException(AppStrings.NOT_FOUND);
+      }
 
       const { sequentialId, parentIssueId } = issue;
 
-      return await this.issueRepository.manager.transaction(
+      await this.issueRepository.manager.transaction(
         async (transactionalEntityManager: EntityManager) => {
           if (sequentialId !== undefined) {
             this.logger.debug(
@@ -330,10 +333,9 @@ export class IssueService {
           this.logger.debug('Soft deleting the child issue with id:', id);
           await transactionalEntityManager.softDelete(ChildIssue, id);
           this.logger.debug('Child issue deleted successfully');
-
-          return new SuccessResponse(AppStrings.ISSUE_DELETED_SUCCESSFULLY);
         },
       );
+      return new SuccessResponse(AppStrings.ISSUE_DELETED_SUCCESSFULLY);
     } catch (error) {
       this.logger.error('Failed to delete child issue:', error);
       throw new BadRequestException(error);
