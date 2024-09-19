@@ -60,6 +60,7 @@ import { ListingAttributes } from '../../../entities/listing-attributes.entity';
 import { ListingAttributeService } from '../services/listing-attributes.service';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { FlagListing } from '../../../entities/flag-listing.entity';
+import { query } from 'express';
 
 @Resolver()
 export class ListingResolver {
@@ -287,7 +288,7 @@ export class ListingResolver {
   }
 
   @UseGuards(AccessTokenGuard)
-  @Mutation(() => Offer, { name: 'getLastOfferPrice', nullable: true })
+  @Query(() => Offer, { name: 'getLastOfferPrice', nullable: true })
   async getLastOfferPrice(@Args('listingId') listingId: string) {
     return await this.offerService.getLastOfferPrice(listingId);
   }

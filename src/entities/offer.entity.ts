@@ -48,7 +48,7 @@ export class Offer extends BaseEntity {
   couponCode: string;
 
   @Field(() => User)
-  @ManyToOne(() => User, (user) => user.offer, { eager: true })
+  @ManyToOne(() => User, (user) => user.offer)
   user: User;
 
   @Field(() => Listing)

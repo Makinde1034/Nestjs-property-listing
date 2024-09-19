@@ -55,6 +55,7 @@ export class OfferService {
       where: {
         listingId: id,
       },
+      select: ['id', 'price'],
       order: { price: 'DESC' },
     });
     return offer[0];
