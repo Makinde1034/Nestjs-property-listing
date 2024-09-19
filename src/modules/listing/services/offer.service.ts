@@ -50,6 +50,16 @@ export class OfferService {
   ) {}
   logger = new Logger(OfferService.name);
 
+  async getLastOfferPrice(id: string) {
+    const offer = await this.offerRepository.find({
+      where: {
+        listingId: id,
+      },
+      order: { price: 'DESC' },
+    });
+    return offer[0];
+  }
+
   async createAnOffer(createOfferDto: CreateOfferDto, user: User) {
     try {
       const offer = await this.offerRepository.find({

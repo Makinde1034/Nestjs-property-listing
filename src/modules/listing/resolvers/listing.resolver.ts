@@ -287,6 +287,12 @@ export class ListingResolver {
   }
 
   @UseGuards(AccessTokenGuard)
+  @Mutation(() => Offer, { name: 'getLastOfferPrice', nullable: true })
+  async getLastOfferPrice(@Args('listingId') listingId: string) {
+    return await this.offerService.getLastOfferPrice(listingId);
+  }
+
+  @UseGuards(AccessTokenGuard)
   @Mutation(() => Offer, { name: 'updateOffer', nullable: true })
   async updateOffer(
     @Args('updateOfferInput') updateOfferInput: UpdateOfferInput,
