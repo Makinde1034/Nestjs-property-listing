@@ -38,6 +38,7 @@ import {
 } from '../dto/response/admin-response';
 import { TicketRepository } from '../../tickets/repositories';
 import { AdminDashboardSort } from '../dto/request/admin-request';
+import { AdminRepository } from '../repositories/admin.repository';
 
 @Injectable()
 export class AdminService {
@@ -48,6 +49,7 @@ export class AdminService {
     private userTracking: UserTrackingRepository,
     private issuesRepository: IssueRepository,
     private ticketsRepository: TicketRepository,
+    private adminRepository: AdminRepository,
   ) {}
 
   logger = new Logger(AdminService.name);
@@ -480,6 +482,19 @@ export class AdminService {
       }));
 
       return ageRangeCounts;
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException('Failed to fetch user age count');
+    }
+  }
+
+  async adminDefault() {
+    try {
+      const result = await this.adminRepository.find({
+        select: ['id', 'saii', 'vat', 'minimumOfferPercentage'],
+      });
+
+      return result[0];
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException('Failed to fetch user age count');

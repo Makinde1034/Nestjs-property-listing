@@ -34,6 +34,7 @@ import { Purpose } from '../../../common/enums';
 import { NotificationScopesEnum } from '../../../common/enums/notification-scope.enum';
 import { NotificationService } from '../../notification/services';
 import { OfferListEnum } from '../../../common/enums/status.enum';
+import { AdminService } from '../../admin/services/admin.service';
 
 @Injectable()
 export class OfferService {
@@ -45,6 +46,7 @@ export class OfferService {
     private userRepository: UserRepository,
     private notificationScopeRepository: NotificationScopeRepository,
     private notificationService: NotificationService,
+    private adminDefaultService: AdminService,
   ) {}
   logger = new Logger(OfferService.name);
 
@@ -173,10 +175,15 @@ export class OfferService {
 
       if (!listing) {
         throw new NotFoundException(AppStrings.LISTING_NOT_FOUND);
-      } //TODO: Add to admin default
-      const price = (80 / listing.price) * 100 * listing.price;
-      const saii = (2.5 / listing.price) * 100 * listing.price;
-      const vat = (15 / saii) * 100;
+      }
+
+      const adminDefault = await this.adminDefaultService.adminDefault(); //TODO: Add to admin default
+      const price =
+        (adminDefault.minimumOfferPercentage / listing.price) *
+        100 *
+        listing.price;
+      const saii = (adminDefault.saii / listing.price) * 100 * listing.price;
+      const vat = (adminDefault.vat / saii) * 100;
       const total = vat + saii + price;
 
       const minimumListingPrice = listing.price - price + total;
