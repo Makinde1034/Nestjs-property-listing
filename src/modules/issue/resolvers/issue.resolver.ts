@@ -74,7 +74,7 @@ export class IssueResolver {
    *
    * @async
    * @param {String}
-   * @returns {Promise<string>}
+   * @returns {Promise<SuccessResponse>}
    */
   @Mutation(() => SuccessResponse)
   @Permissions('delete-issues-categories')
