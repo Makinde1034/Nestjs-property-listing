@@ -53,6 +53,12 @@ import { SplashScreenController } from './controller/splash-screen-controller';
     SplashScreenResolver,
   ],
   controllers: [SplashScreenController],
-  exports: [AdminService, AdminRepository, SplashScreenService],
+  exports: [
+    AdminService,
+    AdminRepository,
+    SplashScreenService,
+    UserTrackingRepository,
+    TicketRepository,
+  ],
 })
 export class AdminModule {}

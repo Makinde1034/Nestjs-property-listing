@@ -5,9 +5,10 @@
 
 import { Column, CreateDateColumn, Entity, UpdateDateColumn } from 'typeorm';
 import BaseEntity from './base.entity';
-import { Field } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 
 @Entity()
+@ObjectType()
 export class AdminDefault extends BaseEntity {
   @Field()
   @Column()
@@ -20,6 +21,15 @@ export class AdminDefault extends BaseEntity {
   @Field()
   @Column()
   city: string;
+
+  @Field()
+  @Column({ type: 'decimal' })
+  saii: number;
+
+  @Field()
+  @Column({ type: 'decimal' })
+  vat: number;
+
   @Field()
   @Column()
   state: string;

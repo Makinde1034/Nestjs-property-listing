@@ -5,6 +5,7 @@
 
 import {
   BadRequestException,
+  HttpException,
   Injectable,
   Logger,
   NotFoundException,
@@ -32,6 +33,8 @@ import {
 import { Purpose } from '../../../common/enums';
 import { NotificationScopesEnum } from '../../../common/enums/notification-scope.enum';
 import { NotificationService } from '../../notification/services';
+import { OfferListEnum } from '../../../common/enums/status.enum';
+import { AdminService } from '../../admin/services/admin.service';
 
 @Injectable()
 export class OfferService {
@@ -43,8 +46,19 @@ export class OfferService {
     private userRepository: UserRepository,
     private notificationScopeRepository: NotificationScopeRepository,
     private notificationService: NotificationService,
+    private adminDefaultService: AdminService,
   ) {}
   logger = new Logger(OfferService.name);
+
+  async getLastOfferPrice(id: string) {
+    const offer = await this.offerRepository.find({
+      where: {
+        listingId: id,
+      },
+      order: { price: 'DESC' },
+    });
+    return offer[0];
+  }
 
   async createAnOffer(createOfferDto: CreateOfferDto, user: User) {
     try {
@@ -138,6 +152,30 @@ export class OfferService {
     }
   }
 
+  async finalizeOffer(id: string) {
+    try {
+      const offer = await this.offerRepository.findOneBy({ id });
+      if (!offer) {
+        throw new NotFoundException(AppStrings.NOT_FOUND);
+      }
+
+      const { affected } = await this.offerRepository.update(id, {
+        status: OfferListEnum.ACTIVE,
+      });
+      if (affected > 0) {
+        return await this.offerRepository.findOneByOrFail({ id: offer.id });
+      }
+    } catch (error) {
+      this.logger.log(error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new BadRequestException(error);
+      }
+    }
+  }
+
   async getMinimumOfferForAListingAndUser(
     listingId: string,
   ): Promise<[number, Listing]> {
@@ -147,11 +185,16 @@ export class OfferService {
 
       if (!listing) {
         throw new NotFoundException(AppStrings.LISTING_NOT_FOUND);
-      } //TODO: Add to admin default
-      const price = (80 / listing.price) * 100 * listing.price;
-      const saii = (2.5 / listing.price) * 100 * listing.price;
-      const vat = (15 / listing.price) * 100 * listing.price;
-      const total = vat + saii;
+      }
+
+      const adminDefault = await this.adminDefaultService.adminDefault(); //TODO: Add to admin default
+      const price =
+        (adminDefault.minimumOfferPercentage / listing.price) *
+        100 *
+        listing.price;
+      const saii = (adminDefault.saii / listing.price) * 100 * listing.price;
+      const vat = (adminDefault.vat / saii) * 100;
+      const total = vat + saii + price;
 
       const minimumListingPrice = listing.price - price + total;
       return [minimumListingPrice, listing];
@@ -176,7 +219,23 @@ export class OfferService {
   async findMany(findOfferInput: FindOfferInput) {
     try {
       const [offer, total] = await this.offerRepository.findAndCount({
-        where: { listingId: findOfferInput.listingId },
+        where: {
+          listingId: findOfferInput.listingId,
+          status: OfferListEnum.ACTIVE,
+        },
+        skip: findOfferInput.skip,
+        take: findOfferInput.take,
+      });
+      return { offer, total };
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+  async findManyForOwner(findOfferInput: FindOfferInput, user?: User) {
+    try {
+      const [offer, total] = await this.offerRepository.findAndCount({
+        where: { listingId: findOfferInput.listingId, userId: user.id },
         skip: findOfferInput.skip,
         take: findOfferInput.take,
       });

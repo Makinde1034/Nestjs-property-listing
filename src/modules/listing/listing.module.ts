@@ -46,6 +46,8 @@ import { GpsCoordinate } from '../../entities/gps-coordinates.entity';
 import { IssueRepository } from '../issue/repositories';
 import { ChildIssueRepository } from '../issue/repositories/child-issue.repository';
 import { ListingAttributeService } from './services/listing-attributes.service';
+import { AdminService } from '../admin/services/admin.service';
+import { AdminModule } from '../admin/admin.module';
 
 @Module({
   imports: [
@@ -62,6 +64,7 @@ import { ListingAttributeService } from './services/listing-attributes.service';
     AdPackageModule,
     PaymentModule,
     NotificationModule,
+    AdminModule,
   ],
   controllers: [ListingController, ListingTypeController],
   providers: [
@@ -96,6 +99,7 @@ import { ListingAttributeService } from './services/listing-attributes.service';
     IssueRepository,
     ChildIssueRepository,
     ListingAttributeService,
+    AdminService,
   ],
   exports: [ListingTypeService],
 })

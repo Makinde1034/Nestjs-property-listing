@@ -280,6 +280,17 @@ export class ListingResolver {
   ) {
     return await this.offerService.createAnOffer(createOfferDto, ctx.req.user);
   }
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => Offer, { name: 'finalizeOffer', nullable: true })
+  async finalizeOffer(@Args('id') id: string, @Context() ctx: any) {
+    return await this.offerService.finalizeOffer(id);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => Offer, { name: 'getLastOfferPrice', nullable: true })
+  async getLastOfferPrice(@Args('listingId') listingId: string) {
+    return await this.offerService.getLastOfferPrice(listingId);
+  }
 
   @UseGuards(AccessTokenGuard)
   @Mutation(() => Offer, { name: 'updateOffer', nullable: true })
@@ -318,7 +329,16 @@ export class ListingResolver {
   async findMany(@Args('findOptions') paginateAndSort: FindOfferInput) {
     return await this.offerService.findMany(paginateAndSort);
   }
-
+  @Query(() => OfferResponse, { name: 'findManyForOwner' })
+  async findManyForOwner(
+    @Args('findOptions') paginateAndSort: FindOfferInput,
+    @Context() ctx: any,
+  ) {
+    return await this.offerService.findManyForOwner(
+      paginateAndSort,
+      ctx.req.user,
+    );
+  }
   /**************************
    *
    *Promotion
