@@ -123,13 +123,13 @@ export class IssueService {
     try {
       if (placement) {
         return await this.issueRepository.find({
-          where: { placement: placement, deletedAt: null },
+          where: { placement: placement, childIssue: { deletedAt: null } },
           order: { sequentialId: 'ASC' },
           relations: ['childIssue'],
         });
       }
       return await this.issueRepository.find({
-        order: { sequentialId: 'ASC', deletedAt: null },
+        order: { sequentialId: 'ASC', childIssue: { deletedAt: null } },
         relations: ['childIssue'],
       });
     } catch (error) {
@@ -210,7 +210,7 @@ export class IssueService {
       throw new BadRequestException(AppStrings.NOT_FOUND);
     }
 
-    // await this.issueRepository.softDelete(id);
+    await this.issueRepository.softDelete(id);
 
     const { sequentialId, placement } = issue;
 
