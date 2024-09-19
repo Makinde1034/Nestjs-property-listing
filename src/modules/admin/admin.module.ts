@@ -22,6 +22,7 @@ import { SplashScreenService } from './services/splash-screen.service';
 import { SplashScreen } from '../../entities/splash-screen.entity';
 import { SplashScreenRepository } from './repositories/splash-screen.repository';
 import { SplashScreenResolver } from './resolver/splash-screen.resolver';
+import { SplashScreenController } from './controller/splash-screen-controller';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { SplashScreenResolver } from './resolver/splash-screen.resolver';
     SplashScreenRepository,
     SplashScreenResolver,
   ],
+  controllers: [SplashScreenController],
   exports: [AdminService, AdminRepository, SplashScreenService],
 })
 export class AdminModule {}

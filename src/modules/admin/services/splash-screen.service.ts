@@ -43,17 +43,19 @@ export class SplashScreenService {
     try {
       const take = findOption.take ?? 20;
 
-      return await this.splashScreenRepository.findAndCount({
-        take: Math.min(take, 20),
-        skip: findOption.skip ?? 0,
-      });
+      const [splashScreen, total] =
+        await this.splashScreenRepository.findAndCount({
+          take: Math.min(take, 20),
+          skip: findOption.skip ?? 0,
+        });
+      return { splashScreen, total };
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
     }
   }
 
-  async findOne(id: string) {
+  async findOne(id: number) {
     try {
       const splashScreen = await this.splashScreenRepository.findOneByOrFail({
         id,
@@ -61,6 +63,7 @@ export class SplashScreenService {
       if (!splashScreen) {
         throw new BadRequestException(AppStrings.NOT_FOUND);
       }
+      return splashScreen;
     } catch (error) {
       this.logger.log(error);
       if (error instanceof HttpException) {
@@ -94,7 +97,7 @@ export class SplashScreenService {
     }
   }
 
-  async delete(id: string) {
+  async delete(id: number) {
     try {
       const splashScreen = await this.splashScreenRepository.findOneByOrFail({
         id,
@@ -116,7 +119,7 @@ export class SplashScreenService {
     }
   }
 
-  async uploadImage(id: string, file: Express.Multer.File) {
+  async uploadImage(id: number, file: Express.Multer.File) {
     try {
       const splashScreen = await this.splashScreenRepository.findOneByOrFail({
         id,
@@ -138,6 +141,7 @@ export class SplashScreenService {
         return await this.splashScreenRepository.findOneByOrFail({ id });
       }
     } catch (error) {
+      console.log(error);
       this.logger.log(error);
       if (error instanceof HttpException) {
         throw error;

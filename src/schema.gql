@@ -667,7 +667,7 @@ type FinancialVsOrder {
 }
 
 type SplashScreen {
-  id: String!
+  id: Float!
   image: String
   default: Boolean!
   startDate: DateTime!
@@ -691,7 +691,7 @@ type MessageResponse {
 type Query {
   app: String!
   findAllSplashScreen(findOption: PaginateAndSort): SplashScreenResponse!
-  findOneSplashScreen(id: String): SplashScreenResponse!
+  findOneSplashScreen(id: Float!): SplashScreen!
   findDefaultSplashScreen: SplashScreenResponse!
   activateTwoFa: TwoFaResult!
   user: User!
