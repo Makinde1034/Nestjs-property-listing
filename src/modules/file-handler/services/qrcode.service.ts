@@ -1,4 +1,8 @@
-// src/qr-code.service.ts
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { Injectable } from '@nestjs/common';
 import * as qrcode from 'qrcode';
 

@@ -147,10 +147,13 @@ export class OfferService {
 
       if (!listing) {
         throw new NotFoundException(AppStrings.LISTING_NOT_FOUND);
-      }
+      } //TODO: Add to admin default
       const price = (80 / listing.price) * 100 * listing.price;
+      const saii = (2.5 / listing.price) * 100 * listing.price;
+      const vat = (15 / listing.price) * 100 * listing.price;
+      const total = vat + saii;
 
-      const minimumListingPrice = listing.price - price;
+      const minimumListingPrice = listing.price - price + total;
       return [minimumListingPrice, listing];
     } catch (error) {
       this.logger.log(error);

@@ -121,18 +121,21 @@ export class IssueService {
 
   async findAllIssuesByPlacement(placement: string): Promise<ParentIssue[]> {
     try {
+      console.log('here');
+
       if (placement) {
         return await this.issueRepository.find({
-          where: { placement: placement, childIssue: { deletedAt: null } },
+          where: { placement: placement },
           order: { sequentialId: 'ASC' },
           relations: ['childIssue'],
         });
       }
       return await this.issueRepository.find({
-        order: { sequentialId: 'ASC', childIssue: { deletedAt: null } },
+        order: { sequentialId: 'ASC' },
         relations: ['childIssue'],
       });
     } catch (error) {
+      console.log(error);
       this.logger.log(error);
       throw new BadRequestException(error);
     }
