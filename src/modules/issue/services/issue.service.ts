@@ -263,14 +263,19 @@ export class IssueService {
   async updateChildIssue(updateChildissue: UpdateChildIssueInput) {
     try {
       const { id, ...rest } = updateChildissue;
-
+      const childIssue = await this.childIssueRepository.findOneByOrFail({
+        id,
+      });
+      if (!childIssue) {
+        throw new BadRequestException(AppStrings.NOT_FOUND);
+      }
       const childIssueCount = await this.childIssueRepository.count();
       rest.sequentialId = childIssueCount + 1;
 
       const { affected } = await this.childIssueRepository.update(id, rest);
 
       if (affected > 0) {
-        return this.childIssueRepository.findOneByOrFail({ id });
+        return await this.childIssueRepository.findOneByOrFail({ id });
       }
     } catch (error) {
       this.logger.log(error);
