@@ -39,7 +39,7 @@ export class ChatService {
           user,
         });
       } else {
-        if (!existingChat.ticket.isOpen) {
+        if (existingChat?.ticket?.isOpen === false) {
           throw new BadRequestException('Ticket already closed');
         }
         chat = existingChat;
