@@ -708,6 +708,21 @@ type MessageResponse {
   lastMessage: Messages
 }
 
+type KnowledgeBaseAndHelp {
+  """id"""
+  id: Int!
+  content: String!
+  image: String!
+  title: String!
+  authorImage: String!
+  authorBio: String!
+  language: String!
+  published: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime!
+}
+
 type Query {
   app: String!
   findAllSplashScreen(findOption: PaginateAndSort): SplashScreenResponse!
@@ -777,6 +792,7 @@ type Query {
   findManyReviews(findMayOptions: FindManyReviewDto): ReviewResponse!
   findCities(findCities: PaginateAndSort): CityResponse!
   getChat(chatFilterInput: ChatFilterInput!): MessageResponse!
+  knowledgeBaseAndHelp(id: Int!): KnowledgeBaseAndHelp!
 }
 
 input PaginateAndSort {
@@ -992,6 +1008,9 @@ type Mutation {
   deleteResponseTemplate(deleteResponseTemplate: DeleteResponsetemplate!): SuccessResponse!
   updateResponseTemplate(updateResponseTemplateInput: UpdateResponseTemplateInput!): ResponseTemplate!
   createReview(createReviewDto: CreateReviewDto!): Review!
+  createKnowledgeBaseAndHelp(createKnowledgeBaseAndHelpInput: CreateKnowledgeBaseAndHelpInput!): KnowledgeBaseAndHelp!
+  updateKnowledgeBaseAndHelp(updateKnowledgeBaseAndHelpInput: UpdateKnowledgeBaseAndHelpInput!): KnowledgeBaseAndHelp!
+  removeKnowledgeBaseAndHelp(id: Int!): KnowledgeBaseAndHelp!
 }
 
 input CreateSplashScreenInput {
@@ -1430,4 +1449,15 @@ input CreateReviewDto {
   rating: Float!
   comment: String
   reviewType: String!
+}
+
+input CreateKnowledgeBaseAndHelpInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input UpdateKnowledgeBaseAndHelpInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
 }

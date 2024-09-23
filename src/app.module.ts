@@ -40,6 +40,7 @@ import { WebHookModule } from './modules/webhook/web-hook.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { SplashScreenResolver } from './modules/admin/resolver/splash-screen.resolver';
+import { KnowledgeBaseAndHelpModule } from './modules/knowledge-base-and-help/knowledge-base-and-help.module';
 
 @Module({
   imports: [
@@ -99,6 +100,7 @@ import { SplashScreenResolver } from './modules/admin/resolver/splash-screen.res
     PaymentModule,
     WebHookModule,
     ChatModule,
+    KnowledgeBaseAndHelpModule,
   ],
   controllers: [],
   providers: [AppResolver, JobService, SplashScreenResolver],
