@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>E-Invoice Template</title>
+    <style>
+      body {
+        height: 942px;
+        width: 795px;
+        margin: 30px auto;
+        font-family: Arial, sans-serif;
+      }
+      .container {
+        margin: 0;
+        padding-top: 50px;
+        background-image: linear-gradient(to right, #f3f3f3, #e8e8e8);
+        box-sizing: border-box;
+        position: relative;
+        overflow: hidden;
+        height: 842px; /* Adjusted height */
+        border-left: #e8e8e8 solid 2px;
+        border-right: #ffffff solid 2px;
+        box-shadow:
+          5px 5px 5px 0px #e8e8e8,
+          inset 4px 4px 15px 0px #fff,
+          5px 5px 15px 5px rgba(0, 0, 0, 0);
+      }
+
+      .first-section {
+        padding-bottom: 15px;
+        margin-left: 20px;
+        margin-right: 20px;
+        border-bottom: 2px solid rgb(185, 182, 182);
+      }
+      .first-section-element {
+        display: flex;
+        justify-items: center;
+        justify-content: space-between;
+        align-items: center;
+        margin: 0 20px 0 20px;
+      }
+      .invoice-type {
+        font-size: larger;
+        text-align: center;
+      }
+      .first-section-items {
+        flex-basis: 50%;
+        justify-items: center;
+      }
+      .first-section-items-box {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        margin: 10px;
+      }
+      .first-section-items-box-container {
+        display: flex;
+        justify-content: center;
+      }
+      .first-section-box {
+        display: flex;
+        font-size: small;
+      }
+
+      .second-section {
+        padding-left: 40px;
+      }
+
+      .second-section-element {
+        display: flex;
+        align-items: center;
+      }
+      .box-1 {
+        flex-basis: 25%;
+      }
+      .box-2 {
+        flex-basis: 75%;
+        display: flex;
+        justify-content: right;
+      }
+      .box-2 .box {
+        border-right: dotted #686868 1px;
+        padding-right: 10px;
+        padding-left: 5px;
+        color: #686868;
+      }
+      .third-section-box {
+        display: flex;
+        justify-content: space-around;
+      }
+      .third-section {
+        padding-bottom: 50px;
+      }
+      .third-section-box .box {
+        border-right: dotted #999 1px;
+        padding-right: 10px;
+        padding-left: 5px;
+      }
+      .fouth-section {
+        display: flex;
+        padding: 20px;
+      }
+
+      .fifth-section {
+        padding: 20px;
+      }
+      .last-box {
+        padding: 0;
+        display: flex;
+        justify-content: space-between;
+        margin: 0;
+      }
+      .table {
+        flex-basis: 100%;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-bottom: 20px;
+        font-size: 14px;
+      }
+      th,
+      td {
+        color: #707070;
+
+        border-right: 1px dotted #999;
+        padding: 6px;
+        word-wrap: break-word;
+        max-width: 150px;
+        font-size: small;
+        text-align: center;
+      }
+      th {
+        font-weight: 500;
+        font-size: small;
+        border-bottom: 1px dotted #999;
+      }
+
+      p {
+        margin: 10px 20px 0 20px;
+        font-size: small;
+        color: #707070;
+      }
+      .buyer-information,
+      .seller-information {
+        display: block;
+        padding: 20px;
+        text-align: end;
+      }
+      h2 {
+        color: #707070;
+        font-size: medium;
+        font-weight: 200;
+        padding: 0;
+        margin: 3px;
+      }
+      h1 {
+        color: #707070;
+      }
+      .box-left {
+        padding-left: 30px;
+      }
+
+      /* SVG as bottom border */
+      .svg-border {
+        position: absolute;
+        width: 795px;
+
+        height: 85px;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="first-section">
+        <div class="first-section-element">
+          <div class="first-section-items" id="qrcode">QR Code</div>
+
+          <div class="first-section-items">
+            <h1 class="invoice-type">Invoice Type</h1>
+
+            <div class="first-section-items-box-container">
+              <div class="first-section-items-box">
+                <div><p>Date</p></div>
+                <div><p>{{22/5/31-15-46-32}}</p></div>
+              </div>
+
+              <div class="first-section-items-box">
+                <div class="first-section-box">
+                  <p>Invoice reference number</p>
+                </div>
+                <div class="first-section-box"><p>{{ME4430}}</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="second-section">
+        <h2 class="seller-information">Seller information</h2>
+
+        <div class="second-section-element">
+          <div class="box">
+            <p>CR Number</p>
+            <p>{{0000000000}}</p>
+          </div>
+          <div class="box-2">
+            <div class="box">
+              <p>Zatca Number</p>
+              <p>{{....}}</p>
+            </div>
+
+            <div class="box">
+              <p>Seller Address</p>
+              <p>{{....}}</p>
+            </div>
+
+            <div class="box">
+              <p>Seller Name</p>
+              <p>{{sellerName}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="third-section">
+        <h2 class="buyer-information">Buyer Information</h2>
+        <div class="third-section-box">
+          <div class="box">
+            <p>Zatca Number</p>
+            <p>{{value}}</p>
+          </div>
+          <div class="box">
+            <p>CR Number</p>
+            <p>{{value}}</p>
+          </div>
+          <div class="box">
+            <p>Customer Address</p>
+            <p>{{value}}</p>
+          </div>
+          <div class="box">
+            <p>Customer Name</p>
+            <p>{{value}}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="fouth-section">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Total With Vat</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{{209}}</td>
+            </tr>
+            <tr>
+              <td>{{92}}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Table 2 with role "grid" -->
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Vat</th>
+              <th>Vat %</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>20</td>
+              <td>%17</td>
+            </tr>
+            <tr>
+              <td>20</td>
+              <td>%20</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Saii Fee</th>
+              <th>Auction Entry fee</th>
+              <th>product 3</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>23</td>
+              <td>23</td>
+              <td>24</td>
+            </tr>
+            <tr>
+              <td>23</td>
+              <td>23</td>
+              <td>23</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="fifth-section">
+        <div class="last-box">
+          <p class="box-left">123</p>
+          <p class="invoice-reference">Total without VAT</p>
+        </div>
+
+        <div class="last-box">
+          <p class="box-left">123</p>
+          <p class="box-right">VAT</p>
+        </div>
+        <div class="last-box">
+          <p class="box-left">123</p>
+          <p class="box-right">Total with VAT</p>
+        </div>
+      </div>
+
+      <!-- SVG as bottom border line -->
+    </div>
+    <div class="svg-border">
+      <svg
+        class="svg"
+        width="100%"
+        height="100"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="100%" style="stop-color: #f3f3f3; stop-opacity: 1" />
+            <stop offset="100%" style="stop-color: #e8e8e8; stop-opacity: 1" />
+          </linearGradient>
+        </defs>
+        <path
+          d="M 0 0 
+             Q 20 25, 40 10
+             T 80 10 
+             T 120 10 
+             T 160 10 
+             T 200 10 
+             T 240 10 
+             T 280 10 
+             T 320 10 
+             T 360 10 
+             T 400 10 
+             T 440 10 
+             T 480 10 
+             T 520 10 
+             T 560 10 
+             T 600 10 
+             T 640 10
+             T 680 10
+             T 720 10
+             T 760 10
+             T 800 10
+             T 840 0"
+          fill="url(#waveGradient)"
+          stroke-width="1"
+        />
+      </svg>
+    </div>
+  </body>
+</html>
