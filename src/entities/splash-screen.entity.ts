@@ -18,7 +18,8 @@ import {
 export class SplashScreen {
   @PrimaryGeneratedColumn()
   @Field()
-  id: string;
+  id: number;
+
   @Column({ nullable: true })
   @Field({ nullable: true })
   image: string;

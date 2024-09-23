@@ -3,15 +3,23 @@
  * For license. See license.txt
  */
 
-import { Controller, Post, Query, UploadedFile } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Query,
+  UploadedFiles,
+  UseInterceptors,
+} from '@nestjs/common';
 import { SplashScreenService } from '../services/splash-screen.service';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
 @Controller('splash-screen')
 export class SplashScreenController {
   constructor(private readonly splashScreenService: SplashScreenService) {}
   @Post('upload-image')
+  @UseInterceptors(AnyFilesInterceptor())
   async uploadSplashScreenImage(
-    @Query('id') id: string,
-    @UploadedFile('file') file: Express.Multer.File,
+    @Query('id') id: number,
+    @UploadedFiles() file: Express.Multer.File,
   ) {
     return await this.splashScreenService.uploadImage(id, file);
   }

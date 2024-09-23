@@ -111,6 +111,7 @@ type AdPackage {
   id: String!
   name: String!
   impression: String!
+  description: String
   coverageRadius: String
   price: Float!
   duration: String!
@@ -555,6 +556,23 @@ type SearchHistoryResponse {
   total: Int!
 }
 
+type AdminDefault {
+  id: ID!
+  minimumOfferPercentage: Float!
+  street: String!
+  city: String!
+  saii: Float!
+  vat: Float!
+  state: String!
+  country: String!
+  countryISOCode: String!
+  postcode: String!
+  daysToAuctionRegistrationEnd: Float!
+  daysToAuctionRegistrationStart: Float!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type InitiatePaymentResponse {
   checkoutId: String
   referenceId: String
@@ -564,45 +582,6 @@ type InitiatePaymentResponse {
 type verifyPaymentResponse {
   status: String
   message: String!
-}
-
-type ResponseTemplate {
-  id: ID!
-  templateName: String!
-  templateArabicName: String!
-  templateText: String!
-  templateArabicText: String!
-  createdAt: DateTime!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type TicketAnalysisResponse {
-  open: Float!
-  closed: Float!
-  aging: Float!
-}
-
-type TicketResponse {
-  ticket: [Ticket!]
-  total: Float!
-  analysis: TicketAnalysisResponse!
-}
-
-type ResponseTemplateResponse {
-  responseTemplate: [ResponseTemplate!]
-  total: Float!
-}
-
-type ReviewResponse {
-  reviews: [Review!]!
-  total: Float!
-  averageRating: String!
-}
-
-type CityResponse {
-  city: [CityEntitity!]!
-  total: Int!
 }
 
 type UserCity {
@@ -667,7 +646,7 @@ type FinancialVsOrder {
 }
 
 type SplashScreen {
-  id: String!
+  id: Float!
   image: String
   default: Boolean!
   startDate: DateTime!
@@ -682,6 +661,45 @@ type SplashScreenResponse {
   total: Float!
 }
 
+type ResponseTemplate {
+  id: ID!
+  templateName: String!
+  templateArabicName: String!
+  templateText: String!
+  templateArabicText: String!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type TicketAnalysisResponse {
+  open: Float!
+  closed: Float!
+  aging: Float!
+}
+
+type TicketResponse {
+  ticket: [Ticket!]
+  total: Float!
+  analysis: TicketAnalysisResponse!
+}
+
+type ResponseTemplateResponse {
+  responseTemplate: [ResponseTemplate!]
+  total: Float!
+}
+
+type ReviewResponse {
+  reviews: [Review!]!
+  total: Float!
+  averageRating: String!
+}
+
+type CityResponse {
+  city: [CityEntitity!]!
+  total: Int!
+}
+
 type MessageResponse {
   messages: [Messages!]!
   total: Float!
@@ -691,7 +709,7 @@ type MessageResponse {
 type Query {
   app: String!
   findAllSplashScreen(findOption: PaginateAndSort): SplashScreenResponse!
-  findOneSplashScreen(id: String): SplashScreenResponse!
+  findOneSplashScreen(id: Float!): SplashScreen!
   findDefaultSplashScreen: SplashScreenResponse!
   activateTwoFa: TwoFaResult!
   user: User!
@@ -726,14 +744,26 @@ type Query {
   flaggedListing(listingId: String!): FlagListing
   getMessageInLocalLanguage: SuccessResponse
   getSearchHistory(paginateAndSort: PaginateAndSort): SearchHistoryResponse
+  getLastOfferPrice(listingId: String!): Offer
   findOneOffer(id: String!): Offer!
   findOffers(findOptions: FindOfferInput!): OfferResponse!
+  findManyForOwner(findOptions: FindOfferInput!): OfferResponse!
   getWishlist: [Wishlist!]!
   findOneListingsForAdmin(listingId: String!): Listing!
   getAuction(id: String!): Auction!
   getAllAuction(findManyOptions: PaginateAndSort!): AuctionResponse!
   adPackages: [AdPackage!]!
   adPackage(id: String!): AdPackage!
+  listingStats(findOptions: AdminDashboardSort!): ListingStats!
+  adminDefault: AdminDefault!
+  totalUser(findOptions: AdminDashboardSort!): UserDemography!
+  userCount(findOptions: AdminDashboardSort!): [UserGenderCount!]!
+  nationality(findOptions: AdminDashboardSort!): [UserCountryCount!]!
+  userAgeCount(findOptions: AdminDashboardSort!): [UserAgeRange!]!
+  userFunnel(findOptions: AdminDashboardSort): UserFunneling!
+  averageResponse: ResponseTime!
+  saiiFees(findOptions: AdminDashboardSort): SaiiFees!
+  financialVsOrder(findOptions: AdminDashboardSort!): [FinancialVsOrder!]!
   fetchIssues(placement: String): [ParentIssue!]!
   fetchChildIssues(parentId: String!): [ChildIssue!]!
   getTicket(ticketId: String!): Ticket!
@@ -744,15 +774,6 @@ type Query {
   findOneReview(id: String!): Review!
   findManyReviews(findMayOptions: FindManyReviewDto): ReviewResponse!
   findCities(findCities: PaginateAndSort): CityResponse!
-  listingStats(findOptions: AdminDashboardSort!): ListingStats!
-  totalUser(findOptions: AdminDashboardSort!): UserDemography!
-  userCount(findOptions: AdminDashboardSort!): [UserGenderCount!]!
-  nationality(findOptions: AdminDashboardSort!): [UserCountryCount!]!
-  userAgeCount(findOptions: AdminDashboardSort!): [UserAgeRange!]!
-  userFunnel(findOptions: AdminDashboardSort): UserFunneling!
-  averageResponse: ResponseTime!
-  saiiFees(findOptions: AdminDashboardSort): SaiiFees!
-  financialVsOrder(findOptions: AdminDashboardSort!): [FinancialVsOrder!]!
   getChat(chatFilterInput: ChatFilterInput!): MessageResponse!
 }
 
@@ -861,6 +882,11 @@ input FindOfferInput {
   listingId: String!
 }
 
+input AdminDashboardSort {
+  timePeriod: String! = "false"
+  value: Float! = 0
+}
+
 input ListTicketInput {
   take: Float
   skip: Float
@@ -878,11 +904,6 @@ input FindManyReviewDto {
   where: WhereOption
   rating: Float!
   timePeriod: String! = "false"
-}
-
-input AdminDashboardSort {
-  timePeriod: String! = "false"
-  value: Float! = 0
 }
 
 input ChatFilterInput {
@@ -935,6 +956,7 @@ type Mutation {
   flagListing(flagListingInput: FlagListingInput!): SuccessResponse!
   deleteListing(listingId: String!): SuccessResponse!
   createOffer(createOfferDto: CreateOfferDto!): Offer
+  finalizeOffer(id: String!): Offer
   updateOffer(updateOfferInput: UpdateOfferInput!): Offer
   acceptOffer(updateOfferInput: UpdateOfferInput!): Offer
   rejectOffer(updateOfferInput: UpdateOfferInput!): Offer
@@ -1328,6 +1350,7 @@ input CreateAdPackageInput {
   name: String!
   price: Float!
   impression: String!
+  description: String!
   coverageRadius: String!
   duration: String!
 }
@@ -1336,6 +1359,7 @@ input UpdateAdPackageInput {
   name: String
   price: Float
   impression: String
+  description: String
   coverageRadius: String
   duration: String
   id: Int!

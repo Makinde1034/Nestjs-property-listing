@@ -123,13 +123,13 @@ export class IssueService {
     try {
       if (placement) {
         return await this.issueRepository.find({
-          where: { placement: placement, deletedAt: null },
+          where: { placement: placement },
           order: { sequentialId: 'ASC' },
           relations: ['childIssue'],
         });
       }
       return await this.issueRepository.find({
-        order: { sequentialId: 'ASC', deletedAt: null },
+        order: { sequentialId: 'ASC' },
         relations: ['childIssue'],
       });
     } catch (error) {
@@ -204,7 +204,7 @@ export class IssueService {
    * @returns {Promise<string>}
    */
   async deleteIssue(id: string) {
-    const issue = await this.issueRepository.findOneByOrFail({ id });
+    const issue = await this.issueRepository.findOneBy({ id });
 
     if (!issue) {
       throw new BadRequestException(AppStrings.NOT_FOUND);
@@ -237,9 +237,9 @@ export class IssueService {
           // Save updated records
           await transactionalEntityManager.save(ParentIssue, records);
         }
-        return new SuccessResponse(AppStrings.ISSUE_DELETED_SUCCESSFULLY);
       },
     );
+    return new SuccessResponse(AppStrings.ISSUE_DELETED_SUCCESSFULLY);
   }
 
   /*********************************
@@ -260,14 +260,20 @@ export class IssueService {
   async updateChildIssue(updateChildissue: UpdateChildIssueInput) {
     try {
       const { id, ...rest } = updateChildissue;
+      const childIssue = await this.childIssueRepository.findOneBy({
+        id,
+      });
 
+      if (!childIssue) {
+        throw new BadRequestException(AppStrings.NOT_FOUND);
+      }
       const childIssueCount = await this.childIssueRepository.count();
       rest.sequentialId = childIssueCount + 1;
 
       const { affected } = await this.childIssueRepository.update(id, rest);
 
       if (affected > 0) {
-        return this.childIssueRepository.findOneByOrFail({ id });
+        return await this.childIssueRepository.findOneByOrFail({ id });
       }
     } catch (error) {
       this.logger.log(error);
@@ -290,14 +296,17 @@ export class IssueService {
 
   async deleteChildIssue(id: string) {
     try {
-      const issue = await this.childIssueRepository.findOneOrFail({
+      const issue = await this.childIssueRepository.findOne({
         where: { id },
         relations: ['parentIssue'],
       });
+      if (!issue) {
+        throw new BadRequestException(AppStrings.NOT_FOUND);
+      }
 
       const { sequentialId, parentIssueId } = issue;
 
-      return await this.issueRepository.manager.transaction(
+      await this.issueRepository.manager.transaction(
         async (transactionalEntityManager: EntityManager) => {
           if (sequentialId !== undefined) {
             this.logger.debug(
@@ -330,10 +339,9 @@ export class IssueService {
           this.logger.debug('Soft deleting the child issue with id:', id);
           await transactionalEntityManager.softDelete(ChildIssue, id);
           this.logger.debug('Child issue deleted successfully');
-
-          return new SuccessResponse(AppStrings.ISSUE_DELETED_SUCCESSFULLY);
         },
       );
+      return new SuccessResponse(AppStrings.ISSUE_DELETED_SUCCESSFULLY);
     } catch (error) {
       this.logger.error('Failed to delete child issue:', error);
       throw new BadRequestException(error);

@@ -34,9 +34,9 @@ export class Offer extends BaseEntity {
   @Column({ nullable: true })
   acceptedAt: Date;
 
-  @Field({ defaultValue: 'inactive' })
+  @Field({ defaultValue: OfferListEnum.INACTIVE })
   @IsEnum(OfferListEnum)
-  @Column({ default: 'active' })
+  @Column({ default: OfferListEnum.ACTIVE })
   status: string;
 
   @Field()
@@ -48,7 +48,7 @@ export class Offer extends BaseEntity {
   couponCode: string;
 
   @Field(() => User)
-  @ManyToOne(() => User, (user) => user.offer, { eager: true })
+  @ManyToOne(() => User, (user) => user.offer)
   user: User;
 
   @Field(() => Listing)

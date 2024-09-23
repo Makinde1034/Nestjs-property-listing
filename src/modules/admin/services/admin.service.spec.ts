@@ -13,6 +13,7 @@ import { IssueRepository } from '../../issue/repositories';
 import { TicketRepository } from '../../tickets/repositories';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { AdminRepository } from '../repositories/admin.repository';
 
 // Mock QueryBuilder
 const mockQueryBuilder = {
@@ -43,11 +44,17 @@ describe('AdminService', () => {
   let adminService: AdminService;
   let listingRepository: Repository<any>;
   let offerRepository: Repository<any>;
+  let adminDefaultRepository: Repository<any>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AdminService,
+
+        {
+          provide: getRepositoryToken(AdminRepository),
+          useValue: mockRepository,
+        },
         {
           provide: getRepositoryToken(ListingRepository),
           useValue: mockRepository,
@@ -82,6 +89,10 @@ describe('AdminService', () => {
     );
     offerRepository = module.get<Repository<any>>(
       getRepositoryToken(OfferRepository),
+    );
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    adminDefaultRepository = module.get<Repository<any>>(
+      getRepositoryToken(AdminRepository),
     );
   });
 

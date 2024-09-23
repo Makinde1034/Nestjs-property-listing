@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { NotificationRepository } from '../repositories';
 import { NotificationEventDto, NotificationInput } from '../dtos';
 import {
@@ -307,155 +307,160 @@ export class NotificationService {
     seller: User,
     buyer: User,
   ) {
-    /************************
-     * Email notification
-     ************************/
-    if (userPrefBuyer?.email) {
-      const mailMessageForBuyer = getMessageData(
-        buyer.firstName,
-        buyer.arabicFirstName,
-        'Create',
-        'Offers',
-        'Offer Creator',
-      );
+    try {
+      /************************
+       * Email notification
+       ************************/
+      if (userPrefBuyer?.email) {
+        const mailMessageForBuyer = getMessageData(
+          buyer.firstName,
+          buyer.arabicFirstName,
+          'Create',
+          'Offers',
+          'Offer Creator',
+        );
 
-      this.sendEmailNotification(null, null, 'offer', {
-        email: buyer.email,
-        subject:
-          buyer.language == 'en'
-            ? mailMessageForBuyer[0]?.title
-            : mailMessageForBuyer[0]?.arabicTitle,
-        text:
-          buyer.language == 'en'
-            ? mailMessageForBuyer[0]?.body
-            : mailMessageForBuyer[0]?.arabicBody,
-      });
-      this.mailService.sendOfferMail({
-        email: buyer.email,
-        subject:
-          buyer.language == 'en'
-            ? mailMessageForBuyer[0]?.title
-            : mailMessageForBuyer[0]?.arabicTitle,
-        text:
-          buyer.language == 'en'
-            ? mailMessageForBuyer[0]?.body
-            : mailMessageForBuyer[0]?.arabicBody,
-      });
+        this.sendEmailNotification(null, null, 'offer', {
+          email: buyer.email,
+          subject:
+            buyer.language == 'en'
+              ? mailMessageForBuyer[0]?.title
+              : mailMessageForBuyer[0]?.arabicTitle,
+          text:
+            buyer.language == 'en'
+              ? mailMessageForBuyer[0]?.body
+              : mailMessageForBuyer[0]?.arabicBody,
+        });
+        this.mailService.sendOfferMail({
+          email: buyer.email,
+          subject:
+            buyer.language == 'en'
+              ? mailMessageForBuyer[0]?.title
+              : mailMessageForBuyer[0]?.arabicTitle,
+          text:
+            buyer.language == 'en'
+              ? mailMessageForBuyer[0]?.body
+              : mailMessageForBuyer[0]?.arabicBody,
+        });
+      }
+
+      if (userPrefSeller?.email) {
+        const mailMessageForSeller = getMessageData(
+          seller.arabicFirstName,
+          'Create',
+          'Offers',
+          'Seller',
+        );
+
+        this.sendEmailNotification(null, null, 'offer', {
+          email: buyer.email,
+          subject:
+            buyer.language == 'en'
+              ? mailMessageForSeller[0]?.title
+              : mailMessageForSeller[0]?.arabicBody,
+          text:
+            buyer.language == 'en'
+              ? mailMessageForSeller[0]?.body
+              : mailMessageForSeller[0]?.arabicBody,
+        });
+      }
+
+      /************************
+       * Push notification
+       ************************/
+
+      if (userPrefBuyer?.mobile) {
+        const mailMessageForBuyer = getMessageData(
+          buyer.firstName,
+          'Create',
+          'Offers',
+          'Offer Creator',
+        );
+        this.sendUsersNotification({
+          recipients: [buyer.id],
+          isPushNotification: true,
+          isEmail: false,
+          title:
+            buyer.language == 'en'
+              ? mailMessageForBuyer[0]['title']
+              : mailMessageForBuyer[0]['arabicTitle'],
+          message:
+            buyer.language == 'en'
+              ? mailMessageForBuyer[0]['body']
+              : mailMessageForBuyer[0]['arabicBody'],
+        });
+      }
+
+      if (userPrefSeller?.email) {
+        const mailMessageForSeller = getMessageData(
+          seller.arabicFirstName,
+          'Create',
+          'Offers',
+          'Seller',
+        );
+
+        this.sendUsersNotification({
+          recipients: [seller.id],
+          isPushNotification: true,
+          isEmail: false,
+          title:
+            buyer.language == 'en'
+              ? mailMessageForSeller[0]['title']
+              : mailMessageForSeller[0]['arabicBody'],
+          message:
+            buyer.language == 'en'
+              ? mailMessageForSeller[0]['body']
+              : mailMessageForSeller[0]['arabicBody'],
+        });
+      }
+
+      /************************
+       * Web notification
+       ************************/
+
+      // If (userPrefBuyer?.desktop) {
+      //   Const mailMessageForBuyer = getMessageData(
+      //     Buyer.firstName,
+      //     'Create',
+      //     'Offers',
+      //     'Offer Creator',
+      //   );
+      //   This.mailService.sendOfferMail({
+      //     Email: buyer.email,
+      //     Subject:
+      //       Buyer.language == 'en'
+      //         ? mailMessageForBuyer[0]['title']
+      //         : mailMessageForBuyer[0]['arabicTitle'],
+      //     Text:
+      //       Buyer.language == 'en'
+      //         ? mailMessageForBuyer[0]['body']
+      //         : mailMessageForBuyer[0]['arabicBody'],
+      //   });
+      // }
+
+      // If (userPrefSeller?.desktop) {
+      //   Const mailMessageForSeller = getMessageData(
+      //     Seller.arabicFirstName,
+      //     'Create',
+      //     'Offers',
+      //     'Seller',
+      //   );
+
+      //   This.mailService.sendOfferMail({
+      //     Email: buyer.email,
+      //     Subject:
+      //       Buyer.language == 'en'
+      //         ? mailMessageForSeller[0]['title']
+      //         : mailMessageForSeller[0]['arabicBody'],
+      //     Text:
+      //       Buyer.language == 'en'
+      //         ? mailMessageForSeller[0]['body']
+      //         : mailMessageForSeller[0]['arabicBody'],
+      //   });
+      // }
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
     }
-
-    if (userPrefSeller?.email) {
-      const mailMessageForSeller = getMessageData(
-        seller.arabicFirstName,
-        'Create',
-        'Offers',
-        'Seller',
-      );
-
-      this.sendEmailNotification(null, null, 'offer', {
-        email: buyer.email,
-        subject:
-          buyer.language == 'en'
-            ? mailMessageForSeller[0]?.title
-            : mailMessageForSeller[0]?.arabicBody,
-        text:
-          buyer.language == 'en'
-            ? mailMessageForSeller[0]?.body
-            : mailMessageForSeller[0]?.arabicBody,
-      });
-    }
-
-    /************************
-     * Push notification
-     ************************/
-
-    if (userPrefBuyer?.mobile) {
-      const mailMessageForBuyer = getMessageData(
-        buyer.firstName,
-        'Create',
-        'Offers',
-        'Offer Creator',
-      );
-      this.sendUsersNotification({
-        recipients: [buyer.id],
-        isPushNotification: true,
-        isEmail: false,
-        title:
-          buyer.language == 'en'
-            ? mailMessageForBuyer[0]['title']
-            : mailMessageForBuyer[0]['arabicTitle'],
-        message:
-          buyer.language == 'en'
-            ? mailMessageForBuyer[0]['body']
-            : mailMessageForBuyer[0]['arabicBody'],
-      });
-    }
-
-    if (userPrefSeller?.email) {
-      const mailMessageForSeller = getMessageData(
-        seller.arabicFirstName,
-        'Create',
-        'Offers',
-        'Seller',
-      );
-
-      this.sendUsersNotification({
-        recipients: [seller.id],
-        isPushNotification: true,
-        isEmail: false,
-        title:
-          buyer.language == 'en'
-            ? mailMessageForSeller[0]['title']
-            : mailMessageForSeller[0]['arabicBody'],
-        message:
-          buyer.language == 'en'
-            ? mailMessageForSeller[0]['body']
-            : mailMessageForSeller[0]['arabicBody'],
-      });
-    }
-
-    /************************
-     * Web notification
-     ************************/
-
-    // If (userPrefBuyer?.desktop) {
-    //   Const mailMessageForBuyer = getMessageData(
-    //     Buyer.firstName,
-    //     'Create',
-    //     'Offers',
-    //     'Offer Creator',
-    //   );
-    //   This.mailService.sendOfferMail({
-    //     Email: buyer.email,
-    //     Subject:
-    //       Buyer.language == 'en'
-    //         ? mailMessageForBuyer[0]['title']
-    //         : mailMessageForBuyer[0]['arabicTitle'],
-    //     Text:
-    //       Buyer.language == 'en'
-    //         ? mailMessageForBuyer[0]['body']
-    //         : mailMessageForBuyer[0]['arabicBody'],
-    //   });
-    // }
-
-    // If (userPrefSeller?.desktop) {
-    //   Const mailMessageForSeller = getMessageData(
-    //     Seller.arabicFirstName,
-    //     'Create',
-    //     'Offers',
-    //     'Seller',
-    //   );
-
-    //   This.mailService.sendOfferMail({
-    //     Email: buyer.email,
-    //     Subject:
-    //       Buyer.language == 'en'
-    //         ? mailMessageForSeller[0]['title']
-    //         : mailMessageForSeller[0]['arabicBody'],
-    //     Text:
-    //       Buyer.language == 'en'
-    //         ? mailMessageForSeller[0]['body']
-    //         : mailMessageForSeller[0]['arabicBody'],
-    //   });
-    // }
   }
 }

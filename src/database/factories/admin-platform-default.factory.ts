@@ -12,6 +12,8 @@ export const AdminPlatformDefaultFactory: Partial<AdminDefault> = {
   state: 'cario',
   country: 'Egypt',
   countryISOCode: 'SAR',
+  saii: 2.5,
+  vat: 15,
   daysToAuctionRegistrationStart: 7,
   daysToAuctionRegistrationEnd: 7,
   postcode: '4240111',

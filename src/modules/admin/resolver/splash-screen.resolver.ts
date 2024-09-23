@@ -31,8 +31,8 @@ export class SplashScreenResolver {
     return await this.splashScreenService.findAll(findOption);
   }
 
-  @Query(() => SplashScreenResponse, { name: 'findOneSplashScreen' })
-  async findOneAll(@Args('id', { nullable: true }) id: string) {
+  @Query(() => SplashScreen, { name: 'findOneSplashScreen' })
+  async findOne(@Args('id') id: number) {
     return await this.splashScreenService.findOne(id);
   }
 
@@ -42,7 +42,7 @@ export class SplashScreenResolver {
   }
 
   @Mutation(() => SplashScreen, { name: 'deleteSplashScreen' })
-  async delete(id: string) {
+  async delete(id: number) {
     return await this.splashScreenService.delete(id);
   }
 

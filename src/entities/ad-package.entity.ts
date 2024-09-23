@@ -29,6 +29,10 @@ export class AdPackage {
   @Field()
   impression: string;
 
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  description: string;
+
   @Field({ nullable: true })
   @Column()
   coverageRadius: string;

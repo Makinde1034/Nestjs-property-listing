@@ -23,5 +23,5 @@ export class UpdateSplashScreenInput extends PartialType(
   CreateSplashScreenInput,
 ) {
   @Field()
-  id: string;
+  id: number;
 }
