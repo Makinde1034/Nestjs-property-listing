@@ -14,7 +14,7 @@ import {
 } from '../dtos';
 import { AppStrings } from 'src/common/messages/app.strings';
 import { ChildIssueRepository } from '../repositories/child-issue.repository';
-import { EntityManager, MoreThanOrEqual, Not } from 'typeorm';
+import { EntityManager, MoreThanOrEqual } from 'typeorm';
 import { IssueRepository } from '../repositories';
 import { SuccessResponse } from '../../../common/utils/success.response';
 
