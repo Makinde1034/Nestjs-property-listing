@@ -60,7 +60,6 @@ import { ListingAttributes } from '../../../entities/listing-attributes.entity';
 import { ListingAttributeService } from '../services/listing-attributes.service';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { FlagListing } from '../../../entities/flag-listing.entity';
-import { query } from 'express';
 
 @Resolver()
 export class ListingResolver {
@@ -283,7 +282,7 @@ export class ListingResolver {
   }
   @UseGuards(AccessTokenGuard)
   @Mutation(() => Offer, { name: 'finalizeOffer', nullable: true })
-  async finalizeOffer(@Args('id') id: string, @Context() ctx: any) {
+  async finalizeOffer(@Args('id') id: string) {
     return await this.offerService.finalizeOffer(id);
   }
 

@@ -121,8 +121,6 @@ export class IssueService {
 
   async findAllIssuesByPlacement(placement: string): Promise<ParentIssue[]> {
     try {
-      console.log('here');
-
       if (placement) {
         return await this.issueRepository.find({
           where: { placement: placement },
@@ -135,7 +133,6 @@ export class IssueService {
         relations: ['childIssue'],
       });
     } catch (error) {
-      console.log(error);
       this.logger.log(error);
       throw new BadRequestException(error);
     }

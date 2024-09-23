@@ -141,7 +141,6 @@ export class SplashScreenService {
         return await this.splashScreenRepository.findOneByOrFail({ id });
       }
     } catch (error) {
-      console.log(error);
       this.logger.log(error);
       if (error instanceof HttpException) {
         throw error;

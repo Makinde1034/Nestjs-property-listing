@@ -90,6 +90,10 @@ describe('AdminService', () => {
     offerRepository = module.get<Repository<any>>(
       getRepositoryToken(OfferRepository),
     );
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    adminDefaultRepository = module.get<Repository<any>>(
+      getRepositoryToken(AdminRepository),
+    );
   });
 
   it('should be defined', () => {

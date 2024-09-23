@@ -21,7 +21,6 @@ export class SplashScreenController {
     @Query('id') id: number,
     @UploadedFiles() file: Express.Multer.File,
   ) {
-    console.log(file);
     return await this.splashScreenService.uploadImage(id, file);
   }
 }
