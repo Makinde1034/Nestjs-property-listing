@@ -14,21 +14,23 @@
       .container {
         margin: 0;
         padding-top: 50px;
-        background-image: linear-gradient(to right, #ffffff, #c2bfc1);
+        background-image: linear-gradient(to right, #f3f3f3, #e8e8e8);
         box-sizing: border-box;
         position: relative;
         overflow: hidden;
         height: 842px; /* Adjusted height */
-        border-left: #92929254 solid 2px;
+        border-left: #e8e8e8 solid 2px;
         border-right: #ffffff solid 2px;
         box-shadow:
-          5px 5px 5px 0px #92929254,
-          inset 4px 4px 15px 0px #929292a8,
+          5px 5px 5px 0px #e8e8e8,
+          inset 4px 4px 15px 0px #fff,
           5px 5px 15px 5px rgba(0, 0, 0, 0);
       }
 
       .first-section {
         padding-bottom: 15px;
+        margin-left: 20px;
+        margin-right: 20px;
         border-bottom: 2px solid rgb(185, 182, 182);
       }
       .first-section-element {
@@ -60,6 +62,11 @@
         display: flex;
         font-size: small;
       }
+
+      .second-section {
+        padding-left: 40px;
+      }
+
       .second-section-element {
         display: flex;
         align-items: center;
@@ -92,6 +99,11 @@
       }
       .fouth-section {
         display: flex;
+        padding: 20px;
+      }
+
+      .fifth-section {
+        padding: 20px;
       }
       .last-box {
         padding: 0;
@@ -111,13 +123,13 @@
       th,
       td {
         color: #707070;
-        border-left: 1px dotted #999;
+
         border-right: 1px dotted #999;
         padding: 6px;
-        text-align: left;
         word-wrap: break-word;
         max-width: 150px;
         font-size: small;
+        text-align: center;
       }
       th {
         font-weight: 500;
@@ -153,10 +165,9 @@
       /* SVG as bottom border */
       .svg-border {
         position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 85px; /* Updated height */
+        width: 795px;
+
+        height: 85px;
         overflow: hidden;
       }
     </style>
@@ -172,37 +183,43 @@
 
             <div class="first-section-items-box-container">
               <div class="first-section-items-box">
-                <div><p>Date and Time</p></div>
-                <div><p>22/5/31-15-46-32</p></div>
+                <div><p>Date</p></div>
+                <div><p>{{22/5/31-15-46-32}}</p></div>
               </div>
 
               <div class="first-section-items-box">
-                <div class="first-section-box"><p>Invoice Issuance</p></div>
-                <div class="first-section-box"><p>ME4430</p></div>
+                <div class="first-section-box">
+                  <p>Invoice reference number</p>
+                </div>
+                <div class="first-section-box"><p>{{ME4430}}</p></div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div>
+      <div class="second-section">
         <h2 class="seller-information">Seller information</h2>
 
         <div class="second-section-element">
-          <p class="box-1">Additional Seller ID</p>
-
+          <div class="box">
+            <p>CR Number</p>
+            <p>{{0000000000}}</p>
+          </div>
           <div class="box-2">
             <div class="box">
-              <p>Seller Information</p>
-              <p>0000000000</p>
+              <p>Zatca Number</p>
+              <p>{{....}}</p>
             </div>
+
             <div class="box">
-              <p>Seller Information</p>
-              <p>....</p>
+              <p>Seller Address</p>
+              <p>{{....}}</p>
             </div>
+
             <div class="box">
-              <p>Seller Information</p>
-              <p>....</p>
+              <p>Seller Name</p>
+              <p>{{sellerName}}</p>
             </div>
           </div>
         </div>
@@ -212,18 +229,20 @@
         <h2 class="buyer-information">Buyer Information</h2>
         <div class="third-section-box">
           <div class="box">
-            <p>Item</p>
-            <p>value</p>
+            <p>Zatca Number</p>
+            <p>{{value}}</p>
           </div>
           <div class="box">
-            <p>Item</p>
-            <p>value</p>
+            <p>CR Number</p>
+            <p>{{value}}</p>
           </div>
           <div class="box">
-            <p>Item</p>
+            <p>Customer Address</p>
+            <p>{{value}}</p>
           </div>
           <div class="box">
-            <p>Item</p>
+            <p>Customer Name</p>
+            <p>{{value}}</p>
           </div>
         </div>
       </div>
@@ -232,15 +251,15 @@
         <table class="table">
           <thead>
             <tr>
-              <th>Name</th>
+              <th>Total With Vat</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>John Doe</td>
+              <td>{{209}}</td>
             </tr>
             <tr>
-              <td>Jane Smith</td>
+              <td>{{92}}</td>
             </tr>
           </tbody>
         </table>
@@ -250,154 +269,103 @@
         <table class="table">
           <thead>
             <tr>
-              <th>Product</th>
-              <th>Price</th>
+              <th>Vat</th>
+              <th>Vat %</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>Laptop</td>
-              <td>$1200</td>
+              <td>20</td>
+              <td>%17</td>
             </tr>
             <tr>
-              <td>Mouse</td>
-              <td>$20</td>
+              <td>20</td>
+              <td>%20</td>
             </tr>
           </tbody>
         </table>
 
-        <!-- Table 3 with role "table" -->
-
         <table class="table">
           <thead>
             <tr>
-              <th>City</th>
+              <th>Saii Fee</th>
+              <th>Auction Entry fee</th>
+              <th>product 3</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>New York</td>
+              <td>23</td>
+              <td>23</td>
+              <td>24</td>
             </tr>
             <tr>
-              <td>London</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <!-- Table 4 with role "list" -->
-
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Task</th>
-              <th>Due Date</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Write Documentation</td>
-              <td>2024-09-18</td>
-              <td>Not Started</td>
-            </tr>
-            <tr>
-              <td></td>
-              <td>Code Review</td>
-              <td>2024-09-20</td>
-              <td>Completed</td>
+              <td>23</td>
+              <td>23</td>
+              <td>23</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <div class="fith-section">
+      <div class="fifth-section">
         <div class="last-box">
           <p class="box-left">123</p>
-          <p class="invoice-reference">Invoice Taxable Amount</p>
+          <p class="invoice-reference">Total without VAT</p>
         </div>
 
         <div class="last-box">
           <p class="box-left">123</p>
-          <p class="box-right">Invoice Number</p>
+          <p class="box-right">VAT</p>
         </div>
         <div class="last-box">
           <p class="box-left">123</p>
-          <p class="box-right">Invoice Number</p>
+          <p class="box-right">Total with VAT</p>
         </div>
       </div>
 
       <!-- SVG as bottom border line -->
-      <div class="svg-border">
-        <svg
-          class="svg"
-          width="100%"
-          height="100"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <defs>
-            <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" style="stop-color: #fff; stop-opacity: 1" />
-              <stop offset="100%" style="stop-color: #fff; stop-opacity: 1" />
-            </linearGradient>
-          </defs>
-          <path
-            d="M 0 80 
-         Q 10 60, 20 80 
-         T 40 80 
-         T 60 80 
-         T 80 80 
-         T 100 80 
-         T 120 80 
-         T 140 80 
-         T 160 80 
-         T 180 80 
-         T 200 80 
-         T 220 80 
-         T 240 80 
-         T 260 80 
-         T 280 80 
-         T 300 80 
-         T 320 80 
-         T 340 80 
-         T 360 80 
-         T 380 80 
-         T 400 80 
-         T 420 80 
-         T 440 80 
-         T 460 80 
-         T 480 80 
-         T 500 80 
-         T 520 80 
-         T 540 80 
-         T 560 80 
-         T 580 80 
-         T 600 80 
-         T 620 80 
-         T 640 80 
-         T 660 80 
-         T 680 80 
-         T 700 80 
-         T 720 80 
-         T 740 80 
-         T 760 80 
-         T 780 80 
-         T 800 80 
-         T 820 80 
-         T 840 80 
-         T 860 80 
-         T 880 80 
-         T 900 80 
-         T 920 80 
-         T 940 80 
-         T 960 80 
-         T 980 80 
-         T 1000 80"
-            stroke="url(#waveGradient)"
-            stroke-width="2"
-            fill="transparent"
-          />
-        </svg>
-      </div>
+    </div>
+    <div class="svg-border">
+      <svg
+        class="svg"
+        width="100%"
+        height="100"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="100%" style="stop-color: #f3f3f3; stop-opacity: 1" />
+            <stop offset="100%" style="stop-color: #e8e8e8; stop-opacity: 1" />
+          </linearGradient>
+        </defs>
+        <path
+          d="M 0 0 
+             Q 20 25, 40 10
+             T 80 10 
+             T 120 10 
+             T 160 10 
+             T 200 10 
+             T 240 10 
+             T 280 10 
+             T 320 10 
+             T 360 10 
+             T 400 10 
+             T 440 10 
+             T 480 10 
+             T 520 10 
+             T 560 10 
+             T 600 10 
+             T 640 10
+             T 680 10
+             T 720 10
+             T 760 10
+             T 800 10
+             T 840 0"
+          fill="url(#waveGradient)"
+          stroke-width="1"
+        />
+      </svg>
     </div>
   </body>
 </html>
