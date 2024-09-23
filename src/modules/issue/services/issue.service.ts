@@ -263,9 +263,10 @@ export class IssueService {
   async updateChildIssue(updateChildissue: UpdateChildIssueInput) {
     try {
       const { id, ...rest } = updateChildissue;
-      const childIssue = await this.childIssueRepository.findOneByOrFail({
+      const childIssue = await this.childIssueRepository.findOneBy({
         id,
       });
+
       if (!childIssue) {
         throw new BadRequestException(AppStrings.NOT_FOUND);
       }

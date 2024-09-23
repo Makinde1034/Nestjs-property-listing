@@ -111,6 +111,7 @@ type AdPackage {
   id: String!
   name: String!
   impression: String!
+  description: String
   coverageRadius: String
   price: Float!
   duration: String!
@@ -1349,6 +1350,7 @@ input CreateAdPackageInput {
   name: String!
   price: Float!
   impression: String!
+  description: String!
   coverageRadius: String!
   duration: String!
 }
@@ -1357,6 +1359,7 @@ input UpdateAdPackageInput {
   name: String
   price: Float
   impression: String
+  description: String
   coverageRadius: String
   duration: String
   id: Int!
