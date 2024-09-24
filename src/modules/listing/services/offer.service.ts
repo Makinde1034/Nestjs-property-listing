@@ -35,6 +35,7 @@ import { NotificationScopesEnum } from '../../../common/enums/notification-scope
 import { NotificationService } from '../../notification/services';
 import { OfferListEnum } from '../../../common/enums/status.enum';
 import { AdminService } from '../../admin/services/admin.service';
+import { ListingRepository } from '../repositories/listing.repository';
 
 @Injectable()
 export class OfferService {
@@ -47,6 +48,7 @@ export class OfferService {
     private notificationScopeRepository: NotificationScopeRepository,
     private notificationService: NotificationService,
     private adminDefaultService: AdminService,
+    private listingRepository: ListingRepository,
   ) {}
   logger = new Logger(OfferService.name);
 
@@ -219,6 +221,9 @@ export class OfferService {
 
   async findMany(findOfferInput: FindOfferInput) {
     try {
+      const listing = await this.listingRepository.findOneBy({
+        id: findOfferInput.listingId,
+      });
       const [offer, total] = await this.offerRepository.findAndCount({
         where: {
           listingId: findOfferInput.listingId,
@@ -227,7 +232,15 @@ export class OfferService {
         skip: findOfferInput.skip,
         take: findOfferInput.take,
       });
-      return { offer, total };
+
+      const offers = await this.offerRepository.count({
+        where: {
+          listingId: findOfferInput.listingId,
+          status: OfferListEnum.ACTIVE,
+        },
+      });
+
+      return { offer, listing, total, offers };
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);

@@ -58,6 +58,9 @@ export class OfferResponse {
   @Field(() => [Offer], { nullable: true })
   offer: Offer[];
 
+  @Field(() => [Listing], { nullable: true })
+  listing: Listing[];
+
   @Field(() => Int)
   total: number;
 }
