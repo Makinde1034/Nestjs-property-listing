@@ -212,6 +212,10 @@ export class Listing extends BaseEntity {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
+  bundleImpression: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   featureDate: Date;
 
   @Column({ default: true })

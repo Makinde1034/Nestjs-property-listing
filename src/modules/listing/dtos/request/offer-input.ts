@@ -60,8 +60,9 @@ export class UpdateOfferInput extends PartialType(CreateOfferDto) {
 
 @InputType()
 export class FindOfferInput extends PaginateAndSort {
-  @Field()
-  @IsUUID()
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   @IsNotEmpty()
   listingId: string;
 }

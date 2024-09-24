@@ -413,6 +413,7 @@ export class ListingService {
             query.orderBy(
               `listing.${sortField}`,
               directionToSort.toUpperCase() as (typeof sortDirections)[number],
+              'NULLS LAST',
             );
           }
         }
@@ -443,8 +444,8 @@ export class ListingService {
         const [listings, count] = await baseQuery()
           .take(take)
           .skip(skip)
-          .orderBy('listing.featureDate', 'DESC')
-          .addOrderBy('listing.promotedDate', 'DESC')
+          .orderBy('listing.featureDate', 'DESC', 'NULLS LAST')
+          .addOrderBy('listing.promotedDate', 'DESC', 'NULLS LAST')
 
           .getManyAndCount();
 
@@ -622,17 +623,19 @@ export class ListingService {
 
         if (sortField && directionToSort) {
           const sortDirections = ['ASC', 'DESC'] as const;
-          if (
-            sortDirections.includes(
-              directionToSort.toUpperCase() as (typeof sortDirections)[number],
-            )
-          ) {
-            query.orderBy(
-              `listing.${sortField}`,
-              directionToSort.toUpperCase() as (typeof sortDirections)[number],
-            );
+          const direction =
+            directionToSort.toUpperCase() as (typeof sortDirections)[number];
+
+          if (sortDirections.includes(direction)) {
+            // Add condition to sort where the date is not null
+            // Query.andWhere(`listing.${sortField}`);
+
+            // Apply sorting to the query
+
+            query.orderBy(`listing.${sortField}`, direction, 'NULLS LAST');
           }
         }
+
         return query;
       };
 
@@ -659,8 +662,8 @@ export class ListingService {
         const [listings, count] = await baseQuery()
           .take(take)
           .skip(skip)
-          .orderBy('listing.featureDate', 'DESC')
-          .addOrderBy('listing.promotedDate', 'DESC')
+          .orderBy('listing.featureDate', 'DESC', 'NULLS LAST')
+          .addOrderBy('listing.promotedDate', 'DESC', 'NULLS LAST')
 
           .getManyAndCount();
 
@@ -788,7 +791,7 @@ export class ListingService {
           .andWhere('listing.published = true')
           .andWhere('listingType.deletedAt IS NULL')
 
-          .orderBy(sortField, directionToSort)
+          .orderBy(sortField, directionToSort, 'NULLS LAST')
           .skip(paginateAndSort.skip)
           .take(paginateAndSort.take)
           .getMany(),
@@ -1360,6 +1363,7 @@ export class ListingService {
           promotedDate: new Date(),
           bundleType: adPackage.name,
           promotionPrice: adPackage.price,
+          bundleImpression: adPackage.impression,
         });
         return promotion;
       }
@@ -1644,6 +1648,7 @@ export class ListingService {
           isListingFeatured: true,
           featureDate: createFeatureInput.startDate,
           bundleType: adPackage.name,
+          bundleImpression: adPackage.impression,
         });
       }
 
