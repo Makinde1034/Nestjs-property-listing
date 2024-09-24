@@ -9,7 +9,7 @@ import { KnowledgeBaseCategoryRepository } from '../repositories/knowledge-base-
 import {
   CreateCategoryInput,
   UpdateCategoryInput,
-} from '../dto/knowledg-base.category.input';
+} from '../dto/request/knowledg-base.category.input';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { AppStrings } from '../../../common/messages/app.strings';
 

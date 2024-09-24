@@ -5,7 +5,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateArticleInput } from '../dto/article.input';
+import { CreateArticleInput } from '../dto/request/article.input';
 
 import { ArticleRepository } from '../repositories/article.repository';
 import { KnowledgeBaseCategoryRepository } from '../repositories/knowledge-base-category.repository';
