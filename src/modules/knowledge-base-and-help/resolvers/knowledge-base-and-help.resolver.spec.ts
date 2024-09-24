@@ -1,16 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { KnowledgeBaseAndHelpResolver } from './knowledge-base-and-help.resolver';
-import { KnowledgeBaseAndHelpService } from './knowledge-base-and-help.service';
+import { ArticleService } from '../services/article.service';
 
 describe('KnowledgeBaseAndHelpResolver', () => {
   let resolver: KnowledgeBaseAndHelpResolver;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [KnowledgeBaseAndHelpResolver, KnowledgeBaseAndHelpService],
+      providers: [KnowledgeBaseAndHelpResolver, ArticleService],
     }).compile();
 
-    resolver = module.get<KnowledgeBaseAndHelpResolver>(KnowledgeBaseAndHelpResolver);
+    resolver = module.get<KnowledgeBaseAndHelpResolver>(
+      KnowledgeBaseAndHelpResolver,
+    );
   });
 
   it('should be defined', () => {

@@ -1,4 +1,4 @@
-import { ObjectType, Field, Int } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import {
   Column,
   CreateDateColumn,
@@ -7,40 +7,27 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-@ObjectType()
 @Entity()
-export class KnowledgeBaseAndHelp {
-  @Field(() => Int, { description: 'id' })
+@ObjectType()
+export class KnowledgeBaseCategory {
   @PrimaryGeneratedColumn()
+  @Field(() => Int)
   id: number;
+  @Column()
+  @Field()
+  placement: string;
 
   @Column()
   @Field()
-  content: string;
+  arabicName: string;
 
   @Column()
   @Field()
-  image: string;
-
-  @Column()
-  @Field()
-  title: string;
-
-  @Column()
-  @Field()
-  authorImage: string;
-
-  @Column()
-  @Field()
-  authorBio: string;
+  englishName: string;
 
   @Column()
   @Field()
   language: string;
-
-  @Column({ default: false })
-  @Field()
-  published: string;
 
   @Column()
   @Field()

@@ -1,48 +1,44 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
-import { KnowledgeBaseAndHelp } from '../../../entities/knowledge-base-and-help.entity';
-import { CreateKnowledgeBaseAndHelpInput } from '../dto/create-knowledge-base-and-help.input';
-import { UpdateKnowledgeBaseAndHelpInput } from '../dto/update-knowledge-base-and-help.input';
-import { KnowledgeBaseAndHelpService } from '../services/knowledge-base-and-help.service';
+import { Resolver, Mutation, Args } from '@nestjs/graphql';
 
-@Resolver(() => KnowledgeBaseAndHelp)
+import { Article } from '../../../entities/article.entity';
+import { ArticleService } from '../services/article.service';
+import { CreateArticleInput } from '../dto/article.input';
+
+@Resolver(() => Article)
 export class KnowledgeBaseAndHelpResolver {
-  constructor(
-    private readonly knowledgeBaseAndHelpService: KnowledgeBaseAndHelpService,
-  ) {}
+  constructor(private readonly articleService: ArticleService) {}
 
-  @Mutation(() => KnowledgeBaseAndHelp)
+  @Mutation(() => Article)
   createKnowledgeBaseAndHelp(
     @Args('createKnowledgeBaseAndHelpInput')
-    createKnowledgeBaseAndHelpInput: CreateKnowledgeBaseAndHelpInput,
+    CreateArticleInput: CreateArticleInput,
   ) {
-    return this.knowledgeBaseAndHelpService.create(
-      createKnowledgeBaseAndHelpInput,
-    );
+    return this.articleService.create(CreateArticleInput);
   }
 
-  @Query(() => [KnowledgeBaseAndHelp], { name: 'knowledgeBaseAndHelp' })
-  findAll() {
-    return this.knowledgeBaseAndHelpService.findAll();
-  }
+  // @Query(() => [KnowledgeBaseAndHelp], { name: 'knowledgeBaseAndHelp' })
+  // findAll() {
+  //   return this.knowledgeBaseAndHelpService.findAll();
+  // }
 
-  @Query(() => KnowledgeBaseAndHelp, { name: 'knowledgeBaseAndHelp' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.knowledgeBaseAndHelpService.findOne(id);
-  }
+  // @Query(() => KnowledgeBaseAndHelp, { name: 'knowledgeBaseAndHelp' })
+  // findOne(@Args('id', { type: () => Int }) id: number) {
+  //   return this.knowledgeBaseAndHelpService.findOne(id);
+  // }
 
-  @Mutation(() => KnowledgeBaseAndHelp)
-  updateKnowledgeBaseAndHelp(
-    @Args('updateKnowledgeBaseAndHelpInput')
-    updateKnowledgeBaseAndHelpInput: UpdateKnowledgeBaseAndHelpInput,
-  ) {
-    return this.knowledgeBaseAndHelpService.update(
-      updateKnowledgeBaseAndHelpInput.id,
-      updateKnowledgeBaseAndHelpInput,
-    );
-  }
+  // @Mutation(() => KnowledgeBaseAndHelp)
+  // updateKnowledgeBaseAndHelp(
+  //   @Args('updateKnowledgeBaseAndHelpInput')
+  //   updateKnowledgeBaseAndHelpInput: UpdateKnowledgeBaseAndHelpInput,
+  // ) {
+  //   return this.knowledgeBaseAndHelpService.update(
+  //     updateKnowledgeBaseAndHelpInput.id,
+  //     updateKnowledgeBaseAndHelpInput,
+  //   );
+  // }
 
-  @Mutation(() => KnowledgeBaseAndHelp)
-  removeKnowledgeBaseAndHelp(@Args('id', { type: () => Int }) id: number) {
-    return this.knowledgeBaseAndHelpService.remove(id);
-  }
+  // @Mutation(() => KnowledgeBaseAndHelp)
+  // removeKnowledgeBaseAndHelp(@Args('id', { type: () => Int }) id: number) {
+  //   return this.knowledgeBaseAndHelpService.remove(id);
+  // }
 }

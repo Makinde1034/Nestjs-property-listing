@@ -708,7 +708,7 @@ type MessageResponse {
   lastMessage: Messages
 }
 
-type KnowledgeBaseAndHelp {
+type Article {
   """id"""
   id: Int!
   content: String!
@@ -792,7 +792,6 @@ type Query {
   findManyReviews(findMayOptions: FindManyReviewDto): ReviewResponse!
   findCities(findCities: PaginateAndSort): CityResponse!
   getChat(chatFilterInput: ChatFilterInput!): MessageResponse!
-  knowledgeBaseAndHelp(id: Int!): KnowledgeBaseAndHelp!
 }
 
 input PaginateAndSort {
@@ -1008,9 +1007,7 @@ type Mutation {
   deleteResponseTemplate(deleteResponseTemplate: DeleteResponsetemplate!): SuccessResponse!
   updateResponseTemplate(updateResponseTemplateInput: UpdateResponseTemplateInput!): ResponseTemplate!
   createReview(createReviewDto: CreateReviewDto!): Review!
-  createKnowledgeBaseAndHelp(createKnowledgeBaseAndHelpInput: CreateKnowledgeBaseAndHelpInput!): KnowledgeBaseAndHelp!
-  updateKnowledgeBaseAndHelp(updateKnowledgeBaseAndHelpInput: UpdateKnowledgeBaseAndHelpInput!): KnowledgeBaseAndHelp!
-  removeKnowledgeBaseAndHelp(id: Int!): KnowledgeBaseAndHelp!
+  createKnowledgeBaseAndHelp(createKnowledgeBaseAndHelpInput: CreateArticleInput!): Article!
 }
 
 input CreateSplashScreenInput {
@@ -1451,13 +1448,12 @@ input CreateReviewDto {
   reviewType: String!
 }
 
-input CreateKnowledgeBaseAndHelpInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
-}
-
-input UpdateKnowledgeBaseAndHelpInput {
-  """Example field (placeholder)"""
-  exampleField: Int
-  id: Int!
+input CreateArticleInput {
+  content: String!
+  image: String!
+  categoryId: Float!
+  title: String!
+  authorImage: String!
+  authorBio: String!
+  language: String!
 }
