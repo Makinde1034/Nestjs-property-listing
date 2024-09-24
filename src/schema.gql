@@ -357,6 +357,22 @@ type SearchHistory {
   updatedAt: DateTime!
 }
 
+type Article {
+  """id"""
+  id: Int!
+  content: String!
+  image: String!
+  title: String!
+  authorImage: String!
+  user: User!
+  authorBio: String!
+  language: String!
+  published: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime!
+}
+
 type User {
   id: ID!
   userType: String!
@@ -389,6 +405,7 @@ type User {
   chat: Chat!
   nationality: String
   city: String
+  article: [Article!]!
   nationalIdentity: NationalIdentity
   company: Company
   notificationPreference: [UserNotificationPreference!]
@@ -706,21 +723,6 @@ type MessageResponse {
   messages: [Messages!]!
   total: Float!
   lastMessage: Messages
-}
-
-type Article {
-  """id"""
-  id: Int!
-  content: String!
-  image: String!
-  title: String!
-  authorImage: String!
-  authorBio: String!
-  language: String!
-  published: String!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  deletedAt: DateTime!
 }
 
 type Query {

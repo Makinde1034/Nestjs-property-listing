@@ -17,6 +17,7 @@ export class CreateCategoryInput {
   @IsNotEmpty()
   @Field()
   arabicName: string;
+
   @IsString()
   @IsNotEmpty()
   @Field()

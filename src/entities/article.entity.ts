@@ -3,9 +3,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { User } from './user.entity';
 
 @ObjectType()
 @Entity()
@@ -29,6 +31,10 @@ export class Article {
   @Column()
   @Field()
   authorImage: string;
+
+  @Field(() => User)
+  @ManyToOne(() => User, (user) => user.article)
+  user: User;
 
   @Column()
   @Field()

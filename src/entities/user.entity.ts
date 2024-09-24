@@ -36,6 +36,7 @@ import { Wishlist } from './wishlist.entity';
 import { Messages } from './message.entity';
 import { Chat } from './chat.entity';
 import { FlagListing } from './flag-listing.entity';
+import { Article } from './article.entity';
 
 @Entity()
 @ObjectType()
@@ -157,9 +158,13 @@ export class User extends BaseEntity {
   @Field({ nullable: true })
   nationality: string;
 
-  @Column({ default: 'riyadh', nullable: true })
+  @Column({ nullable: true })
   @Field({ nullable: true })
   city: string;
+
+  @Field(() => [Article])
+  @OneToMany(() => Article, (article) => article.user)
+  article: Article[];
 
   @Field(() => NationalIdentity, { nullable: true })
   @OneToOne(() => NationalIdentity, (identity) => identity.user, {
