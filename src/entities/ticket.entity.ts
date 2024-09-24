@@ -83,7 +83,7 @@ export class Ticket extends BaseEntity {
   createdAt: Date;
 
   @Field()
-  @UpdateDateColumn()
+  @UpdateDateColumn({ default: new Date() })
   updatedAt: Date;
 
   @Exclude()
