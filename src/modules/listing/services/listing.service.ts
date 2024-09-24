@@ -628,7 +628,7 @@ export class ListingService {
 
           if (sortDirections.includes(direction)) {
             // Add condition to sort where the date is not null
-            // query.andWhere(`listing.${sortField}`);
+            // Query.andWhere(`listing.${sortField}`);
 
             // Apply sorting to the query
 
