@@ -240,7 +240,7 @@ export class OfferService {
         },
       });
 
-      return { offer, listing, total, offers };
+      return { offer, listing, total };
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -248,13 +248,14 @@ export class OfferService {
   }
   async findManyForOwner(findOfferInput: FindOfferInput, user?: User) {
     try {
-      const listing = 1;
       const [offer, total] = await this.offerRepository.findAndCount({
         where: { listingId: findOfferInput.listingId, userId: user.id },
         skip: findOfferInput.skip,
         take: findOfferInput.take,
       });
-      return { offer, total, listing };
+
+      const totalOfferOnlisting = 15;
+      return { offer, total, totalOfferOnlisting };
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);

@@ -577,6 +577,12 @@ type OfferResponse {
   total: Int!
 }
 
+type OfferOwnerResponse {
+  offer: [Offer!]
+  totalOfferOnlisting: Float!
+  total: Int!
+}
+
 type AuctionResponse {
   auctions: [Auction!]!
   total: Int!
@@ -783,7 +789,7 @@ type Query {
   getLastOfferPrice(listingId: String!): Offer
   findOneOffer(id: String!): Offer!
   findOffers(findOptions: FindOfferInput!): OfferResponse!
-  findManyForOwner(findOptions: FindOfferInput!): OfferResponse!
+  findManyForOwner(findOptions: FindOfferInput!): OfferOwnerResponse!
   getWishlist: [Wishlist!]!
   findOneListingsForAdmin(listingId: String!): Listing!
   getAuction(id: String!): Auction!
