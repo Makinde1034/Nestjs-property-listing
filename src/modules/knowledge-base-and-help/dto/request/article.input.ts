@@ -49,6 +49,7 @@ export class CreateArticleInput {
 @InputType()
 export class UpdateArticleInput extends PartialType(CreateArticleInput) {
   @Field(() => Int)
+  @IsNumber()
   id: number;
 }
 

@@ -821,6 +821,8 @@ type Query {
   knowledgeBaseCategory(id: Int!): Category!
   findManyArticles(findOption: ArticleFilterInput!): ArticleResponse!
   findOneArticle(id: Int!): Article!
+  publishArticle(articlePublishInput: ArticlePublishInput!): SuccessResponse!
+  unpublishArticle(articlePublishInput: ArticlePublishInput!): SuccessResponse!
 }
 
 input PaginateAndSort {
@@ -979,6 +981,10 @@ input ArticleFilterInput {
   placement: String
 }
 
+input ArticlePublishInput {
+  id: [Float!]!
+}
+
 type Mutation {
   createSplashScreen(createSplashScreenInput: CreateSplashScreenInput!): SplashScreen!
   updateSplashScreen: SplashScreen!
@@ -1058,6 +1064,8 @@ type Mutation {
   updateKnowledgeBaseCatecory(updateKnowledgeBaseCategoryInput: UpdateCategoryInput!): Category!
   removeKnowledgeBaseCatecory(id: Int!): SuccessResponse!
   createArticle(createArticleInput: CreateArticleInput!): Article!
+  delete(id: Float!): SuccessResponse!
+  updateArticle(updateArticleInput: UpdateArticleInput!): Article!
 }
 
 input CreateSplashScreenInput {
@@ -1519,4 +1527,15 @@ input CreateArticleInput {
   authorImage: String
   authorBio: String!
   language: String!
+}
+
+input UpdateArticleInput {
+  content: String
+  image: String
+  categoryId: Float
+  title: String
+  authorImage: String
+  authorBio: String
+  language: String
+  id: Int!
 }

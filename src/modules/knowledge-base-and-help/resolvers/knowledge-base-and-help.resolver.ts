@@ -4,7 +4,9 @@ import { Article } from '../../../entities/article.entity';
 import { ArticleService } from '../services/article.service';
 import {
   ArticleFilterInput,
+  ArticlePublishInput,
   CreateArticleInput,
+  UpdateArticleInput,
 } from '../dto/request/article.input';
 import { Category } from '../../../entities/knowledge-base-category.entity';
 import { KnowledgeBaseCategoryService } from '../services/category.services';
@@ -72,11 +74,37 @@ export class KnowledgeBaseAndHelpResolver {
 
   @Query(() => ArticleResponse, { name: 'findManyArticles' })
   async findManyArticles(@Args('findOption') placement: ArticleFilterInput) {
-    return this.articleService.findAll(placement);
+    return await this.articleService.findAll(placement);
   }
 
   @Query(() => Article, { name: 'findOneArticle' })
   async findOneArticle(@Args('id', { type: () => Int }) id: number) {
-    return this.articleService.findOne(id);
+    return await this.articleService.findOne(id);
+  }
+
+  @Query(() => SuccessResponse, { name: 'publishArticle' })
+  async publish(
+    @Args('articlePublishInput') articlePublishInput: ArticlePublishInput,
+  ) {
+    return await this.articleService.publish(articlePublishInput);
+  }
+
+  @Query(() => SuccessResponse, { name: 'unpublishArticle' })
+  async unPublish(
+    @Args('articlePublishInput') articlePublishInput: ArticlePublishInput,
+  ) {
+    return await this.articleService.unpublish(articlePublishInput);
+  }
+
+  @Mutation(() => SuccessResponse)
+  async delete(@Args('id') id: number) {
+    return await this.articleService.remove(id);
+  }
+
+  @Mutation(() => Article)
+  async updateArticle(
+    @Args('updateArticleInput') updateArticleInput: UpdateArticleInput,
+  ) {
+    return await this.articleService.update(updateArticleInput);
   }
 }
