@@ -3,13 +3,15 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Article } from './article.entity';
 
 @Entity()
 @ObjectType()
-export class KnowledgeBaseCategory {
+export class Category {
   @PrimaryGeneratedColumn()
   @Field(() => Int)
   id: number;
@@ -25,9 +27,9 @@ export class KnowledgeBaseCategory {
   @Field()
   englishName: string;
 
-  @Column()
-  @Field()
-  language: string;
+  @Field(() => [Article])
+  @OneToMany(() => Article, (article) => article.category)
+  article: Article[];
 
   @Column()
   @Field()

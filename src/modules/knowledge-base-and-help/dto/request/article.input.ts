@@ -1,5 +1,12 @@
 import { InputType, Int, Field, PartialType } from '@nestjs/graphql';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
+import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
 
 @InputType()
 export class CreateArticleInput {
@@ -8,9 +15,9 @@ export class CreateArticleInput {
   @IsNotEmpty()
   content: string;
 
-  @Field()
+  @Field({ nullable: true })
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   image: string;
 
   @Field()
@@ -23,9 +30,9 @@ export class CreateArticleInput {
   @IsNotEmpty()
   title: string;
 
-  @Field()
+  @Field({ nullable: true })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   authorImage: string;
 
   @Field()
@@ -43,4 +50,20 @@ export class CreateArticleInput {
 export class UpdateArticleInput extends PartialType(CreateArticleInput) {
   @Field(() => Int)
   id: number;
+}
+
+@InputType()
+export class ArticleFilterInput extends PaginateAndSort {
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  placement: string;
+}
+
+@InputType()
+export class ArticlePublishInput {
+  @Field(() => [Number])
+  @IsOptional()
+  @IsArray()
+  id: number[];
 }

@@ -33,7 +33,7 @@ export class Ticket extends BaseEntity {
   @ManyToOne(() => User, { cascade: true })
   support: User;
 
-  @Field(() => ParentIssue)
+  @Field(() => ParentIssue, { nullable: true })
   @ManyToOne(() => ParentIssue, (parentIssue) => parentIssue.ticket, {
     cascade: true,
     eager: true,

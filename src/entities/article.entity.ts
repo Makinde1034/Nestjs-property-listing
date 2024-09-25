@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
+import { Category } from './knowledge-base-category.entity';
 
 @ObjectType()
 @Entity()
@@ -20,25 +21,29 @@ export class Article {
   @Field()
   content: string;
 
-  @Column()
-  @Field()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   image: string;
 
   @Column()
   @Field()
   title: string;
 
-  @Column()
-  @Field()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   authorImage: string;
 
   @Field(() => User)
   @ManyToOne(() => User, (user) => user.article)
   user: User;
 
-  @Column()
-  @Field()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   authorBio: string;
+
+  @Field(() => Category)
+  @ManyToOne(() => Category, (category) => category.article)
+  category: Category;
 
   @Column()
   @Field()
@@ -46,7 +51,7 @@ export class Article {
 
   @Column({ default: false })
   @Field()
-  published: string;
+  published: boolean;
 
   @Column()
   @Field()

@@ -163,7 +163,7 @@ type Ticket {
   id: ID!
   reporter: User!
   support: User
-  parentIssue: ParentIssue!
+  parentIssue: ParentIssue
   childIssue: ChildIssue
   status: String!
   type: String
@@ -357,17 +357,29 @@ type SearchHistory {
   updatedAt: DateTime!
 }
 
+type Category {
+  id: Int!
+  placement: String!
+  arabicName: String!
+  englishName: String!
+  article: [Article!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime!
+}
+
 type Article {
   """id"""
   id: Int!
   content: String!
-  image: String!
+  image: String
   title: String!
-  authorImage: String!
+  authorImage: String
   user: User!
-  authorBio: String!
+  authorBio: String
+  category: Category!
   language: String!
-  published: String!
+  published: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
   deletedAt: DateTime!
@@ -561,7 +573,7 @@ type AdminListingResponse {
 
 type OfferResponse {
   offer: [Offer!]
-  listing: [Listing!]
+  listing: Listing!
   total: Int!
 }
 
@@ -725,6 +737,11 @@ type MessageResponse {
   lastMessage: Messages
 }
 
+type ArticleResponse {
+  article: [Article!]!
+  total: Float!
+}
+
 type Query {
   app: String!
   findAllSplashScreen(findOption: PaginateAndSort): SplashScreenResponse!
@@ -794,6 +811,10 @@ type Query {
   findManyReviews(findMayOptions: FindManyReviewDto): ReviewResponse!
   findCities(findCities: PaginateAndSort): CityResponse!
   getChat(chatFilterInput: ChatFilterInput!): MessageResponse!
+  categories(findOption: CategoryFilterInput): [Category!]!
+  knowledgeBaseCategory(id: Int!): Category!
+  findManyArticles(findOption: ArticleFilterInput!): ArticleResponse!
+  findOneArticle(id: Int!): Article!
 }
 
 input PaginateAndSort {
@@ -934,6 +955,24 @@ input ChatFilterInput {
   ticketId: String!
 }
 
+input CategoryFilterInput {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
+  placement: String
+}
+
+input ArticleFilterInput {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
+  placement: String
+}
+
 type Mutation {
   createSplashScreen(createSplashScreenInput: CreateSplashScreenInput!): SplashScreen!
   updateSplashScreen: SplashScreen!
@@ -1009,7 +1048,10 @@ type Mutation {
   deleteResponseTemplate(deleteResponseTemplate: DeleteResponsetemplate!): SuccessResponse!
   updateResponseTemplate(updateResponseTemplateInput: UpdateResponseTemplateInput!): ResponseTemplate!
   createReview(createReviewDto: CreateReviewDto!): Review!
-  createKnowledgeBaseAndHelp(createKnowledgeBaseAndHelpInput: CreateArticleInput!): Article!
+  createCategory(createCategoryInput: CreateCategoryInput!): Category!
+  updateKnowledgeBaseCatecory(updateKnowledgeBaseCategoryInput: UpdateCategoryInput!): Category!
+  removeKnowledgeBaseCatecory(id: Int!): SuccessResponse!
+  createArticle(createArticleInput: CreateArticleInput!): Article!
 }
 
 input CreateSplashScreenInput {
@@ -1450,12 +1492,25 @@ input CreateReviewDto {
   reviewType: String!
 }
 
+input CreateCategoryInput {
+  placement: String!
+  arabicName: String!
+  englishName: String!
+}
+
+input UpdateCategoryInput {
+  placement: String
+  arabicName: String
+  englishName: String
+  id: Float!
+}
+
 input CreateArticleInput {
   content: String!
-  image: String!
+  image: String
   categoryId: Float!
   title: String!
-  authorImage: String!
+  authorImage: String
   authorBio: String!
   language: String!
 }

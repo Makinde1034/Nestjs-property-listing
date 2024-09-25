@@ -248,12 +248,13 @@ export class OfferService {
   }
   async findManyForOwner(findOfferInput: FindOfferInput, user?: User) {
     try {
+      const listing = 1;
       const [offer, total] = await this.offerRepository.findAndCount({
         where: { listingId: findOfferInput.listingId, userId: user.id },
         skip: findOfferInput.skip,
         take: findOfferInput.take,
       });
-      return { offer, total };
+      return { offer, total, listing };
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);

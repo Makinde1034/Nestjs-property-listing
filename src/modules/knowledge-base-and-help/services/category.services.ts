@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { KnowledgeBaseCategoryRepository } from '../repositories/knowledge-base-category.repository';
 import {
+  CategoryFilterInput,
   CreateCategoryInput,
   UpdateCategoryInput,
 } from '../dto/request/knowledg-base.category.input';
@@ -30,10 +31,56 @@ export class KnowledgeBaseCategoryService {
       throw new BadRequestException(error);
     }
   }
-
-  async findAll() {
+  async findOne(id: number) {
     try {
-      return await this.knowledgeBaseCategoryRepository.find();
+      const category = await this.knowledgeBaseCategoryRepository.findOne({
+        where: { id },
+        relations: ['category'],
+      });
+
+      if (!category) {
+        throw new NotFoundException(AppStrings.NOT_FOUND);
+      }
+    } catch (error) {
+      this.logger.log(error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new BadRequestException(error);
+      }
+    }
+  }
+
+  async findAll(findOption: CategoryFilterInput) {
+    try {
+      const sortField = findOption.sortField;
+      const sortDirection: 'ASC' | 'DESC' = findOption.directionToSort as
+        | 'ASC'
+        | 'DESC';
+
+      if (findOption.take == undefined && findOption.skip == undefined) {
+        findOption.skip = 0;
+        findOption.take = 20;
+      }
+
+      const orderOptions = {
+        [sortField]: sortDirection,
+      };
+      if (findOption.placement) {
+        return await this.knowledgeBaseCategoryRepository.find({
+          where: { placement: findOption.placement },
+          take: findOption.take,
+          skip: findOption.skip,
+          order: orderOptions,
+        });
+      } else {
+        return await this.knowledgeBaseCategoryRepository.find({
+          take: findOption.take,
+          skip: findOption.skip,
+          order: orderOptions,
+        });
+      }
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);

@@ -5,11 +5,19 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateArticleInput } from '../dto/request/article.input';
+import {
+  ArticleFilterInput,
+  ArticlePublishInput,
+  CreateArticleInput,
+  UpdateArticleInput,
+} from '../dto/request/article.input';
 
 import { ArticleRepository } from '../repositories/article.repository';
 import { KnowledgeBaseCategoryRepository } from '../repositories/knowledge-base-category.repository';
 import { AppStrings } from '../../../common/messages/app.strings';
+import { SuccessResponse } from '../../../common/utils/success.response';
+import { Article } from '../../../entities/article.entity';
+import { DeepPartial, In } from 'typeorm';
 
 @Injectable()
 export class ArticleService {
@@ -27,7 +35,10 @@ export class ArticleService {
       if (!category) {
         throw new NotFoundException(AppStrings.NOT_FOUND);
       }
-      return await this.articleRepository.save(createArticleInput);
+      return await this.articleRepository.save({
+        ...createArticleInput,
+        category,
+      });
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
@@ -37,20 +48,162 @@ export class ArticleService {
       }
     }
   }
+  async findAll(findOption: ArticleFilterInput) {
+    try {
+      const {
+        placement,
+        take: initialTake,
+        skip,
+        sortField,
+        directionToSort,
+      } = findOption;
+      const orderOptions = {
+        [sortField]: directionToSort,
+      };
 
-  async findAll(findOption) {
-    return await this.articleRepository.findAndCount();
+      const take = initialTake <= 20 ? initialTake : 20;
+      const [article, total] = await this.articleRepository.findAndCount({
+        where: { category: { placement: placement } },
+        take,
+        skip,
+        order: orderOptions,
+        relations: ['category'],
+      });
+
+      return { article, total };
+    } catch (error) {
+      this.logger.error(error);
+      throw new BadRequestException(error);
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} knowledgeBaseAndHelp`;
+  async findOne(id: number) {
+    try {
+      const article = await this.articleRepository.findOne({
+        where: { id },
+        relations: ['category'],
+      });
+
+      if (!article) {
+        throw new NotFoundException(AppStrings.NOT_FOUND);
+      }
+
+      return article;
+    } catch (error) {
+      this.logger.log(error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new BadRequestException(error);
+      }
+    }
   }
 
-  update(id: number) {
-    return `This action updates a #${id} knowledgeBaseAndHelp`;
+  async update(updateArticleInput: UpdateArticleInput) {
+    try {
+      const { id, ...rest } = updateArticleInput;
+      const { affected } = await this.articleRepository.update(id, rest);
+
+      if (affected > 0) {
+        return await this.knowledgeBaseCategoryRepository.findOneBy({ id });
+      }
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} knowledgeBaseAndHelp`;
+  async publish(articlePublishInput: ArticlePublishInput) {
+    try {
+      const { id } = articlePublishInput;
+      const articleToUpdate: DeepPartial<Article>[] = [];
+      const notFoundIds: number[] = [];
+
+      const article = await this.articleRepository.find({
+        where: { id: In(id) },
+      });
+
+      if (article.length < id.length) {
+        const foundUserIds = article.map((article) => article.id);
+        notFoundIds.push(...id.filter((id) => !foundUserIds.includes(id)));
+      }
+
+      article.forEach((article) => {
+        articleToUpdate.push({ id: article.id, published: true });
+      });
+
+      const updatedArticle = await this.articleRepository.save(articleToUpdate);
+
+      return new SuccessResponse(
+        `You have successfully published the selected article`,
+        {
+          successful: updatedArticle,
+          failed: notFoundIds,
+        },
+      );
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async unpublish(articlePublishInput: ArticlePublishInput) {
+    try {
+      const { id } = articlePublishInput;
+      const articleToUpdate: DeepPartial<Article>[] = [];
+      const notFoundIds: number[] = [];
+
+      const article = await this.articleRepository.find({
+        where: { id: In(id) },
+      });
+
+      if (article.length < id.length) {
+        const foundUserIds = article.map((article) => article.id);
+        notFoundIds.push(...id.filter((id) => !foundUserIds.includes(id)));
+      }
+
+      article.forEach((article) => {
+        articleToUpdate.push({ id: article.id, published: false });
+      });
+
+      const updatedArticle = await this.articleRepository.save(articleToUpdate);
+
+      return new SuccessResponse(
+        `You have successfully unpublished the selected article`,
+        {
+          successful: updatedArticle,
+          failed: notFoundIds,
+        },
+      );
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async remove(id: number) {
+    try {
+      const category = await this.articleRepository.findOneBy({
+        id,
+      });
+
+      if (!category) {
+        throw new NotFoundException(AppStrings.NOT_FOUND);
+      }
+      const { affected } = await this.articleRepository.softDelete(id);
+
+      if (affected > 0) {
+        return new SuccessResponse(AppStrings.DELETED_SUCCESSFULLY);
+      }
+    } catch (error) {
+      this.logger.log(error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new BadRequestException(error);
+      }
+    }
   }
 }

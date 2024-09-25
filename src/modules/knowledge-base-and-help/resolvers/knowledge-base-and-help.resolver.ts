@@ -1,44 +1,82 @@
-import { Resolver, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Mutation, Args, Query, Int } from '@nestjs/graphql';
 
 import { Article } from '../../../entities/article.entity';
 import { ArticleService } from '../services/article.service';
-import { CreateArticleInput } from '../dto/request/article.input';
+import {
+  ArticleFilterInput,
+  CreateArticleInput,
+} from '../dto/request/article.input';
+import { Category } from '../../../entities/knowledge-base-category.entity';
+import { KnowledgeBaseCategoryService } from '../services/category.services';
+import {
+  CategoryFilterInput,
+  CreateCategoryInput,
+  UpdateCategoryInput,
+} from '../dto/request/knowledg-base.category.input';
+import { SuccessResponse } from '../../../common/utils/success.response';
+import { ArticleResponse } from '../dto/response/article';
 
 @Resolver(() => Article)
 export class KnowledgeBaseAndHelpResolver {
-  constructor(private readonly articleService: ArticleService) {}
+  constructor(
+    private readonly articleService: ArticleService,
+    private readonly knowledgeBaseCategoryService: KnowledgeBaseCategoryService,
+  ) {}
 
-  @Mutation(() => Article)
-  createKnowledgeBaseAndHelp(
-    @Args('createKnowledgeBaseAndHelpInput')
-    CreateArticleInput: CreateArticleInput,
+  @Mutation(() => Category)
+  async createCategory(
+    @Args('createCategoryInput')
+    CreateArticleInput: CreateCategoryInput,
   ) {
-    return this.articleService.create(CreateArticleInput);
+    return await this.knowledgeBaseCategoryService.createCategory(
+      CreateArticleInput,
+    );
   }
 
-  // @Query(() => [KnowledgeBaseAndHelp], { name: 'knowledgeBaseAndHelp' })
-  // findAll() {
-  //   return this.knowledgeBaseAndHelpService.findAll();
-  // }
+  @Query(() => [Category], { name: 'categories' })
+  async findAll(
+    @Args('findOption', { nullable: true }) findOption: CategoryFilterInput,
+  ) {
+    return await this.knowledgeBaseCategoryService.findAll(findOption);
+  }
 
-  // @Query(() => KnowledgeBaseAndHelp, { name: 'knowledgeBaseAndHelp' })
-  // findOne(@Args('id', { type: () => Int }) id: number) {
-  //   return this.knowledgeBaseAndHelpService.findOne(id);
-  // }
+  @Query(() => Category, { name: 'knowledgeBaseCategory' })
+  async findOne(@Args('id', { type: () => Int }) id: number) {
+    return this.knowledgeBaseCategoryService.findOne(id);
+  }
 
-  // @Mutation(() => KnowledgeBaseAndHelp)
-  // updateKnowledgeBaseAndHelp(
-  //   @Args('updateKnowledgeBaseAndHelpInput')
-  //   updateKnowledgeBaseAndHelpInput: UpdateKnowledgeBaseAndHelpInput,
-  // ) {
-  //   return this.knowledgeBaseAndHelpService.update(
-  //     updateKnowledgeBaseAndHelpInput.id,
-  //     updateKnowledgeBaseAndHelpInput,
-  //   );
-  // }
+  @Mutation(() => Category)
+  async updateKnowledgeBaseCatecory(
+    @Args('updateKnowledgeBaseCategoryInput')
+    updateKnowledgeBaseAndHelpInput: UpdateCategoryInput,
+  ) {
+    return await this.knowledgeBaseCategoryService.update(
+      updateKnowledgeBaseAndHelpInput,
+    );
+  }
 
-  // @Mutation(() => KnowledgeBaseAndHelp)
-  // removeKnowledgeBaseAndHelp(@Args('id', { type: () => Int }) id: number) {
-  //   return this.knowledgeBaseAndHelpService.remove(id);
-  // }
+  @Mutation(() => SuccessResponse)
+  async removeKnowledgeBaseCatecory(
+    @Args('id', { type: () => Int }) id: number,
+  ) {
+    return await this.knowledgeBaseCategoryService.delete(id);
+  }
+
+  @Mutation(() => Article)
+  async createArticle(
+    @Args('createArticleInput')
+    CreateArticleInput: CreateArticleInput,
+  ) {
+    return await this.articleService.create(CreateArticleInput);
+  }
+
+  @Query(() => ArticleResponse, { name: 'findManyArticles' })
+  async findManyArticles(@Args('findOption') placement: ArticleFilterInput) {
+    return this.articleService.findAll(placement);
+  }
+
+  @Query(() => Article, { name: 'findOneArticle' })
+  async findOneArticle(@Args('id', { type: () => Int }) id: number) {
+    return this.articleService.findOne(id);
+  }
 }

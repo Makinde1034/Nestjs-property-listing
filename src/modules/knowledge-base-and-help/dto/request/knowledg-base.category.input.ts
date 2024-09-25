@@ -1,5 +1,6 @@
 import { Field, InputType, PartialType } from '@nestjs/graphql';
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
 
 @InputType()
 export class CreateCategoryInput {
@@ -7,11 +8,6 @@ export class CreateCategoryInput {
   @IsNotEmpty()
   @Field()
   placement: string;
-
-  @IsOptional()
-  @IsString()
-  @Field()
-  language: string;
 
   @IsString()
   @IsNotEmpty()
@@ -23,10 +19,17 @@ export class CreateCategoryInput {
   @Field()
   englishName: string;
 }
-
+@InputType()
 export class UpdateCategoryInput extends PartialType(CreateCategoryInput) {
   @Field()
   @IsNotEmpty()
   @IsNumber()
   id: number;
+}
+@InputType()
+export class CategoryFilterInput extends PaginateAndSort {
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  placement: string;
 }
