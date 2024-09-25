@@ -86,6 +86,7 @@ export class ReviewService {
       take: paginateAndSort.take,
       skip: paginateAndSort.skip,
       order: { createdAt: 'DESC' },
+      relations: ['user'],
     });
 
     const averageRating = await this.aggregateReview();
