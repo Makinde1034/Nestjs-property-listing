@@ -240,7 +240,7 @@ export class OfferService {
         },
       });
 
-      return { offer, listing, total, offers };
+      return { offer, listing, total };
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -253,7 +253,9 @@ export class OfferService {
         skip: findOfferInput.skip,
         take: findOfferInput.take,
       });
-      return { offer, total };
+
+      const totalOfferOnlisting = 15;
+      return { offer, total, totalOfferOnlisting };
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);

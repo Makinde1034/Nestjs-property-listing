@@ -22,6 +22,7 @@ import {
   AuctionResponse,
   FlaggedListingResponse,
   ListingResponse,
+  OfferOwnerResponse,
   OfferResponse,
   SearchHistoryResponse,
 } from '../dtos/response/listing.response';
@@ -329,7 +330,7 @@ export class ListingResolver {
   async findMany(@Args('findOptions') paginateAndSort: FindOfferInput) {
     return await this.offerService.findMany(paginateAndSort);
   }
-  @Query(() => OfferResponse, { name: 'findManyForOwner' })
+  @Query(() => OfferOwnerResponse, { name: 'findManyForOwner' })
   async findManyForOwner(
     @Args('findOptions') paginateAndSort: FindOfferInput,
     @Context() ctx: any,

@@ -548,7 +548,7 @@ export class ListingService {
           .andWhere('listing.published = true')
 
           .where(
-            'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented  AND listing.published IS true',
+            'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented   AND listing.published IS true',
             {
               isListingDisabled: false,
               isListingSold: false,
