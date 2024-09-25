@@ -18,12 +18,14 @@ import { AppStrings } from '../../../common/messages/app.strings';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { Article } from '../../../entities/article.entity';
 import { DeepPartial, In } from 'typeorm';
+import { StorageService } from '../../file-handler/services/storage.service';
 
 @Injectable()
 export class ArticleService {
   constructor(
     private readonly articleRepository: ArticleRepository,
     private readonly knowledgeBaseCategoryRepository: KnowledgeBaseCategoryRepository,
+    private storageService: StorageService,
   ) {}
   logger = new Logger(ArticleService.name);
   async create(createArticleInput: CreateArticleInput) {
@@ -103,10 +105,15 @@ export class ArticleService {
   async update(updateArticleInput: UpdateArticleInput) {
     try {
       const { id, ...rest } = updateArticleInput;
+      const article = await this.articleRepository.findOneBy({ id });
+
+      if (!article) {
+        throw new NotFoundException(AppStrings.NOT_FOUND);
+      }
       const { affected } = await this.articleRepository.update(id, rest);
 
       if (affected > 0) {
-        return await this.knowledgeBaseCategoryRepository.findOneBy({ id });
+        return await this.articleRepository.findOneBy({ id });
       }
     } catch (error) {
       this.logger.log(error);
@@ -203,6 +210,31 @@ export class ArticleService {
         throw error;
       } else {
         throw new BadRequestException(error);
+      }
+    }
+  }
+
+  async uploadImage(id: number, file: Express.Multer.File) {
+    try {
+      const article = await this.articleRepository.findOne({ where: { id } });
+
+      if (!article) {
+        throw new NotFoundException(AppStrings.NOT_FOUND);
+      }
+
+      const url = await this.storageService.upload(file);
+
+      await this.articleRepository.update(id, { image: url });
+
+      return new SuccessResponse(AppStrings.UPLOAD_SUCCESSFUL, url);
+    } catch (error) {
+      this.logger.error('Error during image upload', error);
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new BadRequestException(
+          error.message || 'An unexpected error occurred during image upload',
+        );
       }
     }
   }
