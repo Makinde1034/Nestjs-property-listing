@@ -25,7 +25,6 @@ export class Chat extends BaseEntity {
   @Field(() => Messages, { nullable: true })
   @OneToMany(() => Messages, (message) => message.chat, { eager: true })
   message: Messages[];
-
   @ManyToOne(() => User, (user) => user.chat)
   user: User;
 

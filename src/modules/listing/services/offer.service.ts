@@ -252,6 +252,7 @@ export class OfferService {
         where: { listingId: findOfferInput.listingId, userId: user.id },
         skip: findOfferInput.skip,
         take: findOfferInput.take,
+        relations: ['listing'],
       });
 
       const totalOfferOnlisting = 15;
