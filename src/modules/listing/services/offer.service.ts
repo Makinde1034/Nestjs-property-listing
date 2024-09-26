@@ -233,13 +233,6 @@ export class OfferService {
         take: findOfferInput.take,
       });
 
-      const offers = await this.offerRepository.count({
-        where: {
-          listingId: findOfferInput.listingId,
-          status: OfferListEnum.ACTIVE,
-        },
-      });
-
       return { offer, listing, total };
     } catch (error) {
       this.logger.log(error);
@@ -248,14 +241,20 @@ export class OfferService {
   }
   async findManyForOwner(findOfferInput: FindOfferInput, user?: User) {
     try {
-      const [offer, total] = await this.offerRepository.findAndCount({
-        where: { listingId: findOfferInput.listingId, userId: user.id },
-        skip: findOfferInput.skip,
-        take: findOfferInput.take,
-        relations: ['listing'],
-      });
+      const [[offer, total], totalOfferOnlisting] = await Promise.all([
+        this.offerRepository.findAndCount({
+          where: {
+            listingId: findOfferInput.listingId,
+            userId: user.id,
+          },
+          skip: findOfferInput.skip,
+          take: findOfferInput.take,
+          relations: ['listing'],
+        }),
 
-      const totalOfferOnlisting = 15;
+        this.listingRepository.count({ where: { userId: user.id } }),
+      ]);
+
       return { offer, total, totalOfferOnlisting };
     } catch (error) {
       this.logger.log(error);
@@ -274,7 +273,6 @@ export class OfferService {
             user: { email: true, firstName: true },
           },
         }),
-
         await this.offerRepository.find({
           where: {
             price: MoreThanOrEqual(updateOfferInput.price),
