@@ -7,6 +7,7 @@ import {
   BadRequestException,
   HttpException,
   Injectable,
+  InternalServerErrorException,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
@@ -36,6 +37,9 @@ import { NotificationService } from '../../notification/services';
 import { OfferListEnum } from '../../../common/enums/status.enum';
 import { AdminService } from '../../admin/services/admin.service';
 import { ListingRepository } from '../repositories/listing.repository';
+import { Mutation } from '@nestjs/graphql';
+import { SuccessResponse } from '../../../common/utils/success.response';
+import { async } from 'rxjs';
 
 @Injectable()
 export class OfferService {
@@ -499,6 +503,36 @@ export class OfferService {
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
+    }
+  }
+
+  async deleteOffer(id: string) {
+    try {
+      // TODO: revert payment
+
+      const offer = await this.offerRepository.findOneBy({ id });
+
+      if (!offer) {
+        throw new NotFoundException(AppStrings.NOT_FOUND);
+      }
+
+      const { affected } = await this.offerRepository.softDelete({ id });
+
+      if (affected) {
+        return new SuccessResponse(AppStrings.DELETED_SUCCESSFULLY);
+      } else {
+        throw new BadRequestException('Offer could not be deleted');
+      }
+    } catch (error) {
+      this.logger.error('Error in deleteOffer:', error.stack);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      // For other errors, throw a generic exception
+      throw new InternalServerErrorException(
+        'An error occurred while deleting the offer',
+      );
     }
   }
 }
