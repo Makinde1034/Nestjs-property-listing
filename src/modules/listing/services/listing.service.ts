@@ -195,32 +195,49 @@ export class ListingService {
 
   async findAllListingsForOwner(data: AttributeDto, user?: User) {
     try {
-      const { take: initialTake, skip, sortField, directionToSort } = data;
+      let { sortField, directionToSort } = data;
 
-      const orderOptions = {
-        [sortField]: directionToSort,
-      };
+      const { take: initialTake, skip } = data;
+
+      const sortDirections = ['ASC', 'DESC'] as const;
+      if (sortField && directionToSort) {
+        sortField = data.sortField;
+        directionToSort =
+          directionToSort.toUpperCase() as (typeof sortDirections)[number];
+      } else {
+        sortField = null; // No sorting if not provided
+      }
 
       const take = initialTake <= 20 ? initialTake : 20;
 
-      const listing = await this.listingRepository.findAndCount({
-        take,
-        skip,
-        where: { userId: user.id },
-        relations: ['listingAttributes', 'listingType'],
-        order: orderOptions,
-      });
+      const query = this.listingRepository
+        .createQueryBuilder('listing')
+        .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
+        .leftJoinAndSelect('listing.listingType', 'listingType')
+        .loadRelationCountAndMap('listing.offers', 'listing.offer')
+        .where('listing.userId = :id', { id: user.id })
+        .take(take)
+        .skip(skip);
 
-      // const d = await this.listingRepository.
+      if (sortField && directionToSort) {
+        // Ensure sortField is valid and exists in the entity before adding orderBy
+        query.orderBy(
+          `listing.${sortField}`,
+          directionToSort as 'ASC' | 'DESC',
+          'NULLS LAST',
+        );
+      }
 
-      //
+      const listing = await query.getManyAndCount();
 
       return listing;
     } catch (error) {
       this.logger.log(error);
       if (error instanceof HttpException) {
         throw error;
-      } else throw new BadRequestException(error.messages || error.data);
+      } else {
+        throw new BadRequestException(error.messages || error.data);
+      }
     }
   }
 

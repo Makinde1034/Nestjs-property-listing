@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { Resolver, Mutation, Args, Query, Int } from '@nestjs/graphql';
 
 import { Article } from '../../../entities/article.entity';
@@ -28,10 +33,10 @@ export class KnowledgeBaseAndHelpResolver {
   @Mutation(() => Category)
   async createCategory(
     @Args('createCategoryInput')
-    CreateArticleInput: CreateCategoryInput,
+    createCategoryInput: CreateCategoryInput,
   ) {
     return await this.knowledgeBaseCategoryService.createCategory(
-      CreateArticleInput,
+      createCategoryInput,
     );
   }
 
@@ -44,7 +49,7 @@ export class KnowledgeBaseAndHelpResolver {
 
   @Query(() => Category, { name: 'knowledgeBaseCategory' })
   async findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.knowledgeBaseCategoryService.findOne(id);
+    return await this.knowledgeBaseCategoryService.findOne(id);
   }
 
   @Mutation(() => Category)
@@ -67,9 +72,9 @@ export class KnowledgeBaseAndHelpResolver {
   @Mutation(() => Article)
   async createArticle(
     @Args('createArticleInput')
-    CreateArticleInput: CreateArticleInput,
+    createArticleInput: CreateArticleInput,
   ) {
-    return await this.articleService.create(CreateArticleInput);
+    return await this.articleService.create(createArticleInput);
   }
 
   @Query(() => ArticleResponse, { name: 'findManyArticles' })

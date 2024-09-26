@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import {
   BadRequestException,
   HttpException,
@@ -127,16 +132,18 @@ export class ArticleService {
       const articleToUpdate: DeepPartial<Article>[] = [];
       const notFoundIds: number[] = [];
 
-      const article = await this.articleRepository.find({
+      const articles = await this.articleRepository.find({
         where: { id: In(id) },
       });
 
-      if (article.length < id.length) {
-        const foundUserIds = article.map((article) => article.id);
-        notFoundIds.push(...id.filter((id) => !foundUserIds.includes(id)));
+      if (articles.length < id.length) {
+        const foundUserIds = articles.map((article) => article.id);
+        notFoundIds.push(
+          ...id.filter((value) => !foundUserIds.includes(value)),
+        );
       }
 
-      article.forEach((article) => {
+      articles.forEach((article) => {
         articleToUpdate.push({ id: article.id, published: true });
       });
 
@@ -166,12 +173,14 @@ export class ArticleService {
       });
 
       if (article.length < id.length) {
-        const foundUserIds = article.map((article) => article.id);
-        notFoundIds.push(...id.filter((id) => !foundUserIds.includes(id)));
+        const foundUserIds = article.map((element) => element.id);
+        notFoundIds.push(
+          ...id.filter((value) => !foundUserIds.includes(value)),
+        );
       }
 
-      article.forEach((article) => {
-        articleToUpdate.push({ id: article.id, published: false });
+      article.forEach((element) => {
+        articleToUpdate.push({ id: element.id, published: false });
       });
 
       const updatedArticle = await this.articleRepository.save(articleToUpdate);
