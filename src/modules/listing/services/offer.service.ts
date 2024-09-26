@@ -61,6 +61,8 @@ export class OfferService {
       },
       select: ['id', 'price'],
       order: { price: 'DESC' },
+      take: 1,
+      skip: 0,
     });
     return offer[0];
   }
@@ -82,11 +84,6 @@ export class OfferService {
       if (offerExpiry > maxExpiry) {
         throw new BadRequestException('Max expiry is 2 days');
       }
-      if (offer.length > 0) {
-        throw new BadRequestException(
-          `Minimum Offer must be greater than ${offer[0].price}`,
-        );
-      }
 
       const [minimumPrice, listing] =
         await this.getMinimumOfferForAListingAndUser(createOfferDto.listingId);
@@ -104,6 +101,11 @@ export class OfferService {
       if (user.id == listing.user.id) {
         throw new BadRequestException(
           'The creator of a listing cannot create an offer on  that listing',
+        );
+      }
+      if (offer.length > 0) {
+        throw new BadRequestException(
+          `Minimum Offer must be greater than ${offer[0].price}`,
         );
       }
 
