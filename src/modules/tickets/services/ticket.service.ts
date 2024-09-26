@@ -3,7 +3,12 @@
  * For license. See license.txt
  */
 
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { TicketRepository } from '../repositories';
 import {
   CreateResponseTemplateInput,
@@ -178,53 +183,43 @@ export class TicketService {
    * @param {UpdateTicketInput} input
    * @returns {Promise<Ticket>}
    */
-  async updateTicket(user: User, input: UpdateTicketInput): Promise<Ticket> {
+  async updateTicket(user: User, input: UpdateTicketInput): Promise<Ticket[]> {
     try {
       const { ticketId, status } = input;
-      const ticket = await this.ticketRepository.findOneByOrFail({
-        id: ticketId,
+      const tickets = await this.ticketRepository.find({
+        where: {
+          id: In(ticketId),
+        },
       });
-      let data: Partial<Ticket>;
-      switch (status) {
-        case TicketStatus.IN_PROGRESS:
-          {
-            data = {
-              status,
-              assignedAt: ticket.assignedAt ?? new Date(),
-              isOpen: true,
-              support: user,
-            };
-            const { affected } = await this.ticketRepository.update(
-              ticketId,
-              data,
-            );
-            if (affected) {
-              return this.ticketRepository.findOneByOrFail({ id: ticketId });
-            }
-          }
-          break;
 
-        case TicketStatus.CLOSE: {
-          data = {
-            status,
-            isOpen: false,
-            closedAt: new Date(),
-          };
-          const { affected } = await this.ticketRepository.update(
-            ticketId,
-            data,
-          );
-          if (affected) {
-            return this.ticketRepository.findOneByOrFail({ id: ticketId });
-          }
-          break;
-        }
-        default:
-          break;
+      if (tickets.length === 0) {
+        throw new NotFoundException('Tickets not found');
       }
+
+      // Prepare tickets for update
+      const ticketToUpdate = tickets.map((ticket) => {
+        const updatedTicket: Partial<Ticket> = {
+          status,
+          assignedAt: ticket.assignedAt ?? new Date(),
+          isOpen: true,
+          support: user,
+        };
+        return { ...ticket, ...updatedTicket };
+      });
+
+      // Save and return the updated tickets
+      if (
+        status === TicketStatus.IN_PROGRESS ||
+        status === TicketStatus.CLOSE ||
+        status === TicketStatus.OPEN
+      ) {
+        return await this.ticketRepository.save(ticketToUpdate);
+      }
+
+      throw new BadRequestException('Invalid status update');
     } catch (error) {
-      this.logger.log(error);
-      throw new BadRequestException(error);
+      this.logger.error('Error updating tickets', error.stack);
+      throw new BadRequestException(error.message);
     }
   }
 

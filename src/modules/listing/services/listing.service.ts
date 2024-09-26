@@ -211,6 +211,10 @@ export class ListingService {
         order: orderOptions,
       });
 
+      // const d = await this.listingRepository.
+
+      //
+
       return listing;
     } catch (error) {
       this.logger.log(error);
