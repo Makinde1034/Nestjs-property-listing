@@ -47,6 +47,8 @@ export class CreateOfferDto {
   @IsNotEmpty()
   listingId: string;
 
+  saiiFee: number;
+
   userId?: string;
 }
 
