@@ -93,6 +93,7 @@ type Review {
 type Offer {
   id: ID!
   price: Float!
+  saiiFee: Float!
   expireAt: DateTime!
   acceptedAt: DateTime
   status: String!

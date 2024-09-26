@@ -38,6 +38,7 @@ import { OfferListEnum } from '../../../common/enums/status.enum';
 import { AdminService } from '../../admin/services/admin.service';
 import { ListingRepository } from '../repositories/listing.repository';
 import { SuccessResponse } from '../../../common/utils/success.response';
+import { SaiiFees } from '../../admin/dto/response/admin-response';
 
 @Injectable()
 export class OfferService {
@@ -85,7 +86,7 @@ export class OfferService {
         throw new BadRequestException('Max expiry is 2 days');
       }
 
-      const [minimumPrice, listing] =
+      const [minimumPrice, listing, saiiFee] =
         await this.getMinimumOfferForAListingAndUser(createOfferDto.listingId);
 
       if (!listing.negotiable) {
@@ -110,6 +111,7 @@ export class OfferService {
       }
 
       createOfferDto.userId = user.id;
+      createOfferDto.saiiFee = saiiFee;
       createOfferDto.expireAt = new Date(addDaysToDate(new Date(), 1));
 
       const offerPayload = await this.offerRepository.save(createOfferDto);
@@ -185,7 +187,7 @@ export class OfferService {
 
   async getMinimumOfferForAListingAndUser(
     listingId: string,
-  ): Promise<[number, Listing]> {
+  ): Promise<[number, Listing, number]> {
     try {
       const listing =
         await this.listingService.findOneListingForBuyer(listingId);
@@ -204,7 +206,7 @@ export class OfferService {
       const total = vat + saii + price;
 
       const minimumListingPrice = listing.price - price + total;
-      return [minimumListingPrice, listing];
+      return [minimumListingPrice, listing, saii];
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -299,7 +301,7 @@ export class OfferService {
         );
       }
 
-      const [minimumPrice, listing] =
+      const [minimumPrice, listing, saiiFee] =
         await this.getMinimumOfferForAListingAndUser(
           updateOfferInput.listingId,
         );
@@ -333,7 +335,10 @@ export class OfferService {
         scope,
       });
 
-      const { affected } = await this.offerRepository.update(id, rest);
+      const { affected } = await this.offerRepository.update(id, {
+        saiiFee: saiiFee,
+        ...rest,
+      });
 
       if (affected) {
         return await this.offerRepository.findOneBy({ id });

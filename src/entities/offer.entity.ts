@@ -26,6 +26,10 @@ export class Offer extends BaseEntity {
   @Field()
   price: number;
 
+  @Column('decimal', { precision: 10, scale: 2, default: 0.5 })
+  @Field()
+  saiiFee: number;
+
   @Field()
   @Column()
   expireAt: Date;
