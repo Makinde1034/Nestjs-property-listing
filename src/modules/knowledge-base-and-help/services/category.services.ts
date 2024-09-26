@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import {
   BadRequestException,
   HttpException,
@@ -74,13 +79,12 @@ export class KnowledgeBaseCategoryService {
           skip: findOption.skip,
           order: orderOptions,
         });
-      } else {
-        return await this.knowledgeBaseCategoryRepository.find({
-          take: findOption.take,
-          skip: findOption.skip,
-          order: orderOptions,
-        });
       }
+      return await this.knowledgeBaseCategoryRepository.find({
+        take: findOption.take,
+        skip: findOption.skip,
+        order: orderOptions,
+      });
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);

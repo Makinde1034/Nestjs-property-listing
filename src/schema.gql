@@ -330,6 +330,7 @@ type Listing {
   featureDate: DateTime
   published: Boolean!
   flaggedDate: DateTime
+  offers: Float
   featureExpiration: DateTime
   promotionExpiration: DateTime
   createdAt: DateTime

@@ -227,6 +227,9 @@ export class Listing extends BaseEntity {
   @Index()
   flaggedDate: Date;
 
+  @Field({ nullable: true })
+  offers: number;
+
   @Column({ nullable: true })
   @Field({ nullable: true })
   featureExpiration: Date;

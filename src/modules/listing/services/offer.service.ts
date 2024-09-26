@@ -37,9 +37,7 @@ import { NotificationService } from '../../notification/services';
 import { OfferListEnum } from '../../../common/enums/status.enum';
 import { AdminService } from '../../admin/services/admin.service';
 import { ListingRepository } from '../repositories/listing.repository';
-import { Mutation } from '@nestjs/graphql';
 import { SuccessResponse } from '../../../common/utils/success.response';
-import { async } from 'rxjs';
 
 @Injectable()
 export class OfferService {
@@ -520,9 +518,8 @@ export class OfferService {
 
       if (affected) {
         return new SuccessResponse(AppStrings.DELETED_SUCCESSFULLY);
-      } else {
-        throw new BadRequestException('Offer could not be deleted');
       }
+      throw new BadRequestException('Offer could not be deleted');
     } catch (error) {
       this.logger.error('Error in deleteOffer:', error.stack);
       if (error instanceof HttpException) {
