@@ -100,15 +100,15 @@ export class TicketsResolver {
    * Update Ticket
    * @async
    * @param {UpdateTicketInput} RequestInput
-   * @returns {Promise<Ticket>}
+   * @returns {Promise<Ticket[]>}
    */
-  @Mutation(() => Ticket)
+  @Mutation(() => [Ticket])
   @Permissions('update-support-tickets')
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async manageTicket(
     @Args('RequestInput') RequestInput: UpdateTicketInput,
     @Context() ctx: any,
-  ): Promise<Ticket> {
+  ): Promise<Ticket[]> {
     return await this.ticketService.updateTicket(ctx.req.user, RequestInput);
   }
 

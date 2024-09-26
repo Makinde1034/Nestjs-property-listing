@@ -58,10 +58,10 @@ export class UpdateResponseTemplateInput extends PartialType(
 
 @InputType()
 export class UpdateTicketInput {
-  @Field()
-  @IsString()
+  @Field(() => [String])
+  @IsArray()
   @IsNotEmpty()
-  ticketId: string;
+  ticketId: [string];
 
   @Field()
   @IsEnum(TicketStatus)
