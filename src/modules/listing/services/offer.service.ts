@@ -349,7 +349,6 @@ export class OfferService {
       throw new BadRequestException(error);
     }
   }
-
   async acceptOffer(user: User, updateOfferInput: UpdateOfferInput) {
     try {
       const { id } = updateOfferInput;
