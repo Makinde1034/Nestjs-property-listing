@@ -340,6 +340,12 @@ export class ListingResolver {
       ctx.req.user,
     );
   }
+
+  @Mutation(() => SuccessResponse)
+  async cancelOffer(@Args('id') id: string) {
+    return await this.offerService.deleteOffer(id);
+  }
+
   /**************************
    *
    *Promotion

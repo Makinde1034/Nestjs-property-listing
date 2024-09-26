@@ -65,6 +65,7 @@ import { KnowledgeBaseAndHelpModule } from './modules/knowledge-base-and-help/kn
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: 'src/schema.gql',
+
       formatError: (err) => formatError(err),
       fieldResolverEnhancers: ['interceptors'],
       context: ({ req, res }) => ({ req, res }),

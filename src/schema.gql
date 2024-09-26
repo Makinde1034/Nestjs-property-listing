@@ -1030,6 +1030,7 @@ type Mutation {
   updateOffer(updateOfferInput: UpdateOfferInput!): Offer
   acceptOffer(updateOfferInput: UpdateOfferInput!): Offer
   rejectOffer(updateOfferInput: UpdateOfferInput!): Offer
+  cancelOffer(id: String!): SuccessResponse!
   createPromotion(createPromotionInput: CreatePromotionInput!): Promotion!
   addToWishlist(createWishlistInput: CreateWishlistInput!): Wishlist!
   removeFromWishlist(wishlistId: String!): SuccessResponse!
