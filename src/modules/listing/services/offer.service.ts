@@ -272,9 +272,12 @@ export class OfferService {
       const [offer, allOffers] = await Promise.all([
         await this.offerRepository.findOne({
           where: { id: updateOfferInput.id },
-          relations: ['listing.user'],
+          relations: ['user', 'listing', 'listing.user'],
           select: {
-            user: { email: true, firstName: true },
+            listing: {
+              id: true,
+              user: { email: true, firstName: true },
+            },
           },
         }),
         await this.offerRepository.find({
@@ -285,6 +288,7 @@ export class OfferService {
           order: { price: 'DESC' },
         }),
       ]);
+
       if (!offer) {
         throw new BadRequestException(AppStrings.NOT_FOUND);
       }
@@ -311,32 +315,31 @@ export class OfferService {
         );
       }
 
-      const mailMessageForBuyer = getMessageData(
-        offer.user.firstName,
-        'Update',
-        'Offers',
-        'Offer Creator',
-      );
-      const mailMessageForSeller = getMessageData(
-        offer.listing.user.firstName,
-        'Update',
-        'Offers',
-        'Seller',
+      const notificationPreference =
+        await this.notificationScopeRepository.find();
+      //Filter out the correct scope
+      const scope: NotificationScope = notificationPreference.find(
+        (element) => {
+          if (element.name == NotificationScopesEnum.UPDATE_OFFER) {
+            return element;
+          }
+        },
       );
 
-      const update = await this.offerRepository.update(id, rest);
-      await this.mailService.sendOfferMail({
-        email: offer.user.email,
-        subject: mailMessageForBuyer[0]['Title'],
-        text: mailMessageForBuyer[0]['Body'],
+      //TODO:switch to an emited event
+      this.notificationService.sendNotification({
+        creatorId: user.id,
+        receiverId: listing.userId,
+        scope,
       });
-      await this.mailService.sendOfferMail({
-        email: offer.listing.user.email,
-        subject: mailMessageForSeller[0]['Title'],
-        text: mailMessageForSeller[0]['Body'],
-      });
-      return update;
+
+      const { affected } = await this.offerRepository.update(id, rest);
+
+      if (affected) {
+        return await this.offerRepository.findOneBy({ id });
+      }
     } catch (error) {
+      console.log(error);
       this.logger.log(error);
       throw new BadRequestException(error);
     }
@@ -392,24 +395,24 @@ export class OfferService {
 
       await this.mailService.sendOfferMail({
         email: offer.user.email,
-        subject: mailMessageForBuyer[0]['Title'],
-        text: mailMessageForBuyer[0]['Body'],
+        subject: mailMessageForBuyer[0]['title'],
+        text: mailMessageForBuyer[0]['body'],
       });
       await this.mailService.sendOfferMail({
         email: offer.listing.user.email,
-        subject: mailMessageForSeller[0]['Title'],
-        text: mailMessageForSeller[0]['Body'],
+        subject: mailMessageForSeller[0]['title'],
+        text: mailMessageForSeller[0]['body'],
       });
 
       await this.mailService.sendOfferMail({
         email: offer.user.email,
-        subject: mailMessageForBuyerResponse[0]['Title'],
-        text: mailMessageForBuyerResponse[0]['Body'],
+        subject: mailMessageForBuyerResponse[0]['title'],
+        text: mailMessageForBuyerResponse[0]['body'],
       });
       await this.mailService.sendOfferMail({
         email: offer.listing.user.email,
-        subject: mailMessageForSellerResponse[0]['Title'],
-        text: mailMessageForSellerResponse[0]['Body'],
+        subject: mailMessageForSellerResponse[0]['title'],
+        text: mailMessageForSellerResponse[0]['body'],
       });
 
       return update;
@@ -470,34 +473,34 @@ export class OfferService {
 
       await this.mailService.sendOfferMail({
         email: offer.user.email,
-        subject: mailMessageForBuyer[0]['Title'],
-        text: mailMessageForBuyer[0]['Body'],
+        subject: mailMessageForBuyer[0]['title'],
+        text: mailMessageForBuyer[0]['body'],
       });
       await this.mailService.sendOfferMail({
         email: offer.listing.user.email,
-        subject: mailMessageForSeller[0]['Title'],
-        text: mailMessageForSeller[0]['Body'],
+        subject: mailMessageForSeller[0]['title'],
+        text: mailMessageForSeller[0]['body'],
       });
       await this.mailService.sendOfferMail({
         email: offer.user.email,
-        subject: mailMessageForBuyer[0]['Title'],
-        text: mailMessageForBuyer[0]['Body'],
+        subject: mailMessageForBuyer[0]['title'],
+        text: mailMessageForBuyer[0]['body'],
       });
       await this.mailService.sendOfferMail({
         email: offer.listing.user.email,
-        subject: mailMessageForSeller[0]['Title'],
-        text: mailMessageForSeller[0]['Body'],
+        subject: mailMessageForSeller[0]['title'],
+        text: mailMessageForSeller[0]['body'],
       });
 
       await this.mailService.sendOfferMail({
         email: offer.user.email,
-        subject: mailMessageForBuyerResponse[0]['Title'],
-        text: mailMessageForBuyerResponse[0]['Body'],
+        subject: mailMessageForBuyerResponse[0]['title'],
+        text: mailMessageForBuyerResponse[0]['body'],
       });
       await this.mailService.sendOfferMail({
         email: offer.listing.user.email,
-        subject: mailMessageForSellerResponse[0]['Title'],
-        text: mailMessageForSellerResponse[0]['Body'],
+        subject: mailMessageForSellerResponse[0]['title'],
+        text: mailMessageForSellerResponse[0]['body'],
       });
       return update;
     } catch (error) {
