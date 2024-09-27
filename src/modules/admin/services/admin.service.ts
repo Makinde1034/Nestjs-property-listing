@@ -22,7 +22,7 @@ import {
   subMonths,
 } from 'date-fns';
 
-import { Between } from 'typeorm';
+import { Between, MoreThan } from 'typeorm';
 import { OfferListEnum } from '../../../common/enums/status.enum';
 import {
   SaiiFees,
@@ -39,6 +39,8 @@ import {
 import { TicketRepository } from '../../tickets/repositories';
 import { AdminDashboardSort } from '../dto/request/admin-request';
 import { AdminRepository } from '../repositories/admin.repository';
+import { CouponRepository } from '../repositories/coupons.repository';
+import { CreateCouponsInput } from '../dto/request/coupons';
 
 @Injectable()
 export class AdminService {
@@ -50,6 +52,7 @@ export class AdminService {
     private issuesRepository: IssueRepository,
     private ticketsRepository: TicketRepository,
     private adminRepository: AdminRepository,
+    private couponRepository: CouponRepository,
   ) {}
 
   logger = new Logger(AdminService.name);
@@ -498,6 +501,26 @@ export class AdminService {
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException('Failed to fetch user age count');
+    }
+  }
+
+  async createCoupon(createCouponInput: CreateCouponsInput) {
+    try {
+      return await this.couponRepository.save(createCouponInput);
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async fetchCoupons() {
+    try {
+      return await this.couponRepository.find({
+        where: { endDate: MoreThan(new Date()) },
+      });
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
     }
   }
 }
