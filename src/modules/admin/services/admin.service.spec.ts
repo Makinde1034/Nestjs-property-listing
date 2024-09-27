@@ -14,6 +14,7 @@ import { TicketRepository } from '../../tickets/repositories';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AdminRepository } from '../repositories/admin.repository';
+import { CouponRepository } from '../repositories/coupons.repository';
 
 // Mock QueryBuilder
 const mockQueryBuilder = {
@@ -45,11 +46,17 @@ describe('AdminService', () => {
   let listingRepository: Repository<any>;
   let offerRepository: Repository<any>;
   let adminDefaultRepository: Repository<any>;
+  let couponRepository: Repository<any>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AdminService,
+
+        {
+          provide: getRepositoryToken(CouponRepository),
+          useValue: mockRepository,
+        },
 
         {
           provide: getRepositoryToken(AdminRepository),
@@ -93,6 +100,10 @@ describe('AdminService', () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     adminDefaultRepository = module.get<Repository<any>>(
       getRepositoryToken(AdminRepository),
+    );
+
+    couponRepository = module.get<Repository<any>>(
+      getRepositoryToken(CouponRepository),
     );
   });
 
