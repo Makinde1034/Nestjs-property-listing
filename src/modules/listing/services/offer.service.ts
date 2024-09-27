@@ -77,13 +77,16 @@ export class OfferService {
         },
         order: { price: 'DESC' },
       });
+      const adminDefault = await this.adminDefaultService.adminDefault();
 
       const offerExpiry = new Date(createOfferDto.expireAt);
 
-      const maxExpiry = new Date(addDaysToDate(new Date(), 2)); //TODO: add this to admin default value
+      const maxExpiry = new Date(
+        addDaysToDate(new Date(), adminDefault.maximumDaysForOfferExpiration),
+      );
 
       if (offerExpiry > maxExpiry) {
-        throw new BadRequestException('Max expiry is 2 days');
+        throw new BadRequestException(`Max expiry is ${maxExpiry}`);
       }
 
       const [minimumPrice, listing, saiiFee] =
@@ -287,6 +290,8 @@ export class OfferService {
             price: MoreThanOrEqual(updateOfferInput.price),
             listingId: updateOfferInput.listingId,
           },
+          skip: 0,
+          take: 1,
           order: { price: 'DESC' },
         }),
       ]);

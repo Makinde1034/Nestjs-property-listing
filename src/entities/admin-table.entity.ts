@@ -48,6 +48,10 @@ export class AdminDefault extends BaseEntity {
   daysToAuctionRegistrationEnd: number;
 
   @Field()
+  @Column({ default: 2 })
+  maximumDaysForOfferExpiration: number;
+
+  @Field()
   @Column()
   daysToAuctionRegistrationStart: number;
 
