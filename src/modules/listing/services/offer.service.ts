@@ -318,7 +318,7 @@ export class OfferService {
 
       if (user.id == listing.user.id) {
         throw new BadRequestException(
-          'The creator of a listing cannot create an offer on  that listing',
+          'The creator of a listing cannot edit an offer on  that listing',
         );
       }
 

@@ -12,6 +12,7 @@ import { InvoiceRepository } from './repositories/invoice.repository';
 import { HttpModule } from '@nestjs/axios';
 import { HyperPayService } from './service-providers/hyper-pay.service';
 import { AdminRepository } from '../admin/repositories/admin.repository';
+import { InvoiceService } from './services/invoice.service';
 
 @Module({
   imports: [FilehandlerModule, HttpModule],
@@ -21,8 +22,9 @@ import { AdminRepository } from '../admin/repositories/admin.repository';
     InvoiceRepository,
     HyperPayService,
     AdminRepository,
+    InvoiceService,
   ],
   controllers: [PaymentController],
-  exports: [InvoiceRepository, PaymentService, HyperPayService],
+  exports: [InvoiceRepository, PaymentService, HyperPayService, InvoiceService],
 })
 export class PaymentModule {}
