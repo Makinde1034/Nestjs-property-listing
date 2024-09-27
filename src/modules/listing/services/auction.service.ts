@@ -56,12 +56,11 @@ export class AuctionService {
 
   async findAll(paginateAndSort: PaginateAndSort) {
     try {
-      const sortField = paginateAndSort.sortField;
-      const sortDirection: 'ASC' | 'DESC' = paginateAndSort.directionToSort as
-        | 'ASC'
-        | 'DESC';
+      const { sortField, directionToSort } = paginateAndSort;
+      const sortDirection: 'ASC' | 'DESC' = directionToSort as 'ASC' | 'DESC';
 
-      if (paginateAndSort.take && paginateAndSort.skip) {
+      // Default pagination if not provided
+      if (!paginateAndSort.take || !paginateAndSort.skip) {
         paginateAndSort.skip = 0;
         paginateAndSort.take = 20;
       }
@@ -71,15 +70,20 @@ export class AuctionService {
         .where("CURRENT_DATE < auction.startDate - INTERVAL '3 days'")
         .take(paginateAndSort.take)
         .skip(paginateAndSort.skip)
-        .orderBy(`auction.${sortField}`, sortDirection)
+        .orderBy(
+          sortField ? `auction.${sortField}` : 'auction.createdAt',
+          sortDirection || 'DESC',
+          'NULLS LAST',
+        )
         .getManyAndCount();
 
       return { auctions, total };
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message || 'Error fetching auctions');
     }
   }
+
   async update(updateAuctionInput: UpdateAuctionInput) {
     try {
       const { id, ...rest } = updateAuctionInput;
