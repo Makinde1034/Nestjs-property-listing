@@ -613,6 +613,20 @@ type AdminDefault {
   updatedAt: DateTime!
 }
 
+type Coupon {
+  id: String!
+  code: String!
+  maxUse: Float!
+  discountType: String!
+  discountValue: Float!
+  createdAt: DateTime!
+  startDate: DateTime!
+  endDate: DateTime!
+  deactived: Boolean!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type InitiatePaymentResponse {
   checkoutId: String
   referenceId: String
@@ -809,6 +823,7 @@ type Query {
   averageResponse: ResponseTime!
   saiiFees(findOptions: AdminDashboardSort): SaiiFees!
   financialVsOrder(findOptions: AdminDashboardSort!): [FinancialVsOrder!]!
+  fetchCoupons: [Coupon!]!
   fetchIssues(placement: String): [ParentIssue!]!
   fetchChildIssues(parentId: String!): [ChildIssue!]!
   getTicket(ticketId: String!): Ticket!
@@ -1052,6 +1067,10 @@ type Mutation {
   removeAdPackage(id: Int!): AdPackage!
   initializePayment(paymentInput: InitiatePaymentInput!): InitiatePaymentResponse!
   verifyPayment(verifyPaymentInput: verifyPaymentInput!): verifyPaymentResponse!
+  createCoupon(createCouponsInput: CreateCouponInput!): Coupon!
+  updateCoupon(updateCouponsInput: UpdateCouponInput!): Coupon!
+  deleteCoupons(deleteCouponsInput: DeleteCouponInput!): SuccessResponse!
+  deactivateCoupons(deactivateCoupons: DeactivateCouponInput!): SuccessResponse!
   createIssue(input: CreateIssueInput!): ParentIssue!
   updateIssue(RequestInput: UpdateIssueInput!): ParentIssue!
   deleteIssue(id: String!): SuccessResponse!
@@ -1451,6 +1470,31 @@ input InitiatePaymentInput {
 
 input verifyPaymentInput {
   checkoutId: String
+}
+
+input CreateCouponInput {
+  maxUse: Float!
+  discountType: String!
+  discountValue: Float!
+  startDate: DateTime!
+  endDate: DateTime!
+}
+
+input UpdateCouponInput {
+  maxUse: Float
+  discountType: String
+  discountValue: Float
+  startDate: DateTime
+  endDate: DateTime
+  id: String!
+}
+
+input DeleteCouponInput {
+  id: [String!]!
+}
+
+input DeactivateCouponInput {
+  id: [String!]!
 }
 
 input CreateIssueInput {
