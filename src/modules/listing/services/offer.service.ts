@@ -240,6 +240,7 @@ export class OfferService {
         },
         skip: findOfferInput.skip,
         take: findOfferInput.take,
+        relations: ['user'],
       });
 
       return { offer, listing, total };
