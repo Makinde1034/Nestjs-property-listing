@@ -1,5 +1,6 @@
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, PartialType } from '@nestjs/graphql';
 import {
+  IsArray,
   IsDate,
   IsEnum,
   IsNumber,
@@ -9,11 +10,7 @@ import {
 import { CouponEnum } from '../../../../common/enums/coupons.enum';
 
 @InputType()
-export class CreateCouponsInput {
-  @Field()
-  @IsString()
-  code: string;
-
+export class CreateCouponInput {
   @Field()
   @IsNumber()
   maxUse: number;
@@ -25,7 +22,7 @@ export class CreateCouponsInput {
   @Field()
   @IsNumber()
   @IsPositive()
-  discoutValue: number;
+  discountValue: number;
 
   @Field()
   @IsDate()
@@ -34,4 +31,25 @@ export class CreateCouponsInput {
   @Field()
   @IsDate()
   endDate: Date;
+}
+
+@InputType()
+export class UpdateCouponInput extends PartialType(CreateCouponInput) {
+  @Field()
+  @IsString()
+  id: string;
+}
+
+@InputType()
+export class DeactivateCouponInput {
+  @Field(() => [String])
+  @IsArray()
+  id: string[];
+}
+
+@InputType()
+export class DeleteCouponInput {
+  @Field(() => [String])
+  @IsArray()
+  id: string[];
 }

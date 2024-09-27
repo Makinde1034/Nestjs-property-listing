@@ -16,13 +16,21 @@ import {
   UserGenderCount,
 } from '../dto/response/admin-response';
 
-import { Args, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 
 import { AdminDashboardSort } from '../dto/request/admin-request';
 import { UseGuards } from '@nestjs/common';
 import { AccessTokenGuard } from '../../auth/guards';
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { AdminDefault } from '../../../entities/admin-table.entity';
+import {
+  CreateCouponInput,
+  DeactivateCouponInput,
+  DeleteCouponInput,
+  UpdateCouponInput,
+} from '../dto/request/coupons';
+import { Coupon } from '../../../entities/coupon.entity';
+import { SuccessResponse } from '../../../common/utils/success.response';
 
 @Resolver()
 @UseGuards(AccessTokenGuard)
@@ -83,5 +91,45 @@ export class AdminResolver {
   @Query(() => [FinancialVsOrder], { name: 'financialVsOrder' })
   async financialVsOrder(@Args('findOptions') findOption: AdminDashboardSort) {
     return await this.adminService.financialVsOrder(findOption);
+  }
+
+  /************************************
+   * Coupons
+   ************************************/
+
+  @UseGuards(AdminGuard)
+  @Mutation(() => Coupon, { name: 'createCoupon' })
+  async createCoupon(
+    @Args('createCouponsInput') createCouponsInput: CreateCouponInput,
+  ) {
+    return await this.adminService.createCoupon(createCouponsInput);
+  }
+
+  @UseGuards(AdminGuard)
+  @Query(() => [Coupon], { name: 'fetchCoupons' })
+  async fetchCoupons(@Context() ctx: any) {
+    return await this.adminService.fetchCoupons(ctx.req.user);
+  }
+  @Mutation(() => Coupon, { name: 'updateCoupon' })
+  async updateCoupons(
+    @Args('updateCouponsInput') updateCouponsInput: UpdateCouponInput,
+  ) {
+    return await this.adminService.updateCoupon(updateCouponsInput);
+  }
+
+  @UseGuards(AdminGuard)
+  @Mutation(() => SuccessResponse, { name: 'deleteCoupons' })
+  async deleteCoupons(
+    @Args('deleteCouponsInput') deleteCouponsInput: DeleteCouponInput,
+  ) {
+    return await this.adminService.deleteCoupon(deleteCouponsInput);
+  }
+
+  @UseGuards(AdminGuard)
+  @Mutation(() => SuccessResponse, { name: 'deactivateCoupons' })
+  async deactivateCoupons(
+    @Args('deactivateCoupons') deactivateCouponsInput: DeactivateCouponInput,
+  ) {
+    return await this.adminService.deactivateCoupon(deactivateCouponsInput);
   }
 }

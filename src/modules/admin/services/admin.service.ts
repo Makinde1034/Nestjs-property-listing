@@ -22,7 +22,7 @@ import {
   subMonths,
 } from 'date-fns';
 
-import { Between, MoreThan } from 'typeorm';
+import { Between, In, MoreThan } from 'typeorm';
 import { OfferListEnum } from '../../../common/enums/status.enum';
 import {
   SaiiFees,
@@ -40,7 +40,21 @@ import { TicketRepository } from '../../tickets/repositories';
 import { AdminDashboardSort } from '../dto/request/admin-request';
 import { AdminRepository } from '../repositories/admin.repository';
 import { CouponRepository } from '../repositories/coupons.repository';
-import { CreateCouponsInput } from '../dto/request/coupons';
+import {
+  CreateCouponInput,
+  DeactivateCouponInput,
+  DeleteCouponInput,
+  UpdateCouponInput,
+} from '../dto/request/coupons';
+import { User } from '../../../entities';
+import { Coupon } from '../../../entities/coupon.entity';
+import {
+  generateRandomArray,
+  generateRandomString,
+} from '../../../common/utils/helper';
+import slugify from 'slugify';
+import { SuccessResponse } from '../../../common/utils/success.response';
+import { AppStrings } from '../../../common/messages/app.strings';
 
 @Injectable()
 export class AdminService {
@@ -504,20 +518,89 @@ export class AdminService {
     }
   }
 
-  async createCoupon(createCouponInput: CreateCouponsInput) {
+  async createCoupon(createCouponInput: CreateCouponInput) {
     try {
-      return await this.couponRepository.save(createCouponInput);
+      const code = generateRandomArray(1, 6);
+      console.log(code);
+      return await this.couponRepository.save({
+        code: slugify(code[0].toUpperCase()),
+        ...createCouponInput,
+      });
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
     }
   }
 
-  async fetchCoupons() {
+  async fetchCoupons(user: User) {
     try {
-      return await this.couponRepository.find({
-        where: { endDate: MoreThan(new Date()) },
+      return await this.couponRepository.find({});
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async updateCoupon(updateCouponInput: UpdateCouponInput) {
+    try {
+      const coupons = await this.couponRepository.findOne({
+        where: { id: updateCouponInput.id },
       });
+
+      const updatedCoupons: Partial<Coupon> = {
+        startDate: updateCouponInput.startDate ?? coupons.startDate,
+        endDate: updateCouponInput.endDate ?? coupons.endDate,
+        maxUse: updateCouponInput.maxUse ?? coupons.maxUse,
+        discountType: updateCouponInput.discountType ?? coupons.discountType,
+        discountValue: updateCouponInput.discountValue ?? coupons.discountValue,
+      };
+
+      const { affected } = await this.couponRepository.update(
+        coupons.id,
+        updatedCoupons,
+      );
+
+      if (affected) {
+        return await this.couponRepository.findOneBy({ id: coupons.id });
+      }
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+  async deleteCoupon(deleteCouponInput: DeleteCouponInput) {
+    try {
+      const coupons = await this.couponRepository.find({
+        where: { id: In(deleteCouponInput.id) },
+      });
+      const deletedCoupons = coupons.map((element) => {
+        const coupons: Partial<Coupon> = {
+          deletedAt: new Date(),
+        };
+        return { ...element, ...coupons };
+      });
+      await this.couponRepository.save(deletedCoupons);
+      return new SuccessResponse(AppStrings.DELETED_SUCCESSFULLY);
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async deactivateCoupon(deactivateCouponInput: DeactivateCouponInput) {
+    try {
+      const coupons = await this.couponRepository.find({
+        where: { id: In(deactivateCouponInput.id) },
+      });
+      const deactivateCoupon = coupons.map((element) => {
+        const coupons: Partial<Coupon> = {
+          deactived: true,
+        };
+        return { ...element, ...coupons };
+      });
+      await this.couponRepository.save(deactivateCoupon);
+
+      return new SuccessResponse(AppStrings.SUCCESSFULL);
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);

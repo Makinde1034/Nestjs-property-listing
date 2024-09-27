@@ -1,4 +1,4 @@
-import { Field } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 import {
   Column,
   CreateDateColumn,
@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 
 @Entity()
+@ObjectType()
 export class Coupon {
   @Field()
   @PrimaryGeneratedColumn('uuid')
@@ -28,7 +29,7 @@ export class Coupon {
 
   @Field()
   @Column()
-  discoutValue: number;
+  discountValue: number;
 
   @Field()
   @CreateDateColumn()
@@ -43,8 +44,12 @@ export class Coupon {
   endDate: Date;
 
   @Field()
+  @Column({ default: false })
+  deactived: boolean;
+
+  @Field()
   @DeleteDateColumn()
-  deletedAt: string;
+  deletedAt: Date;
 
   @Field()
   @UpdateDateColumn()
