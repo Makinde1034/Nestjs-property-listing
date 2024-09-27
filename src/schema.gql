@@ -607,6 +607,7 @@ type AdminDefault {
   countryISOCode: String!
   postcode: String!
   daysToAuctionRegistrationEnd: Float!
+  maximumDaysForOfferExpiration: Float!
   daysToAuctionRegistrationStart: Float!
   createdAt: DateTime!
   updatedAt: DateTime!

@@ -412,7 +412,6 @@ export class OfferService {
         subject: mailMessageForSeller[0]['title'],
         text: mailMessageForSeller[0]['body'],
       });
-
       await this.mailService.sendOfferMail({
         email: offer.user.email,
         subject: mailMessageForBuyerResponse[0]['title'],
