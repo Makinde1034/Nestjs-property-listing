@@ -594,6 +594,16 @@ type SearchHistoryResponse {
   total: Int!
 }
 
+type Invoice {
+  id: Float!
+  price: Float!
+  userId: String!
+  listingid: String!
+  expireAt: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type AdminDefault {
   id: ID!
   minimumOfferPercentage: Float!
@@ -635,6 +645,11 @@ type InitiatePaymentResponse {
 type verifyPaymentResponse {
   status: String
   message: String!
+}
+
+type InvoiceResponse {
+  invoices: [Invoice!]!
+  total: Float!
 }
 
 type UserCity {
@@ -812,6 +827,7 @@ type Query {
   getAllAuction(findManyOptions: PaginateAndSort!): AuctionResponse!
   adPackages: [AdPackage!]!
   adPackage(id: String!): AdPackage!
+  fetchInvoice(findOption: PaginateAndSort!): InvoiceResponse!
   listingStats(findOptions: AdminDashboardSort!): ListingStats!
   adminDefault: AdminDefault!
   totalUser(findOptions: AdminDashboardSort!): UserDemography!

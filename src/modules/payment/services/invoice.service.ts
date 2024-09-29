@@ -11,9 +11,13 @@ import { CreateInvoiceInput } from '../dto/invoice';
 import { InvoiceRepository } from '../repositories/invoice.repository';
 import { QrCodeService } from '../../file-handler/services/qrcode.service';
 import { PdfService } from '../../file-handler/services/pdf.service';
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { StorageService } from '../../file-handler/services/storage.service';
 import { MailgunEmailService } from '../../mail/services/implementations/mailgun.services';
+import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
+import { skip } from 'node:test';
+import { find } from 'rxjs';
+import { WhereOption } from '../../core/dto/where-option.dto';
 @Injectable()
 export class InvoiceService {
   constructor(
@@ -58,6 +62,27 @@ export class InvoiceService {
       return invoice;
     } catch (error) {
       this.logger.log(error);
+    }
+  }
+
+  async fetchInvoice(findOption: PaginateAndSort) {
+    try {
+      const whereOption = {
+        [findOption.where.fieldToChose]: [findOption.where.whereParam],
+      };
+      const orderOptions = {
+        [findOption.sortField]: findOption.directionToSort,
+      };
+      const [invoices, total] = await this.invoiceRepository.findAndCount({
+        where: whereOption ?? {},
+        order: orderOptions,
+        take: findOption.take ?? 20,
+        skip: findOption.skip ?? 0,
+      });
+      return { invoices, total };
+    } catch (error) {
+      this.logger.error('Error fetching invoice:', error);
+      throw new BadRequestException(error);
     }
   }
 }
