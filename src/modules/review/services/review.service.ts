@@ -81,6 +81,10 @@ export class ReviewService {
         whereCondition = {};
     }
 
+    if (paginateAndSort.rating) {
+      whereCondition = { ...whereCondition, rating: paginateAndSort.rating };
+    }
+
     const [review, total] = await this.reviewRepository.findAndCount({
       where: whereCondition,
       take: paginateAndSort.take,
