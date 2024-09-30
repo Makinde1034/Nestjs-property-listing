@@ -4,13 +4,13 @@
  */
 
 export enum NotificationScopesEnum {
-  CREATE_OFFER = 'Create Offer',
+  CREATE_OFFER = 'Create',
   UPDATE_OFFER = 'Update Offer',
   OFFER_RESPONSE = 'Offer Response',
   BIDS = 'Bids',
   RESULT = 'Results',
   LAST_MINUITE = 'Last minute',
-  FIFTEEN_MINUITE_TOeND = '15 minutes to end',
+  FIFTEEN_MINUITE_TO_END = '15 minutes to end',
   CREATED = 'Created',
   DELIVERED = 'Delivered',
   PRICE_CHANGE = 'Price change',

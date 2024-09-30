@@ -25,13 +25,12 @@ import { AppStrings } from '../../../common/messages/app.strings';
 
 import { addDaysToDate } from '../../../common/utils/helper';
 import { MailgunEmailService } from '../../mail/services/implementations';
-import { getMessageData } from '../../../common/messages/alert-messages';
+
 import { PdfInput } from '../../file-handler/dto/pdf.dto';
 import {
   NotificationScopeRepository,
   UserRepository,
 } from '../../user/repositories';
-import { Purpose } from '../../../common/enums';
 import { NotificationScopesEnum } from '../../../common/enums/notification-scope.enum';
 import { NotificationService } from '../../notification/services';
 import { OfferListEnum } from '../../../common/enums/status.enum';
@@ -101,16 +100,16 @@ export class OfferService {
         );
       }
 
-      if (user.id == listing.user.id) {
-        throw new BadRequestException(
-          'The creator of a listing cannot create an offer on  that listing',
-        );
-      }
-      if (offer.length > 0) {
-        throw new BadRequestException(
-          `Minimum Offer must be greater than ${offer[0].price}`,
-        );
-      }
+      // if (user.id == listing.user.id) {
+      //   throw new BadRequestException(
+      //     'The creator of a listing cannot create an offer on  that listing',
+      //   );
+      // }
+      // if (offer.length > 0) {
+      //   throw new BadRequestException(
+      //     `Minimum Offer must be greater than ${offer[0].price}`,
+      //   );
+      // }
 
       createOfferDto.userId = user.id;
       createOfferDto.saiiFee = saiiFee;
@@ -136,6 +135,7 @@ export class OfferService {
         sumTotalWithVat: 1,
       };
 
+      //TODO: switch to event emitter
       this.paymentService.invoice(data, user, listing);
 
       const seller = await this.userRepository.findOneOrFail({
@@ -154,12 +154,13 @@ export class OfferService {
           }
         },
       );
-
       //TODO:switch to an emited event
       this.notificationService.sendNotification({
         creatorId: user.id,
         receiverId: seller.id,
-        scope,
+        scope: scope,
+        event: NotificationScopesEnum.CREATE_OFFER,
+        recipientFormat: ['Seller', 'Offer Creator'],
       });
       return offerPayload;
     } catch (error) {
@@ -343,6 +344,7 @@ export class OfferService {
         creatorId: user.id,
         receiverId: listing.user.id, // Use listing.user.id directly
         scope: notificationPreference,
+        event: NotificationScopesEnum.UPDATE_OFFER,
       });
 
       // Update offer with new data and saiiFee
@@ -398,6 +400,7 @@ export class OfferService {
         creatorId: user.id,
         receiverId: offer.listing.user.id,
         scope: notificationPreference,
+        event: NotificationScopesEnum.ACCEPTED,
       });
 
       return update;
@@ -442,6 +445,7 @@ export class OfferService {
         creatorId: user.id,
         receiverId: offer.listing.user.id,
         scope: notificationPreference,
+        event: NotificationScopesEnum.RESPONSE,
       });
 
       return update;

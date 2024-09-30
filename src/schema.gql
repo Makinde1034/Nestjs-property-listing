@@ -98,6 +98,7 @@ type Offer {
   acceptedAt: DateTime
   status: String!
   coupon: Boolean!
+  isPaid: Boolean!
   couponCode: String
   user: User!
   listing: Listing!
@@ -433,6 +434,7 @@ type User {
   createdAt: DateTime!
   updatedAt: DateTime!
   deletedAt: DateTime
+  notificationToken: String
   name: String
 }
 

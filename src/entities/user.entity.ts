@@ -241,6 +241,8 @@ export class User extends BaseEntity {
   @DeleteDateColumn()
   deletedAt: Date;
 
+  @Field({ nullable: true })
+  @Column({ nullable: true })
   notificationToken: string;
 
   @Field({ nullable: true })

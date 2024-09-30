@@ -47,6 +47,10 @@ export class Offer extends BaseEntity {
   @Column({ default: false })
   coupon: boolean;
 
+  @Field()
+  @Column({ default: true })
+  isPaid: boolean;
+
   @Field({ nullable: true })
   @Column({ nullable: true })
   couponCode: string;
