@@ -16,7 +16,7 @@ import {
   UserGenderCount,
 } from '../dto/response/admin-response';
 
-import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 
 import { AdminDashboardSort } from '../dto/request/admin-request';
 import { UseGuards } from '@nestjs/common';
@@ -107,8 +107,8 @@ export class AdminResolver {
 
   @UseGuards(AdminGuard)
   @Query(() => [Coupon], { name: 'fetchCoupons' })
-  async fetchCoupons(@Context() ctx: any) {
-    return await this.adminService.fetchCoupons(ctx.req.user);
+  async fetchCoupons() {
+    return await this.adminService.fetchCoupons();
   }
   @Mutation(() => Coupon, { name: 'updateCoupon' })
   async updateCoupons(

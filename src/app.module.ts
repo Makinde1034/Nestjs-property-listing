@@ -34,13 +34,13 @@ import { AdPackageModule } from './modules/ad-package/ad-package.module';
 
 import { PaymentModule } from './modules/payment/payment.module';
 import { ScheduleModule } from '@nestjs/schedule';
-import { JobService } from './modules/in-app-services/job.scheduler';
 import { WebHookModule } from './modules/webhook/web-hook.module';
 
 import { AdminModule } from './modules/admin/admin.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { SplashScreenResolver } from './modules/admin/resolver/splash-screen.resolver';
 import { KnowledgeBaseAndHelpModule } from './modules/knowledge-base-and-help/knowledge-base-and-help.module';
+import { InAppModule } from './modules/in-app-services/in-app.module';
 
 @Module({
   imports: [
@@ -102,8 +102,9 @@ import { KnowledgeBaseAndHelpModule } from './modules/knowledge-base-and-help/kn
     WebHookModule,
     ChatModule,
     KnowledgeBaseAndHelpModule,
+    InAppModule,
   ],
   controllers: [],
-  providers: [AppResolver, JobService, SplashScreenResolver],
+  providers: [AppResolver, SplashScreenResolver],
 })
 export class AppModule {}

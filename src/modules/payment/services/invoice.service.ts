@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { addDays } from 'date-fns';
 import { Readable } from 'stream';
 import { Listing, User } from '../../../entities';
