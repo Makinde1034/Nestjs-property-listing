@@ -320,11 +320,11 @@ export class OfferService {
       }
 
       // Validate that the user isn't editing an offer on their own listing
-      // If (user.id === listing.user.id) {
-      //   Throw new BadRequestException(
-      //     'The creator of a listing cannot edit an offer on that listing',
-      //   );
-      // }
+      if (user.id === listing.user.id) {
+        throw new BadRequestException(
+          'The creator of a listing cannot edit an offer on that listing',
+        );
+      }
 
       // Fetch notification preference
       const notificationPreference =
@@ -364,7 +364,7 @@ export class OfferService {
 
       const offer = await this.offerRepository.findOne({
         where: { id: id },
-        relations: ['listing.user'],
+        relations: ['user', 'listing', 'listing.user'],
         select: {
           user: { email: true, firstName: true },
         },
@@ -381,50 +381,17 @@ export class OfferService {
         status: 'accepted',
       });
 
-      const mailMessageForBuyer = getMessageData(
-        offer.user.firstName,
-        'Accepted',
-        'Offers',
-        'Buyer',
-      );
-      const mailMessageForSeller = getMessageData(
-        offer.listing.user.firstName,
-        'If Accepted Offer',
-        'Offers',
-        'Seller',
-      );
-      const mailMessageForBuyerResponse = getMessageData(
-        offer.user.firstName,
-        'Response',
-        'Offers',
-        'Offer Creator',
-      );
-      const mailMessageForSellerResponse = getMessageData(
-        offer.listing.user.firstName,
-        'Response',
-        'Offers',
-        'Seller',
-      );
+      // Fetch notification preference
+      const notificationPreference =
+        await this.notificationScopeRepository.findOne({
+          where: { name: NotificationScopesEnum.ACCEPTED },
+        });
 
-      this.mailService.sendOfferMail({
-        email: offer.user.email,
-        subject: mailMessageForBuyer[0]['title'],
-        text: mailMessageForBuyer[0]['body'],
-      });
-      this.mailService.sendOfferMail({
-        email: offer.listing.user.email,
-        subject: mailMessageForSeller[0]['title'],
-        text: mailMessageForSeller[0]['body'],
-      });
-      this.mailService.sendOfferMail({
-        email: offer.user.email,
-        subject: mailMessageForBuyerResponse[0]['title'],
-        text: mailMessageForBuyerResponse[0]['body'],
-      });
-      this.mailService.sendOfferMail({
-        email: offer.listing.user.email,
-        subject: mailMessageForSellerResponse[0]['title'],
-        text: mailMessageForSellerResponse[0]['body'],
+      //TODO switch to event emmiter
+      this.notificationService.sendNotification({
+        creatorId: user.id,
+        receiverId: offer.listing.user.id,
+        scope: notificationPreference,
       });
 
       return update;
@@ -458,62 +425,19 @@ export class OfferService {
         status: 'rejected',
       });
 
-      const mailMessageForBuyer = getMessageData(
-        offer.user.firstName,
-        'Accepted',
-        'Offers',
-        'Buyer',
-      );
-      const mailMessageForSeller = getMessageData(
-        offer.listing.user.firstName,
-        'If Accepted Offer',
-        'Offers',
-        'Seller',
-      );
-      const mailMessageForBuyerResponse = getMessageData(
-        offer.user.firstName,
-        'Response',
-        'Offers',
-        'Offer Creator',
-      );
-      const mailMessageForSellerResponse = getMessageData(
-        offer.listing.user.firstName,
-        'Response',
-        'Offers',
-        'Seller',
-      );
+      // Fetch notification preference
+      const notificationPreference =
+        await this.notificationScopeRepository.findOne({
+          where: { name: NotificationScopesEnum.RESPONSE },
+        });
 
-      this.mailService.sendOfferMail({
-        email: offer.user.email,
-        subject: mailMessageForBuyer[0]['title'],
-        text: mailMessageForBuyer[0]['body'],
-      });
-      this.mailService.sendOfferMail({
-        email: offer.listing.user.email,
-        subject: mailMessageForSeller[0]['title'],
-        text: mailMessageForSeller[0]['body'],
-      });
-      this.mailService.sendOfferMail({
-        email: offer.user.email,
-        subject: mailMessageForBuyer[0]['title'],
-        text: mailMessageForBuyer[0]['body'],
-      });
-      this.mailService.sendOfferMail({
-        email: offer.listing.user.email,
-        subject: mailMessageForSeller[0]['title'],
-        text: mailMessageForSeller[0]['body'],
+      //TODO switch to event emmiter
+      this.notificationService.sendNotification({
+        creatorId: user.id,
+        receiverId: offer.listing.user.id,
+        scope: notificationPreference,
       });
 
-      this.mailService.sendOfferMail({
-        email: offer.user.email,
-        subject: mailMessageForBuyerResponse[0]['title'],
-        text: mailMessageForBuyerResponse[0]['body'],
-      });
-      this.mailService.sendOfferMail({
-        email: offer.listing.user.email,
-        subject: mailMessageForSellerResponse[0]['title'],
-        text: mailMessageForSellerResponse[0]['body'],
-      });
       return update;
     } catch (error) {
       this.logger.log(error);
