@@ -48,10 +48,7 @@ import {
 } from '../dto/request/coupons';
 import { User } from '../../../entities';
 import { Coupon } from '../../../entities/coupon.entity';
-import {
-  generateRandomArray,
-  generateRandomString,
-} from '../../../common/utils/helper';
+import { generateRandomArray } from '../../../common/utils/helper';
 import slugify from 'slugify';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { AppStrings } from '../../../common/messages/app.strings';
@@ -508,7 +505,13 @@ export class AdminService {
   async adminDefault() {
     try {
       const result = await this.adminRepository.find({
-        select: ['id', 'saii', 'vat', 'minimumOfferPercentage'],
+        select: [
+          'id',
+          'saii',
+          'vat',
+          'minimumOfferPercentage',
+          'maximumDaysForOfferExpiration',
+        ],
       });
 
       return result[0];

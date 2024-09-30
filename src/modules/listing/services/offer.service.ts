@@ -78,6 +78,7 @@ export class OfferService {
         order: { price: 'DESC' },
       });
       const adminDefault = await this.adminDefaultService.adminDefault();
+      console.log(adminDefault);
 
       const offerExpiry = new Date(createOfferDto.expireAt);
 
