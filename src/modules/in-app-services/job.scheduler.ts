@@ -139,7 +139,10 @@ export class JobService {
 
           status: OfferListEnum.ACTIVE,
         },
-        { status: OfferListEnum.EXPIRED },
+        {
+          status: OfferListEnum.EXPIRED,
+          isPaid: false,
+        },
       );
     } catch (error) {
       this.logger.error('Update Offer Status', error);

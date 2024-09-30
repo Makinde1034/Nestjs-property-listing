@@ -9,19 +9,19 @@ export const NotificationScopeFactory: NotificationScope[] = [
   {
     id: 1,
     scopeGroup: 'Offers',
-    name: 'Create Offer',
+    name: 'Create',
     description: 'Receive Notification for when an offer is created',
   },
   {
     id: 2,
     scopeGroup: 'Offers',
-    name: 'Update Offer',
+    name: 'Update',
     description: 'Receive Notification for when an offer is updated',
   },
   {
     id: 3,
     scopeGroup: 'Offers',
-    name: 'Offer Response',
+    name: 'Response',
     description:
       'Receive Notification for when a response is given for an offer',
   },

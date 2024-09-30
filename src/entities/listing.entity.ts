@@ -41,7 +41,7 @@ export class Listing extends BaseEntity {
   title: string;
 
   @Column()
-  @Field({ nullable: true })
+  @Field({ nullable: true, defaultValue: '' })
   @Index()
   purpose: string;
 

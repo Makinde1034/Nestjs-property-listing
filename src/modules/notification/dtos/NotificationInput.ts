@@ -12,6 +12,7 @@ import {
   IsString,
 } from 'class-validator';
 import { NotificationEventInput } from 'src/common/interface';
+import { NotificationScope } from '../../../entities';
 
 @InputType()
 export class NotificationInput {
@@ -48,4 +49,12 @@ export class NotificationInput {
 
 export class NotificationEventDto {
   constructor(public input: NotificationEventInput) {}
+}
+
+export class SendNotificationInput {
+  creatorId: string;
+  receiverId?: string;
+  scope: NotificationScope;
+  event: string;
+  recipientFormat?: [string, string];
 }
