@@ -31,9 +31,7 @@ export class JobService {
   ) {}
   logger = new Logger(JobService.name);
 
-  // @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT, { timeZone: 'Africa/Cairo' })
-
-  @Cron(CronExpression.EVERY_30_SECONDS, { timeZone: 'Africa/Cairo' }) //TODO: remove after testing
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT, { timeZone: 'Africa/Cairo' })
   async handleCron() {
     await this.sendAlertOnIncompleteOffers();
     await this.sendNotificationForNewListingBasedOnSearchHistory();
