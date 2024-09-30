@@ -317,7 +317,6 @@ export class NotificationService {
     buyer: User,
     scope?: string,
     event?: string,
-    recipient?: string,
   ) {
     try {
       /************************
@@ -327,9 +326,9 @@ export class NotificationService {
         const mailMessageForBuyer = getMessageData(
           buyer.firstName,
           buyer.arabicFirstName,
-          event,
-          scope,
-          recipient,
+          'Create',
+          'Offers',
+          'Offer Creator',
         );
 
         this.sendEmailNotification(null, null, 'offer', {
