@@ -22,7 +22,7 @@ import {
   subMonths,
 } from 'date-fns';
 
-import { Between, In, MoreThan } from 'typeorm';
+import { Between, In } from 'typeorm';
 import { OfferListEnum } from '../../../common/enums/status.enum';
 import {
   SaiiFees,
@@ -46,7 +46,6 @@ import {
   DeleteCouponInput,
   UpdateCouponInput,
 } from '../dto/request/coupons';
-import { User } from '../../../entities';
 import { Coupon } from '../../../entities/coupon.entity';
 import { generateRandomArray } from '../../../common/utils/helper';
 import slugify from 'slugify';
@@ -524,7 +523,6 @@ export class AdminService {
   async createCoupon(createCouponInput: CreateCouponInput) {
     try {
       const code = generateRandomArray(1, 6);
-      console.log(code);
       return await this.couponRepository.save({
         code: slugify(code[0].toUpperCase()),
         ...createCouponInput,
@@ -535,7 +533,7 @@ export class AdminService {
     }
   }
 
-  async fetchCoupons(user: User) {
+  async fetchCoupons() {
     try {
       return await this.couponRepository.find({});
     } catch (error) {
@@ -577,10 +575,10 @@ export class AdminService {
         where: { id: In(deleteCouponInput.id) },
       });
       const deletedCoupons = coupons.map((element) => {
-        const coupons: Partial<Coupon> = {
+        const coupon: Partial<Coupon> = {
           deletedAt: new Date(),
         };
-        return { ...element, ...coupons };
+        return { ...element, ...coupon };
       });
       await this.couponRepository.save(deletedCoupons);
       return new SuccessResponse(AppStrings.DELETED_SUCCESSFULLY);
@@ -596,10 +594,10 @@ export class AdminService {
         where: { id: In(deactivateCouponInput.id) },
       });
       const deactivateCoupon = coupons.map((element) => {
-        const coupons: Partial<Coupon> = {
+        const coupon: Partial<Coupon> = {
           deactived: true,
         };
-        return { ...element, ...coupons };
+        return { ...element, ...coupon };
       });
       await this.couponRepository.save(deactivateCoupon);
 

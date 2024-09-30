@@ -8,8 +8,8 @@ import { NotificationResolver } from './notification.resolver';
 import { NotificationService, PushNotificationService } from './services';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Notification } from 'src/entities';
-import { NotificationRepository } from './repositories';
 import { NotificationEventListener } from './events';
+import { NotificationRepository } from './repositories';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Notification])],

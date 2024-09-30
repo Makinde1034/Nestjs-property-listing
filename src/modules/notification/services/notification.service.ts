@@ -35,7 +35,7 @@ import { MailInput } from '../../mail/mail.dto';
 export class NotificationService {
   private readonly logger = new Logger(NotificationService.name);
   constructor(
-    private readonly notificationRepository: NotificationRepository,
+    private notificationRepository: NotificationRepository,
     private readonly userRepository: UserRepository,
     private readonly notificationScopeRepository: NotificationScopeRepository,
     private readonly mailService: MailgunEmailService,
@@ -159,7 +159,7 @@ export class NotificationService {
   async saveNotificationLog(
     data: Partial<Notification>,
   ): Promise<Notification> {
-    return await this.notificationRepository.create(data);
+    return await this.notificationRepository.save(data);
   }
 
   /**
@@ -213,7 +213,13 @@ export class NotificationService {
    * @returns {Promise<Notification>}
    */
   async updateNotification(id: string): Promise<Notification> {
-    return await this.notificationRepository.update(id, { read: true });
+    const { affected } = await this.notificationRepository.update(id, {
+      read: true,
+    });
+
+    if (affected) {
+      return await this.notificationRepository.findOneBy({ id });
+    }
   }
 
   /**
@@ -224,7 +230,7 @@ export class NotificationService {
    * @returns {Promise<Notification[]>}
    */
   async find(user: User): Promise<Notification[]> {
-    return await this.notificationRepository.findAll({
+    return await this.notificationRepository.find({
       where: { recipient: { id: user.id } },
     });
   }

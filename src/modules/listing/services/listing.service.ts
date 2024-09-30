@@ -21,7 +21,7 @@ import {
   ListingImageInput,
   UpdateListingDto,
 } from '../dtos/request/listing.dto';
-import { User } from '../../../entities';
+import { Attribute, User } from '../../../entities';
 
 import { ForbiddenError } from '@nestjs/apollo';
 import { StorageService } from '../../file-handler/services/storage.service';
@@ -1682,10 +1682,12 @@ export class ListingService {
     searchHistory: Partial<CreateSearchHistoryInput>,
     user: User,
   ) {
+    let isValid = false;
     let attributes = [];
+    let attributeList: Attribute[];
 
     if (searchHistory.attributes) {
-      const attributeList = await this.attributeRepository.find({
+      attributeList = await this.attributeRepository.find({
         where: { id: In(searchHistory.attributes.map((a) => a.attributeId)) },
       });
 
@@ -1709,6 +1711,10 @@ export class ListingService {
         })
         .filter((attr) => attr !== null);
     }
+    //If attribute is found then the search is a valid search
+    if (attributes.length == attributeList.length) {
+      isValid = true;
+    }
     const type = await this.listingTypeService.findOne(
       searchHistory.listingTypeId,
     );
@@ -1724,6 +1730,7 @@ export class ListingService {
       type: JSON.stringify(type),
       rentingOption: searchHistory.rentingOption,
       user: user,
+      isValid: isValid,
     });
   }
 

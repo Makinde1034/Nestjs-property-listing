@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { Field, InputType, PartialType } from '@nestjs/graphql';
 import {
   IsArray,

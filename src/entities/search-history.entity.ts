@@ -62,7 +62,6 @@ export class SearchHistory extends BaseEntity {
   type: string;
 
   @Column({ default: false })
-  @Field({ defaultValue: false })
   isValid: boolean;
 
   @Field({ nullable: true })

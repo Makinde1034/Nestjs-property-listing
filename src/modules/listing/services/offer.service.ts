@@ -38,7 +38,6 @@ import { OfferListEnum } from '../../../common/enums/status.enum';
 import { AdminService } from '../../admin/services/admin.service';
 import { ListingRepository } from '../repositories/listing.repository';
 import { SuccessResponse } from '../../../common/utils/success.response';
-import { SaiiFees } from '../../admin/dto/response/admin-response';
 
 @Injectable()
 export class OfferService {
@@ -78,7 +77,6 @@ export class OfferService {
         order: { price: 'DESC' },
       });
       const adminDefault = await this.adminDefaultService.adminDefault();
-      console.log(adminDefault);
 
       const offerExpiry = new Date(createOfferDto.expireAt);
 
@@ -157,7 +155,6 @@ export class OfferService {
         receiverId: seller.id,
         scope,
       });
-
       return offerPayload;
     } catch (error) {
       this.logger.log(error);
@@ -272,14 +269,17 @@ export class OfferService {
       throw new BadRequestException(error);
     }
   }
+
   async updateOffer(user: User, updateOfferInput: UpdateOfferInput) {
     try {
-      const { id, ...rest } = updateOfferInput;
+      const { id, price, listingId, ...rest } = updateOfferInput;
+      console.log(rest.expireAt);
 
-      const [offer, allOffers] = await Promise.all([
-        await this.offerRepository.findOne({
-          where: { id: updateOfferInput.id },
-          relations: ['user', 'listing', 'listing.user'],
+      // Fetch offer and highest offer concurrently
+      const [offer, highestOffer] = await Promise.all([
+        this.offerRepository.findOne({
+          where: { id },
+          relations: ['user', 'listing.user'],
           select: {
             listing: {
               id: true,
@@ -287,75 +287,77 @@ export class OfferService {
             },
           },
         }),
-        await this.offerRepository.find({
+        this.offerRepository.findOne({
           where: {
-            price: MoreThanOrEqual(updateOfferInput.price),
-            listingId: updateOfferInput.listingId,
+            price: MoreThanOrEqual(price),
+            listingId,
           },
-          skip: 0,
-          take: 1,
           order: { price: 'DESC' },
         }),
       ]);
 
+      // Validate if offer exists
       if (!offer) {
         throw new BadRequestException(AppStrings.NOT_FOUND);
       }
 
-      if (allOffers.length > 0) {
+      // Validate if price is greater than the highest existing offer
+      if (highestOffer) {
         throw new BadRequestException(
-          `Minimum Offer must be greater than ${allOffers[0].price}`,
+          `Minimum Offer must be greater than ${highestOffer.price}`,
         );
       }
 
+      // Fetch minimum price, listing and saiiFee for the offer
       const [minimumPrice, listing, saiiFee] =
-        await this.getMinimumOfferForAListingAndUser(
-          updateOfferInput.listingId,
-        );
-      if (minimumPrice > updateOfferInput.price) {
+        await this.getMinimumOfferForAListingAndUser(listingId);
+
+      // Validate minimum price requirement
+      if (minimumPrice > price) {
         throw new BadRequestException(
-          `Minimum Offer must be greater than  ${minimumPrice}`,
+          `Minimum Offer must be greater than ${minimumPrice}`,
         );
       }
 
-      if (user.id == listing.user.id) {
-        throw new BadRequestException(
-          'The creator of a listing cannot edit an offer on  that listing',
-        );
-      }
+      // Validate that the user isn't editing an offer on their own listing
+      // If (user.id === listing.user.id) {
+      //   Throw new BadRequestException(
+      //     'The creator of a listing cannot edit an offer on that listing',
+      //   );
+      // }
 
+      // Fetch notification preference
       const notificationPreference =
-        await this.notificationScopeRepository.find();
-      //Filter out the correct scope
-      const scope: NotificationScope = notificationPreference.find(
-        (element) => {
-          if (element.name == NotificationScopesEnum.UPDATE_OFFER) {
-            return element;
-          }
-        },
-      );
+        await this.notificationScopeRepository.findOne({
+          where: { name: NotificationScopesEnum.UPDATE_OFFER },
+        });
 
-      //TODO:switch to an emited event
+      //TODO switch to event emmiter
       this.notificationService.sendNotification({
         creatorId: user.id,
-        receiverId: listing.userId,
-        scope,
+        receiverId: listing.user.id, // Use listing.user.id directly
+        scope: notificationPreference,
       });
 
+      // Update offer with new data and saiiFee
       const { affected } = await this.offerRepository.update(id, {
-        saiiFee: saiiFee,
+        saiiFee,
         ...rest,
       });
 
       if (affected) {
-        return await this.offerRepository.findOneBy({ id });
+        return this.offerRepository.findOneBy({ id });
       }
     } catch (error) {
-      console.log(error);
-      this.logger.log(error);
-      throw new BadRequestException(error);
+      this.logger.error(error);
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new BadRequestException('Offer update failed');
+      }
     }
   }
+
   async acceptOffer(user: User, updateOfferInput: UpdateOfferInput) {
     try {
       const { id } = updateOfferInput;
@@ -404,22 +406,22 @@ export class OfferService {
         'Seller',
       );
 
-      await this.mailService.sendOfferMail({
+      this.mailService.sendOfferMail({
         email: offer.user.email,
         subject: mailMessageForBuyer[0]['title'],
         text: mailMessageForBuyer[0]['body'],
       });
-      await this.mailService.sendOfferMail({
+      this.mailService.sendOfferMail({
         email: offer.listing.user.email,
         subject: mailMessageForSeller[0]['title'],
         text: mailMessageForSeller[0]['body'],
       });
-      await this.mailService.sendOfferMail({
+      this.mailService.sendOfferMail({
         email: offer.user.email,
         subject: mailMessageForBuyerResponse[0]['title'],
         text: mailMessageForBuyerResponse[0]['body'],
       });
-      await this.mailService.sendOfferMail({
+      this.mailService.sendOfferMail({
         email: offer.listing.user.email,
         subject: mailMessageForSellerResponse[0]['title'],
         text: mailMessageForSellerResponse[0]['body'],
@@ -481,33 +483,33 @@ export class OfferService {
         'Seller',
       );
 
-      await this.mailService.sendOfferMail({
+      this.mailService.sendOfferMail({
         email: offer.user.email,
         subject: mailMessageForBuyer[0]['title'],
         text: mailMessageForBuyer[0]['body'],
       });
-      await this.mailService.sendOfferMail({
+      this.mailService.sendOfferMail({
         email: offer.listing.user.email,
         subject: mailMessageForSeller[0]['title'],
         text: mailMessageForSeller[0]['body'],
       });
-      await this.mailService.sendOfferMail({
+      this.mailService.sendOfferMail({
         email: offer.user.email,
         subject: mailMessageForBuyer[0]['title'],
         text: mailMessageForBuyer[0]['body'],
       });
-      await this.mailService.sendOfferMail({
+      this.mailService.sendOfferMail({
         email: offer.listing.user.email,
         subject: mailMessageForSeller[0]['title'],
         text: mailMessageForSeller[0]['body'],
       });
 
-      await this.mailService.sendOfferMail({
+      this.mailService.sendOfferMail({
         email: offer.user.email,
         subject: mailMessageForBuyerResponse[0]['title'],
         text: mailMessageForBuyerResponse[0]['body'],
       });
-      await this.mailService.sendOfferMail({
+      this.mailService.sendOfferMail({
         email: offer.listing.user.email,
         subject: mailMessageForSellerResponse[0]['title'],
         text: mailMessageForSellerResponse[0]['body'],

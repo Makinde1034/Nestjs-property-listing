@@ -201,7 +201,7 @@ export class TicketService {
         const updatedTicket: Partial<Ticket> = {
           status,
           assignedAt: ticket.assignedAt ?? new Date(),
-          isOpen: true,
+          isOpen: status !== TicketStatus.CLOSE,
           support: user,
         };
         return { ...ticket, ...updatedTicket };
