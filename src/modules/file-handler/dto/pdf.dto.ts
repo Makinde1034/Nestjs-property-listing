@@ -6,13 +6,24 @@
 export class PdfInput {
   invoiceNumber?: number;
   createdDate: string;
-  dueDate: string;
-  clientName: string;
-  item?: string;
-  englishName?: string;
-  arabicName?: string;
-  type: string;
-  price: number;
-  totalPrice: number;
-  rentingOption?: string;
+  qrcode?: string;
+  sellerCRNumber: string;
+  sellerzatcaNumber: string;
+  sellerAddress: string;
+  sellerName: string;
+  customerCRNumber: string;
+  customerName: string;
+  customerAddress: string;
+  customerZatcaNumber: string;
+  totalWithVat: [number];
+  itemVat: [VatItem];
+  product: unknown;
+  sumTotalWithoutVat: number;
+  sumTotalVat: number;
+  sumTotalWithVat: number;
+}
+
+export interface VatItem {
+  vat: number;
+  vatValue: number;
 }

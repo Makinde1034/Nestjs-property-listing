@@ -15,14 +15,11 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { StorageService } from '../../file-handler/services/storage.service';
 import { MailgunEmailService } from '../../mail/services/implementations/mailgun.services';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
-import { skip } from 'node:test';
-import { find } from 'rxjs';
-import { WhereOption } from '../../core/dto/where-option.dto';
+
 @Injectable()
 export class InvoiceService {
   constructor(
     private invoiceRepository: InvoiceRepository,
-    private qrcodeService: QrCodeService,
     private pdfGeneratorService: PdfService,
     private storageService: StorageService,
     private mailService: MailgunEmailService,
@@ -30,16 +27,11 @@ export class InvoiceService {
   logger = new Logger(InvoiceService.name);
   async invoice(data?: PdfInput, user?: User, listing?: Listing) {
     try {
-      const qrcode = await this.qrcodeService.generateQrCode('');
       const payload: CreateInvoiceInput = {
-        qrcode: qrcode,
         expiredAt: addDays(new Date(), 4),
-        price: data.price,
         userId: user.id,
         listingid: listing.id,
       };
-      data.item = listing.title;
-
       const invoice = await this.invoiceRepository.save(payload);
       data.invoiceNumber = invoice.id;
       const invoicePdf =
@@ -56,7 +48,6 @@ export class InvoiceService {
         filename: invoice.id.toString(),
         path: '',
       };
-
       await this.storageService.uploadFile(multerFile);
       await this.mailService.sendEmailInvoice(user, invoicePdf);
       return invoice;
