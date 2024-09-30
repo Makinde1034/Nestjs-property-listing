@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Resolver, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 
 import { PaymentService } from '../services/payment.service';
@@ -18,10 +18,16 @@ import {
   verifyPaymentResponse,
 } from '../dto/response/payment.response';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import { InvoiceResponse } from '../dto/response/invoice.response';
+import { InvoiceService } from '../services/invoice.service';
+import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 
 @Resolver('payment')
 export class PaymentResolver {
-  constructor(private readonly paymentService: PaymentService) {}
+  constructor(
+    private readonly paymentService: PaymentService,
+    private invoiceService: InvoiceService,
+  ) {}
 
   @Mutation(() => InitiatePaymentResponse)
   @UseGuards(AccessTokenGuard)
@@ -38,5 +44,11 @@ export class PaymentResolver {
     @Args('verifyPaymentInput') verifyDto: verifyPaymentInput,
   ) {
     return await this.paymentService.verifyPayment(verifyDto);
+  }
+
+  @Query(() => InvoiceResponse)
+  @UseGuards(AccessTokenGuard)
+  async fetchInvoice(@Args('findOption') findOption: PaginateAndSort) {
+    return await this.invoiceService.fetchInvoice(findOption);
   }
 }

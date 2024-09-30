@@ -22,7 +22,7 @@ export class PdfService {
         '../../',
         'mail',
         'templates',
-        'invoice.hbs',
+        'english-payment-invoice.hbs',
       );
       const htmlTemplate = fs.readFileSync(templatePath, 'utf8');
       const template = handlebars.compile(htmlTemplate);

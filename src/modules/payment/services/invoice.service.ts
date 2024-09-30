@@ -11,14 +11,15 @@ import { CreateInvoiceInput } from '../dto/invoice';
 import { InvoiceRepository } from '../repositories/invoice.repository';
 import { QrCodeService } from '../../file-handler/services/qrcode.service';
 import { PdfService } from '../../file-handler/services/pdf.service';
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { StorageService } from '../../file-handler/services/storage.service';
 import { MailgunEmailService } from '../../mail/services/implementations/mailgun.services';
+import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
+
 @Injectable()
 export class InvoiceService {
   constructor(
     private invoiceRepository: InvoiceRepository,
-    private qrcodeService: QrCodeService,
     private pdfGeneratorService: PdfService,
     private storageService: StorageService,
     private mailService: MailgunEmailService,
@@ -26,16 +27,11 @@ export class InvoiceService {
   logger = new Logger(InvoiceService.name);
   async invoice(data?: PdfInput, user?: User, listing?: Listing) {
     try {
-      const qrcode = await this.qrcodeService.generateQrCode('');
       const payload: CreateInvoiceInput = {
-        qrcode: qrcode,
         expiredAt: addDays(new Date(), 4),
-        price: data.price,
         userId: user.id,
         listingid: listing.id,
       };
-      data.item = listing.title;
-
       const invoice = await this.invoiceRepository.save(payload);
       data.invoiceNumber = invoice.id;
       const invoicePdf =
@@ -52,12 +48,32 @@ export class InvoiceService {
         filename: invoice.id.toString(),
         path: '',
       };
-
       await this.storageService.uploadFile(multerFile);
       await this.mailService.sendEmailInvoice(user, invoicePdf);
       return invoice;
     } catch (error) {
       this.logger.log(error);
+    }
+  }
+
+  async fetchInvoice(findOption: PaginateAndSort) {
+    try {
+      const whereOption = {
+        [findOption.where.fieldToChose]: [findOption.where.whereParam],
+      };
+      const orderOptions = {
+        [findOption.sortField]: findOption.directionToSort,
+      };
+      const [invoices, total] = await this.invoiceRepository.findAndCount({
+        where: whereOption ?? {},
+        order: orderOptions,
+        take: findOption.take ?? 20,
+        skip: findOption.skip ?? 0,
+      });
+      return { invoices, total };
+    } catch (error) {
+      this.logger.error('Error fetching invoice:', error);
+      throw new BadRequestException(error);
     }
   }
 }

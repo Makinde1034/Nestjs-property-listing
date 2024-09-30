@@ -22,9 +22,15 @@ import { generateRandomString } from '../../../common/utils/helper';
 import { StorageService } from '../../file-handler/services/storage.service';
 import { Readable } from 'stream';
 import { QrCodeService } from '../../file-handler/services/qrcode.service';
+import {
+  AppDefaultConfig,
+  getAappDefaultConfigName,
+} from '../../../config/app-default/app-default';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class PaymentService {
+  private appDefaultConfig: AppDefaultConfig;
   constructor(
     private pdfGeneratorService: PdfService,
     private mailService: MailgunEmailService,
@@ -32,7 +38,12 @@ export class PaymentService {
     private readonly hyperPayService: HyperPayService,
     private storageService: StorageService,
     private readonly qrcodeService: QrCodeService,
-  ) {}
+    private configService: ConfigService,
+  ) {
+    this.appDefaultConfig = this.configService.get<AppDefaultConfig>(
+      getAappDefaultConfigName(),
+    );
+  }
   logger = new Logger(PaymentService.name);
   async initializePayment(
     createPaymentInput: InitiatePaymentInput,
@@ -61,20 +72,23 @@ export class PaymentService {
 
   async invoice(data?: PdfInput, user?: User, listing?: Listing) {
     try {
-      const qrcode = await this.qrcodeService.generateQrCode('');
       const payload: CreateInvoiceInput = {
-        qrcode: qrcode,
         expiredAt: addDays(new Date(), 4),
-        price: data.price,
         userId: user.id,
         listingid: listing.id,
       };
-      data.item = listing.title;
 
       const invoice = await this.invoiceRepository.save(payload);
+
+      const qrcode = await this.qrcodeService.generateQrCode(
+        `${this.appDefaultConfig.customerFrontEndUrl}?${invoice.id}`,
+      );
+      data.qrcode = qrcode;
       data.invoiceNumber = invoice.id;
+
       const invoicePdf =
         await this.pdfGeneratorService.generatePdfForInvoice(data);
+
       const multerFile: Express.Multer.File = {
         fieldname: invoice.id.toString(),
         originalname: invoice.id.toString(),
