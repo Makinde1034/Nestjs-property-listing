@@ -301,6 +301,9 @@ export class NotificationService {
         case NotificationScopesEnum.RESPONSE:
           break;
 
+        case NotificationScopesEnum.RESPONSE:
+          break;
+
         default:
           break;
       }
@@ -326,9 +329,8 @@ export class NotificationService {
         const mailMessageForBuyer = getMessageData(
           buyer.firstName,
           buyer.arabicFirstName,
-          'Create',
-          'Offers',
-          'Offer Creator',
+          event,
+          scope,
         );
 
         this.sendEmailNotification(null, null, 'offer', {
