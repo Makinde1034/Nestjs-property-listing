@@ -18,4 +18,5 @@ export enum NotificationScopesEnum {
   CREATE_INVOICE = 'Create Invoice',
   REGISTRATION = 'Registration',
   ACCEPTED = 'Accepted',
+  RESPONSE = 'Response',
 }
