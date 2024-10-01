@@ -403,6 +403,8 @@ type User {
   verifiedAt: DateTime
   password: String
   gender: String
+  crNumber: String
+  zatcaNuber: String
   language: String!
   maritalStatus: String
   occupation: String
@@ -600,6 +602,7 @@ type Invoice {
   id: Float!
   price: Float!
   userId: String!
+  file: String
   listingid: String!
   expireAt: DateTime!
   createdAt: DateTime!

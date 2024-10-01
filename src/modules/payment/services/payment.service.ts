@@ -36,9 +36,9 @@ export class PaymentService {
     private mailService: MailgunEmailService,
     private invoiceRepository: InvoiceRepository,
     private readonly hyperPayService: HyperPayService,
-    private storageService: StorageService,
+    private readonly storageService: StorageService,
     private readonly qrcodeService: QrCodeService,
-    private configService: ConfigService,
+    private readonly configService: ConfigService,
   ) {
     this.appDefaultConfig = this.configService.get<AppDefaultConfig>(
       getAappDefaultConfigName(),
@@ -73,6 +73,8 @@ export class PaymentService {
   async invoice(data?: PdfInput, user?: User, listing?: Listing) {
     try {
       const payload: CreateInvoiceInput = {
+        price: data.sumTotalWithVat,
+
         expiredAt: addDays(new Date(), 4),
         userId: user.id,
         listingid: listing.id,
@@ -101,8 +103,8 @@ export class PaymentService {
         filename: invoice.id.toString(),
         path: '',
       };
-
-      await this.storageService.uploadFile(multerFile);
+      const url = await this.storageService.upload(multerFile);
+      await this.invoiceRepository.update(invoice.id, { file: url });
       await this.mailService.sendEmailInvoice(user, invoicePdf);
       return invoice;
     } catch (error) {

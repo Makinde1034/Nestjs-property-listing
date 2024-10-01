@@ -27,6 +27,9 @@ export class Invoice {
   @Column()
   @Field()
   userId: string;
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  file: string;
 
   @Column()
   @Field()

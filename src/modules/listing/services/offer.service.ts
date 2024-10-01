@@ -44,12 +44,11 @@ export class OfferService {
     private readonly offerRepository: OfferRepository,
     private paymentService: PaymentService,
     private listingService: ListingService,
-    private mailService: MailgunEmailService,
     private userRepository: UserRepository,
-    private notificationScopeRepository: NotificationScopeRepository,
-    private notificationService: NotificationService,
-    private adminDefaultService: AdminService,
-    private listingRepository: ListingRepository,
+    private readonly notificationScopeRepository: NotificationScopeRepository,
+    private readonly notificationService: NotificationService,
+    private readonly adminDefaultService: AdminService,
+    private readonly listingRepository: ListingRepository,
   ) {}
   logger = new Logger(OfferService.name);
 
@@ -88,7 +87,10 @@ export class OfferService {
       }
 
       const [minimumPrice, listing, saiiFee] =
-        await this.getMinimumOfferForAListingAndUser(createOfferDto.listingId);
+        await this.getMinimumOfferForAListingAndUser(
+          createOfferDto.listingId,
+          createOfferDto.price,
+        );
 
       if (!listing.negotiable) {
         throw new BadRequestException(AppStrings.LISTING_IS_NOT_NEGOTIABLE);
@@ -117,31 +119,37 @@ export class OfferService {
 
       const offerPayload = await this.offerRepository.save(createOfferDto);
 
+      const seller = await this.userRepository.findOneOrFail({
+        where: { id: listing.userId },
+        relations: ['notificationPreference'],
+      });
+
       const data: PdfInput = {
         createdDate: `${offerPayload.createdAt.getDate()}-${offerPayload.createdAt.getMonth() + 1}-${offerPayload.createdAt.getFullYear()}`,
-        sellerCRNumber: '',
-        sellerzatcaNumber: '',
-        sellerAddress: '',
-        sellerName: '',
-        customerCRNumber: '',
-        customerName: '',
-        customerAddress: '',
-        customerZatcaNumber: `${user.firstName} ${user.lastName}`,
+        sellerCRNumber: seller.crNumber,
+        sellerzatcaNumber: seller.zatcaNuber,
+        sellerAddress: seller.address,
+        sellerName:
+          seller.language === 'en'
+            ? `${seller.firstName} ${seller.lastName}`
+            : `${seller.arabicFirstName} ${seller.arabicLastName}`,
+        customerCRNumber: user.crNumber,
+        customerName:
+          user.language === 'en'
+            ? `${user.firstName} ${user.lastName}`
+            : `${user.arabicFirstName} ${user.arabicLastName}`,
+        customerAddress: user.address,
+        customerZatcaNumber: user.zatcaNuber,
         totalWithVat: [1],
         itemVat: [{ vat: 1, vatValue: 1 }],
         product: offerPayload,
         sumTotalWithoutVat: 1,
         sumTotalVat: 1,
-        sumTotalWithVat: 1,
+        sumTotalWithVat: offerPayload.price,
       };
 
       //TODO: switch to event emitter
       this.paymentService.invoice(data, user, listing);
-
-      const seller = await this.userRepository.findOneOrFail({
-        where: { id: listing.userId },
-        relations: ['notificationPreference'],
-      });
 
       // Find the Scope available for application
       const notificationPreference =
@@ -195,6 +203,7 @@ export class OfferService {
 
   async getMinimumOfferForAListingAndUser(
     listingId: string,
+    offerPrice: number,
   ): Promise<[number, Listing, number]> {
     try {
       const listing =
@@ -204,12 +213,14 @@ export class OfferService {
         throw new NotFoundException(AppStrings.LISTING_NOT_FOUND);
       }
 
-      const adminDefault = await this.adminDefaultService.adminDefault(); //TODO: Add to admin default
+      const adminDefault = await this.adminDefaultService.adminDefault();
       const price =
         (adminDefault.minimumOfferPercentage / listing.price) *
         100 *
         listing.price;
-      const saii = (adminDefault.saii / listing.price) * 100 * listing.price;
+      const saii =
+        (adminDefault.saii / 100) * offerPrice * (1 + adminDefault.vat / 100);
+
       const vat = (adminDefault.vat / saii) * 100;
       const total = vat + saii + price;
 
@@ -280,10 +291,14 @@ export class OfferService {
   async updateOffer(user: User, updateOfferInput: UpdateOfferInput) {
     try {
       const { id, price, listingId, ...rest } = updateOfferInput;
-      console.log(rest.expireAt);
 
-      // Fetch offer and highest offer concurrently
-      const [offer, highestOffer] = await Promise.all([
+      // Fetch offer, highest offer, minimum price, listing, and saiiFee concurrently
+      const [
+        offer,
+        highestOffer,
+        [minimumPrice, listing, saiiFee],
+        notificationPreference,
+      ] = await Promise.all([
         this.offerRepository.findOne({
           where: { id },
           relations: ['user', 'listing.user'],
@@ -301,6 +316,10 @@ export class OfferService {
           },
           order: { price: 'DESC' },
         }),
+        this.getMinimumOfferForAListingAndUser(listingId, price),
+        this.notificationScopeRepository.findOne({
+          where: { name: NotificationScopesEnum.UPDATE_OFFER },
+        }),
       ]);
 
       // Validate if offer exists
@@ -314,10 +333,6 @@ export class OfferService {
           `Minimum Offer must be greater than ${highestOffer.price}`,
         );
       }
-
-      // Fetch minimum price, listing and saiiFee for the offer
-      const [minimumPrice, listing, saiiFee] =
-        await this.getMinimumOfferForAListingAndUser(listingId);
 
       // Validate minimum price requirement
       if (minimumPrice > price) {
@@ -334,10 +349,6 @@ export class OfferService {
       }
 
       // Fetch notification preference
-      const notificationPreference =
-        await this.notificationScopeRepository.findOne({
-          where: { name: NotificationScopesEnum.UPDATE_OFFER },
-        });
 
       //TODO switch to event emmiter
       this.notificationService.sendNotification({
@@ -354,8 +365,13 @@ export class OfferService {
         ...rest,
       });
 
+      // Return the updated offer only if it was affected
       if (affected) {
-        return this.offerRepository.findOneBy({ id });
+        offer.saiiFee = saiiFee; // Update the offer object in memory
+        Object.assign(offer, rest); // Apply rest of the changes
+        return offer;
+      } else {
+        throw new BadRequestException('Offer update failed');
       }
     } catch (error) {
       this.logger.error(error);
