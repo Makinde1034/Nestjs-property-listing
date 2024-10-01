@@ -4,11 +4,12 @@
  */
 
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { PrimaryGeneratedColumn } from 'typeorm';
+import { Index, PrimaryGeneratedColumn } from 'typeorm';
 
 @ObjectType()
 export default class BaseEntity {
   @Field(() => ID)
   @PrimaryGeneratedColumn('uuid')
+  @Index()
   id: string;
 }

@@ -5,7 +5,7 @@
 
 export enum NotificationScopesEnum {
   CREATE_OFFER = 'Create',
-  UPDATE_OFFER = 'Update Offer',
+  UPDATE_OFFER = 'Update',
   OFFER_RESPONSE = 'Offer Response',
   BIDS = 'Bids',
   RESULT = 'Results',

@@ -57,12 +57,14 @@ export class Offer extends BaseEntity {
 
   @Field(() => User)
   @ManyToOne(() => User, (user) => user.offer)
+  @Index()
   user: User;
 
   @Field(() => Listing)
   @JoinColumn({ name: 'listingId' })
   @Index()
   @ManyToOne(() => Listing, (listing) => listing.offer)
+  @Index()
   listing: Listing;
 
   @Field()
