@@ -387,13 +387,20 @@ export class OfferService {
     try {
       const { id } = updateOfferInput;
 
-      const offer = await this.offerRepository.findOne({
-        where: { id: id },
-        relations: ['user', 'listing', 'listing.user'],
-        select: {
-          user: { email: true, firstName: true },
-        },
-      });
+      const [offer, notificationPreference] = await Promise.all([
+        this.offerRepository.findOne({
+          where: { id: id },
+          relations: ['user', 'listing', 'listing.user'],
+          select: {
+            user: { email: true, firstName: true },
+          },
+        }),
+
+        this.notificationScopeRepository.findOne({
+          where: { name: NotificationScopesEnum.ACCEPTED },
+        }),
+      ]);
+
       if (!offer) {
         throw new NotFoundException('Offer not found');
       }
@@ -402,26 +409,24 @@ export class OfferService {
         throw new BadRequestException('Only the creator can accept an offer');
       }
 
-      const update = await this.offerRepository.update(id, {
+      const { affected } = await this.offerRepository.update(id, {
         status: 'accepted',
       });
 
       // Fetch notification preference
-      const notificationPreference =
-        await this.notificationScopeRepository.findOne({
-          where: { name: NotificationScopesEnum.ACCEPTED },
-        });
 
       //TODO switch to event emmiter
       this.notificationService.sendNotification({
         creatorId: user.id,
         receiverId: offer.listing.user.id,
         scope: notificationPreference,
-        event: NotificationScopesEnum.ACCEPTED,
+        event: NotificationScopesEnum.RESPONSE,
         recipientFormat: ['Seller', 'Offer Creator'],
       });
 
-      return await this.offerRepository.findOneBy({ id });
+      if (affected) {
+        return await this.offerRepository.findOneBy({ id });
+      }
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);

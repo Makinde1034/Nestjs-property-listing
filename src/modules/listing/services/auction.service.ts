@@ -3,7 +3,12 @@
  * For license. See license.txt
  */
 
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { AuctionRepository } from '../repositories/auction.repository';
 import {
   CreateAuctionInput,
@@ -123,43 +128,60 @@ export class AuctionService {
   }
 
   async addListingToAuction(data: CreateAuctionParticipantInput) {
-    const adminDefault = await this.adminRepository.find();
+    try {
+      const adminDefault = await this.adminRepository.find();
 
-    const auction = await this.findOne(data.auctionId);
+      const auction = await this.findOne(data.auctionId);
 
-    if (!auction.imageLink) {
-      throw new BadRequestException(
-        AppStrings.AUCTION_IS_NOT_COMPLETELY_SET_UP,
-      );
-    }
-    const date = new Date();
-    if (
-      auction.startDate <=
-      new Date(
-        removeDaysFromDate(
-          date,
-          adminDefault[0].daysToAuctionRegistrationStart,
-        ),
-      )
-    ) {
-      throw new BadRequestException(
-        AppStrings.AUCTION_REGISTRATION_HAS_NOT_STARTED,
-      );
-    }
+      if (!auction.imageLink) {
+        throw new BadRequestException(
+          AppStrings.AUCTION_IS_NOT_COMPLETELY_SET_UP,
+        );
+      }
+      const date = new Date();
+      if (
+        auction.startDate <=
+        new Date(
+          removeDaysFromDate(
+            date,
+            adminDefault[0].daysToAuctionRegistrationStart,
+          ),
+        )
+      ) {
+        throw new BadRequestException(
+          AppStrings.AUCTION_REGISTRATION_HAS_NOT_STARTED,
+        );
+      }
 
-    if (
-      auction.startDate <=
-      new Date(
-        removeDaysFromDate(date, adminDefault[0].daysToAuctionRegistrationEnd),
-      )
-    ) {
-      throw new BadRequestException(AppStrings.AUCTION_REGISTATION_HAS_ENDED);
+      if (
+        auction.startDate <=
+        new Date(
+          removeDaysFromDate(
+            date,
+            adminDefault[0].daysToAuctionRegistrationEnd,
+          ),
+        )
+      ) {
+        throw new BadRequestException(AppStrings.AUCTION_REGISTATION_HAS_ENDED);
+      }
+      return await this.auctionParticipantRepository.save(data);
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        this.logger.log(error);
+        throw new BadRequestException(error);
+      }
     }
-    return await this.auctionParticipantRepository.save(data);
   }
 
   async delete(id: string) {
-    const deleteAuction = await this.auctionRepository.softDelete(id);
-    return deleteAuction;
+    try {
+      const deleteAuction = await this.auctionRepository.softDelete(id);
+      return deleteAuction;
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
   }
 }
