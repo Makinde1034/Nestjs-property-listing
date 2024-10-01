@@ -534,6 +534,9 @@ type AuctionParticipant {
   id: ID!
   listingId: String!
   auction: Auction!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type Auction {

@@ -4,7 +4,14 @@
  */
 
 import { Field, ObjectType } from '@nestjs/graphql';
-import { Column, Entity, ManyToOne } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  ManyToOne,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Auction } from './auction-table.entity';
 import BaseEntity from './base.entity';
 
@@ -18,4 +25,15 @@ export class AuctionParticipant extends BaseEntity {
   @Field(() => Auction)
   @ManyToOne(() => Auction, (auction) => auction.auctionParticipant)
   auction: Auction;
+
+  @Field()
+  @CreateDateColumn()
+  createdAt: Date;
+  @Field()
+  @DeleteDateColumn()
+  deletedAt: Date;
+
+  @Field()
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
