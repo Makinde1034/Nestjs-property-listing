@@ -432,6 +432,8 @@ export class OfferService {
         throw new BadRequestException('Only the Creator can reject an offer');
       }
 
+      //TODO: revert payment
+
       const update = await this.offerRepository.update(id, {
         status: 'rejected',
       });

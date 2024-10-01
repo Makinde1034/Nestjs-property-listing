@@ -304,6 +304,7 @@ export class NotificationService {
             buyer,
             notificationInput.event,
             notificationInput.scope.scopeGroup,
+            notificationInput.recipientFormat,
           );
           break;
 
@@ -315,6 +316,7 @@ export class NotificationService {
             buyer,
             notificationInput.event,
             notificationInput.scope.scopeGroup,
+            notificationInput.recipientFormat,
           );
           break;
 
@@ -326,6 +328,7 @@ export class NotificationService {
             buyer,
             notificationInput.event,
             notificationInput.scope.scopeGroup,
+            notificationInput.recipientFormat,
           );
           break;
 
@@ -352,6 +355,7 @@ export class NotificationService {
        * Email notification
        ************************/
       this.logger.log('Sending mail');
+      console.log(recipientFormat);
 
       if (userPrefRecipients?.email) {
         const mailMessageForBuyer = getMessageData(
