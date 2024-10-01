@@ -19,7 +19,7 @@ import {
 import { OfferRepository } from '../repositories';
 import { Listing, NotificationScope, User } from '../../../entities';
 import { PaymentService } from '../../payment/services/payment.service';
-import { MoreThanOrEqual } from 'typeorm';
+import { EntityManager, MoreThanOrEqual } from 'typeorm';
 import { ListingService } from './listing.service';
 import { AppStrings } from '../../../common/messages/app.strings';
 
@@ -37,6 +37,8 @@ import { OfferListEnum } from '../../../common/enums/status.enum';
 import { AdminService } from '../../admin/services/admin.service';
 import { ListingRepository } from '../repositories/listing.repository';
 import { SuccessResponse } from '../../../common/utils/success.response';
+import { Offer } from '../../../entities/offer.entity';
+import { error } from 'console';
 
 @Injectable()
 export class OfferService {
@@ -292,35 +294,44 @@ export class OfferService {
     try {
       const { id, price, listingId, ...rest } = updateOfferInput;
 
-      const [offer, highestOffer, notificationPreference] = await Promise.all([
-        this.offerRepository.findOne({
-          where: { id },
-          relations: ['user', 'listing.user'],
-          select: {
-            listing: {
-              id: true,
-              user: { email: true, firstName: true },
-            },
-          },
-        }),
+      const [offer, notificationPreference] = await Promise.all([
+        // Fetch offer and highest offer in a single query
+        this.offerRepository
+          .createQueryBuilder('offer')
+          .leftJoinAndSelect('offer.listing', 'listing')
+          .leftJoinAndSelect('listing.user', 'listingUser')
+          .select([
+            'offer.id',
+            'offer.price',
+            'listing.id',
+            'listingUser.id',
+            'listingUser.email',
+            'listingUser.firstName',
+            'listing.price',
+          ])
+          .addSelect((subQuery) => {
+            return subQuery
+              .select('MAX(offerSub.price)', 'maxPrice')
+              .from(Offer, 'offerSub')
+              .where('offerSub.listingId = :listingId', { listingId });
+          }, 'maxPrice')
+          .where('offer.id = :id', { id })
+          .getRawOne(),
 
-        this.offerRepository.findOne({
-          where: {
-            price: MoreThanOrEqual(price),
-            listingId,
-          },
-          order: { price: 'DESC' },
-        }),
-
+        // Fetch notification preference
         this.notificationScopeRepository.findOne({
           where: { name: NotificationScopesEnum.UPDATE_OFFER },
         }),
       ]);
+      console.log(notificationPreference);
+
+      const { maxPrice } = offer;
+      const highestOfferPrice = maxPrice || 0;
 
       const [minimumPrice, saiiFee] =
         await this.getMinimumOfferForAListingAndUser(
           price,
-          offer.listing.price,
+          offer.listing_price,
         );
 
       // Validate if offer exists
@@ -329,9 +340,9 @@ export class OfferService {
       }
 
       // Validate if price is greater than the highest existing offer
-      if (highestOffer) {
+      if (highestOfferPrice >= price) {
         throw new BadRequestException(
-          `Minimum Offer must be greater than ${highestOffer.price}`,
+          `Minimum Offer must be greater than ${highestOfferPrice}`,
         );
       }
 
@@ -343,18 +354,16 @@ export class OfferService {
       }
 
       // Validate that the user isn't editing an offer on their own listing
-      if (user.id === offer.listing.user.id) {
-        throw new BadRequestException(
-          'The creator of a listing cannot edit an offer on that listing',
-        );
-      }
+      // if (user.id === offer.listingUser_id) {
+      //   throw new BadRequestException(
+      //     'The creator of a listing cannot edit an offer on that listing',
+      //   );
+      // }
 
-      // Fetch notification preference
-
-      //TODO switch to event emmiter
+      // Send notification using an event emitter
       this.notificationService.sendNotification({
         creatorId: user.id,
-        receiverId: offer.listing.user.id, // Use listing.user.id directly
+        receiverId: offer.listingUser_id,
         scope: notificationPreference,
         event: NotificationScopesEnum.UPDATE_OFFER,
         recipientFormat: ['Seller', 'Offer Creator'],
@@ -368,8 +377,9 @@ export class OfferService {
 
       // Return the updated offer only if it was affected
       if (affected) {
-        offer.saiiFee = saiiFee; // Update the offer object in memory
-        Object.assign(offer, rest); // Apply rest of the changes
+        offer.saiiFee = saiiFee;
+        Object.assign(offer, rest);
+        console.log(offer);
         return offer;
       } else {
         throw new BadRequestException('Offer update failed');
@@ -379,108 +389,150 @@ export class OfferService {
       if (error instanceof HttpException) {
         throw error;
       } else {
+        console.log(error);
         throw new BadRequestException('Offer update failed');
       }
     }
   }
 
+  // Needed for transactions
+
   async acceptOffer(user: User, updateOfferInput: UpdateOfferInput) {
-    try {
-      const { id } = updateOfferInput;
+    const { id } = updateOfferInput;
 
-      const [offer, notificationPreference] = await Promise.all([
-        this.offerRepository.findOne({
-          where: { id: id },
-          relations: ['user', 'listing.user'],
-          select: {
-            user: { email: true, firstName: true },
-          },
-        }),
+    return await this.offerRepository.manager.transaction(
+      async (entityManager: EntityManager) => {
+        try {
+          // Fetch offer and listing user in a single query, limiting selected fields
+          const offer = await entityManager.findOne(Offer, {
+            where: { id },
+            relations: ['listing', 'listing.user'],
+            select: {
+              id: true,
+              listing: { id: true, user: { id: true } },
+            },
+          });
 
-        this.notificationScopeRepository.findOne({
-          where: { name: NotificationScopesEnum.RESPONSE },
-        }),
-      ]);
+          // Validate if offer exists
+          if (!offer) {
+            throw new NotFoundException('Offer not found');
+          }
 
-      if (!offer) {
-        throw new NotFoundException('Offer not found');
-      }
+          // Validate if user is the creator of the listing
+          if (user.id !== offer.listing.user.id) {
+            throw new BadRequestException(
+              'Only the creator can accept an offer',
+            );
+          }
 
-      if (user.id != offer.listing.user.id) {
-        throw new BadRequestException('Only the creator can accept an offer');
-      }
+          // Update offer status and return updated offer immediately using RETURNING (if supported by your DB)
+          const updateResult = await entityManager
+            .createQueryBuilder()
+            .update(Offer)
+            .set({ status: 'accepted' })
+            .where({ id })
+            .returning(['id', 'status']) // Fetch updated fields right after the update
+            .execute();
 
-      const { affected } = await this.offerRepository.update(id, {
-        status: 'accepted',
-      });
+          if (!updateResult.affected) {
+            throw new BadRequestException('Failed to update offer status');
+          }
 
-      // Fetch notification preference
+          // Fetch notification preference only if offer update is successful
+          const notificationPreference = await entityManager.findOne(
+            NotificationScope,
+            {
+              where: { name: NotificationScopesEnum.RESPONSE },
+            },
+          );
 
-      //TODO switch to event emmiter
-      this.notificationService.sendNotification({
-        creatorId: user.id,
-        receiverId: offer.listing.user.id,
-        scope: notificationPreference,
-        event: NotificationScopesEnum.RESPONSE,
-        recipientFormat: ['Seller', 'Offer Creator'],
-      });
+          // Send notification (event emitter can be used here)
+          this.notificationService.sendNotification({
+            creatorId: user.id,
+            receiverId: offer.listing.user.id,
+            scope: notificationPreference,
+            event: NotificationScopesEnum.RESPONSE,
+            recipientFormat: ['Seller', 'Offer Creator'],
+          });
 
-      if (affected) {
-        return await this.offerRepository.findOneBy({ id });
-      }
-    } catch (error) {
-      this.logger.log(error);
-      throw new BadRequestException(error);
-    }
+          // Return the updated offer
+          return updateResult.raw[0]; // Returning the updated offer from the query result
+        } catch (error) {
+          console.log(error);
+          this.logger.error('Error accepting offer:', error);
+          throw new BadRequestException('Failed to accept offer');
+        }
+      },
+    );
   }
+
   async rejectOffer(user: User, updateOfferInput: UpdateOfferInput) {
-    try {
-      const { id } = updateOfferInput;
+    const { id } = updateOfferInput;
 
-      const [offer, notificationPreference] = await Promise.all([
-        this.offerRepository.findOne({
-          where: { id: id },
-          relations: ['user', 'listing.user'],
-          select: {
-            user: { email: true, firstName: true },
-          },
-        }),
+    return await this.offerRepository.manager.transaction(
+      async (entityManager: EntityManager) => {
+        try {
+          // Fetch offer and listing user in a single query, limiting selected fields
+          const offer = await entityManager.findOne(Offer, {
+            where: { id },
+            relations: ['listing', 'listing.user'],
+            select: {
+              id: true,
+              listing: { id: true, user: { id: true } },
+            },
+          });
 
-        this.notificationScopeRepository.findOne({
-          where: { name: NotificationScopesEnum.RESPONSE },
-        }),
-      ]);
+          // Validate if offer exists
+          if (!offer) {
+            throw new NotFoundException('Offer not found');
+          }
 
-      if (!offer) {
-        throw new NotFoundException('Offer not found');
-      }
+          // Validate if user is the creator of the listing
+          if (user.id !== offer.listing.user.id) {
+            throw new BadRequestException(
+              'Only the creator can accept an offer',
+            );
+          }
 
-      if (user.id != offer.listing.user.id) {
-        throw new BadRequestException('Only the Creator can reject an offer');
-      }
+          // Update offer status and return updated offer immediately using RETURNING (if supported by your DB)
+          const updateResult = await entityManager
+            .createQueryBuilder()
+            .update(Offer)
+            .set({ status: 'rejected' })
+            .where({ id })
+            .returning(['id', 'status']) // Fetch updated fields right after the update
+            .execute();
 
-      //TODO: revert payment
+          if (!updateResult.affected) {
+            throw new BadRequestException('Failed to update offer status');
+          }
 
-      const { affected } = await this.offerRepository.update(id, {
-        status: 'rejected',
-      });
+          // Fetch notification preference only if offer update is successful
+          const notificationPreference = await entityManager.findOne(
+            NotificationScope,
+            {
+              where: { name: NotificationScopesEnum.RESPONSE },
+            },
+          );
 
-      //TODO switch to event emmiter
-      this.notificationService.sendNotification({
-        creatorId: user.id,
-        receiverId: offer.listing.user.id,
-        scope: notificationPreference,
-        event: NotificationScopesEnum.RESPONSE,
-        recipientFormat: ['Seller', 'Offer Creator'],
-      });
+          // Send notification (event emitter can be used here)
+          this.notificationService.sendNotification({
+            creatorId: user.id,
+            receiverId: offer.listing.user.id,
+            scope: notificationPreference,
+            event: NotificationScopesEnum.RESPONSE,
+            recipientFormat: ['Seller', 'Offer Creator'],
+          });
 
-      if (affected) {
-        return await this.offerRepository.findOneBy({ id });
-      }
-    } catch (error) {
-      this.logger.log(error);
-      throw new BadRequestException(error);
-    }
+          // Return the updated offer
+          return updateResult.raw[0]; // Returning the updated offer from the query result
+        } catch (error) {
+          console.log(error);
+          this.logger.error('Error accepting offer:', error);
+          throw new BadRequestException('Failed to reject offer');
+        }
+      },
+    );
   }
 
   async deleteOffer(id: string) {
