@@ -29,7 +29,6 @@ export class AuctionParticipant extends BaseEntity {
   @Field()
   @CreateDateColumn()
   createdAt: Date;
-
   @Field()
   @DeleteDateColumn()
   deletedAt: Date;

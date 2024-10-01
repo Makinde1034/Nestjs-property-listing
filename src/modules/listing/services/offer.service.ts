@@ -454,9 +454,12 @@ export class OfferService {
           // Return the updated offer
           return updateResult.raw[0]; // Returning the updated offer from the query result
         } catch (error) {
-          console.log(error);
-          this.logger.error('Error accepting offer:', error);
-          throw new BadRequestException('Failed to accept offer');
+          if (error instanceof HttpException) {
+            throw error;
+          } else {
+            this.logger.error('Error accepting offer:', error);
+            throw new BadRequestException('Failed to accept offer');
+          }
         }
       },
     );
@@ -523,9 +526,12 @@ export class OfferService {
           // Return the updated offer
           return updateResult.raw[0]; // Returning the updated offer from the query result
         } catch (error) {
-          console.log(error);
-          this.logger.error('Error accepting offer:', error);
-          throw new BadRequestException('Failed to reject offer');
+          if (error instanceof HttpException) {
+            throw error;
+          } else {
+            this.logger.error('Error accepting offer:', error);
+            throw new BadRequestException('Failed to reject offer');
+          }
         }
       },
     );
