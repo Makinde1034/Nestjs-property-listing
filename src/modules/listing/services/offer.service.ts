@@ -100,16 +100,16 @@ export class OfferService {
         );
       }
 
-      // if (user.id == listing.user.id) {
-      //   throw new BadRequestException(
-      //     'The creator of a listing cannot create an offer on  that listing',
-      //   );
-      // }
-      // if (offer.length > 0) {
-      //   throw new BadRequestException(
-      //     `Minimum Offer must be greater than ${offer[0].price}`,
-      //   );
-      // }
+      if (user.id == listing.user.id) {
+        throw new BadRequestException(
+          'The creator of a listing cannot create an offer on  that listing',
+        );
+      }
+      if (offer.length > 0) {
+        throw new BadRequestException(
+          `Minimum Offer must be greater than ${offer[0].price}`,
+        );
+      }
 
       createOfferDto.userId = user.id;
       createOfferDto.saiiFee = saiiFee;
@@ -345,6 +345,7 @@ export class OfferService {
         receiverId: listing.user.id, // Use listing.user.id directly
         scope: notificationPreference,
         event: NotificationScopesEnum.UPDATE_OFFER,
+        recipientFormat: ['Seller', 'Offer Creator'],
       });
 
       // Update offer with new data and saiiFee
@@ -401,9 +402,10 @@ export class OfferService {
         receiverId: offer.listing.user.id,
         scope: notificationPreference,
         event: NotificationScopesEnum.ACCEPTED,
+        recipientFormat: ['Seller', 'Offer Creator'],
       });
 
-      return update;
+      return await this.offerRepository.findOneBy({ id });
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -446,9 +448,10 @@ export class OfferService {
         receiverId: offer.listing.user.id,
         scope: notificationPreference,
         event: NotificationScopesEnum.RESPONSE,
+        recipientFormat: ['Seller', 'Offer Creator'],
       });
 
-      return update;
+      return await this.offerRepository.findOneBy({ id });
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
