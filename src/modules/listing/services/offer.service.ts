@@ -323,7 +323,6 @@ export class OfferService {
           where: { name: NotificationScopesEnum.UPDATE_OFFER },
         }),
       ]);
-      console.log(notificationPreference);
 
       const { maxPrice } = offer;
       const highestOfferPrice = maxPrice || 0;
@@ -377,10 +376,7 @@ export class OfferService {
 
       // Return the updated offer only if it was affected
       if (affected) {
-        offer.saiiFee = saiiFee;
-        Object.assign(offer, rest);
-        console.log(offer);
-        return offer;
+        return await this.offerRepository.findOneBy({ id });
       } else {
         throw new BadRequestException('Offer update failed');
       }
