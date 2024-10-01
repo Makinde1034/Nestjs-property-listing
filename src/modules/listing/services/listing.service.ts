@@ -853,7 +853,7 @@ export class ListingService {
     try {
       const listing = await this.listingRepository.findOneOrFail({
         where: { id },
-        relations: ['user', 'promotion', 'feature', 'flag'],
+        relations: ['user'],
         select: {
           id: true,
           title: true,
@@ -889,31 +889,6 @@ export class ListingService {
             arabicFirstName: true,
             arabicLastName: true,
             email: true,
-          },
-          feature: {
-            id: true,
-            endDate: true,
-            startDate: true,
-            adPackage: {
-              id: true,
-              name: true,
-            },
-          },
-          promotion: {
-            id: true,
-            expiredAt: true,
-            createdAt: true,
-            adPackage: {
-              id: true,
-              name: true,
-              price: true,
-            },
-          },
-          flag: {
-            id: true,
-
-            userId: true,
-            createdAt: true,
           },
         },
       });
