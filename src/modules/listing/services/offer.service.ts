@@ -353,11 +353,11 @@ export class OfferService {
       }
 
       // Validate that the user isn't editing an offer on their own listing
-      // if (user.id === offer.listingUser_id) {
-      //   throw new BadRequestException(
-      //     'The creator of a listing cannot edit an offer on that listing',
-      //   );
-      // }
+      if (user.id === offer.listingUser_id) {
+        throw new BadRequestException(
+          'The creator of a listing cannot edit an offer on that listing',
+        );
+      }
 
       // Send notification using an event emitter
       this.notificationService.sendNotification({
