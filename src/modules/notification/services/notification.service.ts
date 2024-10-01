@@ -415,7 +415,6 @@ export class NotificationService {
       /************************
        * Push notification
        ************************/
-
       if (userPrefRecipients?.mobile) {
         const mailMessageForBuyer = getMessageData(
           recipient.firstName,
