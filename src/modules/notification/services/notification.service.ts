@@ -255,7 +255,6 @@ export class NotificationService {
 
   async sendNotification(notificationInput: SendNotificationInput) {
     try {
-      console.log(notificationInput);
       //Get user information for buyer and their notification preference
       const buyer = await this.userRepository.findOneOrFail({
         where: { id: notificationInput.creatorId },
@@ -416,7 +415,6 @@ export class NotificationService {
       /************************
        * Push notification
        ************************/
-
       if (userPrefRecipients?.mobile) {
         const mailMessageForBuyer = getMessageData(
           recipient.firstName,

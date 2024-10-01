@@ -75,6 +75,13 @@ export class OfferService {
         order: { price: 'DESC' },
       });
       const adminDefault = await this.adminDefaultService.adminDefault();
+      const listing = await this.listingService.findOneListingForBuyer(
+        createOfferDto.listingId,
+      );
+
+      if (!listing) {
+        throw new NotFoundException(AppStrings.LISTING_NOT_FOUND);
+      }
 
       const offerExpiry = new Date(createOfferDto.expireAt);
 
@@ -86,10 +93,10 @@ export class OfferService {
         throw new BadRequestException(`Max expiry is ${maxExpiry}`);
       }
 
-      const [minimumPrice, listing, saiiFee] =
+      const [minimumPrice, saiiFee] =
         await this.getMinimumOfferForAListingAndUser(
-          createOfferDto.listingId,
           createOfferDto.price,
+          listing.price,
         );
 
       if (!listing.negotiable) {
@@ -202,30 +209,23 @@ export class OfferService {
   }
 
   async getMinimumOfferForAListingAndUser(
-    listingId: string,
     offerPrice: number,
-  ): Promise<[number, Listing, number]> {
+    listingPrice: number,
+  ): Promise<[number, number]> {
     try {
-      const listing =
-        await this.listingService.findOneListingForBuyer(listingId);
-
-      if (!listing) {
-        throw new NotFoundException(AppStrings.LISTING_NOT_FOUND);
-      }
-
       const adminDefault = await this.adminDefaultService.adminDefault();
       const price =
-        (adminDefault.minimumOfferPercentage / listing.price) *
+        (adminDefault.minimumOfferPercentage / listingPrice) *
         100 *
-        listing.price;
+        listingPrice;
       const saii =
         (adminDefault.saii / 100) * offerPrice * (1 + adminDefault.vat / 100);
 
       const vat = (adminDefault.vat / saii) * 100;
       const total = vat + saii + price;
 
-      const minimumListingPrice = listing.price - price + total;
-      return [minimumListingPrice, listing, saii];
+      const minimumListingPrice = listingPrice - price + total;
+      return [minimumListingPrice, saii];
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -292,13 +292,7 @@ export class OfferService {
     try {
       const { id, price, listingId, ...rest } = updateOfferInput;
 
-      // Fetch offer, highest offer, minimum price, listing, and saiiFee concurrently
-      const [
-        offer,
-        highestOffer,
-        [minimumPrice, listing, saiiFee],
-        notificationPreference,
-      ] = await Promise.all([
+      const [offer, highestOffer, notificationPreference] = await Promise.all([
         this.offerRepository.findOne({
           where: { id },
           relations: ['user', 'listing.user'],
@@ -309,6 +303,7 @@ export class OfferService {
             },
           },
         }),
+
         this.offerRepository.findOne({
           where: {
             price: MoreThanOrEqual(price),
@@ -316,11 +311,17 @@ export class OfferService {
           },
           order: { price: 'DESC' },
         }),
-        this.getMinimumOfferForAListingAndUser(listingId, price),
+
         this.notificationScopeRepository.findOne({
           where: { name: NotificationScopesEnum.UPDATE_OFFER },
         }),
       ]);
+
+      const [minimumPrice, saiiFee] =
+        await this.getMinimumOfferForAListingAndUser(
+          price,
+          offer.listing.price,
+        );
 
       // Validate if offer exists
       if (!offer) {
@@ -342,7 +343,7 @@ export class OfferService {
       }
 
       // Validate that the user isn't editing an offer on their own listing
-      if (user.id === listing.user.id) {
+      if (user.id === offer.listing.user.id) {
         throw new BadRequestException(
           'The creator of a listing cannot edit an offer on that listing',
         );
@@ -353,7 +354,7 @@ export class OfferService {
       //TODO switch to event emmiter
       this.notificationService.sendNotification({
         creatorId: user.id,
-        receiverId: listing.user.id, // Use listing.user.id directly
+        receiverId: offer.listing.user.id, // Use listing.user.id directly
         scope: notificationPreference,
         event: NotificationScopesEnum.UPDATE_OFFER,
         recipientFormat: ['Seller', 'Offer Creator'],
@@ -390,14 +391,14 @@ export class OfferService {
       const [offer, notificationPreference] = await Promise.all([
         this.offerRepository.findOne({
           where: { id: id },
-          relations: ['user', 'listing', 'listing.user'],
+          relations: ['user', 'listing.user'],
           select: {
             user: { email: true, firstName: true },
           },
         }),
 
         this.notificationScopeRepository.findOne({
-          where: { name: NotificationScopesEnum.ACCEPTED },
+          where: { name: NotificationScopesEnum.RESPONSE },
         }),
       ]);
 
@@ -432,18 +433,23 @@ export class OfferService {
       throw new BadRequestException(error);
     }
   }
-
   async rejectOffer(user: User, updateOfferInput: UpdateOfferInput) {
     try {
       const { id } = updateOfferInput;
 
-      const offer = await this.offerRepository.findOne({
-        where: { id: id },
-        relations: ['listing.user'],
-        select: {
-          user: { email: true, firstName: true },
-        },
-      });
+      const [offer, notificationPreference] = await Promise.all([
+        this.offerRepository.findOne({
+          where: { id: id },
+          relations: ['user', 'listing.user'],
+          select: {
+            user: { email: true, firstName: true },
+          },
+        }),
+
+        this.notificationScopeRepository.findOne({
+          where: { name: NotificationScopesEnum.RESPONSE },
+        }),
+      ]);
 
       if (!offer) {
         throw new NotFoundException('Offer not found');
@@ -455,15 +461,9 @@ export class OfferService {
 
       //TODO: revert payment
 
-      const update = await this.offerRepository.update(id, {
+      const { affected } = await this.offerRepository.update(id, {
         status: 'rejected',
       });
-
-      // Fetch notification preference
-      const notificationPreference =
-        await this.notificationScopeRepository.findOne({
-          where: { name: NotificationScopesEnum.RESPONSE },
-        });
 
       //TODO switch to event emmiter
       this.notificationService.sendNotification({
@@ -474,7 +474,9 @@ export class OfferService {
         recipientFormat: ['Seller', 'Offer Creator'],
       });
 
-      return await this.offerRepository.findOneBy({ id });
+      if (affected) {
+        return await this.offerRepository.findOneBy({ id });
+      }
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
