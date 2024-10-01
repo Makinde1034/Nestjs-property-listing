@@ -9,7 +9,6 @@ import { Listing, User } from '../../../entities';
 import { PdfInput } from '../../file-handler/dto/pdf.dto';
 import { CreateInvoiceInput } from '../dto/invoice';
 import { InvoiceRepository } from '../repositories/invoice.repository';
-import { QrCodeService } from '../../file-handler/services/qrcode.service';
 import { PdfService } from '../../file-handler/services/pdf.service';
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { StorageService } from '../../file-handler/services/storage.service';
@@ -58,22 +57,40 @@ export class InvoiceService {
 
   async fetchInvoice(findOption: PaginateAndSort) {
     try {
-      const whereOption = {
-        [findOption.where.fieldToChose]: [findOption.where.whereParam],
-      };
-      const orderOptions = {
-        [findOption.sortField]: findOption.directionToSort,
-      };
+      // Validate and set default where option
+      const whereOption =
+        findOption?.where?.fieldToChose && findOption?.where?.whereParam
+          ? { [findOption.where.fieldToChose]: findOption.where.whereParam }
+          : {};
+
+      // Validate and set default order options
+      const orderOptions =
+        findOption.sortField && findOption.directionToSort
+          ? {
+              [findOption.sortField]: findOption.directionToSort as
+                | 'ASC'
+                | 'DESC',
+            }
+          : { createdAt: 'DESC' as 'ASC' | 'DESC' }; // Default sorting by createdAt in descending order
+
+      // Set take and skip with reasonable defaults
+      const take =
+        findOption.take && findOption.take > 0 ? findOption.take : 20;
+      const skip =
+        findOption.skip && findOption.skip >= 0 ? findOption.skip : 0;
+
+      // Fetch invoices and total count
       const [invoices, total] = await this.invoiceRepository.findAndCount({
-        where: whereOption ?? {},
+        where: whereOption,
         order: orderOptions,
-        take: findOption.take ?? 20,
-        skip: findOption.skip ?? 0,
+        take,
+        skip,
       });
+
       return { invoices, total };
     } catch (error) {
       this.logger.error('Error fetching invoice:', error);
-      throw new BadRequestException(error);
+      throw new BadRequestException('Unable to fetch invoices');
     }
   }
 }
