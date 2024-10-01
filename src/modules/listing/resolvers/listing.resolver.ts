@@ -320,16 +320,18 @@ export class ListingResolver {
   ) {
     return await this.offerService.rejectOffer(ctx.req.user, updateOfferInput);
   }
-
+  @UseGuards(AccessTokenGuard)
   @Query(() => Offer, { name: 'findOneOffer' })
   async findOne(@Args('id') id: string) {
     return await this.offerService.findOne(id);
   }
 
+  @UseGuards(AccessTokenGuard)
   @Query(() => OfferResponse, { name: 'findOffers' })
   async findMany(@Args('findOptions') paginateAndSort: FindOfferInput) {
     return await this.offerService.findMany(paginateAndSort);
   }
+  @UseGuards(AccessTokenGuard)
   @Query(() => OfferOwnerResponse, { name: 'findManyForOwner' })
   async findManyForOwner(
     @Args('findOptions') paginateAndSort: FindOfferInput,
