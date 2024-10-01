@@ -252,7 +252,6 @@ export class OfferService {
       const [offer, total] = await this.offerRepository.findAndCount({
         where: {
           listingId: findOfferInput.listingId,
-          status: OfferListEnum.ACTIVE,
         },
         skip: findOfferInput.skip,
         take: findOfferInput.take,
