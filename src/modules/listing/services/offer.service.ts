@@ -275,7 +275,7 @@ export class OfferService {
           },
           skip: findOfferInput.skip,
           take: findOfferInput.take,
-          relations: ['listing'],
+          relations: ['listing', 'listing.user'],
         }),
 
         this.listingRepository.count({ where: { userId: user.id } }),
@@ -283,6 +283,7 @@ export class OfferService {
 
       return { offer, total, totalOfferOnlisting };
     } catch (error) {
+      console.log(error);
       this.logger.log(error);
       throw new BadRequestException(error);
     }
