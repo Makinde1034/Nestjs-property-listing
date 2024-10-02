@@ -95,13 +95,11 @@ export class OfferService {
         throw new BadRequestException(`Max expiry is ${maxExpiry}`);
       }
 
-      const [minimumPrice, saiiFee] =
+      const [minimumPrice, saii, vat] =
         await this.getMinimumOfferForAListingAndUser(
           createOfferDto.price,
           listing.price,
         );
-
-      console.log(saiiFee, minimumPrice, createOfferDto.price);
 
       if (!listing.negotiable) {
         throw new BadRequestException(AppStrings.LISTING_IS_NOT_NEGOTIABLE);
@@ -125,7 +123,8 @@ export class OfferService {
       }
 
       createOfferDto.userId = user.id;
-      createOfferDto.saiiFee = saiiFee;
+      createOfferDto.saiiFee = saii;
+      createOfferDto.vat = vat;
       createOfferDto.expireAt = new Date(addDaysToDate(new Date(), 1));
 
       const offerPayload = await this.offerRepository.save(createOfferDto);
@@ -151,11 +150,11 @@ export class OfferService {
             : `${user.arabicFirstName} ${user.arabicLastName}`,
         customerAddress: user.address,
         customerZatcaNumber: user.zatcaNuber,
-        totalWithVat: [1],
-        itemVat: [{ vat: 1, vatValue: 1 }],
+        totalWithVat: [offerPayload.price],
+        itemVat: [{ vat: adminDefault.vat, vatValue: vat }],
         product: offerPayload,
-        sumTotalWithoutVat: 1,
-        sumTotalVat: 1,
+        sumTotalWithoutVat: offerPayload.price - vat,
+        sumTotalVat: vat,
         sumTotalWithVat: offerPayload.price,
       };
 
@@ -215,21 +214,22 @@ export class OfferService {
   async getMinimumOfferForAListingAndUser(
     offerPrice: number,
     listingPrice: number,
-  ): Promise<[number, number]> {
+  ): Promise<[number, number, number]> {
     try {
       const adminDefault = await this.adminDefaultService.adminDefault();
-      const price =
+      const minimumPrice =
         (adminDefault.minimumOfferPercentage / listingPrice) *
         100 *
         listingPrice;
-      const saii =
-        (adminDefault.saii / 100) * offerPrice * (1 + adminDefault.vat / 100);
 
-      const vat = (adminDefault.vat / saii) * 100;
-      const total = vat + saii + price;
+      const saii = (adminDefault.saii / 100) * offerPrice;
+      const vat =
+        (adminDefault.vat / 100) * (adminDefault.saii / 100) * offerPrice;
 
-      const minimumListingPrice = listingPrice - price + total;
-      return [minimumListingPrice, saii];
+      const total = vat + saii + minimumPrice;
+
+      const minimumListingPrice = listingPrice - minimumPrice + total;
+      return [minimumListingPrice, saii, vat];
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);

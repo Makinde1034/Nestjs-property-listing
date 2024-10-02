@@ -94,6 +94,7 @@ type Offer {
   id: ID!
   price: Float!
   saiiFee: Float!
+  vat: Float!
   expireAt: DateTime!
   acceptedAt: DateTime
   status: String!

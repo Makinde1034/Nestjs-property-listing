@@ -22,13 +22,17 @@ import { IsEnum } from 'class-validator';
 @ObjectType()
 @Entity()
 export class Offer extends BaseEntity {
-  @Column('decimal', { precision: 10, scale: 2, default: 1300 })
+  @Column('decimal', { precision: 12, scale: 2 })
   @Field()
   price: number;
 
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column('decimal', { precision: 12, scale: 2 })
   @Field()
   saiiFee: number;
+
+  @Column('decimal', { precision: 12, scale: 2, default: 0 })
+  @Field()
+  vat: number;
 
   @Field()
   @Column()

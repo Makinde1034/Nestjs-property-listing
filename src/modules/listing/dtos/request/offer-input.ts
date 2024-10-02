@@ -51,6 +51,8 @@ export class CreateOfferDto {
 
   saiiFee: number;
 
+  vat: number;
+
   userId?: string;
 }
 
