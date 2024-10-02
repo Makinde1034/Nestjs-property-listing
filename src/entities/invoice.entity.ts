@@ -27,9 +27,22 @@ export class Invoice {
   @Column()
   @Field()
   userId: string;
+
+  @Column({ default: 'offer' })
+  @Field()
+  type: string;
+
+  @Column({ default: 'pending' })
+  @Field()
+  status: string;
+
   @Column({ nullable: true })
   @Field({ nullable: true })
   file: string;
+
+  @Column({ default: 0 })
+  @Field()
+  vat: number;
 
   @Column()
   @Field()

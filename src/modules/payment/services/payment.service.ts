@@ -30,7 +30,7 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class PaymentService {
-  private appDefaultConfig: AppDefaultConfig;
+  private readonly appDefaultConfig: AppDefaultConfig;
   constructor(
     private pdfGeneratorService: PdfService,
     private mailService: MailgunEmailService,
