@@ -278,7 +278,7 @@ export class OfferService {
 
   async updateOffer(user: User, updateOfferInput: UpdateOfferInput) {
     try {
-      const { id, price, listingId, ...rest } = updateOfferInput;
+      const { id, listingId, ...rest } = updateOfferInput;
       console.log(rest.expireAt);
 
       // Fetch offer and highest offer concurrently
@@ -295,7 +295,7 @@ export class OfferService {
         }),
         this.offerRepository.findOne({
           where: {
-            price: MoreThanOrEqual(price),
+            price: MoreThanOrEqual(rest.price),
             listingId,
           },
           order: { price: 'DESC' },
@@ -319,7 +319,7 @@ export class OfferService {
         await this.getMinimumOfferForAListingAndUser(listingId);
 
       // Validate minimum price requirement
-      if (minimumPrice > price) {
+      if (minimumPrice > rest.price) {
         throw new BadRequestException(
           `Minimum Offer must be greater than ${minimumPrice}`,
         );
