@@ -292,7 +292,7 @@ export class OfferService {
 
   async updateOffer(user: User, updateOfferInput: UpdateOfferInput) {
     try {
-      const { id, price, listingId, ...rest } = updateOfferInput;
+      const { id, listingId, ...rest } = updateOfferInput;
 
       const [offer, notificationPreference] = await Promise.all([
         // Fetch offer and highest offer in a single query
@@ -329,7 +329,7 @@ export class OfferService {
 
       const [minimumPrice, saiiFee] =
         await this.getMinimumOfferForAListingAndUser(
-          price,
+          rest.price,
           offer.listing_price,
         );
 
@@ -339,14 +339,14 @@ export class OfferService {
       }
 
       // Validate if price is greater than the highest existing offer
-      if (highestOfferPrice >= price) {
+      if (highestOfferPrice >= rest.price) {
         throw new BadRequestException(
           `Minimum Offer must be greater than ${highestOfferPrice}`,
         );
       }
 
       // Validate minimum price requirement
-      if (minimumPrice > price) {
+      if (minimumPrice > rest.price) {
         throw new BadRequestException(
           `Minimum Offer must be greater than ${minimumPrice}`,
         );
@@ -390,7 +390,6 @@ export class OfferService {
       }
     }
   }
-
   // Needed for transactions
 
   async acceptOffer(user: User, updateOfferInput: UpdateOfferInput) {
