@@ -346,7 +346,7 @@ export class OfferService {
       }
 
       // Validate minimum price requirement
-      if (minimumPrice > price) {
+      if (minimumPrice > rest.price) {
         throw new BadRequestException(
           `Minimum Offer must be greater than ${minimumPrice}`,
         );
