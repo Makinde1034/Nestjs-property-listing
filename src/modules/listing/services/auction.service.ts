@@ -160,15 +160,6 @@ export class AuctionService {
           ),
         ) >= auction.startDate
       ) {
-        console.log(
-          new Date(
-            removeDaysFromDate(
-              date,
-              adminDefault[0].daysToAuctionRegistrationEnd,
-            ),
-          ),
-        );
-
         throw new BadRequestException(AppStrings.AUCTION_REGISTATION_HAS_ENDED);
       }
       return await this.auctionParticipantRepository.save(data);

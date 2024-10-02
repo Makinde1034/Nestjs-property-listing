@@ -17,14 +17,13 @@ import {
   UpdateOfferInput,
 } from '../dtos/request/offer-input';
 import { OfferRepository } from '../repositories';
-import { Listing, NotificationScope, User } from '../../../entities';
+import { NotificationScope, User } from '../../../entities';
 import { PaymentService } from '../../payment/services/payment.service';
 import { EntityManager, MoreThanOrEqual } from 'typeorm';
 import { ListingService } from './listing.service';
 import { AppStrings } from '../../../common/messages/app.strings';
 
 import { addDaysToDate } from '../../../common/utils/helper';
-import { MailgunEmailService } from '../../mail/services/implementations';
 
 import { PdfInput } from '../../file-handler/dto/pdf.dto';
 import {
@@ -38,7 +37,6 @@ import { AdminService } from '../../admin/services/admin.service';
 import { ListingRepository } from '../repositories/listing.repository';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { Offer } from '../../../entities/offer.entity';
-import { error } from 'console';
 
 @Injectable()
 export class OfferService {
@@ -287,7 +285,6 @@ export class OfferService {
 
       return { offer, total, totalOfferOnlisting };
     } catch (error) {
-      console.log(error);
       this.logger.log(error);
       throw new BadRequestException(error);
     }
@@ -297,7 +294,7 @@ export class OfferService {
     try {
       const { id, listingId, ...rest } = updateOfferInput;
 
-      const [offer, notificationPreference] = await Promise.all([
+      const [offer, scope] = await Promise.all([
         // Fetch offer and highest offer in a single query
         this.offerRepository
           .createQueryBuilder('offer')
@@ -391,7 +388,6 @@ export class OfferService {
         updateOfferInput.saiiFee = saii;
         updateOfferInput.vat = vat;
         updateOfferInput.expireAt = new Date(addDaysToDate(new Date(), 1));
-        console.log(offer);
 
         const seller = await this.userRepository.findOneOrFail({
           where: { id: offer.listingUser_id },
@@ -424,7 +420,7 @@ export class OfferService {
         this.notificationService.sendNotification({
           creatorId: user.id,
           receiverId: offer.listingUser_id,
-          scope: notificationPreference,
+          scope: scope,
           event: NotificationScopesEnum.UPDATE_OFFER,
           recipientFormat: ['Seller', 'Offer Creator'],
         });
@@ -440,12 +436,10 @@ export class OfferService {
         throw new BadRequestException('Offer update failed');
       }
     } catch (error) {
-      console.log();
       this.logger.error(error);
       if (error instanceof HttpException) {
         throw error;
       } else {
-        console.log(error);
         throw new BadRequestException('Offer update failed');
       }
     }
