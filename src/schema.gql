@@ -534,6 +534,7 @@ type AttributeResponse {
 type AuctionParticipant {
   id: ID!
   listingId: String!
+  minimumPrice: Float!
   auction: Auction!
   createdAt: DateTime!
   deletedAt: DateTime!
@@ -643,6 +644,19 @@ type Coupon {
   startDate: DateTime!
   endDate: DateTime!
   deactived: Boolean!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Bids {
+  id: String!
+  userId: String!
+  bidNumber: Float!
+  price: Float!
+  auctionId: String!
+  listingId: String!
+  autoBid: Boolean!
+  createdAt: DateTime!
   deletedAt: DateTime!
   updatedAt: DateTime!
 }
@@ -836,6 +850,7 @@ type Query {
   findOneListingsForAdmin(listingId: String!): Listing!
   getAuction(id: String!): Auction!
   getAllAuction(findManyOptions: PaginateAndSort!): AuctionResponse!
+  findNewestBid(findBidInput: FindBidInput!): [Bids!]!
   adPackages: [AdPackage!]!
   adPackage(id: String!): AdPackage!
   fetchInvoice(findOption: PaginateAndSort!): InvoiceResponse!
@@ -974,6 +989,11 @@ input FindOfferInput {
   listingId: String
 }
 
+input FindBidInput {
+  auctionId: String!
+  listingId: String!
+}
+
 input AdminDashboardSort {
   timePeriod: String! = "false"
   value: Float! = 0
@@ -1088,6 +1108,7 @@ type Mutation {
   deleteSavedHistory(id: String!): SuccessResponse!
   unpublishAListing(id: String!): SuccessResponse!
   publishAListing(id: String!): SuccessResponse!
+  createBid(createBidInput: CreateBidInput!): Bids!
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!
@@ -1467,6 +1488,13 @@ input UpdateAuctionInput {
 }
 
 input CreateAuctionParticipantInput {
+  minimumPrice: Float!
+  auctionId: String!
+  listingId: String!
+}
+
+input CreateBidInput {
+  price: Float!
   auctionId: String!
   listingId: String!
 }

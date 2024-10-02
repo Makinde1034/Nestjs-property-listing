@@ -8,6 +8,7 @@ import {
   HttpException,
   Injectable,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { AuctionRepository } from '../repositories/auction.repository';
 import {
@@ -20,6 +21,10 @@ import { AuctionParticipantRepository } from '../repositories/auction-participan
 import { AppStrings } from '../../../common/messages/app.strings';
 import { AdminRepository } from '../../admin/repositories/admin.repository';
 import { removeDaysFromDate } from '../../../common/utils/helper';
+import { BidsRepository } from '../repositories/bids.repository';
+import { CreateBidInput, FindBidInput } from '../dtos/request/bids';
+import { generateOtp } from '../../../common/utils/functions';
+import { User } from '../../../entities';
 
 @Injectable()
 export class AuctionService {
@@ -27,6 +32,7 @@ export class AuctionService {
     private auctionRepository: AuctionRepository,
     private auctionParticipantRepository: AuctionParticipantRepository,
     private adminRepository: AdminRepository,
+    private bidRepository: BidsRepository,
   ) {}
   logger = new Logger(AuctionService.name);
   async create(auctionInput: CreateAuctionInput) {
@@ -162,7 +168,7 @@ export class AuctionService {
       ) {
         throw new BadRequestException(AppStrings.AUCTION_REGISTATION_HAS_ENDED);
       }
-      return await this.auctionParticipantRepository.save(data);
+      return await this.auctionParticipantRepository.save({ ...data, auction });
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
@@ -178,6 +184,55 @@ export class AuctionService {
       const deleteAuction = await this.auctionRepository.softDelete(id);
       return deleteAuction;
     } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  /***********************************
+   * Bids
+   ***********************************/
+
+  async bidOnAuction(bidInput: CreateBidInput, user: User) {
+    try {
+      const auctionListing = await this.auctionParticipantRepository.findOne({
+        where: { listingId: bidInput.listingId },
+      });
+
+      if (!auctionListing) {
+        throw new NotFoundException('Listing not registered in auction');
+      }
+
+      if (bidInput.price < auctionListing.minimumPrice) {
+        throw new BadRequestException('Bid is too low');
+      }
+
+      bidInput.bidNumber = generateOtp();
+      bidInput.userId = user.id;
+      return await this.bidRepository.save(bidInput);
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        this.logger.log(error);
+        throw new BadRequestException(error);
+      }
+    }
+  }
+
+  async fetchBidsOnAuction(findBidInput: FindBidInput) {
+    try {
+      return await this.bidRepository.find({
+        where: {
+          auctionId: findBidInput.auctionId,
+          listingId: findBidInput.listingId,
+        },
+        order: { createdAt: 'DESC' },
+        take: 15,
+        skip: 0,
+      });
+    } catch (error) {
+      console.log(error);
       this.logger.log(error);
       throw new BadRequestException(error);
     }

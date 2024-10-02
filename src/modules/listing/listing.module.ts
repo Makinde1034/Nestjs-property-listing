@@ -48,6 +48,8 @@ import { ChildIssueRepository } from '../issue/repositories/child-issue.reposito
 import { ListingAttributeService } from './services/listing-attributes.service';
 import { AdminService } from '../admin/services/admin.service';
 import { AdminModule } from '../admin/admin.module';
+import { BidsRepository } from './repositories/bids.repository';
+import { Bids } from '../../entities/bids.entity';
 
 @Module({
   imports: [
@@ -60,6 +62,7 @@ import { AdminModule } from '../admin/admin.module';
       Amenities,
       Promotion,
       GpsCoordinate,
+      Bids,
     ]),
     AdPackageModule,
     PaymentModule,
@@ -99,6 +102,7 @@ import { AdminModule } from '../admin/admin.module';
     IssueRepository,
     ChildIssueRepository,
     ListingAttributeService,
+    BidsRepository,
     AdminService,
   ],
   exports: [ListingTypeService],
