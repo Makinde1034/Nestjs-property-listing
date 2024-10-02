@@ -12,6 +12,7 @@ import {
 } from 'typeorm';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { int } from 'aws-sdk/clients/datapipeline';
+import { PaymentStatus } from '../common/enums/status.enum';
 
 @Entity()
 @ObjectType()
@@ -27,13 +28,23 @@ export class Invoice {
   @Column()
   @Field()
   userId: string;
+
+  @Column({ default: 'Saii Fees' })
+  @Field()
+  type?: string;
+
+  @Column({ enum: PaymentStatus, default: 'pending' })
+  @Field()
+  status: string;
+
   @Column({ nullable: true })
   @Field({ nullable: true })
   file: string;
 
-  @Column()
+  @Column({ default: 0 })
   @Field()
-  listingid: string;
+  vat: number;
+
   @Column()
   @Field()
   @CreateDateColumn()

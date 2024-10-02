@@ -18,20 +18,23 @@ import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 @Injectable()
 export class InvoiceService {
   constructor(
-    private invoiceRepository: InvoiceRepository,
-    private pdfGeneratorService: PdfService,
-    private storageService: StorageService,
-    private mailService: MailgunEmailService,
+    private readonly invoiceRepository: InvoiceRepository,
+    private readonly pdfGeneratorService: PdfService,
+    private readonly storageService: StorageService,
+    private readonly mailService: MailgunEmailService,
   ) {}
   logger = new Logger(InvoiceService.name);
-  async invoice(data?: PdfInput, user?: User, listing?: Listing) {
+  async invoice(
+    createInvoiceInput: CreateInvoiceInput,
+    data?: PdfInput,
+    user?: User,
+    listing?: Listing,
+  ) {
     try {
-      const payload: CreateInvoiceInput = {
-        expiredAt: addDays(new Date(), 4),
-        userId: user.id,
-        listingid: listing.id,
-      };
-      const invoice = await this.invoiceRepository.save(payload);
+      createInvoiceInput.expiredAt = addDays(new Date(), 4);
+      createInvoiceInput.userId = user.id;
+
+      const invoice = await this.invoiceRepository.save(createInvoiceInput);
       data.invoiceNumber = invoice.id;
       const invoicePdf =
         await this.pdfGeneratorService.generatePdfForInvoice(data);
@@ -86,7 +89,6 @@ export class InvoiceService {
         take,
         skip,
       });
-
       return { invoices, total };
     } catch (error) {
       this.logger.error('Error fetching invoice:', error);

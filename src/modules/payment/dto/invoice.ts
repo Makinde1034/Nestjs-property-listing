@@ -15,7 +15,16 @@ export class CreateInvoiceInput {
   userId: string;
 
   @Field()
+  status?: string;
+
+  @Field()
+  vat?: number;
+
+  @Field()
   expiredAt: Date;
+
+  @Field()
+  type?: string;
 
   @Field()
   listingid: string;
