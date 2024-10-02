@@ -292,35 +292,27 @@ export class OfferService {
 
   async updateOffer(user: User, updateOfferInput: UpdateOfferInput) {
     try {
-      const { id, price, listingId, ...rest } = updateOfferInput;
+      const { id, listingId, ...rest } = updateOfferInput;
+      console.log(rest.expireAt);
 
-      const [offer, notificationPreference] = await Promise.all([
-        // Fetch offer and highest offer in a single query
-        this.offerRepository
-          .createQueryBuilder('offer')
-          .leftJoinAndSelect('offer.listing', 'listing')
-          .leftJoinAndSelect('listing.user', 'listingUser')
-          .select([
-            'offer.id',
-            'offer.price',
-            'listing.id',
-            'listingUser.id',
-            'listingUser.email',
-            'listingUser.firstName',
-            'listing.price',
-          ])
-          .addSelect((subQuery) => {
-            return subQuery
-              .select('MAX(offerSub.price)', 'maxPrice')
-              .from(Offer, 'offerSub')
-              .where('offerSub.listingId = :listingId', { listingId });
-          }, 'maxPrice')
-          .where('offer.id = :id', { id })
-          .getRawOne(),
-
-        // Fetch notification preference
-        this.notificationScopeRepository.findOne({
-          where: { name: NotificationScopesEnum.UPDATE_OFFER },
+      // Fetch offer and highest offer concurrently
+      const [offer, highestOffer] = await Promise.all([
+        this.offerRepository.findOne({
+          where: { id },
+          relations: ['user', 'listing.user'],
+          select: {
+            listing: {
+              id: true,
+              user: { email: true, firstName: true },
+            },
+          },
+        }),
+        this.offerRepository.findOne({
+          where: {
+            price: MoreThanOrEqual(rest.price),
+            listingId,
+          },
+          order: { price: 'DESC' },
         }),
       ]);
 
