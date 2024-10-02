@@ -17,14 +17,13 @@ import {
   UpdateOfferInput,
 } from '../dtos/request/offer-input';
 import { OfferRepository } from '../repositories';
-import { Listing, NotificationScope, User } from '../../../entities';
+import { NotificationScope, User } from '../../../entities';
 import { PaymentService } from '../../payment/services/payment.service';
 import { EntityManager, MoreThanOrEqual } from 'typeorm';
 import { ListingService } from './listing.service';
 import { AppStrings } from '../../../common/messages/app.strings';
 
 import { addDaysToDate } from '../../../common/utils/helper';
-import { MailgunEmailService } from '../../mail/services/implementations';
 
 import { PdfInput } from '../../file-handler/dto/pdf.dto';
 import {
@@ -38,7 +37,6 @@ import { AdminService } from '../../admin/services/admin.service';
 import { ListingRepository } from '../repositories/listing.repository';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { Offer } from '../../../entities/offer.entity';
-import { error } from 'console';
 
 @Injectable()
 export class OfferService {
@@ -104,6 +102,9 @@ export class OfferService {
       if (!listing.negotiable) {
         throw new BadRequestException(AppStrings.LISTING_IS_NOT_NEGOTIABLE);
       }
+      if (offerExpiry <= new Date()) {
+        throw new BadRequestException('Expiry Date is in the past');
+      }
 
       if (createOfferDto.price < minimumPrice) {
         throw new BadRequestException(
@@ -125,13 +126,11 @@ export class OfferService {
       createOfferDto.userId = user.id;
       createOfferDto.saiiFee = saii;
       createOfferDto.vat = vat;
-      createOfferDto.expireAt = new Date(addDaysToDate(new Date(), 1));
 
       const offerPayload = await this.offerRepository.save(createOfferDto);
 
       const seller = await this.userRepository.findOneOrFail({
         where: { id: listing.userId },
-        relations: ['notificationPreference'],
       });
 
       const data: PdfInput = {
@@ -286,7 +285,6 @@ export class OfferService {
 
       return { offer, total, totalOfferOnlisting };
     } catch (error) {
-      console.log(error);
       this.logger.log(error);
       throw new BadRequestException(error);
     }
@@ -296,7 +294,7 @@ export class OfferService {
     try {
       const { id, listingId, ...rest } = updateOfferInput;
 
-      const [offer, notificationPreference] = await Promise.all([
+      const [offer, scope] = await Promise.all([
         // Fetch offer and highest offer in a single query
         this.offerRepository
           .createQueryBuilder('offer')
@@ -310,6 +308,7 @@ export class OfferService {
             'listingUser.email',
             'listingUser.firstName',
             'listing.price',
+            'offer.createdAt',
           ])
           .addSelect((subQuery) => {
             return subQuery
@@ -329,7 +328,7 @@ export class OfferService {
       const { maxPrice } = offer;
       const highestOfferPrice = maxPrice || 0;
 
-      const [minimumPrice, saiiFee] =
+      const [minimumPrice, saii, vat] =
         await this.getMinimumOfferForAListingAndUser(
           rest.price,
           offer.listing_price,
@@ -338,6 +337,22 @@ export class OfferService {
       // Validate if offer exists
       if (!offer) {
         throw new BadRequestException(AppStrings.NOT_FOUND);
+      }
+
+      const adminDefault = await this.adminDefaultService.adminDefault();
+
+      const offerExpiry = new Date(updateOfferInput.expireAt);
+
+      const maxExpiry = new Date(
+        addDaysToDate(new Date(), adminDefault.maximumDaysForOfferExpiration),
+      );
+
+      if (offerExpiry >= maxExpiry) {
+        throw new BadRequestException(`Max expiry is ${maxExpiry}`);
+      }
+
+      if (offerExpiry <= new Date()) {
+        throw new BadRequestException('Expiry Date is in the past');
       }
 
       // Validate if price is greater than the highest existing offer
@@ -355,26 +370,64 @@ export class OfferService {
       }
 
       // Validate that the user isn't editing an offer on their own listing
-      if (user.id === offer.listingUser_id) {
-        throw new BadRequestException(
-          'The creator of a listing cannot edit an offer on that listing',
-        );
-      }
+      // if (user.id === offer.listingUser_id) {
+      //   throw new BadRequestException(
+      //     'The creator of a listing cannot edit an offer on that listing',
+      //   );
+      // }
 
       // Send notification using an event emitter
-      this.notificationService.sendNotification({
-        creatorId: user.id,
-        receiverId: offer.listingUser_id,
-        scope: notificationPreference,
-        event: NotificationScopesEnum.UPDATE_OFFER,
-        recipientFormat: ['Seller', 'Offer Creator'],
-      });
 
       // Update offer with new data and saiiFee
       const { affected } = await this.offerRepository.update(id, {
-        saiiFee,
+        saiiFee: saii,
         ...rest,
       });
+      if (updateOfferInput.price) {
+        updateOfferInput.userId = user.id;
+        updateOfferInput.saiiFee = saii;
+        updateOfferInput.vat = vat;
+        updateOfferInput.expireAt = new Date(addDaysToDate(new Date(), 1));
+
+        const seller = await this.userRepository.findOneOrFail({
+          where: { id: offer.listingUser_id },
+        });
+
+        const data: PdfInput = {
+          createdDate: `${offer.offer_createdAt.getDate()}-${offer.offer_createdAt.getMonth() + 1}-${offer.offer_createdAt.getFullYear()}`,
+          sellerCRNumber: seller.crNumber,
+          sellerzatcaNumber: seller.zatcaNuber,
+          sellerAddress: seller.address,
+          sellerName:
+            seller.language === 'en'
+              ? `${seller.firstName} ${seller.lastName}`
+              : `${seller.arabicFirstName} ${seller.arabicLastName}`,
+          customerCRNumber: user.crNumber,
+          customerName:
+            user.language === 'en'
+              ? `${user.firstName} ${user.lastName}`
+              : `${user.arabicFirstName} ${user.arabicLastName}`,
+          customerAddress: user.address,
+          customerZatcaNumber: user.zatcaNuber,
+          totalWithVat: [offer.price],
+          itemVat: [{ vat: adminDefault.vat, vatValue: vat }],
+          product: offer,
+          sumTotalWithoutVat: offer.price - vat,
+          sumTotalVat: vat,
+          sumTotalWithVat: offer.price,
+        };
+
+        this.notificationService.sendNotification({
+          creatorId: user.id,
+          receiverId: offer.listingUser_id,
+          scope: scope,
+          event: NotificationScopesEnum.UPDATE_OFFER,
+          recipientFormat: ['Seller', 'Offer Creator'],
+        });
+
+        //TODO: switch to event emitter
+        this.paymentService.invoice(data, user, offer.listing);
+      }
 
       // Return the updated offer only if it was affected
       if (affected) {
@@ -387,7 +440,6 @@ export class OfferService {
       if (error instanceof HttpException) {
         throw error;
       } else {
-        console.log(error);
         throw new BadRequestException('Offer update failed');
       }
     }

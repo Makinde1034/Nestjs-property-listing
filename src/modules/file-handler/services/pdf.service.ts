@@ -53,7 +53,6 @@ export class PdfService {
       this.logger.log('PDF generated successfully');
       return pdfBuffer;
     } catch (error) {
-      console.log(error);
       this.logger.error('Error generating PDF', error);
       throw new Error('Error generating PDF'); // Throwing an error to handle it properly in the caller
     }

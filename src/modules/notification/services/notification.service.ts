@@ -336,7 +336,6 @@ export class NotificationService {
           break;
       }
     } catch (error) {
-      console.log(error);
       this.logger.log(error);
     }
   }
@@ -355,7 +354,6 @@ export class NotificationService {
        * Email notification
        ************************/
       this.logger.log('Sending mail');
-      console.log(recipientFormat);
 
       if (userPrefRecipients?.email) {
         const mailMessageForBuyer = getMessageData(
@@ -507,7 +505,6 @@ export class NotificationService {
       //   });
       // }
     } catch (error) {
-      console.log(error);
       this.logger.log(error);
       throw new BadRequestException(error);
     }
