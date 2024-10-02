@@ -30,7 +30,7 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class PaymentService {
-  private readonly appDefaultConfig: AppDefaultConfig;
+  private appDefaultConfig: AppDefaultConfig;
   constructor(
     private pdfGeneratorService: PdfService,
     private mailService: MailgunEmailService,
@@ -74,6 +74,8 @@ export class PaymentService {
     try {
       const payload: CreateInvoiceInput = {
         price: data.sumTotalWithVat,
+        vat: data.sumTotalVat,
+        // type: 'offer', //TODO create an enum for all possible payment
 
         expiredAt: addDays(new Date(), 4),
         userId: user.id,

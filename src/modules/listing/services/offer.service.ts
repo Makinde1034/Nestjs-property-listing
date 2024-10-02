@@ -91,7 +91,7 @@ export class OfferService {
         addDaysToDate(new Date(), adminDefault.maximumDaysForOfferExpiration),
       );
 
-      if (offerExpiry > maxExpiry) {
+      if (maxExpiry <= offerExpiry) {
         throw new BadRequestException(`Max expiry is ${maxExpiry}`);
       }
 
@@ -100,6 +100,8 @@ export class OfferService {
           createOfferDto.price,
           listing.price,
         );
+
+      console.log(saiiFee, minimumPrice, createOfferDto.price);
 
       if (!listing.negotiable) {
         throw new BadRequestException(AppStrings.LISTING_IS_NOT_NEGOTIABLE);

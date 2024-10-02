@@ -605,8 +605,10 @@ type Invoice {
   id: Float!
   price: Float!
   userId: String!
+  type: String!
+  status: String!
   file: String
-  listingid: String!
+  vat: Float!
   expireAt: DateTime!
   createdAt: DateTime!
   updatedAt: DateTime!
