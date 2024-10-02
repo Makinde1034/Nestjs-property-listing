@@ -61,6 +61,8 @@ import { ListingAttributes } from '../../../entities/listing-attributes.entity';
 import { ListingAttributeService } from '../services/listing-attributes.service';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { FlagListing } from '../../../entities/flag-listing.entity';
+import { CreateBidInput, FindBidInput } from '../dtos/request/bids';
+import { Bids } from '../../../entities/bids.entity';
 
 @Resolver()
 export class ListingResolver {
@@ -506,5 +508,20 @@ export class ListingResolver {
   @Mutation(() => SuccessResponse, { name: 'publishAListing' })
   async publishListing(@Args('id') id: string, @Context() ctx: any) {
     return await this.listingService.publishListing(id, ctx.req.user);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => Bids, { name: 'createBid' })
+  async createBid(
+    @Args('createBidInput') createBidInput: CreateBidInput,
+    @Context() ctx: any,
+  ) {
+    return await this.auctionService.bidOnAuction(createBidInput, ctx.req.user);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Query(() => [Bids], { name: 'findNewestBid' })
+  async findNewestBid(@Args('findBidInput') findBidInput: FindBidInput) {
+    return await this.auctionService.fetchBidsOnAuction(findBidInput);
   }
 }
