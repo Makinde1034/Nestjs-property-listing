@@ -510,6 +510,8 @@ export class AdminService {
           'vat',
           'minimumOfferPercentage',
           'maximumDaysForOfferExpiration',
+          'daysToAuctionRegistrationStart',
+          'daysToAuctionRegistrationEnd',
         ],
       });
 

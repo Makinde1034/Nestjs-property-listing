@@ -9,11 +9,14 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
+  OneToOne,
   UpdateDateColumn,
 } from 'typeorm';
 import { Auction } from './auction-table.entity';
 import BaseEntity from './base.entity';
+import { Listing } from './listing.entity';
 
 @Entity()
 @ObjectType()
@@ -21,6 +24,11 @@ export class AuctionParticipant extends BaseEntity {
   @Field()
   @Column()
   listingId: string;
+
+  @Field(() => Listing)
+  @JoinColumn({ name: 'listingId' })
+  @OneToOne(() => Listing, (listing) => listing.auctionParticipant)
+  listing: Listing;
 
   @Field()
   @Column({ default: 0 })
