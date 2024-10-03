@@ -221,6 +221,8 @@ export class ListingService {
       const query = this.listingRepository
         .createQueryBuilder('listing')
         .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
+        .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
+
         .leftJoinAndSelect('listing.listingType', 'listingType')
         .loadRelationCountAndMap('listing.offers', 'listing.offer')
         .where(whereOption, { id: user.id })
