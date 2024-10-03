@@ -291,6 +291,34 @@ type GpsCoordinate {
   listing: GpsCoordinate!
 }
 
+type Auction {
+  id: ID!
+  titleInEnglish: String!
+  titleInArabic: String
+  arabicDescription: String
+  englishDescription: String
+  startDate: DateTime!
+  liveFor: Float
+  imageLink: String
+  maxListing: Float!
+  auctionParticipant: [AuctionParticipant!]!
+  status: String!
+  deletedAt: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type AuctionParticipant {
+  id: ID!
+  listingId: String!
+  listing: Listing!
+  minimumPrice: Float!
+  auction: Auction!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type Listing {
   id: ID!
   ownership: String
@@ -302,6 +330,7 @@ type Listing {
   rentingOption: String
   iban: String
   zatcaNumber: String
+  auctionParticipant: AuctionParticipant!
   listingType: ListingType
   listingTypeId: String
   gpsCoordinate: GpsCoordinate
@@ -531,33 +560,6 @@ type AttributeResponse {
   total: Int!
 }
 
-type AuctionParticipant {
-  id: ID!
-  listingId: String!
-  minimumPrice: Float!
-  auction: Auction!
-  createdAt: DateTime!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type Auction {
-  id: ID!
-  titleInEnglish: String!
-  titleInArabic: String
-  arabicDescription: String
-  englishDescription: String
-  startDate: DateTime!
-  liveFor: Float
-  imageLink: String
-  maxListing: Float!
-  auctionParticipant: [AuctionParticipant!]!
-  status: String!
-  deletedAt: DateTime!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
 type ListingResponse {
   listing: [Listing!]!
   total: Int!
@@ -595,6 +597,11 @@ type OfferOwnerResponse {
 
 type AuctionResponse {
   auctions: [Auction!]!
+  total: Int!
+}
+
+type AuctionParticipantResponse {
+  listing: [AuctionParticipant!]!
   total: Int!
 }
 
@@ -849,7 +856,10 @@ type Query {
   getWishlist: [Wishlist!]!
   findOneListingsForAdmin(listingId: String!): Listing!
   getAuction(id: String!): Auction!
-  getAllAuction(findManyOptions: PaginateAndSort!): AuctionResponse!
+  getAllRunningAuction(findManyOption: PaginateAndSort!): AuctionResponse!
+  getAllUpcomingAuction(findManyOption: PaginateAndSort!): AuctionResponse!
+  getAllAuction(findManyOption: PaginateAndSort!): AuctionResponse!
+  getListingsAuction(findManyOption: PaginateAndSort!): AuctionParticipantResponse!
   findNewestBid(findBidInput: FindBidInput!): [Bids!]!
   adPackages: [AdPackage!]!
   adPackage(id: String!): AdPackage!

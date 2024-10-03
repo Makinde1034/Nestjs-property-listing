@@ -27,6 +27,7 @@ import { Wishlist } from './wishlist.entity';
 import { ListingType } from './listing-type.entity';
 import { ListingAttributes } from './listing-attributes.entity';
 import { GpsCoordinate } from './gps-coordinates.entity';
+import { AuctionParticipant } from './auction-participant.entity';
 
 @Entity()
 @ObjectType()
@@ -70,6 +71,10 @@ export class Listing extends BaseEntity {
   @Column()
   @Field({ nullable: true })
   zatcaNumber: string;
+
+  @Field(() => AuctionParticipant)
+  @OneToOne(() => AuctionParticipant, (listing) => listing.listing)
+  auctionParticipant: AuctionParticipant;
 
   @Field(() => ListingType, { nullable: true })
   @JoinColumn({ name: 'listingTypeId' })
@@ -117,7 +122,6 @@ export class Listing extends BaseEntity {
     onDelete: 'CASCADE',
   })
   offer: Offer[];
-
   @Column()
   @Index()
   @Field({ nullable: true })

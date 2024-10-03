@@ -19,6 +19,7 @@ import { AccessTokenGuard } from '../../auth/guards';
 
 import {
   AdminListingResponse,
+  AuctionParticipantResponse,
   AuctionResponse,
   FlaggedListingResponse,
   ListingResponse,
@@ -330,7 +331,7 @@ export class ListingResolver {
 
   @UseGuards(AccessTokenGuard)
   @Query(() => OfferResponse, { name: 'findOffers' })
-  async findMany(@Args('findOptions') paginateAndSort: FindOfferInput) {
+  async findManyOffers(@Args('findOptions') paginateAndSort: FindOfferInput) {
     return await this.offerService.findMany(paginateAndSort);
   }
   @UseGuards(AccessTokenGuard)
@@ -464,9 +465,25 @@ export class ListingResolver {
     return await this.auctionService.findOne(id);
   }
   @UseGuards(AccessTokenGuard)
+  @Query(() => AuctionResponse, { name: 'getAllRunningAuction' })
+  async getAllRunningAuction(
+    @Args('findManyOption') paginateAndSort: PaginateAndSort,
+  ) {
+    return await this.auctionService.findAllRunning(paginateAndSort);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Query(() => AuctionResponse, { name: 'getAllUpcomingAuction' })
+  async getAllUpcomingAuction(
+    @Args('findManyOption') paginateAndSort: PaginateAndSort,
+  ) {
+    return await this.auctionService.findAllUpcoming(paginateAndSort);
+  }
+
+  @UseGuards(AccessTokenGuard)
   @Query(() => AuctionResponse, { name: 'getAllAuction' })
-  async findManyAuction(
-    @Args('findManyOptions') paginateAndSort: PaginateAndSort,
+  async getAllAuction(
+    @Args('findManyOption') paginateAndSort: PaginateAndSort,
   ) {
     return await this.auctionService.findAll(paginateAndSort);
   }
@@ -491,6 +508,14 @@ export class ListingResolver {
     return await this.auctionService.addListingToAuction(
       addParticipantToAuctionInput,
     );
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Query(() => AuctionParticipantResponse, { name: 'getListingsAuction' })
+  async getListingsAuction(
+    @Args('findManyOption') paginateAndSort: PaginateAndSort,
+  ) {
+    return await this.auctionService.getPaticipantOfAuction(paginateAndSort);
   }
 
   @UseGuards(AccessTokenGuard)
