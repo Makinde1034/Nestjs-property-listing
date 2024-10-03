@@ -29,10 +29,10 @@ import { User } from '../../../entities';
 @Injectable()
 export class AuctionService {
   constructor(
-    private auctionRepository: AuctionRepository,
-    private auctionParticipantRepository: AuctionParticipantRepository,
-    private adminRepository: AdminRepository,
-    private bidRepository: BidsRepository,
+    private readonly auctionRepository: AuctionRepository,
+    private readonly auctionParticipantRepository: AuctionParticipantRepository,
+    private readonly adminRepository: AdminRepository,
+    private readonly bidRepository: BidsRepository,
   ) {}
   logger = new Logger(AuctionService.name);
   async create(auctionInput: CreateAuctionInput) {

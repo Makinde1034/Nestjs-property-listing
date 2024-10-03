@@ -197,7 +197,9 @@ export class ListingService {
     try {
       let { sortField, directionToSort } = data;
 
-      const { take: initialTake, skip } = data;
+      const { take: initialTake, skip, where } = data;
+
+      let whereOption;
 
       const sortDirections = ['ASC', 'DESC'] as const;
       if (sortField && directionToSort) {
@@ -208,6 +210,12 @@ export class ListingService {
         sortField = null; // No sorting if not provided
       }
 
+      if (where) {
+        whereOption = ` listing.${where.fieldToChose} IS ${where.whereParam} AND listing.userId = :id`;
+      } else {
+        whereOption = 'listing.userId = :id';
+      }
+
       const take = initialTake <= 20 ? initialTake : 20;
 
       const query = this.listingRepository
@@ -215,7 +223,7 @@ export class ListingService {
         .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
         .leftJoinAndSelect('listing.listingType', 'listingType')
         .loadRelationCountAndMap('listing.offers', 'listing.offer')
-        .where('listing.userId = :id', { id: user.id })
+        .where(whereOption, { id: user.id })
         .take(take)
         .skip(skip);
 
