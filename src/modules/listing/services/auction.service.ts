@@ -19,7 +19,6 @@ import {
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { AuctionParticipantRepository } from '../repositories/auction-participant.repository';
 import { AppStrings } from '../../../common/messages/app.strings';
-import { AdminRepository } from '../../admin/repositories/admin.repository';
 import { removeDaysFromDate } from '../../../common/utils/helper';
 import { BidsRepository } from '../repositories/bids.repository';
 import { CreateBidInput, FindBidInput } from '../dtos/request/bids';
@@ -334,7 +333,6 @@ export class AuctionService {
         skip: 0,
       });
     } catch (error) {
-      console.log(error);
       this.logger.log(error);
       throw new BadRequestException(error);
     }
