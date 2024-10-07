@@ -441,6 +441,7 @@ type User {
   dateOfBirth: DateTime
   profilePhoto: String
   address: String
+  autoBidEnable: Boolean!
   biometricKey: String
   twoFaRequired: Boolean
   review: [Review!]

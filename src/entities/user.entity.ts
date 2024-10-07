@@ -130,6 +130,10 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   address: string;
 
+  @Field()
+  @Column({ default: false })
+  autoBidEnable: boolean;
+
   @Column({ nullable: true })
   @Field({ nullable: true })
   biometricKey: string;

@@ -322,6 +322,11 @@ export class AuctionService {
     }
   }
 
+  async autoBidOnAuction() {
+    try {
+    } catch (error) {}
+  }
+
   async fetchBidsOnAuction(findBidInput: FindBidInput) {
     try {
       return await this.bidRepository.find({
@@ -330,7 +335,7 @@ export class AuctionService {
           listingId: findBidInput.listingId,
         },
         order: { createdAt: 'DESC' },
-        take: 15,
+        take: 10,
         skip: 0,
       });
     } catch (error) {
