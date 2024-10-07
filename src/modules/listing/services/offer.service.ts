@@ -32,11 +32,13 @@ import {
 } from '../../user/repositories';
 import { NotificationScopesEnum } from '../../../common/enums/notification-scope.enum';
 import { NotificationService } from '../../notification/services';
-import { OfferListEnum } from '../../../common/enums/status.enum';
+import { AuctionEnum, OfferListEnum } from '../../../common/enums/status.enum';
 import { AdminService } from '../../admin/services/admin.service';
 import { ListingRepository } from '../repositories/listing.repository';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { Offer } from '../../../entities/offer.entity';
+
+import { AuctionParticipantRepository } from '../repositories/auction-participant.repository';
 
 @Injectable()
 export class OfferService {
@@ -49,6 +51,7 @@ export class OfferService {
     private readonly notificationService: NotificationService,
     private readonly adminDefaultService: AdminService,
     private readonly listingRepository: ListingRepository,
+    private readonly auctionParticipantRepository: AuctionParticipantRepository,
   ) {}
   logger = new Logger(OfferService.name);
 
@@ -370,11 +373,11 @@ export class OfferService {
       }
 
       // Validate that the user isn't editing an offer on their own listing
-      // if (user.id === offer.listingUser_id) {
-      //   throw new BadRequestException(
-      //     'The creator of a listing cannot edit an offer on that listing',
-      //   );
-      // }
+      if (user.id === offer.listingUser_id) {
+        throw new BadRequestException(
+          'The creator of a listing cannot edit an offer on that listing',
+        );
+      }
 
       // Send notification using an event emitter
 
@@ -432,9 +435,8 @@ export class OfferService {
       // Return the updated offer only if it was affected
       if (affected) {
         return await this.offerRepository.findOneBy({ id });
-      } else {
-        throw new BadRequestException('Offer update failed');
       }
+      throw new BadRequestException('Offer update failed');
     } catch (error) {
       this.logger.error(error);
       if (error instanceof HttpException) {
@@ -444,10 +446,25 @@ export class OfferService {
       }
     }
   }
-  // Needed for transactions
 
   async acceptOffer(user: User, updateOfferInput: UpdateOfferInput) {
     const { id } = updateOfferInput;
+    const offerPayload = await this.offerRepository.findOne({
+      where: { id },
+    });
+
+    const auctionparticipant = await this.auctionParticipantRepository.find({
+      where: {
+        listingId: offerPayload.listingId,
+        auction: { status: AuctionEnum.ACTIVE },
+      },
+    });
+
+    if (auctionparticipant.length > 0) {
+      throw new BadRequestException(
+        AppStrings.CANNOT_ACCEPT_AN_OFFER_WHILE_LISTING_IS_BEING_AUCTIONED,
+      );
+    }
 
     return await this.offerRepository.manager.transaction(
       async (entityManager: EntityManager) => {
