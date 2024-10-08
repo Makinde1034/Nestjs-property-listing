@@ -50,6 +50,9 @@ import { AdminService } from '../admin/services/admin.service';
 import { AdminModule } from '../admin/admin.module';
 import { BidsRepository } from './repositories/bids.repository';
 import { Bids } from '../../entities/bids.entity';
+import { AutoBidRepository } from './repositories/auto-bid.repository';
+import { AutoBid } from '../../entities/auto-bid.entity';
+import { AuctionBidRangeRepository } from './repositories/auction-bid-range.repository';
 
 @Module({
   imports: [
@@ -63,6 +66,7 @@ import { Bids } from '../../entities/bids.entity';
       Promotion,
       GpsCoordinate,
       Bids,
+      AutoBid,
     ]),
     AdPackageModule,
     PaymentModule,
@@ -104,6 +108,8 @@ import { Bids } from '../../entities/bids.entity';
     ListingAttributeService,
     BidsRepository,
     AdminService,
+    AutoBidRepository,
+    AuctionBidRangeRepository,
   ],
   exports: [ListingTypeService],
 })

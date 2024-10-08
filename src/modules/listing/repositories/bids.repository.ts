@@ -10,7 +10,7 @@ import { Bids } from '../../../entities/bids.entity';
 
 @Injectable()
 export class BidsRepository extends Repository<Bids> {
-  constructor(private dataSource: DataSource) {
+  constructor(private readonly dataSource: DataSource) {
     super(Bids, dataSource.createEntityManager());
   }
 }
