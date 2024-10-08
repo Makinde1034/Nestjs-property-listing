@@ -5,7 +5,7 @@
 
 import { addDays } from 'date-fns';
 import { Readable } from 'stream';
-import { Listing, User } from '../../../entities';
+
 import { PdfInput } from '../../file-handler/dto/pdf.dto';
 import { CreateInvoiceInput } from '../dto/invoice';
 import { InvoiceRepository } from '../repositories/invoice.repository';
@@ -14,6 +14,7 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { StorageService } from '../../file-handler/services/storage.service';
 import { MailgunEmailService } from '../../mail/services/implementations/mailgun.services';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
+import { User } from '../../../entities';
 
 @Injectable()
 export class InvoiceService {
@@ -28,7 +29,6 @@ export class InvoiceService {
     createInvoiceInput: CreateInvoiceInput,
     data?: PdfInput,
     user?: User,
-    listing?: Listing,
   ) {
     try {
       createInvoiceInput.expiredAt = addDays(new Date(), 4);

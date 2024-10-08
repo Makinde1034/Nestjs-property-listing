@@ -434,7 +434,6 @@ export class AuctionService {
         skip: 0,
       });
     } catch (error) {
-      console.log(error);
       this.logger.log(error);
       throw new BadRequestException(error);
     }

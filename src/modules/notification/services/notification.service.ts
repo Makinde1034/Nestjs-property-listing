@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { BadRequestException, Injectable, Logger, Scope } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { NotificationRepository } from '../repositories';
 import {
   NotificationEventDto,
@@ -39,7 +39,7 @@ import { MailInput } from '../../mail/mail.dto';
 export class NotificationService {
   private readonly logger = new Logger(NotificationService.name);
   constructor(
-    private notificationRepository: NotificationRepository,
+    private readonly notificationRepository: NotificationRepository,
     private readonly userRepository: UserRepository,
     private readonly notificationScopeRepository: NotificationScopeRepository,
     private readonly mailService: MailgunEmailService,

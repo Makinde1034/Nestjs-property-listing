@@ -75,7 +75,7 @@ export class PaymentService {
       const payload: CreateInvoiceInput = {
         price: data.sumTotalWithVat,
         vat: data.sumTotalVat,
-        // type: 'offer', //TODO create an enum for all possible payment
+        // Type: 'offer', //TODO create an enum for all possible payment
 
         expiredAt: addDays(new Date(), 4),
         userId: user.id,

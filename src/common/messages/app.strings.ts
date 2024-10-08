@@ -107,4 +107,7 @@ export const AppStrings = {
   AUCTION_REGISTATION_HAS_ENDED: 'Auction registration has ended',
   SUCCESSFULLY_DISABLED: 'Successfully disabled',
   SUCCESSFULL: 'Successfull',
+
+  CANNOT_ACCEPT_AN_OFFER_WHILE_LISTING_IS_BEING_AUCTIONED:
+    'Cannot accept an offer while listing is being auctioned',
 };
