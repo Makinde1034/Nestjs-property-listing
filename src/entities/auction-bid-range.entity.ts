@@ -13,7 +13,7 @@ import {
 import BaseEntity from './base.entity';
 import { Field, ObjectType } from '@nestjs/graphql';
 
-// @Entity()
+@Entity()
 @ObjectType()
 export class AuctionBidRange extends BaseEntity {
   @Field()
