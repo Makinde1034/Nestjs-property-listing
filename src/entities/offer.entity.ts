@@ -30,7 +30,7 @@ export class Offer extends BaseEntity {
   @Field()
   saiiFee: number;
 
-  @Column('decimal', { precision: 12, scale: 2, default: 0 })
+  @Column('decimal', { precision: 12, scale: 2 })
   @Field()
   vat: number;
 

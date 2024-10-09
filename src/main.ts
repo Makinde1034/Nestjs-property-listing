@@ -43,6 +43,7 @@ async function bootstrap() {
     const trackingMiddleware = new TrackingMiddleware(UsertrackingService);
     trackingMiddleware.use(req, res, next);
   });
+  console.log(process.memoryUsage());
 
   await app.listen(PORT, HOST);
 }
