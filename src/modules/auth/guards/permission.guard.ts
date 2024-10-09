@@ -47,7 +47,12 @@ export class PermissionsGuard implements CanActivate {
     /**********************
      * Allow admin
      **********************/
-    if (user.userType === 'admin' || hasPermission) {
+    if (
+      user.userType === 'admin' ||
+      hasPermission ||
+      user.status == UserStatus.ACTIVE ||
+      UserStatus.VERIFIED
+    ) {
       return true;
     }
 
