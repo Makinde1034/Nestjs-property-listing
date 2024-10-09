@@ -584,6 +584,13 @@ export class ListingResolver {
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions()
+  @Mutation(() => SuccessResponse, { name: 'stopPromotion' })
+  async stopPromotion(@Args('id') id: string, @Context() ctx: any) {
+    return await this.listingService.stopPromotion(id, ctx.req.user);
+  }
+
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions()
   @Mutation(() => Bids, { name: 'createBid' })
   async createBid(
     @Args('createBidInput') createBidInput: CreateBidInput,

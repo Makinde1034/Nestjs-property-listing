@@ -1129,6 +1129,7 @@ type Mutation {
   deleteSavedHistory(id: String!): SuccessResponse!
   unpublishAListing(id: String!): SuccessResponse!
   publishAListing(id: String!): SuccessResponse!
+  stopPromotion(id: String!): SuccessResponse!
   createBid(createBidInput: CreateBidInput!): Bids!
   autoBidOnAuction(createAutoBidInput: CreateAutoBidInput!): AutoBid!
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
