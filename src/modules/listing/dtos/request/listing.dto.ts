@@ -177,12 +177,19 @@ export class ListingActionInput {
 export class ListingImageInput {
   @IsUUID()
   listingId: string;
+
   @IsNumber()
   @IsOptional()
   imageId: number;
+
+  @IsBoolean()
+  @IsOptional()
+  feature: boolean;
+
   @IsNumber()
   @IsOptional()
   lng?: number;
+
   @IsNumber()
   @IsOptional()
   lat?: number;
