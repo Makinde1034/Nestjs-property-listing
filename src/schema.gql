@@ -669,6 +669,16 @@ type Bids {
   updatedAt: DateTime!
 }
 
+type AutoBid {
+  id: ID!
+  listingId: String!
+  auctionId: String!
+  userId: String!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type InitiatePaymentResponse {
   checkoutId: String
   referenceId: String
@@ -1120,6 +1130,7 @@ type Mutation {
   unpublishAListing(id: String!): SuccessResponse!
   publishAListing(id: String!): SuccessResponse!
   createBid(createBidInput: CreateBidInput!): Bids!
+  autoBidOnAuction(createAutoBidInput: CreateAutoBidInput!): AutoBid!
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!
@@ -1508,6 +1519,11 @@ input CreateBidInput {
   price: Float!
   auctionId: String!
   listingId: String!
+}
+
+input CreateAutoBidInput {
+  listingId: String!
+  auctionId: String!
 }
 
 input CreateAdPackageInput {

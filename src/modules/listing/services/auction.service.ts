@@ -341,6 +341,7 @@ export class AuctionService {
     user: User,
   ) {
     try {
+      //TODO: add payment check
       const [auction, listing] = await Promise.all([
         this.findOne(createAutoBidInput.auctionId),
         this.listingRepository.findOneBy({ id: createAutoBidInput.listingId }),
@@ -360,7 +361,7 @@ export class AuctionService {
       });
 
       if (autoBid) {
-        return new SuccessResponse(AppStrings.SUCCESSFULL);
+        return autoBid;
       }
     } catch (error) {
       this.logger.error(error);
@@ -374,7 +375,8 @@ export class AuctionService {
   }
   async autobid(price: number, bidInput: CreateBidInput) {
     try {
-      const valueInRange = price / 1000000;
+      const valueInRange = Math.floor(price / 1000000);
+
       const [autoBids, auctionBidRange] = await Promise.all([
         this.autoBidRepository.find({
           where: {
@@ -385,11 +387,13 @@ export class AuctionService {
         this.auctionBidRangeRepository
           .createQueryBuilder('auctionBidRange')
           .where(
-            `auctionBidRange.lowerBound >:bidPrice AND auctionBidRange.upperBound <:bidPrice`,
+            'auctionBidRange.lowerBound <= :valueInRange AND auctionBidRange.upperBound >= :valueInRange',
             { valueInRange },
           )
           .getOne(),
       ]);
+
+      console.log(auctionBidRange);
 
       const bidsToMake: CreateBidInput[] = autoBids.map((element) => {
         return {
@@ -400,9 +404,10 @@ export class AuctionService {
           price: this.calculatebidPrice(price, auctionBidRange),
         };
       });
-
       await this.bidRepository.save(bidsToMake);
+      return new SuccessResponse(AppStrings.SUCCESSFULL);
     } catch (error) {
+      console.log(error);
       this.logger.error(error);
       if (error instanceof HttpException) {
         throw error;
@@ -414,10 +419,11 @@ export class AuctionService {
   }
 
   /***
-   * calculate the new price to bid based on system default increment
+   * calculate the new price to bid based on system's default increment
    */
 
   calculatebidPrice(bidPrice: number, auctionBidRange: AuctionBidRange) {
+    console.log(auctionBidRange);
     const newBidPrice = bidPrice + auctionBidRange.increment * 1000;
     return newBidPrice;
   }

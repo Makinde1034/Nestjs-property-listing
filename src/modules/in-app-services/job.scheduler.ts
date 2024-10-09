@@ -16,7 +16,6 @@ import { formatDate } from 'date-fns';
 import { LessThan } from 'typeorm';
 import { OfferListEnum } from '../../common/enums/status.enum';
 import { Injectable, Logger } from '@nestjs/common';
-import { TicketRepository } from '../tickets/repositories';
 
 @Injectable()
 export class JobService {
@@ -27,16 +26,15 @@ export class JobService {
     private mailService: MailgunEmailService,
     private pushNotification: NotificationService,
     private offerRepository: OfferRepository,
-    private ticketRepository: TicketRepository,
   ) {}
   logger = new Logger(JobService.name);
 
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT, { timeZone: 'Africa/Cairo' })
+  @Cron(CronExpression.EVERY_10_SECONDS, { timeZone: 'Africa/Cairo' })
   async handleCron() {
-    await this.sendAlertOnIncompleteOffers();
-    await this.sendNotificationForNewListingBasedOnSearchHistory();
-    await this.updateListingFeatureStatus();
-    await this.updateListingPromotionStatus();
+    // await this.sendAlertOnIncompleteOffers();
+    // await this.sendNotificationForNewListingBasedOnSearchHistory();
+    // await this.updateListingFeatureStatus();
+    // await this.updateListingPromotionStatus();
     await this.updateOfferStatus();
   }
 
@@ -148,7 +146,6 @@ export class JobService {
       this.logger.error('Update Offer Status', error);
     }
   }
-
   async updateListingPromotionStatus() {
     try {
       await this.listingRepository.update(

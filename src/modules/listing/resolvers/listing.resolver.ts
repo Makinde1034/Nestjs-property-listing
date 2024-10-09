@@ -64,6 +64,8 @@ import { SuccessResponse } from '../../../common/utils/success.response';
 import { FlagListing } from '../../../entities/flag-listing.entity';
 import { CreateBidInput, FindBidInput } from '../dtos/request/bids';
 import { Bids } from '../../../entities/bids.entity';
+import { AutoBid } from '../../../entities/auto-bid.entity';
+import { CreateAutoBidInput } from '../dtos/request/auto-bid';
 
 @Resolver()
 export class ListingResolver {
@@ -548,5 +550,17 @@ export class ListingResolver {
   @Query(() => [Bids], { name: 'findNewestBid' })
   async findNewestBid(@Args('findBidInput') findBidInput: FindBidInput) {
     return await this.auctionService.fetchBidsOnAuction(findBidInput);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => AutoBid, { name: 'autoBidOnAuction' })
+  async createAutoBidOnAuction(
+    @Args('createAutoBidInput') createAutoBidInput: CreateAutoBidInput,
+    @Context() ctx: any,
+  ) {
+    return await this.auctionService.createAutoBidOnAuction(
+      createAutoBidInput,
+      ctx.req.user,
+    );
   }
 }
