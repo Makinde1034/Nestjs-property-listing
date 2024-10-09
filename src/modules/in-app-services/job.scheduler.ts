@@ -31,10 +31,10 @@ export class JobService {
 
   @Cron(CronExpression.EVERY_10_SECONDS, { timeZone: 'Africa/Cairo' })
   async handleCron() {
-    // await this.sendAlertOnIncompleteOffers();
-    // await this.sendNotificationForNewListingBasedOnSearchHistory();
-    // await this.updateListingFeatureStatus();
-    // await this.updateListingPromotionStatus();
+    await this.sendAlertOnIncompleteOffers();
+    await this.sendNotificationForNewListingBasedOnSearchHistory();
+    await this.updateListingFeatureStatus();
+    await this.updateListingPromotionStatus();
     await this.updateOfferStatus();
   }
 
