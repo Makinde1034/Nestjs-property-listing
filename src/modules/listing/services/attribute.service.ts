@@ -273,15 +273,20 @@ export class AttributeService {
    * @returns {Promise<AttributeSet>}
    */
   async createAttributeSet(input: AttributeSetInput): Promise<AttributeSet> {
-    const attributes = await this.attributeRepository.find({
-      where: { id: In([...input.attributes]) },
-    });
-    const data: Partial<AttributeSet> = {
-      englishName: input.englishName,
-      arabicName: input.arabicName,
-      attributes,
-    };
-    return await this.attributeSetRepository.create(data);
+    try {
+      const attributes = await this.attributeRepository.find({
+        where: { id: In([...input.attributes]) },
+      });
+      const data: Partial<AttributeSet> = {
+        englishName: input.englishName,
+        arabicName: input.arabicName,
+        attributes,
+      };
+      return await this.attributeSetRepository.create(data);
+    } catch (error) {
+      console.log(error);
+      this.logger.log(error);
+    }
   }
 
   /**

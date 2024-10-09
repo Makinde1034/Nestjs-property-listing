@@ -108,6 +108,7 @@ export class OfferService {
       if (offerExpiry <= new Date()) {
         throw new BadRequestException('Expiry Date is in the past');
       }
+      console.log(createOfferDto.price, minimumPrice);
 
       if (createOfferDto.price < minimumPrice) {
         throw new BadRequestException(
@@ -231,6 +232,7 @@ export class OfferService {
       const total = vat + saii + minimumPrice;
 
       const minimumListingPrice = listingPrice - minimumPrice + total;
+      console.log(minimumListingPrice);
       return [minimumListingPrice, saii, vat];
     } catch (error) {
       this.logger.log(error);
@@ -252,9 +254,11 @@ export class OfferService {
 
   async findMany(findOfferInput: FindOfferInput) {
     try {
-      const listing = await this.listingRepository.findOneBy({
-        id: findOfferInput.listingId,
+      const listing = await this.listingRepository.findOne({
+        where: { id: findOfferInput.listingId },
+        relations: ['listingType'],
       });
+
       const [offer, total] = await this.offerRepository.findAndCount({
         where: {
           listingId: findOfferInput.listingId,
