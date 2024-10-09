@@ -1230,6 +1230,7 @@ export class ListingService {
         const newImages = uploadedUrls.map((url, index) => ({
           id: (existingImages.length + index).toString(), // Generate unique ID
           url,
+          isFeatured: query.feature,
           isDeleted: false,
           isPanorama: false, // Default value
           verified: verified,
