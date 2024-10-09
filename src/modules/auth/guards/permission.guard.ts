@@ -14,6 +14,8 @@ import { User } from 'src/entities';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { RoleService } from '../../user/services';
 import { PERMISSION_KEY } from '../../../common/decorator/permission';
+import { UserStatus } from '../../../common/enums';
+import { AppStrings } from '../../../common/messages/app.strings';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
@@ -39,12 +41,16 @@ export class PermissionsGuard implements CanActivate {
       requiredPermission,
     );
 
+    if (user.status === UserStatus.DISABLED) {
+      throw new ForbiddenException(AppStrings.SUSPENDED_ACCOUNT);
+    }
     /**********************
      * Allow admin
      **********************/
     if (user.userType === 'admin' || hasPermission) {
       return true;
     }
+
     throw new ForbiddenException();
   }
 }

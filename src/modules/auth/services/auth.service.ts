@@ -255,9 +255,6 @@ export class AuthService {
     } else if (!user.verifiedAt) {
       // Throw Forbidden error if the user is not verified
       throw new ForbiddenException(AppStrings.UNCONFIRMED_ACCOUNT);
-    } else if (user.disabledAt) {
-      // Throw Forbidden error if the user is not verified
-      throw new ForbiddenException(AppStrings.SUSPENDED_ACCOUNT);
     }
     // Allow Indiviudal/Company to login from Customer App
     // Allow Admin/Staff to login from Admin App
