@@ -41,7 +41,7 @@ export class Invoice {
   @Field({ nullable: true })
   file: string;
 
-  @Column({ default: 0 })
+  @Column('decimal', { precision: 10, scale: 2 })
   @Field()
   vat: number;
 

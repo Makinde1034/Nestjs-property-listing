@@ -284,7 +284,6 @@ export class AttributeService {
       };
       return await this.attributeSetRepository.create(data);
     } catch (error) {
-      console.log(error);
       this.logger.log(error);
     }
   }
