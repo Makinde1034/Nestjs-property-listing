@@ -120,7 +120,7 @@ export class AttributeResolver {
    * @param {AttributeSetInput} RequestInput
    * @returns {Promise<AttributeSet>}
    */
-  @Mutation(() => AttributeSetResponse)
+  @Mutation(() => AttributeSet)
   @Permissions('create-attribute-set')
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async createAttributeSet(

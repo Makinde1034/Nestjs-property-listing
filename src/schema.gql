@@ -1103,7 +1103,7 @@ type Mutation {
   createAttribute(RequestInput: AttributeInput!): Attribute!
   updateAttribute(RequestInput: AttributeUpdateInput!): Attribute!
   deleteAttribute(RequestInput: AttributeDeleteInput!): String!
-  createAttributeSet(RequestInput: AttributeSetInput!): AttributeSetResponse!
+  createAttributeSet(RequestInput: AttributeSetInput!): AttributeSet!
   updateAttributeSet(RequestInput: AttributeSetUpdateInput!): AttributeSet!
   deleteAttributeSet(RequestInput: AttributeDeleteInput!): String!
   createListing(createListing: CreateListingDto!): Listing!
