@@ -503,17 +503,7 @@ export class AdminService {
 
   async adminDefault() {
     try {
-      const result = await this.adminRepository.find({
-        select: [
-          'id',
-          'saii',
-          'vat',
-          'minimumOfferPercentage',
-          'maximumDaysForOfferExpiration',
-          'daysToAuctionRegistrationStart',
-          'daysToAuctionRegistrationEnd',
-        ],
-      });
+      const result = await this.adminRepository.find();
 
       return result[0];
     } catch (error) {

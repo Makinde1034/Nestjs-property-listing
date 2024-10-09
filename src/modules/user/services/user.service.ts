@@ -892,4 +892,14 @@ export class UserService {
       updatedUsers,
     );
   }
+
+  async enableAutoBid(user: User, reference?: string) {
+    try {
+      return await this.usersRepository.update(user.id, {
+        autoBidEnable: true,
+      });
+    } catch (error) {
+      this.logger.log(error);
+    }
+  }
 }

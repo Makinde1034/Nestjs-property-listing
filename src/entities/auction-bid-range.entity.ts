@@ -15,18 +15,18 @@ import { Field, ObjectType } from '@nestjs/graphql';
 
 @Entity()
 @ObjectType()
-export class AutoBid extends BaseEntity {
+export class AuctionBidRange extends BaseEntity {
   @Field()
   @Column()
-  listingId: string;
+  lowerBound: number;
 
   @Field()
   @Column()
-  auctionId: string;
+  upperBound: number;
 
   @Field()
   @Column()
-  userId: string;
+  increment: number;
 
   @Field()
   @CreateDateColumn()

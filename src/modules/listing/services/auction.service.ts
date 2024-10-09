@@ -19,13 +19,21 @@ import {
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { AuctionParticipantRepository } from '../repositories/auction-participant.repository';
 import { AppStrings } from '../../../common/messages/app.strings';
+
 import { removeDaysFromDate } from '../../../common/utils/helper';
 import { BidsRepository } from '../repositories/bids.repository';
 import { CreateBidInput, FindBidInput } from '../dtos/request/bids';
 import { generateOtp } from '../../../common/utils/functions';
 import { User } from '../../../entities';
 import { AdminService } from '../../admin/services/admin.service';
-import { QueryFailedError } from 'typeorm';
+import { LessThan, QueryFailedError } from 'typeorm';
+import { AutoBidRepository } from '../repositories/auto-bid.repository';
+import { SuccessResponse } from '../../../common/utils/success.response';
+import { CreateAutoBidInput } from '../dtos/request/auto-bid';
+import { ListingRepository } from '../repositories/listing.repository';
+
+import { AuctionBidRangeRepository } from '../repositories/auction-bid-range.repository';
+import { AuctionBidRange } from '../../../entities/auction-bid-range.entity';
 
 @Injectable()
 export class AuctionService {
@@ -34,6 +42,9 @@ export class AuctionService {
     private readonly auctionParticipantRepository: AuctionParticipantRepository,
     private readonly adminService: AdminService,
     private readonly bidRepository: BidsRepository,
+    private readonly listingRepository: ListingRepository,
+    private readonly auctionBidRangeRepository: AuctionBidRangeRepository,
+    private readonly autoBidRepository: AutoBidRepository,
   ) {}
   logger = new Logger(AuctionService.name);
   async create(auctionInput: CreateAuctionInput) {
@@ -290,10 +301,9 @@ export class AuctionService {
     }
   }
 
-  /***********************************
+  /***************
    * Bids
-   ***********************************/
-
+   ***************/
   async bidOnAuction(bidInput: CreateBidInput, user: User) {
     try {
       const auctionListing = await this.auctionParticipantRepository.findOne({
@@ -310,7 +320,12 @@ export class AuctionService {
 
       bidInput.bidNumber = generateOtp();
       bidInput.userId = user.id;
-      return await this.bidRepository.save(bidInput);
+      const bid = await this.bidRepository.save(bidInput);
+
+      if (bid) {
+        await this.autobid(bid.price, bidInput);
+      }
+      return bid;
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
@@ -321,6 +336,98 @@ export class AuctionService {
     }
   }
 
+  async createAutoBidOnAuction(
+    createAutoBidInput: CreateAutoBidInput,
+    user: User,
+  ) {
+    try {
+      //TODO: add payment check
+      const [auction, listing] = await Promise.all([
+        this.findOne(createAutoBidInput.auctionId),
+        this.listingRepository.findOneBy({ id: createAutoBidInput.listingId }),
+      ]);
+
+      if (!listing) {
+        throw new NotFoundException(AppStrings.NOT_FOUND);
+      }
+
+      if (!auction) {
+        throw new NotFoundException(AppStrings.NOT_FOUND);
+      }
+
+      const autoBid = await this.autoBidRepository.save({
+        ...createAutoBidInput,
+        userId: user.id,
+      });
+
+      if (autoBid) {
+        return autoBid;
+      }
+    } catch (error) {
+      this.logger.error(error);
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        this.logger.log(error);
+        throw new BadRequestException(error);
+      }
+    }
+  }
+  async autobid(price: number, bidInput: CreateBidInput) {
+    try {
+      const valueInRange = Math.floor(price / 1000000);
+
+      const [autoBids, auctionBidRange] = await Promise.all([
+        this.autoBidRepository.find({
+          where: {
+            auctionId: bidInput.auctionId,
+            listingId: bidInput.listingId,
+          },
+        }),
+        this.auctionBidRangeRepository
+          .createQueryBuilder('auctionBidRange')
+          .where(
+            'auctionBidRange.lowerBound <= :valueInRange AND auctionBidRange.upperBound >= :valueInRange',
+            { valueInRange },
+          )
+          .getOne(),
+      ]);
+
+      console.log(auctionBidRange);
+
+      const bidsToMake: CreateBidInput[] = autoBids.map((element) => {
+        return {
+          listingId: bidInput.listingId,
+          auctionId: bidInput.auctionId,
+          bidNumber: generateOtp(),
+          userId: element.userId,
+          price: this.calculatebidPrice(price, auctionBidRange),
+        };
+      });
+      await this.bidRepository.save(bidsToMake);
+      return new SuccessResponse(AppStrings.SUCCESSFULL);
+    } catch (error) {
+      console.log(error);
+      this.logger.error(error);
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        this.logger.log(error);
+        throw new BadRequestException(error);
+      }
+    }
+  }
+
+  /***
+   * calculate the new price to bid based on system's default increment
+   */
+
+  calculatebidPrice(bidPrice: number, auctionBidRange: AuctionBidRange) {
+    console.log(auctionBidRange);
+    const newBidPrice = bidPrice + auctionBidRange.increment * 1000;
+    return newBidPrice;
+  }
+
   async fetchBidsOnAuction(findBidInput: FindBidInput) {
     try {
       return await this.bidRepository.find({
@@ -329,7 +436,7 @@ export class AuctionService {
           listingId: findBidInput.listingId,
         },
         order: { createdAt: 'DESC' },
-        take: 15,
+        take: 10,
         skip: 0,
       });
     } catch (error) {

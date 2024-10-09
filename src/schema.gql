@@ -441,6 +441,7 @@ type User {
   dateOfBirth: DateTime
   profilePhoto: String
   address: String
+  autoBidEnable: Boolean!
   biometricKey: String
   twoFaRequired: Boolean
   review: [Review!]
@@ -663,6 +664,16 @@ type Bids {
   auctionId: String!
   listingId: String!
   autoBid: Boolean!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type AutoBid {
+  id: ID!
+  listingId: String!
+  auctionId: String!
+  userId: String!
   createdAt: DateTime!
   deletedAt: DateTime!
   updatedAt: DateTime!
@@ -1119,6 +1130,7 @@ type Mutation {
   unpublishAListing(id: String!): SuccessResponse!
   publishAListing(id: String!): SuccessResponse!
   createBid(createBidInput: CreateBidInput!): Bids!
+  autoBidOnAuction(createAutoBidInput: CreateAutoBidInput!): AutoBid!
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!
@@ -1507,6 +1519,11 @@ input CreateBidInput {
   price: Float!
   auctionId: String!
   listingId: String!
+}
+
+input CreateAutoBidInput {
+  listingId: String!
+  auctionId: String!
 }
 
 input CreateAdPackageInput {

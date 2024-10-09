@@ -16,7 +16,6 @@ import { formatDate } from 'date-fns';
 import { LessThan } from 'typeorm';
 import { OfferListEnum } from '../../common/enums/status.enum';
 import { Injectable, Logger } from '@nestjs/common';
-import { TicketRepository } from '../tickets/repositories';
 
 @Injectable()
 export class JobService {
@@ -27,7 +26,6 @@ export class JobService {
     private mailService: MailgunEmailService,
     private pushNotification: NotificationService,
     private offerRepository: OfferRepository,
-    private ticketRepository: TicketRepository,
   ) {}
   logger = new Logger(JobService.name);
 
@@ -148,7 +146,6 @@ export class JobService {
       this.logger.error('Update Offer Status', error);
     }
   }
-
   async updateListingPromotionStatus() {
     try {
       await this.listingRepository.update(
