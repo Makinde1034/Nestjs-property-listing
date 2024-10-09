@@ -280,7 +280,12 @@ export class OfferService {
           },
           skip: findOfferInput.skip,
           take: findOfferInput.take,
-          relations: ['listing', 'listing.user'],
+          relations: [
+            'listing',
+            'listing.user',
+            'listing.listingType',
+            'listing.listingAttributes.attribute',
+          ],
         }),
 
         this.listingRepository.count({ where: { userId: user.id } }),
@@ -303,6 +308,7 @@ export class OfferService {
           .createQueryBuilder('offer')
           .leftJoinAndSelect('offer.listing', 'listing')
           .leftJoinAndSelect('listing.user', 'listingUser')
+
           .select([
             'offer.id',
             'offer.price',
