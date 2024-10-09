@@ -11,6 +11,7 @@ import {
   InternalServerErrorException,
   Logger,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { ListingRepository } from '../repositories/listing.repository';
 import {
@@ -31,7 +32,7 @@ import { CreatePromotionInput } from '../dtos/request/promotion-input';
 import { PromotionRepository } from '../repositories/promotion.repository';
 
 import { AdPackageService } from '../../ad-package/services/ad-package.service';
-import { Between, In, LessThan, QueryFailedError } from 'typeorm';
+import { Between, In, LessThan, MoreThan, QueryFailedError } from 'typeorm';
 
 import { addDaysToDate, haversine } from '../../../common/utils/helper';
 import { FlagListingRepository } from '../repositories/flag-listing.repository';
@@ -1324,13 +1325,16 @@ export class ListingService {
 
   async createPromotion(createPromotionInput: CreatePromotionInput) {
     try {
-      const listing = await this.listingRepository.findOne({
-        where: { id: createPromotionInput.listingId },
-      });
+      const [listing, adPackage, currentPromotion] = await Promise.all([
+        this.listingRepository.findOne({
+          where: { id: createPromotionInput.listingId },
+        }),
+        this.adpackageService.findOne(createPromotionInput.adPackageId),
 
-      const adPackage = await this.adpackageService.findOne(
-        createPromotionInput.adPackageId,
-      );
+        this.promotionRepository.find({
+          where: { expiredAt: MoreThan(new Date()) },
+        }),
+      ]);
 
       if (!adPackage) {
         throw new BadRequestException('Invalid Ad Package ');
@@ -1339,17 +1343,11 @@ export class ListingService {
       if (!adPackage && !listing) {
         throw new BadRequestException('Invalid listing ');
       }
+      if (currentPromotion.length > 0) {
+        throw new BadRequestException('A promotion is currently running');
+      }
 
       if (adPackage && listing) {
-        const currentPromotion = await this.promotionRepository.find({
-          where: {
-            expiredAt: LessThan(new Date()),
-          },
-        });
-
-        if (currentPromotion.length > 0) {
-          throw new BadRequestException('A promotion is currently running');
-        }
         const promotion = await this.promotionRepository.save({
           ...createPromotionInput,
           adPackage: { ...adPackage },
@@ -1370,12 +1368,49 @@ export class ListingService {
       }
     } catch (error) {
       this.logger.log(error);
-      if (error instanceof QueryFailedError) {
-        if ((error as any).code === '23505') {
-          throw new ConflictException('You already have this Ad running');
-        }
+
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new BadRequestException(error);
       }
-      throw new BadRequestException('You already have this Ad running');
+    }
+  }
+
+  async stopPromotion(id: string, user: User) {
+    try {
+      const listing = await this.listingRepository.findOneBy({ id });
+
+      if (!listing) {
+        throw new NotFoundException(AppStrings.NOT_FOUND);
+      }
+
+      if (user.id != listing.userId) {
+        throw new BadRequestException(
+          'Only the user of this listing can stop promotion',
+        );
+      }
+      const { affected } = await this.listingRepository.update(id, {
+        isListingPromoted: false,
+        promotedDate: null,
+        promotionExpiration: null,
+        promotionPrice: null,
+        bundleImpression: null,
+        bundleType: null,
+      });
+
+      if (affected > 0) {
+        return new SuccessResponse();
+      } else {
+        throw new UnprocessableEntityException();
+      }
+    } catch (error) {
+      this.logger.log(error);
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new BadRequestException(error);
+      }
     }
   }
 
