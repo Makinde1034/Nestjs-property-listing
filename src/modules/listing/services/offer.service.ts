@@ -220,17 +220,13 @@ export class OfferService {
     try {
       const adminDefault = await this.adminDefaultService.adminDefault();
       const minimumPrice =
-        (adminDefault.minimumOfferPercentage / listingPrice) *
-        100 *
-        listingPrice;
+        (adminDefault.minimumOfferPercentage / 100) * listingPrice;
 
       const saii = (adminDefault.saii / 100) * offerPrice;
       const vat =
         (adminDefault.vat / 100) * (adminDefault.saii / 100) * offerPrice;
 
-      const total = vat + saii + minimumPrice;
-
-      const minimumListingPrice = listingPrice - minimumPrice + total;
+      const minimumListingPrice = minimumPrice;
       return [minimumListingPrice, saii, vat];
     } catch (error) {
       this.logger.log(error);
