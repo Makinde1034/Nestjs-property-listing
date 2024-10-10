@@ -44,7 +44,8 @@ export class WebHookController {
 
   @Post('api/v1/user/iam')
   @HttpCode(200)
-  User() {
+  User(@Body() natafh: any) {
+    console.log(natafh);
     return HttpStatus.OK;
   }
 }

@@ -179,4 +179,8 @@ export class JobService {
       this.logger.error('update Listing Feature Status', error);
     }
   }
+
+  async NotifyUsersAboutUpcomingAuctions() {
+    await this.userRepository.find();
+  }
 }

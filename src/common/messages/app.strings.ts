@@ -101,7 +101,7 @@ export const AppStrings = {
   AUCTION_NOT_FOUND: 'Auction not found',
 
   AUCTION_IS_NOT_COMPLETELY_SET_UP:
-    'Listing cannot be fully configured because auction is not fully configured',
+    'Listing cannot be added because auction is not fully configured',
 
   AUCTION_REGISTRATION_HAS_NOT_STARTED: 'Auction registration has not started',
   AUCTION_REGISTATION_HAS_ENDED: 'Auction registration has ended',
