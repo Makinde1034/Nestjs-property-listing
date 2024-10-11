@@ -117,6 +117,24 @@ export class RoleService {
     try {
       const role = await this.roleRepository.findOneOrFail({
         where: { id: id },
+
+        relations: ['user', 'rolePermissions'],
+        select: {
+          id: true,
+          englishName: true,
+          arabicName: true,
+          rolePermissions: {
+            permissionId: true,
+            approve: true,
+            use: true,
+          },
+          user: {
+            id: true,
+            employeeId: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
       });
       return role;
     } catch (error) {
