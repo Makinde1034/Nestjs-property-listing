@@ -3,7 +3,13 @@
  * For license. See license.txt
  */
 
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   PermissionRepository,
   RoleRepository,
@@ -24,6 +30,7 @@ import slugify from 'slugify';
 import { AppStrings } from '../../../common/messages/app.strings';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
+import { NotFoundError } from 'rxjs';
 
 @Injectable()
 export class RoleService {
@@ -115,30 +122,36 @@ export class RoleService {
 
   async findRole(id: number): Promise<Role> {
     try {
-      const role = await this.roleRepository.findOneOrFail({
-        where: { id: id },
+      const role = await this.roleRepository
+        .createQueryBuilder('role')
 
-        relations: ['user', 'rolePermissions'],
-        select: {
-          id: true,
-          englishName: true,
-          arabicName: true,
-          rolePermissions: {
-            permissionId: true,
-            approve: true,
-            use: true,
-          },
-          user: {
-            id: true,
-            employeeId: true,
-            firstName: true,
-            lastName: true,
-          },
-        },
-      });
+        .leftJoinAndSelect('role.user', 'user')
+        .leftJoinAndSelect('role.rolePermissions', 'rolePermissions')
+        .where('role.id =:id', { id })
+        .select([
+          'role.id',
+          'role.englishName',
+          'role.arabicName',
+          'rolePermissions.permissionId',
+          'rolePermissions.approve',
+          'rolePermissions.use',
+          'user.id',
+          'user.employeeId',
+          'user.firstName',
+          'user.lastName',
+        ])
+        .getOne();
+      if (!role) {
+        throw new NotFoundException(AppStrings.NOT_FOUND);
+      }
+
       return role;
     } catch (error) {
       this.logger.log(error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
 
       throw new BadRequestException(AppStrings.NOT_FOUND);
     }
