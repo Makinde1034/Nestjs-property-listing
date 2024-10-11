@@ -11,21 +11,34 @@ import { NotificationService } from '../notification/services';
 import { MailgunEmailService } from '../mail/services/implementations';
 import { OfferRepository } from '../listing/repositories';
 
-import { UserRepository } from '../user/repositories';
+import {
+  NotificationScopeRepository,
+  UserRepository,
+} from '../user/repositories';
 import { formatDate } from 'date-fns';
 import { LessThan } from 'typeorm';
 import { OfferListEnum } from '../../common/enums/status.enum';
 import { Injectable, Logger } from '@nestjs/common';
+import { AuctionRepository } from '../listing/repositories/auction.repository';
+import { addDaysToDate } from '../../common/utils/helper';
+import { getMessageData } from '../../common/messages/alert-messages';
+import { NotificationScopesEnum } from '../../common/enums/notification-scope.enum';
+import { NotificationScope } from '../../entities';
+import { AuctionParticipantRepository } from '../listing/repositories/auction-participant.repository';
 
 @Injectable()
 export class JobService {
   constructor(
-    private userRepository: UserRepository,
-    private listingRepository: ListingRepository,
-    private searchHistoryRepository: SearchHistoryRepository,
-    private mailService: MailgunEmailService,
-    private pushNotification: NotificationService,
-    private offerRepository: OfferRepository,
+    private readonly userRepository: UserRepository,
+    private readonly listingRepository: ListingRepository,
+    private readonly searchHistoryRepository: SearchHistoryRepository,
+    private readonly mailService: MailgunEmailService,
+    private readonly notificationService: NotificationService,
+    private readonly offerRepository: OfferRepository,
+    private readonly notificationScopeRepository: NotificationScopeRepository,
+    private readonly auctionParticipantRepository: AuctionParticipantRepository,
+
+    private readonly auctionRepository: AuctionRepository,
   ) {}
   logger = new Logger(JobService.name);
 
@@ -74,7 +87,7 @@ export class JobService {
       });
 
       await this.mailService.sendSearchHistoryIsNowAvailable(listingArrayMails);
-      this.pushNotification.sendUsersNotification({
+      this.notificationService.sendUsersNotification({
         title: 'New listing',
         message: 'A listing that matches  your search is now available',
         isEmail: false,
@@ -113,7 +126,7 @@ export class JobService {
 
       for (const element of records) {
         if (element.listing.price >= element.price) {
-          this.pushNotification.sendUsersNotification({
+          this.notificationService.sendUsersNotification({
             title: 'New listing',
             message: `This offers created on ${formatDate(element.createdAt, 'MM/dd/yyyy')}, with listing Id: ${element.listingId},
            Seller's name: ${element.user.firstName} ${element.user.lastName},
@@ -181,6 +194,111 @@ export class JobService {
   }
 
   async NotifyUsersAboutUpcomingAuctions() {
-    await this.userRepository.find();
+    let oneMonthNotification = [];
+    let oneWeekNotification = [];
+    let threeDaysNotification = [];
+    let oneDayNotification = [];
+
+    const [users, auctions] = await Promise.all([
+      this.userRepository.find(),
+      this.auctionRepository.find(),
+    ]);
+
+    const notificationPreference =
+      await this.notificationScopeRepository.find();
+    //Filter out the correct scope
+    const scope: NotificationScope = notificationPreference.find((element) => {
+      if (element.name == NotificationScopesEnum.UPCOMING_EVENTS) {
+        return element;
+      }
+    });
+
+    auctions.forEach((element) => {
+      if (element.startDate == new Date(addDaysToDate(new Date(), 1))) {
+        oneDayNotification.push(element);
+      }
+      if (element.startDate == new Date(addDaysToDate(new Date(), 3))) {
+        threeDaysNotification.push(element);
+      }
+      if (element.startDate == new Date(addDaysToDate(new Date(), 7))) {
+        oneWeekNotification.push(element);
+      }
+      if (element.startDate == new Date(addDaysToDate(new Date(), 30))) {
+        oneMonthNotification.push(element);
+      }
+    });
+
+    const userArray = users.map((element) => {
+      if (oneMonthNotification.length > 0) {
+        this.notificationService.sendNotification({
+          creatorId: element.id,
+          scope: scope,
+          event: NotificationScopesEnum.UPCOMING_EVENTS,
+          recipientFormat: ['All platform', null],
+        });
+      }
+      if (oneWeekNotification.length > 0) {
+        this.notificationService.sendNotification({
+          creatorId: element.id,
+          scope: scope,
+          event: NotificationScopesEnum.UPCOMING_EVENTS,
+          recipientFormat: ['All platform', null],
+        });
+      }
+      if (threeDaysNotification.length > 0) {
+        this.notificationService.sendNotification({
+          creatorId: element.id,
+          scope: scope,
+          event: NotificationScopesEnum.UPCOMING_EVENTS,
+          recipientFormat: ['All platform', null],
+        });
+      }
+      if (oneDayNotification.length) {
+        this.notificationService.sendNotification({
+          creatorId: element.id,
+          scope: scope,
+          event: NotificationScopesEnum.UPCOMING_EVENTS,
+          recipientFormat: ['All platform', null],
+        });
+      }
+
+      return element.email;
+    });
+  }
+
+  async NotifyUsersAboutStartOfAuctionsTheySubscribedTo() {
+    let oneDayNotification = [];
+
+    const auctions = await this.auctionParticipantRepository.find({
+      relations: ['user'],
+    });
+
+    const notificationPreference =
+      await this.notificationScopeRepository.find();
+    //Filter out the correct scope
+    const scope: NotificationScope = notificationPreference.find((element) => {
+      if (element.name == NotificationScopesEnum.UPCOMING_EVENTS) {
+        return element;
+      }
+    });
+
+    auctions.forEach((element) => {
+      if (element.startDate == new Date(addDaysToDate(new Date(), 1))) {
+        oneDayNotification.push(element);
+      }
+    });
+
+    const userArray = users.map((element) => {
+      if (oneDayNotification.length) {
+        this.notificationService.sendNotification({
+          creatorId: element.id,
+          scope: scope,
+          event: NotificationScopesEnum.UPCOMING_EVENTS,
+          recipientFormat: ['All platform', null],
+        });
+      }
+
+      return element.email;
+    });
   }
 }

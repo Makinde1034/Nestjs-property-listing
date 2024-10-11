@@ -119,6 +119,7 @@ export class NotificationService {
             // Send EMail notification
             await this.sendPushNotification(pushNotificationData);
           }
+
           const notificationLog: Partial<Notification> = {
             ...emailData,
             recipient: user,
@@ -177,6 +178,7 @@ export class NotificationService {
    * @param {Partial<PushNotificationPayload>} data
    * @returns {Promise<void>}
    */
+
   async sendPushNotification(data: PushNotificationPayload): Promise<void> {
     await this.pushNotificationService.sendPushNotification(data);
   }
@@ -341,12 +343,12 @@ export class NotificationService {
   }
   //TODO: use Event emmiter
   SendNotificationBasedOnPreference(
-    userPrefRecipients: UserNotificationPreference,
-    userPrefOwner: UserNotificationPreference,
-    owner: User,
-    recipient: User,
-    event: string,
-    scope: string,
+    userPrefRecipients?: UserNotificationPreference,
+    userPrefOwner?: UserNotificationPreference,
+    owner?: User,
+    recipient?: User,
+    event?: string,
+    scope?: string,
     recipientFormat?: [string, string],
   ) {
     try {

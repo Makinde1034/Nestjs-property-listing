@@ -407,7 +407,6 @@ export class AuctionService {
       await this.bidRepository.save(bidsToMake);
       return new SuccessResponse(AppStrings.SUCCESSFULL);
     } catch (error) {
-      console.log(error);
       this.logger.error(error);
       if (error instanceof HttpException) {
         throw error;

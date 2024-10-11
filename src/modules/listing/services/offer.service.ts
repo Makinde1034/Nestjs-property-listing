@@ -253,6 +253,10 @@ export class OfferService {
         relations: ['listingType'],
       });
 
+      if (!listing) {
+        throw new NotFoundException(AppStrings.LISTING_NOT_FOUND);
+      }
+
       const [offer, total] = await this.offerRepository.findAndCount({
         where: {
           listingId: findOfferInput.listingId,
@@ -264,8 +268,12 @@ export class OfferService {
 
       return { offer, listing, total };
     } catch (error) {
-      this.logger.log(error);
-      throw new BadRequestException(error);
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        this.logger.log(error);
+        throw new BadRequestException(error);
+      }
     }
   }
   async findManyForOwner(findOfferInput: FindOfferInput, user?: User) {
