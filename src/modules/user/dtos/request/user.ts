@@ -5,26 +5,28 @@
 
 import { Field, InputType } from '@nestjs/graphql';
 import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
-import { IsEnum, IsOptional } from 'class-validator';
-import {
-  UserLevelEnum,
-  UserProfileTypeEnum,
-  UserStatus,
-} from '../../../../common/enums';
+import { IsArray, IsEnum, IsOptional, IsString } from 'class-validator';
+import { UserLevelEnum } from '../../../../common/enums';
 @InputType()
 export class UserFilter extends PaginateAndSort {
   @Field({ nullable: true })
   @IsOptional()
+  @IsString()
   @IsEnum(UserLevelEnum)
   level: string;
 
-  @Field({ nullable: true })
+  @Field(() => [String], { nullable: true })
   @IsOptional()
-  @IsEnum(UserStatus)
-  status: string;
+  @IsArray()
+  status: string[];
 
-  @Field({ nullable: true })
+  @Field(() => [String], { nullable: true })
   @IsOptional()
-  @IsEnum(UserProfileTypeEnum)
-  type: string;
+  @IsArray()
+  type: string[];
+
+  @Field(() => [Number], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  roles: number[];
 }
