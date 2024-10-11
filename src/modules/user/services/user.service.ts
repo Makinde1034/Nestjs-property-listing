@@ -3,7 +3,12 @@
  * For license. See license.txt
  */
 
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import {
   NationalIdentityRepository,
   RoleRepository,
@@ -487,8 +492,16 @@ export class UserService {
 
   async findAllUser(userFilterInput: UserFilter) {
     try {
-      const { level, status, type, sortField, directionToSort, take, skip } =
-        userFilterInput;
+      const {
+        level,
+        status,
+        type,
+        roles,
+        sortField,
+        directionToSort,
+        take,
+        skip,
+      } = userFilterInput;
 
       // Validate sort direction
       const validSortDirections = ['ASC', 'DESC'];
@@ -499,9 +512,10 @@ export class UserService {
 
       // Build where options
       const whereOptions: any = {
-        level: level ?? undefined,
-        status: status ?? undefined,
-        type: type ?? undefined,
+        ...(level && { userLevel: level }),
+        ...(status && { status: In(status) }),
+        ...(roles && { roles: { id: In(roles) } }),
+        ...(type && { type: In(type) }),
       };
 
       // Build order options
@@ -522,7 +536,13 @@ export class UserService {
       return { users, total: count };
     } catch (error) {
       this.logger.error('Failed to get customer', error);
-      throw new BadRequestException('Failed to retrieve customer');
+      this.logger.log(error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new BadRequestException(error);
+      }
     }
   }
 

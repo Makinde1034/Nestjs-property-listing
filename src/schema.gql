@@ -930,8 +930,9 @@ input UserFilter {
   directionToSort: SortOrder
   where: WhereOption
   level: String
-  status: String
-  type: String
+  status: [String!]
+  type: [String!]
+  roles: [Float!]
 }
 
 input AttributeFilter {
