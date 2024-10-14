@@ -110,7 +110,6 @@ export class PaymentService {
       await this.mailService.sendEmailInvoice(user, invoicePdf);
       return invoice;
     } catch (error) {
-      console.log(error);
       this.logger.log(error);
     }
   }

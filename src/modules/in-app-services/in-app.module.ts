@@ -6,7 +6,10 @@
 import { Module } from '@nestjs/common';
 import { OfferRepository } from '../listing/repositories';
 import { ListingRepository } from '../listing/repositories/listing.repository';
-import { UserRepository } from '../user/repositories';
+import {
+  NotificationScopeRepository,
+  UserRepository,
+} from '../user/repositories';
 import { SearchHistoryRepository } from '../listing/repositories/search-history.repository';
 import {
   NotificationService,
@@ -15,12 +18,14 @@ import {
 import { MailgunEmailService } from '../mail/services/implementations';
 import { JobService } from './job.scheduler';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Notification } from '../../entities';
+import { Notification, NotificationScope } from '../../entities';
 import { NotificationRepository } from '../notification/repositories';
 import { TicketRepository } from '../tickets/repositories';
+import { AuctionRepository } from '../listing/repositories/auction.repository';
+import { AuctionParticipantRepository } from '../listing/repositories/auction-participant.repository';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Notification])],
+  imports: [TypeOrmModule.forFeature([Notification, NotificationScope])],
   providers: [
     JobService,
     OfferRepository,
@@ -32,6 +37,9 @@ import { TicketRepository } from '../tickets/repositories';
     NotificationRepository,
     PushNotificationService,
     TicketRepository,
+    AuctionRepository,
+    NotificationScopeRepository,
+    AuctionParticipantRepository,
   ],
 })
 export class InAppModule {}

@@ -586,7 +586,6 @@ export class UserService {
       throw new BadRequestException('Failed to retrieve customer');
     }
   }
-
   async findUserByEmailPhoneOrName(searchParam: string) {
     try {
       const valueToSearch = checkIfEmailNameOrPhoneNumber(searchParam);
@@ -913,7 +912,7 @@ export class UserService {
     );
   }
 
-  async enableAutoBid(user: User, reference?: string) {
+  async enableAutoBid(user: User) {
     try {
       return await this.usersRepository.update(user.id, {
         autoBidEnable: true,

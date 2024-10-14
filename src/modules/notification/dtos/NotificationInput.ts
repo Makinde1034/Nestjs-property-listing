@@ -5,9 +5,11 @@
 
 import { Field, InputType } from '@nestjs/graphql';
 import {
+  isArray,
   IsArray,
   IsBoolean,
   IsNotEmpty,
+  IsObject,
   IsOptional,
   IsString,
 } from 'class-validator';
@@ -49,12 +51,4 @@ export class NotificationInput {
 
 export class NotificationEventDto {
   constructor(public input: NotificationEventInput) {}
-}
-
-export class SendNotificationInput {
-  creatorId: string;
-  receiverId?: string;
-  scope: NotificationScope;
-  event: string;
-  recipientFormat?: [string, string];
 }

@@ -1401,9 +1401,8 @@ export class ListingService {
 
       if (affected > 0) {
         return new SuccessResponse();
-      } else {
-        throw new UnprocessableEntityException();
       }
+      throw new UnprocessableEntityException();
     } catch (error) {
       this.logger.log(error);
       if (error instanceof HttpException) {

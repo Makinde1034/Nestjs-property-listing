@@ -393,8 +393,6 @@ export class AuctionService {
           .getOne(),
       ]);
 
-      console.log(auctionBidRange);
-
       const bidsToMake: CreateBidInput[] = autoBids.map((element) => {
         return {
           listingId: bidInput.listingId,
@@ -407,7 +405,6 @@ export class AuctionService {
       await this.bidRepository.save(bidsToMake);
       return new SuccessResponse(AppStrings.SUCCESSFULL);
     } catch (error) {
-      console.log(error);
       this.logger.error(error);
       if (error instanceof HttpException) {
         throw error;
@@ -419,11 +416,10 @@ export class AuctionService {
   }
 
   /***
-   * calculate the new price to bid based on system's default increment
+   * Calculate the new price to bid based on system's default increment
    */
 
   calculatebidPrice(bidPrice: number, auctionBidRange: AuctionBidRange) {
-    console.log(auctionBidRange);
     const newBidPrice = bidPrice + auctionBidRange.increment * 1000;
     return newBidPrice;
   }

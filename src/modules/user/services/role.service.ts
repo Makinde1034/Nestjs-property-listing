@@ -30,7 +30,6 @@ import slugify from 'slugify';
 import { AppStrings } from '../../../common/messages/app.strings';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
-import { NotFoundError } from 'rxjs';
 
 @Injectable()
 export class RoleService {
@@ -268,6 +267,7 @@ export class RoleService {
    * @param {User} user
    * @returns {Promise<string>}
    */
+
   async fetchUserRoles(user: User): Promise<Role[]> {
     const userData = await this.staffRepository.findOneOrFail({
       where: { id: user.id },

@@ -5,11 +5,7 @@
 
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { NotificationRepository } from '../repositories';
-import {
-  NotificationEventDto,
-  NotificationInput,
-  SendNotificationInput,
-} from '../dtos';
+import { NotificationEventDto, NotificationInput } from '../dtos';
 import {
   Notification,
   NotificationScope,
@@ -26,6 +22,7 @@ import {
   EmailNotificationPayload,
   NotificationEventInput,
   PushNotificationPayload,
+  SendNotificationInput,
 } from 'src/common/interface';
 import { PushNotificationService } from './push-notification.service';
 import { NotificationEvent, NotificationType } from 'src/common/enums';
@@ -97,6 +94,7 @@ export class NotificationService {
       const users = await this.userRepository.find({
         where: { id: In([...recipients]) },
       });
+
       await Promise.all(
         users.map(async (user) => {
           const emailData: EmailNotificationPayload = {
@@ -119,6 +117,7 @@ export class NotificationService {
             // Send EMail notification
             await this.sendPushNotification(pushNotificationData);
           }
+
           const notificationLog: Partial<Notification> = {
             ...emailData,
             recipient: user,
@@ -177,6 +176,7 @@ export class NotificationService {
    * @param {Partial<PushNotificationPayload>} data
    * @returns {Promise<void>}
    */
+
   async sendPushNotification(data: PushNotificationPayload): Promise<void> {
     await this.pushNotificationService.sendPushNotification(data);
   }
@@ -198,12 +198,6 @@ export class NotificationService {
     switch (category) {
       case 'offer':
         await this.mailService.sendOfferMail(mailInput);
-        break;
-
-      case 'auction':
-        break;
-
-      case 'listing':
         break;
 
       default:
@@ -242,7 +236,6 @@ export class NotificationService {
       where: { recipient: { id: user.id } },
     });
   }
-
   /**
    * List system NotificationScopes
    *
@@ -255,258 +248,212 @@ export class NotificationService {
 
   async sendNotification(notificationInput: SendNotificationInput) {
     try {
-      //Get user information for buyer and their notification preference
-      const buyer = await this.userRepository.findOneOrFail({
-        where: { id: notificationInput.creatorId },
-        relations: ['notificationPreference'],
-      });
+      const { creatorId, receiverId, scope, event, recipientFormat, count } =
+        notificationInput;
 
-      //Get user information for seller and their notification preference
+      // Get user information for buyer and seller along with their notification preferences
+      const [buyer, seller] = await Promise.all([
+        this.userRepository.findOneOrFail({
+          where: { id: creatorId },
+          relations: ['notificationPreference'],
+        }),
 
-      const seller = await this.userRepository.findOneOrFail({
-        where: { id: notificationInput.receiverId },
-        relations: ['notificationPreference'],
-      });
+        this.userRepository.findOneOrFail({
+          where: { id: receiverId },
+          relations: ['notificationPreference'],
+        }),
+      ]);
 
-      //Get the preference of a particular user
-      const userPrefBuyer = buyer.notificationPreference.find((element) => {
-        if (element.scope.id == notificationInput.scope.id) {
-          return element;
-        }
-      });
+      // Get the preferences for both buyer and seller
 
-      //Get the preference of a particular user
-      const userPrefSeller = seller.notificationPreference.find((element) => {
-        if (element.scope.id == notificationInput.scope.id) {
-          return element;
-        }
-      });
+      const userPrefBuyer = buyer.notificationPreference.find(
+        (pref) => pref.scope.id === scope.id,
+      );
+      const userPrefSeller = seller.notificationPreference.find(
+        (pref) => pref.scope.id === scope.id,
+      );
 
-      //Generate notification payload based on scope
-      switch (notificationInput.scope.name) {
-        case NotificationScopesEnum.CREATE_OFFER:
-          this.SendNotificationBasedOnPreference(
-            userPrefBuyer,
-            userPrefSeller,
-            seller,
-            buyer,
-            notificationInput.event,
-            notificationInput.scope.scopeGroup,
-            notificationInput.recipientFormat,
-          );
-          break;
+      const scopeName = scope.name as NotificationScopesEnum;
 
-        case NotificationScopesEnum.UPDATE_OFFER:
-          this.SendNotificationBasedOnPreference(
-            userPrefBuyer,
-            userPrefSeller,
-            seller,
-            buyer,
-            notificationInput.event,
-            notificationInput.scope.scopeGroup,
-            notificationInput.recipientFormat,
-          );
-          break;
+      // Define scopes that trigger notifications
+      const notificationScopes = [
+        NotificationScopesEnum.CREATE_OFFER,
+        NotificationScopesEnum.UPDATE_OFFER,
+        NotificationScopesEnum.ACCEPTED,
+        NotificationScopesEnum.RESPONSE,
+        NotificationScopesEnum.UPCOMING_EVENTS,
+      ];
 
-        case NotificationScopesEnum.ACCEPTED:
-          this.SendNotificationBasedOnPreference(
-            userPrefBuyer,
-            userPrefSeller,
-            seller,
-            buyer,
-            notificationInput.event,
-            notificationInput.scope.scopeGroup,
-            notificationInput.recipientFormat,
-          );
-          break;
-
-        case NotificationScopesEnum.RESPONSE:
-          this.SendNotificationBasedOnPreference(
-            userPrefBuyer,
-            userPrefSeller,
-            seller,
-            buyer,
-            notificationInput.event,
-            notificationInput.scope.scopeGroup,
-            notificationInput.recipientFormat,
-          );
-          break;
-
-        default:
-          break;
+      // If scope matches one of the predefined notification scopes, send the notification
+      if (notificationScopes.includes(scopeName)) {
+        this.SendNotificationBasedOnPreference(
+          userPrefBuyer,
+          userPrefSeller,
+          seller,
+          buyer,
+          event,
+          scope.name,
+          recipientFormat,
+          notificationInput.type,
+          count,
+        );
       }
     } catch (error) {
-      this.logger.log(error);
+      this.logger.error('Error sending notification:', error);
+      throw error; // Optional: throw to let calling service handle it
     }
   }
+
   //TODO: use Event emmiter
   SendNotificationBasedOnPreference(
-    userPrefRecipients: UserNotificationPreference,
-    userPrefOwner: UserNotificationPreference,
-    owner: User,
-    recipient: User,
-    event: string,
-    scope: string,
+    userPrefRecipients?: UserNotificationPreference,
+    userPrefOwner?: UserNotificationPreference,
+    owner?: User,
+    recipient?: User,
+    event?: string,
+    scope?: string,
     recipientFormat?: [string, string],
+    type?: string,
+    countInEnglish?: number,
   ) {
     try {
       /************************
-       * Email notification
+       * Email Notification
        ************************/
-      this.logger.log('Sending mail');
 
       if (userPrefRecipients?.email) {
-        const mailMessageForBuyer = getMessageData(
-          recipient.firstName,
-          recipient.arabicFirstName,
+        this.logger.log('Sending notifications');
+        this.logger.log('here');
+        this.sendEmailToUser(
+          recipient,
           event,
           scope,
           recipientFormat[1],
+          type,
+          null,
+          countInEnglish,
         );
-
-        this.sendEmailNotification(null, null, 'offer', {
-          email: recipient.email,
-          subject:
-            recipient.language == 'en'
-              ? mailMessageForBuyer[0]?.title
-              : mailMessageForBuyer[0]?.arabicTitle,
-          text:
-            recipient.language == 'en'
-              ? mailMessageForBuyer[0]?.body
-              : mailMessageForBuyer[0]?.arabicBody,
-        });
-        this.mailService.sendOfferMail({
-          email: recipient.email,
-          subject:
-            recipient.language == 'en'
-              ? mailMessageForBuyer[0]?.title
-              : mailMessageForBuyer[0]?.arabicTitle,
-          text:
-            recipient.language == 'en'
-              ? mailMessageForBuyer[0]?.body
-              : mailMessageForBuyer[0]?.arabicBody,
-        });
       }
 
       if (userPrefOwner?.email) {
-        const mailMessageForSeller = getMessageData(
-          recipient.firstName,
-          recipient.arabicFirstName,
+        this.logger.log('Sending notifications');
+        this.sendEmailToUser(
+          owner,
           event,
           scope,
           recipientFormat[0],
+          type,
+          recipient,
         );
-
-        this.sendEmailNotification(null, null, 'offer', {
-          email: owner.email,
-          subject:
-            recipient.language == 'en'
-              ? mailMessageForSeller[0]?.title
-              : mailMessageForSeller[0]?.arabicBody,
-          text:
-            recipient.language == 'en'
-              ? mailMessageForSeller[0]?.body
-              : mailMessageForSeller[0]?.arabicBody,
-        });
       }
 
       /************************
-       * Push notification
+       * Push Notification
        ************************/
       if (userPrefRecipients?.mobile) {
-        const mailMessageForBuyer = getMessageData(
-          recipient.firstName,
-          recipient.arabicFirstName,
+        this.logger.log('Sending notifications');
+        this.sendPushNotificationToUser(
+          recipient,
           event,
           scope,
           recipientFormat[1],
         );
-        this.sendUsersNotification({
-          recipients: [recipient.id],
-          isPushNotification: true,
-          isEmail: false,
-          title:
-            recipient.language == 'en'
-              ? mailMessageForBuyer[0].title
-              : mailMessageForBuyer[0].arabicTitle,
-          message:
-            recipient.language == 'en'
-              ? mailMessageForBuyer[0].body
-              : mailMessageForBuyer[0].arabicBody,
-        });
       }
 
-      if (userPrefOwner?.email) {
-        const mailMessageForSeller = getMessageData(
-          recipient.firstName,
-          recipient.arabicFirstName,
+      if (userPrefOwner?.mobile) {
+        this.logger.log('Sending notifications');
+        this.sendPushNotificationToUser(
+          owner,
           event,
           scope,
-          recipientFormat[1],
+          recipientFormat[0],
+          recipient,
         );
-
-        this.sendUsersNotification({
-          recipients: [owner.id],
-          isPushNotification: true,
-          isEmail: false,
-          title:
-            recipient.language == 'en'
-              ? mailMessageForSeller[0].title
-              : mailMessageForSeller[0].arabicBody,
-          message:
-            recipient.language == 'en'
-              ? mailMessageForSeller[0].body
-              : mailMessageForSeller[0].arabicBody,
-        });
       }
 
       /************************
-       * Web notification
+       * Web Notification (future)
        ************************/
-
-      // If (userPrefRecipients?.desktop) {
-      //   Const mailMessageForBuyer = getMessageData(
-      //     Buyer.firstName,
-      //     'Create',
-      //     'Offers',
-      //     'Offer Creator',
-      //   );
-      //   This.mailService.sendOfferMail({
-      //     Email: buyer.email,
-      //     Subject:
-      //       Buyer.language == 'en'
-      //         ? mailMessageForBuyer[0]['title']
-      //         : mailMessageForBuyer[0]['arabicTitle'],
-      //     Text:
-      //       Buyer.language == 'en'
-      //         ? mailMessageForBuyer[0]['body']
-      //         : mailMessageForBuyer[0]['arabicBody'],
-      //   });
-      // }
-
-      // If (userPrefOwner?.desktop) {
-      //   Const mailMessageForSeller = getMessageData(
-      //     Seller.arabicFirstName,
-      //     'Create',
-      //     'Offers',
-      //     'Seller',
-      //   );
-
-      //   This.mailService.sendOfferMail({
-      //     Email: buyer.email,
-      //     Subject:
-      //       Buyer.language == 'en'
-      //         ? mailMessageForSeller[0]['title']
-      //         : mailMessageForSeller[0]['arabicBody'],
-      //     Text:
-      //       Buyer.language == 'en'
-      //         ? mailMessageForSeller[0]['body']
-      //         : mailMessageForSeller[0]['arabicBody'],
-      //   });
-      // }
+      // Add web notification logic when needed
     } catch (error) {
-      this.logger.log(error);
+      this.logger.error('Error sending notifications', error);
       throw new BadRequestException(error);
     }
+  }
+
+  /**
+   * Helper method to send email notification.
+   */
+  private sendEmailToUser(
+    user: User,
+    event: string,
+    scope: string,
+    format: string,
+    type: string,
+    additionalUser?: User,
+    countInEnglish?: number,
+  ) {
+    if (user) {
+      const messageData = getMessageData(
+        user.firstName,
+        user.arabicFirstName,
+        event,
+        scope,
+        format,
+        countInEnglish,
+      );
+
+      const subject: string =
+        user.language === 'en'
+          ? messageData[0]?.title
+          : messageData[0]?.arabicTitle;
+      const text =
+        user.language === 'en'
+          ? messageData[0]?.body
+          : messageData[0]?.arabicBody;
+      this.sendEmailNotification(
+        user,
+        {
+          title: subject,
+          message: text,
+        },
+        type,
+        null,
+      );
+    }
+  }
+
+  /**
+   * Helper method to send push notification.
+   */
+  private sendPushNotificationToUser(
+    user: User,
+    event: string,
+    scope: string,
+    format: string,
+    additionalUser?: User,
+  ) {
+    const messageData = getMessageData(
+      user.firstName,
+      user.arabicFirstName,
+      event,
+      scope,
+      format,
+    );
+
+    const title =
+      user.language === 'en'
+        ? messageData[0].title
+        : messageData[0].arabicTitle;
+    const message =
+      user.language === 'en' ? messageData[0].body : messageData[0].arabicBody;
+
+    this.sendUsersNotification({
+      recipients: [user.id],
+      isPushNotification: true,
+      isEmail: false,
+      title,
+      message,
+    });
   }
 }

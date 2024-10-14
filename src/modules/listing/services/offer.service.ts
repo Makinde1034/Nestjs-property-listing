@@ -39,6 +39,8 @@ import { SuccessResponse } from '../../../common/utils/success.response';
 import { Offer } from '../../../entities/offer.entity';
 
 import { AuctionParticipantRepository } from '../repositories/auction-participant.repository';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { NotificationEvent } from '../../../common/enums';
 
 @Injectable()
 export class OfferService {
@@ -48,10 +50,10 @@ export class OfferService {
     private listingService: ListingService,
     private userRepository: UserRepository,
     private readonly notificationScopeRepository: NotificationScopeRepository,
-    private readonly notificationService: NotificationService,
     private readonly adminDefaultService: AdminService,
     private readonly listingRepository: ListingRepository,
     private readonly auctionParticipantRepository: AuctionParticipantRepository,
+    private readonly eventEmiter: EventEmitter2,
   ) {}
   logger = new Logger(OfferService.name);
 
@@ -175,12 +177,13 @@ export class OfferService {
         },
       );
       //TODO:switch to an emited event
-      this.notificationService.sendNotification({
+      this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
         creatorId: user.id,
         receiverId: seller.id,
         scope: scope,
         event: NotificationScopesEnum.CREATE_OFFER,
         recipientFormat: ['Seller', 'Offer Creator'],
+        type: 'offer',
       });
       return offerPayload;
     } catch (error) {
@@ -188,7 +191,6 @@ export class OfferService {
       throw new BadRequestException(error?.data || error?.message || error);
     }
   }
-
   async finalizeOffer(id: string) {
     try {
       const offer = await this.offerRepository.findOneBy({ id });
@@ -212,7 +214,6 @@ export class OfferService {
       }
     }
   }
-
   async getMinimumOfferForAListingAndUser(
     offerPrice: number,
     listingPrice: number,
@@ -253,6 +254,10 @@ export class OfferService {
         relations: ['listingType'],
       });
 
+      if (!listing) {
+        throw new NotFoundException(AppStrings.LISTING_NOT_FOUND);
+      }
+
       const [offer, total] = await this.offerRepository.findAndCount({
         where: {
           listingId: findOfferInput.listingId,
@@ -264,8 +269,12 @@ export class OfferService {
 
       return { offer, listing, total };
     } catch (error) {
-      this.logger.log(error);
-      throw new BadRequestException(error);
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        this.logger.log(error);
+        throw new BadRequestException(error);
+      }
     }
   }
   async findManyForOwner(findOfferInput: FindOfferInput, user?: User) {
@@ -424,12 +433,13 @@ export class OfferService {
           sumTotalWithVat: offer.price,
         };
 
-        this.notificationService.sendNotification({
+        this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
           creatorId: user.id,
           receiverId: offer.listingUser_id,
           scope: scope,
           event: NotificationScopesEnum.UPDATE_OFFER,
           recipientFormat: ['Seller', 'Offer Creator'],
+          type: 'offer',
         });
 
         //TODO: switch to event emitter
@@ -517,12 +527,13 @@ export class OfferService {
           );
 
           // Send notification (event emitter can be used here)
-          this.notificationService.sendNotification({
+          this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
             creatorId: user.id,
             receiverId: offer.listing.user.id,
             scope: notificationPreference,
             event: NotificationScopesEnum.RESPONSE,
             recipientFormat: ['Seller', 'Offer Creator'],
+            type: null,
           });
 
           // Return the updated offer
@@ -589,12 +600,13 @@ export class OfferService {
           );
 
           // Send notification (event emitter can be used here)
-          this.notificationService.sendNotification({
+          this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
             creatorId: user.id,
             receiverId: offer.listing.user.id,
             scope: notificationPreference,
             event: NotificationScopesEnum.RESPONSE,
             recipientFormat: ['Seller', 'Offer Creator'],
+            type: null,
           });
 
           // Return the updated offer

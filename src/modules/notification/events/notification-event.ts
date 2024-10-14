@@ -8,6 +8,7 @@ import { NotificationService } from '../services';
 import { OnEvent } from '@nestjs/event-emitter';
 import { NotificationEvent } from 'src/common/enums';
 import { NotificationEventDto } from '../dtos';
+import { SendNotificationInput } from '../../../common/interface';
 
 @Injectable()
 export class NotificationEventListener {
@@ -15,13 +16,12 @@ export class NotificationEventListener {
   constructor(private readonly notificationService: NotificationService) {}
 
   @OnEvent(NotificationEvent.SEND_NOTIFICATION, { async: true })
-  async handleSendUserNotificationEvent(payload: NotificationEventDto) {
+  async handleSendUserNotificationEvent(payload: SendNotificationInput) {
     this.logger.debug(
       `Started Handling ${NotificationEvent.SEND_NOTIFICATION} event.`,
       new Date(),
     );
-    await this.notificationService.handleNotificationEvent(payload.input);
-
+    await this.notificationService.sendNotification(payload);
     this.logger.debug(
       `Finished Handling ${NotificationEvent.SEND_NOTIFICATION}`,
       new Date(),

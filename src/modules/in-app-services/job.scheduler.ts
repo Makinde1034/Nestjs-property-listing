@@ -11,21 +11,40 @@ import { NotificationService } from '../notification/services';
 import { MailgunEmailService } from '../mail/services/implementations';
 import { OfferRepository } from '../listing/repositories';
 
-import { UserRepository } from '../user/repositories';
+import {
+  NotificationScopeRepository,
+  UserRepository,
+} from '../user/repositories';
 import { formatDate } from 'date-fns';
-import { LessThan } from 'typeorm';
+import { Between, LessThan, LessThanOrEqual } from 'typeorm';
 import { OfferListEnum } from '../../common/enums/status.enum';
 import { Injectable, Logger } from '@nestjs/common';
+import { AuctionRepository } from '../listing/repositories/auction.repository';
+import {
+  addDaysToDate,
+  calculateDaysDifference,
+  removeDaysFromDate,
+} from '../../common/utils/helper';
+import { NotificationScopesEnum } from '../../common/enums/notification-scope.enum';
+import { NotificationScope } from '../../entities';
+import { AuctionParticipantRepository } from '../listing/repositories/auction-participant.repository';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { NotificationEvent } from '../../common/enums';
 
 @Injectable()
 export class JobService {
   constructor(
-    private userRepository: UserRepository,
-    private listingRepository: ListingRepository,
-    private searchHistoryRepository: SearchHistoryRepository,
-    private mailService: MailgunEmailService,
-    private pushNotification: NotificationService,
-    private offerRepository: OfferRepository,
+    private readonly userRepository: UserRepository,
+    private readonly listingRepository: ListingRepository,
+    private readonly searchHistoryRepository: SearchHistoryRepository,
+    private readonly mailService: MailgunEmailService,
+    private readonly notificationService: NotificationService,
+    private readonly offerRepository: OfferRepository,
+    private readonly notificationScopeRepository: NotificationScopeRepository,
+    private readonly auctionParticipantRepository: AuctionParticipantRepository,
+    private readonly eventEmiter: EventEmitter2,
+
+    private readonly auctionRepository: AuctionRepository,
   ) {}
   logger = new Logger(JobService.name);
 
@@ -35,6 +54,12 @@ export class JobService {
     await this.sendNotificationForNewListingBasedOnSearchHistory();
     await this.updateListingFeatureStatus();
     await this.updateListingPromotionStatus();
+    await this.notifyUsersAboutUpcomingAuctions();
+  }
+
+  @Cron(CronExpression.EVERY_5_SECONDS)
+  async test() {
+    // Await this.notifyUsersAboutUpcomingAuctions();
   }
 
   @Cron(CronExpression.EVERY_12_HOURS, { timeZone: 'Africa/Cairo' })
@@ -53,7 +78,7 @@ export class JobService {
         relations: ['user'],
       });
 
-      searchHistory.map(async (element) => {
+      searchHistory.forEach(async (element) => {
         const listing = await this.listingRepository.findOne({
           where: {
             price: element.minPrice,
@@ -74,7 +99,7 @@ export class JobService {
       });
 
       await this.mailService.sendSearchHistoryIsNowAvailable(listingArrayMails);
-      this.pushNotification.sendUsersNotification({
+      this.notificationService.sendUsersNotification({
         title: 'New listing',
         message: 'A listing that matches  your search is now available',
         isEmail: false,
@@ -113,7 +138,7 @@ export class JobService {
 
       for (const element of records) {
         if (element.listing.price >= element.price) {
-          this.pushNotification.sendUsersNotification({
+          this.notificationService.sendUsersNotification({
             title: 'New listing',
             message: `This offers created on ${formatDate(element.createdAt, 'MM/dd/yyyy')}, with listing Id: ${element.listingId},
            Seller's name: ${element.user.firstName} ${element.user.lastName},
@@ -180,7 +205,194 @@ export class JobService {
     }
   }
 
-  async NotifyUsersAboutUpcomingAuctions() {
-    await this.userRepository.find();
+  async notifyUsersAboutUpcomingAuctions() {
+    try {
+      const oneMonthNotification = [];
+      let weeklyUpcomingAuction;
+      const currentDate = new Date();
+
+      const [users, auctions] = await Promise.all([
+        this.userRepository.find(),
+        this.auctionRepository.find({
+          order: { startDate: 'DESC' },
+          take: 1,
+          skip: 0,
+          where: {
+            startDate: Between(
+              currentDate,
+              new Date(addDaysToDate(currentDate, 31)),
+            ),
+          },
+        }),
+      ]);
+
+      const notificationPreference =
+        await this.notificationScopeRepository.find();
+
+      //Filter out the correct scope
+      const scope: NotificationScope = notificationPreference.find(
+        (element) => element.name == NotificationScopesEnum.UPCOMING_EVENTS,
+      );
+
+      // Filter auctions for notifications based on time frames
+      auctions.forEach((auction) => {
+        const auctionStartDate = new Date(auction.startDate);
+        const daysUntilStart = calculateDaysDifference(
+          currentDate,
+          auctionStartDate,
+        );
+
+        if (daysUntilStart % 7 == 0) {
+          weeklyUpcomingAuction = auction;
+        }
+        if (daysUntilStart == 30) {
+          oneMonthNotification.push(auction);
+        }
+      });
+
+      // Send notifications to all users for applicable auctions
+      users.forEach((user) => {
+        if (oneMonthNotification.length > 0) {
+          this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
+            creatorId: user.id,
+            scope: scope,
+            event: 'A month before',
+            recipientFormat: ['All platform', null],
+            type: null,
+          });
+        }
+
+        if (weeklyUpcomingAuction.length > 0) {
+          this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
+            creatorId: user.id,
+            scope: scope,
+            event: 'Weekly',
+            recipientFormat: ['All platform', null],
+            type: null,
+            count: calculateDaysDifference(
+              currentDate,
+              weeklyUpcomingAuction.auctionStartDate,
+            ),
+          });
+        }
+      });
+    } catch (error) {
+      this.logger.error(
+        'Failed to notify users about upcoming auctions',
+        error,
+      );
+    }
+  }
+
+  async notifyUsersAboutStartOfAuctionsTheySubscribedTo() {
+    const oneDayNotification = [];
+
+    const auctions = await this.auctionParticipantRepository.find({
+      where: {
+        auction: {
+          startDate: Between(
+            new Date(),
+            new Date(removeDaysFromDate(new Date(), 1)),
+          ),
+        },
+        createdAt: LessThanOrEqual(new Date()),
+      },
+      relations: ['listing', 'listing.user'],
+      select: {
+        id: true,
+        listing: {
+          userId: true,
+          user: {
+            id: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    const notificationPreference =
+      await this.notificationScopeRepository.find();
+    //Filter out the correct scope
+    const scope: NotificationScope = notificationPreference.find((element) => {
+      if (element.name == NotificationScopesEnum.UPCOMING_EVENTS) {
+        return element;
+      }
+    });
+
+    auctions.forEach((element) => {
+      if (
+        element.auction.startDate == new Date(removeDaysFromDate(new Date(), 1))
+      ) {
+        oneDayNotification.push(element);
+      }
+    });
+
+    auctions.forEach((element) => {
+      if (oneDayNotification.length) {
+        this.notificationService.sendNotification({
+          creatorId: element.listing.userId,
+          scope: scope,
+          event: 'Daily',
+          recipientFormat: ['Users enlisted to bid and sellers', null],
+          type: null,
+        });
+      }
+    });
+  }
+
+  async notifyUsersAboutStartOfAuctionsTheySubscribedTo12HoursBefore() {
+    const oneDayNotification = [];
+
+    const auctions = await this.auctionParticipantRepository.find({
+      where: {
+        auction: {
+          startDate: Between(
+            new Date(),
+            new Date(removeDaysFromDate(new Date(), 0.5)),
+          ),
+        },
+        createdAt: LessThanOrEqual(new Date()),
+      },
+      relations: ['listing', 'listing.user'],
+      select: {
+        id: true,
+        listing: {
+          userId: true,
+          user: {
+            id: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    const notificationPreference =
+      await this.notificationScopeRepository.find();
+    //Filter out the correct scope
+    const scope: NotificationScope = notificationPreference.find((element) => {
+      if (element.name == NotificationScopesEnum.UPCOMING_EVENTS) {
+        return element;
+      }
+    });
+
+    auctions.forEach((element) => {
+      if (
+        element.auction.startDate == new Date(removeDaysFromDate(new Date(), 1))
+      ) {
+        oneDayNotification.push(element);
+      }
+    });
+
+    auctions.forEach((element) => {
+      if (oneDayNotification.length) {
+        this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
+          creatorId: element.listing.userId,
+          scope: scope,
+          event: '12- Hour before',
+          recipientFormat: ['Users enlisted to bid and sellers', null],
+          type: null,
+        });
+      }
+    });
   }
 }
