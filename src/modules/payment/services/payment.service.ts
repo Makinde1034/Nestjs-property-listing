@@ -13,7 +13,7 @@ import { HyperPayService } from '../service-providers/hyper-pay.service';
 import { Listing, User } from '../../../entities';
 import {
   InitiatePaymentInput,
-  verifyPaymentInput,
+  VerifyPaymentInput,
 } from '../dto/request/payment.input';
 import { PdfInput } from '../../file-handler/dto/pdf.dto';
 import { PdfService } from '../../file-handler/services/pdf.service';
@@ -27,6 +27,7 @@ import {
   getAappDefaultConfigName,
 } from '../../../config/app-default/app-default';
 import { ConfigService } from '@nestjs/config';
+import { AdminService } from '../../admin/services/admin.service';
 
 @Injectable()
 export class PaymentService {
@@ -39,16 +40,25 @@ export class PaymentService {
     private readonly storageService: StorageService,
     private readonly qrcodeService: QrCodeService,
     private readonly configService: ConfigService,
+    private readonly adminService: AdminService,
   ) {
     this.appDefaultConfig = this.configService.get<AppDefaultConfig>(
       getAappDefaultConfigName(),
     );
   }
+
   logger = new Logger(PaymentService.name);
   async initializePayment(
     createPaymentInput: InitiatePaymentInput,
     user: User,
   ) {
+    let coupon;
+    if (createPaymentInput) {
+      coupon = await this.adminService.isCouponValid(
+        createPaymentInput.coupon,
+        createPaymentInput.amount,
+      );
+    }
     const checkout = await this.hyperPayService.createCheckout(
       createPaymentInput,
       user,
@@ -61,7 +71,7 @@ export class PaymentService {
     };
   }
 
-  async verifyPayment(data: verifyPaymentInput) {
+  async verifyPayment(data: VerifyPaymentInput) {
     const response = await this.hyperPayService.verifyPayment(data.checkoutId);
 
     return {

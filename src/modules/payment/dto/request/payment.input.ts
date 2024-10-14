@@ -5,18 +5,23 @@
 
 import { Field, InputType } from '@nestjs/graphql';
 
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 @InputType()
 export class InitiatePaymentInput {
   @Field({ nullable: true })
   @IsNotEmpty()
+  @IsNumber()
+  amount: number;
+
+  @Field({ nullable: true })
+  @IsNotEmpty()
   @IsString()
-  amount: string;
+  coupon: string;
 }
 
 @InputType()
-export class verifyPaymentInput {
+export class VerifyPaymentInput {
   @Field({ nullable: true })
   @IsNotEmpty()
   @IsString()
@@ -26,11 +31,8 @@ export class verifyPaymentInput {
 export class PerformCopyAndPayInput {
   entityId: string;
   amount: string;
-
   currency: string;
-
   shopperUrl?: string;
-
   paymentType: string;
 }
 

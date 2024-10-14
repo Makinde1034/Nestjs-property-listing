@@ -646,6 +646,7 @@ type Coupon {
   id: String!
   code: String!
   maxUse: Float!
+  currentUse: Float!
   discountType: String!
   discountValue: Float!
   createdAt: DateTime!
@@ -1081,7 +1082,7 @@ type Mutation {
   biometricRegister(RequestInput: BiometricRegister!): LoginResponse!
   biometricLogin(LoginInput: BiometricLogin!): LoginResponse!
   resetPasswordRequest(RequestInput: PasswordResetRequestDto!): SuccessResponse!
-  resetPassword(ResetInput: PasswordResetDto!): SuccessResponse!
+  resetPassword(ResetInput: UserActionInput!): SuccessResponse!
   twoFaLogin(LoginInput: TwoFaLoginInput!): LoginResponse!
   resendEmailConfirmation(RequestInput: ConfirmationInput!): SuccessResponse!
   profileUpdate(RequestInput: UserProfileInput!): User!
@@ -1137,7 +1138,7 @@ type Mutation {
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!
   initializePayment(paymentInput: InitiatePaymentInput!): InitiatePaymentResponse!
-  verifyPayment(verifyPaymentInput: verifyPaymentInput!): verifyPaymentResponse!
+  verifyPayment(verifyPaymentInput: VerifyPaymentInput!): verifyPaymentResponse!
   createCoupon(createCouponsInput: CreateCouponInput!): Coupon!
   updateCoupon(updateCouponsInput: UpdateCouponInput!): Coupon!
   deleteCoupons(deleteCouponsInput: DeleteCouponInput!): SuccessResponse!
@@ -1210,10 +1211,9 @@ input PasswordResetRequestDto {
   email: String!
 }
 
-input PasswordResetDto {
-  token: String!
-  email: String!
-  password: String!
+input UserActionInput {
+  userId: [String!]!
+  action: Boolean!
 }
 
 input TwoFaLoginInput {
@@ -1260,11 +1260,6 @@ input StaffConfirmDto {
   email: String!
   token: String!
   password: String!
-}
-
-input UserActionInput {
-  userId: [String!]!
-  action: Boolean!
 }
 
 input DeleteUserInput {
@@ -1548,10 +1543,11 @@ input UpdateAdPackageInput {
 }
 
 input InitiatePaymentInput {
-  amount: String
+  amount: Float
+  coupon: String
 }
 
-input verifyPaymentInput {
+input VerifyPaymentInput {
   checkoutId: String
 }
 

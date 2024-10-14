@@ -20,6 +20,7 @@ import {
   endOfMonth,
   startOfMonth,
   subMonths,
+  isThisMinute,
 } from 'date-fns';
 
 import { Between, In } from 'typeorm';
@@ -51,18 +52,18 @@ import { generateRandomArray } from '../../../common/utils/helper';
 import slugify from 'slugify';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { AppStrings } from '../../../common/messages/app.strings';
+import { CouponEnum } from '../../../common/enums/coupons.enum';
 
 @Injectable()
 export class AdminService {
   constructor(
     private readonly listingRepository: ListingRepository,
     private readonly offerRepository: OfferRepository,
-    private userRepository: UserRepository,
-    private userTracking: UserTrackingRepository,
-    private issuesRepository: IssueRepository,
-    private ticketsRepository: TicketRepository,
-    private adminRepository: AdminRepository,
-    private couponRepository: CouponRepository,
+    private readonly userRepository: UserRepository,
+    private readonly userTracking: UserTrackingRepository,
+    private readonly ticketsRepository: TicketRepository,
+    private readonly adminRepository: AdminRepository,
+    private readonly couponRepository: CouponRepository,
   ) {}
 
   logger = new Logger(AdminService.name);
@@ -528,6 +529,41 @@ export class AdminService {
   async fetchCoupons() {
     try {
       return await this.couponRepository.find({});
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async isCouponValid(code: string, amount: number) {
+    try {
+      const coupon = await this.couponRepository.findOne({
+        where: { code },
+      });
+      let newAmount;
+
+      if (
+        coupon.endDate > new Date() &&
+        !coupon.deactived &&
+        coupon.maxUse > coupon.currentUse
+      ) {
+        switch (coupon.discountType) {
+          case CouponEnum.NUMBER:
+            newAmount = amount - coupon.discountValue;
+            break;
+
+          case CouponEnum.PERCENT:
+            newAmount = (coupon.discountValue / 100) * amount;
+            break;
+          default:
+            break;
+        }
+        return {
+          valid: true,
+          amount,
+        };
+      }
+      return false;
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);

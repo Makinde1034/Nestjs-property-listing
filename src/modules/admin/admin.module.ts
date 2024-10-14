@@ -62,6 +62,7 @@ import { CouponRepository } from './repositories/coupons.repository';
     UserTrackingRepository,
     TicketRepository,
     CouponRepository,
+    ListingRepository,
   ],
 })
 export class AdminModule {}
