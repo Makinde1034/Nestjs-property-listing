@@ -94,7 +94,7 @@ export class UserResolver {
 
   @UseGuards(AccessTokenGuard, AdminGuard)
   @Mutation(() => SuccessResponse)
-  async resetPassword(
+  async resetPasswordAdmin(
     @Args('ResetInput') ResetInput: UserActionInput,
   ): Promise<SuccessResponse> {
     return await this.userService.resetPassword(ResetInput);
