@@ -540,33 +540,49 @@ export class AdminService {
       const coupon = await this.couponRepository.findOne({
         where: { code },
       });
-      let newAmount;
 
+      if (!coupon) {
+        return { valid: false, message: 'Coupon not found' };
+      }
+
+      // Check if the coupon is valid
       if (
         coupon.endDate > new Date() &&
         !coupon.deactived &&
         coupon.maxUse > coupon.currentUse
       ) {
+        let newAmount = amount;
+
         switch (coupon.discountType) {
           case CouponEnum.NUMBER:
             newAmount = amount - coupon.discountValue;
             break;
 
           case CouponEnum.PERCENT:
-            newAmount = (coupon.discountValue / 100) * amount;
+            newAmount = amount - (coupon.discountValue / 100) * amount;
             break;
+
           default:
             break;
         }
+
         return {
           valid: true,
-          amount,
+          newAmount,
+          message: null,
         };
       }
-      return false;
+
+      return {
+        valid: false,
+        amount,
+        message: 'Coupon is expired, deactivated, or has reached usage limits',
+      };
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        error.message || 'Failed to validate coupon',
+      );
     }
   }
 

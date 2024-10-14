@@ -1082,10 +1082,11 @@ type Mutation {
   biometricRegister(RequestInput: BiometricRegister!): LoginResponse!
   biometricLogin(LoginInput: BiometricLogin!): LoginResponse!
   resetPasswordRequest(RequestInput: PasswordResetRequestDto!): SuccessResponse!
-  resetPassword(ResetInput: UserActionInput!): SuccessResponse!
+  resetPassword(ResetInput: PasswordResetDto!): SuccessResponse!
   twoFaLogin(LoginInput: TwoFaLoginInput!): LoginResponse!
   resendEmailConfirmation(RequestInput: ConfirmationInput!): SuccessResponse!
   profileUpdate(RequestInput: UserProfileInput!): User!
+  resetPasswordAdmin(ResetInput: UserActionInput!): SuccessResponse!
   createStaff(RequestInput: CreateStaffInput!): User!
   staffConfirmation(RequestInput: StaffConfirmDto!): String!
   blockUser(RequestInput: UserActionInput!): SuccessResponse!
@@ -1211,9 +1212,10 @@ input PasswordResetRequestDto {
   email: String!
 }
 
-input UserActionInput {
-  userId: [String!]!
-  action: Boolean!
+input PasswordResetDto {
+  token: String!
+  email: String!
+  password: String!
 }
 
 input TwoFaLoginInput {
@@ -1241,6 +1243,11 @@ input IdentityInput {
   type: String!
   identityNumber: String!
   dateOfExpiry: DateTime!
+}
+
+input UserActionInput {
+  userId: [String!]!
+  action: Boolean!
 }
 
 input CreateStaffInput {
