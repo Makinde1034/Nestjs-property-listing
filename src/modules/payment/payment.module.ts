@@ -13,9 +13,10 @@ import { HttpModule } from '@nestjs/axios';
 import { HyperPayService } from './service-providers/hyper-pay.service';
 import { AdminRepository } from '../admin/repositories/admin.repository';
 import { InvoiceService } from './services/invoice.service';
+import { AdminModule } from '../admin/admin.module';
 
 @Module({
-  imports: [FilehandlerModule, HttpModule],
+  imports: [FilehandlerModule, HttpModule, AdminModule],
   providers: [
     PaymentResolver,
     PaymentService,

@@ -30,6 +30,10 @@ export class Coupon {
 
   @Field()
   @Column()
+  currentUse: number;
+
+  @Field()
+  @Column()
   discountType: string;
 
   @Field()

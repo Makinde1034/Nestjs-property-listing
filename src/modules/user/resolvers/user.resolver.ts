@@ -92,6 +92,14 @@ export class UserResolver {
     return await this.userService.updateProfile(ctx.req.user, inputDto);
   }
 
+  @UseGuards(AccessTokenGuard, AdminGuard)
+  @Mutation(() => SuccessResponse)
+  async resetPassword(
+    @Args('ResetInput') ResetInput: UserActionInput,
+  ): Promise<SuccessResponse> {
+    return await this.userService.resetPassword(ResetInput);
+  }
+
   /**
    * Create Staff User Profile
    *
