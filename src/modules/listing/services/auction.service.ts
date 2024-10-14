@@ -393,8 +393,6 @@ export class AuctionService {
           .getOne(),
       ]);
 
-      console.log(auctionBidRange);
-
       const bidsToMake: CreateBidInput[] = autoBids.map((element) => {
         return {
           listingId: bidInput.listingId,
@@ -418,11 +416,10 @@ export class AuctionService {
   }
 
   /***
-   * calculate the new price to bid based on system's default increment
+   * Calculate the new price to bid based on system's default increment
    */
 
   calculatebidPrice(bidPrice: number, auctionBidRange: AuctionBidRange) {
-    console.log(auctionBidRange);
     const newBidPrice = bidPrice + auctionBidRange.increment * 1000;
     return newBidPrice;
   }

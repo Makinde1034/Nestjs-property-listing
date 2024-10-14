@@ -16,15 +16,20 @@ import {
   UserRepository,
 } from '../user/repositories';
 import { formatDate } from 'date-fns';
-import { LessThan } from 'typeorm';
+import { Between, LessThan, LessThanOrEqual } from 'typeorm';
 import { OfferListEnum } from '../../common/enums/status.enum';
 import { Injectable, Logger } from '@nestjs/common';
 import { AuctionRepository } from '../listing/repositories/auction.repository';
-import { addDaysToDate } from '../../common/utils/helper';
-import { getMessageData } from '../../common/messages/alert-messages';
+import {
+  addDaysToDate,
+  calculateDaysDifference,
+  removeDaysFromDate,
+} from '../../common/utils/helper';
 import { NotificationScopesEnum } from '../../common/enums/notification-scope.enum';
 import { NotificationScope } from '../../entities';
 import { AuctionParticipantRepository } from '../listing/repositories/auction-participant.repository';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { NotificationEvent } from '../../common/enums';
 
 @Injectable()
 export class JobService {
@@ -37,6 +42,7 @@ export class JobService {
     private readonly offerRepository: OfferRepository,
     private readonly notificationScopeRepository: NotificationScopeRepository,
     private readonly auctionParticipantRepository: AuctionParticipantRepository,
+    private readonly eventEmiter: EventEmitter2,
 
     private readonly auctionRepository: AuctionRepository,
   ) {}
@@ -48,6 +54,12 @@ export class JobService {
     await this.sendNotificationForNewListingBasedOnSearchHistory();
     await this.updateListingFeatureStatus();
     await this.updateListingPromotionStatus();
+    await this.notifyUsersAboutUpcomingAuctions();
+  }
+
+  @Cron(CronExpression.EVERY_5_SECONDS)
+  async test() {
+    // Await this.notifyUsersAboutUpcomingAuctions();
   }
 
   @Cron(CronExpression.EVERY_12_HOURS, { timeZone: 'Africa/Cairo' })
@@ -66,7 +78,7 @@ export class JobService {
         relations: ['user'],
       });
 
-      searchHistory.map(async (element) => {
+      searchHistory.forEach(async (element) => {
         const listing = await this.listingRepository.findOne({
           where: {
             price: element.minPrice,
@@ -193,16 +205,110 @@ export class JobService {
     }
   }
 
-  async NotifyUsersAboutUpcomingAuctions() {
-    let oneMonthNotification = [];
-    let oneWeekNotification = [];
-    let threeDaysNotification = [];
-    let oneDayNotification = [];
+  async notifyUsersAboutUpcomingAuctions() {
+    try {
+      const oneMonthNotification = [];
+      let weeklyUpcomingAuction;
+      const currentDate = new Date();
 
-    const [users, auctions] = await Promise.all([
-      this.userRepository.find(),
-      this.auctionRepository.find(),
-    ]);
+      const [users, auctions] = await Promise.all([
+        this.userRepository.find(),
+        this.auctionRepository.find({
+          order: { startDate: 'DESC' },
+          take: 1,
+          skip: 0,
+          where: {
+            startDate: Between(
+              currentDate,
+              new Date(addDaysToDate(currentDate, 31)),
+            ),
+          },
+        }),
+      ]);
+
+      const notificationPreference =
+        await this.notificationScopeRepository.find();
+
+      //Filter out the correct scope
+      const scope: NotificationScope = notificationPreference.find(
+        (element) => element.name == NotificationScopesEnum.UPCOMING_EVENTS,
+      );
+
+      // Filter auctions for notifications based on time frames
+      auctions.forEach((auction) => {
+        const auctionStartDate = new Date(auction.startDate);
+        const daysUntilStart = calculateDaysDifference(
+          currentDate,
+          auctionStartDate,
+        );
+
+        if (daysUntilStart % 7 == 0) {
+          weeklyUpcomingAuction = auction;
+        }
+        if (daysUntilStart == 30) {
+          oneMonthNotification.push(auction);
+        }
+      });
+
+      // Send notifications to all users for applicable auctions
+      users.forEach((user) => {
+        if (oneMonthNotification.length > 0) {
+          this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
+            creatorId: user.id,
+            scope: scope,
+            event: 'A month before',
+            recipientFormat: ['All platform', null],
+            type: null,
+          });
+        }
+
+        if (weeklyUpcomingAuction.length > 0) {
+          this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
+            creatorId: user.id,
+            scope: scope,
+            event: 'Weekly',
+            recipientFormat: ['All platform', null],
+            type: null,
+            count: calculateDaysDifference(
+              currentDate,
+              weeklyUpcomingAuction.auctionStartDate,
+            ),
+          });
+        }
+      });
+    } catch (error) {
+      this.logger.error(
+        'Failed to notify users about upcoming auctions',
+        error,
+      );
+    }
+  }
+
+  async notifyUsersAboutStartOfAuctionsTheySubscribedTo() {
+    const oneDayNotification = [];
+
+    const auctions = await this.auctionParticipantRepository.find({
+      where: {
+        auction: {
+          startDate: Between(
+            new Date(),
+            new Date(removeDaysFromDate(new Date(), 1)),
+          ),
+        },
+        createdAt: LessThanOrEqual(new Date()),
+      },
+      relations: ['listing', 'listing.user'],
+      select: {
+        id: true,
+        listing: {
+          userId: true,
+          user: {
+            id: true,
+            email: true,
+          },
+        },
+      },
+    });
 
     const notificationPreference =
       await this.notificationScopeRepository.find();
@@ -214,63 +320,50 @@ export class JobService {
     });
 
     auctions.forEach((element) => {
-      if (element.startDate == new Date(addDaysToDate(new Date(), 1))) {
+      if (
+        element.auction.startDate == new Date(removeDaysFromDate(new Date(), 1))
+      ) {
         oneDayNotification.push(element);
-      }
-      if (element.startDate == new Date(addDaysToDate(new Date(), 3))) {
-        threeDaysNotification.push(element);
-      }
-      if (element.startDate == new Date(addDaysToDate(new Date(), 7))) {
-        oneWeekNotification.push(element);
-      }
-      if (element.startDate == new Date(addDaysToDate(new Date(), 30))) {
-        oneMonthNotification.push(element);
       }
     });
 
-    const userArray = users.map((element) => {
-      if (oneMonthNotification.length > 0) {
-        this.notificationService.sendNotification({
-          creatorId: element.id,
-          scope: scope,
-          event: NotificationScopesEnum.UPCOMING_EVENTS,
-          recipientFormat: ['All platform', null],
-        });
-      }
-      if (oneWeekNotification.length > 0) {
-        this.notificationService.sendNotification({
-          creatorId: element.id,
-          scope: scope,
-          event: NotificationScopesEnum.UPCOMING_EVENTS,
-          recipientFormat: ['All platform', null],
-        });
-      }
-      if (threeDaysNotification.length > 0) {
-        this.notificationService.sendNotification({
-          creatorId: element.id,
-          scope: scope,
-          event: NotificationScopesEnum.UPCOMING_EVENTS,
-          recipientFormat: ['All platform', null],
-        });
-      }
+    auctions.forEach((element) => {
       if (oneDayNotification.length) {
         this.notificationService.sendNotification({
-          creatorId: element.id,
+          creatorId: element.listing.userId,
           scope: scope,
-          event: NotificationScopesEnum.UPCOMING_EVENTS,
-          recipientFormat: ['All platform', null],
+          event: 'Daily',
+          recipientFormat: ['Users enlisted to bid and sellers', null],
+          type: null,
         });
       }
-
-      return element.email;
     });
   }
 
-  async NotifyUsersAboutStartOfAuctionsTheySubscribedTo() {
-    let oneDayNotification = [];
+  async notifyUsersAboutStartOfAuctionsTheySubscribedTo12HoursBefore() {
+    const oneDayNotification = [];
 
     const auctions = await this.auctionParticipantRepository.find({
-      relations: ['user'],
+      where: {
+        auction: {
+          startDate: Between(
+            new Date(),
+            new Date(removeDaysFromDate(new Date(), 0.5)),
+          ),
+        },
+        createdAt: LessThanOrEqual(new Date()),
+      },
+      relations: ['listing', 'listing.user'],
+      select: {
+        id: true,
+        listing: {
+          userId: true,
+          user: {
+            id: true,
+            email: true,
+          },
+        },
+      },
     });
 
     const notificationPreference =
@@ -283,22 +376,23 @@ export class JobService {
     });
 
     auctions.forEach((element) => {
-      if (element.startDate == new Date(addDaysToDate(new Date(), 1))) {
+      if (
+        element.auction.startDate == new Date(removeDaysFromDate(new Date(), 1))
+      ) {
         oneDayNotification.push(element);
       }
     });
 
-    const userArray = users.map((element) => {
+    auctions.forEach((element) => {
       if (oneDayNotification.length) {
-        this.notificationService.sendNotification({
-          creatorId: element.id,
+        this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
+          creatorId: element.listing.userId,
           scope: scope,
-          event: NotificationScopesEnum.UPCOMING_EVENTS,
-          recipientFormat: ['All platform', null],
+          event: '12- Hour before',
+          recipientFormat: ['Users enlisted to bid and sellers', null],
+          type: null,
         });
       }
-
-      return element.email;
     });
   }
 }

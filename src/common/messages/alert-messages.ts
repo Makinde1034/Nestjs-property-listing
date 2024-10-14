@@ -9,6 +9,7 @@ export function getMessageData(
   event?: string,
   scope?: string,
   recipients?: string,
+  countInEnglish?: number,
 ) {
   const response = [];
 
@@ -222,10 +223,10 @@ export function getMessageData(
       'System Notification': true,
       recipients: 'All platform',
       title: 'Auction Alert',
-      body: `Hi ${username}, just X weeks to go until our upcoming auction! Make sure to check out the listings or enlist your own properties.`,
+      body: `Hi ${username}, just ${countInEnglish} weeks to go until our upcoming auction! Make sure to check out the listings or enlist your own properties.`,
       arabicTitle: 'تنبيه المزاد',
       arabicBody:
-        'مرحبًا [الاسم الأول]، فقط X أسابيع حتى مزادنا القادم! تأكد من مراجعة القوائم أو إدراج عقاراتك.',
+        'مرحبًا [الاسم الأول]، فقط [X] أسابيع حتى مزادنا القادم! تأكد من مراجعة القوائم أو إدراج عقاراتك.',
     },
     {
       scope: 'Upcoming Auctions',

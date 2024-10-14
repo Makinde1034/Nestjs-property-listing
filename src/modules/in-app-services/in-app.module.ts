@@ -22,6 +22,7 @@ import { Notification, NotificationScope } from '../../entities';
 import { NotificationRepository } from '../notification/repositories';
 import { TicketRepository } from '../tickets/repositories';
 import { AuctionRepository } from '../listing/repositories/auction.repository';
+import { AuctionParticipantRepository } from '../listing/repositories/auction-participant.repository';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Notification, NotificationScope])],
@@ -38,6 +39,7 @@ import { AuctionRepository } from '../listing/repositories/auction.repository';
     TicketRepository,
     AuctionRepository,
     NotificationScopeRepository,
+    AuctionParticipantRepository,
   ],
 })
 export class InAppModule {}

@@ -9,6 +9,7 @@ import {
   Headers,
   HttpCode,
   HttpStatus,
+  Logger,
   Post,
 } from '@nestjs/common';
 import { WebHookPaymentResponse } from './dto/wehook.response';
@@ -30,6 +31,7 @@ export class WebHookController {
       getWebhookConfigName(),
     );
   }
+  logger = new Logger(WebHookController.name);
   @Post('webhook/payment')
   @HttpCode(200)
   Payment(
@@ -45,7 +47,7 @@ export class WebHookController {
   @Post('api/v1/user/iam')
   @HttpCode(200)
   User(@Body() natafh: any) {
-    console.log(natafh);
+    this.logger.log(natafh);
     return HttpStatus.OK;
   }
 }

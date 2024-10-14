@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { Logger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { Seeder, SeederFactoryManager } from 'typeorm-extension';

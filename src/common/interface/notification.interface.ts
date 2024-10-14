@@ -3,6 +3,8 @@
  * For license. See license.txt
  */
 
+import { NotificationScope } from '../../entities';
+
 export interface EmailNotificationPayload {
   title: string;
   message: string;
@@ -21,4 +23,14 @@ export interface NotificationEventInput {
   isEmail: boolean;
   isPushNotification: boolean;
   deepLink?: string;
+  data?: SendNotificationInput;
+}
+export interface SendNotificationInput {
+  creatorId: string;
+  receiverId?: string;
+  scope: NotificationScope;
+  event: string;
+  recipientFormat?: [string, string];
+  type: string;
+  count?: number;
 }
