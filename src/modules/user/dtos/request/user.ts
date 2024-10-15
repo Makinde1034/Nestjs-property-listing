@@ -26,7 +26,7 @@ export class UserFilter extends PaginateAndSort {
   @IsArray()
   status: string[];
 
-  @Field()
+  @Field({ nullable: true })
   @IsOptional()
   @IsBoolean()
   isBlocked: boolean;
