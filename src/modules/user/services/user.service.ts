@@ -571,6 +571,7 @@ export class UserService {
         ...(level && { userLevel: level }),
         ...(status && { status: In(status) }),
         isBlocked: isBlocked ?? undefined,
+        userType: UserProfileTypeEnum.INDIVIDUAL,
       };
 
       // Build order options
