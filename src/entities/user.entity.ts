@@ -129,6 +129,10 @@ export class User extends BaseEntity {
   @Field({ nullable: true })
   twoFaRequired: boolean;
 
+  @Column({ default: false })
+  @Field({ nullable: true })
+  isBlocked: boolean;
+
   @Field(() => [Review], { nullable: true })
   @OneToMany(() => Review, (review) => review.user, { cascade: true })
   review: Review[];

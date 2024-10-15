@@ -380,6 +380,7 @@ type User {
   address: String
   biometricKey: String
   twoFaRequired: Boolean
+  isBlocked: Boolean
   review: [Review!]
   listing: [Listing!]
   offer: [Offer!]
