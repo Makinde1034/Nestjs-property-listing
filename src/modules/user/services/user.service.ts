@@ -856,11 +856,10 @@ export class UserService {
       notFoundIds.push(...userId.filter((id) => !foundUserIds.includes(id)));
     }
 
-    const status = action ? UserStatus.DISABLED : UserStatus.ACTIVE;
     const disabledAt = action ? new Date() : null;
 
     users.forEach((user) => {
-      usersToUpdate.push({ id: user.id, status, disabledAt });
+      usersToUpdate.push({ id: user.id, isBlocked: action, disabledAt });
     });
 
     const updatedUsers = await this.usersRepository.save(usersToUpdate);

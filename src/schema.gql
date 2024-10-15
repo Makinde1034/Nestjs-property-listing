@@ -444,6 +444,7 @@ type User {
   autoBidEnable: Boolean!
   biometricKey: String
   twoFaRequired: Boolean
+  isBlocked: Boolean
   review: [Review!]
   listing: [Listing!]
   offer: [Offer!]
