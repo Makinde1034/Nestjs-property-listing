@@ -600,6 +600,8 @@ export class UserService {
         .orWhere('user.employeeId LIKE :term', { term: `%${searchParam}%` })
         .orWhere('role.arabicName LIKE :term', { term: `%${searchParam}%` })
         .orWhere('role.englishName LIKE :term', { term: `%${searchParam}%` })
+        .take(10)
+
         .getMany();
     } catch (error) {
       this.logger.log(error);

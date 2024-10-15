@@ -22,6 +22,8 @@ import {
 } from '../dto/request/knowledg-base.category.input';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { ArticleResponse } from '../dto/response/article';
+import { UseGuards } from '@nestjs/common';
+import { AccessTokenGuard } from '../../auth/guards';
 
 @Resolver(() => Article)
 export class KnowledgeBaseAndHelpResolver {
@@ -111,5 +113,13 @@ export class KnowledgeBaseAndHelpResolver {
     @Args('updateArticleInput') updateArticleInput: UpdateArticleInput,
   ) {
     return await this.articleService.update(updateArticleInput);
+  }
+
+  @Query(() => [Category], { name: 'searchForCategory' })
+  @UseGuards(AccessTokenGuard)
+  async searchForSplashScreen(@Args('searchParam') searchParam: string) {
+    return await this.knowledgeBaseCategoryService.searchForCategory(
+      searchParam,
+    );
   }
 }

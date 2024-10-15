@@ -26,7 +26,7 @@ import { SplashScreen } from '../../../entities/splash-screen.entity';
 @Injectable()
 export class SplashScreenService {
   constructor(
-    private splashScreenRepository: SplashScreenRepository,
+    private readonly splashScreenRepository: SplashScreenRepository,
     private readonly storageService: StorageService,
   ) {}
   logger = new Logger(SplashScreenService.name);
@@ -170,6 +170,25 @@ export class SplashScreenService {
     } catch (error) {
       this.logger.log(error);
       throw new NotFoundException(AppStrings.NOT_FOUND);
+    }
+  }
+  async searchForSplashScreen(searchParam: string) {
+    try {
+      return this.splashScreenRepository
+        .createQueryBuilder('splashScreen')
+
+        .orWhere('splashScreen.title LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+        .orWhere('splashScreen.placement LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+
+        .take(10)
+        .getMany();
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
     }
   }
 }

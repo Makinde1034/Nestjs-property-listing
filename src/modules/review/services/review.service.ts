@@ -130,4 +130,30 @@ export class ReviewService {
 
     return averageRating;
   }
+
+  async searchForReview(searchParam: string) {
+    try {
+      return this.reviewRepository
+        .createQueryBuilder('review')
+        .leftJoinAndSelect('review.user', 'user')
+
+        .orWhere('user.name LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+
+        .orWhere('review.rating LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+
+        .orWhere('review.service LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+
+        .take(10)
+        .getMany();
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
 }

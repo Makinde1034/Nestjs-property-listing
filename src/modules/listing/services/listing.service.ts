@@ -1847,6 +1847,7 @@ export class ListingService {
         .orWhere('listingType.arabicName LIKE :term', {
           term: `%${searchParam}%`,
         })
+        .take(10)
 
         .getMany();
     } catch (error) {

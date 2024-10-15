@@ -12,6 +12,8 @@ import {
 import { SplashScreenService } from '../services/splash-screen.service';
 import { SplashScreenResponse } from '../dto/response/splash-screen-response';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
+import { UseGuards } from '@nestjs/common';
+import { AccessTokenGuard } from '../../auth/guards';
 
 @Resolver()
 export class SplashScreenResolver {
@@ -49,5 +51,11 @@ export class SplashScreenResolver {
   @Query(() => SplashScreenResponse, { name: 'findDefaultSplashScreen' })
   async findDefault() {
     return await this.splashScreenService.fetchDefault();
+  }
+
+  @Query(() => [SplashScreen], { name: 'searchForSplashScreen' })
+  @UseGuards(AccessTokenGuard)
+  async searchForSplashScreen(@Args('searchParam') searchParam: string) {
+    return await this.splashScreenService.searchForSplashScreen(searchParam);
   }
 }

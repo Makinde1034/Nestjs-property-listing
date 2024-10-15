@@ -22,6 +22,14 @@ export class SplashScreen {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
+  title: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  placement: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   image: string;
 
   @Column({ default: false })

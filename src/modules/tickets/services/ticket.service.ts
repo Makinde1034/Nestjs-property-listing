@@ -334,4 +334,67 @@ export class TicketService {
       throw new BadRequestException(error);
     }
   }
+
+  async searchForTickets(searchParam: string) {
+    try {
+      return this.ticketRepository
+        .createQueryBuilder('ticket')
+        .leftJoinAndSelect('ticket.reporter', 'user')
+        .leftJoinAndSelect('ticket.parentIssue', 'parentIssue')
+        .leftJoinAndSelect('ticket.childIssue', 'childIssue')
+
+        .orWhere('user.firstName LIKE :term', { term: `%${searchParam}%` })
+        .orWhere('user.arablicFirstName LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+
+        .orWhere('parentIssue.arabicName LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+
+        .orWhere('parrentIssue.englishName LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+        .orWhere('clildIssue.arabicName LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+
+        .orWhere('clildIssue.englishName LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+        .getMany();
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async searchForResponseTemplate(searchParam: string) {
+    try {
+      return this.responseTemplateRepostiory
+        .createQueryBuilder('responseTemplate')
+
+        .orWhere('responseTemplate.templateText LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+
+        .orWhere('responseTemplate.templateArabicText LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+
+        .orWhere('responseTemplate.templateArabicName LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+
+        .orWhere('responseTemplate.templateName LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+        .take(10)
+
+        .getMany();
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
 }

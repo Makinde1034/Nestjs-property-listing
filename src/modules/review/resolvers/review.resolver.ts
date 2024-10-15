@@ -47,4 +47,10 @@ export class ReviewResolver {
       await this.reviewService.findAll(findManyOption);
     return { reviews, total, averageRating };
   }
+
+  @Query(() => [Review], { name: 'searchForReview' })
+  @UseGuards(AccessTokenGuard)
+  async searchForReview(@Args('searchParam') searchParam: string) {
+    return await this.reviewService.searchForReview(searchParam);
+  }
 }

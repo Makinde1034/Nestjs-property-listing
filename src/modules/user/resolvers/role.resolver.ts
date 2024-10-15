@@ -49,7 +49,7 @@ export class RoleResolver {
 
   @Query(() => [Role], { name: 'searchForRoles' })
   @UseGuards(AccessTokenGuard)
-  async searchForUser(@Args('searchParam') searchParam: string) {
+  async searchForRole(@Args('searchParam') searchParam: string) {
     return await this.roleService.searchForRole(searchParam);
   }
 
@@ -64,7 +64,6 @@ export class RoleResolver {
 
   /**
    * Create Role
-   *
    * @async
    * @param {RoleInputDto} RequestInput
    * @returns {Promise<Role>}
@@ -110,8 +109,7 @@ export class RoleResolver {
 
   /**
    * Get User roles
-   *
-   * @returns { Promise<User>}
+   * @returns { Promise<Role[]>}
    */
   @Query(() => [Role])
   @UseGuards(AccessTokenGuard)
