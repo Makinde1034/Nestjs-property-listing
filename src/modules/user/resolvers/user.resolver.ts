@@ -47,10 +47,10 @@ export class UserResolver {
     return await this.userService.findUserById(id, ['roles']);
   }
 
-  @Query(() => [User], { name: 'searchForUser' })
+  @Query(() => [User], { name: 'searchForUsers' })
   @UseGuards(AccessTokenGuard)
   async searchForUser(@Args('searchParam') searchParam: string) {
-    return await this.userService.findUserByEmailPhoneOrName(searchParam);
+    return await this.userService.searchForUsers(searchParam);
   }
 
   @Query(() => UserResponse, { name: 'findAllUser' })
@@ -102,7 +102,6 @@ export class UserResolver {
 
   /**
    * Create Staff User Profile
-   *
    * @async
    * @param {CreateStaffInput} inputDto
    * @returns {Promise<User>}

@@ -832,12 +832,13 @@ type Query {
   activateTwoFa: TwoFaResult!
   user: User!
   getOneUser(id: String!): User!
-  searchForUser(searchParam: String!): [User!]!
+  searchForUsers(searchParam: String!): [User!]!
   findAllUser(userFilterInput: UserFilter!): UserResponse!
   getEmployees(userFilterInput: UserFilter): UserResponse!
   findAllCustomers(userFilterInput: UserFilter!): UserResponse!
   permissions: [Permission!]!
   roles: [RoleData!]!
+  searchForRoles(searchParam: String!): [Role!]!
   rolesAndUser(paginateAndSort: PaginateAndSort!): [Role!]!
   getUserRoles: [Role!]!
   getRole(id: Float!): Role!
@@ -874,6 +875,7 @@ type Query {
   getAllAuction(findManyOption: PaginateAndSort!): AuctionResponse!
   getListingsAuction(findManyOption: PaginateAndSort!): AuctionParticipantResponse!
   findNewestBid(findBidInput: FindBidInput!): [Bids!]!
+  searchForListing(searchParam: String!): [Listing!]!
   adPackages: [AdPackage!]!
   adPackage(id: String!): AdPackage!
   fetchInvoice(findOption: PaginateAndSort!): InvoiceResponse!

@@ -317,4 +317,21 @@ export class RoleService {
       requiredPermissions.includes(permission.slug),
     );
   }
+
+  async searchForRole(searchParam: string) {
+    try {
+      return this.roleRepository
+        .createQueryBuilder('role')
+
+        .orWhere('user.status LIKE :term', { term: `%${searchParam}%` })
+
+        .orWhere('role.arabicName LIKE :term', { term: `%${searchParam}%` })
+
+        .orWhere('role.englishName LIKE :term', { term: `%${searchParam}%` })
+        .getMany();
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
 }

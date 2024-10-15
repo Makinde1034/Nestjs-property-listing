@@ -451,11 +451,10 @@ export class UserService {
 
     return { url: imageurl };
   }
-  /********************************
-   *
+
+  /****************
    * ADMIN
-   *
-   *********************************/
+   ****************/
   async assignRoleToUser(assignRoleInput: AssignRoleInput) {
     try {
       // Find the roles based on the provided role IDs
@@ -586,40 +585,25 @@ export class UserService {
       throw new BadRequestException('Failed to retrieve customer');
     }
   }
-  async findUserByEmailPhoneOrName(searchParam: string) {
+
+  async searchForUsers(searchParam: string) {
     try {
-      const valueToSearch = checkIfEmailNameOrPhoneNumber(searchParam);
-
-      switch (valueToSearch) {
-        case 'email': {
-          return await this.usersRepository.find({
-            where: { email: Like(searchParam) },
-          });
-        }
-
-        case 'name': {
-          return await this.usersRepository.find({
-            where: [
-              { firstName: Like(`%${searchParam}%`) },
-              { lastName: Like(`%${searchParam}%`) },
-              { arabicFirstName: Like(`%${searchParam}%`) },
-              { arabicLastName: Like(`%${searchParam}%`) },
-            ],
-          });
-        }
-
-        case 'phoneNumber': {
-          return await this.usersRepository.find({
-            where: { phone: Like(searchParam) },
-          });
-        }
-
-        default:
-          throw new BadRequestException(AppStrings.NOT_FOUND);
-      }
+      return this.usersRepository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.roles', 'role')
+        .where('user.firstName LIKE :term', { term: `%${searchParam}%` })
+        .orWhere('user.lastName LIKE :term', { term: `%${searchParam}%` })
+        .orWhere('user.userType LIKE :term', { term: `%${searchParam}%` })
+        .orWhere('user.userLevel LIKE :term', { term: `%${searchParam}%` })
+        .orWhere('user.email LIKE :term', { term: `%${searchParam}%` })
+        .orWhere('user.status LIKE :term', { term: `%${searchParam}%` })
+        .orWhere('user.employeeId LIKE :term', { term: `%${searchParam}%` })
+        .orWhere('role.arabicName LIKE :term', { term: `%${searchParam}%` })
+        .orWhere('role.englishName LIKE :term', { term: `%${searchParam}%` })
+        .getMany();
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error.error);
+      throw new BadRequestException(error);
     }
   }
 
