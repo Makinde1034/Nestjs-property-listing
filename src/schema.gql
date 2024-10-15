@@ -942,6 +942,7 @@ input UserFilter {
   where: WhereOption
   level: String
   status: [String!]
+  isBlocked: Boolean!
   type: [String!]
   roles: [Float!]
 }

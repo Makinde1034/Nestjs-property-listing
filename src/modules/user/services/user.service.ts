@@ -499,6 +499,7 @@ export class UserService {
         sortField,
         directionToSort,
         take,
+        isBlocked,
         skip,
       } = userFilterInput;
 
@@ -515,6 +516,7 @@ export class UserService {
         ...(status && { status: In(status) }),
         ...(roles && { roles: { id: In(roles) } }),
         ...(type && { type: In(type) }),
+        isBlocked: isBlocked ?? undefined,
       };
 
       // Build order options
@@ -547,8 +549,15 @@ export class UserService {
 
   async findAllCustomers(userFilterInput: UserFilter) {
     try {
-      const { level, status, sortField, directionToSort, take, skip } =
-        userFilterInput;
+      const {
+        level,
+        status,
+        sortField,
+        directionToSort,
+        isBlocked,
+        take,
+        skip,
+      } = userFilterInput;
 
       // Validate sort direction
       const validSortDirections = ['ASC', 'DESC'];
@@ -559,9 +568,9 @@ export class UserService {
 
       // Build where options
       const whereOptions: any = {
-        level: level ?? undefined,
-        status: status ?? undefined,
-        userType: UserProfileTypeEnum.INDIVIDUAL,
+        ...(level && { userLevel: level }),
+        ...(status && { status: In(status) }),
+        isBlocked: isBlocked ?? undefined,
       };
 
       // Build order options
@@ -708,6 +717,7 @@ export class UserService {
       throw new BadRequestException(error);
     }
   }
+
   async updateUserData(input: UpdateUserData): Promise<User> {
     try {
       let roles: Role[];
@@ -730,8 +740,16 @@ export class UserService {
   }
   async getEmployees(userFilterInput: UserFilter) {
     try {
-      const { level, status, type, sortField, directionToSort, take, skip } =
-        userFilterInput;
+      const {
+        level,
+        status,
+        type,
+        sortField,
+        isBlocked,
+        directionToSort,
+        take,
+        skip,
+      } = userFilterInput;
 
       // Validate sort direction
       const validSortDirections = ['ASC', 'DESC'];
@@ -742,11 +760,11 @@ export class UserService {
 
       // Build where options
       const whereOptions: any = {
-        userLevel: level ?? undefined,
-        status: status ?? undefined,
-        type: type ?? undefined,
+        ...(level && { userLevel: level }),
+        ...(status && { status: In(status) }),
+        ...(type && { type: In(type) }),
+        isBlocked: isBlocked ?? undefined,
       };
-
       // Build order options
       const orderOptions = sortField ? { [sortField]: direction || 'ASC' } : {};
 
@@ -896,7 +914,6 @@ export class UserService {
       updatedUsers,
     );
   }
-
   async enableAutoBid(user: User) {
     try {
       return await this.usersRepository.update(user.id, {
