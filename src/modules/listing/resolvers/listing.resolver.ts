@@ -618,4 +618,9 @@ export class ListingResolver {
       ctx.req.user,
     );
   }
+  @Query(() => [Listing], { name: 'searchForListing' })
+  @UseGuards(AccessTokenGuard)
+  async searchForListing(@Args('searchParam') searchParam: string) {
+    return await this.listingService.searchForListing(searchParam);
+  }
 }

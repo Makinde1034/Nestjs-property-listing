@@ -5,7 +5,13 @@
 
 import { Field, InputType } from '@nestjs/graphql';
 import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
-import { IsArray, IsEnum, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsEnum,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { UserLevelEnum } from '../../../../common/enums';
 @InputType()
 export class UserFilter extends PaginateAndSort {
@@ -19,6 +25,11 @@ export class UserFilter extends PaginateAndSort {
   @IsOptional()
   @IsArray()
   status: string[];
+
+  @Field()
+  @IsOptional()
+  @IsBoolean()
+  isBlocked: boolean;
 
   @Field(() => [String], { nullable: true })
   @IsOptional()

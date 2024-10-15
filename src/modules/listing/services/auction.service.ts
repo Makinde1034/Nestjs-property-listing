@@ -26,7 +26,7 @@ import { CreateBidInput, FindBidInput } from '../dtos/request/bids';
 import { generateOtp } from '../../../common/utils/functions';
 import { User } from '../../../entities';
 import { AdminService } from '../../admin/services/admin.service';
-import { LessThan, QueryFailedError } from 'typeorm';
+import { QueryFailedError } from 'typeorm';
 import { AutoBidRepository } from '../repositories/auto-bid.repository';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { CreateAutoBidInput } from '../dtos/request/auto-bid';
@@ -435,6 +435,26 @@ export class AuctionService {
         take: 10,
         skip: 0,
       });
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async searchForAuction(searchParam: string) {
+    try {
+      return this.auctionRepository
+        .createQueryBuilder('auction')
+
+        .orWhere('auction.titleInArabic LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+        .orWhere('auction.titleInArabic LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+
+        .take(10)
+        .getMany();
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);

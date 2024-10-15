@@ -30,7 +30,7 @@ export class ArticleService {
   constructor(
     private readonly articleRepository: ArticleRepository,
     private readonly knowledgeBaseCategoryRepository: KnowledgeBaseCategoryRepository,
-    private storageService: StorageService,
+    private readonly storageService: StorageService,
   ) {}
   logger = new Logger(ArticleService.name);
   async create(createArticleInput: CreateArticleInput) {
@@ -245,6 +245,34 @@ export class ArticleService {
           error.message || 'An unexpected error occurred during image upload',
         );
       }
+    }
+  }
+
+  async searchForArticles(searchParam: string) {
+    try {
+      return this.articleRepository
+        .createQueryBuilder('article')
+        .leftJoinAndSelect('author.user', 'user')
+        .orWhere('article.title LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+        .orWhere('article.placement LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+        .orWhere('article.title LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+        .orWhere('user.firstName LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+        .orWhere('user.arabicFirstName LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+        .take(10)
+        .getMany();
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
     }
   }
 }

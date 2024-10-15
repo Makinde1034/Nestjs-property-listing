@@ -47,6 +47,12 @@ export class RoleResolver {
     return await this.roleService.findAllRoles();
   }
 
+  @Query(() => [Role], { name: 'searchForRoles' })
+  @UseGuards(AccessTokenGuard)
+  async searchForRole(@Args('searchParam') searchParam: string) {
+    return await this.roleService.searchForRole(searchParam);
+  }
+
   @Query(() => [Role], { name: 'rolesAndUser' })
   @Permissions('read-role')
   @UseGuards(AccessTokenGuard, PermissionsGuard)
@@ -58,7 +64,6 @@ export class RoleResolver {
 
   /**
    * Create Role
-   *
    * @async
    * @param {RoleInputDto} RequestInput
    * @returns {Promise<Role>}
@@ -104,8 +109,7 @@ export class RoleResolver {
 
   /**
    * Get User roles
-   *
-   * @returns { Promise<User>}
+   * @returns { Promise<Role[]>}
    */
   @Query(() => [Role])
   @UseGuards(AccessTokenGuard)

@@ -32,7 +32,7 @@ import { CreatePromotionInput } from '../dtos/request/promotion-input';
 import { PromotionRepository } from '../repositories/promotion.repository';
 
 import { AdPackageService } from '../../ad-package/services/ad-package.service';
-import { Between, In, LessThan, MoreThan, QueryFailedError } from 'typeorm';
+import { Between, In, LessThan, MoreThan } from 'typeorm';
 
 import { addDaysToDate, haversine } from '../../../common/utils/helper';
 import { FlagListingRepository } from '../repositories/flag-listing.repository';
@@ -1826,6 +1826,33 @@ export class ListingService {
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error.message || 'An error occurred');
+    }
+  }
+
+  async searchForListing(searchParam: string) {
+    try {
+      return this.listingRepository
+        .createQueryBuilder('listing')
+        .leftJoinAndSelect('listing.user', 'user')
+        .leftJoinAndSelect('listing.listingType', 'listingType')
+
+        .where('listing.title LIKE :term', { term: `%${searchParam}%` })
+        .orWhere('user.lastName LIKE :term', { term: `%${searchParam}%` })
+        .orWhere('user.firstName LIKE :term', { term: `%${searchParam}%` })
+
+        .orWhere('listingType.englishName LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+
+        .orWhere('listingType.arabicName LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+        .take(10)
+
+        .getMany();
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
     }
   }
 }

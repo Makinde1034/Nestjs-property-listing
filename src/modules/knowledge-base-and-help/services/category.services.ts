@@ -133,4 +133,23 @@ export class KnowledgeBaseCategoryService {
       }
     }
   }
+
+  async searchForCategory(searchParam: string) {
+    try {
+      return this.knowledgeBaseCategoryRepository
+        .createQueryBuilder('category')
+
+        .orWhere('category.englishName LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+        .orWhere('category.arabicName LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+        .take(10)
+        .getMany();
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
 }

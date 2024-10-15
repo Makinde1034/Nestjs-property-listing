@@ -166,4 +166,16 @@ export class TicketsResolver {
       updateResponseTemplateInput,
     );
   }
+
+  @Query(() => [Ticket], { name: 'searchForTickets' })
+  @UseGuards(AccessTokenGuard)
+  async searchForTickets(@Args('searchParam') searchParam: string) {
+    return await this.ticketService.searchForTickets(searchParam);
+  }
+
+  @Query(() => [Ticket], { name: 'searchForResponseTemplate' })
+  @UseGuards(AccessTokenGuard)
+  async searchForResponseTemplate(@Args('searchParam') searchParam: string) {
+    return await this.ticketService.searchForResponseTemplate(searchParam);
+  }
 }

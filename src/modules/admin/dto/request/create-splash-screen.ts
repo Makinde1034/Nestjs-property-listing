@@ -4,12 +4,21 @@
  */
 
 import { Field, InputType, PartialType } from '@nestjs/graphql';
-import { IsBoolean, IsDate } from 'class-validator';
+import { IsBoolean, IsDate, IsEnum, IsString } from 'class-validator';
+import { SplashScreenPlacement } from '../../../../common/enums/splashScreen';
 @InputType()
 export class CreateSplashScreenInput {
   @Field()
   @IsBoolean()
   default: boolean;
+
+  @Field()
+  @IsEnum(SplashScreenPlacement)
+  placement: string;
+
+  @Field()
+  @IsString()
+  title: string;
 
   @Field()
   @IsDate()
