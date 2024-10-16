@@ -17,6 +17,7 @@ import { Permissions } from 'src/common/decorator/permission';
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { ListingTypesResponse } from '../dtos/response/listingType.response';
+import { Public } from '../../auth/decorators/permision.decorator';
 
 @Resolver()
 export class ListingTypeResolver {
@@ -27,14 +28,14 @@ export class ListingTypeResolver {
    *
    * @async
    * @returns {Promise<ListingType[]>}
-   */
+   */ @Public()
   @Query(() => ListingTypesResponse)
   async fetchListingTypes(
     @Args('findOptions', { nullable: true }) findOptions: PaginateAndSort,
   ) {
     return await this.listingTypeService.findAllListingTypes(findOptions);
   }
-
+  @Public()
   @Query(() => ListingType)
   async fetchOneListingTypes(@Args('id') id: string): Promise<ListingType> {
     return await this.listingTypeService.findOne(id);

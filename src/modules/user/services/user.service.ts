@@ -765,6 +765,7 @@ export class UserService {
         ...(status && { status: In(status) }),
         ...(type && { type: In(type) }),
         isBlocked: isBlocked ?? undefined,
+        userType: UserProfileTypeEnum.COMPANY,
       };
       // Build order options
       const orderOptions = sortField ? { [sortField]: direction || 'ASC' } : {};
