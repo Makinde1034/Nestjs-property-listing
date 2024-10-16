@@ -161,7 +161,7 @@ export class ListingResolver {
 
   @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
-  @Query(() => Listing, { name: 'unfeatureAListing' })
+  @Query(() => SuccessResponse, { name: 'unfeatureAListing' })
   async unfeatureAListing(@Args('id') id: string) {
     return await this.listingService.unfeatureAListing(id);
   }
