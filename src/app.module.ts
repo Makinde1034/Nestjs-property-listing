@@ -41,6 +41,8 @@ import { ChatModule } from './modules/chat/chat.module';
 import { SplashScreenResolver } from './modules/admin/resolver/splash-screen.resolver';
 import { KnowledgeBaseAndHelpModule } from './modules/knowledge-base-and-help/knowledge-base-and-help.module';
 import { InAppModule } from './modules/in-app-services/in-app.module';
+import { GlobalPermissionsGuard } from './modules/auth/guards/global-permission-guard';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -105,6 +107,13 @@ import { InAppModule } from './modules/in-app-services/in-app.module';
     InAppModule,
   ],
   controllers: [],
-  providers: [AppResolver, SplashScreenResolver],
+  providers: [
+    AppResolver,
+    SplashScreenResolver,
+    {
+      provide: APP_GUARD,
+      useClass: GlobalPermissionsGuard,
+    },
+  ],
 })
 export class AppModule {}

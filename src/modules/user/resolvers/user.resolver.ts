@@ -25,6 +25,7 @@ import {
 import { UserFilter } from '../dtos/request/user';
 import { UserResponse } from '../dtos/response/user.response';
 import { AdminGuard } from '../../auth/guards/admin.guard';
+import { Public } from '../../auth/decorators/permision.decorator';
 
 @Resolver()
 export class UserResolver {
@@ -37,6 +38,7 @@ export class UserResolver {
    */
   @Query(() => User, { name: 'user' })
   @UseGuards(AccessTokenGuard)
+  @Public()
   async getUser(@Context() ctx): Promise<User> {
     return await this.userService.findUserById(ctx.req.user.id, ['roles']);
   }
