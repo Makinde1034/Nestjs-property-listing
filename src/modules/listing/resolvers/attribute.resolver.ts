@@ -24,6 +24,7 @@ import {
   AttributeResponse,
   AttributeSetResponse,
 } from '../dtos/response/attribute.response';
+import { Public } from '../../auth/decorators/permision.decorator';
 
 @Resolver()
 export class AttributeResolver {
@@ -35,6 +36,8 @@ export class AttributeResolver {
    * @async
    * @returns {Promise<Attribute[]>}
    */
+
+  @Public()
   @Query(() => AttributeResponse)
   async fetchAttributes(
     @Args('findOptions', { nullable: true }) findOptions: AttributeFilter,
@@ -96,18 +99,19 @@ export class AttributeResolver {
    * @async
    * @returns {Promise<AttributeSet[]>}
    */
+  @Public()
   @Query(() => AttributeSetResponse)
   async fetchAttributeSets(
     @Args('findOptions', { nullable: true }) findOptions: PaginateAndSort,
   ) {
     return await this.attributeService.findAllAttributeSets(findOptions);
   }
-
+  @Public()
   @Query(() => AttributeSet)
   async fetchOneAttributeSets(@Args('id') id: string): Promise<AttributeSet> {
     return await this.attributeService.findOneAttributeSet(id);
   }
-
+  @Public()
   @Query(() => Attribute)
   async fetchOneAttribute(@Args('id') id: string): Promise<Attribute> {
     return await this.attributeService.findOneAttribute(id);

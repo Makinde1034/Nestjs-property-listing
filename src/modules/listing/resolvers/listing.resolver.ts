@@ -67,6 +67,7 @@ import { Bids } from '../../../entities/bids.entity';
 import { AutoBid } from '../../../entities/auto-bid.entity';
 import { CreateAutoBidInput } from '../dtos/request/auto-bid';
 import { Permissions } from '../../../common/decorator/permission';
+import { Public } from '../../auth/decorators/permision.decorator';
 
 @Resolver()
 export class ListingResolver {
@@ -101,6 +102,7 @@ export class ListingResolver {
   @Query(() => ListingResponse, {
     name: 'findAllListingForBuyerUnauthenticated',
   })
+  @Public()
   async findListingForBuyer(
     @Args('findManyOptions', { nullable: true })
     findManyOptions?: CreateSearchHistoryInput,
@@ -113,8 +115,7 @@ export class ListingResolver {
     return { listing, total };
   }
 
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
-  @Permissions()
+  @UseGuards(AccessTokenGuard)
   @Query(() => ListingResponse, { name: 'findListingsForOwner' })
   async findListingsForOwner(
     @Context() ctx: any,
@@ -170,7 +171,7 @@ export class ListingResolver {
   async findOneForBuyer(@Args('id') id: string) {
     return await this.listingService.findOneListingForBuyer(id);
   }
-
+  @Public()
   @Query(() => Listing, { name: 'findOneForUnauthenticatedBuyer' })
   async findOneForUnauthenticatedBuyer(@Args('id') id: string) {
     return await this.listingService.findOneListingForBuyerUnauthenticated(id);
