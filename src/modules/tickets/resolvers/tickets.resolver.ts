@@ -24,20 +24,22 @@ import {
 import { ResponseTemplate } from '../../../entities/response-template.entity';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
+import { Public } from '../../auth/decorators/permision.decorator';
 
 @Resolver()
+@Public()
 export class TicketsResolver {
   constructor(private readonly ticketService: TicketService) {}
 
   /**
    * Create Issue
-   *
    * @async
    * @param {CreateIssueInput} RequestInput
    * @returns {Promise<string>}
    */
   @Mutation(() => Ticket)
   @UseGuards(AccessTokenGuard)
+  @Public()
   // @Permissions('create-support-tickets')
   async createTicket(
     @Args('RequestInput') RequestInput: CreateTicketInput,
@@ -54,7 +56,7 @@ export class TicketsResolver {
    * @returns {Promise<Ticket>}
    */
   @Query(() => Ticket)
-  // @Permissions('read-support-tickets')
+  @Public()
   @UseGuards(AccessTokenGuard)
   async getTicket(@Args('ticketId') ticketId: string): Promise<Ticket> {
     return await this.ticketService.getTicket(ticketId);
@@ -68,7 +70,7 @@ export class TicketsResolver {
    * @returns {Promise<Ticket>}
    */
   @Query(() => [Ticket])
-  // @Permissions('read-support-tickets')
+  @Public()
   @UseGuards(AccessTokenGuard)
   async listTickets(
     @Context() ctx: any,
@@ -156,6 +158,7 @@ export class TicketsResolver {
   }
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Public()
   @Permissions('create-support-tickets')
   @Mutation(() => ResponseTemplate)
   async updateResponseTemplate(

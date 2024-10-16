@@ -25,6 +25,7 @@ import {
 import { AccessTokenGuard } from '../guards';
 import { AuthService } from '../services/auth.service';
 import { SuccessResponse } from '../../../common/utils/success.response';
+import { Public } from '../decorators/permision.decorator';
 
 @Resolver()
 export class AuthResolver {
@@ -38,6 +39,7 @@ export class AuthResolver {
    * @returns {Promise<User>}
    */
   @Mutation(() => User, { name: 'register' })
+  @Public()
   async register(
     @Args('RegisterInput') inputDto: RegisterInput,
   ): Promise<User> {
@@ -52,6 +54,7 @@ export class AuthResolver {
    * @returns {Promise<string>}
    */
   @Mutation(() => String, { name: 'registerConfirm' })
+  @Public()
   async registerConfirm(
     @Args('RegisterConfirmInput') inputDto: AuthRegisterConfirmDto,
   ): Promise<string> {
@@ -67,6 +70,7 @@ export class AuthResolver {
    */
   @Mutation(() => LoginResponse, { name: 'login' })
   @Throttle({ default: { limit: 2, ttl: 60000 } })
+  @Public()
   async login(
     @Args('loginInput') loginInput: LoginInput,
   ): Promise<LoginResponse> {
@@ -82,6 +86,7 @@ export class AuthResolver {
    */
   @Mutation(() => LoginResponse, { name: 'biometricRegister' })
   @Throttle({ default: { limit: 2, ttl: 60000 } })
+  @Public()
   async biometricRegister(
     @Args('RequestInput') inputDto: BiometricRegister,
   ): Promise<LoginResponse> {
@@ -97,6 +102,7 @@ export class AuthResolver {
    */
   @Mutation(() => LoginResponse, { name: 'biometricLogin' })
   @Throttle({ default: { limit: 2, ttl: 60000 } })
+  @Public()
   async biometricLogin(
     @Args('LoginInput') loginInput: BiometricLogin,
   ): Promise<LoginResponse> {
@@ -112,6 +118,7 @@ export class AuthResolver {
    */
   @Mutation(() => SuccessResponse)
   @Throttle({ default: { limit: 1, ttl: 60000 } })
+  @Public()
   async resetPasswordRequest(
     @Args('RequestInput') RequestInput: PasswordResetRequestDto,
   ): Promise<SuccessResponse> {
@@ -127,6 +134,7 @@ export class AuthResolver {
    */
   @Mutation(() => SuccessResponse)
   @Throttle({ default: { limit: 1, ttl: 60000 } })
+  @Public()
   async resetPassword(
     @Args('ResetInput') ResetInput: PasswordResetDto,
   ): Promise<SuccessResponse> {
@@ -154,6 +162,7 @@ export class AuthResolver {
    */
   @Mutation(() => LoginResponse, { name: 'twoFaLogin' })
   @UseGuards(AccessTokenGuard)
+  @Public()
   async twoFaLogin(
     @Args('LoginInput') loginInput: TwoFaLoginInput,
     @Context() ctx: any,
@@ -172,6 +181,7 @@ export class AuthResolver {
    */
   @Mutation(() => SuccessResponse)
   @Throttle({ default: { limit: 1, ttl: 60000 } })
+  @Public()
   async resendEmailConfirmation(
     @Args('RequestInput') RequestInput: ConfirmationInput,
   ): Promise<SuccessResponse> {

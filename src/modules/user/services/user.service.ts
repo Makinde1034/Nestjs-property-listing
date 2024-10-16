@@ -915,6 +915,7 @@ export class UserService {
       updatedUsers,
     );
   }
+
   async enableAutoBid(user: User) {
     try {
       return await this.usersRepository.update(user.id, {
