@@ -181,6 +181,7 @@ export class UserResolver {
   ): Promise<User> {
     return await this.userService.changePassword(ctx.req.user, inputDto);
   }
+
   @Mutation(() => User, { name: 'updateUserData' })
   @UseGuards(AccessTokenGuard)
   @UseGuards(AdminGuard)
