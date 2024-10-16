@@ -941,7 +941,7 @@ input UserFilter {
   sortField: String
   directionToSort: SortOrder
   where: WhereOption
-  level: String
+  level: [String!]
   status: [String!]
   isBlocked: Boolean
   type: [String!]
