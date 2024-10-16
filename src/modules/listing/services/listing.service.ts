@@ -1616,6 +1616,9 @@ export class ListingService {
       return new SuccessResponse('success', message);
     } catch (error) {
       this.logger.log(error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
       throw new BadRequestException(error);
     }
   }
@@ -1640,6 +1643,9 @@ export class ListingService {
       return { searchHistory, total };
     } catch (error) {
       this.logger.log(error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
       throw new BadRequestException(error);
     }
   }
@@ -1690,6 +1696,42 @@ export class ListingService {
       return featured;
     } catch (error) {
       this.logger.log(error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new BadRequestException(error);
+    }
+  }
+
+  async unfeatureAListing(id: string) {
+    try {
+      const listing = await this.listingRepository.findOneBy({
+        id,
+      });
+
+      if (!listing.isListingFeatured) {
+        throw new BadRequestException('Listing is not Featured');
+      }
+
+      if (!listing) {
+        throw new NotFoundException(AppStrings.NOT_FOUND);
+      }
+
+      const { affected } = await this.listingRepository.update(listing.id, {
+        isListingFeatured: false,
+        featureDate: null,
+        featureExpiration: null,
+      });
+
+      if (affected > 0) {
+        return new SuccessResponse(AppStrings.SUCCESSFULL);
+      }
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
       throw new BadRequestException(error);
     }
   }
@@ -1772,6 +1814,9 @@ export class ListingService {
       }
     } catch (error) {
       this.logger.log(error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
       throw new BadRequestException(error);
     }
   }
@@ -1825,6 +1870,10 @@ export class ListingService {
       );
     } catch (error) {
       this.logger.log(error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
       throw new BadRequestException(error.message || 'An error occurred');
     }
   }
