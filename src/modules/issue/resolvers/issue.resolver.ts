@@ -16,6 +16,7 @@ import { IssueService } from '../services';
 import { Permissions } from 'src/common/decorator/permission';
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { SuccessResponse } from '../../../common/utils/success.response';
+import { Public } from '../../auth/decorators/permision.decorator';
 
 @Resolver()
 export class IssueResolver {
@@ -63,6 +64,7 @@ export class IssueResolver {
 
   @Query(() => [ParentIssue])
   @UseGuards(AccessTokenGuard)
+  @Public()
   async fetchIssues(
     @Args('placement', { nullable: true }) placement: string,
   ): Promise<ParentIssue[]> {
@@ -102,6 +104,7 @@ export class IssueResolver {
 
   @Query(() => [ChildIssue])
   @UseGuards(AccessTokenGuard)
+  @Public()
   async fetchChildIssues(
     @Args('parentId') parentId: string,
   ): Promise<ChildIssue[]> {
