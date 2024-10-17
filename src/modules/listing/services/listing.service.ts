@@ -1467,6 +1467,14 @@ export class ListingService {
 
   async viewFlaggedListing(paginateAndSort: PaginateAndSort) {
     try {
+      const whereOption =
+        paginateAndSort?.where?.fieldToChose &&
+        paginateAndSort?.where?.whereParam
+          ? {
+              [paginateAndSort.where.fieldToChose]:
+                paginateAndSort.where.whereParam,
+            }
+          : {};
       const orderOptions = {
         [paginateAndSort.sortField]: paginateAndSort.directionToSort,
       };
@@ -1477,6 +1485,7 @@ export class ListingService {
       }
       const [flaggedListing, total] =
         await this.flagListingRepository.findAndCount({
+          where: whereOption,
           take: paginateAndSort.take,
           skip: paginateAndSort.skip,
           order: orderOptions,
