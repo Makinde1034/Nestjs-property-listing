@@ -23,8 +23,6 @@ export class GlobalPermissionsGuard implements CanActivate {
       context.getHandler(),
     );
 
-    console.log(isPublic);
-
     // Skip permission check if the route is marked as public
     if (isPublic) {
       return true;

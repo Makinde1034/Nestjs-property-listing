@@ -36,8 +36,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       throw new UnauthorizedException();
     } else if (!user.verifiedAt) {
       throw new ForbiddenException(AppStrings.UNCONFIRMED_ACCOUNT);
-    } else if (user.disabledAt) {
-      throw new ForbiddenException(AppStrings.SUSPENDED_ACCOUNT);
     }
     return user;
   }
