@@ -230,7 +230,7 @@ export class ListingResolver {
     name: 'flaggedListing',
   })
   async flaggedListings(
-    @Args('listingId')
+    @Args('id')
     listingId: string,
   ) {
     return await this.listingService.flaggedListing(listingId);

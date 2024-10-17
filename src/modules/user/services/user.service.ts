@@ -745,6 +745,7 @@ export class UserService {
         level,
         status,
         type,
+        roles,
         sortField,
         isBlocked,
         directionToSort,
@@ -764,6 +765,8 @@ export class UserService {
         ...(level && { userLevel: In(level) }),
         ...(status && { status: In(status) }),
         ...(type && { type: In(type) }),
+        ...(roles && { roles: { id: In(roles) } }),
+
         isBlocked: isBlocked ?? undefined,
         userType: UserProfileTypeEnum.STAFF,
       };
