@@ -20,6 +20,7 @@ import {
 } from '../../config/web-hook.config.ts/web-hook.config';
 
 import { WebhookService } from './services/web-hook.services';
+import { Public } from '../auth/decorators/permision.decorator';
 @Controller()
 export class WebHookController {
   private webhookConfig: WebhookConfig;
@@ -33,6 +34,7 @@ export class WebHookController {
   }
   logger = new Logger(WebHookController.name);
   @Post('webhook/payment')
+  @Public()
   @HttpCode(200)
   Payment(
     @Body() hyperPayWebHookResponse: WebHookPaymentResponse,
@@ -45,6 +47,7 @@ export class WebHookController {
   }
 
   @Post('api/v1/user/iam')
+  @Public()
   @HttpCode(200)
   User(@Body() natafh: any) {
     this.logger.log(natafh);

@@ -568,10 +568,10 @@ export class UserService {
 
       // Build where options
       const whereOptions: any = {
-        ...(level && { userLevel: level }),
+        ...(level && { userLevel: In(level) }),
         ...(status && { status: In(status) }),
         isBlocked: isBlocked ?? undefined,
-        userType: UserProfileTypeEnum.INDIVIDUAL,
+        userType: Not(UserProfileTypeEnum.STAFF),
       };
 
       // Build order options
@@ -761,11 +761,11 @@ export class UserService {
 
       // Build where options
       const whereOptions: any = {
-        ...(level && { userLevel: level }),
+        ...(level && { userLevel: In(level) }),
         ...(status && { status: In(status) }),
         ...(type && { type: In(type) }),
         isBlocked: isBlocked ?? undefined,
-        userType: UserProfileTypeEnum.COMPANY,
+        userType: UserProfileTypeEnum.STAFF,
       };
       // Build order options
       const orderOptions = sortField ? { [sortField]: direction || 'ASC' } : {};
@@ -777,7 +777,7 @@ export class UserService {
       // Fetch employees with count
       const [users, count] = await this.usersRepository.findAndCount({
         order: orderOptions,
-        where: { ...whereOptions, company: { id: Not(null) } },
+        where: { ...whereOptions },
         take: paginationTake,
         skip: paginationSkip,
       });
