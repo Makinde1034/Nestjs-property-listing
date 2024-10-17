@@ -279,21 +279,28 @@ export class OfferService {
   }
   async findManyForOwner(findOfferInput: FindOfferInput, user?: User) {
     try {
+      const skip = findOfferInput.skip ?? 20;
+      const take = findOfferInput.take ?? 0;
       const [[offer, total], totalOfferOnlisting] = await Promise.all([
-        this.offerRepository.findAndCount({
-          where: {
-            listingId: findOfferInput.listingId,
+        this.offerRepository
+          .createQueryBuilder('offer')
+          .leftJoinAndSelect('offer.listing', 'listing')
+          .leftJoinAndSelect('offer.user', 'user')
+          .leftJoinAndSelect('listing.listingType', 'listingType')
+          .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
+          .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
+          .where('offer.userId = :userId', {
             userId: user.id,
-          },
-          skip: findOfferInput.skip,
-          take: findOfferInput.take,
-          relations: [
-            'listing',
-            'listing.user',
-            'listing.listingType',
-            'listing.listingAttributes.attribute',
-          ],
-        }),
+          })
+          .andWhere(
+            findOfferInput.listingId ? 'listing.id = :listingId' : '1=1',
+            {
+              listingId: findOfferInput.listingId ?? undefined,
+            },
+          )
+          .skip(skip)
+          .take(take)
+          .getManyAndCount(),
 
         this.listingRepository.count({ where: { userId: user.id } }),
       ]);
