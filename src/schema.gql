@@ -200,6 +200,7 @@ type FlagListing {
   reporter: User
   parentIssue: ParentIssue!
   childIssue: ChildIssue
+  listingId: String!
   listing: Listing
   createdAt: DateTime!
   deletedAt: DateTime!
@@ -836,6 +837,7 @@ type Query {
   user: User!
   getOneUser(id: String!): User!
   searchForUsers(searchParam: String!): [User!]!
+  searchForEmployee(searchParam: String!): [User!]!
   findAllUser(userFilterInput: UserFilter!): UserResponse!
   getEmployees(userFilterInput: UserFilter): UserResponse!
   findAllCustomers(userFilterInput: UserFilter!): UserResponse!

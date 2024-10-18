@@ -55,6 +55,12 @@ export class UserResolver {
     return await this.userService.searchForUsers(searchParam);
   }
 
+  @Query(() => [User], { name: 'searchForEmployee' })
+  @UseGuards(AccessTokenGuard)
+  async searchForEmployee(@Args('searchParam') searchParam: string) {
+    return await this.userService.searchForEmployee(searchParam);
+  }
+
   @Query(() => UserResponse, { name: 'findAllUser' })
   @UseGuards(AccessTokenGuard)
   async findAllUser(@Args('userFilterInput') userFilterInput: UserFilter) {
