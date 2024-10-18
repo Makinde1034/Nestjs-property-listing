@@ -454,6 +454,7 @@ type User {
   chat: Chat!
   nationality: String
   city: String
+  isDataVerified: Boolean!
   article: [Article!]!
   nationalIdentity: NationalIdentity
   company: Company
@@ -546,6 +547,10 @@ scalar JSON
 type UserResponse {
   users: [User!]!
   total: Float!
+}
+
+type NafathAuthenticationResponseToUser {
+  random: String!
 }
 
 type ListingTypesResponse {
@@ -1102,6 +1107,7 @@ type Mutation {
   resetPasswordAdmin(ResetInput: UserActionInput!): SuccessResponse!
   createStaff(RequestInput: CreateStaffInput!): User!
   staffConfirmation(RequestInput: StaffConfirmDto!): String!
+  upgradeUser: NafathAuthenticationResponseToUser!
   blockUser(RequestInput: UserActionInput!): SuccessResponse!
   deleteUser(RequestInput: DeleteUserInput!): SuccessResponse!
   updateNotificationPreference(RequestInput: NotificationPrefenceInput!): User!

@@ -5,23 +5,33 @@
 
 import { registerAs } from '@nestjs/config';
 
-const key = process.env.NAFATH_TOKEN;
+const key = process.env.NAFATH_KEY;
 const baseUrl = process.env.NAFATH_BASE_URL;
+const nafathAction = process.env.NAFATH_ACTION;
+const NafathId = process.env.NAFATH_ID;
+const NafthService = process.env.NAFATH_SERVICE;
+
+console.log(process.env.NAFATH_TOKEN);
 
 export type NafathConfig = {
   key: string;
   baseUrl: string;
+  nafathAction: string;
+  NafathId: string;
+  NafthService: string;
 };
 
-// If (!token || !baseUrl) {
-//   Throw new Error(
-//     'Missing configuration. Please ensure you provided HYPERPAY_TOKEN | HYPERPAY_BASE_URL | HYPERPAY_ENTITY_ID',
+// if (!key || !baseUrl) {
+//   throw new Error(
+//     'Cannot find configuration for Nafath. Please ensure you  them provided ',
 //   );
 // }
-
 const getNafathConfig = (): NafathConfig => ({
   key: key,
   baseUrl: baseUrl,
+  nafathAction: nafathAction,
+  NafathId: NafathId,
+  NafthService: NafthService,
 });
 
 export const getNafathConfigName = () => 'nafathConfig';

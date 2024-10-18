@@ -14,16 +14,33 @@ import { ConfigService } from '@nestjs/config';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import * as crypto from 'crypto';
 
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
+import {
+  NafathAuthenticationResponse,
+  NafathUserResponse,
+  NafathWebHookResponse,
+} from '../../user/dtos/response/nafath';
+import { UserService } from '../../user/services';
+import { JwtService } from '@nestjs/jwt';
 @Injectable()
 export class WebhookService {
   private webhookConfig: WebhookConfig;
-  constructor(private configService: ConfigService) {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly userService: UserService,
+    private readonly jwtService: JwtService,
+  ) {
     this.webhookConfig = this.configService.get<WebhookConfig>(
       getWebhookConfigName(),
     );
   }
   logger = new Logger(WebhookService.name);
+
   handleWebHookForHyperpay(
     hyperPayWebHookResponse: WebHookPaymentResponse,
     signature: string,
@@ -80,5 +97,20 @@ export class WebhookService {
       }
     }
     return new SuccessResponse();
+  }
+
+  async handleWebhookForNafath(data: NafathWebHookResponse) {
+    try {
+      const userData: NafathUserResponse = this.jwtService.decode(
+        data.response,
+      );
+      await this.userService.finalizeUpgradeUser(data, userData);
+    } catch (error) {
+      this.logger.error(error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new BadRequestException(error);
+    }
   }
 }

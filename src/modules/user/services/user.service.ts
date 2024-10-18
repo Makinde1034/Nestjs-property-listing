@@ -51,6 +51,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   NationalIdentityType,
   RegisterEventAction,
+  UserLevelEnum,
   UserProfileTypeEnum,
   UserStatus,
 } from '../../../common/enums';
@@ -68,7 +69,14 @@ import {
 import { AppStrings } from '../../../common/messages/app.strings';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { UserFilter } from '../dtos/request/user';
-import { checkIfEmailNameOrPhoneNumber } from '../../../common/utils/helper';
+
+import {
+  NafathAuthenticationResponseToUser,
+  NafathUserResponse,
+  NafathWebHookResponse,
+} from '../dtos/response/nafath';
+import { NafathService } from '../service-providers/nafath.service';
+import { NafathLogsRepository } from '../repositories/nafath-log.repository';
 
 @Injectable()
 export class UserService {
@@ -84,6 +92,8 @@ export class UserService {
     private readonly eventEmitter: EventEmitter2,
     private readonly mailService: MailgunEmailService,
     private readonly configService: ConfigService,
+    private readonly nafathService: NafathService,
+    private readonly nafathLogsRepository: NafathLogsRepository,
   ) {
     this.frontEndUrl = this.configService.get('ADMIN_FRONTEND_URL');
   }
@@ -106,6 +116,69 @@ export class UserService {
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
+    }
+  }
+
+  async upgradeUser(user: User): Promise<NafathAuthenticationResponseToUser> {
+    try {
+      /************************************************
+       *Bypass Nafath
+       *
+       ************************************************/
+      //TODO: remove before going live
+
+      if (process.env.NODE_ENV == 'production') {
+        const result = await this.nafathService.verifyUser();
+        await this.nafathLogsRepository.save({ ...result, userId: user.id });
+        return { random: result.random };
+      } else {
+        /*************************************************/
+        await this.usersRepository.update(user.id, {
+          userLevel: UserLevelEnum.LEVEL_2,
+          isDataVerified: true,
+        });
+
+        return { random: '45' };
+      }
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new BadRequestException(error);
+      }
+    }
+  }
+
+  async finalizeUpgradeUser(
+    data: NafathWebHookResponse,
+    userData: NafathUserResponse,
+  ) {
+    try {
+      const nafathLog = await this.nafathLogsRepository.findOne({
+        where: {
+          transId: data.transId,
+        },
+      });
+      await this.usersRepository.update(nafathLog.userId, {
+        userLevel: UserLevelEnum.LEVEL_2,
+        firstName: userData.user_info['first_name#en'],
+        lastName: userData.user_info['family_name#en'],
+        arabicFirstName: userData.user_info['first_name#ar'],
+        arabicLastName: userData.user_info['family_name#ar'],
+        middleName: userData.user_info['grand_name#en'],
+        arabicMiddleName: userData.user_info['grand_name#ar'],
+        dateOfBirth: new Date(userData.user_info['dob#g']),
+        nationality: userData.user_info['nationality#en'],
+        isDataVerified: true,
+      });
+
+      //TODO: notify User
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new BadRequestException(error);
+      }
     }
   }
 

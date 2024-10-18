@@ -31,10 +31,14 @@ import { UserController } from './controllers';
 import { UserEventHandler } from './events';
 import { UserTrackingService } from './services/user.tracking.service';
 import { UserTrackingRepository } from './repositories/user-tracking-repository';
+import { NafathService } from './service-providers/nafath.service';
+import { NafathLogsRepository } from './repositories/nafath-log.repository';
+import { HttpModule } from '@nestjs/axios';
 
 @Global()
 @Module({
   imports: [
+    HttpModule,
     TypeOrmModule.forFeature([
       User,
       TokenConfirmation,
@@ -63,6 +67,8 @@ import { UserTrackingRepository } from './repositories/user-tracking-repository'
     UserNotificationRepository,
     NotificationScopeRepository,
     RolePermissionRepository,
+    NafathLogsRepository,
+    NafathService,
   ],
   exports: [
     UserService,
