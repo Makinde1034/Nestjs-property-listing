@@ -200,6 +200,7 @@ type FlagListing {
   reporter: User
   parentIssue: ParentIssue!
   childIssue: ChildIssue
+  listingId: String!
   listing: Listing
   createdAt: DateTime!
   deletedAt: DateTime!
@@ -931,7 +932,7 @@ enum SortOrder {
 
 input WhereOption {
   fieldToChose: String!
-  whereParam: Boolean!
+  whereParam: String
 }
 
 input UserFilter {

@@ -43,8 +43,12 @@ export class FlagListing extends BaseEntity {
     cascade: true,
   })
   childIssue: ChildIssue;
+  @Field()
+  @Column()
+  listingId: string;
 
   @Field(() => Listing, { nullable: true })
+  @JoinColumn({ name: 'listingId' })
   @ManyToOne(() => Listing, (listing) => listing.flag, { eager: true })
   listing: Listing;
 
