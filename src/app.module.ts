@@ -46,9 +46,11 @@ import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
-    // PuppeteerModule.forRoot(),
     ConfigModule.forRoot({
-      envFilePath: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
+      envFilePath:
+        process.env.NODE_ENV === 'development'
+          ? '.env.development.local'
+          : '.env',
       load: configuration,
       isGlobal: true,
     }),

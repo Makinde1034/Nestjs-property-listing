@@ -178,6 +178,10 @@ export class User extends BaseEntity {
   @Field({ nullable: true })
   city: string;
 
+  @Column({ default: false })
+  @Field({})
+  isDataVerified: boolean;
+
   @Field(() => [Article])
   @OneToMany(() => Article, (article) => article.user)
   article: Article[];

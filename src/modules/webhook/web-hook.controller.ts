@@ -21,12 +21,13 @@ import {
 
 import { WebhookService } from './services/web-hook.services';
 import { Public } from '../auth/decorators/permision.decorator';
+import { NafathWebHookResponse } from '../user/dtos/response/nafath';
 @Controller()
 export class WebHookController {
   private webhookConfig: WebhookConfig;
   constructor(
-    private configService: ConfigService,
-    private webhookService: WebhookService,
+    private readonly configService: ConfigService,
+    private readonly webhookService: WebhookService,
   ) {
     this.webhookConfig = this.configService.get<WebhookConfig>(
       getWebhookConfigName(),
@@ -49,8 +50,8 @@ export class WebHookController {
   @Post('api/v1/user/iam')
   @Public()
   @HttpCode(200)
-  User(@Body() data: any) {
-    console.log(data);
+  User(@Body() data: NafathWebHookResponse) {
+    this.webhookService.handleWebhookForNafath(data);
     return HttpStatus.OK;
   }
 }

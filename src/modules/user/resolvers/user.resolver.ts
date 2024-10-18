@@ -26,6 +26,7 @@ import { UserFilter } from '../dtos/request/user';
 import { UserResponse } from '../dtos/response/user.response';
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { Public } from '../../auth/decorators/permision.decorator';
+import { NafathAuthenticationResponseToUser } from '../dtos/response/nafath';
 
 @Resolver()
 export class UserResolver {
@@ -134,6 +135,19 @@ export class UserResolver {
     @Args('RequestInput') inputDto: StaffConfirmDto,
   ): Promise<string> {
     return await this.userService.staffPasswordConfirmation(inputDto);
+  }
+
+  /**
+   * Confirm Staff And Set new Password
+   * @async
+
+   * @returns {}
+   */
+  @Mutation(() => NafathAuthenticationResponseToUser)
+  async upgradeUser(
+    @Context() ctx: any,
+  ): Promise<NafathAuthenticationResponseToUser> {
+    return await this.userService.upgradeUser(ctx.req.user);
   }
 
   /**
