@@ -200,7 +200,6 @@ type FlagListing {
   reporter: User
   parentIssue: ParentIssue!
   childIssue: ChildIssue
-  listingId: String!
   listing: Listing
   createdAt: DateTime!
   deletedAt: DateTime!
