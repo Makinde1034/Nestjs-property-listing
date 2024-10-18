@@ -323,8 +323,6 @@ export class RoleService {
       return this.roleRepository
         .createQueryBuilder('role')
 
-        .orWhere('user.status LIKE :term', { term: `%${searchParam}%` })
-
         .orWhere('role.arabicName LIKE :term', { term: `%${searchParam}%` })
 
         .orWhere('role.englishName LIKE :term', { term: `%${searchParam}%` })
