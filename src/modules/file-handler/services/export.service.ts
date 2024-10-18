@@ -1,19 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { Parser } from 'json2csv';
 import { PdfService } from './pdf.service';
 
 @Injectable()
 export class ExportService {
   constructor(private readonly pdfService: PdfService) {}
-
+  logger = new Logger(ExportService.name);
   async generateTable(jsonData: Array<Object>) {
-    // Example JSON data
-    // const jsonData = [
-    //   { name: 'John Doe', age: 28, city: 'New York' },
-    //   { name: 'Anna Smith', age: 22, city: 'London' },
-    //   { name: 'Peter Jones', age: 35, city: 'Sydney' },
-    // ];
-
     // Get the table headers (keys from the first object in the JSON array)
     const headers = Object.keys(jsonData[0]);
     // Start dynamically building the HTML for the table
@@ -35,7 +28,7 @@ export class ExportService {
           </style>
         </head>
         <body>
-          <h1>User Information Table</h1>
+          <h1>Waseet</h1>
           <table>
             <thead>
               <tr>`;
@@ -66,13 +59,19 @@ export class ExportService {
         </body>
         </html>`;
 
-    return htmlTable;
+    return await this.pdfService.generatePdf(htmlTable);
   }
 
   async generateCsv(jsonData: Array<Object>) {
-    // Initialize the json2csv parser
-    const json2csvParser = new Parser();
-    const csv = json2csvParser.parse(jsonData); // Convert JSON to CSV
-    return csv;
+    try {
+      // Initialize the json2csv parser
+      const json2csvParser = new Parser();
+      const csv = json2csvParser.parse(jsonData); // Convert JSON to CSV
+      return csv;
+    } catch (error) {
+      this.logger.error(error);
+
+      throw new BadRequestException('unable to generate csv');
+    }
   }
 }

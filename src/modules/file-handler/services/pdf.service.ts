@@ -24,10 +24,21 @@ export class PdfService {
         'templates',
         'english-payment-invoice.hbs',
       );
+
       const htmlTemplate = fs.readFileSync(templatePath, 'utf8');
       const template = handlebars.compile(htmlTemplate);
       const html = template(data);
 
+      this.logger.log('PDF generated successfully');
+      return await this.generatePdf(html);
+    } catch (error) {
+      this.logger.error('Error generating PDF', error);
+      throw new Error('Error generating PDF'); // Throwing an error to handle it properly in the caller
+    }
+  }
+
+  async generatePdf(html: string): Promise<Buffer> {
+    try {
       // Launch Puppeteer
       const browser = await puppeteer.launch({
         product: 'firefox',
