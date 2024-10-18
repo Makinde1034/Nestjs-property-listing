@@ -5,16 +5,12 @@
 
 import { registerAs } from '@nestjs/config';
 
-const token = process.env.HYPERPAY_TOKEN;
-const baseUrl = process.env.HYPERPAY_BASE_URL;
-const entityId = process.env.HYPERPAY_ENTITY_ID;
-const frontendUrl = process.env.FRONT_END_URL;
+const key = process.env.NAFATH_TOKEN;
+const baseUrl = process.env.NAFATH_BASE_URL;
 
 export type NafathConfig = {
-  token: string;
+  key: string;
   baseUrl: string;
-  entityId: string;
-  frontendUrl: string;
 };
 
 // If (!token || !baseUrl) {
@@ -24,10 +20,8 @@ export type NafathConfig = {
 // }
 
 const getNafathConfig = (): NafathConfig => ({
-  token: token,
+  key: key,
   baseUrl: baseUrl,
-  entityId: entityId,
-  frontendUrl: frontendUrl,
 });
 
 export const getNafathConfigName = () => 'nafathConfig';
