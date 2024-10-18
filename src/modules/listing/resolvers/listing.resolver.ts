@@ -67,6 +67,7 @@ import { Bids } from '../../../entities/bids.entity';
 import { AutoBid } from '../../../entities/auto-bid.entity';
 import { CreateAutoBidInput } from '../dtos/request/auto-bid';
 import { Public } from '../../auth/decorators/permision.decorator';
+import { UserTwoGuard } from '../../auth/guards/level-two.guard';
 
 @Resolver()
 export class ListingResolver {
@@ -81,7 +82,8 @@ export class ListingResolver {
   /*************************
    * Create Listing
    *************************/
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
+
+  @UseGuards(AccessTokenGuard, PermissionsGuard, UserTwoGuard)
   @Mutation(() => Listing, { name: 'createListing' })
   async createListing(
     @Args('createListing') createListingDto: CreateListingDto,
@@ -287,7 +289,7 @@ export class ListingResolver {
    *Offer
    * ************************/
 
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @UseGuards(AccessTokenGuard, PermissionsGuard, UserTwoGuard)
   @Mutation(() => Offer, { name: 'createOffer', nullable: true })
   async createOffer(
     @Args('createOfferDto') createOfferDto: CreateOfferDto,
@@ -551,7 +553,7 @@ export class ListingResolver {
     return await this.listingService.stopPromotion(id, ctx.req.user);
   }
 
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @UseGuards(AccessTokenGuard, PermissionsGuard, UserTwoGuard)
   @Mutation(() => Bids, { name: 'createBid' })
   async createBid(
     @Args('createBidInput') createBidInput: CreateBidInput,
@@ -566,7 +568,7 @@ export class ListingResolver {
     return await this.auctionService.fetchBidsOnAuction(findBidInput);
   }
 
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @UseGuards(AccessTokenGuard, PermissionsGuard, UserTwoGuard)
   @Mutation(() => AutoBid, { name: 'autoBidOnAuction' })
   async createAutoBidOnAuction(
     @Args('createAutoBidInput') createAutoBidInput: CreateAutoBidInput,
@@ -577,6 +579,7 @@ export class ListingResolver {
       ctx.req.user,
     );
   }
+
   @Query(() => [Listing], { name: 'searchForListing' })
   @UseGuards(AccessTokenGuard)
   async searchForListing(@Args('searchParam') searchParam: string) {
