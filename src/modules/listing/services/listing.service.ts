@@ -1478,14 +1478,13 @@ export class ListingService {
       const orderOptions = {
         [paginateAndSort.sortField]: paginateAndSort.directionToSort,
       };
-
       if (paginateAndSort.take && paginateAndSort.skip) {
         paginateAndSort.skip = 0;
         paginateAndSort.take = 20;
       }
       const [flaggedListing, total] =
         await this.flagListingRepository.findAndCount({
-          where: whereOption,
+          where: { ...whereOption },
           take: paginateAndSort.take,
           skip: paginateAndSort.skip,
           order: orderOptions,
@@ -1495,6 +1494,7 @@ export class ListingService {
       return { flaggedListing, total };
     } catch (error) {
       this.logger.log(error);
+      console.log(error);
       throw new BadRequestException(error?.messages | error.data);
     }
   }
