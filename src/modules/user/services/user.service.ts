@@ -22,6 +22,7 @@ import type {
   UserNotificationPreference,
 } from '../../../entities';
 import {
+  Brackets,
   DeepPartial,
   FindOptionsWhere,
   In,
@@ -598,21 +599,86 @@ export class UserService {
 
   async searchForUsers(searchParam: string) {
     try {
-      return this.usersRepository
-        .createQueryBuilder('user')
-        .leftJoinAndSelect('user.roles', 'role')
-        .where('user.firstName LIKE :term', { term: `%${searchParam}%` })
-        .orWhere('user.lastName LIKE :term', { term: `%${searchParam}%` })
-        .orWhere('user.userType LIKE :term', { term: `%${searchParam}%` })
-        .orWhere('user.userLevel LIKE :term', { term: `%${searchParam}%` })
-        .orWhere('user.email LIKE :term', { term: `%${searchParam}%` })
-        .orWhere('user.status LIKE :term', { term: `%${searchParam}%` })
-        .orWhere('user.employeeId LIKE :term', { term: `%${searchParam}%` })
-        .orWhere('role.arabicName LIKE :term', { term: `%${searchParam}%` })
-        .orWhere('role.englishName LIKE :term', { term: `%${searchParam}%` })
-        .take(10)
+      return (
+        this.usersRepository
+          .createQueryBuilder('user')
+          .leftJoinAndSelect('user.roles', 'role')
+          .where('user.userType != :type', { type: UserProfileTypeEnum.STAFF }) // Ensure proper exclusion of userType STAFF
+          // Combine all other conditions using OR logic
+          .andWhere(
+            new Brackets((qb) => {
+              qb.where('user.firstName LIKE :term', {
+                term: `%${searchParam}%`,
+              })
+                .orWhere('user.lastName LIKE :term', {
+                  term: `%${searchParam}%`,
+                })
+                .orWhere('user.userType LIKE :term', {
+                  term: `%${searchParam}%`,
+                })
+                .orWhere('user.userLevel LIKE :term', {
+                  term: `%${searchParam}%`,
+                })
+                .orWhere('user.email LIKE :term', { term: `%${searchParam}%` })
+                .orWhere('user.status LIKE :term', { term: `%${searchParam}%` })
+                .orWhere('user.employeeId LIKE :term', {
+                  term: `%${searchParam}%`,
+                })
+                .orWhere('role.arabicName LIKE :term', {
+                  term: `%${searchParam}%`,
+                })
+                .orWhere('role.englishName LIKE :term', {
+                  term: `%${searchParam}%`,
+                });
+            }),
+          )
+          .take(10) // Limit to 10 results
+          .getMany()
+      );
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
 
-        .getMany();
+  async searchForEmployee(searchParam: string) {
+    try {
+      return (
+        this.usersRepository
+          .createQueryBuilder('user')
+          .leftJoinAndSelect('user.roles', 'role')
+          .where('user.userType = :type', { type: UserProfileTypeEnum.STAFF }) // Ensure proper exclusion of userType STAFF
+          // Combine all other conditions using OR logic
+          .andWhere(
+            new Brackets((qb) => {
+              qb.where('user.firstName LIKE :term', {
+                term: `%${searchParam}%`,
+              })
+                .orWhere('user.lastName LIKE :term', {
+                  term: `%${searchParam}%`,
+                })
+                .orWhere('user.userType LIKE :term', {
+                  term: `%${searchParam}%`,
+                })
+                .orWhere('user.userLevel LIKE :term', {
+                  term: `%${searchParam}%`,
+                })
+                .orWhere('user.email LIKE :term', { term: `%${searchParam}%` })
+                .orWhere('user.status LIKE :term', { term: `%${searchParam}%` })
+                .orWhere('user.employeeId LIKE :term', {
+                  term: `%${searchParam}%`,
+                })
+                .orWhere('role.arabicName LIKE :term', {
+                  term: `%${searchParam}%`,
+                })
+                .orWhere('role.englishName LIKE :term', {
+                  term: `%${searchParam}%`,
+                });
+            }),
+          )
+          .take(10) // Limit to 10 results
+          .getMany()
+      );
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
