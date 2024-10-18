@@ -15,6 +15,6 @@ export class WhereOption {
 
   @ValidateIf((o) => o.fieldToChose !== undefined)
   @IsNotEmpty({ message: 'WhereParam must contain a value' })
-  @Field(() => Boolean || String || Number)
+  @Field(() => String, { nullable: true })
   whereParam: boolean | string | number;
 }

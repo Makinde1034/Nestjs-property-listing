@@ -7,11 +7,14 @@ import { Global, Module } from '@nestjs/common';
 import { StorageService } from './services/storage.service';
 import { PdfService } from './services/pdf.service';
 import { QrCodeService } from './services/qrcode.service';
+import { ExportService } from './services/export.service';
+import { FileController } from './controller/file.controller';
 
 @Global()
 @Module({
   imports: [],
-  providers: [PdfService, StorageService, QrCodeService],
-  exports: [PdfService, StorageService, QrCodeService],
+  controllers: [FileController],
+  providers: [PdfService, StorageService, QrCodeService, ExportService],
+  exports: [PdfService, StorageService, QrCodeService, ExportService],
 })
 export class FilehandlerModule {}
