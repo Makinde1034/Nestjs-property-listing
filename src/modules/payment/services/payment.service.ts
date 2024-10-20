@@ -65,9 +65,9 @@ export class PaymentService {
     );
 
     return {
-      checkoutId: checkout.data.id,
+      checkoutId: checkout.id,
       referenceId: generateRandomString(),
-      timeStamp: checkout.data.timestamp,
+      timeStamp: checkout.timestamp,
     };
   }
 

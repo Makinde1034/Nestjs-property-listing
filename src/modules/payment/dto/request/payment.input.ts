@@ -37,7 +37,7 @@ export class PerformCopyAndPayInput {
 }
 export class PaymentRequest {
   entityId: string;
-  amount: string;
+  amount: number;
   currency: string;
   paymentType: string;
   integrity: boolean;
@@ -109,13 +109,11 @@ export class PaymentRequest {
 // }
 
 export interface CheckoutResponse {
-  data: {
-    id: string;
-    result: Result;
-    buildNumber: string;
-    timestamp: string;
-    ndc: string;
-  };
+  id: string;
+  result: Result;
+  buildNumber: string;
+  timestamp: string;
+  ndc: string;
 }
 
 export interface Result {

@@ -1,25 +1,3 @@
-// /*
-//  * Copyright (c) 2024, Waseet LLC. All rights reserved.
-//  * For license. See license.txt
-//  */
-
-// import { HttpService } from '@nestjs/axios';
-// import { ConfigService } from '@nestjs/config';
-// import {
-//   BadRequestException,
-//   HttpException,
-//   Injectable,
-//   Logger,
-// } from '@nestjs/common';
-
-// import { lastValueFrom } from 'rxjs';
-
-// import { AxiosRequestConfig } from 'axios';
-
-// import { URLSearchParams } from 'url';
-
-// import * as querystring from 'querystring';
-
 // import * as https from 'https';
 
 // import { User } from '../../../entities';
@@ -175,6 +153,8 @@
 //   }
 // }
 
+import * as querystring from 'querystring';
+
 /*
  * Copyright (c) 2024, Waseet LLC. All rights reserved.
  * For license. See license.txt
@@ -229,25 +209,26 @@ export class HyperPayService {
   async createCheckout(initiatePaymentInput: InitiatePaymentInput, user: User) {
     try {
       const payload = await this.createPayload(initiatePaymentInput, user);
-      const stringifiedPayload = Object.fromEntries(
-        Object.entries(payload).map(([key, value]) => [key, String(value)]),
-      );
-      console.log(payload);
 
-      const requestPayload = new URLSearchParams(stringifiedPayload).toString();
+      const requestPayload = querystring.stringify(payload as any);
 
-      const response = this.httpService.post(
-        this.hyperPayConfig.baseUrl + '/checkouts',
-        requestPayload,
-        this.options,
+      const response = await lastValueFrom(
+        this.httpService.post<CheckoutResponse>(
+          this.hyperPayConfig.baseUrl + '/checkouts',
+          requestPayload,
+          this.options,
+        ),
       );
-      const data: CheckoutResponse = await (await lastValueFrom(response)).data;
-      return data;
+      return response.data;
     } catch (error) {
-      console.log(error.message);
+      console.log(error);
       this.logger.error('Error creating checkout', error);
       if (error instanceof HttpException) {
         throw error;
+      } else if (error.isAxiosError) {
+        throw new BadRequestException(
+          error.response?.data?.message || 'Payment service error',
+        );
       } else {
         throw new BadRequestException(error.message);
       }
@@ -256,15 +237,9 @@ export class HyperPayService {
 
   async verifyPayment(checkoutId: string) {
     try {
-      const requestPayload1 = new URLSearchParams(checkoutId).toString();
-
-      const requestpayload2 = new URLSearchParams({
-        entityId: this.hyperPayConfig.entityId,
-      }).toString();
-
       const response = this.httpService.get(
         this.hyperPayConfig.baseUrl +
-          `checkouts/${requestPayload1}/payment?${requestpayload2}`,
+          `/checkouts/${checkoutId}/payment?entityId=${this.hyperPayConfig.entityId}`,
         this.options,
       );
 
@@ -272,6 +247,7 @@ export class HyperPayService {
 
       return data;
     } catch (error) {
+      console.log(error);
       this.logger.error('Error creating checkout', error);
       if (error instanceof HttpException) {
         throw error;
@@ -296,16 +272,16 @@ export class HyperPayService {
 
     const data: PaymentRequest = {
       entityId: this.hyperPayConfig.entityId,
-      amount: initiatePaymentInput.amount.toString(),
-      currency: adminDefault?.paymentType ?? 'SAR',
-      paymentType: adminDefault?.countryISOCode ?? 'DB',
+      amount: initiatePaymentInput.amount,
+      currency: adminDefault?.countryISOCode ?? 'SAR',
+      paymentType: adminDefault?.paymentType ?? 'DB',
       integrity: true,
       'customer.email': user.email,
       'customer.givenName': user.firstName,
       'customer.surname': user.lastName,
-      'billing.city': user.city ?? '',
-      'billing.country': user.nationality ?? '',
-      merchantTransactionId: adminDefault?.merchantTransactionId ?? '',
+      'billing.city': user.city,
+      'billing.country': user.nationality,
+      merchantTransactionId: adminDefault?.merchantTransactionId,
     };
 
     return data;
