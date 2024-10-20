@@ -35,6 +35,19 @@ export class PerformCopyAndPayInput {
   shopperUrl?: string;
   paymentType: string;
 }
+export class PaymentRequest {
+  entityId: string;
+  amount: string;
+  currency: string;
+  paymentType: string;
+  integrity: boolean;
+  'customer.email': string;
+  'customer.givenName': string;
+  'customer.surname': string;
+  'billing.city': string;
+  'billing.country': string;
+  merchantTransactionId: string;
+}
 
 // @InputType()
 // Export class PreAuthorisedPaymentInput {
@@ -96,12 +109,13 @@ export class PerformCopyAndPayInput {
 // }
 
 export interface CheckoutResponse {
-  id: string;
-
-  result: Result;
-  buildNumber: string;
-  timestamp: string;
-  ndc: string;
+  data: {
+    id: string;
+    result: Result;
+    buildNumber: string;
+    timestamp: string;
+    ndc: string;
+  };
 }
 
 export interface Result {

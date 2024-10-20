@@ -12,9 +12,11 @@ export const AdminPlatformDefaultFactory: Partial<AdminDefault> = {
   state: 'cario',
   country: 'Egypt',
   countryISOCode: 'SAR',
+  paymentType: 'DB',
   saii: 2.5,
   vat: 15,
   daysToAuctionRegistrationStart: 7,
   daysToAuctionRegistrationEnd: 7,
   postcode: '4240111',
+  merchantTransactionId: 'WASEET-2024-PI',
 };
