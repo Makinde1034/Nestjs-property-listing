@@ -52,12 +52,12 @@ export class PaymentService {
     createPaymentInput: InitiatePaymentInput,
     user: User,
   ) {
-    let coupon;
-    if (createPaymentInput) {
-      coupon = await this.adminService.isCouponValid(
+    if (createPaymentInput.coupon) {
+      const coupon = await this.adminService.isCouponValid(
         createPaymentInput.coupon,
         createPaymentInput.amount,
       );
+      createPaymentInput.amount = coupon.amount;
     }
     const checkout = await this.hyperPayService.createCheckout(
       createPaymentInput,
@@ -85,8 +85,6 @@ export class PaymentService {
       const payload: CreateInvoiceInput = {
         price: data.sumTotalWithVat,
         vat: data.sumTotalVat,
-        // Type: 'offer', //TODO create an enum for all possible payment
-
         expiredAt: addDays(new Date(), 4),
         userId: user.id,
         listingid: listing.id,

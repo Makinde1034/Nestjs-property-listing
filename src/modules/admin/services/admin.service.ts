@@ -535,7 +535,7 @@ export class AdminService {
     }
   }
 
-  async isCouponValid(code: string, amount: number) {
+  async isCouponValid(code: string, price: number) {
     try {
       const coupon = await this.couponRepository.findOne({
         where: { code },
@@ -551,15 +551,15 @@ export class AdminService {
         !coupon.deactived &&
         coupon.maxUse > coupon.currentUse
       ) {
-        let newAmount = amount;
+        let amount = price;
 
         switch (coupon.discountType) {
           case CouponEnum.NUMBER:
-            newAmount = amount - coupon.discountValue;
+            amount = price - coupon.discountValue;
             break;
 
           case CouponEnum.PERCENT:
-            newAmount = amount - (coupon.discountValue / 100) * amount;
+            amount = price - (coupon.discountValue / 100) * price;
             break;
 
           default:
@@ -568,14 +568,14 @@ export class AdminService {
 
         return {
           valid: true,
-          newAmount,
+          amount,
           message: null,
         };
       }
 
       return {
         valid: false,
-        amount,
+        amount: price,
         message: 'Coupon is expired, deactivated, or has reached usage limits',
       };
     } catch (error) {

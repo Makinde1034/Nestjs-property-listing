@@ -179,7 +179,6 @@ import {
   PaymentRequest,
 } from '../dto/request/payment.input';
 import { AxiosRequestConfig } from 'axios';
-import { URLSearchParams } from 'url';
 import { User } from '../../../entities';
 import { AdminService } from '../../admin/services/admin.service';
 

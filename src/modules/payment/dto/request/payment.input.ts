@@ -5,7 +5,7 @@
 
 import { Field, InputType } from '@nestjs/graphql';
 
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 @InputType()
 export class InitiatePaymentInput {
@@ -15,7 +15,7 @@ export class InitiatePaymentInput {
   amount: number;
 
   @Field({ nullable: true })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   coupon: string;
 }
