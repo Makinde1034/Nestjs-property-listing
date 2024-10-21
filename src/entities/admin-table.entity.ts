@@ -32,6 +32,10 @@ export class AdminDefault extends BaseEntity {
 
   @Field()
   @Column()
+  paymentType: string;
+
+  @Field()
+  @Column()
   state: string;
   @Field()
   @Column()
@@ -42,6 +46,10 @@ export class AdminDefault extends BaseEntity {
   @Field()
   @Column()
   postcode: string;
+
+  @Field()
+  @Column()
+  merchantTransactionId: string;
 
   @Field()
   @Column()

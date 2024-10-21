@@ -149,7 +149,6 @@ export class UserResolver {
   ): Promise<NafathAuthenticationResponseToUser> {
     return await this.userService.upgradeUser(ctx.req.user);
   }
-
   /**
    * Block User
    *

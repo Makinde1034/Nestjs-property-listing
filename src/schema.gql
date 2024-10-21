@@ -638,10 +638,12 @@ type AdminDefault {
   city: String!
   saii: Float!
   vat: Float!
+  paymentType: String!
   state: String!
   country: String!
   countryISOCode: String!
   postcode: String!
+  merchantTransactionId: String!
   daysToAuctionRegistrationEnd: Float!
   maximumDaysForOfferExpiration: Float!
   daysToAuctionRegistrationStart: Float!

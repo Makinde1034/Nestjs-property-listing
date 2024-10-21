@@ -36,6 +36,7 @@ import {
   UserCountryCount,
   UserGenderCount,
   UserAgeRange,
+  CouponResponse,
 } from '../dto/response/admin-response';
 import { TicketRepository } from '../../tickets/repositories';
 import { AdminDashboardSort } from '../dto/request/admin-request';
@@ -535,14 +536,18 @@ export class AdminService {
     }
   }
 
-  async isCouponValid(code: string, amount: number) {
+  async isCouponValid(code: string, price: number) {
     try {
+      let result: CouponResponse;
       const coupon = await this.couponRepository.findOne({
         where: { code },
       });
 
       if (!coupon) {
-        return { valid: false, message: 'Coupon not found' };
+        return (result = {
+          valid: false,
+          amount: price,
+        });
       }
 
       // Check if the coupon is valid
@@ -551,33 +556,31 @@ export class AdminService {
         !coupon.deactived &&
         coupon.maxUse > coupon.currentUse
       ) {
-        let newAmount = amount;
+        let amount = price;
 
         switch (coupon.discountType) {
           case CouponEnum.NUMBER:
-            newAmount = amount - coupon.discountValue;
+            amount = price - coupon.discountValue;
             break;
 
           case CouponEnum.PERCENT:
-            newAmount = amount - (coupon.discountValue / 100) * amount;
+            amount = price - (coupon.discountValue / 100) * price;
             break;
 
           default:
             break;
         }
 
-        return {
+        return (result = {
           valid: true,
-          newAmount,
-          message: null,
-        };
+          amount,
+        });
       }
 
-      return {
+      return (result = {
         valid: false,
-        amount,
-        message: 'Coupon is expired, deactivated, or has reached usage limits',
-      };
+        amount: price,
+      });
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(

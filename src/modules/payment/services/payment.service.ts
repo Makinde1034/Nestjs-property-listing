@@ -28,6 +28,7 @@ import {
 } from '../../../config/app-default/app-default';
 import { ConfigService } from '@nestjs/config';
 import { AdminService } from '../../admin/services/admin.service';
+import { CouponResponse } from '../../admin/dto/response/admin-response';
 
 @Injectable()
 export class PaymentService {
@@ -52,13 +53,15 @@ export class PaymentService {
     createPaymentInput: InitiatePaymentInput,
     user: User,
   ) {
-    let coupon;
-    if (createPaymentInput) {
-      coupon = await this.adminService.isCouponValid(
+    if (createPaymentInput.coupon) {
+      const coupon: CouponResponse = await this.adminService.isCouponValid(
         createPaymentInput.coupon,
         createPaymentInput.amount,
       );
+      console.log(coupon);
+      createPaymentInput.amount = coupon.amount;
     }
+    console.log(createPaymentInput.amount);
     const checkout = await this.hyperPayService.createCheckout(
       createPaymentInput,
       user,
@@ -85,8 +88,6 @@ export class PaymentService {
       const payload: CreateInvoiceInput = {
         price: data.sumTotalWithVat,
         vat: data.sumTotalVat,
-        // Type: 'offer', //TODO create an enum for all possible payment
-
         expiredAt: addDays(new Date(), 4),
         userId: user.id,
         listingid: listing.id,
