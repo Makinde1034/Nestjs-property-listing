@@ -340,32 +340,29 @@ export class TicketService {
       return this.ticketRepository
         .createQueryBuilder('ticket')
         .leftJoinAndSelect('ticket.reporter', 'user')
-        .leftJoinAndSelect('ticket.parentIssue', 'parentIssue')
+        .leftJoinAndSelect('ticket.parentIssue', 'parentIssue') // Correct alias here
         .leftJoinAndSelect('ticket.childIssue', 'childIssue')
 
         .orWhere('user.firstName LIKE :term', { term: `%${searchParam}%` })
-        .orWhere('user.arablicFirstName LIKE :term', {
+        .orWhere('user.arabicFirstName LIKE :term', {
           term: `%${searchParam}%`,
         })
-
         .orWhere('parentIssue.arabicName LIKE :term', {
           term: `%${searchParam}%`,
-        })
-
-        .orWhere('parrentIssue.englishName LIKE :term', {
+        }) // Correct alias
+        .orWhere('parentIssue.englishName LIKE :term', {
+          term: `%${searchParam}%`,
+        }) // Correct alias
+        .orWhere('childIssue.arabicName LIKE :term', {
           term: `%${searchParam}%`,
         })
-        .orWhere('clildIssue.arabicName LIKE :term', {
-          term: `%${searchParam}%`,
-        })
-
-        .orWhere('clildIssue.englishName LIKE :term', {
+        .orWhere('childIssue.englishName LIKE :term', {
           term: `%${searchParam}%`,
         })
         .getMany();
     } catch (error) {
-      this.logger.log(error);
-      throw new BadRequestException(error);
+      this.logger.error('Error searching tickets', error);
+      throw new BadRequestException(error.message);
     }
   }
 

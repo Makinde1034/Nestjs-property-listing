@@ -910,7 +910,7 @@ type Query {
   fetchOneResponseTemplate(id: String!): ResponseTemplate!
   fetchResponseTemplate(findOption: PaginateAndSort): ResponseTemplateResponse!
   searchForTickets(searchParam: String!): [Ticket!]!
-  searchForResponseTemplate(searchParam: String!): [Ticket!]!
+  searchForResponseTemplate(searchParam: String!): [ResponseTemplate!]!
   findOneReview(id: String!): Review!
   findManyReviews(findMayOptions: FindManyReviewDto): ReviewResponse!
   searchForReview(searchParam: String!): [Review!]!
