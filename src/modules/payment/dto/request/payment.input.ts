@@ -47,18 +47,12 @@ export class PaymentRequest {
   currency: string;
   paymentType: string;
   integrity: boolean;
-  customer: Customer;
-
+  'customer.email': string;
+  'customer.givenName': string;
+  'customer.surname': string;
+  'customer.city': string;
+  'customer.country': string;
   merchantTransactionId: string;
-  paymentBrand: string;
-}
-
-export class Customer {
-  email: string;
-  givenName: string;
-  surname: string;
-  city: string;
-  country: string;
 }
 
 export class RefundPaymentRequest {
@@ -68,41 +62,42 @@ export class RefundPaymentRequest {
   paymentType: string;
   merchantTransactionId: string;
   paymentBrand: string;
-  card: Card;
+  'card.number': string;
+  'card.holder': string;
+  'card.expiryMonth': string;
+  'card.expiryYear': string;
+  'card.cvv': string;
 }
+
 @InputType()
 export class PreAuthorisedPaymentInput {
   @Field()
   @IsPositive()
-  Amount: number;
+  amount: number;
 
   @Field()
   @IsString()
-  PaymentBrand: string;
+  paymentBrand: string;
 
   @Field()
   @IsString()
-  CardNumber: string;
+  cardNumber: string;
 
   @Field()
   @IsString()
-  CardHolder: string;
+  cardHolder: string;
 
   @Field()
   @IsString()
-  CardExpiryMonth: string;
+  cardExpiryMonth: string;
 
   @Field()
   @IsString()
-  CardExpiryYear: string;
+  cardExpiryYear: string;
 
   @Field()
   @IsString()
-  CardCvv: string;
-
-  PaymentType?: string;
-  EntityId?: string;
-  Currency?: string;
+  cardCvv: string;
 }
 
 export interface DebitPaymentResponse {

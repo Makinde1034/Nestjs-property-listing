@@ -650,8 +650,8 @@ export class UserService {
 
       // Build where options
       const whereOptions: any = {
-        ...(level && { userLevel: In(level) }),
-        ...(status && { status: In(status) }),
+        ...(level ? { userLevel: In(level) } : {}),
+        ...(status ? { status: In(status) } : {}),
         isBlocked: isBlocked ?? undefined,
         userType: Not(UserProfileTypeEnum.STAFF),
       };
@@ -909,12 +909,11 @@ export class UserService {
 
       // Build where options
       const whereOptions: any = {
-        ...(level && { userLevel: In(level) }),
-        ...(status && { status: In(status) }),
-        ...(type && { type: In(type) }),
-        ...(roles && { roles: { id: In(roles) } }),
-
-        isBlocked: isBlocked ?? undefined,
+        ...(level ? { userLevel: In(level) } : {}),
+        ...(status ? { status: In(status) } : {}),
+        ...(type ? { type: In(type) } : {}),
+        ...(roles ? { roles: { id: In(roles) } } : {}),
+        ...(isBlocked !== undefined ? { isBlocked } : {}),
         userType: UserProfileTypeEnum.STAFF,
       };
       // Build order options

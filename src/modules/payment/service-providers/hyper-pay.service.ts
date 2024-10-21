@@ -222,21 +222,18 @@ export class HyperPayService {
         currency: 'SAR',
         paymentType: 'DB',
         integrity: true,
-        customer: {
-          email: user.email,
-          givenName: user.firstName,
-          surname: user.lastName,
-          city: user.city,
-          country: user.nationality,
-        },
+        'customer.email': user.email,
+        'customer.givenName': user.firstName,
+        'customer.surname': user.lastName,
+        'customer.city': user.city,
+        'customer.country': user.nationality,
         merchantTransactionId: adminDefault?.merchantTransactionId,
-        paymentBrand: 'VISA',
       };
 
       const requestPayload = querystring.stringify(payload as any);
 
       const response = await lastValueFrom(
-        this.httpService.post<CheckoutResponse>(
+        this.httpService.post<PreAuthorisedPaymentResponse>(
           this.hyperPayConfig.baseUrl + '/checkouts',
           requestPayload,
           this.options,
@@ -269,6 +266,50 @@ export class HyperPayService {
       const data = await (await lastValueFrom(response)).data;
 
       return data;
+    } catch (error) {
+      console.log(error);
+      this.logger.error('Error creating checkout', error);
+      if (error instanceof HttpException) {
+        throw error;
+      } else if (error.isAxiosError) {
+        throw new BadRequestException(
+          error.response?.data?.message || 'Payment service error',
+        );
+      } else {
+        throw new BadRequestException(error.message);
+      }
+    }
+  }
+
+  async preAuthorize(initiatePaymentInput: PreAuthorisedPaymentInput) {
+    try {
+      const adminDefault = await this.adminService.adminDefault();
+
+      const payload = {
+        entityId: this.hyperPayConfig.entityId,
+        amount: initiatePaymentInput.amount,
+        currency: 'SAR',
+        paymentType: 'PA',
+        integrity: true,
+        'card.number': initiatePaymentInput.cardNumber,
+        'card.holder': initiatePaymentInput.cardHolder,
+        'card.expiryMonth': initiatePaymentInput.cardExpiryMonth,
+        'card.expiryYear': initiatePaymentInput.cardExpiryYear,
+        'card.cvv': initiatePaymentInput.cardCvv,
+        merchantTransactionId: adminDefault?.merchantTransactionId,
+        paymentBrand: initiatePaymentInput.paymentBrand,
+      };
+
+      const requestPayload = querystring.stringify(payload as any);
+
+      const response = await lastValueFrom(
+        this.httpService.post<CheckoutResponse>(
+          this.hyperPayConfig.baseUrl + '/payments',
+          requestPayload,
+          this.options,
+        ),
+      );
+      return response.data;
     } catch (error) {
       console.log(error);
       this.logger.error('Error creating checkout', error);
