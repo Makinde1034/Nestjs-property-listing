@@ -176,7 +176,7 @@ export class TicketsResolver {
     return await this.ticketService.searchForTickets(searchParam);
   }
 
-  @Query(() => [Ticket], { name: 'searchForResponseTemplate' })
+  @Query(() => [ResponseTemplate], { name: 'searchForResponseTemplate' })
   @UseGuards(AccessTokenGuard)
   async searchForResponseTemplate(@Args('searchParam') searchParam: string) {
     return await this.ticketService.searchForResponseTemplate(searchParam);
