@@ -1,9 +1,8 @@
 import {
   Body,
   Controller,
-  Get,
+  Post,
   Query,
-  Res,
   StreamableFile,
   UseGuards,
 } from '@nestjs/common';
@@ -11,12 +10,14 @@ import { ExportService } from '../services/export.service';
 import { RestAccessTokenGuard } from '../../auth/guards';
 
 import { Readable } from 'stream';
+import { Public } from '../../auth/decorators/permision.decorator';
 
 @Controller()
 export class FileController {
   constructor(private readonly exportService: ExportService) {}
   @UseGuards(RestAccessTokenGuard)
-  @Get('export/csv')
+  @Post('export/csv')
+  @Public()
   async exportToCsv(
     @Query('name') name: string,
     @Body() payload: Array<Object>,
@@ -33,8 +34,9 @@ export class FileController {
     });
   }
 
+  @Public()
   @UseGuards(RestAccessTokenGuard)
-  @Get('export/pdf')
+  @Post('export/pdf')
   async exportToPdf(
     @Query('name') name: string,
     @Body() payload: Array<Object>,
