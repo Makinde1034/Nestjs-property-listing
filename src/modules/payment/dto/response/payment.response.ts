@@ -43,6 +43,21 @@ export interface PreAuthorisedPaymentCard {
   expiryYear: string;
 }
 
+export interface CapturePaymentResponse {
+  id: string;
+  referencedId: string;
+  paymentType: string;
+  result: CapturePaymentData;
+  buildNumber: string;
+  timestamp: string;
+  ndc: string;
+}
+
+export interface CapturePaymentData {
+  code: string;
+  description: string;
+}
+
 export interface PreAuthorisedPaymentResult {
   code: string;
   description: string;

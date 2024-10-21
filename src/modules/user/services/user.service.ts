@@ -129,6 +129,10 @@ export class UserService {
 
       if (process.env.NODE_ENV == 'production') {
         const result = await this.nafathService.verifyUser();
+        if (!result) {
+          throw new BadRequestException('Failed to innitiate verification');
+        }
+
         await this.nafathLogsRepository.save({ ...result, userId: user.id });
         return { random: result.random };
       } else {
@@ -159,18 +163,22 @@ export class UserService {
           transId: data.transId,
         },
       });
-      await this.usersRepository.update(nafathLog.userId, {
-        userLevel: UserLevelEnum.LEVEL_2,
-        firstName: userData.user_info['first_name#en'],
-        lastName: userData.user_info['family_name#en'],
-        arabicFirstName: userData.user_info['first_name#ar'],
-        arabicLastName: userData.user_info['family_name#ar'],
-        middleName: userData.user_info['grand_name#en'],
-        arabicMiddleName: userData.user_info['grand_name#ar'],
-        dateOfBirth: new Date(userData.user_info['dob#g']),
-        nationality: userData.user_info['nationality#en'],
-        isDataVerified: true,
-      });
+      if (nafathLog) {
+        await this.usersRepository.update(nafathLog.userId, {
+          userLevel: UserLevelEnum.LEVEL_2,
+          firstName: userData.user_info['first_name#en'],
+          lastName: userData.user_info['family_name#en'],
+          arabicFirstName: userData.user_info['first_name#ar'],
+          arabicLastName: userData.user_info['family_name#ar'],
+          middleName: userData.user_info['grand_name#en'],
+          arabicMiddleName: userData.user_info['grand_name#ar'],
+          dateOfBirth: new Date(userData.user_info['dob#g']),
+          nationality: userData.user_info['nationality#en'],
+          isDataVerified: true,
+        });
+      } else {
+        //TODO alert User of failure
+      }
 
       //TODO: notify User
     } catch (error) {

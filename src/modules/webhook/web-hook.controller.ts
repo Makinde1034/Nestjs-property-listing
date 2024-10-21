@@ -21,7 +21,6 @@ import {
 
 import { WebhookService } from './services/web-hook.services';
 import { Public } from '../auth/decorators/permision.decorator';
-import { NafathWebHookResponse } from '../user/dtos/response/nafath';
 @Controller()
 export class WebHookController {
   private webhookConfig: WebhookConfig;
@@ -38,19 +37,21 @@ export class WebHookController {
   @Public()
   @HttpCode(200)
   Payment(
-    @Body() hyperPayWebHookResponse: WebHookPaymentResponse,
+    @Body() hyperPayWebHookResponse: any,
     @Headers('x-signature') signature: string,
   ) {
+    console.log('response', hyperPayWebHookResponse);
     this.webhookService.handleWebHookForHyperpay(
       hyperPayWebHookResponse,
       signature,
     );
+    return HttpStatus.OK;
   }
 
   @Post('api/v1/user/iam')
   @Public()
   @HttpCode(200)
-  User(@Body() data: NafathWebHookResponse) {
+  User(@Body() data: any) {
     this.webhookService.handleWebhookForNafath(data);
     return HttpStatus.OK;
   }

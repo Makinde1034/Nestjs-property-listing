@@ -134,3 +134,8 @@ export class FinancialVsOrder {
   @Field({ nullable: true })
   totalOrdered: number;
 }
+
+export class CouponResponse {
+  valid: boolean;
+  amount: number;
+}

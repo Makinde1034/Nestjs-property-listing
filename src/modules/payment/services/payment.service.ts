@@ -28,6 +28,7 @@ import {
 } from '../../../config/app-default/app-default';
 import { ConfigService } from '@nestjs/config';
 import { AdminService } from '../../admin/services/admin.service';
+import { CouponResponse } from '../../admin/dto/response/admin-response';
 
 @Injectable()
 export class PaymentService {
@@ -53,12 +54,14 @@ export class PaymentService {
     user: User,
   ) {
     if (createPaymentInput.coupon) {
-      const coupon = await this.adminService.isCouponValid(
+      const coupon: CouponResponse = await this.adminService.isCouponValid(
         createPaymentInput.coupon,
         createPaymentInput.amount,
       );
+      console.log(coupon);
       createPaymentInput.amount = coupon.amount;
     }
+    console.log(createPaymentInput.amount);
     const checkout = await this.hyperPayService.createCheckout(
       createPaymentInput,
       user,

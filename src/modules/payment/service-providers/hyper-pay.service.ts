@@ -174,13 +174,20 @@ import {
   getHyperpayConfigName,
 } from '../../../config/payment/hyper-payment.config';
 import {
+  CapturePaymentData,
   CheckoutResponse,
   InitiatePaymentInput,
   PaymentRequest,
+  PreAuthorisedPaymentInput,
+  RefundPaymentRequest,
 } from '../dto/request/payment.input';
 import { AxiosRequestConfig } from 'axios';
 import { User } from '../../../entities';
 import { AdminService } from '../../admin/services/admin.service';
+import {
+  CapturePaymentResponse,
+  PreAuthorisedPaymentResponse,
+} from '../dto/response/payment.response';
 
 @Injectable()
 export class HyperPayService {
@@ -207,7 +214,24 @@ export class HyperPayService {
 
   async createCheckout(initiatePaymentInput: InitiatePaymentInput, user: User) {
     try {
-      const payload = await this.createPayload(initiatePaymentInput, user);
+      const adminDefault = await this.adminService.adminDefault();
+
+      const payload: PaymentRequest = {
+        entityId: this.hyperPayConfig.entityId,
+        amount: initiatePaymentInput.amount,
+        currency: 'SAR',
+        paymentType: 'DB',
+        integrity: true,
+        customer: {
+          email: user.email,
+          givenName: user.firstName,
+          surname: user.lastName,
+          city: user.city,
+          country: user.nationality,
+        },
+        merchantTransactionId: adminDefault?.merchantTransactionId,
+        paymentBrand: 'VISA',
+      };
 
       const requestPayload = querystring.stringify(payload as any);
 
@@ -260,29 +284,71 @@ export class HyperPayService {
     }
   }
 
-  private async createPayload(
+  async performDebitPayment(
     initiatePaymentInput: InitiatePaymentInput,
     user: User,
   ) {
-    if (!user.email || !user.firstName || !initiatePaymentInput.amount) {
-      throw new BadRequestException('Missing required payment or user details');
+    try {
+      const adminDefault = await this.adminService.adminDefault();
+
+      const payload = {
+        entityId: this.hyperPayConfig.entityId,
+        amount: initiatePaymentInput.amount,
+        currency: 'SAR',
+        paymentType: 'DB',
+        'card.number': '4200000000000000',
+        'card.holder': 'Jane Jones',
+        'card.expiryMonth': '05',
+        'card.expiryYear': '2034',
+        'card.cvv': '123',
+        merchantTransactionId: adminDefault?.merchantTransactionId,
+        paymentBrand: 'VISA',
+        shopperResultUrl: this.hyperPayConfig.frontendUrl,
+      };
+      const requestPayload = querystring.stringify(payload as any);
+      const response = await lastValueFrom(
+        this.httpService.post<PreAuthorisedPaymentResponse>(
+          this.hyperPayConfig.baseUrl + '/payments',
+          requestPayload,
+          this.options,
+        ),
+      );
+      return response.data;
+    } catch (error) {
+      console.log(error.response.data.result.parameterErrors);
+      this.logger.error('Error in payment pre-authorization', error);
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new BadRequestException(error.message);
+      }
     }
-    const adminDefault = await this.adminService.adminDefault();
+  }
 
-    const data: PaymentRequest = {
-      entityId: this.hyperPayConfig.entityId,
-      amount: initiatePaymentInput.amount,
-      currency: adminDefault?.countryISOCode ?? 'SAR',
-      paymentType: adminDefault?.paymentType ?? 'DB',
-      integrity: true,
-      'customer.email': user.email,
-      'customer.givenName': user.firstName,
-      'customer.surname': user.lastName,
-      'billing.city': user.city,
-      'billing.country': user.nationality,
-      merchantTransactionId: adminDefault?.merchantTransactionId,
-    };
+  async capturePayment(capturePayment: CapturePaymentData) {
+    try {
+      const payload = querystring.stringify({
+        entityId: this.hyperPayConfig.entityId,
+        amount: capturePayment.amount,
+        paymentType: 'CP',
+        currency: 'SAR',
+      });
 
-    return data;
+      const response = await lastValueFrom(
+        this.httpService.post<CapturePaymentResponse>(
+          this.hyperPayConfig.baseUrl + `/payments${capturePayment.paymentId}`,
+          payload,
+          this.options,
+        ),
+      );
+      return response.data;
+    } catch (error) {
+      this.logger.error('Error in payment pre-authorization', error);
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new BadRequestException(error.message);
+      }
+    }
   }
 }

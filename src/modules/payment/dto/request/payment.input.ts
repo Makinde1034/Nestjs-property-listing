@@ -5,7 +5,13 @@
 
 import { Field, InputType } from '@nestjs/graphql';
 
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  IsString,
+} from 'class-validator';
 
 @InputType()
 export class InitiatePaymentInput {
@@ -41,72 +47,87 @@ export class PaymentRequest {
   currency: string;
   paymentType: string;
   integrity: boolean;
-  'customer.email': string;
-  'customer.givenName': string;
-  'customer.surname': string;
-  'billing.city': string;
-  'billing.country': string;
+  customer: Customer;
+
   merchantTransactionId: string;
+  paymentBrand: string;
 }
 
-// @InputType()
-// Export class PreAuthorisedPaymentInput {
-//   @Field()
-//   @IsPositive()
-//   Amount: number;
+export class Customer {
+  email: string;
+  givenName: string;
+  surname: string;
+  city: string;
+  country: string;
+}
 
-//   @Field()
-//   @IsString()
-//   PaymentBrand: string;
+export class RefundPaymentRequest {
+  entityId: string;
+  amount: number;
+  currency: string;
+  paymentType: string;
+  merchantTransactionId: string;
+  paymentBrand: string;
+  card: Card;
+}
+@InputType()
+export class PreAuthorisedPaymentInput {
+  @Field()
+  @IsPositive()
+  Amount: number;
 
-//   @Field()
-//   @IsString()
-//   CardNumber: string;
+  @Field()
+  @IsString()
+  PaymentBrand: string;
 
-//   @Field()
-//   @IsString()
-//   CardHolder: string;
+  @Field()
+  @IsString()
+  CardNumber: string;
 
-//   @Field()
-//   @IsString()
-//   CardExpiryMonth: string;
+  @Field()
+  @IsString()
+  CardHolder: string;
 
-//   @Field()
-//   @IsString()
-//   CardExpiryYear: string;
+  @Field()
+  @IsString()
+  CardExpiryMonth: string;
 
-//   @Field()
-//   @IsString()
-//   CardCvv: string;
+  @Field()
+  @IsString()
+  CardExpiryYear: string;
 
-//   PaymentType?: string;
-//   EntityId?: string;
-//   Currency?: string;
-// }
+  @Field()
+  @IsString()
+  CardCvv: string;
 
-// Export interface DebitPaymentResponse {
-//   Id: string;
-//   PaymentType: string;
-//   PaymentBrand: string;
-//   Result: Result;
-//   Card: Card;
-//   BuildNumber: string;
-//   Timestamp: string;
-//   Ndc: string;
-// }
+  PaymentType?: string;
+  EntityId?: string;
+  Currency?: string;
+}
 
-// Export interface Card {
-//   Bin: string;
-//   Last4Digits: string;
-//   Holder: string;
-//   ExpiryMonth: string;
-//   ExpiryYear: string;
-// }
+export interface DebitPaymentResponse {
+  Id: string;
+  PaymentType: string;
+  PaymentBrand: string;
+  Result: Result;
+  Card: Card;
+  BuildNumber: string;
+  Timestamp: string;
+  Ndc: string;
+}
 
-// Export interface Result {
-//   Code: string;
-//   Description: string;
-// }
+export interface Card {
+  holder: string;
+  expiryMonth: string;
+  expiryYear: string;
+  number: string;
+  cvv: string;
+}
+
+export interface Result {
+  Code: string;
+  Description: string;
+}
 
 export interface CheckoutResponse {
   id: string;
@@ -119,4 +140,8 @@ export interface CheckoutResponse {
 export interface Result {
   code: string;
   description: string;
+}
+export interface CapturePaymentData {
+  amount: string;
+  paymentId: string;
 }
