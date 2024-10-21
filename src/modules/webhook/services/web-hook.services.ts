@@ -21,7 +21,6 @@ import {
   Logger,
 } from '@nestjs/common';
 import {
-  NafathAuthenticationResponse,
   NafathUserResponse,
   NafathWebHookResponse,
 } from '../../user/dtos/response/nafath';

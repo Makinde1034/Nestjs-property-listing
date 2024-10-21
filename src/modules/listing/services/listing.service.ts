@@ -776,6 +776,13 @@ export class ListingService {
     ) {
       whereCondition.isListingFlagged = paginateAndSort.isListingFlagged;
     }
+
+    if (
+      paginateAndSort.isListingFeatured !== undefined &&
+      paginateAndSort.isListingFeatured !== null
+    ) {
+      whereCondition.isListingFeatured = paginateAndSort.isListingFeatured;
+    }
     if (
       paginateAndSort.isListingRented !== undefined &&
       paginateAndSort.isListingRented !== null
