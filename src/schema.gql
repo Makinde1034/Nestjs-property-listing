@@ -1018,6 +1018,7 @@ input AdminFilterAndSort {
   where: WhereOption
   timePeriod: String = "false"
   isListingPromoted: Boolean
+  isListingFeatured: Boolean
   isListingSold: Boolean
   isListingFlagged: Boolean
   isListingRented: Boolean

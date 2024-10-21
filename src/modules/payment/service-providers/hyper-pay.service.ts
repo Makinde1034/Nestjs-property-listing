@@ -284,47 +284,6 @@ export class HyperPayService {
     }
   }
 
-  async performDebitPayment(
-    initiatePaymentInput: InitiatePaymentInput,
-    user: User,
-  ) {
-    try {
-      const adminDefault = await this.adminService.adminDefault();
-
-      const payload = {
-        entityId: this.hyperPayConfig.entityId,
-        amount: initiatePaymentInput.amount,
-        currency: 'SAR',
-        paymentType: 'DB',
-        'card.number': '4200000000000000',
-        'card.holder': 'Jane Jones',
-        'card.expiryMonth': '05',
-        'card.expiryYear': '2034',
-        'card.cvv': '123',
-        merchantTransactionId: adminDefault?.merchantTransactionId,
-        paymentBrand: 'VISA',
-        shopperResultUrl: this.hyperPayConfig.frontendUrl,
-      };
-      const requestPayload = querystring.stringify(payload as any);
-      const response = await lastValueFrom(
-        this.httpService.post<PreAuthorisedPaymentResponse>(
-          this.hyperPayConfig.baseUrl + '/payments',
-          requestPayload,
-          this.options,
-        ),
-      );
-      return response.data;
-    } catch (error) {
-      console.log(error.response.data.result.parameterErrors);
-      this.logger.error('Error in payment pre-authorization', error);
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        throw new BadRequestException(error.message);
-      }
-    }
-  }
-
   async capturePayment(capturePayment: CapturePaymentData) {
     try {
       const payload = querystring.stringify({

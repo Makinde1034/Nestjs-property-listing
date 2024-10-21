@@ -151,6 +151,11 @@ export class UserFilterAndSort extends PaginateAndSort {
   @Field()
   @IsOptional()
   @IsBoolean()
+  isListingFeatured: boolean;
+
+  @Field()
+  @IsOptional()
+  @IsBoolean()
   isListingSold: boolean;
 
   @Field()
