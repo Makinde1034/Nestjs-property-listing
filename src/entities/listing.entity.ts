@@ -64,14 +64,6 @@ export class Listing extends BaseEntity {
   @Index()
   rentingOption: string;
 
-  @Column()
-  @Field({ nullable: true })
-  iban: string;
-
-  @Column()
-  @Field({ nullable: true })
-  zatcaNumber: string;
-
   @Field(() => AuctionParticipant)
   @OneToOne(() => AuctionParticipant, (listing) => listing.listing)
   auctionParticipant: AuctionParticipant;
