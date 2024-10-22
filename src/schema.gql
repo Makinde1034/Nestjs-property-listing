@@ -329,8 +329,6 @@ type Listing {
   deedNumber: String
   poaNumber: String
   rentingOption: String
-  iban: String
-  zatcaNumber: String
   auctionParticipant: AuctionParticipant!
   listingType: ListingType
   listingTypeId: String
@@ -1446,8 +1444,6 @@ input CreateListingDto {
   poaNumber: String
   deedNumber: String
   rentingOption: String
-  iban: String!
-  zatcaNumber: String!
   listingTypeId: String!
   attributes: [Attributes!]!
   gpsCoordinate: LocationDto
@@ -1463,8 +1459,6 @@ input UpdateListingDto {
   poaNumber: String
   deedNumber: String
   rentingOption: String
-  iban: String
-  zatcaNumber: String
   listingTypeId: String
   attributes: [Attributes!]
   gpsCoordinate: LocationDto

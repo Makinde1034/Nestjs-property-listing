@@ -988,8 +988,6 @@ export class ListingService {
         .execute();
 
       listing.deedNumber = '';
-      listing.zatcaNumber = '';
-      listing.iban = '';
 
       return listing;
     } catch (error) {
@@ -1048,8 +1046,6 @@ export class ListingService {
         .execute();
 
       listing.deedNumber = '';
-      listing.zatcaNumber = '';
-      listing.iban = '';
 
       return listing;
     } catch (error) {

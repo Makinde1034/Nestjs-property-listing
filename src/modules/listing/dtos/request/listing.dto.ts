@@ -75,14 +75,6 @@ export class CreateListingDto {
   rentingOption: string;
 
   @Field()
-  @IsNumberString()
-  iban: string;
-
-  @Field()
-  @IsNumberString()
-  zatcaNumber: string;
-
-  @Field()
   @IsString()
   listingTypeId: string;
 
