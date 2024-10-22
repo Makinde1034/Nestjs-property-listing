@@ -7,11 +7,15 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { I18nMiddleware } from 'nestjs-i18n';
-import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  Logger,
+  ValidationPipe,
+} from '@nestjs/common';
 import { TrackingMiddleware } from './common/interceptors/user-visit';
 import { UserTrackingService } from './modules/user/services/user.tracking.service';
 import { TimeoutMiddleware } from './common/interceptors/timeout.middleware';
-
+new Logger();
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
@@ -43,7 +47,6 @@ async function bootstrap() {
     const trackingMiddleware = new TrackingMiddleware(UsertrackingService);
     trackingMiddleware.use(req, res, next);
   });
-  console.log(process.memoryUsage());
 
   await app.listen(PORT, HOST);
 }

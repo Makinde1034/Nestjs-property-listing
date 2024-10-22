@@ -320,4 +320,25 @@ export class AttributeService {
     await this.attributeSetRepository.softDelete(data.id);
     return AppStrings.ATTRIBUTESET_DELETED_SUCCESSFULLY;
   }
+
+  async searchForAttributes(searchParam: string) {
+    try {
+      return await this.attributeRepository
+        .createQueryBuilder('attributes')
+
+        .orWhere('attributes.englishName LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+
+        .orWhere('attributes.arabicName LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+        .take(10)
+
+        .getMany();
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
 }

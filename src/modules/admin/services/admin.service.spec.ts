@@ -15,6 +15,9 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AdminRepository } from '../repositories/admin.repository';
 import { CouponRepository } from '../repositories/coupons.repository';
+import { CreateCouponInput } from '../dto/request/coupons';
+import { CouponEnum } from '../../../common/enums/coupons.enum';
+import { AdminDefault } from '../../../entities/admin-table.entity';
 
 // Mock QueryBuilder
 const mockQueryBuilder = {
@@ -144,6 +147,56 @@ describe('AdminService', () => {
     // Verify that the methods were called
     expect(adminService.averageCloseTime).toHaveBeenCalled();
     expect(adminService.averageSupportTime).toHaveBeenCalled();
+  });
+
+  it('should mock coupon repository', async () => {
+    const mockCreateCoupon: CreateCouponInput = {
+      maxUse: 1,
+      discountType: CouponEnum.NUMBER,
+      discountValue: 20,
+      endDate: new Date(),
+      startDate: new Date(),
+    };
+
+    jest.spyOn(couponRepository, 'create').mockReturnValue(mockCreateCoupon);
+    jest
+      .spyOn(couponRepository, 'save')
+      .mockResolvedValueOnce(mockCreateCoupon);
+
+    // Call the createCoupon method
+    const result = await adminService.createCoupon(mockCreateCoupon);
+
+    // Assert that the result matches the mockCreateCoupon
+    expect(result).toEqual(mockCreateCoupon);
+  });
+
+  it('should mock admin default repository', async () => {
+    const adminDefault: Partial<AdminDefault> = {
+      minimumOfferPercentage: 80,
+      street: '2 fake street',
+      city: 'cario',
+      state: 'cario',
+      country: 'Egypt',
+      countryISOCode: 'SAR',
+      paymentType: 'DB',
+      saii: 2.5,
+      vat: 15,
+      daysToAuctionRegistrationStart: 7,
+      daysToAuctionRegistrationEnd: 7,
+      postcode: '4240111',
+      merchantTransactionId: 'WASEET-2024-PI',
+    };
+
+    jest.spyOn(adminDefaultRepository, 'create').mockReturnValue(adminDefault);
+    jest
+      .spyOn(adminDefaultRepository, 'save')
+      .mockResolvedValueOnce(adminDefault);
+
+    // Call the createCoupon method
+    const result = await adminDefaultRepository.save(adminDefault);
+
+    // Assert that the result matches the mockCreateCoupon
+    expect(result).toEqual(adminDefault);
   });
 
   it('should fetch listing stats', async () => {

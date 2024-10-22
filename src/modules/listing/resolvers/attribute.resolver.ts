@@ -165,4 +165,10 @@ export class AttributeResolver {
   ): Promise<string> {
     return await this.attributeService.deleteAttributeSet(RequestInput);
   }
+
+  @Query(() => [Attribute], { name: 'searchForAttribute' })
+  @UseGuards(AccessTokenGuard)
+  async searchForListing(@Args('searchParam') searchParam: string) {
+    return await this.attributeService.searchForAttributes(searchParam);
+  }
 }

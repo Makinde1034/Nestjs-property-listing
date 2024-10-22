@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import {
   CanActivate,
   ExecutionContext,
@@ -8,7 +13,6 @@ import {
 import { Reflector } from '@nestjs/core';
 import { UserStatus } from '../../../common/enums';
 import { AppStrings } from '../../../common/messages/app.strings';
-import { PERMISSION_KEY } from '../../../common/decorator/permission';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { User } from '../../../entities';
 import { IS_PUBLIC_KEY } from '../decorators/permision.decorator';
@@ -34,9 +38,6 @@ export class GlobalPermissionsGuard implements CanActivate {
     if (!user) {
       throw new UnauthorizedException();
     }
-
-    const requiredPermissions =
-      this.reflector.get<string[]>(PERMISSION_KEY, context.getHandler()) || [];
 
     if (
       user.status === UserStatus.DISABLED ||

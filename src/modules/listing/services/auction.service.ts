@@ -443,7 +443,7 @@ export class AuctionService {
 
   async searchForAuction(searchParam: string) {
     try {
-      return this.auctionRepository
+      return await this.auctionRepository
         .createQueryBuilder('auction')
 
         .orWhere('auction.titleInArabic LIKE :term', {

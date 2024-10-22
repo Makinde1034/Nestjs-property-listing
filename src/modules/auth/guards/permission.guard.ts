@@ -14,7 +14,6 @@ import { User } from 'src/entities';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { RoleService } from '../../user/services';
 import { PERMISSION_KEY } from '../../../common/decorator/permission';
-import { UserStatus } from '../../../common/enums';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {

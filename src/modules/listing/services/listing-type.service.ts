@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { AttributeSetRepository, ListingTypeRepository } from '../repositories';
 import { ListingType } from 'src/entities';
 import {
@@ -23,7 +23,7 @@ export class ListingTypeService {
     private readonly attributeSetRepository: AttributeSetRepository,
     private readonly storageService: StorageService,
   ) {}
-
+  logger = new Logger(ListingTypeService.name);
   async findOne(id: string) {
     try {
       const listingType = await this.listingTypeRepository.findByIdOrFail(id, [
@@ -134,5 +134,25 @@ export class ListingTypeService {
     }
 
     return result;
+  }
+
+  async searchForListingType(searchParam: string) {
+    try {
+      return await this.listingTypeRepository
+        .queryBuilder('listingType')
+
+        .orWhere('listingType.englishName LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+        .orWhere('listingType.arabicName LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+        .take(10)
+
+        .getMany();
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
   }
 }

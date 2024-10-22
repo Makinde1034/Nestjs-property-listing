@@ -27,7 +27,6 @@ import {
   FindOptionsWhere,
   In,
   LessThan,
-  Like,
   Not,
 } from 'typeorm';
 import { PostgresError } from 'pg-error-enum';
@@ -135,15 +134,14 @@ export class UserService {
 
         await this.nafathLogsRepository.save({ ...result, userId: user.id });
         return { random: result.random };
-      } else {
-        /*************************************************/
-        await this.usersRepository.update(user.id, {
-          userLevel: UserLevelEnum.LEVEL_2,
-          isDataVerified: true,
-        });
-
-        return { random: '45' };
       }
+      /*************************************************/
+      await this.usersRepository.update(user.id, {
+        userLevel: UserLevelEnum.LEVEL_2,
+        isDataVerified: true,
+      });
+
+      return { random: '45' };
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
@@ -680,42 +678,40 @@ export class UserService {
 
   async searchForUsers(searchParam: string) {
     try {
-      return (
-        this.usersRepository
-          .createQueryBuilder('user')
-          .leftJoinAndSelect('user.roles', 'role')
-          .where('user.userType != :type', { type: UserProfileTypeEnum.STAFF }) // Ensure proper exclusion of userType STAFF
-          // Combine all other conditions using OR logic
-          .andWhere(
-            new Brackets((qb) => {
-              qb.where('user.firstName LIKE :term', {
+      return await this.usersRepository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.roles', 'role')
+        .where('user.userType != :type', { type: UserProfileTypeEnum.STAFF }) // Ensure proper exclusion of userType STAFF
+        // Combine all other conditions using OR logic
+        .andWhere(
+          new Brackets((qb) => {
+            qb.where('user.firstName LIKE :term', {
+              term: `%${searchParam}%`,
+            })
+              .orWhere('user.lastName LIKE :term', {
                 term: `%${searchParam}%`,
               })
-                .orWhere('user.lastName LIKE :term', {
-                  term: `%${searchParam}%`,
-                })
-                .orWhere('user.userType LIKE :term', {
-                  term: `%${searchParam}%`,
-                })
-                .orWhere('user.userLevel LIKE :term', {
-                  term: `%${searchParam}%`,
-                })
-                .orWhere('user.email LIKE :term', { term: `%${searchParam}%` })
-                .orWhere('user.status LIKE :term', { term: `%${searchParam}%` })
-                .orWhere('user.employeeId LIKE :term', {
-                  term: `%${searchParam}%`,
-                })
-                .orWhere('role.arabicName LIKE :term', {
-                  term: `%${searchParam}%`,
-                })
-                .orWhere('role.englishName LIKE :term', {
-                  term: `%${searchParam}%`,
-                });
-            }),
-          )
-          .take(10) // Limit to 10 results
-          .getMany()
-      );
+              .orWhere('user.userType LIKE :term', {
+                term: `%${searchParam}%`,
+              })
+              .orWhere('user.userLevel LIKE :term', {
+                term: `%${searchParam}%`,
+              })
+              .orWhere('user.email LIKE :term', { term: `%${searchParam}%` })
+              .orWhere('user.status LIKE :term', { term: `%${searchParam}%` })
+              .orWhere('user.employeeId LIKE :term', {
+                term: `%${searchParam}%`,
+              })
+              .orWhere('role.arabicName LIKE :term', {
+                term: `%${searchParam}%`,
+              })
+              .orWhere('role.englishName LIKE :term', {
+                term: `%${searchParam}%`,
+              });
+          }),
+        )
+        .take(10) // Limit to 10 results
+        .getMany();
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -724,42 +720,40 @@ export class UserService {
 
   async searchForEmployee(searchParam: string) {
     try {
-      return (
-        this.usersRepository
-          .createQueryBuilder('user')
-          .leftJoinAndSelect('user.roles', 'role')
-          .where('user.userType = :type', { type: UserProfileTypeEnum.STAFF }) // Ensure proper exclusion of userType STAFF
-          // Combine all other conditions using OR logic
-          .andWhere(
-            new Brackets((qb) => {
-              qb.where('user.firstName LIKE :term', {
+      return await this.usersRepository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.roles', 'role')
+        .where('user.userType = :type', { type: UserProfileTypeEnum.STAFF }) // Ensure proper exclusion of userType STAFF
+        // Combine all other conditions using OR logic
+        .andWhere(
+          new Brackets((qb) => {
+            qb.where('user.firstName LIKE :term', {
+              term: `%${searchParam}%`,
+            })
+              .orWhere('user.lastName LIKE :term', {
                 term: `%${searchParam}%`,
               })
-                .orWhere('user.lastName LIKE :term', {
-                  term: `%${searchParam}%`,
-                })
-                .orWhere('user.userType LIKE :term', {
-                  term: `%${searchParam}%`,
-                })
-                .orWhere('user.userLevel LIKE :term', {
-                  term: `%${searchParam}%`,
-                })
-                .orWhere('user.email LIKE :term', { term: `%${searchParam}%` })
-                .orWhere('user.status LIKE :term', { term: `%${searchParam}%` })
-                .orWhere('user.employeeId LIKE :term', {
-                  term: `%${searchParam}%`,
-                })
-                .orWhere('role.arabicName LIKE :term', {
-                  term: `%${searchParam}%`,
-                })
-                .orWhere('role.englishName LIKE :term', {
-                  term: `%${searchParam}%`,
-                });
-            }),
-          )
-          .take(10) // Limit to 10 results
-          .getMany()
-      );
+              .orWhere('user.userType LIKE :term', {
+                term: `%${searchParam}%`,
+              })
+              .orWhere('user.userLevel LIKE :term', {
+                term: `%${searchParam}%`,
+              })
+              .orWhere('user.email LIKE :term', { term: `%${searchParam}%` })
+              .orWhere('user.status LIKE :term', { term: `%${searchParam}%` })
+              .orWhere('user.employeeId LIKE :term', {
+                term: `%${searchParam}%`,
+              })
+              .orWhere('role.arabicName LIKE :term', {
+                term: `%${searchParam}%`,
+              })
+              .orWhere('role.englishName LIKE :term', {
+                term: `%${searchParam}%`,
+              });
+          }),
+        )
+        .take(10) // Limit to 10 results
+        .getMany();
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);

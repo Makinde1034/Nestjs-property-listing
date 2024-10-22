@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import {
   Body,
   Controller,
@@ -20,7 +25,7 @@ export class FileController {
   @Public()
   async exportToCsv(
     @Query('name') name: string,
-    @Body() payload: Array<Object>,
+    @Body() payload: object[],
   ): Promise<StreamableFile> {
     const csv = await this.exportService.generateCsv(payload);
 
@@ -39,7 +44,7 @@ export class FileController {
   @Post('export/pdf')
   async exportToPdf(
     @Query('name') name: string,
-    @Body() payload: Array<Object>,
+    @Body() payload: object[],
   ): Promise<StreamableFile> {
     const pdf = await this.exportService.generateTable(payload);
 

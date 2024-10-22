@@ -10,7 +10,6 @@ import { OfferRepository } from '../../listing/repositories';
 import { UserRepository } from '../../user/repositories';
 
 import { UserTrackingRepository } from '../../user/repositories/user-tracking-repository';
-import { IssueRepository } from '../../issue/repositories';
 
 import {
   startOfYear,
@@ -20,7 +19,6 @@ import {
   endOfMonth,
   startOfMonth,
   subMonths,
-  isThisMinute,
 } from 'date-fns';
 
 import { Between, In } from 'typeorm';
@@ -544,10 +542,12 @@ export class AdminService {
       });
 
       if (!coupon) {
-        return (result = {
+        result = {
           valid: false,
           amount: price,
-        });
+        };
+
+        return result;
       }
 
       // Check if the coupon is valid
@@ -571,16 +571,17 @@ export class AdminService {
             break;
         }
 
-        return (result = {
+        result = {
           valid: true,
           amount,
-        });
+        };
+        return result;
       }
-
-      return (result = {
+      result = {
         valid: false,
         amount: price,
-      });
+      };
+      return result;
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(

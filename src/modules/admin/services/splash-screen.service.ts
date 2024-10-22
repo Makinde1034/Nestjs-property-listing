@@ -174,7 +174,7 @@ export class SplashScreenService {
   }
   async searchForSplashScreen(searchParam: string) {
     try {
-      return this.splashScreenRepository
+      return await this.splashScreenRepository
         .createQueryBuilder('splashScreen')
 
         .orWhere('splashScreen.title LIKE :term', {
@@ -183,7 +183,6 @@ export class SplashScreenService {
         .orWhere('splashScreen.placement LIKE :term', {
           term: `%${searchParam}%`,
         })
-
         .take(10)
         .getMany();
     } catch (error) {

@@ -89,4 +89,10 @@ export class ListingTypeResolver {
   ): Promise<string> {
     return await this.listingTypeService.deleteListingType(RequestInput);
   }
+
+  @Query(() => [ListingType], { name: 'searchForListingType' })
+  @UseGuards(AccessTokenGuard)
+  async searchForListingType(@Args('searchParam') searchParam: string) {
+    return await this.listingTypeService.searchForListingType(searchParam);
+  }
 }

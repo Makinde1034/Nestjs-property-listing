@@ -367,7 +367,6 @@ export class NotificationService {
           event,
           scope,
           recipientFormat[0],
-          recipient,
         );
       }
 
@@ -431,7 +430,6 @@ export class NotificationService {
     event: string,
     scope: string,
     format: string,
-    additionalUser?: User,
   ) {
     const messageData = getMessageData(
       user.firstName,

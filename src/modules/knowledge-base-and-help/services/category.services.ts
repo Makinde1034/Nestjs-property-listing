@@ -136,7 +136,7 @@ export class KnowledgeBaseCategoryService {
 
   async searchForCategory(searchParam: string) {
     try {
-      return this.knowledgeBaseCategoryRepository
+      return await this.knowledgeBaseCategoryRepository
         .createQueryBuilder('category')
 
         .orWhere('category.englishName LIKE :term', {

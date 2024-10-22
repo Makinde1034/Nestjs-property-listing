@@ -12,7 +12,10 @@ import { InvoiceRepository } from '../repositories/invoice.repository';
 import { HyperPayService } from '../service-providers/hyper-pay.service';
 import { Listing, User } from '../../../entities';
 import {
+  CapturePaymentData,
   InitiatePaymentInput,
+  PreAuthorisedPaymentInput,
+  RefundPaymentData,
   VerifyPaymentInput,
 } from '../dto/request/payment.input';
 import { PdfInput } from '../../file-handler/dto/pdf.dto';
@@ -58,14 +61,62 @@ export class PaymentService {
         createPaymentInput.coupon,
         createPaymentInput.amount,
       );
-      console.log(coupon);
       createPaymentInput.amount = coupon.amount;
     }
-    console.log(createPaymentInput.amount);
     const checkout = await this.hyperPayService.createCheckout(
       createPaymentInput,
       user,
     );
+
+    return {
+      checkoutId: checkout.id,
+      referenceId: generateRandomString(),
+      timeStamp: checkout.timestamp,
+    };
+  }
+
+  async preAuthorized(
+    createPaymentInput: PreAuthorisedPaymentInput,
+    // User: User,
+  ) {
+    if (createPaymentInput.coupon) {
+      const coupon: CouponResponse = await this.adminService.isCouponValid(
+        createPaymentInput.coupon,
+        createPaymentInput.amount,
+      );
+      createPaymentInput.amount = coupon.amount;
+    }
+    const checkout =
+      await this.hyperPayService.preAuthorize(createPaymentInput);
+
+    return {
+      checkoutId: checkout.id,
+      referenceId: generateRandomString(),
+      timeStamp: checkout.timestamp,
+    };
+  }
+
+  async capturePayment(createPaymentInput: CapturePaymentData) {
+    // If (createPaymentInput.coupon) {
+    //   Const coupon: CouponResponse = await this.adminService.isCouponValid(
+    //     CreatePaymentInput.coupon,
+    //     CreatePaymentInput.amount,
+    //   );
+    //   CreatePaymentInput.amount = coupon.amount;
+    // }
+    const checkout =
+      await this.hyperPayService.capturePayment(createPaymentInput);
+
+    return {
+      checkoutId: checkout.id,
+      referenceId: generateRandomString(),
+      timeStamp: checkout.timestamp,
+    };
+  }
+
+  async refundPayment(createPaymentInput: RefundPaymentData) {
+    const checkout =
+      await this.hyperPayService.refundPayment(createPaymentInput);
 
     return {
       checkoutId: checkout.id,
