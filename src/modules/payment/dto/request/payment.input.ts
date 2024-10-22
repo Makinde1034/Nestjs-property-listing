@@ -89,6 +89,11 @@ export class PreAuthorisedPaymentInput {
 
   @Field()
   @IsString()
+  @IsOptional()
+  coupon: string;
+
+  @Field()
+  @IsString()
   cardExpiryMonth: string;
 
   @Field()
@@ -137,6 +142,11 @@ export interface Result {
   description: string;
 }
 export interface CapturePaymentData {
+  amount: string;
+  paymentId: string;
+}
+
+export interface RefundPaymentData {
   amount: string;
   paymentId: string;
 }

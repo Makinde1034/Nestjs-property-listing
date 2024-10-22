@@ -337,10 +337,10 @@ export class TicketService {
 
   async searchForTickets(searchParam: string) {
     try {
-      return this.ticketRepository
+      return await this.ticketRepository
         .createQueryBuilder('ticket')
         .leftJoinAndSelect('ticket.reporter', 'user')
-        .leftJoinAndSelect('ticket.parentIssue', 'parentIssue') // Correct alias here
+        .leftJoinAndSelect('ticket.parentIssue', 'parentIssue')
         .leftJoinAndSelect('ticket.childIssue', 'childIssue')
 
         .orWhere('user.firstName LIKE :term', { term: `%${searchParam}%` })
@@ -349,10 +349,10 @@ export class TicketService {
         })
         .orWhere('parentIssue.arabicName LIKE :term', {
           term: `%${searchParam}%`,
-        }) // Correct alias
+        })
         .orWhere('parentIssue.englishName LIKE :term', {
           term: `%${searchParam}%`,
-        }) // Correct alias
+        })
         .orWhere('childIssue.arabicName LIKE :term', {
           term: `%${searchParam}%`,
         })
@@ -368,7 +368,7 @@ export class TicketService {
 
   async searchForResponseTemplate(searchParam: string) {
     try {
-      return this.responseTemplateRepostiory
+      return await this.responseTemplateRepostiory
         .createQueryBuilder('responseTemplate')
 
         .orWhere('responseTemplate.templateText LIKE :term', {
@@ -387,7 +387,6 @@ export class TicketService {
           term: `%${searchParam}%`,
         })
         .take(10)
-
         .getMany();
     } catch (error) {
       this.logger.log(error);

@@ -5,7 +5,6 @@
 
 import {
   BadRequestException,
-  ConflictException,
   HttpException,
   Injectable,
   InternalServerErrorException,
@@ -1501,7 +1500,6 @@ export class ListingService {
       return { flaggedListing, total };
     } catch (error) {
       this.logger.log(error);
-      console.log(error);
       throw new BadRequestException(error?.messages | error.data);
     }
   }
@@ -1896,7 +1894,7 @@ export class ListingService {
 
   async searchForListing(searchParam: string) {
     try {
-      return this.listingRepository
+      return await this.listingRepository
         .createQueryBuilder('listing')
         .leftJoinAndSelect('listing.user', 'user')
         .leftJoinAndSelect('listing.listingType', 'listingType')

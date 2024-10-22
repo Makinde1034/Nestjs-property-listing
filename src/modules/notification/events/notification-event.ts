@@ -7,7 +7,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { NotificationService } from '../services';
 import { OnEvent } from '@nestjs/event-emitter';
 import { NotificationEvent } from 'src/common/enums';
-import { NotificationEventDto } from '../dtos';
+
 import { SendNotificationInput } from '../../../common/interface';
 
 @Injectable()

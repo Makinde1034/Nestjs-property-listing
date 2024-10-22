@@ -5,16 +5,13 @@
 
 import { Field, InputType } from '@nestjs/graphql';
 import {
-  isArray,
   IsArray,
   IsBoolean,
   IsNotEmpty,
-  IsObject,
   IsOptional,
   IsString,
 } from 'class-validator';
 import { NotificationEventInput } from 'src/common/interface';
-import { NotificationScope } from '../../../entities';
 
 @InputType()
 export class NotificationInput {

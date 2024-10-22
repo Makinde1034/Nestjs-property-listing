@@ -11,8 +11,6 @@ const nafathAction = process.env.NAFATH_ACTION;
 const NafathId = process.env.NAFATH_ID;
 const NafthService = process.env.NAFATH_SERVICE;
 
-console.log(process.env.NAFATH_TOKEN);
-
 export type NafathConfig = {
   key: string;
   baseUrl: string;
@@ -21,8 +19,8 @@ export type NafathConfig = {
   NafthService: string;
 };
 
-// if (!key || !baseUrl) {
-//   throw new Error(
+// If (!key || !baseUrl) {
+//   Throw new Error(
 //     'Cannot find configuration for Nafath. Please ensure you  them provided ',
 //   );
 // }

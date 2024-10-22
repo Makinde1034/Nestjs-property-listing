@@ -858,10 +858,12 @@ type Query {
   listNotificationScopes: [NotificationScope!]!
   fetchListingTypes(findOptions: PaginateAndSort): ListingTypesResponse!
   fetchOneListingTypes(id: String!): ListingType!
+  searchForListingType(searchParam: String!): [ListingType!]!
   fetchAttributes(findOptions: AttributeFilter): AttributeResponse!
   fetchAttributeSets(findOptions: PaginateAndSort): AttributeSetResponse!
   fetchOneAttributeSets(id: String!): AttributeSet!
   fetchOneAttribute(id: String!): Attribute!
+  searchForAttribute(searchParam: String!): [Attribute!]!
   findAllListingForBuyerUnauthenticated(findManyOptions: CreateSearchHistoryInput): ListingResponse!
   findListingsForOwner(findManyOptions: AttributeDto): ListingResponse!
   findOneListingForOwner(id: String!): Listing!

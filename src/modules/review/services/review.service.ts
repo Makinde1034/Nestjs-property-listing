@@ -133,7 +133,7 @@ export class ReviewService {
 
   async searchForReview(searchParam: string) {
     try {
-      return this.reviewRepository
+      return await this.reviewRepository
         .createQueryBuilder('review')
         .leftJoinAndSelect('review.user', 'user')
 

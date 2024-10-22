@@ -12,7 +12,6 @@ import {
   Logger,
   Post,
 } from '@nestjs/common';
-import { WebHookPaymentResponse } from './dto/wehook.response';
 import { ConfigService } from '@nestjs/config';
 import {
   getWebhookConfigName,
@@ -36,11 +35,14 @@ export class WebHookController {
   @Post('webhook/payment')
   @Public()
   @HttpCode(200)
-  Payment(
+  payment(
     @Body() hyperPayWebHookResponse: any,
     @Headers('x-signature') signature: string,
   ) {
-    console.log('response', hyperPayWebHookResponse);
+    this.logger.log('data', hyperPayWebHookResponse, signature);
+
+    this.logger.log('data', signature);
+
     this.webhookService.handleWebHookForHyperpay(
       hyperPayWebHookResponse,
       signature,

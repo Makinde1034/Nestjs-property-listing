@@ -250,7 +250,7 @@ export class ArticleService {
 
   async searchForArticles(searchParam: string) {
     try {
-      return this.articleRepository
+      return await this.articleRepository
         .createQueryBuilder('article')
         .leftJoinAndSelect('author.user', 'user')
         .orWhere('article.title LIKE :term', {

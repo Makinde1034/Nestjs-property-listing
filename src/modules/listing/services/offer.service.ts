@@ -31,7 +31,7 @@ import {
   UserRepository,
 } from '../../user/repositories';
 import { NotificationScopesEnum } from '../../../common/enums/notification-scope.enum';
-import { NotificationService } from '../../notification/services';
+
 import { AuctionEnum, OfferListEnum } from '../../../common/enums/status.enum';
 import { AdminService } from '../../admin/services/admin.service';
 import { ListingRepository } from '../repositories/listing.repository';
@@ -117,8 +117,8 @@ export class OfferService {
         );
       }
 
-      // if (user.id == listing.user.id) {
-      //   throw new BadRequestException(
+      // If (user.id == listing.user.id) {
+      //   Throw new BadRequestException(
       //     'The creator of a listing cannot create an offer on  that listing',
       //   );
       // }

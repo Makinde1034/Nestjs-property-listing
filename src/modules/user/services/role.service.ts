@@ -320,7 +320,7 @@ export class RoleService {
 
   async searchForRole(searchParam: string) {
     try {
-      return this.roleRepository
+      return await this.roleRepository
         .createQueryBuilder('role')
 
         .orWhere('role.arabicName LIKE :term', { term: `%${searchParam}%` })
