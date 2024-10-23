@@ -73,6 +73,7 @@ import {
   NafathAuthenticationResponseToUser,
   NafathUserResponse,
   NafathWebHookResponse,
+  UserUpgradeInput,
 } from '../dtos/response/nafath';
 import { NafathService } from '../service-providers/nafath.service';
 import { NafathLogsRepository } from '../repositories/nafath-log.repository';
@@ -118,7 +119,10 @@ export class UserService {
     }
   }
 
-  async upgradeUser(user: User): Promise<NafathAuthenticationResponseToUser> {
+  async upgradeUser(
+    userUpgradeInput: UserUpgradeInput,
+    user: User,
+  ): Promise<NafathAuthenticationResponseToUser> {
     try {
       /************************************************
        *Bypass Nafath
@@ -127,7 +131,7 @@ export class UserService {
       //TODO: remove before going live
 
       if (process.env.NODE_ENV == 'production') {
-        const result = await this.nafathService.verifyUser();
+        const result = await this.nafathService.verifyUser(userUpgradeInput.id);
         if (!result) {
           throw new BadRequestException('Failed to innitiate verification');
         }

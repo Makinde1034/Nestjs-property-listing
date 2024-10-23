@@ -1059,7 +1059,6 @@ export class ListingService {
     }
   }
 
-  //
   async updateListing(editListingDto: UpdateListingDto, user: User) {
     try {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars

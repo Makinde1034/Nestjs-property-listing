@@ -87,7 +87,7 @@ export class CreateListingDto {
   gpsCoordinate: LocationDto;
 
   @Field(() => [String], { nullable: true })
-  panoramaView: string[];
+  panoramaView: string;
 
   @Field({ defaultValue: false, nullable: true })
   @IsBoolean()
@@ -181,7 +181,7 @@ export class ListingImageInput {
 
   @IsBoolean()
   @IsOptional()
-  feature: boolean;
+  feature?: boolean;
 
   @IsNumber()
   @IsOptional()
