@@ -141,7 +141,7 @@ export class ListingTypeService {
       return await this.listingTypeRepository
         .queryBuilder('listingType')
 
-        .orWhere('listingType.englishName LIKE :term', {
+        .where('listingType.englishName LIKE :term', {
           term: `%${searchParam}%`,
         })
         .orWhere('listingType.arabicName LIKE :term', {

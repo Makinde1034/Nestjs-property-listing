@@ -326,7 +326,7 @@ export class AttributeService {
       return await this.attributeRepository
         .createQueryBuilder('attributes')
 
-        .orWhere('attributes.englishName LIKE :term', {
+        .where('attributes.englishName LIKE :term', {
           term: `%${searchParam}%`,
         })
 
@@ -346,7 +346,7 @@ export class AttributeService {
       return await this.attributeRepository
         .createQueryBuilder('attributeSets')
 
-        .orWhere('attributeSets.englishName LIKE :term', {
+        .where('attributeSets.englishName LIKE :term', {
           term: `%${searchParam}%`,
         })
 
