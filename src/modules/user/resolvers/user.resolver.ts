@@ -26,7 +26,10 @@ import { UserFilter } from '../dtos/request/user';
 import { UserResponse } from '../dtos/response/user.response';
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { Public } from '../../auth/decorators/permision.decorator';
-import { NafathAuthenticationResponseToUser } from '../dtos/response/nafath';
+import {
+  NafathAuthenticationResponseToUser,
+  UserUpgradeInput,
+} from '../dtos/response/nafath';
 
 @Resolver()
 export class UserResolver {
@@ -145,9 +148,10 @@ export class UserResolver {
    */
   @Mutation(() => NafathAuthenticationResponseToUser)
   async upgradeUser(
+    userUpgradeInput: UserUpgradeInput,
     @Context() ctx: any,
   ): Promise<NafathAuthenticationResponseToUser> {
-    return await this.userService.upgradeUser(ctx.req.user);
+    return await this.userService.upgradeUser(userUpgradeInput, ctx.req.user);
   }
   /**
    * Block User

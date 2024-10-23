@@ -1150,7 +1150,7 @@ type Mutation {
   createFeature(createFeatureInput: CreateFeatureInput!): Feature!
   createAuction(createAuctionInput: CreateAuctionInput!): Auction!
   updateAuction(updateAuctionInput: UpdateAuctionInput!): Auction!
-  id(id: String!): Auction!
+  deleteAuction(id: String!): Auction!
   addAuctionParticipant(createAuctionParticipantInput: CreateAuctionParticipantInput!): AuctionParticipant!
   deleteSavedHistory(id: String!): SuccessResponse!
   unpublishAListing(id: String!): SuccessResponse!
