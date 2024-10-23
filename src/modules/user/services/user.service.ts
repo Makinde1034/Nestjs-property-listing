@@ -130,22 +130,21 @@ export class UserService {
        ************************************************/
       //TODO: remove before going live
 
-      if (process.env.NODE_ENV == 'production') {
-        const result = await this.nafathService.verifyUser(userUpgradeInput.id);
-        if (!result) {
-          throw new BadRequestException('Failed to innitiate verification');
-        }
+      const result = await this.nafathService.verifyUser(userUpgradeInput.id);
+      if (!result) {
+        throw new BadRequestException('Failed to initiate verification');
+      }
+      if (result.test) {
+        await this.usersRepository.update(user.id, {
+          userLevel: UserLevelEnum.LEVEL_2,
+          isDataVerified: true,
+        });
 
         await this.nafathLogsRepository.save({ ...result, userId: user.id });
         return { random: result.random };
       }
-      /*************************************************/
-      await this.usersRepository.update(user.id, {
-        userLevel: UserLevelEnum.LEVEL_2,
-        isDataVerified: true,
-      });
 
-      return { random: '45' };
+      /*************************************************/
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;

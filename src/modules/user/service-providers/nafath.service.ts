@@ -39,8 +39,12 @@ export class NafathService {
     };
   }
 
-  async verifyUser(id: string) {
+  async verifyUser(id: string): Promise<NafathAuthenticationResponse> {
     try {
+      if (id == this.nafathConfig.NafathId) {
+        return { transId: 'faketransacrtionId', random: '45', test: true };
+      }
+
       const payload = this.createPayload(id);
       const response = await lastValueFrom(
         this.httpService.post<NafathAuthenticationResponse>(

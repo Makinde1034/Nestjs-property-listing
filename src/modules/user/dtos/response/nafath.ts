@@ -34,6 +34,7 @@ export class NafathAuthenticationResponseToUser {
 export interface NafathAuthenticationResponse {
   transId: string;
   random: string;
+  test: boolean;
 }
 export interface NafathUserResponse {
   user_info: Userinfo;
