@@ -18,6 +18,7 @@ import {
   CreateListingDto,
   FlagListingInput,
   ListingActionInput,
+  ListingImageFormDataInput,
   ListingImageInput,
   UpdateListingDto,
 } from '../dtos/request/listing.dto';
@@ -1174,6 +1175,7 @@ export class ListingService {
   }
 
   async uploadListingImage(
+    feature: ListingImageFormDataInput,
     query: ListingImageInput,
     files: Express.Multer.File[],
     gpsCoordinate: LocationDto,
@@ -1232,7 +1234,7 @@ export class ListingService {
         const newImages = uploadedUrls.map((url, index) => ({
           id: (existingImages.length + index).toString(), // Generate unique ID
           url,
-          isFeatured: query.feature,
+          isFeatured: feature.feature,
           isDeleted: false,
           isPanorama: false, // Default value
           verified: verified,
@@ -1310,7 +1312,6 @@ export class ListingService {
 
       // Save the updated images to the database
       await this.listingRepository.update(id, { images: stringifiedImages });
-
       return new SuccessResponse(AppStrings.UPLOAD_SUCCESSFUL, existingImages);
     } catch (error) {
       this.logger.error('Error during panorama image upload', error);
