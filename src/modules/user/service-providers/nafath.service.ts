@@ -39,9 +39,9 @@ export class NafathService {
     };
   }
 
-  async verifyUser() {
+  async verifyUser(id: string) {
     try {
-      const payload = this.createPayload();
+      const payload = this.createPayload(id);
       const response = await lastValueFrom(
         this.httpService.post<NafathAuthenticationResponse>(
           this.nafathConfig.baseUrl,
@@ -61,9 +61,9 @@ export class NafathService {
     }
   }
 
-  private createPayload() {
+  private createPayload(id: string) {
     return {
-      id: this.nafathConfig.NafathId,
+      id: id,
       action: this.nafathConfig.nafathAction,
       service: this.nafathConfig.NafthService,
     };

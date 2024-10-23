@@ -3,13 +3,28 @@
  * For license. See license.txt
  */
 
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, InputType, ObjectType } from '@nestjs/graphql';
+import { IsString } from 'class-validator';
 
 export class NafathWebHookResponse {
   response: string;
   status: string;
   transId: string;
   ServiceName: string;
+}
+@InputType()
+export class UserUpgradeInput {
+  @Field()
+  @IsString()
+  idType: string;
+
+  @Field()
+  @IsString()
+  id: string;
+
+  @Field()
+  @IsString()
+  phoneNumber: string;
 }
 @ObjectType()
 export class NafathAuthenticationResponseToUser {

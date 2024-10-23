@@ -502,7 +502,7 @@ export class ListingResolver {
 
   @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
-  @Mutation(() => Auction, { name: 'id' })
+  @Mutation(() => Auction, { name: 'deleteAuction' })
   async deleteAuction(@Args('id') id: string) {
     return await this.auctionService.delete(id);
   }
