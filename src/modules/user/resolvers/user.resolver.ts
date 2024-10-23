@@ -148,7 +148,7 @@ export class UserResolver {
    */
   @Mutation(() => NafathAuthenticationResponseToUser)
   async upgradeUser(
-    userUpgradeInput: UserUpgradeInput,
+    @Args('userUpgradeInput') userUpgradeInput: UserUpgradeInput,
     @Context() ctx: any,
   ): Promise<NafathAuthenticationResponseToUser> {
     return await this.userService.upgradeUser(userUpgradeInput, ctx.req.user);
