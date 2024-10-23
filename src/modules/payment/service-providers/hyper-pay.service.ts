@@ -281,17 +281,14 @@ export class HyperPayService {
       }
     }
   }
-
   async preAuthorize(initiatePaymentInput: PreAuthorisedPaymentInput) {
     try {
       const adminDefault = await this.adminService.adminDefault();
-
       const payload = {
         entityId: this.hyperPayConfig.entityId,
         amount: initiatePaymentInput.amount,
         currency: 'SAR',
         paymentType: 'PA',
-        integrity: true,
         'card.number': initiatePaymentInput.cardNumber,
         'card.holder': initiatePaymentInput.cardHolder,
         'card.expiryMonth': initiatePaymentInput.cardExpiryMonth,
@@ -300,6 +297,7 @@ export class HyperPayService {
         merchantTransactionId: adminDefault?.merchantTransactionId,
         paymentBrand: initiatePaymentInput.paymentBrand,
       };
+      console.log(payload);
 
       const requestPayload = querystring.stringify(payload as any);
 

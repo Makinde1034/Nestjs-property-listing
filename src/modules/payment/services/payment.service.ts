@@ -86,6 +86,7 @@ export class PaymentService {
       );
       createPaymentInput.amount = coupon.amount;
     }
+
     const checkout =
       await this.hyperPayService.preAuthorize(createPaymentInput);
 

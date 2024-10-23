@@ -11,6 +11,7 @@ import { User } from '../../../entities';
 import { AccessTokenGuard } from '../../auth/guards';
 import {
   InitiatePaymentInput,
+  PreAuthorisedPaymentInput,
   VerifyPaymentInput,
 } from '../dto/request/payment.input';
 import {
@@ -38,6 +39,15 @@ export class PaymentResolver {
     return await this.paymentService.initializePayment(paymentDto, user);
   }
 
+  @Mutation(() => InitiatePaymentResponse)
+  @UseGuards(AccessTokenGuard)
+  async preAuthorisedPayment(
+    @Args('paymentInput') paymentDto: PreAuthorisedPaymentInput,
+    @CurrentUser() user: User,
+  ) {
+    return await this.paymentService.preAuthorized(paymentDto);
+  }
+
   @Mutation(() => verifyPaymentResponse)
   @UseGuards(AccessTokenGuard)
   async verifyPayment(
@@ -45,7 +55,6 @@ export class PaymentResolver {
   ) {
     return await this.paymentService.verifyPayment(verifyDto);
   }
-
   @Query(() => InvoiceResponse)
   @UseGuards(AccessTokenGuard)
   async fetchInvoice(@Args('findOption') findOption: PaginateAndSort) {

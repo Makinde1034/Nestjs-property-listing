@@ -341,4 +341,24 @@ export class AttributeService {
       throw new BadRequestException(error);
     }
   }
+  async searchForAttributeSets(searchParam: string) {
+    try {
+      return await this.attributeRepository
+        .createQueryBuilder('attributeSets')
+
+        .orWhere('attributeSets.englishName LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+
+        .orWhere('attributeSets.arabicName LIKE :term', {
+          term: `%${searchParam}%`,
+        })
+        .take(10)
+
+        .getMany();
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
 }
