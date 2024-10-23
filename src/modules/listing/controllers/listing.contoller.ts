@@ -4,6 +4,7 @@
  */
 
 import {
+  Body,
   Controller,
   Delete,
   Post,
@@ -15,7 +16,7 @@ import {
 import { ListingService } from '../services/listing.service';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { RestAccessTokenGuard } from '../../auth/guards';
-import { ListingImageInput } from '../dtos/request';
+import { ListingImageFormDataInput, ListingImageInput } from '../dtos/request';
 
 @Controller('listing')
 export class ListingController {
@@ -24,16 +25,19 @@ export class ListingController {
   @UseGuards(RestAccessTokenGuard)
   @UseInterceptors(AnyFilesInterceptor())
   async uploadListingImage(
+    @Body() feature: ListingImageFormDataInput,
     @Query() query: ListingImageInput,
     @UploadedFiles() files: Express.Multer.File[],
   ) {
+    console.log(feature);
     const locationDto = {
       lat: query.lat,
       lng: query.lng,
     };
-    return await this.listingService.uploadListingImage(
-      query,
 
+    return await this.listingService.uploadListingImage(
+      feature,
+      query,
       files,
       locationDto,
     );

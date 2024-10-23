@@ -179,10 +179,6 @@ export class ListingImageInput {
   @IsOptional()
   imageId: number;
 
-  @IsBoolean()
-  @IsOptional()
-  feature?: boolean;
-
   @IsNumber()
   @IsOptional()
   lng?: number;
@@ -190,4 +186,10 @@ export class ListingImageInput {
   @IsNumber()
   @IsOptional()
   lat?: number;
+}
+
+export class ListingImageFormDataInput {
+  @IsBoolean()
+  @IsOptional()
+  feature: boolean;
 }
