@@ -862,6 +862,7 @@ type Query {
   fetchOneAttributeSets(id: String!): AttributeSet!
   fetchOneAttribute(id: String!): Attribute!
   searchForAttribute(searchParam: String!): [Attribute!]!
+  searchForAttributeSets(searchParam: String!): [AttributeSet!]!
   findAllListingForBuyerUnauthenticated(findManyOptions: CreateSearchHistoryInput): ListingResponse!
   findListingsForOwner(findManyOptions: AttributeDto): ListingResponse!
   findOneListingForOwner(id: String!): Listing!
@@ -1110,7 +1111,7 @@ type Mutation {
   resetPasswordAdmin(ResetInput: UserActionInput!): SuccessResponse!
   createStaff(RequestInput: CreateStaffInput!): User!
   staffConfirmation(RequestInput: StaffConfirmDto!): String!
-  upgradeUser: NafathAuthenticationResponseToUser!
+  upgradeUser(userUpgradeInput: UserUpgradeInput!): NafathAuthenticationResponseToUser!
   blockUser(RequestInput: UserActionInput!): SuccessResponse!
   deleteUser(RequestInput: DeleteUserInput!): SuccessResponse!
   updateNotificationPreference(RequestInput: NotificationPrefenceInput!): User!
@@ -1162,6 +1163,7 @@ type Mutation {
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!
   initializePayment(paymentInput: InitiatePaymentInput!): InitiatePaymentResponse!
+  preAuthorisedPayment(paymentInput: PreAuthorisedPaymentInput!): InitiatePaymentResponse!
   verifyPayment(verifyPaymentInput: VerifyPaymentInput!): verifyPaymentResponse!
   createCoupon(createCouponsInput: CreateCouponInput!): Coupon!
   updateCoupon(updateCouponsInput: UpdateCouponInput!): Coupon!
@@ -1292,6 +1294,12 @@ input StaffConfirmDto {
   email: String!
   token: String!
   password: String!
+}
+
+input UserUpgradeInput {
+  idType: String!
+  id: String!
+  phoneNumber: String!
 }
 
 input DeleteUserInput {
@@ -1573,6 +1581,17 @@ input UpdateAdPackageInput {
 input InitiatePaymentInput {
   amount: Float
   coupon: String
+}
+
+input PreAuthorisedPaymentInput {
+  amount: Float!
+  paymentBrand: String!
+  cardNumber: String!
+  cardHolder: String!
+  coupon: String!
+  cardExpiryMonth: String!
+  cardExpiryYear: String!
+  cardCvv: String!
 }
 
 input VerifyPaymentInput {

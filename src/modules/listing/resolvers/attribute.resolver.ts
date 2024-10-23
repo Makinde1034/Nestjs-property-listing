@@ -168,7 +168,13 @@ export class AttributeResolver {
 
   @Query(() => [Attribute], { name: 'searchForAttribute' })
   @UseGuards(AccessTokenGuard)
-  async searchForListing(@Args('searchParam') searchParam: string) {
+  async searchForAttribute(@Args('searchParam') searchParam: string) {
     return await this.attributeService.searchForAttributes(searchParam);
+  }
+
+  @Query(() => [AttributeSet], { name: 'searchForAttributeSets' })
+  @UseGuards(AccessTokenGuard)
+  async searchForAttributeSets(@Args('searchParam') searchParam: string) {
+    return await this.attributeService.searchForAttributeSets(searchParam);
   }
 }
