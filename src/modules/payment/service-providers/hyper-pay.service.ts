@@ -228,8 +228,7 @@ export class HyperPayService {
         'customer.email': user.email,
         'customer.givenName': user.firstName,
         'customer.surname': user.lastName,
-        'customer.city': user.city,
-        'customer.country': user.nationality,
+
         merchantTransactionId: adminDefault?.merchantTransactionId,
       };
 
@@ -244,6 +243,7 @@ export class HyperPayService {
       );
       return response.data;
     } catch (error) {
+      console.log(error.response.data.result);
       this.logger.error('Error creating checkout', error);
       if (error instanceof HttpException) {
         throw error;
