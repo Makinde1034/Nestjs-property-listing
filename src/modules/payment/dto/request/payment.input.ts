@@ -50,8 +50,8 @@ export class PaymentRequest {
   'customer.email': string;
   'customer.givenName': string;
   'customer.surname': string;
-  'customer.city': string;
-  'customer.country': string;
+  // 'customer.city': string;
+  // 'customer.country': string;
   merchantTransactionId: string;
 }
 
