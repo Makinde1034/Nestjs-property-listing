@@ -16,11 +16,19 @@ import {
 import { ListingService } from '../services/listing.service';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { RestAccessTokenGuard } from '../../auth/guards';
-import { ListingImageFormDataInput, ListingImageInput } from '../dtos/request';
+import {
+  AuctionListingImageInput,
+  ListingImageFormDataInput,
+  ListingImageInput,
+} from '../dtos/request';
+import { AuctionService } from '../services/auction.service';
 
 @Controller('listing')
 export class ListingController {
-  constructor(private listingService: ListingService) {}
+  constructor(
+    private listingService: ListingService,
+    private readonly auctionService: AuctionService,
+  ) {}
   @Post('listing-image-upload')
   @UseGuards(RestAccessTokenGuard)
   @UseInterceptors(AnyFilesInterceptor())
@@ -41,6 +49,16 @@ export class ListingController {
       files,
       locationDto,
     );
+  }
+
+  @Post('auction-image-upload')
+  @UseGuards(RestAccessTokenGuard)
+  @UseInterceptors(AnyFilesInterceptor())
+  async uploadAuctionListingImage(
+    @Query() query: AuctionListingImageInput,
+    @UploadedFiles() file: Express.Multer.File,
+  ) {
+    return await this.auctionService.uploadAuctionImage(query.id, file);
   }
 
   @Post('panorama-listing-image-upload')

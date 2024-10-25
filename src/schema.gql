@@ -566,6 +566,64 @@ type AttributeResponse {
   total: Int!
 }
 
+type Bids {
+  id: String!
+  userId: String!
+  bidNumber: Float!
+  price: Float!
+  auctionId: String!
+  listingId: String!
+  autoBid: Boolean!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type AdminDefault {
+  id: ID!
+  minimumOfferPercentage: Float!
+  street: String!
+  city: String!
+  saii: Float!
+  vat: Float!
+  paymentType: String!
+  state: String!
+  country: String!
+  countryISOCode: String!
+  postcode: String!
+  merchantTransactionId: String!
+  daysToAuctionRegistrationEnd: Float!
+  maximumDaysForOfferExpiration: Float!
+  daysToAuctionRegistrationStart: Float!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Coupon {
+  id: String!
+  code: String!
+  maxUse: Float!
+  currentUse: Float!
+  discountType: String!
+  discountValue: Float!
+  createdAt: DateTime!
+  startDate: DateTime!
+  endDate: DateTime!
+  deactived: Boolean!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type AutoBid {
+  id: ID!
+  listingId: String!
+  auctionId: String!
+  userId: String!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type ListingResponse {
   listing: [Listing!]!
   total: Int!
@@ -626,64 +684,6 @@ type Invoice {
   vat: Float!
   expireAt: DateTime!
   createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type AdminDefault {
-  id: ID!
-  minimumOfferPercentage: Float!
-  street: String!
-  city: String!
-  saii: Float!
-  vat: Float!
-  paymentType: String!
-  state: String!
-  country: String!
-  countryISOCode: String!
-  postcode: String!
-  merchantTransactionId: String!
-  daysToAuctionRegistrationEnd: Float!
-  maximumDaysForOfferExpiration: Float!
-  daysToAuctionRegistrationStart: Float!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type Coupon {
-  id: String!
-  code: String!
-  maxUse: Float!
-  currentUse: Float!
-  discountType: String!
-  discountValue: Float!
-  createdAt: DateTime!
-  startDate: DateTime!
-  endDate: DateTime!
-  deactived: Boolean!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type Bids {
-  id: String!
-  userId: String!
-  bidNumber: Float!
-  price: Float!
-  auctionId: String!
-  listingId: String!
-  autoBid: Boolean!
-  createdAt: DateTime!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type AutoBid {
-  id: ID!
-  listingId: String!
-  auctionId: String!
-  userId: String!
-  createdAt: DateTime!
-  deletedAt: DateTime!
   updatedAt: DateTime!
 }
 
