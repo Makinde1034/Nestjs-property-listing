@@ -53,6 +53,10 @@ export const parseObjectValues = (
   return object;
 };
 
+export function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 /**
  * Adds a specified number of days to a given date string.
  * @param dateString The input date string (e.g., '2024-06-12T00:00:00Z').

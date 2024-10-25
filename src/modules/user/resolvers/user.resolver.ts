@@ -151,7 +151,7 @@ export class UserResolver {
     @Args('userUpgradeInput') userUpgradeInput: UserUpgradeInput,
     @Context() ctx: any,
   ): Promise<NafathAuthenticationResponseToUser> {
-    return await this.userService.upgradeUser(userUpgradeInput, ctx.req.user);
+    return await this.userService.verifyUser(userUpgradeInput, ctx.req.user);
   }
   /**
    * Block User

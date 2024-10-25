@@ -4,24 +4,22 @@
  */
 
 import { NestFactory, Reflector } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { I18nMiddleware } from 'nestjs-i18n';
-import {
-  ClassSerializerInterceptor,
-  Logger,
-  ValidationPipe,
-} from '@nestjs/common';
+import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { TrackingMiddleware } from './common/interceptors/user-visit';
 import { UserTrackingService } from './modules/user/services/user.tracking.service';
 import { TimeoutMiddleware } from './common/interceptors/timeout.middleware';
-new Logger();
+import { AppModule } from './app.module';
+
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    forceCloseConnections: true,
+  });
+
   const configService = app.get(ConfigService);
   const PORT = configService.get('PORT');
   const HOST = configService.get('HOST');
-
   app.enableCors();
   app.use(I18nMiddleware);
   app.useGlobalPipes(
@@ -39,15 +37,15 @@ async function bootstrap() {
   );
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.use(new TimeoutMiddleware().use);
-
   const UsertrackingService = app.get(UserTrackingService);
-
-  // Apply the middleware
+  // Apply the middleware for user tracking
   app.use((req, res, next) => {
     const trackingMiddleware = new TrackingMiddleware(UsertrackingService);
     trackingMiddleware.use(req, res, next);
   });
 
+  app.enableShutdownHooks();
   await app.listen(PORT, HOST);
+  console.log(`Application is running on: ${await app.getUrl()}`);
 }
 bootstrap();
