@@ -188,6 +188,11 @@ export class ListingImageInput {
   lat?: number;
 }
 
+export class AuctionListingImageInput {
+  @IsString()
+  id: string;
+}
+
 export class ListingImageFormDataInput {
   @IsBoolean()
   @IsOptional()

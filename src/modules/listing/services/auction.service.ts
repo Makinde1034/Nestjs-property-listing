@@ -34,6 +34,7 @@ import { ListingRepository } from '../repositories/listing.repository';
 
 import { AuctionBidRangeRepository } from '../repositories/auction-bid-range.repository';
 import { AuctionBidRange } from '../../../entities/auction-bid-range.entity';
+import { StorageService } from '../../file-handler/services/storage.service';
 
 @Injectable()
 export class AuctionService {
@@ -45,6 +46,7 @@ export class AuctionService {
     private readonly listingRepository: ListingRepository,
     private readonly auctionBidRangeRepository: AuctionBidRangeRepository,
     private readonly autoBidRepository: AutoBidRepository,
+    private readonly storageService: StorageService,
   ) {}
   logger = new Logger(AuctionService.name);
   async create(auctionInput: CreateAuctionInput) {
@@ -458,6 +460,30 @@ export class AuctionService {
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
+    }
+  }
+
+  async uploadAuctionImage(id: string, file: Express.Multer.File) {
+    try {
+      const listing = await this.auctionRepository.findOne({ where: { id } });
+      if (!listing) {
+        throw new BadRequestException('Auction not found');
+      }
+      // Upload the new files
+      const uploadedUrl = await this.storageService.upload(file);
+
+      // Save the updated images to the database
+      await this.auctionRepository.update(id, { imageLink: uploadedUrl });
+      return new SuccessResponse(AppStrings.UPLOAD_SUCCESSFUL, uploadedUrl);
+    } catch (error) {
+      this.logger.error('Error during  image upload', error);
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new BadRequestException(
+          error.message || 'An unexpected error occurred during image upload',
+        );
+      }
     }
   }
 }
