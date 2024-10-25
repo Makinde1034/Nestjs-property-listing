@@ -27,30 +27,9 @@ export class SseService {
   clients: Map<string, Subject<MessageEvent>> = new Map();
   private readonly logger = new Logger(SseService.name);
 
-  // /**
-  //  * Adds a new client subscriber
-  //  * @param userId string
-  //  * @param client Subject<MessageEvent>
-  //  */
-  // addClient(userId: string, client: Subject<MessageEvent>) {
-  //   this.clients.set(userId, client);
-  //   this.logger.log(`Client added for userId: ${userId}`);
-  // }
-
-  // /**
-  //  * Removes a client subscriber
-  //  * @param userId string
-  //  */
-  // removeClient(userId: string) {
-  //   this.clients.delete(userId);
-  //   this.logger.log(`Client removed for userId: ${userId}`);
-  // }
-
   addClient(userId: string, client: Subject<MessageEvent>) {
     addClient(userId, client);
-    this.logger.log(
-      `Client added for userId: ${userId}. Total clients: ${this.clients.size}`,
-    );
+    this.logger.log(`Client added for userId: ${userId}`);
   }
 
   removeClient(userId: string) {

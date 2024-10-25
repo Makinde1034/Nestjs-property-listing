@@ -1,8 +1,11 @@
 import { Global, Module } from '@nestjs/common';
 import { SseService } from './client.service';
-@Global() // This makes the module available across the app
+import { AuthModule } from '../auth/auth.module';
+
+@Global()
 @Module({
-  providers: [SseService], // Provide SseService
-  exports: [SseService], // Export it so other modules can use it
+  imports: [AuthModule],
+  providers: [SseService],
+  exports: [SseService],
 })
-export class SseModule {} // This can be AppModule or a separate module
+export class SseModule {}
