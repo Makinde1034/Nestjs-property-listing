@@ -34,6 +34,8 @@ import { UserTrackingRepository } from './repositories/user-tracking-repository'
 import { NafathService } from './service-providers/nafath.service';
 import { NafathLogsRepository } from './repositories/nafath-log.repository';
 import { HttpModule } from '@nestjs/axios';
+import { ActivityLogRepository } from './repositories/activity-log.repository';
+import { ActivityLogService } from './services/activity-log.service';
 
 @Global()
 @Module({
@@ -69,7 +71,10 @@ import { HttpModule } from '@nestjs/axios';
     RolePermissionRepository,
     NafathLogsRepository,
     NafathService,
+    ActivityLogRepository,
+    ActivityLogService,
   ],
+
   exports: [
     UserService,
     UserRepository,
