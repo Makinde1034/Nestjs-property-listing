@@ -28,11 +28,6 @@ export class AppController {
       this.sseService.removeClient(userId);
       clientSubject.complete();
     });
-
     return clientSubject.asObservable();
-  }
-
-  async triggerEventForUser(userId: string, payload: MessageEvent) {
-    this.sseService.sendEvent(userId, payload);
   }
 }

@@ -42,7 +42,6 @@ import { KnowledgeBaseAndHelpModule } from './modules/knowledge-base-and-help/kn
 import { InAppModule } from './modules/in-app-services/in-app.module';
 import { GlobalPermissionsGuard } from './modules/auth/guards/global-permission-guard';
 import { APP_GUARD } from '@nestjs/core';
-import { CacheModule } from '@nestjs/cache-manager';
 import { AppResolver } from './modules/app/app.resolver';
 import { AppController } from './modules/app/app.controller';
 import { SseService } from './modules/app/client.service';
@@ -71,12 +70,7 @@ import { SseModule } from './modules/app/event.module';
         AcceptLanguageResolver,
       ],
     }),
-    CacheModule.register({
-      isGlobal: true, // Make it globally available
-      store: 'redis', // Use Redis as the cache store
-      host: 'localhost',
-      port: 6379,
-    }),
+
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: 'src/schema.gql',
