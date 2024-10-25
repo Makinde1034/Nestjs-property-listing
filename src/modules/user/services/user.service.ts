@@ -50,6 +50,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   NationalIdentityType,
   RegisterEventAction,
+  ServerSentEvents,
   UserLevelEnum,
   UserProfileTypeEnum,
   UserStatus,
@@ -77,6 +78,9 @@ import {
 } from '../dtos/response/nafath';
 import { NafathService } from '../service-providers/nafath.service';
 import { NafathLogsRepository } from '../repositories/nafath-log.repository';
+import { sleep } from '../../../common/utils/helper';
+import { SseService } from '../../app/client.service';
+import { MessageEvent } from '../../app/request/app';
 
 @Injectable()
 export class UserService {
@@ -94,6 +98,7 @@ export class UserService {
     private readonly configService: ConfigService,
     private readonly nafathService: NafathService,
     private readonly nafathLogsRepository: NafathLogsRepository,
+    private readonly sseService: SseService,
   ) {
     this.frontEndUrl = this.configService.get('ADMIN_FRONTEND_URL');
   }
@@ -119,21 +124,21 @@ export class UserService {
     }
   }
 
-  async upgradeUser(
+  async verifyUser(
     userUpgradeInput: UserUpgradeInput,
     user: User,
   ): Promise<NafathAuthenticationResponseToUser> {
     try {
+      const result = await this.nafathService.verifyUser(userUpgradeInput.id);
+      if (!result) {
+        throw new BadRequestException('Failed to initiate verification');
+      }
+
       /************************************************
        *Bypass Nafath
        *
        ************************************************/
       //TODO: remove before going live
-
-      const result = await this.nafathService.verifyUser(userUpgradeInput.id);
-      if (!result) {
-        throw new BadRequestException('Failed to initiate verification');
-      }
       if (result.test) {
         await this.usersRepository.update(user.id, {
           userLevel: UserLevelEnum.LEVEL_2,
@@ -141,6 +146,7 @@ export class UserService {
         });
 
         await this.nafathLogsRepository.save({ ...result, userId: user.id });
+        this.performActionWithDelay(user);
         return { random: result.random };
       }
 
@@ -154,9 +160,43 @@ export class UserService {
     }
   }
 
+  /************************************************
+   *Bypass Nafath
+   *
+   ************************************************/
+  //TODO: remove before going live
+
+  async performActionWithDelay(user: any) {
+    this.logger.log('Action started');
+
+    const payload: MessageEvent = {
+      type: ServerSentEvents.SUCCESS,
+      data: user,
+    };
+    // Sleep for 2 seconds (2000 milliseconds)
+    await sleep(30000);
+    this.sseService.sendEvent(user.id, payload);
+    this.logger.log('Action resumed after 30 seconds');
+  }
+
+  /************************************************
+   *Bypass Nafath
+   *
+   ************************************************/
+  //TODO: remove before going live
+
+  // triggerNotification(userId: string, payload: MessageEvent) {
+  //   const client = this.clientsService.getClient(userId);
+  //   console.log(client);
+  //   if (client) {
+  //     client.next(payload); // Send the notification/event
+  //   } else {
+  //     console.warn(`No client connected for userId: ${userId}`);
+  //   }
+  // }
   async finalizeUpgradeUser(
-    data: NafathWebHookResponse,
-    userData: NafathUserResponse,
+    data?: NafathWebHookResponse,
+    userData?: NafathUserResponse,
   ) {
     try {
       const nafathLog = await this.nafathLogsRepository.findOne({
@@ -165,23 +205,30 @@ export class UserService {
         },
       });
       if (nafathLog) {
-        await this.usersRepository.update(nafathLog.userId, {
-          userLevel: UserLevelEnum.LEVEL_2,
-          firstName: userData.user_info['first_name#en'],
-          lastName: userData.user_info['family_name#en'],
-          arabicFirstName: userData.user_info['first_name#ar'],
-          arabicLastName: userData.user_info['family_name#ar'],
-          middleName: userData.user_info['grand_name#en'],
-          arabicMiddleName: userData.user_info['grand_name#ar'],
-          dateOfBirth: new Date(userData.user_info['dob#g']),
-          nationality: userData.user_info['nationality#en'],
-          isDataVerified: true,
-        });
-      } else {
-        //TODO alert User of failure
-      }
+        const { affected } = await this.usersRepository.update(
+          nafathLog.userId,
+          {
+            userLevel: UserLevelEnum.LEVEL_2,
+            firstName: userData.user_info['first_name#en'],
+            lastName: userData.user_info['family_name#en'],
+            arabicFirstName: userData.user_info['first_name#ar'],
+            arabicLastName: userData.user_info['family_name#ar'],
+            middleName: userData.user_info['grand_name#en'],
+            arabicMiddleName: userData.user_info['grand_name#ar'],
+            dateOfBirth: new Date(userData.user_info['dob#g']),
+            nationality: userData.user_info['nationality#en'],
+            isDataVerified: true,
+          },
+        );
+        if (affected > 0) {
+          const user = await this.usersRepository.findOneBy({
+            id: nafathLog.userId,
+          });
+          //TODO switch to event emiter
 
-      //TODO: notify User
+          // this.eventController.triggerEventForUser(user.id, {});
+        }
+      }
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;

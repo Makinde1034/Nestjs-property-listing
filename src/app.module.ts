@@ -10,7 +10,6 @@ import * as path from 'path';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { formatError } from './common/utils/format-error';
-import { AppResolver } from './modules/app/app.resolver';
 import configuration from './database/seeders/config/configuration';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AuthModule } from './modules/auth/auth.module';
@@ -43,9 +42,15 @@ import { KnowledgeBaseAndHelpModule } from './modules/knowledge-base-and-help/kn
 import { InAppModule } from './modules/in-app-services/in-app.module';
 import { GlobalPermissionsGuard } from './modules/auth/guards/global-permission-guard';
 import { APP_GUARD } from '@nestjs/core';
+import { CacheModule } from '@nestjs/cache-manager';
+import { AppResolver } from './modules/app/app.resolver';
+import { AppController } from './modules/app/app.controller';
+import { SseService } from './modules/app/client.service';
+import { SseModule } from './modules/app/event.module';
 
 @Module({
   imports: [
+    SseModule,
     ConfigModule.forRoot({
       envFilePath:
         process.env.NODE_ENV === 'development'
@@ -65,6 +70,12 @@ import { APP_GUARD } from '@nestjs/core';
         { use: QueryResolver, options: ['lang'] },
         AcceptLanguageResolver,
       ],
+    }),
+    CacheModule.register({
+      isGlobal: true, // Make it globally available
+      store: 'redis', // Use Redis as the cache store
+      host: 'localhost',
+      port: 6379,
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
@@ -108,14 +119,16 @@ import { APP_GUARD } from '@nestjs/core';
     KnowledgeBaseAndHelpModule,
     InAppModule,
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [
     AppResolver,
+    SseService,
     SplashScreenResolver,
     {
       provide: APP_GUARD,
       useClass: GlobalPermissionsGuard,
     },
   ],
+  exports: [],
 })
 export class AppModule {}

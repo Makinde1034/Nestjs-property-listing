@@ -13,3 +13,8 @@ export enum NotificationType {
 export enum NotificationEvent {
   SEND_NOTIFICATION = 'send.notification',
 }
+
+export enum ServerSentEvents {
+  SUCCESS = 'success',
+  NOTIFICATION = 'notification',
+}
