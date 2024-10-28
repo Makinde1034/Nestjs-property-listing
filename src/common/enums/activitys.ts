@@ -1,7 +1,11 @@
 export enum ActivityEnum {
   ADDED = 'added',
-  DELETE = 'deleted',
+  DELETED = 'deleted',
   CREATED = 'created',
-  UPDATED = 'updated',
+  UPDATED = 'edited',
   VIEWED = 'viewed',
+  DISABLE = 'disable',
+  ENABLED = 'enabled',
+
+  BLOCKED = 'blocked',
 }

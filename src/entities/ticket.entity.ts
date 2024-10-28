@@ -11,6 +11,7 @@ import {
   Entity,
   Index,
   ManyToOne,
+  OneToMany,
   OneToOne,
   UpdateDateColumn,
 } from 'typeorm';
@@ -21,6 +22,7 @@ import { Exclude } from 'class-transformer';
 import { Chat } from './chat.entity';
 import { ParentIssue } from './parent-issue.entity';
 import { ChildIssue } from './child-issue.entity';
+import { ActivityLog } from './activity-log.entity';
 
 @ObjectType()
 @Entity()
@@ -32,6 +34,10 @@ export class Ticket extends BaseEntity {
   @Field(() => User, { nullable: true })
   @ManyToOne(() => User, { cascade: true })
   support: User;
+
+  @Field(() => [ActivityLog], { nullable: true })
+  @OneToMany(() => ActivityLog, (activityLogs) => activityLogs.ticket)
+  ticketActivityLog: ActivityLog;
 
   @Field(() => ParentIssue, { nullable: true })
   @ManyToOne(() => ParentIssue, (parentIssue) => parentIssue.ticket, {

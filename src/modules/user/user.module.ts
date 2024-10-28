@@ -71,7 +71,6 @@ import { ActivityLogService } from '../activity-log/services/activity-log.servic
     RolePermissionRepository,
     NafathLogsRepository,
     NafathService,
-    ActivityLogService,
   ],
 
   exports: [

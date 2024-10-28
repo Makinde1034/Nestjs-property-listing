@@ -17,10 +17,15 @@ import {
 import BaseEntity from './base.entity';
 import { AttributeSet } from './attribute-set.entity';
 import { Listing } from './listing.entity';
+import { ActivityLog } from './activity-log.entity';
 
 @Entity()
 @ObjectType()
 export class ListingType extends BaseEntity {
+  @Field(() => [ActivityLog], { nullable: true })
+  @OneToMany(() => ActivityLog, (activityLogs) => activityLogs.role)
+  listingTypeActivityLogs: ActivityLog;
+
   @Column()
   @Field({ nullable: true })
   englishName: string;

@@ -1,8 +1,28 @@
+import { Field, ObjectType } from '@nestjs/graphql';
 import { ActivityEnum } from '../../../common/enums/activitys';
+import { ActivityLog } from '../../../entities/activity-log.entity';
+import { numBytes } from 'aws-sdk/clients/finspace';
 
 export class CreateActivityLog {
-  userId: string;
-  scope: string;
+  adminId: string;
   action: ActivityEnum;
-  details?: Record<string, any>;
+  details?: string;
+  roleId?: number;
+  userId?: string;
+  listingTypeId?: string;
+  listingId?: string;
+  responseTemplateId?: string;
+  ticketId?: string;
+  articleId?: number;
+  auctionId?: string;
+  splashScreenId?: number;
+}
+
+@ObjectType()
+export class ActivityLogsResponse {
+  @Field(() => [ActivityLog])
+  logs: [ActivityLog];
+
+  @Field()
+  total: number;
 }

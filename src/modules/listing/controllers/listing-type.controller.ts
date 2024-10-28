@@ -19,6 +19,7 @@ import { Permissions } from 'src/common/decorator/permission';
 
 import { Attribute, ListingType } from 'src/entities';
 import { AdminGuard } from '../../auth/guards/admin.guard';
+import { Context } from '@nestjs/graphql';
 
 @Controller('listing-type')
 export class ListingTypeController {
@@ -54,9 +55,12 @@ export class ListingTypeController {
   async uploadListingTypeIcon(
     @Query('listingTypeId') listingTypeId: string,
     @UploadedFile() icon: Express.Multer.File,
+    @Context() ctx: any,
   ): Promise<ListingType> {
     return await this.listingTypeService.updateListingTypeIcon(
       listingTypeId,
+      ctx.req.user,
+
       icon,
     );
   }

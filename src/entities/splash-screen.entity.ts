@@ -9,9 +9,11 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { ActivityLog } from './activity-log.entity';
 
 @Entity()
 @ObjectType()
@@ -43,6 +45,10 @@ export class SplashScreen {
   @Column()
   @Field()
   endDate: Date;
+
+  @Field(() => [ActivityLog], { nullable: true })
+  @OneToMany(() => ActivityLog, (activityLogs) => activityLogs.splashScreen)
+  splashScreenActivityLog: ActivityLog;
 
   @Field()
   @CreateDateColumn()

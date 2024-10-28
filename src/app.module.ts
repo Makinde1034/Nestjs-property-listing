@@ -46,6 +46,7 @@ import { AppResolver } from './modules/app/app.resolver';
 import { AppController } from './modules/app/app.controller';
 import { SseService } from './modules/app/client.service';
 import { SseModule } from './modules/app/event.module';
+import { ActivityLogModule } from './modules/activity-log/activity-log.module';
 
 @Module({
   imports: [
@@ -112,6 +113,7 @@ import { SseModule } from './modules/app/event.module';
     ChatModule,
     KnowledgeBaseAndHelpModule,
     InAppModule,
+    ActivityLogModule,
   ],
   controllers: [AppController],
   providers: [

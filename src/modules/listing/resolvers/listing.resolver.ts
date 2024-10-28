@@ -427,8 +427,12 @@ export class ListingResolver {
   @Mutation(() => SuccessResponse, { name: 'enableListing' })
   async adminEnableListing(
     @Args('listingActionInput') listingActionInput: ListingActionInput,
+    @Context() ctx: any,
   ) {
-    return await this.listingService.enableListing(listingActionInput);
+    return await this.listingService.enableListing(
+      listingActionInput,
+      ctx.req.user,
+    );
   }
   @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
@@ -467,8 +471,9 @@ export class ListingResolver {
   @Mutation(() => Auction, { name: 'updateAuction' })
   async updateAuction(
     @Args('updateAuctionInput') updateAuctionInput: UpdateAuctionInput,
+    @Context() ctx: any,
   ) {
-    return await this.auctionService.update(updateAuctionInput);
+    return await this.auctionService.update(updateAuctionInput, ctx.req.user);
   }
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)

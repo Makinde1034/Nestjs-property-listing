@@ -18,6 +18,7 @@ import {
 import { Permission } from './permission.entity';
 import { RolePermissions } from './role-permission.entity';
 import { User } from './user.entity';
+import { ActivityLog } from './activity-log.entity';
 
 @Entity()
 @ObjectType()
@@ -54,6 +55,10 @@ export class Role {
   @Field(() => [User], { nullable: true })
   @ManyToMany(() => User, (user) => user.roles, { nullable: true })
   user: User[];
+
+  @Field(() => [ActivityLog], { nullable: true })
+  @OneToMany(() => ActivityLog, (activityLogs) => activityLogs.role)
+  activityLogs: ActivityLog;
 
   @Field()
   @CreateDateColumn()

@@ -30,17 +30,9 @@ import {
   NafathAuthenticationResponseToUser,
   UserUpgradeInput,
 } from '../dtos/response/nafath';
-
-import { ActivityLog } from '../../../entities/activity-log.entity';
-import { ActivityLogService } from '../../activity-log/services/activity-log.service';
-
 @Resolver()
 export class UserResolver {
-  constructor(
-    private readonly userService: UserService,
-    private readonly activityLogsService: ActivityLogService,
-  ) {}
-
+  constructor(private readonly userService: UserService) {}
   /**
    * User
    *
@@ -114,8 +106,9 @@ export class UserResolver {
   @Mutation(() => SuccessResponse)
   async resetPasswordAdmin(
     @Args('ResetInput') ResetInput: UserActionInput,
+    @Context() ctx: any,
   ): Promise<SuccessResponse> {
-    return await this.userService.resetPassword(ResetInput);
+    return await this.userService.resetPassword(ResetInput, ctx.req.user);
   }
 
   /**
@@ -170,16 +163,18 @@ export class UserResolver {
   @UseGuards(AccessTokenGuard)
   async blockUser(
     @Args('RequestInput') inputDto: UserActionInput,
+    @Context() ctx: any,
   ): Promise<SuccessResponse> {
-    return await this.userService.blockUser(inputDto);
+    return await this.userService.blockUser(inputDto, ctx.req.user);
   }
 
   @Mutation(() => SuccessResponse)
   @UseGuards(AccessTokenGuard)
   async deleteUser(
     @Args('RequestInput') inputDto: DeleteUserInput,
+    @Context() ctx: any,
   ): Promise<SuccessResponse> {
-    return await this.userService.deleteUser(inputDto);
+    return await this.userService.deleteUser(inputDto, ctx.req.user);
   }
 
   @Mutation(() => User)
@@ -216,8 +211,9 @@ export class UserResolver {
   @UseGuards(AdminGuard)
   async updateUserData(
     @Args('updateUserInput') updateUserInput: UpdateUserData,
+    @Context() ctx: any,
   ): Promise<User> {
-    return await this.userService.updateUserData(updateUserInput);
+    return await this.userService.updateUserData(updateUserInput, ctx.req.user);
   }
 
   @Mutation(() => User, { name: 'assignRoleToUser' })
@@ -227,11 +223,5 @@ export class UserResolver {
     @Args('assignRoleInput') assignRoleInput: AssignRoleInput,
   ): Promise<User> {
     return await this.userService.assignRoleToUser(assignRoleInput);
-  }
-
-  @Mutation(() => [ActivityLog])
-  @UseGuards(AccessTokenGuard)
-  async fetchLogs(@Args('string') id: string) {
-    return await this.activityLogsService.getLogs(id);
   }
 }

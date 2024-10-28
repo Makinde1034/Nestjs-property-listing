@@ -72,9 +72,10 @@ export class RoleResolver {
   @Permissions('create-role')
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async createRole(
+    @Context() ctx: any,
     @Args('RequestInput') RequestInput: RoleInputDto,
   ): Promise<Role> {
-    return await this.roleService.createRole(RequestInput);
+    return await this.roleService.createRole(RequestInput, ctx.req.user);
   }
 
   /**
@@ -88,9 +89,10 @@ export class RoleResolver {
   @Permissions('update-role')
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async updateRole(
+    @Context() ctx: any,
     @Args('RequestInput') RequestInput: RoleUpdateInputDto,
   ): Promise<Role> {
-    return await this.roleService.updateRole(RequestInput);
+    return await this.roleService.updateRole(RequestInput, ctx.req.user);
   }
 
   /**
@@ -103,8 +105,11 @@ export class RoleResolver {
   @Mutation(() => SuccessResponse)
   @Permissions('delete-role')
   @UseGuards(AccessTokenGuard, PermissionsGuard)
-  async deleteRole(@Args('deleteRoleInput') deleteRoleInput: DeleteRolesInput) {
-    return await this.roleService.deleteRoles(deleteRoleInput);
+  async deleteRole(
+    @Context() ctx: any,
+    @Args('deleteRoleInput') deleteRoleInput: DeleteRolesInput,
+  ) {
+    return await this.roleService.deleteRoles(deleteRoleInput, ctx.req.user);
   }
 
   /**
@@ -113,7 +118,7 @@ export class RoleResolver {
    */
   @Query(() => [Role])
   @UseGuards(AccessTokenGuard)
-  async getUserRoles(@Context() ctx): Promise<Role[]> {
+  async getUserRoles(@Context() ctx: any): Promise<Role[]> {
     return await this.roleService.fetchUserRoles(ctx.req.user);
   }
 

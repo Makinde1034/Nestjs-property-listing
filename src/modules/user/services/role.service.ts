@@ -30,6 +30,8 @@ import slugify from 'slugify';
 import { AppStrings } from '../../../common/messages/app.strings';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
+import { ActivityLogService } from '../../activity-log/services/activity-log.service';
+import { ActivityEnum } from '../../../common/enums/activitys';
 
 @Injectable()
 export class RoleService {
@@ -38,6 +40,7 @@ export class RoleService {
     private readonly permissionRepository: PermissionRepository,
     private readonly staffRepository: UserRepository,
     private readonly rolePermissionRepository: RolePermissionRepository,
+    private readonly activityLogsService: ActivityLogService,
   ) {}
 
   logger = new Logger(RoleService.name);
@@ -58,12 +61,27 @@ export class RoleService {
     }
   }
 
-  async deleteRoles(deleteRoleInput: DeleteRolesInput) {
+  async deleteRoles(deleteRoleInput: DeleteRolesInput, user: User) {
     try {
+      const roles = await this.roleRepository.find({
+        where: {
+          id: In(deleteRoleInput.id),
+        },
+      });
       const { affected } = await this.roleRepository.update(
         { id: In(deleteRoleInput.id) },
         { deletedAt: new Date() },
       );
+
+      const activityToSave = roles.map((element) => {
+        return {
+          adminId: user.id,
+          action: ActivityEnum.DELETED,
+          roleId: element.id,
+        };
+      });
+
+      await this.activityLogsService.logActivity(activityToSave);
 
       if (affected > 0) {
         return new SuccessResponse(AppStrings.ROLE_DELETED_SUCCESSFULLY);
@@ -163,7 +181,7 @@ export class RoleService {
    * @param {RoleInput} input
    * @returns {Promise<Role>}
    */
-  async createRole(input: RoleInputDto): Promise<Role> {
+  async createRole(input: RoleInputDto, user: User): Promise<Role> {
     const permissionIds = input.permissions.map((item) => item.permissionId);
     const permissions = await this.permissionRepository.find({
       where: { id: In([...permissionIds]) },
@@ -196,6 +214,15 @@ export class RoleService {
 
     await this.rolePermissionRepository.save(rolePermissions);
 
+    await this.activityLogsService.logActivity([
+      {
+        adminId: user.id,
+        action: ActivityEnum.CREATED,
+        details: JSON.stringify(roleData),
+        roleId: roleData.id,
+      },
+    ]);
+
     return role;
   }
 
@@ -206,7 +233,7 @@ export class RoleService {
    * @param {RoleUpdateInputDto} input
    * @returns {Promise<Role>}
    */
-  async updateRole(input: RoleUpdateInputDto): Promise<Role> {
+  async updateRole(input: RoleUpdateInputDto, user: User): Promise<Role> {
     const role = await this.roleRepository.findOneByOrFail({
       id: input.id,
     });
@@ -239,7 +266,32 @@ export class RoleService {
       .filter((item) => item !== null);
 
     await this.rolePermissionRepository.save(rolePermissions);
-    return await this.roleRepository.save(Object.assign(role, data));
+
+    if (permissionIds.length > 0) {
+      await this.activityLogsService.logActivity([
+        {
+          adminId: user.id,
+          action: ActivityEnum.UPDATED,
+          details: JSON.stringify(rolePermissions),
+          roleId: role.id,
+        },
+      ]);
+    }
+
+    const roleResult = await this.roleRepository.save(
+      Object.assign(role, data),
+    );
+
+    await this.activityLogsService.logActivity([
+      {
+        adminId: user.id,
+        action: ActivityEnum.UPDATED,
+        details: JSON.stringify(roleResult),
+        roleId: roleResult.id,
+      },
+    ]);
+
+    return roleResult;
   }
 
   /**
@@ -249,13 +301,21 @@ export class RoleService {
    * @param {RoleIdInputDto} data
    * @returns {Promise<string>}
    */
-  async disableRole(data: RoleIdInputDto): Promise<string> {
+  async disableRole(data: RoleIdInputDto, user: User): Promise<string> {
     const role = await this.roleRepository.findOneByOrFail({
       id: data.roleId,
     });
 
     if (role) {
       await this.roleRepository.update(data.roleId, { isDisabled: true });
+
+      await this.activityLogsService.logActivity([
+        {
+          adminId: user.id,
+          action: ActivityEnum.DISABLE,
+          roleId: role.id,
+        },
+      ]);
       return AppStrings.SUCCESSFULLY_DISABLED;
     }
   }

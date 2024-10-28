@@ -28,6 +28,7 @@ import { ListingType } from './listing-type.entity';
 import { ListingAttributes } from './listing-attributes.entity';
 import { GpsCoordinate } from './gps-coordinates.entity';
 import { AuctionParticipant } from './auction-participant.entity';
+import { ActivityLog } from './activity-log.entity';
 
 @Entity()
 @ObjectType()
@@ -233,6 +234,10 @@ export class Listing extends BaseEntity {
   @Column({ nullable: true })
   @Field({ nullable: true })
   promotionExpiration: Date;
+
+  @Field(() => [ActivityLog], { nullable: true })
+  @OneToMany(() => ActivityLog, (activityLogs) => activityLogs.listing)
+  listingActivityLogs: ActivityLog;
 
   @Field({ nullable: true })
   @Index()

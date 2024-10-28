@@ -27,6 +27,8 @@ import { ChildIssueRepository } from '../../issue/repositories/child-issue.repos
 import { ResponseTemplateRepository } from '../repositories/response-template.repository';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
+import { ActivityEnum } from '../../../common/enums/activitys';
+import { ActivityLogService } from '../../activity-log/services/activity-log.service';
 @Injectable()
 export class TicketService {
   constructor(
@@ -35,6 +37,8 @@ export class TicketService {
 
     private childIssueRepository: ChildIssueRepository,
     private readonly issueRepository: IssueRepository,
+
+    private readonly activityLogService: ActivityLogService,
   ) {}
   logger = new Logger(TicketService.name);
 
@@ -213,7 +217,17 @@ export class TicketService {
         status === TicketStatus.CLOSE ||
         status === TicketStatus.OPEN
       ) {
-        return await this.ticketRepository.save(ticketToUpdate);
+        const ticket = await this.ticketRepository.save(ticketToUpdate);
+
+        const activityToSave = ticket.map((element) => {
+          return {
+            adminId: user.id,
+            action: ActivityEnum.UPDATED,
+            ticketId: element.id,
+          };
+        });
+
+        await this.activityLogService.logActivity(activityToSave);
       }
 
       throw new BadRequestException('Invalid status update');
@@ -229,11 +243,22 @@ export class TicketService {
 
   async createResponseTemplate(
     createResponseTemplateInput: CreateResponseTemplateInput,
+    admin: User,
   ) {
     try {
-      return await this.responseTemplateRepostiory.save(
+      const responseTemplate = await this.responseTemplateRepostiory.save(
         createResponseTemplateInput,
       );
+
+      await this.activityLogService.logActivity([
+        {
+          adminId: admin.id,
+          action: ActivityEnum.CREATED,
+          responseTemplateId: responseTemplate.id,
+          details: JSON.stringify(responseTemplate),
+        },
+      ]);
+      return responseTemplate;
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -263,7 +288,10 @@ export class TicketService {
     }
   }
 
-  async deleteResponseTemplate(deleteResponseTemplate: DeleteResponsetemplate) {
+  async deleteResponseTemplate(
+    deleteResponseTemplate: DeleteResponsetemplate,
+    admin: User,
+  ) {
     try {
       const idsToUpdate: string[] = [];
       const template = await this.responseTemplateRepostiory.find({
@@ -283,6 +311,16 @@ export class TicketService {
       const { affected } =
         await this.responseTemplateRepostiory.softDelete(idsToUpdate);
 
+      const activityToSave = template.map((element) => {
+        return {
+          adminId: admin.id,
+          action: ActivityEnum.DELETED,
+          responseTemplateId: element.id,
+        };
+      });
+
+      await this.activityLogService.logActivity(activityToSave);
+
       if (affected > 0) {
         return new SuccessResponse(AppStrings.DELETED_SUCCESSFULLY);
       }
@@ -294,6 +332,7 @@ export class TicketService {
 
   async updateResponseTemplate(
     updateResponseTemplate: UpdateResponseTemplateInput,
+    admin: User,
   ) {
     try {
       const template = await this.responseTemplateRepostiory.findOneByOrFail({
@@ -310,9 +349,19 @@ export class TicketService {
       );
 
       if (affected > 0) {
-        return await this.responseTemplateRepostiory.findOneByOrFail({
-          id: template.id,
-        });
+        const responseTemplate =
+          await this.responseTemplateRepostiory.findOneByOrFail({
+            id: template.id,
+          });
+
+        await this.activityLogService.logActivity([
+          {
+            adminId: admin.id,
+            action: ActivityEnum.UPDATED,
+            responseTemplateId: responseTemplate.id,
+            details: JSON.stringify(responseTemplate),
+          },
+        ]);
       }
     } catch (error) {
       this.logger.log(error);

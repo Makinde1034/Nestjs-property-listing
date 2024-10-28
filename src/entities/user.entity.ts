@@ -161,7 +161,11 @@ export class User extends BaseEntity {
 
   @Field(() => [ActivityLog], { nullable: true })
   @OneToMany(() => ActivityLog, (activityLogs) => activityLogs.user)
-  activityLogs: ActivityLog;
+  activityLogs: ActivityLog[];
+
+  @Field(() => [ActivityLog], { nullable: true })
+  @OneToMany(() => ActivityLog, (activityLogs) => activityLogs.user)
+  adminActivityLogs: ActivityLog;
 
   @Field({ nullable: true, defaultValue: UserStatus.PENDING })
   @Column({ nullable: true, default: UserStatus.PENDING })

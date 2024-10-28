@@ -9,11 +9,13 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 import { Category } from './knowledge-base-category.entity';
+import { ActivityLog } from './activity-log.entity';
 
 @ObjectType()
 @Entity()
@@ -49,6 +51,10 @@ export class Article {
   @Field(() => Category)
   @ManyToOne(() => Category, (category) => category.article)
   category: Category;
+
+  @Field(() => [ActivityLog], { nullable: true })
+  @OneToMany(() => ActivityLog, (activityLogs) => activityLogs.ticket)
+  articleActivityLog: ActivityLog;
 
   @Column()
   @Field()
