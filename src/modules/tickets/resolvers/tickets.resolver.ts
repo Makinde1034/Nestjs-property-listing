@@ -118,11 +118,15 @@ export class TicketsResolver {
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Mutation(() => ResponseTemplate)
   async createResponseTemplate(
+    @Context()
+    ctx: any,
+
     @Args('createResponseTemplateInput')
     createResponseTemplateInput: CreateResponseTemplateInput,
   ) {
     return await this.ticketService.createResponseTemplate(
       createResponseTemplateInput,
+      ctx.req.user,
     );
   }
 
@@ -149,11 +153,14 @@ export class TicketsResolver {
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Mutation(() => SuccessResponse)
   async deleteResponseTemplate(
+    @Context()
+    ctx: any,
     @Args('deleteResponseTemplate')
     deleteResponseTemplate: DeleteResponsetemplate,
   ) {
     return await this.ticketService.deleteResponseTemplate(
       deleteResponseTemplate,
+      ctx.req.user,
     );
   }
 
@@ -162,11 +169,14 @@ export class TicketsResolver {
   @Permissions('create-support-tickets')
   @Mutation(() => ResponseTemplate)
   async updateResponseTemplate(
+    @Context()
+    ctx: any,
     @Args('updateResponseTemplateInput')
     updateResponseTemplateInput: UpdateResponseTemplateInput,
   ) {
     return await this.ticketService.updateResponseTemplate(
       updateResponseTemplateInput,
+      ctx.req.user,
     );
   }
 

@@ -35,6 +35,8 @@ import { ListingRepository } from '../repositories/listing.repository';
 import { AuctionBidRangeRepository } from '../repositories/auction-bid-range.repository';
 import { AuctionBidRange } from '../../../entities/auction-bid-range.entity';
 import { StorageService } from '../../file-handler/services/storage.service';
+import { ActivityEnum } from '../../../common/enums/activitys';
+import { ActivityLogService } from '../../activity-log/services/activity-log.service';
 
 @Injectable()
 export class AuctionService {
@@ -47,6 +49,7 @@ export class AuctionService {
     private readonly auctionBidRangeRepository: AuctionBidRangeRepository,
     private readonly autoBidRepository: AutoBidRepository,
     private readonly storageService: StorageService,
+    private readonly activityLogsService: ActivityLogService,
   ) {}
   logger = new Logger(AuctionService.name);
   async create(auctionInput: CreateAuctionInput) {
@@ -174,7 +177,7 @@ export class AuctionService {
     }
   }
 
-  async update(updateAuctionInput: UpdateAuctionInput) {
+  async update(updateAuctionInput: UpdateAuctionInput, user: User) {
     try {
       const { id, ...rest } = updateAuctionInput;
 
@@ -200,12 +203,24 @@ export class AuctionService {
         );
       }
       const update = await this.auctionRepository.update(id, rest);
-      if (update.affected > 0)
-        return await this.auctionRepository.findOne({
+      if (update.affected > 0) {
+        const result = await this.auctionRepository.findOne({
           where: {
             id: id,
           },
         });
+        await this.activityLogsService.logActivity([
+          {
+            adminId: user.id,
+            action: ActivityEnum.UPDATED,
+
+            details: JSON.stringify(auction),
+
+            auctionId: result.id,
+          },
+        ]);
+        return result;
+      }
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -375,6 +390,7 @@ export class AuctionService {
       }
     }
   }
+
   async autobid(price: number, bidInput: CreateBidInput) {
     try {
       const valueInRange = Math.floor(price / 1000000);
@@ -404,6 +420,7 @@ export class AuctionService {
           price: this.calculatebidPrice(price, auctionBidRange),
         };
       });
+
       await this.bidRepository.save(bidsToMake);
       return new SuccessResponse(AppStrings.SUCCESSFULL);
     } catch (error) {

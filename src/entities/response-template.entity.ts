@@ -8,10 +8,12 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  OneToMany,
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
 import { Field, ObjectType } from '@nestjs/graphql';
+import { ActivityLog } from './activity-log.entity';
 
 @Entity()
 @ObjectType()
@@ -34,6 +36,10 @@ export class ResponseTemplate extends BaseEntity {
   @CreateDateColumn()
   @Field()
   createdAt: Date;
+
+  @Field(() => [ActivityLog], { nullable: true })
+  @OneToMany(() => ActivityLog, (activityLogs) => activityLogs.responseTemplate)
+  responseTemplateActivityLogs: ActivityLog;
 
   @DeleteDateColumn()
   @Field()

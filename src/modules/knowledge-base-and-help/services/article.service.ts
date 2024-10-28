@@ -24,6 +24,9 @@ import { SuccessResponse } from '../../../common/utils/success.response';
 import { Article } from '../../../entities/article.entity';
 import { DeepPartial, In } from 'typeorm';
 import { StorageService } from '../../file-handler/services/storage.service';
+import { ActivityLogService } from '../../activity-log/services/activity-log.service';
+import { ActivityEnum } from '../../../common/enums/activitys';
+import { User } from '../../../entities';
 
 @Injectable()
 export class ArticleService {
@@ -31,6 +34,7 @@ export class ArticleService {
     private readonly articleRepository: ArticleRepository,
     private readonly knowledgeBaseCategoryRepository: KnowledgeBaseCategoryRepository,
     private readonly storageService: StorageService,
+    private readonly activityLogService: ActivityLogService,
   ) {}
   logger = new Logger(ArticleService.name);
   async create(createArticleInput: CreateArticleInput) {
@@ -107,7 +111,7 @@ export class ArticleService {
     }
   }
 
-  async update(updateArticleInput: UpdateArticleInput) {
+  async update(updateArticleInput: UpdateArticleInput, user: User) {
     try {
       const { id, ...rest } = updateArticleInput;
       const article = await this.articleRepository.findOneBy({ id });
@@ -118,6 +122,13 @@ export class ArticleService {
       const { affected } = await this.articleRepository.update(id, rest);
 
       if (affected > 0) {
+        await this.activityLogService.logActivity([
+          {
+            adminId: user.id,
+            action: ActivityEnum.UPDATED,
+            articleId: article.id,
+          },
+        ]);
         return await this.articleRepository.findOneBy({ id });
       }
     } catch (error) {

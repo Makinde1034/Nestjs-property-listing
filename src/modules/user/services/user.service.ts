@@ -81,6 +81,8 @@ import { NafathLogsRepository } from '../repositories/nafath-log.repository';
 import { sleep } from '../../../common/utils/helper';
 import { SseService } from '../../app/client.service';
 import { MessageEvent } from '../../app/request/app';
+import { ActivityEnum } from '../../../common/enums/activitys';
+import { ActivityLogService } from '../../activity-log/services/activity-log.service';
 
 @Injectable()
 export class UserService {
@@ -99,6 +101,7 @@ export class UserService {
     private readonly nafathService: NafathService,
     private readonly nafathLogsRepository: NafathLogsRepository,
     private readonly sseService: SseService,
+    private readonly activityLogsService: ActivityLogService,
   ) {
     this.frontEndUrl = this.configService.get('ADMIN_FRONTEND_URL');
   }
@@ -117,6 +120,7 @@ export class UserService {
       userData.employeeId = JSON.stringify(generateOtp());
 
       const user = await this.usersRepository.save(userData);
+
       return user;
     } catch (error) {
       this.logger.log(error);
@@ -810,7 +814,10 @@ export class UserService {
     }
   }
 
-  async resetPassword(requestInput: UserActionInput): Promise<SuccessResponse> {
+  async resetPassword(
+    requestInput: UserActionInput,
+    admin: User,
+  ): Promise<SuccessResponse> {
     const { userId } = requestInput;
     const notFoundIds: string[] = [];
 
@@ -840,6 +847,16 @@ export class UserService {
         ...user,
         password: generateRandomToken(),
       });
+
+      const activityToSave = users.map((element) => {
+        return {
+          adminId: admin.id,
+          action: ActivityEnum.UPDATED,
+          userId: element.id,
+        };
+      });
+
+      await this.activityLogsService.logActivity(activityToSave);
 
       // Prepare the data for sending the email
       const updatedUser: StaffCreatedData = {
@@ -910,7 +927,7 @@ export class UserService {
     }
   }
 
-  async updateUserData(input: UpdateUserData): Promise<User> {
+  async updateUserData(input: UpdateUserData, admin: User): Promise<User> {
     try {
       let roles: Role[];
       if (input.roles?.length) {
@@ -925,7 +942,18 @@ export class UserService {
         ...rest,
         roles,
       };
-      return await this.usersRepository.save({ id, ...userData });
+      const user = await this.usersRepository.save({ id, ...userData });
+
+      await this.activityLogsService.logActivity([
+        {
+          adminId: admin.id,
+          action: ActivityEnum.UPDATED,
+          details: JSON.stringify(userData),
+          userId: user.id,
+        },
+      ]);
+
+      return user;
     } catch (error) {
       throw new BadRequestException(error);
     }
@@ -1041,7 +1069,10 @@ export class UserService {
    * @param {UserActionInput} requestInput
    * @returns {Promise<User>}
    */
-  async blockUser(requestInput: UserActionInput): Promise<SuccessResponse> {
+  async blockUser(
+    requestInput: UserActionInput,
+    admin: User,
+  ): Promise<SuccessResponse> {
     const { userId, action } = requestInput;
     const usersToUpdate: DeepPartial<User>[] = [];
     const notFoundIds: string[] = [];
@@ -1069,13 +1100,26 @@ export class UserService {
       );
     }
 
+    const activityToSave = users.map((element) => {
+      return {
+        adminId: admin.id,
+        action: ActivityEnum.BLOCKED,
+        userId: element.id,
+      };
+    });
+
+    await this.activityLogsService.logActivity(activityToSave);
+
     return new SuccessResponse(
       `You have successfully ${action ? 'blocked' : 'unblocked'} the selected users`,
       updatedUsers,
     );
   }
 
-  async deleteUser(requestInput: DeleteUserInput): Promise<SuccessResponse> {
+  async deleteUser(
+    requestInput: DeleteUserInput,
+    admin: User,
+  ): Promise<SuccessResponse> {
     const { userId } = requestInput;
     const usersToUpdate: DeepPartial<User>[] = [];
     const notFoundIds: string[] = [];
@@ -1104,6 +1148,15 @@ export class UserService {
     //   );
     // }
 
+    const activityToSave = users.map((element) => {
+      return {
+        adminId: admin.id,
+        action: ActivityEnum.DELETED,
+        userId: element.id,
+      };
+    });
+
+    await this.activityLogsService.logActivity(activityToSave);
     return new SuccessResponse(
       `You have successfully deleted the selected users`,
       updatedUsers,

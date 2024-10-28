@@ -28,6 +28,7 @@ export class CreateSplashScreenInput {
   @IsDate()
   endDate: Date;
 }
+@InputType()
 export class UpdateSplashScreenInput extends PartialType(
   CreateSplashScreenInput,
 ) {

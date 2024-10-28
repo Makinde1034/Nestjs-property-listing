@@ -41,55 +41,6 @@ type Permission {
   permissionRoles: [RolePermissions!]!
 }
 
-type Role {
-  id: Float!
-  englishName: String!
-  arabicName: String
-  slug: String!
-  isDisabled: Boolean!
-  permissions: [Permission!]!
-  rolePermissions: [RolePermissions!]!
-  user: [User!]
-  createdAt: DateTime!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type Company {
-  id: ID!
-  name: String!
-  vatNumber: String!
-  crNumber: String!
-  user: User!
-}
-
-type NotificationScope {
-  id: Float!
-  name: String!
-  description: String
-  scopeGroup: String
-}
-
-type UserNotificationPreference {
-  id: ID!
-  email: Boolean
-  mobile: Boolean
-  desktop: Boolean
-  user: User!
-  scope: NotificationScope!
-}
-
-type Review {
-  id: ID!
-  rating: Float!
-  comment: String!
-  user: User!
-  userId: String!
-  reviewType: String!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
 type Offer {
   id: ID!
   price: Float!
@@ -166,6 +117,7 @@ type Ticket {
   id: ID!
   reporter: User!
   support: User
+  ticketActivityLog: [ActivityLog!]
   parentIssue: ParentIssue
   childIssue: ChildIssue
   status: String!
@@ -228,63 +180,6 @@ type Wishlist {
   updatedAt: DateTime!
 }
 
-type ListingAttributes {
-  id: ID!
-  listing: Listing!
-  attribute: Attribute
-  name: String
-  attributeId: String
-  value: String
-}
-
-type Attribute {
-  id: ID!
-  englishName: String
-  arabicName: String
-  type: String
-  icon: String
-  dropDownOptions: [String!]
-  isRequired: Boolean
-  showInSummary: Boolean!
-  hiddenToBuyers: Boolean!
-  isAmenity: Boolean
-  isAddress: Boolean
-  showInComparison: Boolean!
-  showInFilters: Boolean!
-  filterIndex: Float
-  summaryIndex: Float!
-  createListingIndex: Float!
-  thiqaIntegration: [String!]
-  attributeSets: [AttributeSet!]!
-  listingAttribute: Attribute!
-  deletedAt: DateTime!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type AttributeSet {
-  id: ID!
-  arabicName: String
-  englishName: String
-  attributes: [Attribute!]
-  listingTypes: [ListingType!]!
-  deletedAt: DateTime!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type ListingType {
-  id: ID!
-  englishName: String
-  arabicName: String
-  icon: String
-  listing: Listing!
-  attributeSets: [AttributeSet!]
-  createdAt: DateTime!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
-}
-
 type GpsCoordinate {
   id: ID!
   lat: Float!
@@ -301,6 +196,7 @@ type Auction {
   startDate: DateTime!
   liveFor: Float
   imageLink: String
+  actionActivityLog: [ActivityLog!]
   maxListing: Float!
   auctionParticipant: [AuctionParticipant!]!
   status: String!
@@ -364,26 +260,78 @@ type Listing {
   offers: Float
   featureExpiration: DateTime
   promotionExpiration: DateTime
+  listingActivityLogs: [ActivityLog!]
   createdAt: DateTime
   deletedAt: DateTime!
   updatedAt: DateTime!
 }
 
-type SearchHistory {
+type ListingAttributes {
   id: ID!
-  userId: String
-  user: [User!]!
-  minPrice: Float
-  purpose: String
-  maxPrice: Float
-  minArea: Float
-  maxArea: Float
-  gpsCoordinate: String
-  attributes: String
+  listing: Listing!
+  attribute: Attribute
+  name: String
+  attributeId: String
+  value: String
+}
+
+type Attribute {
+  id: ID!
+  englishName: String
+  arabicName: String
   type: String
-  rentingOption: String
-  listingId: String
+  icon: String
+  dropDownOptions: [String!]
+  isRequired: Boolean
+  showInSummary: Boolean!
+  hiddenToBuyers: Boolean!
+  isAmenity: Boolean
+  isAddress: Boolean
+  showInComparison: Boolean!
+  showInFilters: Boolean!
+  filterIndex: Float
+  summaryIndex: Float!
+  createListingIndex: Float!
+  thiqaIntegration: [String!]
+  attributeSets: [AttributeSet!]!
+  listingAttribute: Attribute!
+  deletedAt: DateTime!
   createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type AttributeSet {
+  id: ID!
+  arabicName: String
+  englishName: String
+  attributes: [Attribute!]
+  listingTypes: [ListingType!]!
+  deletedAt: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type ListingType {
+  id: ID!
+  listingTypeActivityLogs: [ActivityLog!]
+  englishName: String
+  arabicName: String
+  icon: String
+  listing: Listing!
+  attributeSets: [AttributeSet!]
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type ResponseTemplate {
+  id: ID!
+  templateName: String!
+  templateArabicName: String!
+  templateText: String!
+  templateArabicText: String!
+  createdAt: DateTime!
+  responseTemplateActivityLogs: [ActivityLog!]
   deletedAt: DateTime!
   updatedAt: DateTime!
 }
@@ -409,11 +357,122 @@ type Article {
   user: User!
   authorBio: String
   category: Category!
+  articleActivityLog: [ActivityLog!]
   language: String!
   published: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
   deletedAt: DateTime!
+}
+
+type SplashScreen {
+  id: Float!
+  title: String
+  placement: String
+  image: String
+  default: Boolean!
+  startDate: DateTime!
+  endDate: DateTime!
+  splashScreenActivityLog: [ActivityLog!]
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type ActivityLog {
+  id: ID!
+  user: User
+  admin: User
+  role: Role
+  listingType: ListingType
+  listing: Listing
+  responseTemplate: ResponseTemplate
+  ticket: Ticket
+  article: Article
+  splashScreen: SplashScreen
+  auction: Auction
+  userId: String!
+  auctionId: String!
+  adminId: String!
+  ticketId: String!
+  roleId: Float!
+  responseTemplateId: String!
+  listingId: String!
+  articleId: Float!
+  splashScreenId: Float!
+  action: String!
+  details: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Role {
+  id: Float!
+  englishName: String!
+  arabicName: String
+  slug: String!
+  isDisabled: Boolean!
+  permissions: [Permission!]!
+  rolePermissions: [RolePermissions!]!
+  user: [User!]
+  activityLogs: [ActivityLog!]
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Company {
+  id: ID!
+  name: String!
+  vatNumber: String!
+  crNumber: String!
+  user: User!
+}
+
+type NotificationScope {
+  id: Float!
+  name: String!
+  description: String
+  scopeGroup: String
+}
+
+type UserNotificationPreference {
+  id: ID!
+  email: Boolean
+  mobile: Boolean
+  desktop: Boolean
+  user: User!
+  scope: NotificationScope!
+}
+
+type Review {
+  id: ID!
+  rating: Float!
+  comment: String!
+  user: User!
+  userId: String!
+  reviewType: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type SearchHistory {
+  id: ID!
+  userId: String
+  user: [User!]!
+  minPrice: Float
+  purpose: String
+  maxPrice: Float
+  minArea: Float
+  maxArea: Float
+  gpsCoordinate: String
+  attributes: String
+  type: String
+  rentingOption: String
+  listingId: String
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type User {
@@ -447,6 +506,8 @@ type User {
   review: [Review!]
   listing: [Listing!]
   offer: [Offer!]
+  activityLogs: [ActivityLog!]
+  adminActivityLogs: [ActivityLog!]
   status: String
   messages: [Messages!]!
   chat: Chat!
@@ -764,33 +825,9 @@ type FinancialVsOrder {
   totalOrdered: Float
 }
 
-type SplashScreen {
-  id: Float!
-  title: String
-  placement: String
-  image: String
-  default: Boolean!
-  startDate: DateTime!
-  endDate: DateTime!
-  createdAt: DateTime!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
-}
-
 type SplashScreenResponse {
   splashScreen: [SplashScreen!]!
   total: Float!
-}
-
-type ResponseTemplate {
-  id: ID!
-  templateName: String!
-  templateArabicName: String!
-  templateText: String!
-  templateArabicText: String!
-  createdAt: DateTime!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
 }
 
 type TicketAnalysisResponse {
@@ -829,6 +866,11 @@ type MessageResponse {
 
 type ArticleResponse {
   article: [Article!]!
+  total: Float!
+}
+
+type ActivityLogsResponse {
+  logs: [ActivityLog!]!
   total: Float!
 }
 
@@ -924,6 +966,8 @@ type Query {
   publishArticle(articlePublishInput: ArticlePublishInput!): SuccessResponse!
   unpublishArticle(articlePublishInput: ArticlePublishInput!): SuccessResponse!
   searchForCategory(searchParam: String!): [Category!]!
+  getActivityLogs(id: String!): [ActivityLog!]!
+  getAllActivityLogs(paginateAndSort: PaginateAndSort): ActivityLogsResponse!
 }
 
 input PaginateAndSort {
@@ -1096,7 +1140,7 @@ input ArticlePublishInput {
 
 type Mutation {
   createSplashScreen(createSplashScreenInput: CreateSplashScreenInput!): SplashScreen!
-  updateSplashScreen: SplashScreen!
+  updateSplashScreen(updateSplashScreenInput: UpdateSplashScreenInput!): SplashScreen!
   deleteSplashScreen: SplashScreen!
   register(RegisterInput: RegisterInput!): User!
   registerConfirm(RegisterConfirmInput: AuthRegisterConfirmDto!): String!
@@ -1195,6 +1239,15 @@ input CreateSplashScreenInput {
   title: String!
   startDate: DateTime!
   endDate: DateTime!
+}
+
+input UpdateSplashScreenInput {
+  default: Boolean
+  placement: String
+  title: String
+  startDate: DateTime
+  endDate: DateTime
+  id: Float!
 }
 
 input RegisterInput {

@@ -279,8 +279,8 @@ export class OfferService {
   }
   async findManyForOwner(findOfferInput: FindOfferInput, user?: User) {
     try {
-      const skip = findOfferInput.skip ?? 20;
-      const take = findOfferInput.take ?? 0;
+      const skip = findOfferInput.skip ?? 0;
+      const take = findOfferInput.take ?? 20;
       const [[offer, total], totalOfferOnlisting] = await Promise.all([
         this.offerRepository
           .createQueryBuilder('offer')
@@ -311,7 +311,6 @@ export class OfferService {
       throw new BadRequestException(error);
     }
   }
-
   async updateOffer(user: User, updateOfferInput: UpdateOfferInput) {
     try {
       const { id, listingId, ...rest } = updateOfferInput;

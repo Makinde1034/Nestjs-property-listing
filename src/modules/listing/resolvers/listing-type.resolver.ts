@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ListingTypeService } from '../services/listing-type.service';
 import { UseGuards } from '@nestjs/common';
 import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
@@ -53,9 +53,13 @@ export class ListingTypeResolver {
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async createListingType(
     @Args('RequestInput') RequestInput: ListingTypeInput,
+    @Context() ctx: any,
   ): Promise<ListingType> {
     RequestInput.englishName = RequestInput.englishName.toLocaleLowerCase();
-    return await this.listingTypeService.createListingType(RequestInput);
+    return await this.listingTypeService.createListingType(
+      RequestInput,
+      ctx.req.user,
+    );
   }
 
   /**
@@ -70,8 +74,12 @@ export class ListingTypeResolver {
   @UseGuards(AccessTokenGuard, AdminGuard)
   async updateListingType(
     @Args('RequestInput') RequestInput: ListingTypeUpdateInput,
+    @Context() ctx: any,
   ): Promise<ListingType> {
-    return await this.listingTypeService.updateListingType(RequestInput);
+    return await this.listingTypeService.updateListingType(
+      RequestInput,
+      ctx.req.user,
+    );
   }
 
   /**
@@ -86,8 +94,12 @@ export class ListingTypeResolver {
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async deleteListingType(
     @Args('RequestInput') RequestInput: ListingTypeDeleteInput,
+    @Context() ctx: any,
   ): Promise<string> {
-    return await this.listingTypeService.deleteListingType(RequestInput);
+    return await this.listingTypeService.deleteListingType(
+      RequestInput,
+      ctx.req.user,
+    );
   }
 
   @Query(() => [ListingType], { name: 'searchForListingType' })

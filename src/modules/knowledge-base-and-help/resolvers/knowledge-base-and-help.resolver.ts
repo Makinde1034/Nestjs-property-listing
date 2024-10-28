@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Resolver, Mutation, Args, Query, Int } from '@nestjs/graphql';
+import { Resolver, Mutation, Args, Query, Int, Context } from '@nestjs/graphql';
 
 import { Article } from '../../../entities/article.entity';
 import { ArticleService } from '../services/article.service';
@@ -111,8 +111,9 @@ export class KnowledgeBaseAndHelpResolver {
   @Mutation(() => Article)
   async updateArticle(
     @Args('updateArticleInput') updateArticleInput: UpdateArticleInput,
+    @Context() ctx: any,
   ) {
-    return await this.articleService.update(updateArticleInput);
+    return await this.articleService.update(updateArticleInput, ctx.req.user);
   }
 
   @Query(() => [Category], { name: 'searchForCategory' })

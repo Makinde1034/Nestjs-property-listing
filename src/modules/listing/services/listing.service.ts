@@ -65,6 +65,8 @@ import { AttributeRepository } from '../repositories';
 import { ChildIssueRepository } from '../../issue/repositories/child-issue.repository';
 import { IssueRepository } from '../../issue/repositories';
 import { LocationDto } from '../../location/dto/request/location.dto';
+import { ActivityLogService } from '../../activity-log/services/activity-log.service';
+import { ActivityEnum } from '../../../common/enums/activitys';
 
 @Injectable()
 export class ListingService {
@@ -85,6 +87,8 @@ export class ListingService {
     private attributeRepository: AttributeRepository,
     private childIssueRepository: ChildIssueRepository,
     private issueRepository: IssueRepository,
+
+    private readonly activityLogsService: ActivityLogService,
   ) {}
   logger = new Logger(ListingService.name);
 
@@ -218,12 +222,10 @@ export class ListingService {
       }
 
       const take = initialTake <= 20 ? initialTake : 20;
-
       const query = this.listingRepository
         .createQueryBuilder('listing')
         .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
         .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
-
         .leftJoinAndSelect('listing.listingType', 'listingType')
         .loadRelationCountAndMap('listing.offers', 'listing.offer')
         .where(whereOption, { id: user.id })
@@ -238,9 +240,7 @@ export class ListingService {
           'NULLS LAST',
         );
       }
-
       const listing = await query.getManyAndCount();
-
       return listing;
     } catch (error) {
       this.logger.log(error);
@@ -1585,14 +1585,27 @@ export class ListingService {
     }
   }
 
-  async enableListing(listingActionInput: ListingActionInput) {
+  async enableListing(listingActionInput: ListingActionInput, admin: User) {
     try {
+      const listing = await this.listingRepository.find({
+        where: { id: In(listingActionInput.listingId) },
+      });
       await this.listingRepository.update(
         { id: In(listingActionInput.listingId) },
         {
           isListingDisabled: false,
         },
       );
+
+      const activityToSave = listing.map((element) => {
+        return {
+          adminId: admin.id,
+          action: ActivityEnum.ENABLED,
+          listingId: element.id,
+        };
+      });
+
+      await this.activityLogsService.logActivity(activityToSave);
 
       return new SuccessResponse(AppStrings.LISTING_ENABLED_SUCCESSFULLY);
     } catch (error) {

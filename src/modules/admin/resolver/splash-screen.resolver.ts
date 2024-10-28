@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { SplashScreen } from '../../../entities/splash-screen.entity';
 import {
   CreateSplashScreenInput,
@@ -22,8 +22,12 @@ export class SplashScreenResolver {
   async create(
     @Args('createSplashScreenInput')
     createSplashScreenInput: CreateSplashScreenInput,
+    @Context() ctx: any,
   ) {
-    return await this.splashScreenService.create(createSplashScreenInput);
+    return await this.splashScreenService.create(
+      createSplashScreenInput,
+      ctx.req.user,
+    );
   }
 
   @Query(() => SplashScreenResponse, { name: 'findAllSplashScreen' })
@@ -39,8 +43,15 @@ export class SplashScreenResolver {
   }
 
   @Mutation(() => SplashScreen, { name: 'updateSplashScreen' })
-  async update(updateSplashScreenInput: UpdateSplashScreenInput) {
-    return await this.splashScreenService.update(updateSplashScreenInput);
+  async update(
+    @Args('updateSplashScreenInput')
+    updateSplashScreenInput: UpdateSplashScreenInput,
+    @Context() ctx: any,
+  ) {
+    return await this.splashScreenService.update(
+      updateSplashScreenInput,
+      ctx.req.user,
+    );
   }
 
   @Mutation(() => SplashScreen, { name: 'deleteSplashScreen' })

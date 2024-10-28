@@ -23,16 +23,35 @@ import { SuccessResponse } from '../../../common/utils/success.response';
 import { StorageService } from '../../file-handler/services/storage.service';
 import { LessThanOrEqual, MoreThan } from 'typeorm';
 import { SplashScreen } from '../../../entities/splash-screen.entity';
+import { User } from '../../../entities';
+import { ActivityLogService } from '../../activity-log/services/activity-log.service';
+import { ActivityEnum } from '../../../common/enums/activitys';
 @Injectable()
 export class SplashScreenService {
   constructor(
     private readonly splashScreenRepository: SplashScreenRepository,
     private readonly storageService: StorageService,
+
+    private readonly activityLogService: ActivityLogService,
   ) {}
   logger = new Logger(SplashScreenService.name);
-  async create(createSplashScreen: CreateSplashScreenInput) {
+  async create(createSplashScreen: CreateSplashScreenInput, user: User) {
     try {
-      return await this.splashScreenRepository.save(createSplashScreen);
+      const splashScreen =
+        await this.splashScreenRepository.save(createSplashScreen);
+
+      await this.activityLogService.logActivity([
+        {
+          adminId: user.id,
+          action: ActivityEnum.CREATED,
+
+          details: JSON.stringify(SplashScreen),
+
+          splashScreenId: splashScreen.id,
+        },
+      ]);
+
+      return splashScreen;
     } catch (error) {
       this.logger.error(error);
       throw new BadGatewayException(error);
@@ -74,7 +93,7 @@ export class SplashScreenService {
     }
   }
 
-  async update(updateSplashScreenInput: UpdateSplashScreenInput) {
+  async update(updateSplashScreenInput: UpdateSplashScreenInput, user: User) {
     try {
       const { id, ...rest } = updateSplashScreenInput;
       const splashScreen = await this.splashScreenRepository.findOneByOrFail({
@@ -85,7 +104,18 @@ export class SplashScreenService {
       }
       const { affected } = await this.splashScreenRepository.update(id, rest);
       if (affected > 0) {
-        return await this.splashScreenRepository.findOneByOrFail({ id });
+        const splashScreen = await this.splashScreenRepository.findOneByOrFail({
+          id,
+        });
+
+        await this.activityLogService.logActivity([
+          {
+            adminId: user.id,
+            action: ActivityEnum.UPDATED,
+            details: JSON.stringify(SplashScreen),
+            splashScreenId: splashScreen.id,
+          },
+        ]);
       }
     } catch (error) {
       this.logger.log(error);

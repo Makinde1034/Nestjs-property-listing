@@ -16,6 +16,7 @@ import { Field, ObjectType } from '@nestjs/graphql';
 import { AuctionParticipant } from './auction-participant.entity';
 import { IsEnum } from 'class-validator';
 import { AuctionEnum } from '../common/enums/status.enum';
+import { ActivityLog } from './activity-log.entity';
 @ObjectType()
 @Entity()
 export class Auction extends BaseEntity {
@@ -46,6 +47,10 @@ export class Auction extends BaseEntity {
   @Column({ nullable: true })
   @Field({ nullable: true })
   imageLink: string;
+
+  @Field(() => [ActivityLog], { nullable: true })
+  @OneToMany(() => ActivityLog, (activityLogs) => activityLogs.splashScreen)
+  actionActivityLog: ActivityLog;
 
   @Column()
   @Field()
