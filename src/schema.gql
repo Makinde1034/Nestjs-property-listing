@@ -416,6 +416,17 @@ type Article {
   deletedAt: DateTime!
 }
 
+type ActivityLog {
+  id: ID!
+  user: User
+  userId: String!
+  action: String!
+  scopeId: String!
+  details: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type User {
   id: ID!
   userType: String!
@@ -447,6 +458,7 @@ type User {
   review: [Review!]
   listing: [Listing!]
   offer: [Offer!]
+  activityLogs: [ActivityLog!]
   status: String
   messages: [Messages!]!
   chat: Chat!
@@ -1118,6 +1130,7 @@ type Mutation {
   changePassword(RequestInput: PasswordInput!): User!
   updateUserData(updateUserInput: UpdateUserData!): User!
   assignRoleToUser(assignRoleInput: AssignRoleInput!): User!
+  fetchLogs(string: String!): [ActivityLog!]!
   createRole(RequestInput: RoleInputDto!): Role!
   updateRole(RequestInput: RoleUpdateInputDto!): Role!
   deleteRole(deleteRoleInput: DeleteRolesInput!): SuccessResponse!

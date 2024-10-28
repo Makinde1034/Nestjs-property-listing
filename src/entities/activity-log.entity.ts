@@ -1,24 +1,44 @@
+import { Field, ObjectType } from '@nestjs/graphql';
 import {
   Entity,
   Column,
-  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinTable,
   CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
+import BaseEntity from './base.entity';
+import { User } from './user.entity';
 
 @Entity()
-export class ActivityLog {
-  @PrimaryGeneratedColumn()
-  id: number;
+@ObjectType()
+export class ActivityLog extends BaseEntity {
+  @Field(() => User, { nullable: true })
+  @JoinTable({ name: 'userId' })
+  @ManyToOne(() => User, (user) => user.activityLogs)
+  user: User;
 
+  @Field()
   @Column({ nullable: true })
   userId: string;
 
   @Column()
+  @Field()
   action: string;
 
+  @Column()
+  @Field()
+  scopeId: string;
+
   @Column({ type: 'jsonb', nullable: true })
+  @Field(() => String)
   details: Record<string, any>;
 
+  @Field()
   @CreateDateColumn()
-  timestamp: Date;
+  createdAt: Date;
+
+  @Field()
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

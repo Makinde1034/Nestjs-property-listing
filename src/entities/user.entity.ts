@@ -37,6 +37,7 @@ import { Messages } from './message.entity';
 import { Chat } from './chat.entity';
 import { FlagListing } from './flag-listing.entity';
 import { Article } from './article.entity';
+import { ActivityLog } from './activity-log.entity';
 
 @Entity()
 @ObjectType()
@@ -157,6 +158,10 @@ export class User extends BaseEntity {
   @Field(() => [Offer], { nullable: true })
   @OneToMany(() => Offer, (offer) => offer.user, { cascade: true })
   offer: Offer[];
+
+  @Field(() => [ActivityLog], { nullable: true })
+  @OneToMany(() => ActivityLog, (activityLogs) => activityLogs.user)
+  activityLogs: ActivityLog;
 
   @Field({ nullable: true, defaultValue: UserStatus.PENDING })
   @Column({ nullable: true, default: UserStatus.PENDING })

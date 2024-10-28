@@ -218,12 +218,10 @@ export class ListingService {
       }
 
       const take = initialTake <= 20 ? initialTake : 20;
-
       const query = this.listingRepository
         .createQueryBuilder('listing')
         .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
         .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
-
         .leftJoinAndSelect('listing.listingType', 'listingType')
         .loadRelationCountAndMap('listing.offers', 'listing.offer')
         .where(whereOption, { id: user.id })
@@ -238,9 +236,7 @@ export class ListingService {
           'NULLS LAST',
         );
       }
-
       const listing = await query.getManyAndCount();
-
       return listing;
     } catch (error) {
       this.logger.log(error);

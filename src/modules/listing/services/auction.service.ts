@@ -375,6 +375,7 @@ export class AuctionService {
       }
     }
   }
+
   async autobid(price: number, bidInput: CreateBidInput) {
     try {
       const valueInRange = Math.floor(price / 1000000);
@@ -404,6 +405,7 @@ export class AuctionService {
           price: this.calculatebidPrice(price, auctionBidRange),
         };
       });
+
       await this.bidRepository.save(bidsToMake);
       return new SuccessResponse(AppStrings.SUCCESSFULL);
     } catch (error) {

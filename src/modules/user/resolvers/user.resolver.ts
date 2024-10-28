@@ -31,9 +31,15 @@ import {
   UserUpgradeInput,
 } from '../dtos/response/nafath';
 
+import { ActivityLog } from '../../../entities/activity-log.entity';
+import { ActivityLogService } from '../../activity-log/services/activity-log.service';
+
 @Resolver()
 export class UserResolver {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly activityLogsService: ActivityLogService,
+  ) {}
 
   /**
    * User
@@ -221,5 +227,11 @@ export class UserResolver {
     @Args('assignRoleInput') assignRoleInput: AssignRoleInput,
   ): Promise<User> {
     return await this.userService.assignRoleToUser(assignRoleInput);
+  }
+
+  @Mutation(() => [ActivityLog])
+  @UseGuards(AccessTokenGuard)
+  async fetchLogs(@Args('string') id: string) {
+    return await this.activityLogsService.getLogs(id);
   }
 }
