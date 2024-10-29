@@ -151,6 +151,11 @@ export class Listing extends BaseEntity {
   @Field()
   @Index()
   @Column({ default: false })
+  isListingVerified: boolean;
+
+  @Field()
+  @Index()
+  @Column({ default: false })
   isListingSold: boolean;
 
   @Field()

@@ -186,8 +186,6 @@ export class AuctionService {
         where: { id: id },
       });
 
-      console.log(auction.startDate, new Date());
-
       if (auction.startDate < new Date()) {
         throw new BadRequestException(
           AppStrings.CANNOT_EDIT_AUCTION_ONCE_IT_HAS_STARTED,

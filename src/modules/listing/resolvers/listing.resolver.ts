@@ -122,11 +122,10 @@ export class ListingResolver {
     @Args('findManyOptions', { nullable: true })
     findManyOptions?: AttributeDto,
   ) {
-    const [listing, total] = await this.listingService.findAllListingsForOwner(
+    return await this.listingService.findAllListingsForOwner(
       findManyOptions,
       ctx.req.user,
     );
-    return { listing, total };
   }
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)

@@ -67,6 +67,7 @@ import { IssueRepository } from '../../issue/repositories';
 import { LocationDto } from '../../location/dto/request/location.dto';
 import { ActivityLogService } from '../../activity-log/services/activity-log.service';
 import { ActivityEnum } from '../../../common/enums/activitys';
+import { Feature } from '../../../entities/feature.entity';
 
 @Injectable()
 export class ListingService {
@@ -240,12 +241,12 @@ export class ListingService {
           'NULLS LAST',
         );
       }
-      const listing = await query.getManyAndCount();
-      // const result = listing.m[]
+      const [listing, count] = await query.getManyAndCount();
+      const result = listing.map((element) => {
+        return this.transformListing(element);
+      });
 
-      // this.transformListing(listing);
-
-      return listing;
+      return { listing: result, total: count };
     } catch (error) {
       this.logger.log(error);
       if (error instanceof HttpException) {
@@ -258,22 +259,24 @@ export class ListingService {
 
   async findOneListingForOwner(id: string, user?: User) {
     try {
-      const listing = await this.listingRepository.findOneOrFail({
+      const result = await this.listingRepository.findOneOrFail({
         where: { id: id },
         relations: ['listingAttributes', 'listingType', 'promotion'],
       });
 
-      if (listing.userId != user.id) {
+      if (result.userId != user.id) {
         throw new BadRequestException('Listing does not belong to this user');
       }
-      const newImpression = listing.impressions + 1;
+      const newImpression = result.impressions + 1;
 
       this.listingRepository
         .createQueryBuilder()
         .update()
         .set({ impressions: newImpression })
-        .where('id = :id', { id: listing.id })
+        .where('id = :id', { id: result.id })
         .execute();
+
+      const listing = this.transformListing(result);
 
       return listing;
     } catch (error) {
@@ -486,7 +489,11 @@ export class ListingService {
         total = count;
       }
 
-      const listing = [...result];
+      const listingToPerse = [...result];
+
+      const listing = listingToPerse.map((element) => {
+        return this.transformListing(element);
+      });
 
       return { listing, total };
     } catch (error) {
@@ -701,7 +708,11 @@ export class ListingService {
         total = count;
       }
 
-      const listing = [...result];
+      const listingToPerse = [...result];
+
+      const listing = listingToPerse.map((element) => {
+        return this.transformListing(element);
+      });
 
       // Save search history if needed
       if (searchHistory) {
@@ -860,8 +871,12 @@ export class ListingService {
         rented: Number(countsResult.rented),
       };
 
+      const listing = listingResult.map((element) => {
+        return this.transformListing(element);
+      });
+
       return {
-        listing: listingResult,
+        listing: listing,
         analysis,
         total: Number(countsResult.total),
       };
@@ -929,7 +944,9 @@ export class ListingService {
         .where('id = :id', { id: listing.id })
         .execute();
 
-      return listing;
+      const parsedListing = this.transformListing(listing);
+
+      return parsedListing;
     } catch (error) {
       this.logger.log(error);
       if (error instanceof HttpException) {
@@ -994,7 +1011,7 @@ export class ListingService {
 
       listing.deedNumber = '';
 
-      return listing;
+      return this.transformListing(listing);
     } catch (error) {
       this.logger.log(error);
       if (error instanceof HttpException) {
@@ -1163,10 +1180,12 @@ export class ListingService {
 
       // Return the updated listing
       if (update.affected > 0) {
-        return await this.listingRepository.findOneOrFail({
+        const result = await this.listingRepository.findOneOrFail({
           where: { id },
           relations: ['user', 'gpsCoordinate'],
         });
+
+        return this.transformListing(result);
       }
     } catch (error) {
       this.logger.log(error);
@@ -1252,6 +1271,7 @@ export class ListingService {
       // Save the updated images to the database
       await this.listingRepository.update(query.listingId, {
         images: stringifiedImages,
+        isListingVerified: verified,
       });
       return new SuccessResponse(AppStrings.UPLOAD_SUCCESSFUL, existingImages);
     } catch (error) {
@@ -1679,7 +1699,7 @@ export class ListingService {
 
   async featureAListing(createFeatureInput: CreateFeatureInput) {
     try {
-      let featured;
+      let featured: Feature;
       const listing = await this.listingRepository.findOne({
         where: { id: createFeatureInput.listingId },
       });
@@ -1930,16 +1950,39 @@ export class ListingService {
     }
   }
 
-  transformListing(listing: Listing) {
-    const { images, ...rest } = listing;
+  transformListing(listing: Listing): Listing {
+    try {
+      const { images, ...rest } = listing;
 
-    const image = JSON.parse(images);
-    const filteredImage = this.filterDeletedImages(image);
+      // Attempt to parse images only if it's JSON format
+      let parsedImages: string;
+      if (this.isJsonString(images)) {
+        parsedImages = JSON.parse(images);
+      } else {
+        parsedImages = images; // Use original images if not JSON
+      }
 
-    return {
-      ...rest,
-      images: filteredImage,
-    };
+      const filteredImages = Array.isArray(parsedImages)
+        ? this.filterDeletedImages(parsedImages)
+        : parsedImages;
+
+      return {
+        ...rest,
+        images: filteredImages,
+      };
+    } catch (error) {
+      return listing; // Return the original listing if transformation fails
+    }
+  }
+
+  // Helper function to check if a string is valid JSON
+  isJsonString(str: string) {
+    try {
+      JSON.parse(str);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   filterDeletedImages(data: string) {

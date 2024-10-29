@@ -240,6 +240,7 @@ type Listing {
   impressions: Float
   isListingPromoted: Boolean!
   isListingFlagged: Boolean!
+  isListingVerified: Boolean!
   isListingSold: Boolean!
   isListingRented: Boolean!
   isListingFeatured: Boolean!
