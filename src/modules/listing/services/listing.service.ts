@@ -2026,4 +2026,6 @@ export class ListingService {
 
     return images.filter((image) => !image.isDeleted);
   }
+
+  // async dynamicComparison(compare) {}
 }
