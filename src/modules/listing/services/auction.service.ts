@@ -37,6 +37,7 @@ import { AuctionBidRange } from '../../../entities/auction-bid-range.entity';
 import { StorageService } from '../../file-handler/services/storage.service';
 import { ActivityEnum } from '../../../common/enums/activitys';
 import { ActivityLogService } from '../../activity-log/services/activity-log.service';
+import { AuctionEnum } from '../../../common/enums/status.enum';
 
 @Injectable()
 export class AuctionService {
@@ -185,7 +186,9 @@ export class AuctionService {
         where: { id: id },
       });
 
-      if (auction.startDate > new Date()) {
+      console.log(auction.startDate, new Date());
+
+      if (auction.startDate < new Date()) {
         throw new BadRequestException(
           AppStrings.CANNOT_EDIT_AUCTION_ONCE_IT_HAS_STARTED,
         );
@@ -197,7 +200,7 @@ export class AuctionService {
         );
       }
 
-      if (!updateAuctionInput.imageLink) {
+      if (!auction.imageLink) {
         throw new BadRequestException(
           AppStrings.AUCTION_IS_NOT_COMPLETELY_SET_UP,
         );
@@ -223,6 +226,10 @@ export class AuctionService {
       }
     } catch (error) {
       this.logger.log(error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
       throw new BadRequestException(error);
     }
   }
@@ -490,7 +497,10 @@ export class AuctionService {
       const uploadedUrl = await this.storageService.upload(file);
 
       // Save the updated images to the database
-      await this.auctionRepository.update(id, { imageLink: uploadedUrl });
+      await this.auctionRepository.update(id, {
+        imageLink: uploadedUrl,
+        status: AuctionEnum.ACTIVE,
+      });
       return new SuccessResponse(AppStrings.UPLOAD_SUCCESSFUL, uploadedUrl);
     } catch (error) {
       this.logger.error('Error during  image upload', error);

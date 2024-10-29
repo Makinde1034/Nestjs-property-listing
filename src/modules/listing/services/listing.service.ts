@@ -22,7 +22,7 @@ import {
   ListingImageInput,
   UpdateListingDto,
 } from '../dtos/request/listing.dto';
-import { Attribute, User } from '../../../entities';
+import { Attribute, Listing, User } from '../../../entities';
 
 import { ForbiddenError } from '@nestjs/apollo';
 import { StorageService } from '../../file-handler/services/storage.service';
@@ -241,6 +241,10 @@ export class ListingService {
         );
       }
       const listing = await query.getManyAndCount();
+      // const result = listing.m[]
+
+      // this.transformListing(listing);
+
       return listing;
     } catch (error) {
       this.logger.log(error);
@@ -1915,16 +1919,32 @@ export class ListingService {
         .orWhere('listingType.englishName LIKE :term', {
           term: `%${searchParam}%`,
         })
-
         .orWhere('listingType.arabicName LIKE :term', {
           term: `%${searchParam}%`,
         })
         .take(10)
-
         .getMany();
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
     }
+  }
+
+  transformListing(listing: Listing) {
+    const { images, ...rest } = listing;
+
+    const image = JSON.parse(images);
+    const filteredImage = this.filterDeletedImages(image);
+
+    return {
+      ...rest,
+      images: filteredImage,
+    };
+  }
+
+  filterDeletedImages(data: string) {
+    const images = JSON.parse(data);
+
+    return images.filter((image) => !image.isDeleted);
   }
 }
