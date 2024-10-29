@@ -115,8 +115,9 @@ export class AuctionService {
 
   async findAll(paginateAndSort: PaginateAndSort) {
     try {
-      const { sortField, directionToSort } = paginateAndSort;
+      const { sortField, directionToSort, where } = paginateAndSort;
       const sortDirection: 'ASC' | 'DESC' = directionToSort as 'ASC' | 'DESC';
+      let whereOption = {};
 
       // Default pagination if not provided
       if (!paginateAndSort.take || !paginateAndSort.skip) {
@@ -124,11 +125,15 @@ export class AuctionService {
         paginateAndSort.take = 20;
       }
 
+      if (where) {
+        whereOption = `auction.${where.fieldToChose} = :whereParam`;
+      }
+
       const [auctions, total] = await this.auctionRepository
         .createQueryBuilder('auction')
-
         .take(paginateAndSort.take)
         .skip(paginateAndSort.skip)
+        .where(whereOption, { whereParam: where?.whereParam })
         .orderBy(
           sortField ? `auction.${sortField}` : 'auction.createdAt',
           sortDirection || 'DESC',
@@ -138,7 +143,7 @@ export class AuctionService {
 
       return { auctions, total };
     } catch (error) {
-      this.logger.log(error);
+      this.logger.error(error.message || error);
       throw new BadRequestException(error.message || 'Error fetching auctions');
     }
   }
