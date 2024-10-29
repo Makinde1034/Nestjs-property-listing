@@ -257,7 +257,7 @@ export class AuctionService {
             auctionId: result.id,
           },
         ]);
-        return result;
+        return new SuccessResponse(AppStrings.SUCCESSFULL);
       }
     } catch (error) {
       this.logger.log(error);
@@ -294,7 +294,7 @@ export class AuctionService {
             auctionId: result.id,
           },
         ]);
-        return result;
+        return new SuccessResponse(AppStrings.SUCCESSFULL);
       }
     } catch (error) {
       this.logger.log(error);
@@ -390,7 +390,9 @@ export class AuctionService {
   async delete(id: string) {
     try {
       const deleteAuction = await this.auctionRepository.softDelete(id);
-      return deleteAuction;
+      if (deleteAuction.affected > 0) {
+        return new SuccessResponse(AppStrings.SUCCESSFULL);
+      }
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
