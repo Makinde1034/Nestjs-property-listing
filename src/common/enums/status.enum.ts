@@ -33,6 +33,7 @@ export enum AuctionEnum {
   INACTIVE = 'inactive',
   ACTIVE = 'active',
   ACCEPTED = 'completed',
+  CANCLED = 'cancled',
 }
 
 export enum PaymentStatus {

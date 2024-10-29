@@ -122,11 +122,10 @@ export class ListingResolver {
     @Args('findManyOptions', { nullable: true })
     findManyOptions?: AttributeDto,
   ) {
-    const [listing, total] = await this.listingService.findAllListingsForOwner(
+    return await this.listingService.findAllListingsForOwner(
       findManyOptions,
       ctx.req.user,
     );
-    return { listing, total };
   }
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)
@@ -507,9 +506,23 @@ export class ListingResolver {
 
   @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
-  @Mutation(() => Auction, { name: 'deleteAuction' })
+  @Mutation(() => SuccessResponse, { name: 'deleteAuction' })
   async deleteAuction(@Args('id') id: string) {
     return await this.auctionService.delete(id);
+  }
+
+  @UseGuards(AdminGuard)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Mutation(() => SuccessResponse, { name: 'reactivateAuction' })
+  async reactivateAuction(@Args('id') id: string, @Context() ctx: any) {
+    return await this.auctionService.reactivateAuction(id, ctx.req.user);
+  }
+
+  @UseGuards(AdminGuard)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Mutation(() => SuccessResponse, { name: 'cancleAuction' })
+  async cancleAuction(@Args('id') id: string, @Context() ctx: any) {
+    return await this.auctionService.cancleAuction(id, ctx.req.user);
   }
 
   /********************************

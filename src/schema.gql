@@ -240,6 +240,7 @@ type Listing {
   impressions: Float
   isListingPromoted: Boolean!
   isListingFlagged: Boolean!
+  isListingVerified: Boolean!
   isListingSold: Boolean!
   isListingRented: Boolean!
   isListingFeatured: Boolean!
@@ -1195,7 +1196,9 @@ type Mutation {
   createFeature(createFeatureInput: CreateFeatureInput!): Feature!
   createAuction(createAuctionInput: CreateAuctionInput!): Auction!
   updateAuction(updateAuctionInput: UpdateAuctionInput!): Auction!
-  deleteAuction(id: String!): Auction!
+  deleteAuction(id: String!): SuccessResponse!
+  reactivateAuction(id: String!): SuccessResponse!
+  cancleAuction(id: String!): SuccessResponse!
   addAuctionParticipant(createAuctionParticipantInput: CreateAuctionParticipantInput!): AuctionParticipant!
   deleteSavedHistory(id: String!): SuccessResponse!
   unpublishAListing(id: String!): SuccessResponse!

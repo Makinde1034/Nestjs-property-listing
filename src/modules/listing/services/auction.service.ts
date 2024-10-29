@@ -37,6 +37,7 @@ import { AuctionBidRange } from '../../../entities/auction-bid-range.entity';
 import { StorageService } from '../../file-handler/services/storage.service';
 import { ActivityEnum } from '../../../common/enums/activitys';
 import { ActivityLogService } from '../../activity-log/services/activity-log.service';
+import { AuctionEnum } from '../../../common/enums/status.enum';
 
 @Injectable()
 export class AuctionService {
@@ -114,8 +115,9 @@ export class AuctionService {
 
   async findAll(paginateAndSort: PaginateAndSort) {
     try {
-      const { sortField, directionToSort } = paginateAndSort;
+      const { sortField, directionToSort, where } = paginateAndSort;
       const sortDirection: 'ASC' | 'DESC' = directionToSort as 'ASC' | 'DESC';
+      let whereOption = {};
 
       // Default pagination if not provided
       if (!paginateAndSort.take || !paginateAndSort.skip) {
@@ -123,11 +125,15 @@ export class AuctionService {
         paginateAndSort.take = 20;
       }
 
+      if (where) {
+        whereOption = `auction.${where.fieldToChose} = :whereParam`;
+      }
+
       const [auctions, total] = await this.auctionRepository
         .createQueryBuilder('auction')
-
         .take(paginateAndSort.take)
         .skip(paginateAndSort.skip)
+        .where(whereOption, { whereParam: where?.whereParam })
         .orderBy(
           sortField ? `auction.${sortField}` : 'auction.createdAt',
           sortDirection || 'DESC',
@@ -137,7 +143,7 @@ export class AuctionService {
 
       return { auctions, total };
     } catch (error) {
-      this.logger.log(error);
+      this.logger.error(error.message || error);
       throw new BadRequestException(error.message || 'Error fetching auctions');
     }
   }
@@ -185,7 +191,7 @@ export class AuctionService {
         where: { id: id },
       });
 
-      if (auction.startDate > new Date()) {
+      if (auction.startDate < new Date()) {
         throw new BadRequestException(
           AppStrings.CANNOT_EDIT_AUCTION_ONCE_IT_HAS_STARTED,
         );
@@ -197,7 +203,7 @@ export class AuctionService {
         );
       }
 
-      if (!updateAuctionInput.imageLink) {
+      if (!auction.imageLink) {
         throw new BadRequestException(
           AppStrings.AUCTION_IS_NOT_COMPLETELY_SET_UP,
         );
@@ -223,6 +229,84 @@ export class AuctionService {
       }
     } catch (error) {
       this.logger.log(error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new BadRequestException(error);
+    }
+  }
+
+  async cancleAuction(id: string, user: User) {
+    try {
+      const auction = await this.auctionRepository.findOne({
+        where: { id: id },
+      });
+
+      const update = await this.auctionRepository.update(id, {
+        status: AuctionEnum.CANCLED,
+      });
+      if (update.affected > 0) {
+        const result = await this.auctionRepository.findOne({
+          where: {
+            id: id,
+          },
+        });
+        await this.activityLogsService.logActivity([
+          {
+            adminId: user.id,
+            action: ActivityEnum.UPDATED,
+
+            details: JSON.stringify(auction),
+
+            auctionId: result.id,
+          },
+        ]);
+        return new SuccessResponse(AppStrings.SUCCESSFULL);
+      }
+    } catch (error) {
+      this.logger.log(error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new BadRequestException(error);
+    }
+  }
+
+  async reactivateAuction(id: string, user: User) {
+    try {
+      const auction = await this.auctionRepository.findOne({
+        where: { id: id },
+      });
+
+      const update = await this.auctionRepository.update(id, {
+        status: AuctionEnum.ACTIVE,
+      });
+      if (update.affected > 0) {
+        const result = await this.auctionRepository.findOne({
+          where: {
+            id: id,
+          },
+        });
+        await this.activityLogsService.logActivity([
+          {
+            adminId: user.id,
+            action: ActivityEnum.UPDATED,
+
+            details: JSON.stringify(auction),
+
+            auctionId: result.id,
+          },
+        ]);
+        return new SuccessResponse(AppStrings.SUCCESSFULL);
+      }
+    } catch (error) {
+      this.logger.log(error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
       throw new BadRequestException(error);
     }
   }
@@ -311,7 +395,9 @@ export class AuctionService {
   async delete(id: string) {
     try {
       const deleteAuction = await this.auctionRepository.softDelete(id);
-      return deleteAuction;
+      if (deleteAuction.affected > 0) {
+        return new SuccessResponse(AppStrings.SUCCESSFULL);
+      }
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -490,7 +576,10 @@ export class AuctionService {
       const uploadedUrl = await this.storageService.upload(file);
 
       // Save the updated images to the database
-      await this.auctionRepository.update(id, { imageLink: uploadedUrl });
+      await this.auctionRepository.update(id, {
+        imageLink: uploadedUrl,
+        status: AuctionEnum.ACTIVE,
+      });
       return new SuccessResponse(AppStrings.UPLOAD_SUCCESSFUL, uploadedUrl);
     } catch (error) {
       this.logger.error('Error during  image upload', error);
