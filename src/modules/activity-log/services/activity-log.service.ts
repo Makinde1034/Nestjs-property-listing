@@ -3,6 +3,7 @@ import { ActivityLogRepository } from '../repositories/activity-log.repository';
 import { CreateActivityLog } from '../dto/activity-log';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { isUUID } from 'class-validator';
+import { ActivityLogInput } from '../dto/request/activity-log';
 
 @Injectable()
 export class ActivityLogService {
@@ -15,37 +16,42 @@ export class ActivityLogService {
       this.logger.log(error);
     }
   }
-  async getLogs(id: string) {
+  async getLogs(activityLogInput: ActivityLogInput) {
     try {
+      const { id, take, skip, fieldToFilter } = activityLogInput;
       const query =
         this.activityLogRepository.createQueryBuilder('activityLog');
-
-      if (isUUID(id)) {
-        // Only perform these conditions if `id` is a valid UUID
-        query
-          .orWhere('activityLog.userId = :id', { id })
-          .orWhere('activityLog.listingTypeId = :id', { id })
-          .orWhere('activityLog.listingId = :id', { id })
-          .orWhere('activityLog.ticketId = :id', { id })
-          .orWhere('activityLog.responseTemplateId = :id', { id })
-          .orWhere('activityLog.auctionId = :id', { id });
+      if (fieldToFilter) {
+        query.where(`activityLog.${fieldToFilter} = :id`, { id });
       } else {
-        // Only perform these conditions if `id` is not a UUID (assumed to be an integer)
-        const numericId = parseInt(id, 10);
-        query
-          .orWhere('activityLog.roleId = :id', { numericId })
+        if (isUUID(id)) {
+          // Only perform these conditions if `id` is a valid UUID
+          query
+            .orWhere('activityLog.userId = :id', { id })
+            .orWhere('activityLog.listingTypeId = :id', { id })
+            .orWhere('activityLog.listingId = :id', { id })
+            .orWhere('activityLog.ticketId = :id', { id })
+            .orWhere('activityLog.responseTemplateId = :id', { id })
+            .orWhere('activityLog.auctionId = :id', { id });
+        } else {
+          // Only perform these conditions if `id` is not a UUID (assumed to be an integer)
+          const numericId = parseInt(id, 10);
+          query
+            .orWhere('activityLog.roleId = :id', { numericId })
 
-          .orWhere('activityLog.articleId = :id', { id: numericId })
-          .orWhere('activityLog.splashScreenId = :id', { id: numericId });
+            .orWhere('activityLog.articleId = :id', { id: numericId })
+            .orWhere('activityLog.splashScreenId = :id', { id: numericId });
+        }
       }
 
-      const logs = await query
-        .take(10)
-        .skip(10)
+      const [logs, total] = await query
+        .take(take)
+        .skip(skip)
         .orderBy('activityLog.createdAt', 'DESC')
-        .getMany();
 
-      return logs;
+        .getManyAndCount();
+
+      return { logs, total };
     } catch (error) {
       this.logger.error(`Error fetching logs: ${error.message}`, error.stack);
       throw error;
