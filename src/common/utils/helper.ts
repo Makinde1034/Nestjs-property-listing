@@ -177,6 +177,21 @@ export function checkIfEmailNameOrPhoneNumber(testStrings: string) {
   return 'no match';
 }
 
+export function isJsonString(str: string) {
+  try {
+    JSON.parse(str);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+export function filterDeletedImages(data: string) {
+  const images = JSON.parse(data);
+
+  return images.filter((image) => !image.isDeleted);
+}
+
 export function haversine(
   lat1: number,
   lon1: number,

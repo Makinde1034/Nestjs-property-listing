@@ -45,9 +45,9 @@ export class ListingController {
   @UseInterceptors(AnyFilesInterceptor())
   async uploadAuctionListingImage(
     @Query() query: AuctionListingImageInput,
-    @UploadedFiles() file: Express.Multer.File,
+    @UploadedFiles() files: Express.Multer.File[],
   ) {
-    return await this.auctionService.uploadAuctionImage(query.id, file);
+    return await this.auctionService.uploadAuctionImage(query.id, files);
   }
 
   @Post('panorama-listing-image-upload')
@@ -66,7 +66,7 @@ export class ListingController {
   }
 
   @Delete('delete-listing-image')
-  // @UseGuards(RestAccessTokenGuard)
+  @UseGuards(RestAccessTokenGuard)
   async deleteListingImage(
     @Query('listingId') listingId: string,
     @Query('imageId') imageId: string[],

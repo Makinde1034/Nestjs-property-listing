@@ -36,8 +36,10 @@ import { Between, In, LessThan, MoreThan } from 'typeorm';
 
 import {
   addDaysToDate,
+  filterDeletedImages,
   getLocationFromImage,
   haversine,
+  isJsonString,
 } from '../../../common/utils/helper';
 import { FlagListingRepository } from '../repositories/flag-listing.repository';
 import { AppStrings } from '../../../common/messages/app.strings';
@@ -1992,14 +1994,14 @@ export class ListingService {
 
       // Attempt to parse images only if it's JSON format
       let parsedImages: string;
-      if (this.isJsonString(images)) {
+      if (isJsonString(images)) {
         parsedImages = JSON.parse(images);
       } else {
         parsedImages = images; // Use original images if not JSON
       }
 
       const filteredImages = Array.isArray(parsedImages)
-        ? this.filterDeletedImages(parsedImages)
+        ? filterDeletedImages(parsedImages)
         : parsedImages;
 
       return {
@@ -2012,20 +2014,33 @@ export class ListingService {
   }
 
   // Helper function to check if a string is valid JSON
-  isJsonString(str: string) {
-    try {
-      JSON.parse(str);
-      return true;
-    } catch (e) {
-      return false;
-    }
+
+  async compareListings(compareListingInput) {
+    const [listings, attributes] = await Promise.all([
+      this.listingRepository
+        .createQueryBuilder('listing')
+        .where('listing.id IN (:...listingIds)', {
+          listingIds: compareListingInput.listingIds,
+        })
+        .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
+        .leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate')
+        .getMany(),
+      this.attributeRepository.find({ where: { showInComparison: true } }),
+    ]);
+
+    const transformListing = listings.map((listing) => {
+      const { listingAttributes, ...rest } = listing;
+
+      const filteredAttributes = listingAttributes.filter((attr) =>
+        attributes.some((compAttr) => compAttr.id === attr.attributeId),
+      );
+
+      return {
+        ...rest,
+        listingAttributes: filteredAttributes,
+      };
+    });
+
+    return transformListing;
   }
-
-  filterDeletedImages(data: string) {
-    const images = JSON.parse(data);
-
-    return images.filter((image) => !image.isDeleted);
-  }
-
-  async dynamicComparison(compare) {}
 }
