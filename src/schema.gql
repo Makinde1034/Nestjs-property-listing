@@ -476,6 +476,16 @@ type SearchHistory {
   updatedAt: DateTime!
 }
 
+type Compare {
+  id: ID!
+  user: User!
+  userId: String!
+  listings: [String!]!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type User {
   id: ID!
   userType: String!
@@ -518,6 +528,7 @@ type User {
   article: [Article!]!
   nationalIdentity: NationalIdentity
   company: Company
+  compare: User!
   notificationPreference: [UserNotificationPreference!]
   searchHistory: SearchHistory!
   twoFactorAuthenticationSecret: String
@@ -909,6 +920,7 @@ type Query {
   findAllListingForBuyerUnauthenticated(findManyOptions: CreateSearchHistoryInput): ListingResponse!
   findListingsForOwner(findManyOptions: AttributeDto): ListingResponse!
   compareListing(compareListingInput: CompareListingInput!): [Listing!]!
+  findCompare: Compare
   findOneListingForOwner(id: String!): Listing!
   findListingsForAdmin(paginateAndSort: AdminFilterAndSort): AdminListingResponse!
   findOneListingForAdmin(id: String!): Listing!

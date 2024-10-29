@@ -69,6 +69,7 @@ import { AutoBid } from '../../../entities/auto-bid.entity';
 import { CreateAutoBidInput } from '../dtos/request/auto-bid';
 import { Public } from '../../auth/decorators/permision.decorator';
 import { UserTwoGuard } from '../../auth/guards/level-two.guard';
+import { Compare } from '../../../entities/compare.entity';
 
 @Resolver()
 export class ListingResolver {
@@ -134,8 +135,18 @@ export class ListingResolver {
   async compareListing(
     @Args('compareListingInput')
     compareListingInput: CompareListingInput,
+    @Context() ctx: any,
   ) {
-    return await this.listingService.compareListings(compareListingInput);
+    return await this.listingService.compareListings(
+      compareListingInput,
+      ctx.req.user,
+    );
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Query(() => Compare, { name: 'findCompare', nullable: true })
+  async findCompare(@Context() ctx: any) {
+    return await this.listingService.fetchCompare(ctx.req.user);
   }
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)
@@ -151,7 +162,7 @@ export class ListingResolver {
     );
     return listing;
   }
-  //
+
   @UseGuards(AccessTokenGuard, PermissionsGuard, AdminGuard)
   @Query(() => AdminListingResponse, { name: 'findListingsForAdmin' })
   async getListingsForAdmin(
