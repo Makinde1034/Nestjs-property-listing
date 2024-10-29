@@ -511,6 +511,20 @@ export class ListingResolver {
     return await this.auctionService.delete(id);
   }
 
+  @UseGuards(AdminGuard)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Mutation(() => Auction, { name: 'reactivateAuction' })
+  async reactivateAuction(@Args('id') id: string, @Context() ctx: any) {
+    return await this.auctionService.reactivateAuction(id, ctx.req.user);
+  }
+
+  @UseGuards(AdminGuard)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Mutation(() => Auction, { name: 'deleteAuction' })
+  async cancleAuction(@Args('id') id: string, @Context() ctx: any) {
+    return await this.auctionService.cancleAuction(id, ctx.req.user);
+  }
+
   /********************************
    * Aution Participant
    *******************************/

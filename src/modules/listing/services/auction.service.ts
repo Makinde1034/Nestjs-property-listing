@@ -232,6 +232,80 @@ export class AuctionService {
     }
   }
 
+  async cancleAuction(id: string, user: User) {
+    try {
+      const auction = await this.auctionRepository.findOne({
+        where: { id: id },
+      });
+
+      const update = await this.auctionRepository.update(id, {
+        status: AuctionEnum.CANCLED,
+      });
+      if (update.affected > 0) {
+        const result = await this.auctionRepository.findOne({
+          where: {
+            id: id,
+          },
+        });
+        await this.activityLogsService.logActivity([
+          {
+            adminId: user.id,
+            action: ActivityEnum.UPDATED,
+
+            details: JSON.stringify(auction),
+
+            auctionId: result.id,
+          },
+        ]);
+        return result;
+      }
+    } catch (error) {
+      this.logger.log(error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new BadRequestException(error);
+    }
+  }
+
+  async reactivateAuction(id: string, user: User) {
+    try {
+      const auction = await this.auctionRepository.findOne({
+        where: { id: id },
+      });
+
+      const update = await this.auctionRepository.update(id, {
+        status: AuctionEnum.ACTIVE,
+      });
+      if (update.affected > 0) {
+        const result = await this.auctionRepository.findOne({
+          where: {
+            id: id,
+          },
+        });
+        await this.activityLogsService.logActivity([
+          {
+            adminId: user.id,
+            action: ActivityEnum.UPDATED,
+
+            details: JSON.stringify(auction),
+
+            auctionId: result.id,
+          },
+        ]);
+        return result;
+      }
+    } catch (error) {
+      this.logger.log(error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new BadRequestException(error);
+    }
+  }
+
   async addListingToAuction(data: CreateAuctionParticipantInput) {
     try {
       const adminDefault = await this.adminService.adminDefault();
