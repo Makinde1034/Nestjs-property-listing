@@ -15,6 +15,7 @@ import {
 import { ListingRepository } from '../repositories/listing.repository';
 import {
   AdminFilterAndSort,
+  CompareListingInput,
   CreateListingDto,
   FlagListingInput,
   ListingActionInput,
@@ -74,6 +75,7 @@ import { LocationDto } from '../../location/dto/request/location.dto';
 import { ActivityLogService } from '../../activity-log/services/activity-log.service';
 import { ActivityEnum } from '../../../common/enums/activitys';
 import { Feature } from '../../../entities/feature.entity';
+import { CompareRepository } from '../repositories/compare.repository';
 
 @Injectable()
 export class ListingService {
@@ -94,6 +96,7 @@ export class ListingService {
     private attributeRepository: AttributeRepository,
     private childIssueRepository: ChildIssueRepository,
     private issueRepository: IssueRepository,
+    private readonly compareRepository: CompareRepository,
 
     private readonly activityLogsService: ActivityLogService,
   ) {}
@@ -2015,32 +2018,70 @@ export class ListingService {
 
   // Helper function to check if a string is valid JSON
 
-  async compareListings(compareListingInput) {
-    const [listings, attributes] = await Promise.all([
-      this.listingRepository
-        .createQueryBuilder('listing')
-        .where('listing.id IN (:...listingIds)', {
-          listingIds: compareListingInput.listingIds,
-        })
-        .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
-        .leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate')
-        .getMany(),
-      this.attributeRepository.find({ where: { showInComparison: true } }),
-    ]);
+  async compareListings(compareListingInput: CompareListingInput, user: User) {
+    try {
+      const [listings, attributes] = await Promise.all([
+        this.listingRepository
+          .createQueryBuilder('listing')
+          .where('listing.id IN (:...listingIds)', {
+            listingIds: compareListingInput.id,
+          })
+          .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
+          .leftJoinAndSelect('listing.listingType', 'listingType')
 
-    const transformListing = listings.map((listing) => {
-      const { listingAttributes, ...rest } = listing;
+          .getMany(),
+        this.attributeRepository.find({ where: { showInComparison: true } }),
+      ]);
 
-      const filteredAttributes = listingAttributes.filter((attr) =>
-        attributes.some((compAttr) => compAttr.id === attr.attributeId),
-      );
+      if (listings.length == 0) {
+        throw new BadRequestException(AppStrings.LISTING_NOT_FOUND);
+      }
 
-      return {
-        ...rest,
-        listingAttributes: filteredAttributes,
-      };
-    });
+      const transformListing = listings.map((listing) => {
+        const { listingAttributes, ...rest } = listing;
 
-    return transformListing;
+        const filteredAttributes = listingAttributes.filter((attr) =>
+          attributes.some((compAttr) => compAttr.id === attr.attributeId),
+        );
+
+        return {
+          ...rest,
+          listingAttributes: filteredAttributes,
+        };
+      });
+
+      const data = await this.compareRepository.findOne({
+        where: { userId: user.id },
+      });
+      if (data) {
+        await this.compareRepository.update(data.id, {
+          user,
+          listings: compareListingInput.id,
+        });
+      } else {
+        await this.compareRepository.save({
+          user,
+          listings: compareListingInput.id,
+        });
+      }
+      return transformListing;
+    } catch (error) {
+      this.logger.error(error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new BadRequestException(error);
+    }
+  }
+
+  async fetchCompare(user: User) {
+    try {
+      return await this.compareRepository.findOne({
+        where: { userId: user.id },
+      });
+    } catch (error) {
+      this.logger.error(error);
+      throw new BadRequestException(error);
+    }
   }
 }

@@ -5,6 +5,8 @@
 
 import { Field, InputType, PartialType } from '@nestjs/graphql';
 import {
+  ArrayMaxSize,
+  ArrayMinSize,
   IsArray,
   IsBoolean,
   IsEnum,
@@ -197,6 +199,8 @@ export class AuctionListingImageInput {
 export class CompareListingInput {
   @Field(() => [String])
   @IsArray()
+  @ArrayMinSize(2)
+  @ArrayMaxSize(3)
   id: string[];
 }
 

@@ -38,6 +38,7 @@ import { Chat } from './chat.entity';
 import { FlagListing } from './flag-listing.entity';
 import { Article } from './article.entity';
 import { ActivityLog } from './activity-log.entity';
+import { Compare } from './compare.entity';
 
 @Entity()
 @ObjectType()
@@ -208,6 +209,10 @@ export class User extends BaseEntity {
     eager: true,
   })
   company?: Company;
+
+  @Field(() => User)
+  @OneToOne(() => Compare, (compare) => compare.user)
+  compare: Compare;
 
   @Field(() => [UserNotificationPreference], { nullable: true })
   @OneToMany(
