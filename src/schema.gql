@@ -967,7 +967,7 @@ type Query {
   publishArticle(articlePublishInput: ArticlePublishInput!): SuccessResponse!
   unpublishArticle(articlePublishInput: ArticlePublishInput!): SuccessResponse!
   searchForCategory(searchParam: String!): [Category!]!
-  getActivityLogs(id: String!): [ActivityLog!]!
+  getActivityLogs(activityLogInput: ActivityLogInput!): ActivityLogsResponse!
   getAllActivityLogs(paginateAndSort: PaginateAndSort): ActivityLogsResponse!
 }
 
@@ -1137,6 +1137,16 @@ input ArticleFilterInput {
 
 input ArticlePublishInput {
   id: [Float!]!
+}
+
+input ActivityLogInput {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
+  id: String!
+  fieldToFilter: String!
 }
 
 type Mutation {

@@ -5,13 +5,17 @@ import { UseGuards } from '@nestjs/common';
 import { ActivityLogService } from '../services/activity-log.service';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { ActivityLogsResponse } from '../dto/activity-log';
+import { ActivityLogInput } from '../dto/request/activity-log';
+
 @Resolver()
 export class ActivityResolver {
   constructor(private readonly activityLogService: ActivityLogService) {}
-  @Query(() => [ActivityLog], { name: 'getActivityLogs' })
+  @Query(() => ActivityLogsResponse, { name: 'getActivityLogs' })
   @UseGuards(AccessTokenGuard)
-  async getActivityLogs(@Args('id') id: string) {
-    return await this.activityLogService.getLogs(id);
+  async getActivityLogs(
+    @Args('activityLogInput') activityLogInput: ActivityLogInput,
+  ) {
+    return await this.activityLogService.getLogs(activityLogInput);
   }
 
   @Query(() => ActivityLogsResponse, { name: 'getAllActivityLogs' })
