@@ -23,7 +23,6 @@ export class ActivityLogService {
       if (isUUID(id)) {
         // Only perform these conditions if `id` is a valid UUID
         query
-          .orWhere('activityLog.roleId = :id', { id })
           .orWhere('activityLog.userId = :id', { id })
           .orWhere('activityLog.listingTypeId = :id', { id })
           .orWhere('activityLog.listingId = :id', { id })
@@ -34,6 +33,8 @@ export class ActivityLogService {
         // Only perform these conditions if `id` is not a UUID (assumed to be an integer)
         const numericId = parseInt(id, 10);
         query
+          .orWhere('activityLog.roleId = :id', { numericId })
+
           .orWhere('activityLog.articleId = :id', { id: numericId })
           .orWhere('activityLog.splashScreenId = :id', { id: numericId });
       }
