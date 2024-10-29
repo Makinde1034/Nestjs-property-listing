@@ -37,18 +37,7 @@ export class ListingController {
     @Query() query: ListingImageInput,
     @UploadedFiles() files: Express.Multer.File[],
   ) {
-    console.log(feature);
-    const locationDto = {
-      lat: query.lat,
-      lng: query.lng,
-    };
-
-    return await this.listingService.uploadListingImage(
-      feature,
-      query,
-      files,
-      locationDto,
-    );
+    return await this.listingService.uploadListingImage(feature, query, files);
   }
 
   @Post('auction-image-upload')

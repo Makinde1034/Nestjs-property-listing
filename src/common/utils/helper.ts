@@ -6,6 +6,7 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { AppStrings } from '../../common/messages/app.strings';
 import { v4 as uuidv4 } from 'uuid';
+import * as exifr from 'exifr';
 
 /**
  * Getting difference between two dates.
@@ -207,4 +208,22 @@ export function haversine(
   const distance = R * c;
 
   return distance;
+}
+
+export async function getLocationFromImage(fileBuffer: Buffer) {
+  try {
+    const metadata = await exifr.parse(fileBuffer, { gps: true });
+
+    if (metadata?.latitude && metadata?.longitude) {
+      return {
+        latitude: metadata.latitude,
+        longitude: metadata.longitude,
+      };
+    } else {
+      return null;
+    }
+  } catch (error) {
+    this.logger.error('Error extracting location from image:', error);
+    throw error;
+  }
 }

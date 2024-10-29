@@ -34,7 +34,11 @@ import { PromotionRepository } from '../repositories/promotion.repository';
 import { AdPackageService } from '../../ad-package/services/ad-package.service';
 import { Between, In, LessThan, MoreThan } from 'typeorm';
 
-import { addDaysToDate, haversine } from '../../../common/utils/helper';
+import {
+  addDaysToDate,
+  getLocationFromImage,
+  haversine,
+} from '../../../common/utils/helper';
 import { FlagListingRepository } from '../repositories/flag-listing.repository';
 import { AppStrings } from '../../../common/messages/app.strings';
 import { SuccessResponse } from '../../../common/utils/success.response';
@@ -1201,9 +1205,9 @@ export class ListingService {
     feature: ListingImageFormDataInput,
     query: ListingImageInput,
     files: Express.Multer.File[],
-    gpsCoordinate: LocationDto,
   ) {
     try {
+      let numberOfimagesWithinDistance: number;
       let verified: boolean = false;
       const listing = await this.listingRepository.findOne({
         where: { id: query.listingId },
@@ -1214,19 +1218,23 @@ export class ListingService {
         throw new BadRequestException('Listing not found');
       }
 
-      // Example usage
-
-      const distance = haversine(
-        gpsCoordinate?.lat,
-        gpsCoordinate?.lng,
-        listing.gpsCoordinate?.lat,
-        listing.gpsCoordinate?.lng,
+      const results = await Promise.all(
+        files.map(async (file) => await getLocationFromImage(file.buffer)),
       );
-      //Convert distance in kilometer to meter
+      results.forEach((element) => {
+        const distance = haversine(
+          element?.latitude,
+          element?.longitude,
+          listing.gpsCoordinate?.lat,
+          listing.gpsCoordinate?.lng,
+        );
 
-      if (distance * 1000 < 500) {
-        verified = true;
-      }
+        if (distance * 1000 < 500) {
+          numberOfimagesWithinDistance = numberOfimagesWithinDistance + 1;
+        }
+      });
+
+      //Convert distance in kilometer to meter
 
       const existingImages: any[] = listing.images
         ? JSON.parse(listing.images)
@@ -1237,13 +1245,17 @@ export class ListingService {
         this.storageService.upload(file),
       );
       const uploadedUrls = await Promise.all(uploadPromises);
+
+      if (numberOfimagesWithinDistance == files.length) {
+        verified = true;
+      }
+
       if (query.imageId) {
         // Update existing image
         let imageUpdated = false;
         existingImages.map((image, index) => {
           if (image.id == query.imageId) {
             existingImages[index].url = uploadedUrls[0];
-            existingImages[index].verified = verified;
             // Assuming single file upload
             imageUpdated = true;
           }
@@ -1275,6 +1287,7 @@ export class ListingService {
       });
       return new SuccessResponse(AppStrings.UPLOAD_SUCCESSFUL, existingImages);
     } catch (error) {
+      console.log(error);
       this.logger.error(error.message || error);
       if (error instanceof HttpException) {
         throw error;
@@ -1290,6 +1303,9 @@ export class ListingService {
     imageId: string,
   ) {
     try {
+      let numberOfimagesWithinDistance: number;
+      let verified = false;
+
       const listing = await this.listingRepository.findOne({ where: { id } });
 
       if (!listing) {
@@ -1305,6 +1321,22 @@ export class ListingService {
         this.storageService.upload(file),
       );
       const uploadedUrls = await Promise.all(uploadPromises);
+
+      const results = await Promise.all(
+        files.map(async (file) => await getLocationFromImage(file.buffer)),
+      );
+      results.forEach((element) => {
+        const distance = haversine(
+          element?.latitude,
+          element?.longitude,
+          listing.gpsCoordinate?.lat,
+          listing.gpsCoordinate?.lng,
+        );
+
+        if (distance * 1000 < 500) {
+          numberOfimagesWithinDistance = numberOfimagesWithinDistance + 1;
+        }
+      });
 
       if (imageId) {
         // Update existing image
@@ -1326,6 +1358,7 @@ export class ListingService {
           url,
           isDeleted: false,
           isPanorama: true,
+          verified: verified,
         }));
 
         existingImages.push(...newImages);
@@ -1335,7 +1368,10 @@ export class ListingService {
       const stringifiedImages = JSON.stringify(existingImages);
 
       // Save the updated images to the database
-      await this.listingRepository.update(id, { images: stringifiedImages });
+      await this.listingRepository.update(id, {
+        images: stringifiedImages,
+        isListingVerified: verified,
+      });
       return new SuccessResponse(AppStrings.UPLOAD_SUCCESSFUL, existingImages);
     } catch (error) {
       this.logger.error('Error during panorama image upload', error);
