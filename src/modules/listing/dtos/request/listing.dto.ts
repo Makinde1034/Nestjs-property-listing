@@ -193,6 +193,13 @@ export class AuctionListingImageInput {
   id: string;
 }
 
+@InputType()
+export class CompareListingInput {
+  @Field(() => [String])
+  @IsArray()
+  id: string[];
+}
+
 export class ListingImageFormDataInput {
   @IsBoolean()
   @IsOptional()

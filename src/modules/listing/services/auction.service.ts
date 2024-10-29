@@ -566,14 +566,14 @@ export class AuctionService {
     }
   }
 
-  async uploadAuctionImage(id: string, file: Express.Multer.File) {
+  async uploadAuctionImage(id: string, file: Express.Multer.File[]) {
     try {
       const listing = await this.auctionRepository.findOne({ where: { id } });
       if (!listing) {
         throw new BadRequestException('Auction not found');
       }
       // Upload the new files
-      const uploadedUrl = await this.storageService.upload(file);
+      const uploadedUrl = await this.storageService.upload(file[0]);
 
       // Save the updated images to the database
       await this.auctionRepository.update(id, {

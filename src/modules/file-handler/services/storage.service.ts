@@ -82,6 +82,7 @@ export class StorageService {
    * @returns {string}
    */
   getFileName(filename: string): string {
-    return `${generatereference()}-${filename}`;
+    const reference = generatereference() || 'default-reference';
+    return `${reference}-${filename}`;
   }
 }

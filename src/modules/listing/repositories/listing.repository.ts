@@ -10,7 +10,7 @@ import { DataSource, Repository } from 'typeorm';
 
 @Injectable()
 export class ListingRepository extends Repository<Listing> {
-  constructor(private dataSource: DataSource) {
+  constructor(private readonly dataSource: DataSource) {
     super(Listing, dataSource.createEntityManager());
   }
 }

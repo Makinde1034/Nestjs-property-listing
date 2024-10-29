@@ -7,6 +7,7 @@ import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ListingService } from '../services/listing.service';
 import {
   AdminFilterAndSort,
+  CompareListingInput,
   CreateListingDto,
   FlagListingInput,
   ListingActionInput,
@@ -126,6 +127,15 @@ export class ListingResolver {
       findManyOptions,
       ctx.req.user,
     );
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Query(() => [Listing], { name: 'compareListing' })
+  async compareListing(
+    @Args('compareListingInput')
+    compareListingInput: CompareListingInput,
+  ) {
+    return await this.listingService.compareListings(compareListingInput);
   }
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)

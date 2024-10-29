@@ -908,6 +908,7 @@ type Query {
   searchForAttributeSets(searchParam: String!): [AttributeSet!]!
   findAllListingForBuyerUnauthenticated(findManyOptions: CreateSearchHistoryInput): ListingResponse!
   findListingsForOwner(findManyOptions: AttributeDto): ListingResponse!
+  compareListing(compareListingInput: CompareListingInput!): [Listing!]!
   findOneListingForOwner(id: String!): Listing!
   findListingsForAdmin(paginateAndSort: AdminFilterAndSort): AdminListingResponse!
   findOneListingForAdmin(id: String!): Listing!
@@ -1054,6 +1055,10 @@ input AttributeDto {
   directionToSort: SortOrder
   where: WhereOption
   listingType: String
+}
+
+input CompareListingInput {
+  id: [String!]!
 }
 
 input AdminFilterAndSort {
