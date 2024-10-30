@@ -6,12 +6,14 @@
 import { InputType, Int, Field, PartialType } from '@nestjs/graphql';
 import {
   IsArray,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
 import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
+import { knowledgeBasePlacement } from '../../../../common/enums/knowledge-base';
 
 @InputType()
 export class CreateArticleInput {
@@ -34,6 +36,11 @@ export class CreateArticleInput {
   @IsString()
   @IsNotEmpty()
   title: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsEnum(knowledgeBasePlacement)
+  placement: string;
 
   @Field({ nullable: true })
   @IsOptional()

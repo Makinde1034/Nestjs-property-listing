@@ -360,6 +360,7 @@ type Article {
   category: Category!
   articleActivityLog: [ActivityLog!]
   language: String!
+  placement: String!
   published: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
@@ -1223,9 +1224,9 @@ type Mutation {
   createFeature(createFeatureInput: CreateFeatureInput!): Feature!
   createAuction(createAuctionInput: CreateAuctionInput!): Auction!
   updateAuction(updateAuctionInput: UpdateAuctionInput!): Auction!
-  deleteAuction(id: String!): SuccessResponse!
-  reactivateAuction(id: String!): SuccessResponse!
-  cancleAuction(id: String!): SuccessResponse!
+  deleteAuction(AuctionActionInput: AuctionActionInput!): SuccessResponse!
+  reactivateAuction(auctionActionInput: AuctionActionInput!): SuccessResponse!
+  cancleAuction(auctionActionInput: AuctionActionInput!): SuccessResponse!
   addAuctionParticipant(createAuctionParticipantInput: CreateAuctionParticipantInput!): AuctionParticipant!
   deleteSavedHistory(id: String!): SuccessResponse!
   unpublishAListing(id: String!): SuccessResponse!
@@ -1257,7 +1258,7 @@ type Mutation {
   createReview(createReviewDto: CreateReviewDto!): Review!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   updateKnowledgeBaseCatecory(updateKnowledgeBaseCategoryInput: UpdateCategoryInput!): Category!
-  removeKnowledgeBaseCatecory(id: Int!): SuccessResponse!
+  removeKnowledgeBaseCatecory(categoryActionInput: CategoryActionInput!): SuccessResponse!
   createArticle(createArticleInput: CreateArticleInput!): Article!
   delete(id: Float!): SuccessResponse!
   updateArticle(updateArticleInput: UpdateArticleInput!): Article!
@@ -1625,6 +1626,10 @@ input UpdateAuctionInput {
   id: String!
 }
 
+input AuctionActionInput {
+  id: [String!]!
+}
+
 input CreateAuctionParticipantInput {
   minimumPrice: Float!
   auctionId: String!
@@ -1776,11 +1781,16 @@ input UpdateCategoryInput {
   id: Float!
 }
 
+input CategoryActionInput {
+  id: [Float!]!
+}
+
 input CreateArticleInput {
   content: String!
   image: String
   categoryId: Float!
   title: String!
+  placement: String
   authorImage: String
   authorBio: String!
   language: String!
@@ -1791,6 +1801,7 @@ input UpdateArticleInput {
   image: String
   categoryId: Float
   title: String
+  placement: String
   authorImage: String
   authorBio: String
   language: String

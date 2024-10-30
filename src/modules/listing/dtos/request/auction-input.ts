@@ -48,6 +48,13 @@ export class UpdateAuctionInput extends PartialType(CreateAuctionInput) {
 }
 
 @InputType()
+export class AuctionActionInput {
+  @Field(() => [String])
+  @IsUUID()
+  id: string[];
+}
+
+@InputType()
 export class CreateAuctionParticipantInput {
   @Field()
   @IsNumber()

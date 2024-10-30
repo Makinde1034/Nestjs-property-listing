@@ -16,6 +16,7 @@ import {
 import { Category } from '../../../entities/knowledge-base-category.entity';
 import { KnowledgeBaseCategoryService } from '../services/category.services';
 import {
+  CategoryActionInput,
   CategoryFilterInput,
   CreateCategoryInput,
   UpdateCategoryInput,
@@ -66,9 +67,9 @@ export class KnowledgeBaseAndHelpResolver {
 
   @Mutation(() => SuccessResponse)
   async removeKnowledgeBaseCatecory(
-    @Args('id', { type: () => Int }) id: number,
+    @Args('categoryActionInput') categoryActionInput: CategoryActionInput,
   ) {
-    return await this.knowledgeBaseCategoryService.delete(id);
+    return await this.knowledgeBaseCategoryService.delete(categoryActionInput);
   }
 
   @Mutation(() => Article)
