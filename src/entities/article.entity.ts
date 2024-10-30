@@ -60,6 +60,10 @@ export class Article {
   @Field()
   language: string;
 
+  @Column()
+  @Field()
+  placement: string;
+
   @Column({ default: false })
   @Field()
   published: boolean;

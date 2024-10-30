@@ -360,6 +360,7 @@ type Article {
   category: Category!
   articleActivityLog: [ActivityLog!]
   language: String!
+  placement: String!
   published: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
@@ -1257,7 +1258,7 @@ type Mutation {
   createReview(createReviewDto: CreateReviewDto!): Review!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   updateKnowledgeBaseCatecory(updateKnowledgeBaseCategoryInput: UpdateCategoryInput!): Category!
-  removeKnowledgeBaseCatecory(id: Int!): SuccessResponse!
+  removeKnowledgeBaseCatecory(categoryActionInput: CategoryActionInput!): SuccessResponse!
   createArticle(createArticleInput: CreateArticleInput!): Article!
   delete(id: Float!): SuccessResponse!
   updateArticle(updateArticleInput: UpdateArticleInput!): Article!
@@ -1780,11 +1781,16 @@ input UpdateCategoryInput {
   id: Float!
 }
 
+input CategoryActionInput {
+  id: [Float!]!
+}
+
 input CreateArticleInput {
   content: String!
   image: String
   categoryId: Float!
   title: String!
+  placement: String
   authorImage: String
   authorBio: String!
   language: String!
@@ -1795,6 +1801,7 @@ input UpdateArticleInput {
   image: String
   categoryId: Float
   title: String
+  placement: String
   authorImage: String
   authorBio: String
   language: String
