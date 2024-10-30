@@ -52,6 +52,7 @@ import { WishlistService } from '../services/wishlist.service';
 import { Wishlist } from '../../../entities/wishlist.entity';
 import { CreateWishlistInput } from '../dtos/request/wishlistInput';
 import {
+  AuctionActionInput,
   CreateAuctionInput,
   CreateAuctionParticipantInput,
   UpdateAuctionInput,
@@ -528,22 +529,38 @@ export class ListingResolver {
   @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Mutation(() => SuccessResponse, { name: 'deleteAuction' })
-  async deleteAuction(@Args('id') id: string) {
-    return await this.auctionService.delete(id);
+  async deleteAuction(
+    @Args('AuctionActionInput') AuctionActionInput: AuctionActionInput,
+
+    @Context() ctx: any,
+  ) {
+    return await this.auctionService.delete(AuctionActionInput, ctx.req.user);
   }
 
   @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Mutation(() => SuccessResponse, { name: 'reactivateAuction' })
-  async reactivateAuction(@Args('id') id: string, @Context() ctx: any) {
-    return await this.auctionService.reactivateAuction(id, ctx.req.user);
+  async reactivateAuction(
+    @Args('auctionActionInput') auctionActionInput: AuctionActionInput,
+    @Context() ctx: any,
+  ) {
+    return await this.auctionService.reactivateAuction(
+      auctionActionInput,
+      ctx.req.user,
+    );
   }
 
   @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Mutation(() => SuccessResponse, { name: 'cancleAuction' })
-  async cancleAuction(@Args('id') id: string, @Context() ctx: any) {
-    return await this.auctionService.cancleAuction(id, ctx.req.user);
+  async cancleAuction(
+    @Args('auctionActionInput') auctionActionInput: AuctionActionInput,
+    @Context() ctx: any,
+  ) {
+    return await this.auctionService.cancleAuction(
+      auctionActionInput,
+      ctx.req.user,
+    );
   }
 
   /********************************

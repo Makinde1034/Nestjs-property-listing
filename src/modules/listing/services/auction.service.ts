@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { AuctionRepository } from '../repositories/auction.repository';
 import {
+  AuctionActionInput,
   CreateAuctionInput,
   CreateAuctionParticipantInput,
   UpdateAuctionInput,
@@ -26,7 +27,7 @@ import { CreateBidInput, FindBidInput } from '../dtos/request/bids';
 import { generateOtp } from '../../../common/utils/functions';
 import { User } from '../../../entities';
 import { AdminService } from '../../admin/services/admin.service';
-import { QueryFailedError } from 'typeorm';
+import { In, QueryFailedError } from 'typeorm';
 import { AutoBidRepository } from '../repositories/auto-bid.repository';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { CreateAutoBidInput } from '../dtos/request/auto-bid';
@@ -237,33 +238,35 @@ export class AuctionService {
     }
   }
 
-  async cancleAuction(id: string, user: User) {
+  async cancleAuction(auctionActionInput: AuctionActionInput, user: User) {
     try {
-      const auction = await this.auctionRepository.findOne({
-        where: { id: id },
+      const auction = await this.auctionRepository.find({
+        where: { id: In(auctionActionInput.id) },
+      });
+      const auctionsToUpdate = auction.map((element) => {
+        const { status, ...rest } = element;
+        return {
+          status: AuctionEnum.CANCLED,
+          ...rest,
+        };
       });
 
-      const update = await this.auctionRepository.update(id, {
-        status: AuctionEnum.CANCLED,
+      const update = await this.auctionRepository.save(auctionsToUpdate);
+
+      const activityToSave = update.map((element) => {
+        return {
+          adminId: user.id,
+          action: ActivityEnum.UPDATED,
+
+          details: JSON.stringify(auction),
+
+          auctionId: element.id,
+        };
       });
-      if (update.affected > 0) {
-        const result = await this.auctionRepository.findOne({
-          where: {
-            id: id,
-          },
-        });
-        await this.activityLogsService.logActivity([
-          {
-            adminId: user.id,
-            action: ActivityEnum.UPDATED,
 
-            details: JSON.stringify(auction),
+      await this.activityLogsService.logActivity(activityToSave);
 
-            auctionId: result.id,
-          },
-        ]);
-        return new SuccessResponse(AppStrings.SUCCESSFULL);
-      }
+      return new SuccessResponse(AppStrings.SUCCESSFULL);
     } catch (error) {
       this.logger.log(error);
 
@@ -274,31 +277,30 @@ export class AuctionService {
     }
   }
 
-  async reactivateAuction(id: string, user: User) {
+  async reactivateAuction(auctionActionInput: AuctionActionInput, user: User) {
     try {
-      const auction = await this.auctionRepository.findOne({
-        where: { id: id },
+      const auction = await this.auctionRepository.find({
+        where: { id: In(auctionActionInput.id) },
+      });
+      const auctionsToUpdate = auction.map((element) => {
+        const { status, ...rest } = element;
+        return {
+          status: AuctionEnum.ACTIVE,
+          ...rest,
+        };
       });
 
-      const update = await this.auctionRepository.update(id, {
-        status: AuctionEnum.ACTIVE,
-      });
-      if (update.affected > 0) {
-        const result = await this.auctionRepository.findOne({
-          where: {
-            id: id,
-          },
-        });
-        await this.activityLogsService.logActivity([
-          {
+      const update = await this.auctionRepository.save(auctionsToUpdate);
+      if (update) {
+        const activityToSave = update.map((element) => {
+          return {
             adminId: user.id,
             action: ActivityEnum.UPDATED,
+            auctionId: element.id,
+          };
+        });
 
-            details: JSON.stringify(auction),
-
-            auctionId: result.id,
-          },
-        ]);
+        await this.activityLogsService.logActivity(activityToSave);
         return new SuccessResponse(AppStrings.SUCCESSFULL);
       }
     } catch (error) {
@@ -392,10 +394,22 @@ export class AuctionService {
     }
   }
 
-  async delete(id: string) {
+  async delete(auctionActionInput: AuctionActionInput, user: User) {
     try {
-      const deleteAuction = await this.auctionRepository.softDelete(id);
+      const deleteAuction = await this.auctionRepository.softDelete(
+        auctionActionInput.id,
+      );
+
       if (deleteAuction.affected > 0) {
+        const activityToSave = auctionActionInput.id.map((element) => {
+          return {
+            adminId: user.id,
+            action: ActivityEnum.UPDATED,
+            auctionId: element,
+          };
+        });
+
+        await this.activityLogsService.logActivity(activityToSave);
         return new SuccessResponse(AppStrings.SUCCESSFULL);
       }
     } catch (error) {
