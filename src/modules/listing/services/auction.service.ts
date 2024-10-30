@@ -447,7 +447,6 @@ export class AuctionService {
       if (bidInput.price < auctionParticipant.minimumPrice) {
         throw new BadRequestException('Bid is too low');
       }
-      console.log(auctionBidRanges);
 
       // Determine appropriate increment based on bid price range
       const increment = auctionBidRanges.find(
@@ -455,7 +454,6 @@ export class AuctionService {
           bidInput.price / 1000000 >= range.lowerBound &&
           bidInput.price / 1000000 <= range.upperBound,
       )?.increment;
-      console.log(increment);
 
       const incrementValue =
         increment * 1000 ||
