@@ -1200,7 +1200,10 @@ type Mutation {
   updateRole(RequestInput: RoleUpdateInputDto!): Role!
   deleteRole(deleteRoleInput: DeleteRolesInput!): SuccessResponse!
   markNotificationAsRead(id: String!): Notification!
-  sendNotification(RequestInput: NotificationInput!): String!
+  sendNotification(requestInput: NotificationInput!): String!
+  updateNotificationScope(requestInput: UpdateAdminNotificationScope!): SuccessResponse!
+  createAdminNotificationScope(requestInput: CreateNotificationScopeInput!): NotificationScope!
+  updateAdminNotificationPreference(requestInput: UpdateAdminNotificationPreferenceScope!): SuccessResponse!
   createListingType(RequestInput: ListingTypeInput!): ListingType!
   updateListingType(RequestInput: ListingTypeUpdateInput!): ListingType!
   deleteListingType(RequestInput: ListingTypeDeleteInput!): String!
@@ -1462,6 +1465,26 @@ input NotificationInput {
   isPushNotification: Boolean!
   recipients: [String!]!
   deepLink: String
+}
+
+input UpdateAdminNotificationScope {
+  name: String
+  description: String
+  scopeGroup: String
+  id: Float!
+}
+
+input CreateNotificationScopeInput {
+  name: String!
+  description: String
+  scopeGroup: String
+}
+
+input UpdateAdminNotificationPreferenceScope {
+  email: Boolean
+  desktop: Boolean
+  mobile: Boolean
+  id: String!
 }
 
 input ListingTypeInput {
