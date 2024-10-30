@@ -12,12 +12,14 @@ import {
 } from '@nestjs/common';
 import { KnowledgeBaseCategoryRepository } from '../repositories/knowledge-base-category.repository';
 import {
+  CategoryActionInput,
   CategoryFilterInput,
   CreateCategoryInput,
   UpdateCategoryInput,
 } from '../dto/request/knowledg-base.category.input';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { AppStrings } from '../../../common/messages/app.strings';
+import { In } from 'typeorm';
 
 @Injectable()
 export class KnowledgeBaseCategoryService {
@@ -108,17 +110,21 @@ export class KnowledgeBaseCategoryService {
     }
   }
 
-  async delete(id: number) {
+  async delete(categoryActionInput: CategoryActionInput) {
     try {
-      const category = await this.knowledgeBaseCategoryRepository.findOneBy({
-        id,
+      const category = await this.knowledgeBaseCategoryRepository.find({
+        where: {
+          id: In(categoryActionInput.id),
+        },
       });
 
       if (!category) {
         throw new NotFoundException(AppStrings.NOT_FOUND);
       }
       const { affected } =
-        await this.knowledgeBaseCategoryRepository.softDelete(id);
+        await this.knowledgeBaseCategoryRepository.softDelete(
+          categoryActionInput.id,
+        );
 
       if (affected > 0) {
         return new SuccessResponse(AppStrings.DELETED_SUCCESSFULLY);

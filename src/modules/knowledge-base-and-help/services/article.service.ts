@@ -42,7 +42,6 @@ export class ArticleService {
       const category = await this.knowledgeBaseCategoryRepository.findOneBy({
         id: createArticleInput.categoryId,
       });
-
       if (!category) {
         throw new NotFoundException(AppStrings.NOT_FOUND);
       }
@@ -74,7 +73,7 @@ export class ArticleService {
 
       const take = initialTake <= 20 ? initialTake : 20;
       const [article, total] = await this.articleRepository.findAndCount({
-        where: { category: { placement: placement } },
+        where: { placement: placement },
         take,
         skip,
         order: orderOptions,

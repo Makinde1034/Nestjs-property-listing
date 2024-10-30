@@ -35,6 +35,26 @@ export class AdminDefault extends BaseEntity {
   paymentType: string;
 
   @Field()
+  @Column({ nullable: true })
+  dataRetention: number;
+
+  @Field()
+  @Column({ nullable: true })
+  ratingPrompt: number;
+
+  @Field()
+  @Column({ nullable: true })
+  ticketAging: number;
+
+  @Field()
+  @Column({ default: 100 })
+  auctionHeldAmount: number;
+
+  @Field()
+  @Column({ default: 1000 })
+  fallBackDefaultBidIncrement: number;
+
+  @Field()
   @Column()
   state: string;
   @Field()

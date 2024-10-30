@@ -418,38 +418,68 @@ export class AuctionService {
     }
   }
 
-  /***************
+  /**************
    * Bids
-   ***************/
+   **************/
   async bidOnAuction(bidInput: CreateBidInput, user: User) {
     try {
-      const auctionListing = await this.auctionParticipantRepository.findOne({
-        where: { listingId: bidInput.listingId },
-      });
+      // Fetch necessary details concurrently
+      const [auctionParticipant, auctionBidRanges, highestBid] =
+        await Promise.all([
+          this.auctionParticipantRepository.findOne({
+            where: { listingId: bidInput.listingId },
+          }),
+          this.auctionBidRangeRepository.find(),
+          this.bidRepository.findOne({
+            where: {
+              listingId: bidInput.listingId,
+              auctionId: bidInput.auctionId,
+            },
+            order: { price: 'DESC' },
+          }),
+        ]);
 
-      if (!auctionListing) {
+      if (!auctionParticipant) {
         throw new NotFoundException('Listing not registered in auction');
       }
 
-      if (bidInput.price < auctionListing.minimumPrice) {
+      // Validate minimum bid price
+      if (bidInput.price < auctionParticipant.minimumPrice) {
         throw new BadRequestException('Bid is too low');
       }
 
+      // Determine appropriate increment based on bid price range
+      const increment = auctionBidRanges.find(
+        (range) =>
+          bidInput.price / 1000000 >= range.lowerBound &&
+          bidInput.price / 1000000 <= range.upperBound,
+      )?.increment;
+
+      const incrementValue =
+        increment * 1000 ||
+        (await this.adminService.adminDefault()).fallBackDefaultBidIncrement;
+
+      // Check minimum increment requirement if a previous highest bid exists
+      if (highestBid && bidInput.price < highestBid.price + incrementValue) {
+        throw new BadRequestException(`Minimum increment is ${incrementValue}`);
+      }
+
+      // Prepare and save the new bid
       bidInput.bidNumber = generateOtp();
       bidInput.userId = user.id;
       const bid = await this.bidRepository.save(bidInput);
 
+      // Trigger autobid if bid was successfully placed
       if (bid) {
         await this.autobid(bid.price, bidInput);
       }
+
       return bid;
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        this.logger.log(error);
-        throw new BadRequestException(error);
-      }
+      this.logger.error(error);
+      throw error instanceof HttpException
+        ? error
+        : new BadRequestException(error.message);
     }
   }
 
@@ -494,6 +524,7 @@ export class AuctionService {
   async autobid(price: number, bidInput: CreateBidInput) {
     try {
       const valueInRange = Math.floor(price / 1000000);
+      const adminDefault = await this.adminService.adminDefault();
 
       const [autoBids, auctionBidRange] = await Promise.all([
         this.autoBidRepository.find({
@@ -502,6 +533,7 @@ export class AuctionService {
             listingId: bidInput.listingId,
           },
         }),
+
         this.auctionBidRangeRepository
           .createQueryBuilder('auctionBidRange')
           .where(
@@ -517,7 +549,10 @@ export class AuctionService {
           auctionId: bidInput.auctionId,
           bidNumber: generateOtp(),
           userId: element.userId,
-          price: this.calculatebidPrice(price, auctionBidRange),
+          autoBid: true,
+          price:
+            this.calculatebidPrice(price, auctionBidRange) ??
+            adminDefault.fallBackDefaultBidIncrement,
         };
       });
 

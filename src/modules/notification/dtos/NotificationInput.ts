@@ -3,15 +3,17 @@
  * For license. See license.txt
  */
 
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, ObjectType, PartialType } from '@nestjs/graphql';
 import {
   IsArray,
   IsBoolean,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
 import { NotificationEventInput } from 'src/common/interface';
+import { NotificationItemInput } from '../../user/dtos/request';
 
 @InputType()
 export class NotificationInput {
@@ -48,4 +50,52 @@ export class NotificationInput {
 
 export class NotificationEventDto {
   constructor(public input: NotificationEventInput) {}
+}
+
+@InputType()
+export class CreateNotificationScopePreferenceInput {
+  @Field(() => Boolean, { nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  email: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  desktop: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  mobile: boolean;
+}
+
+@InputType()
+export class CreateNotificationScopeInput {
+  @Field()
+  name: string;
+
+  @Field({ nullable: true })
+  description: string;
+
+  @Field({ nullable: true })
+  scopeGroup: string;
+}
+
+@InputType()
+export class UpdateAdminNotificationScope extends PartialType(
+  CreateNotificationScopeInput,
+) {
+  @Field()
+  @IsNumber()
+  id: number;
+}
+
+@InputType()
+export class UpdateAdminNotificationPreferenceScope extends PartialType(
+  CreateNotificationScopePreferenceInput,
+) {
+  @Field()
+  @IsNumber()
+  id: string;
 }

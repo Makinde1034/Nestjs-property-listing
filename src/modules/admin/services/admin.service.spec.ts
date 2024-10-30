@@ -18,6 +18,7 @@ import { CouponRepository } from '../repositories/coupons.repository';
 import { CreateCouponInput } from '../dto/request/coupons';
 import { CouponEnum } from '../../../common/enums/coupons.enum';
 import { AdminDefault } from '../../../entities/admin-table.entity';
+import { AuctionBidRangeRepository } from '../../listing/repositories/auction-bid-range.repository';
 
 // Mock QueryBuilder
 const mockQueryBuilder = {
@@ -50,6 +51,7 @@ describe('AdminService', () => {
   let offerRepository: Repository<any>;
   let adminDefaultRepository: Repository<any>;
   let couponRepository: Repository<any>;
+  let auctionBidRangeRepository: Repository<any>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -107,6 +109,9 @@ describe('AdminService', () => {
 
     couponRepository = module.get<Repository<any>>(
       getRepositoryToken(CouponRepository),
+    );
+    auctionBidRangeRepository = module.get<Repository<any>>(
+      getRepositoryToken(AuctionBidRangeRepository),
     );
   });
 

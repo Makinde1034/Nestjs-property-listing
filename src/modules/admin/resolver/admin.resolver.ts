@@ -18,7 +18,10 @@ import {
 
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 
-import { AdminDashboardSort } from '../dto/request/admin-request';
+import {
+  AdminDashboardSort,
+  UpdateAdminDefaultInput,
+} from '../dto/request/admin-request';
 import { UseGuards } from '@nestjs/common';
 import { AccessTokenGuard } from '../../auth/guards';
 import { AdminGuard } from '../../auth/guards/admin.guard';
@@ -87,6 +90,7 @@ export class AdminResolver {
   ) {
     return this.adminService.saiiFees(findOption);
   }
+
   @UseGuards(AdminGuard)
   @Query(() => [FinancialVsOrder], { name: 'financialVsOrder' })
   async financialVsOrder(@Args('findOptions') findOption: AdminDashboardSort) {
@@ -103,6 +107,26 @@ export class AdminResolver {
     @Args('createCouponsInput') createCouponsInput: CreateCouponInput,
   ) {
     return await this.adminService.createCoupon(createCouponsInput);
+  }
+
+  @UseGuards(AdminGuard)
+  @Mutation(() => AdminDefault, { name: 'updateAdminDefault' })
+  async updateAdminDefault(
+    @Args('updateAdminDefaultInput')
+    updateAdminDefaultInput: UpdateAdminDefaultInput,
+  ) {
+    return await this.adminService.updateSystemSetting(updateAdminDefaultInput);
+  }
+
+  @UseGuards(AdminGuard)
+  @Mutation(() => AdminDefault, { name: 'updateAuctionBidRangeSetting' })
+  async updateAuctionBidRangeSetting(
+    @Args('createCouponsInput')
+    updateAdminDefaultInput: UpdateAdminDefaultInput,
+  ) {
+    return await this.adminService.updateAuctionBidRangeSetting(
+      updateAdminDefaultInput,
+    );
   }
 
   @UseGuards(AdminGuard)

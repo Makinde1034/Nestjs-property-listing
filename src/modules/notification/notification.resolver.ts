@@ -8,7 +8,14 @@ import { NotificationService } from './services';
 import { Notification, NotificationScope } from 'src/entities';
 import { UseGuards } from '@nestjs/common';
 import { AccessTokenGuard } from '../auth/guards';
-import { NotificationInput } from './dtos';
+import {
+  CreateNotificationScopeInput,
+  CreateNotificationScopePreferenceInput,
+  NotificationInput,
+  UpdateAdminNotificationPreferenceScope,
+  UpdateAdminNotificationScope,
+} from './dtos';
+import { SuccessResponse } from '../../common/utils/success.response';
 
 @Resolver()
 export class NotificationResolver {
@@ -54,9 +61,37 @@ export class NotificationResolver {
   @Mutation(() => String)
   @UseGuards(AccessTokenGuard)
   sendNotification(
-    @Args('RequestInput') RequestInput: NotificationInput,
+    @Args('requestInput') requestInput: NotificationInput,
   ): string {
-    return this.notificationService.sendUsersNotification(RequestInput);
+    return this.notificationService.sendUsersNotification(requestInput);
+  }
+
+  @Mutation(() => SuccessResponse)
+  @UseGuards(AccessTokenGuard)
+  updateNotificationScope(
+    @Args('requestInput') requestInput: UpdateAdminNotificationScope,
+  ): Promise<SuccessResponse> {
+    return this.notificationService.updateNotificationScope(requestInput);
+  }
+
+  @Mutation(() => NotificationScope)
+  @UseGuards(AccessTokenGuard)
+  async createAdminNotificationScope(
+    @Args('requestInput') requestInput: CreateNotificationScopeInput,
+  ): Promise<NotificationScope> {
+    return await this.notificationService.createAdminNotificationScope(
+      requestInput,
+    );
+  }
+
+  @Mutation(() => SuccessResponse)
+  @UseGuards(AccessTokenGuard)
+  async updateAdminNotificationPreference(
+    @Args('requestInput') requestInput: UpdateAdminNotificationPreferenceScope,
+  ): Promise<SuccessResponse> {
+    return this.notificationService.updateAdminNotificationScopePreference(
+      requestInput,
+    );
   }
 
   /**

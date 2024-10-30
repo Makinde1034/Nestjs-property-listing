@@ -23,9 +23,13 @@ import { NotificationRepository } from '../notification/repositories';
 import { TicketRepository } from '../tickets/repositories';
 import { AuctionRepository } from '../listing/repositories/auction.repository';
 import { AuctionParticipantRepository } from '../listing/repositories/auction-participant.repository';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Notification, NotificationScope])],
+  imports: [
+    TypeOrmModule.forFeature([Notification, NotificationScope]),
+    NotificationModule,
+  ],
   providers: [
     JobService,
     OfferRepository,

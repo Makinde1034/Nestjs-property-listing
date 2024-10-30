@@ -360,6 +360,7 @@ type Article {
   category: Category!
   articleActivityLog: [ActivityLog!]
   language: String!
+  placement: String!
   published: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
@@ -660,6 +661,11 @@ type AdminDefault {
   saii: Float!
   vat: Float!
   paymentType: String!
+  dataRetention: Float!
+  ratingPrompt: Float!
+  ticketAging: Float!
+  auctionHeldAmount: Float!
+  fallBackDefaultBidIncrement: Float!
   state: String!
   country: String!
   countryISOCode: String!
@@ -1194,7 +1200,10 @@ type Mutation {
   updateRole(RequestInput: RoleUpdateInputDto!): Role!
   deleteRole(deleteRoleInput: DeleteRolesInput!): SuccessResponse!
   markNotificationAsRead(id: String!): Notification!
-  sendNotification(RequestInput: NotificationInput!): String!
+  sendNotification(requestInput: NotificationInput!): String!
+  updateNotificationScope(requestInput: UpdateAdminNotificationScope!): SuccessResponse!
+  createAdminNotificationScope(requestInput: CreateNotificationScopeInput!): NotificationScope!
+  updateAdminNotificationPreference(requestInput: UpdateAdminNotificationPreferenceScope!): SuccessResponse!
   createListingType(RequestInput: ListingTypeInput!): ListingType!
   updateListingType(RequestInput: ListingTypeUpdateInput!): ListingType!
   deleteListingType(RequestInput: ListingTypeDeleteInput!): String!
@@ -1240,6 +1249,8 @@ type Mutation {
   preAuthorisedPayment(paymentInput: PreAuthorisedPaymentInput!): InitiatePaymentResponse!
   verifyPayment(verifyPaymentInput: VerifyPaymentInput!): verifyPaymentResponse!
   createCoupon(createCouponsInput: CreateCouponInput!): Coupon!
+  updateAdminDefault(updateAdminDefaultInput: UpdateAdminDefaultInput!): AdminDefault!
+  updateAuctionBidRangeSetting(createCouponsInput: UpdateAdminDefaultInput!): AdminDefault!
   updateCoupon(updateCouponsInput: UpdateCouponInput!): Coupon!
   deleteCoupons(deleteCouponsInput: DeleteCouponInput!): SuccessResponse!
   deactivateCoupons(deactivateCoupons: DeactivateCouponInput!): SuccessResponse!
@@ -1257,7 +1268,7 @@ type Mutation {
   createReview(createReviewDto: CreateReviewDto!): Review!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   updateKnowledgeBaseCatecory(updateKnowledgeBaseCategoryInput: UpdateCategoryInput!): Category!
-  removeKnowledgeBaseCatecory(id: Int!): SuccessResponse!
+  removeKnowledgeBaseCatecory(categoryActionInput: CategoryActionInput!): SuccessResponse!
   createArticle(createArticleInput: CreateArticleInput!): Article!
   delete(id: Float!): SuccessResponse!
   updateArticle(updateArticleInput: UpdateArticleInput!): Article!
@@ -1454,6 +1465,26 @@ input NotificationInput {
   isPushNotification: Boolean!
   recipients: [String!]!
   deepLink: String
+}
+
+input UpdateAdminNotificationScope {
+  name: String
+  description: String
+  scopeGroup: String
+  id: Float!
+}
+
+input CreateNotificationScopeInput {
+  name: String!
+  description: String
+  scopeGroup: String
+}
+
+input UpdateAdminNotificationPreferenceScope {
+  email: Boolean
+  desktop: Boolean
+  mobile: Boolean
+  id: String!
 }
 
 input ListingTypeInput {
@@ -1693,6 +1724,30 @@ input CreateCouponInput {
   endDate: DateTime!
 }
 
+input UpdateAdminDefaultInput {
+  minimumOfferPercentage: Float
+  minBidRange: Float
+  bidIncrement: Float
+  maxBidRange: Float
+  paymentType: String
+  saii: Float
+  saiiForRent: Float
+  dataRetention: Float
+  ratingPrompt: Float
+  ticketAging: Float
+  auctionHeldAmount: Float
+  vat: Float
+  daysToAuctionRegistrationStart: Float
+  daysToAuctionRegistrationEnd: Float
+  postcode: String
+  merchantTransactionId: String
+  street: String
+  city: String
+  state: String
+  country: String
+  countryISOCode: String
+}
+
 input UpdateCouponInput {
   maxUse: Float
   discountType: String
@@ -1780,11 +1835,16 @@ input UpdateCategoryInput {
   id: Float!
 }
 
+input CategoryActionInput {
+  id: [Float!]!
+}
+
 input CreateArticleInput {
   content: String!
   image: String
   categoryId: Float!
   title: String!
+  placement: String
   authorImage: String
   authorBio: String!
   language: String!
@@ -1795,6 +1855,7 @@ input UpdateArticleInput {
   image: String
   categoryId: Float
   title: String
+  placement: String
   authorImage: String
   authorBio: String
   language: String

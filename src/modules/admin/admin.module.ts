@@ -24,6 +24,7 @@ import { SplashScreenRepository } from './repositories/splash-screen.repository'
 import { SplashScreenResolver } from './resolver/splash-screen.resolver';
 import { SplashScreenController } from './controller/splash-screen-controller';
 import { CouponRepository } from './repositories/coupons.repository';
+import { AuctionBidRangeRepository } from '../listing/repositories/auction-bid-range.repository';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { CouponRepository } from './repositories/coupons.repository';
     SplashScreenRepository,
     SplashScreenResolver,
     CouponRepository,
+    AuctionBidRangeRepository,
   ],
   controllers: [SplashScreenController],
   exports: [

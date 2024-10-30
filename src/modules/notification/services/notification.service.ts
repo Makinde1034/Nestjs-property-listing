@@ -5,7 +5,14 @@
 
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { NotificationRepository } from '../repositories';
-import { NotificationEventDto, NotificationInput } from '../dtos';
+import {
+  CreateNotificationScopeInput,
+  CreateNotificationScopePreferenceInput,
+  NotificationEventDto,
+  NotificationInput,
+  UpdateAdminNotificationPreferenceScope,
+  UpdateAdminNotificationScope,
+} from '../dtos';
 import {
   Notification,
   NotificationScope,
@@ -31,6 +38,11 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { getMessageData } from '../../../common/messages/alert-messages';
 import { NotificationScopesEnum } from '../../../common/enums/notification-scope.enum';
 import { MailInput } from '../../mail/mail.dto';
+import { SuccessResponse } from '../../../common/utils/success.response';
+
+import { AdminNotificationPreferenceRepository } from '../repositories/admin.repository';
+import {} from '../../user/dtos/request';
+import { AdminNotificationPreference } from '../../../entities/admin-notification-prefrence.entity';
 
 @Injectable()
 export class NotificationService {
@@ -42,6 +54,9 @@ export class NotificationService {
     private readonly mailService: MailgunEmailService,
     private readonly pushNotificationService: PushNotificationService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly adminNotificationPreferenceRepository: AdminNotificationPreferenceRepository,
+
+    private readonly notificationScope: NotificationScopeRepository,
   ) {}
 
   /**
@@ -244,6 +259,82 @@ export class NotificationService {
    */
   async listNotificationScopes(): Promise<NotificationScope[]> {
     return await this.notificationScopeRepository.find();
+  }
+
+  async updateNotificationScope(
+    input: UpdateAdminNotificationScope,
+  ): Promise<SuccessResponse> {
+    try {
+      const { id, ...rest } = input;
+      const notificationScope = await this.notificationScopeRepository.findOne({
+        where: { id },
+      });
+      const { affected } = await this.notificationScopeRepository.update(
+        notificationScope.id,
+        rest,
+      );
+
+      if (affected > 0) {
+        const notificationScope =
+          await this.notificationScopeRepository.findOne({
+            where: { id },
+          });
+        return new SuccessResponse(AppStrings.SUCCESSFULL, notificationScope);
+      }
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async updateAdminNotificationScopePreference(
+    input: UpdateAdminNotificationPreferenceScope,
+  ): Promise<SuccessResponse> {
+    try {
+      const { id, ...rest } = input;
+      const notificationScope =
+        await this.adminNotificationPreferenceRepository.findOne({
+          where: { id },
+        });
+      const { affected } =
+        await this.adminNotificationPreferenceRepository.update(
+          notificationScope.id,
+          rest,
+        );
+
+      if (affected > 0) {
+        const notificationScope =
+          await this.adminNotificationPreferenceRepository.findOne({
+            where: { id },
+          });
+        return new SuccessResponse(AppStrings.SUCCESSFULL, notificationScope);
+      }
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async createAdminNotificationScope(
+    input: CreateNotificationScopeInput,
+  ): Promise<NotificationScope> {
+    try {
+      const notificationScope = await this.notificationScope.save(input);
+
+      if (notificationScope) {
+        await this.adminNotificationPreferenceRepository.save({
+          email: true,
+          desktop: true,
+          mobile: true,
+          scope: notificationScope,
+        });
+      }
+
+      return notificationScope;
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
   }
 
   async sendNotification(notificationInput: SendNotificationInput) {

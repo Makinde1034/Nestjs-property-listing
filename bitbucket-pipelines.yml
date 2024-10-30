@@ -42,7 +42,7 @@ definitions:
           - npm
         script:
           - npm ci
-          - npm run test
+          # - npm run test
           - npm run build
 
     - step: &test
