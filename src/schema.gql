@@ -661,6 +661,11 @@ type AdminDefault {
   saii: Float!
   vat: Float!
   paymentType: String!
+  dataRetention: Float!
+  ratingPrompt: Float!
+  ticketAging: Float!
+  auctionHeldAmount: Float!
+  fallBackDefaultBidIncrement: Float!
   state: String!
   country: String!
   countryISOCode: String!
@@ -1241,6 +1246,8 @@ type Mutation {
   preAuthorisedPayment(paymentInput: PreAuthorisedPaymentInput!): InitiatePaymentResponse!
   verifyPayment(verifyPaymentInput: VerifyPaymentInput!): verifyPaymentResponse!
   createCoupon(createCouponsInput: CreateCouponInput!): Coupon!
+  updateAdminDefault(updateAdminDefaultInput: UpdateAdminDefaultInput!): AdminDefault!
+  updateAuctionBidRangeSetting(createCouponsInput: UpdateAdminDefaultInput!): AdminDefault!
   updateCoupon(updateCouponsInput: UpdateCouponInput!): Coupon!
   deleteCoupons(deleteCouponsInput: DeleteCouponInput!): SuccessResponse!
   deactivateCoupons(deactivateCoupons: DeactivateCouponInput!): SuccessResponse!
@@ -1692,6 +1699,30 @@ input CreateCouponInput {
   discountValue: Float!
   startDate: DateTime!
   endDate: DateTime!
+}
+
+input UpdateAdminDefaultInput {
+  minimumOfferPercentage: Float
+  minBidRange: Float
+  bidIncrement: Float
+  maxBidRange: Float
+  paymentType: String
+  saii: Float
+  saiiForRent: Float
+  dataRetention: Float
+  ratingPrompt: Float
+  ticketAging: Float
+  auctionHeldAmount: Float
+  vat: Float
+  daysToAuctionRegistrationStart: Float
+  daysToAuctionRegistrationEnd: Float
+  postcode: String
+  merchantTransactionId: String
+  street: String
+  city: String
+  state: String
+  country: String
+  countryISOCode: String
 }
 
 input UpdateCouponInput {

@@ -31,6 +31,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { getMessageData } from '../../../common/messages/alert-messages';
 import { NotificationScopesEnum } from '../../../common/enums/notification-scope.enum';
 import { MailInput } from '../../mail/mail.dto';
+import { SuccessResponse } from '../../../common/utils/success.response';
 
 @Injectable()
 export class NotificationService {
@@ -244,6 +245,24 @@ export class NotificationService {
    */
   async listNotificationScopes(): Promise<NotificationScope[]> {
     return await this.notificationScopeRepository.find();
+  }
+
+  async updateNotificationScope(input): Promise<SuccessResponse> {
+    const { id, ...rest } = input;
+    const notificationScope = await this.notificationScopeRepository.findOne({
+      where: { id },
+    });
+    const { affected } = await this.notificationRepository.update(
+      notificationScope.id,
+      rest,
+    );
+
+    if (affected > 0) {
+      const notificationScope = await this.notificationScopeRepository.findOne({
+        where: { id },
+      });
+      return new SuccessResponse(AppStrings.SUCCESSFULL, notificationScope);
+    }
   }
 
   async sendNotification(notificationInput: SendNotificationInput) {

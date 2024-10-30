@@ -3,7 +3,12 @@
  * For license. See license.txt
  */
 
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { ListingRepository } from '../../listing/repositories/listing.repository';
 import { OfferRepository } from '../../listing/repositories';
 
@@ -37,7 +42,10 @@ import {
   CouponResponse,
 } from '../dto/response/admin-response';
 import { TicketRepository } from '../../tickets/repositories';
-import { AdminDashboardSort } from '../dto/request/admin-request';
+import {
+  AdminDashboardSort,
+  UpdateAdminDefaultInput,
+} from '../dto/request/admin-request';
 import { AdminRepository } from '../repositories/admin.repository';
 import { CouponRepository } from '../repositories/coupons.repository';
 import {
@@ -52,6 +60,7 @@ import slugify from 'slugify';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { AppStrings } from '../../../common/messages/app.strings';
 import { CouponEnum } from '../../../common/enums/coupons.enum';
+import { AuctionBidRangeRepository } from '../../listing/repositories/auction-bid-range.repository';
 
 @Injectable()
 export class AdminService {
@@ -63,9 +72,68 @@ export class AdminService {
     private readonly ticketsRepository: TicketRepository,
     private readonly adminRepository: AdminRepository,
     private readonly couponRepository: CouponRepository,
+    private readonly auctionBidRangeRepository: AuctionBidRangeRepository,
   ) {}
 
   logger = new Logger(AdminService.name);
+
+  async updateSystemSetting(adminDefaultInput: UpdateAdminDefaultInput) {
+    try {
+      const adminDefault = await this.adminDefault();
+      const { affected } = await this.adminRepository.update(
+        adminDefault.id,
+        adminDefaultInput,
+      );
+      if (affected > 0) {
+        return await this.adminDefault();
+      }
+    } catch (error) {
+      this.logger.error(error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new BadRequestException(error);
+    }
+  }
+
+  async updateAuctionBidRangeSetting(
+    adminDefaultInput: UpdateAdminDefaultInput,
+  ) {
+    try {
+      let result;
+      const min = adminDefaultInput.minBidRange;
+      const max = adminDefaultInput.maxBidRange;
+      const increment = adminDefaultInput.bidIncrement;
+
+      const bidPriceRange = await this.auctionBidRangeRepository
+        .createQueryBuilder('auctionBidRange')
+        .where(
+          'auctionBidRange.lowerBound >= :min AND auctionBidRange.upperBound <= :max',
+          { min, max },
+        )
+        .getOne();
+      const { lowerBound, upperBound, ...rest } = result;
+
+      if (bidPriceRange) {
+        const updatedRange = { ...rest, lowerBound: min, upperBound: max };
+
+        result = await this.auctionBidRangeRepository.save(updatedRange);
+      } else {
+        result = await this.auctionBidRangeRepository.save({
+          lowerBound: min,
+          upperBound: max,
+          increment: increment,
+        });
+      }
+      return new SuccessResponse(AppStrings.SUCCESSFULL, result);
+    } catch (error) {
+      this.logger.error(error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new BadRequestException(error);
+    }
+  }
 
   async responseTime() {
     const [averageCloseTime, averageSupportTime] = await Promise.all([
@@ -503,7 +571,7 @@ export class AdminService {
 
   async adminDefault() {
     try {
-      const result = await this.adminRepository.find();
+      const result = await this.adminRepository.find({ take: 1 });
 
       return result[0];
     } catch (error) {
