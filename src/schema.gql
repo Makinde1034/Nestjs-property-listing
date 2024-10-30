@@ -1223,9 +1223,9 @@ type Mutation {
   createFeature(createFeatureInput: CreateFeatureInput!): Feature!
   createAuction(createAuctionInput: CreateAuctionInput!): Auction!
   updateAuction(updateAuctionInput: UpdateAuctionInput!): Auction!
-  deleteAuction(id: String!): SuccessResponse!
-  reactivateAuction(id: String!): SuccessResponse!
-  cancleAuction(id: String!): SuccessResponse!
+  deleteAuction(AuctionActionInput: AuctionActionInput!): SuccessResponse!
+  reactivateAuction(auctionActionInput: AuctionActionInput!): SuccessResponse!
+  cancleAuction(auctionActionInput: AuctionActionInput!): SuccessResponse!
   addAuctionParticipant(createAuctionParticipantInput: CreateAuctionParticipantInput!): AuctionParticipant!
   deleteSavedHistory(id: String!): SuccessResponse!
   unpublishAListing(id: String!): SuccessResponse!
@@ -1623,6 +1623,10 @@ input UpdateAuctionInput {
   maxListing: Float
   imageLink: String
   id: String!
+}
+
+input AuctionActionInput {
+  id: [String!]!
 }
 
 input CreateAuctionParticipantInput {
