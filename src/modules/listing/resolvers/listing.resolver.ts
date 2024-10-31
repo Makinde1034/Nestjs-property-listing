@@ -185,8 +185,8 @@ export class ListingResolver {
   @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Mutation(() => SuccessResponse, { name: 'unfeatureAListing' })
-  async unfeatureAListing(@Args('id') id: string) {
-    return await this.listingService.unfeatureAListing(id);
+  async unfeatureAListing(@Args('id') id: string, @Context() ctx: any) {
+    return await this.listingService.unfeatureAListing(id, ctx.req.user);
   }
 
   @UseGuards(AccessTokenGuard)
@@ -470,8 +470,12 @@ export class ListingResolver {
   @Mutation(() => Feature, { name: 'createFeature' })
   async createFeature(
     @Args('createFeatureInput') createFeatureInput: CreateFeatureInput,
+    @Context() ctx: any,
   ) {
-    return await this.listingService.featureAListing(createFeatureInput);
+    return await this.listingService.featureAListing(
+      createFeatureInput,
+      ctx.req.user,
+    );
   }
 
   /**********************************
