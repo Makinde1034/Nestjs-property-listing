@@ -72,6 +72,11 @@ export class ActivityLogService {
       }
       const [logs, total] = await this.activityLogRepository
         .createQueryBuilder('activityLogs')
+        .leftJoinAndSelect('activityLog.admin', 'admin')
+        .leftJoinAndSelect('activityLog.listing', 'listing')
+        .leftJoinAndSelect('activityLog.user', 'user')
+        .leftJoinAndSelect('activityLog.ticket', 'ticket')
+
         .where(whereOption)
         .skip(skip)
         .take(take)
