@@ -9,9 +9,13 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Listing } from './listing.entity';
+import { AuctionParticipant } from './auction-participant.entity';
 @Entity()
 @ObjectType()
 export class Bids {
@@ -34,6 +38,18 @@ export class Bids {
   @Column()
   @Field()
   auctionId: string;
+
+  @Field(() => Listing)
+  @JoinColumn({ name: 'auctionParticipantId' })
+  @ManyToOne(
+    () => AuctionParticipant,
+    (auctionParticipant) => auctionParticipant.bid,
+  )
+  auctionParticipant: AuctionParticipant;
+
+  @Column({ nullable: true })
+  @Field()
+  auctionParticipantId: string;
 
   @Column()
   @Field()

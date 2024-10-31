@@ -164,6 +164,14 @@ export class UserFilterAndSort extends PaginateAndSort {
 }
 
 @InputType()
+export class AdminAuctionFilter extends PaginateAndSort {
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsEnum(TimePeriod)
+  timePeriod: string;
+}
+
+@InputType()
 export class AdminFilterAndSort extends PartialType(UserFilterAndSort) {}
 
 @InputType()
