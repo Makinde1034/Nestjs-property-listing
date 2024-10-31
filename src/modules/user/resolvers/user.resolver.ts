@@ -2,13 +2,11 @@
  * Copyright (c) 2024, Waseet LLC. All rights reserved.
  * For license. See license.txt
  */
-
 import { UseGuards } from '@nestjs/common';
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
 import { User } from 'src/entities';
 import { UserService } from '../services/user.service';
-
 import { Permissions } from 'src/common/decorator/permission';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import {
@@ -122,8 +120,9 @@ export class UserResolver {
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async createStaff(
     @Args('RequestInput') inputDto: CreateStaffInput,
+    @Context() ctx: any,
   ): Promise<User> {
-    return await this.userService.createStaff(inputDto);
+    return await this.userService.createStaff(inputDto, ctx.req.user);
   }
 
   /**

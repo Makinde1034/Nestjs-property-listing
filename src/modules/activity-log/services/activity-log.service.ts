@@ -19,11 +19,12 @@ export class ActivityLogService {
   async getLogs(activityLogInput: ActivityLogInput) {
     try {
       const { id, take, skip, fieldToFilter } = activityLogInput;
-      const query =
-        this.activityLogRepository.createQueryBuilder('activityLog');
+      const query = this.activityLogRepository
+        .createQueryBuilder('activityLog')
+        .leftJoinAndSelect('activityLog.admin', 'admin');
       if (fieldToFilter) {
         query.where(`activityLog.${fieldToFilter} = :id`, { id });
-      } else {
+      } else if (!fieldToFilter) {
         if (isUUID(id)) {
           // Only perform these conditions if `id` is a valid UUID
           query
@@ -45,6 +46,7 @@ export class ActivityLogService {
       }
 
       const [logs, total] = await query
+
         .take(take)
         .skip(skip)
         .orderBy('activityLog.createdAt', 'DESC')

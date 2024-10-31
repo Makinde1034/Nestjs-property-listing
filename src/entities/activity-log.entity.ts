@@ -77,51 +77,51 @@ export class ActivityLog extends BaseEntity {
   @ManyToOne(() => Auction, (auction) => auction.actionActivityLog)
   auction: Auction;
 
-  @Field()
+  @Field({ nullable: true })
   @Column({ nullable: true })
   userId: string;
 
-  @Field()
+  @Field({ nullable: true })
   @Column({ nullable: true })
   auctionId: string;
 
-  @Field()
+  @Field({ nullable: true })
   @Column({ nullable: true })
   adminId: string;
 
-  @Field()
+  @Field({ nullable: true })
   @Column({ nullable: true })
   ticketId: string;
 
-  @Field()
+  @Field({ nullable: true })
   @Column({ nullable: true })
   roleId: number;
 
-  @Field()
+  @Field({ nullable: true })
   @Column({ nullable: true })
   responseTemplateId: string;
 
-  @Field()
+  @Field({ nullable: true })
   @Column({ nullable: true })
   listingId: string;
 
-  @Field()
+  @Field({ nullable: true })
   @Column({ nullable: true })
   articleId: number;
 
-  @Field()
+  @Field({ nullable: true })
   @Column({ nullable: true })
   splashScreenId: number;
 
   @Column()
-  @Field()
+  @Field({ nullable: true })
   action: string;
 
   @Column({ type: 'jsonb', nullable: true })
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   details: string;
 
-  @Field()
+  @Field({ nullable: true })
   @CreateDateColumn()
   createdAt: Date;
 

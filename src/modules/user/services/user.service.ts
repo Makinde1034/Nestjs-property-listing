@@ -852,6 +852,7 @@ export class UserService {
         return {
           adminId: admin.id,
           action: ActivityEnum.UPDATED,
+          details: JSON.stringify(element),
           userId: element.id,
         };
       });
@@ -902,7 +903,7 @@ export class UserService {
    * @param {CreateStaffInput} input
    * @returns {Promise<Staff>}
    */
-  async createStaff(input: CreateStaffInput): Promise<User> {
+  async createStaff(input: CreateStaffInput, admin: User): Promise<User> {
     try {
       const roles = await this.roleRepository.find({
         where: { id: In([...input.roles]) },
@@ -921,6 +922,15 @@ export class UserService {
         RegisterEventAction.STAFF_CREATED,
         new StaffCreatedEventDto({ staff }),
       );
+
+      await this.activityLogsService.logActivity([
+        {
+          adminId: admin.id,
+          action: ActivityEnum.CREATED,
+          details: JSON.stringify(staff),
+          userId: staff.id,
+        },
+      ]);
       return staff;
     } catch (error) {
       throw new BadRequestException(error);
@@ -1104,6 +1114,7 @@ export class UserService {
       return {
         adminId: admin.id,
         action: ActivityEnum.BLOCKED,
+        details: JSON.stringify(element),
         userId: element.id,
       };
     });
@@ -1152,6 +1163,7 @@ export class UserService {
       return {
         adminId: admin.id,
         action: ActivityEnum.DELETED,
+        details: JSON.stringify(element),
         userId: element.id,
       };
     });

@@ -4,7 +4,7 @@
  */
 
 import { Field, InputType, PartialType } from '@nestjs/graphql';
-import { IsDate, IsNumber, IsString, IsUUID } from 'class-validator';
+import { IsArray, IsDate, IsNumber, IsString, IsUUID } from 'class-validator';
 
 @InputType()
 export class CreateAuctionInput {
@@ -50,7 +50,7 @@ export class UpdateAuctionInput extends PartialType(CreateAuctionInput) {
 @InputType()
 export class AuctionActionInput {
   @Field(() => [String])
-  @IsUUID()
+  @IsArray()
   id: string[];
 }
 

@@ -71,7 +71,6 @@ import { GpsCoordinateRepository } from '../repositories/gps-coordinate.reposito
 import { AttributeRepository } from '../repositories';
 import { ChildIssueRepository } from '../../issue/repositories/child-issue.repository';
 import { IssueRepository } from '../../issue/repositories';
-import { LocationDto } from '../../location/dto/request/location.dto';
 import { ActivityLogService } from '../../activity-log/services/activity-log.service';
 import { ActivityEnum } from '../../../common/enums/activitys';
 import { Feature } from '../../../entities/feature.entity';
@@ -1666,6 +1665,7 @@ export class ListingService {
         return {
           adminId: admin.id,
           action: ActivityEnum.ENABLED,
+          details: JSON.stringify(element),
           listingId: element.id,
         };
       });
@@ -1738,7 +1738,7 @@ export class ListingService {
     }
   }
 
-  async featureAListing(createFeatureInput: CreateFeatureInput) {
+  async featureAListing(createFeatureInput: CreateFeatureInput, admin: User) {
     try {
       let featured: Feature;
       const listing = await this.listingRepository.findOne({
@@ -1781,6 +1781,15 @@ export class ListingService {
         });
       }
 
+      await this.activityLogsService.logActivity([
+        {
+          adminId: admin.id,
+          action: ActivityEnum.FEATURED,
+          details: JSON.stringify(listing),
+          listingId: listing.id,
+        },
+      ]);
+
       return featured;
     } catch (error) {
       this.logger.log(error);
@@ -1792,7 +1801,7 @@ export class ListingService {
     }
   }
 
-  async unfeatureAListing(id: string) {
+  async unfeatureAListing(id: string, admin: User) {
     try {
       const listing = await this.listingRepository.findOneBy({
         id,
@@ -1811,6 +1820,15 @@ export class ListingService {
         featureDate: null,
         featureExpiration: null,
       });
+
+      await this.activityLogsService.logActivity([
+        {
+          adminId: admin.id,
+          action: ActivityEnum.UN_FEATURED,
+          details: JSON.stringify(listing),
+          listingId: listing.id,
+        },
+      ]);
 
       if (affected > 0) {
         return new SuccessResponse(AppStrings.SUCCESSFULL);
