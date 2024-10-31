@@ -947,7 +947,7 @@ type Query {
   getAuction(id: String!): Auction!
   getAllRunningAuction(findManyOption: PaginateAndSort!): AuctionResponse!
   getAllUpcomingAuction(findManyOption: PaginateAndSort!): AuctionResponse!
-  getAllAuction(findManyOption: PaginateAndSort!): AuctionResponse!
+  getAllAuction(findManyOption: AdminAuctionFilter!): AuctionResponse!
   getListingsAuction(findManyOption: PaginateAndSort!): AuctionParticipantResponse!
   findNewestBid(findBidInput: FindBidInput!): [Bids!]!
   searchForListing(searchParam: String!): [Listing!]!
@@ -1100,6 +1100,15 @@ input FindOfferInput {
   directionToSort: SortOrder
   where: WhereOption
   listingId: String
+}
+
+input AdminAuctionFilter {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
+  timePeriod: String
 }
 
 input FindBidInput {

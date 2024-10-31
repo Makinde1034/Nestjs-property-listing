@@ -6,6 +6,7 @@
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ListingService } from '../services/listing.service';
 import {
+  AdminAuctionFilter,
   AdminFilterAndSort,
   CompareListingInput,
   CreateListingDto,
@@ -525,9 +526,9 @@ export class ListingResolver {
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Query(() => AuctionResponse, { name: 'getAllAuction' })
   async getAllAuction(
-    @Args('findManyOption') paginateAndSort: PaginateAndSort,
+    @Args('findManyOption') findManyOption: AdminAuctionFilter,
   ) {
-    return await this.auctionService.findAll(paginateAndSort);
+    return await this.auctionService.findAll(findManyOption);
   }
 
   @UseGuards(AdminGuard)

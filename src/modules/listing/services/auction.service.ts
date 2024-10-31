@@ -27,7 +27,7 @@ import { CreateBidInput, FindBidInput } from '../dtos/request/bids';
 import { generateOtp } from '../../../common/utils/functions';
 import { User } from '../../../entities';
 import { AdminService } from '../../admin/services/admin.service';
-import { In, QueryFailedError } from 'typeorm';
+import { Between, In, QueryFailedError } from 'typeorm';
 import { AutoBidRepository } from '../repositories/auto-bid.repository';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { CreateAutoBidInput } from '../dtos/request/auto-bid';
@@ -39,6 +39,17 @@ import { StorageService } from '../../file-handler/services/storage.service';
 import { ActivityEnum } from '../../../common/enums/activitys';
 import { ActivityLogService } from '../../activity-log/services/activity-log.service';
 import { AuctionEnum } from '../../../common/enums/status.enum';
+import { AdminAuctionFilter } from '../dtos/request';
+import {
+  startOfDay,
+  endOfDay,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  startOfYear,
+  endOfYear,
+} from 'date-fns';
 
 @Injectable()
 export class AuctionService {
@@ -113,17 +124,33 @@ export class AuctionService {
       throw new BadRequestException(error.message || 'Error fetching auctions');
     }
   }
-
-  async findAll(paginateAndSort: PaginateAndSort) {
+  async findAll(paginateAndSort: AdminAuctionFilter) {
     try {
       const { sortField, directionToSort, where } = paginateAndSort;
       const sortDirection: 'ASC' | 'DESC' = directionToSort as 'ASC' | 'DESC';
       let whereOption = {};
+      const now = new Date();
+      const dateField = 'createdAt';
 
       // Default pagination if not provided
       if (!paginateAndSort.take || !paginateAndSort.skip) {
         paginateAndSort.skip = 0;
         paginateAndSort.take = 20;
+      }
+
+      switch (paginateAndSort.timePeriod) {
+        case 'today':
+          whereOption[dateField] = Between(startOfDay(now), endOfDay(now));
+          break;
+        case 'week':
+          whereOption[dateField] = Between(startOfWeek(now), endOfWeek(now));
+          break;
+        case 'month':
+          whereOption[dateField] = Between(startOfMonth(now), endOfMonth(now));
+          break;
+        case 'year':
+          whereOption[dateField] = Between(startOfYear(now), endOfYear(now));
+          break;
       }
 
       if (where) {
