@@ -835,6 +835,7 @@ export class ListingService {
           .addSelect([
             'listingType.id',
             'listingType.englishName',
+            'user.id',
             'user.firstName',
             'user.lastName',
             'user.language',
