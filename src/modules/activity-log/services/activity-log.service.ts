@@ -72,10 +72,10 @@ export class ActivityLogService {
       }
       const [logs, total] = await this.activityLogRepository
         .createQueryBuilder('activityLogs')
-        .leftJoinAndSelect('activityLog.admin', 'admin')
-        .leftJoinAndSelect('activityLog.listing', 'listing')
-        .leftJoinAndSelect('activityLog.user', 'user')
-        .leftJoinAndSelect('activityLog.ticket', 'ticket')
+        .leftJoinAndSelect('activityLogs.admin', 'admin')
+        .leftJoinAndSelect('activityLogs.listing', 'listing')
+        .leftJoinAndSelect('activityLogs.user', 'user')
+        .leftJoinAndSelect('activityLogs.ticket', 'ticket')
 
         .where(whereOption)
         .skip(skip)
@@ -83,6 +83,7 @@ export class ActivityLogService {
         .getManyAndCount();
       return { logs, total };
     } catch (error) {
+      console.log(error);
       this.logger.log(error);
     }
   }
