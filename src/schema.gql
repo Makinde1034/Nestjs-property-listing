@@ -393,18 +393,18 @@ type ActivityLog {
   article: Article
   splashScreen: SplashScreen
   auction: Auction
-  userId: String!
+  userId: String
   auctionId: String!
-  adminId: String!
-  ticketId: String!
-  roleId: Float!
-  responseTemplateId: String!
+  adminId: String
+  ticketId: String
+  roleId: Float
+  responseTemplateId: String
   listingId: String!
-  articleId: Float!
-  splashScreenId: Float!
-  action: String!
-  details: String!
-  createdAt: DateTime!
+  articleId: Float
+  splashScreenId: Float
+  action: String
+  details: String
+  createdAt: DateTime
   updatedAt: DateTime!
 }
 
