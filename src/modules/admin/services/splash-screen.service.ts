@@ -182,7 +182,7 @@ export class SplashScreenService {
   async fetchDefault() {
     let splashScreen: SplashScreen;
     try {
-      splashScreen = await this.splashScreenRepository.findOneOrFail({
+      splashScreen = await this.splashScreenRepository.findOne({
         where: {
           startDate: MoreThan(new Date()),
           endDate: LessThanOrEqual(new Date()),
@@ -190,7 +190,7 @@ export class SplashScreenService {
       });
 
       if (!splashScreen) {
-        splashScreen = await this.splashScreenRepository.findOneOrFail({
+        splashScreen = await this.splashScreenRepository.findOne({
           where: {
             default: true,
           },

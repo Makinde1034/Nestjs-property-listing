@@ -59,7 +59,10 @@ export class SplashScreenResolver {
     return await this.splashScreenService.delete(id);
   }
 
-  @Query(() => SplashScreenResponse, { name: 'findDefaultSplashScreen' })
+  @Query(() => SplashScreen, {
+    name: 'findDefaultSplashScreen',
+    nullable: true,
+  })
   async findDefault() {
     return await this.splashScreenService.fetchDefault();
   }
