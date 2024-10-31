@@ -8,6 +8,5 @@ export enum ActivityEnum {
   ENABLED = 'enabled',
   FEATURED = 'featured',
   UN_FEATURED = 'unfeatured',
-
   BLOCKED = 'blocked',
 }

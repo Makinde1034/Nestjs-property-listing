@@ -205,12 +205,29 @@ type Auction {
   updatedAt: DateTime!
 }
 
+type Bids {
+  id: String!
+  userId: String!
+  bidNumber: Float!
+  price: Float!
+  auctionId: String!
+  auctionParticipant: Listing!
+  auctionParticipantId: String!
+  listingId: String!
+  autoBid: Boolean!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type AuctionParticipant {
   id: ID!
   listingId: String!
+  bidCount: Float
   listing: Listing!
   minimumPrice: Float!
   auction: Auction!
+  bid: Auction!
   createdAt: DateTime!
   deletedAt: DateTime!
   updatedAt: DateTime!
@@ -638,19 +655,6 @@ type AttributeSetResponse {
 type AttributeResponse {
   attribute: [Attribute!]!
   total: Int!
-}
-
-type Bids {
-  id: String!
-  userId: String!
-  bidNumber: Float!
-  price: Float!
-  auctionId: String!
-  listingId: String!
-  autoBid: Boolean!
-  createdAt: DateTime!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
 }
 
 type AdminDefault {
@@ -1241,7 +1245,7 @@ type Mutation {
   createFeature(createFeatureInput: CreateFeatureInput!): Feature!
   createAuction(createAuctionInput: CreateAuctionInput!): Auction!
   updateAuction(updateAuctionInput: UpdateAuctionInput!): Auction!
-  deleteAuction(AuctionActionInput: AuctionActionInput!): SuccessResponse!
+  deleteAuction(auctionActionInput: AuctionActionInput!): SuccessResponse!
   reactivateAuction(auctionActionInput: AuctionActionInput!): SuccessResponse!
   cancleAuction(auctionActionInput: AuctionActionInput!): SuccessResponse!
   addAuctionParticipant(createAuctionParticipantInput: CreateAuctionParticipantInput!): AuctionParticipant!

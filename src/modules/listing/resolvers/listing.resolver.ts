@@ -523,6 +523,14 @@ export class ListingResolver {
     return await this.auctionService.findAllUpcoming(paginateAndSort);
   }
 
+  // @UseGuards(AccessTokenGuard, PermissionsGuard)
+  // @Query(() => AuctionResponse, { name: 'getPaticipantOfAuction' })
+  // async getPaticipantOfAuction(
+  //   @Args('findManyOption') paginateAndSort: PaginateAndSort,
+  // ) {
+  //   return await this.auctionService.getParticipantOfAuction(paginateAndSort);
+  // }
+
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Query(() => AuctionResponse, { name: 'getAllAuction' })
   async getAllAuction(
@@ -535,11 +543,10 @@ export class ListingResolver {
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Mutation(() => SuccessResponse, { name: 'deleteAuction' })
   async deleteAuction(
-    @Args('AuctionActionInput') AuctionActionInput: AuctionActionInput,
-
+    @Args('auctionActionInput') auctionActionInput: AuctionActionInput,
     @Context() ctx: any,
   ) {
-    return await this.auctionService.delete(AuctionActionInput, ctx.req.user);
+    return await this.auctionService.delete(auctionActionInput, ctx.req.user);
   }
 
   @UseGuards(AdminGuard)
@@ -588,7 +595,7 @@ export class ListingResolver {
   async getListingsAuction(
     @Args('findManyOption') paginateAndSort: PaginateAndSort,
   ) {
-    return await this.auctionService.getPaticipantOfAuction(paginateAndSort);
+    return await this.auctionService.getParticipantOfAuction(paginateAndSort);
   }
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)

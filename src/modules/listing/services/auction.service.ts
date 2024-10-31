@@ -50,6 +50,8 @@ import {
   startOfYear,
   endOfYear,
 } from 'date-fns';
+import { AuctionParticipant } from '../../../entities/auction-participant.entity';
+import { Bids } from '../../../entities/bids.entity';
 
 @Injectable()
 export class AuctionService {
@@ -343,7 +345,6 @@ export class AuctionService {
   async addListingToAuction(data: CreateAuctionParticipantInput) {
     try {
       const adminDefault = await this.adminService.adminDefault();
-
       const auction = await this.findOne(data.auctionId);
 
       if (!auction.imageLink) {
@@ -351,25 +352,27 @@ export class AuctionService {
           AppStrings.AUCTION_IS_NOT_COMPLETELY_SET_UP,
         );
       }
-      const date = new Date();
 
-      if (
-        auction.startDate <=
-        new Date(
-          removeDaysFromDate(date, adminDefault.daysToAuctionRegistrationStart),
-        )
-      ) {
+      const now = new Date();
+      const registrationStart = removeDaysFromDate(
+        now,
+        adminDefault.daysToAuctionRegistrationStart,
+      );
+      const registrationEnd = removeDaysFromDate(
+        now,
+        adminDefault.daysToAuctionRegistrationEnd,
+      );
+
+      if (auction.startDate <= new Date(registrationStart)) {
         throw new BadRequestException(
           AppStrings.AUCTION_REGISTRATION_HAS_NOT_STARTED,
         );
       }
-      if (
-        new Date(
-          removeDaysFromDate(date, adminDefault.daysToAuctionRegistrationEnd),
-        ) >= auction.startDate
-      ) {
+
+      if (new Date(registrationEnd) >= auction.startDate) {
         throw new BadRequestException(AppStrings.AUCTION_REGISTATION_HAS_ENDED);
       }
+
       return await this.auctionParticipantRepository.save({ ...data, auction });
     } catch (error) {
       if (error instanceof HttpException) {
@@ -378,15 +381,17 @@ export class AuctionService {
         error instanceof QueryFailedError &&
         error.driverError.code === '23505'
       ) {
-        throw new BadRequestException(' Listing has been added to auction');
+        throw new BadRequestException(
+          'Listing has already been added to this auction',
+        );
       } else {
-        this.logger.log(error);
-        throw new BadRequestException(error);
+        this.logger.error('Failed to add listing to auction', error.stack);
+        throw new BadRequestException('An unexpected error occurred');
       }
     }
   }
 
-  async getPaticipantOfAuction(paginateAndSort: PaginateAndSort) {
+  async getParticipantOfAuction(paginateAndSort: PaginateAndSort) {
     try {
       const { sortField, directionToSort } = paginateAndSort;
       const sortDirection: 'ASC' | 'DESC' = directionToSort as 'ASC' | 'DESC';
@@ -402,7 +407,12 @@ export class AuctionService {
         .leftJoinAndSelect('auctionParticipant.listing', 'listing')
         .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
         .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
-
+        .leftJoinAndSelect('auctionParticipant.bid', 'bids')
+        .loadRelationCountAndMap(
+          'auctionParticipant.bidCount', // Mapping the bid count to `bidCount`
+          'auctionParticipant.bid', // Relation to count
+          'bids',
+        )
         .take(paginateAndSort.take)
         .skip(paginateAndSort.skip)
         .orderBy(
@@ -416,6 +426,7 @@ export class AuctionService {
 
       return { listing, total };
     } catch (error) {
+      console.log(error);
       this.logger.log(error);
       throw new BadRequestException(error.message || 'Error fetching auctions');
     }
@@ -470,11 +481,6 @@ export class AuctionService {
         throw new NotFoundException('Listing not registered in auction');
       }
 
-      // Validate minimum bid price
-      if (bidInput.price < auctionParticipant.minimumPrice) {
-        throw new BadRequestException('Bid is too low');
-      }
-
       // Determine appropriate increment based on bid price range
       const increment = auctionBidRanges.find(
         (range) =>
@@ -486,6 +492,13 @@ export class AuctionService {
         increment * 1000 ||
         (await this.adminService.adminDefault()).fallBackDefaultBidIncrement;
 
+      // Validate minimum bid price
+      if (bidInput.price < highestBid.price) {
+        throw new BadRequestException(
+          `MInimum bid must be more ${Math.floor(highestBid.price + incrementValue)}`,
+        );
+      }
+
       // Check minimum increment requirement if a previous highest bid exists
       if (highestBid && bidInput.price < highestBid.price + incrementValue) {
         throw new BadRequestException(`Minimum increment is ${incrementValue}`);
@@ -494,11 +507,15 @@ export class AuctionService {
       // Prepare and save the new bid
       bidInput.bidNumber = generateOtp();
       bidInput.userId = user.id;
-      const bid = await this.bidRepository.save(bidInput);
+
+      const bid = await this.bidRepository.save({
+        ...bidInput,
+        auctionParticipant,
+      });
 
       // Trigger autobid if bid was successfully placed
       if (bid) {
-        await this.autobid(bid.price, bidInput);
+        await this.autobid(bid.price, auctionParticipant, bidInput);
       }
 
       return bid;
@@ -548,7 +565,11 @@ export class AuctionService {
     }
   }
 
-  async autobid(price: number, bidInput: CreateBidInput) {
+  async autobid(
+    price: number,
+    auctionParticipant: AuctionParticipant,
+    bidInput: CreateBidInput,
+  ) {
     try {
       const valueInRange = Math.floor(price / 1000000);
       const adminDefault = await this.adminService.adminDefault();
@@ -572,6 +593,8 @@ export class AuctionService {
 
       const bidsToMake: CreateBidInput[] = autoBids.map((element) => {
         return {
+          auctionparticipantId: auctionParticipant,
+
           listingId: bidInput.listingId,
           auctionId: bidInput.auctionId,
           bidNumber: generateOtp(),
