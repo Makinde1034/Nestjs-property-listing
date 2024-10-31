@@ -504,10 +504,23 @@ type Compare {
   updatedAt: DateTime!
 }
 
+type AcceptedTerms {
+  id: ID!
+  version: String!
+  user: User!
+  userId: String!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type User {
   id: ID!
   userType: String!
   userLevel: String!
+  termsOfServiceVersion: String
+  currentTermOfservice: String
+  term: [AcceptedTerms!]!
   firstName: String
   arabicFirstName: String
   arabicLastName: String
@@ -1199,6 +1212,8 @@ type Mutation {
   twoFaLogin(LoginInput: TwoFaLoginInput!): LoginResponse!
   resendEmailConfirmation(RequestInput: ConfirmationInput!): SuccessResponse!
   profileUpdate(RequestInput: UserProfileInput!): User!
+  updateTerm: SuccessResponse!
+  forceUpdate(version: String!): SuccessResponse!
   resetPasswordAdmin(ResetInput: UserActionInput!): SuccessResponse!
   createStaff(RequestInput: CreateStaffInput!): User!
   staffConfirmation(RequestInput: StaffConfirmDto!): String!

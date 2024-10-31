@@ -39,6 +39,7 @@ import { FlagListing } from './flag-listing.entity';
 import { Article } from './article.entity';
 import { ActivityLog } from './activity-log.entity';
 import { Compare } from './compare.entity';
+import { AcceptedTerms } from './accepted-terms.entity';
 
 @Entity()
 @ObjectType()
@@ -50,6 +51,18 @@ export class User extends BaseEntity {
   @Column({ default: 'level_1' })
   @Field()
   userLevel: UserLevel;
+
+  @Column({ default: 'v1' })
+  @Field({ nullable: true })
+  termsOfServiceVersion: string;
+
+  @Column({ default: 'v1' })
+  @Field({ nullable: true })
+  currentTermOfservice: string;
+
+  @Field(() => [AcceptedTerms])
+  @OneToMany(() => AcceptedTerms, (term) => term.user, {})
+  term: AcceptedTerms[];
 
   @Column({ nullable: true })
   @Field({ nullable: true })

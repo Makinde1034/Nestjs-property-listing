@@ -589,6 +589,25 @@ export class UserService {
   /****************
    * ADMIN
    ****************/
+
+  async updateTerm(user: User): Promise<SuccessResponse> {
+    await this.usersRepository.update(user.id, {
+      currentTermOfservice: user.termsOfServiceVersion,
+    });
+
+    return new SuccessResponse(AppStrings.SUCCESSFULL);
+  }
+
+  async forceUpdate(version: string): Promise<SuccessResponse> {
+    await this.usersRepository
+      .createQueryBuilder()
+      .update()
+      .set({ currentTermOfservice: version })
+      .execute();
+
+    return new SuccessResponse(AppStrings.SUCCESSFULL);
+  }
+
   async assignRoleToUser(assignRoleInput: AssignRoleInput) {
     try {
       // Find the roles based on the provided role IDs
