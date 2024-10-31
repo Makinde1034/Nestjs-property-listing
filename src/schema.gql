@@ -896,7 +896,7 @@ type Query {
   app: String!
   findAllSplashScreen(findOption: PaginateAndSort): SplashScreenResponse!
   findOneSplashScreen(id: Float!): SplashScreen!
-  findDefaultSplashScreen: SplashScreenResponse!
+  findDefaultSplashScreen: SplashScreen
   searchForSplashScreen(searchParam: String!): [SplashScreen!]!
   activateTwoFa: TwoFaResult!
   user: User!
