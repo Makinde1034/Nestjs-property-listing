@@ -24,7 +24,7 @@ export class ActivityLogService {
         .leftJoinAndSelect('activityLog.admin', 'admin');
       if (fieldToFilter) {
         query.where(`activityLog.${fieldToFilter} = :id`, { id });
-      } else {
+      } else if (!fieldToFilter) {
         if (isUUID(id)) {
           // Only perform these conditions if `id` is a valid UUID
           query

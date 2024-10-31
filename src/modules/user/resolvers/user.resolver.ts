@@ -122,8 +122,9 @@ export class UserResolver {
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async createStaff(
     @Args('RequestInput') inputDto: CreateStaffInput,
+    @Context() ctx: any,
   ): Promise<User> {
-    return await this.userService.createStaff(inputDto);
+    return await this.userService.createStaff(inputDto, ctx.req.user);
   }
 
   /**
