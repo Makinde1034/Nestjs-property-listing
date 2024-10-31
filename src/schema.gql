@@ -394,12 +394,12 @@ type ActivityLog {
   splashScreen: SplashScreen
   auction: Auction
   userId: String
-  auctionId: String!
+  auctionId: String
   adminId: String
   ticketId: String
   roleId: Float
   responseTemplateId: String
-  listingId: String!
+  listingId: String
   articleId: Float
   splashScreenId: Float
   action: String

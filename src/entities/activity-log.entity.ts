@@ -81,7 +81,7 @@ export class ActivityLog extends BaseEntity {
   @Column({ nullable: true })
   userId: string;
 
-  @Field()
+  @Field({ nullable: true })
   @Column({ nullable: true })
   auctionId: string;
 
@@ -101,7 +101,7 @@ export class ActivityLog extends BaseEntity {
   @Column({ nullable: true })
   responseTemplateId: string;
 
-  @Field()
+  @Field({ nullable: true })
   @Column({ nullable: true })
   listingId: string;
 

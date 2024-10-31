@@ -1,7 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { ActivityEnum } from '../../../common/enums/activitys';
 import { ActivityLog } from '../../../entities/activity-log.entity';
-import { numBytes } from 'aws-sdk/clients/finspace';
 
 export class CreateActivityLog {
   adminId: string;
