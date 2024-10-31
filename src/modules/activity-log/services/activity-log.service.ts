@@ -76,7 +76,6 @@ export class ActivityLogService {
         .leftJoinAndSelect('activityLog.listing', 'listing')
         .leftJoinAndSelect('activityLog.user', 'user')
         .leftJoinAndSelect('activityLog.ticket', 'ticket')
-        .leftJoinAndSelect('activityLog.admin', 'admin')
 
         .where(whereOption)
         .skip(skip)
