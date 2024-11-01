@@ -25,15 +25,15 @@ export class ServiceProviderService {
     return `This action returns all serviceProvider`;
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return `This action returns a #${id} serviceProvider`;
   }
 
-  update(id: number, updateServiceProviderInput: UpdateServiceProviderInput) {
+  update(id: string, updateServiceProviderInput: UpdateServiceProviderInput) {
     return `This action updates a #${id} serviceProvider`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} serviceProvider`;
   }
 }

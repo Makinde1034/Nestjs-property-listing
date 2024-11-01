@@ -24,7 +24,7 @@ export class ServiceProviderResolver {
   }
 
   @Query(() => ServiceProvider, { name: 'serviceProvider' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
+  findOne(@Args('id') id: string) {
     return this.serviceProviderService.findOne(id);
   }
 
@@ -40,7 +40,7 @@ export class ServiceProviderResolver {
   }
 
   @Mutation(() => ServiceProvider)
-  removeServiceProvider(@Args('id', { type: () => Int }) id: number) {
+  removeServiceProvider(@Args('id') id: string) {
     return this.serviceProviderService.remove(id);
   }
 }

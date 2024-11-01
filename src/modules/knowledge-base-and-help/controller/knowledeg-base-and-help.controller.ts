@@ -18,14 +18,25 @@ import { RestAccessTokenGuard } from '../../auth/guards';
 @Controller('knowledge-base')
 export class KnowledgeBaseAndHelpController {
   constructor(private articleService: ArticleService) {}
-  @Post('article')
+  @Post('feature-image-upload')
   @UseGuards(RestAccessTokenGuard)
   @UseInterceptors(AnyFilesInterceptor())
   async uploadImage(
     @Query('articleId') articleId: number,
     @UploadedFiles()
-    file: Express.Multer.File,
+    file: Express.Multer.File[],
   ) {
     return await this.articleService.uploadImage(articleId, file);
+  }
+
+  @Post('profile-image-upload')
+  @UseGuards(RestAccessTokenGuard)
+  @UseInterceptors(AnyFilesInterceptor())
+  async uploadProfileImage(
+    @Query('articleId') articleId: number,
+    @UploadedFiles()
+    file: Express.Multer.File[],
+  ) {
+    return await this.articleService.uploadProfileImage(articleId, file);
   }
 }

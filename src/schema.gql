@@ -910,8 +910,7 @@ type ActivityLogsResponse {
 }
 
 type ServiceProvider {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  id: ID!
 }
 
 type Query {
@@ -1010,7 +1009,7 @@ type Query {
   searchForCategory(searchParam: String!): [Category!]!
   getActivityLogs(activityLogInput: ActivityLogInput!): ActivityLogsResponse!
   getAllActivityLogs(paginateAndSort: AuditLogTrailsInput): ActivityLogsResponse!
-  serviceProvider(id: Int!): ServiceProvider!
+  serviceProvider(id: String!): ServiceProvider!
 }
 
 input PaginateAndSort {
@@ -1319,7 +1318,7 @@ type Mutation {
   updateArticle(updateArticleInput: UpdateArticleInput!): Article!
   createServiceProvider(createServiceProviderInput: CreateServiceProviderInput!): ServiceProvider!
   updateServiceProvider(updateServiceProviderInput: UpdateServiceProviderInput!): ServiceProvider!
-  removeServiceProvider(id: Int!): ServiceProvider!
+  removeServiceProvider(id: String!): ServiceProvider!
 }
 
 input CreateSplashScreenInput {
@@ -1911,12 +1910,9 @@ input UpdateArticleInput {
 }
 
 input CreateServiceProviderInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  id: String!
 }
 
 input UpdateServiceProviderInput {
-  """Example field (placeholder)"""
-  exampleField: Int
-  id: Int!
+  id: String!
 }
