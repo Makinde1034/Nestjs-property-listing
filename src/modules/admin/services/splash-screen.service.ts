@@ -149,7 +149,7 @@ export class SplashScreenService {
     }
   }
 
-  async uploadImage(id: number, file: Express.Multer.File) {
+  async uploadImage(id: number, file: Express.Multer.File[]) {
     try {
       const splashScreen = await this.splashScreenRepository.findOneByOrFail({
         id,
@@ -158,7 +158,7 @@ export class SplashScreenService {
       if (!splashScreen) {
         throw new BadRequestException(AppStrings.NOT_FOUND);
       }
-      const url = await this.storageService.upload(file);
+      const url = await this.storageService.upload(file[0]);
 
       const { affected } = await this.splashScreenRepository.update(
         splashScreen.id,

@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ActivityLogRepository } from '../repositories/activity-log.repository';
 import { CreateActivityLog } from '../dto/activity-log';
-import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { isUUID } from 'class-validator';
 import {
   ActivityLogInput,
