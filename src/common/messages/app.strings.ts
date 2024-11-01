@@ -5,6 +5,7 @@
 
 export const AppStrings = {
   APP_NAME: 'Waseet',
+  TERMS_AND_CONDITION: 'Terms and condition has been updated',
   RESOURCE_ALREADY_EXISTS: 'Resource already exist',
   FAILED_RACAPTCHA: 'Recaptcha Failed, Please try again',
   USER_DISABLED: 'Your account has been disabled. ',

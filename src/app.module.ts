@@ -47,6 +47,7 @@ import { AppController } from './modules/app/app.controller';
 import { SseService } from './modules/app/client.service';
 import { SseModule } from './modules/app/event.module';
 import { ActivityLogModule } from './modules/activity-log/activity-log.module';
+import { ServiceProviderModule } from './service-provider/service-provider.module';
 
 @Module({
   imports: [
@@ -114,6 +115,7 @@ import { ActivityLogModule } from './modules/activity-log/activity-log.module';
     KnowledgeBaseAndHelpModule,
     InAppModule,
     ActivityLogModule,
+    ServiceProviderModule,
   ],
   controllers: [AppController],
   providers: [

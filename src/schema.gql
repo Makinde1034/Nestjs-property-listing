@@ -504,10 +504,23 @@ type Compare {
   updatedAt: DateTime!
 }
 
+type AcceptedTerms {
+  id: ID!
+  version: String!
+  user: User!
+  userId: String!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type User {
   id: ID!
   userType: String!
   userLevel: String!
+  termsOfServiceVersion: String
+  currentTermOfservice: String
+  term: [AcceptedTerms!]!
   firstName: String
   arabicFirstName: String
   arabicLastName: String
@@ -896,6 +909,11 @@ type ActivityLogsResponse {
   total: Float!
 }
 
+type ServiceProvider {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
 type Query {
   app: String!
   findAllSplashScreen(findOption: PaginateAndSort): SplashScreenResponse!
@@ -992,6 +1010,7 @@ type Query {
   searchForCategory(searchParam: String!): [Category!]!
   getActivityLogs(activityLogInput: ActivityLogInput!): ActivityLogsResponse!
   getAllActivityLogs(paginateAndSort: PaginateAndSort): ActivityLogsResponse!
+  serviceProvider(id: Int!): ServiceProvider!
 }
 
 input PaginateAndSort {
@@ -1199,6 +1218,8 @@ type Mutation {
   twoFaLogin(LoginInput: TwoFaLoginInput!): LoginResponse!
   resendEmailConfirmation(RequestInput: ConfirmationInput!): SuccessResponse!
   profileUpdate(RequestInput: UserProfileInput!): User!
+  updateTerm: SuccessResponse!
+  forceUpdate(version: String!): SuccessResponse!
   resetPasswordAdmin(ResetInput: UserActionInput!): SuccessResponse!
   createStaff(RequestInput: CreateStaffInput!): User!
   staffConfirmation(RequestInput: StaffConfirmDto!): String!
@@ -1285,6 +1306,9 @@ type Mutation {
   createArticle(createArticleInput: CreateArticleInput!): Article!
   delete(id: Float!): SuccessResponse!
   updateArticle(updateArticleInput: UpdateArticleInput!): Article!
+  createServiceProvider(createServiceProviderInput: CreateServiceProviderInput!): ServiceProvider!
+  updateServiceProvider(updateServiceProviderInput: UpdateServiceProviderInput!): ServiceProvider!
+  removeServiceProvider(id: Int!): ServiceProvider!
 }
 
 input CreateSplashScreenInput {
@@ -1872,5 +1896,16 @@ input UpdateArticleInput {
   authorImage: String
   authorBio: String
   language: String
+  id: Int!
+}
+
+input CreateServiceProviderInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input UpdateServiceProviderInput {
+  """Example field (placeholder)"""
+  exampleField: Int
   id: Int!
 }

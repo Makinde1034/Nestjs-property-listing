@@ -100,6 +100,20 @@ export class UserResolver {
     return await this.userService.updateProfile(ctx.req.user, inputDto);
   }
 
+  @Mutation(() => SuccessResponse, { name: 'updateTerm' })
+  @UseGuards(AccessTokenGuard)
+  async updateTerm(@Context() ctx: any): Promise<SuccessResponse> {
+    return await this.userService.updateTerm(ctx.req.user);
+  }
+
+  @Mutation(() => SuccessResponse, { name: 'forceUpdate' })
+  @UseGuards(AccessTokenGuard)
+  async forceUpdate(
+    @Context() ctx: any,
+    @Args('version') version: string,
+  ): Promise<SuccessResponse> {
+    return await this.userService.forceUpdate(version);
+  }
   @UseGuards(AccessTokenGuard, AdminGuard)
   @Mutation(() => SuccessResponse)
   async resetPasswordAdmin(

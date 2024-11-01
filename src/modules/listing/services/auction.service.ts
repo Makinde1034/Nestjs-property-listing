@@ -287,7 +287,7 @@ export class AuctionService {
           adminId: user.id,
           action: ActivityEnum.UPDATED,
 
-          details: JSON.stringify(auction),
+          details: JSON.stringify(auction.find((a) => a.id === element.id)),
 
           auctionId: element.id,
         };
@@ -326,6 +326,8 @@ export class AuctionService {
             adminId: user.id,
             action: ActivityEnum.UPDATED,
             auctionId: element.id,
+            details: JSON.stringify(auction.find((a) => a.id === element.id)),
+
           };
         });
 
@@ -444,6 +446,7 @@ export class AuctionService {
             adminId: user.id,
             action: ActivityEnum.UPDATED,
             auctionId: element,
+            
           };
         });
 
