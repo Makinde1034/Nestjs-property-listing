@@ -55,7 +55,7 @@ export class SplashScreenResolver {
   }
 
   @Mutation(() => SplashScreen, { name: 'deleteSplashScreen' })
-  async delete(id: number) {
+  async delete(@Args('id') id: number) {
     return await this.splashScreenService.delete(id);
   }
 
