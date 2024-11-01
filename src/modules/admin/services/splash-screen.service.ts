@@ -96,7 +96,7 @@ export class SplashScreenService {
   async update(updateSplashScreenInput: UpdateSplashScreenInput, user: User) {
     try {
       const { id, ...rest } = updateSplashScreenInput;
-      const splashScreen = await this.splashScreenRepository.findOneByOrFail({
+      const splashScreen = await this.splashScreenRepository.findOneBy({
         id,
       });
       if (!splashScreen) {
@@ -116,9 +116,12 @@ export class SplashScreenService {
             splashScreenId: splashScreen.id,
           },
         ]);
+
+        return splashScreen;
       }
     } catch (error) {
       this.logger.log(error);
+
       if (error instanceof HttpException) {
         throw error;
       } else {
