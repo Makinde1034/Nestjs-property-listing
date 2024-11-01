@@ -3,7 +3,11 @@ import { ActivityLogRepository } from '../repositories/activity-log.repository';
 import { CreateActivityLog } from '../dto/activity-log';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { isUUID } from 'class-validator';
-import { ActivityLogInput } from '../dto/request/activity-log';
+import {
+  ActivityLogInput,
+  AuditLogTrailsInput,
+} from '../dto/request/activity-log';
+import { Brackets } from 'typeorm';
 
 @Injectable()
 export class ActivityLogService {
@@ -60,31 +64,60 @@ export class ActivityLogService {
     }
   }
 
-  async getAllLogs(paginateAndSort: PaginateAndSort) {
+  async getAllLogs(paginateAndSort: AuditLogTrailsInput) {
     try {
       const skip = paginateAndSort.skip ?? 0;
       const take = paginateAndSort.take ?? 20;
-      let whereOption = {};
-      const { where } = paginateAndSort;
+      const { where, minDate, maxDate, userName } = paginateAndSort;
 
+      let whereOption = {};
       if (where) {
-        whereOption = ` activityLogs.${where.fieldToChose} IS ${where.whereParam}`;
+        whereOption = {
+          [`activityLogs.${where.fieldToChose}`]: where.whereParam,
+        };
       }
-      const [logs, total] = await this.activityLogRepository
+
+      const query = this.activityLogRepository
         .createQueryBuilder('activityLogs')
         .leftJoinAndSelect('activityLogs.admin', 'admin')
         .leftJoinAndSelect('activityLogs.listing', 'listing')
         .leftJoinAndSelect('activityLogs.user', 'user')
         .leftJoinAndSelect('activityLogs.ticket', 'ticket')
-
-        .where(whereOption)
         .skip(skip)
-        .take(take)
-        .getManyAndCount();
+        .take(take);
+
+      // Add dynamic where options
+      if (Object.keys(whereOption).length) {
+        query.where(whereOption);
+      }
+
+      // Apply date range filter if both minDate and maxDate are provided
+      if (minDate && maxDate) {
+        query.andWhere('activityLogs.createdAt BETWEEN :min AND :max', {
+          min: new Date(minDate),
+          max: new Date(maxDate),
+        });
+      }
+
+      // Handle user name search with case-insensitive partial match
+      if (userName) {
+        query.andWhere(
+          new Brackets((qb) => {
+            qb.orWhere('admin.firstName ILIKE :param', {
+              param: `%${userName}%`,
+            }).orWhere('admin.lastName ILIKE :param', {
+              param: `%${userName}%`,
+            });
+          }),
+        );
+      }
+
+      const [logs, total] = await query.getManyAndCount();
       return { logs, total };
     } catch (error) {
-      console.log(error);
-      this.logger.log(error);
+      console.error(error);
+      this.logger.error('Failed to fetch logs', error.stack);
+      throw new Error('Failed to fetch logs');
     }
   }
 }
