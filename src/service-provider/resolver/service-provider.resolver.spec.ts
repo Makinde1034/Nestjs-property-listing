@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ServiceProviderResolver } from './service-provider.resolver';
-import { ServiceProviderService } from './service-provider.service';
+import { ServiceProviderService } from '../services/service-provider.service';
 
 describe('ServiceProviderResolver', () => {
   let resolver: ServiceProviderResolver;

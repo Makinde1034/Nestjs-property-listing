@@ -233,7 +233,7 @@ export class ArticleService {
     }
   }
 
-  async uploadImage(id: number, file: Express.Multer.File) {
+  async uploadImage(id: number, file: Express.Multer.File[]) {
     try {
       const article = await this.articleRepository.findOne({ where: { id } });
 
@@ -241,9 +241,34 @@ export class ArticleService {
         throw new NotFoundException(AppStrings.NOT_FOUND);
       }
 
-      const url = await this.storageService.upload(file);
+      const url = await this.storageService.upload(file[0]);
 
       await this.articleRepository.update(id, { image: url });
+
+      return new SuccessResponse(AppStrings.UPLOAD_SUCCESSFUL, url);
+    } catch (error) {
+      this.logger.error('Error during image upload', error);
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new BadRequestException(
+          error.message || 'An unexpected error occurred during image upload',
+        );
+      }
+    }
+  }
+
+  async uploadProfileImage(id: number, file: Express.Multer.File[]) {
+    try {
+      const article = await this.articleRepository.findOne({ where: { id } });
+
+      if (!article) {
+        throw new NotFoundException(AppStrings.NOT_FOUND);
+      }
+
+      const url = await this.storageService.upload(file[0]);
+
+      await this.articleRepository.update(id, { authorImage: url });
 
       return new SuccessResponse(AppStrings.UPLOAD_SUCCESSFUL, url);
     } catch (error) {
