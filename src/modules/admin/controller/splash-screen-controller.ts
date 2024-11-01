@@ -19,7 +19,7 @@ export class SplashScreenController {
   @UseInterceptors(AnyFilesInterceptor())
   async uploadSplashScreenImage(
     @Query('id') id: number,
-    @UploadedFiles() file: Express.Multer.File,
+    @UploadedFiles() file: Express.Multer.File[],
   ) {
     return await this.splashScreenService.uploadImage(id, file);
   }

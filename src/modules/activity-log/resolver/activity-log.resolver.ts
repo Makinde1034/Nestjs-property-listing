@@ -5,7 +5,7 @@ import { UseGuards } from '@nestjs/common';
 import { ActivityLogService } from '../services/activity-log.service';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { ActivityLogsResponse } from '../dto/activity-log';
-import { ActivityLogInput } from '../dto/request/activity-log';
+import { ActivityLogInput, AuditLogTrailsInput } from '../dto/request/activity-log';
 
 @Resolver()
 export class ActivityResolver {
@@ -22,7 +22,7 @@ export class ActivityResolver {
   @UseGuards(AccessTokenGuard)
   async getAllActivityLogs(
     @Args('paginateAndSort', { nullable: true })
-    paginateAndSort: PaginateAndSort,
+    paginateAndSort: AuditLogTrailsInput,
   ) {
     return await this.activityLogService.getAllLogs(paginateAndSort);
   }

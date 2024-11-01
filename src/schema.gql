@@ -1009,7 +1009,7 @@ type Query {
   unpublishArticle(articlePublishInput: ArticlePublishInput!): SuccessResponse!
   searchForCategory(searchParam: String!): [Category!]!
   getActivityLogs(activityLogInput: ActivityLogInput!): ActivityLogsResponse!
-  getAllActivityLogs(paginateAndSort: PaginateAndSort): ActivityLogsResponse!
+  getAllActivityLogs(paginateAndSort: AuditLogTrailsInput): ActivityLogsResponse!
   serviceProvider(id: Int!): ServiceProvider!
 }
 
@@ -1202,6 +1202,17 @@ input ActivityLogInput {
   where: WhereOption
   id: String!
   fieldToFilter: String!
+}
+
+input AuditLogTrailsInput {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
+  userName: String
+  minDate: DateTime
+  maxDate: DateTime
 }
 
 type Mutation {
