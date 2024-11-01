@@ -56,7 +56,7 @@ export class User extends BaseEntity {
   @Field({ nullable: true })
   termsOfServiceVersion: string;
 
-  @Column({ default: 'v1' })
+  @Column()
   @Field({ nullable: true })
   currentTermOfservice: string;
 
