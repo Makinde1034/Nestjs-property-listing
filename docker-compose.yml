@@ -14,11 +14,12 @@ services:
       - app-network
     depends_on:
       - postgres
+
   #
-  # Postgres DB
+  # PostGIS-enabled Postgres DB
   #
   postgres:
-    image: postgres:14.1-alpine
+    image: postgis/postgis:14-3.3-alpine
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
@@ -31,6 +32,7 @@ services:
     restart: always
     networks:
       - app-network
+
 volumes:
   db:
 

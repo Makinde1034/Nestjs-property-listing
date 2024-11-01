@@ -609,12 +609,23 @@ export class ListingService {
 
         if (gpsCoordinate) {
           const { lng, lat } = gpsCoordinate;
+          const radiusInKm = 5; // Radius in kilometers
+
           query
             .leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate')
-            .andWhere('gpsCoordinate.lng = :lng AND gpsCoordinate.lat = :lat', {
-              lng,
-              lat,
-            });
+            .andWhere(
+              `
+              ST_DistanceSphere(
+                ST_MakePoint(gpsCoordinate.lng, gpsCoordinate.lat),
+                ST_MakePoint(:lng, :lat)
+              ) <= :distance
+            `,
+              {
+                lng,
+                lat,
+                distance: radiusInKm * 1000, // Convert kilometers to meters
+              },
+            );
         } else {
           query.leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate');
         }
@@ -1666,7 +1677,8 @@ export class ListingService {
         return {
           adminId: admin.id,
           action: ActivityEnum.ENABLED,
-          details: JSON.stringify(element),
+          details: JSON.stringify(listing.find((a) => a.id === element.id)),
+
           listingId: element.id,
         };
       });

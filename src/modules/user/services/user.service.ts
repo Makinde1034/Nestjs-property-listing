@@ -1133,7 +1133,7 @@ export class UserService {
       return {
         adminId: admin.id,
         action: ActivityEnum.BLOCKED,
-        details: JSON.stringify(element),
+        details: JSON.stringify(users.find((a) => a.id === element.id)),
         userId: element.id,
       };
     });
@@ -1182,7 +1182,7 @@ export class UserService {
       return {
         adminId: admin.id,
         action: ActivityEnum.DELETED,
-        details: JSON.stringify(element),
+        details: JSON.stringify(users.find((a) => a.id === element.id)),
         userId: element.id,
       };
     });

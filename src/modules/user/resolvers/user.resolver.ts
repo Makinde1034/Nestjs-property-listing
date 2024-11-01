@@ -114,7 +114,6 @@ export class UserResolver {
   ): Promise<SuccessResponse> {
     return await this.userService.forceUpdate(version);
   }
-
   @UseGuards(AccessTokenGuard, AdminGuard)
   @Mutation(() => SuccessResponse)
   async resetPasswordAdmin(
