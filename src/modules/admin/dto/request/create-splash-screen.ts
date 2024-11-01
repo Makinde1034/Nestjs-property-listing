@@ -4,7 +4,7 @@
  */
 
 import { Field, InputType, PartialType } from '@nestjs/graphql';
-import { IsBoolean, IsDate, IsEnum, IsString } from 'class-validator';
+import { IsBoolean, IsDate, IsEnum, IsNumber, IsString } from 'class-validator';
 import { SplashScreenPlacement } from '../../../../common/enums/splashScreen';
 @InputType()
 export class CreateSplashScreenInput {
@@ -28,10 +28,12 @@ export class CreateSplashScreenInput {
   @IsDate()
   endDate: Date;
 }
+
 @InputType()
 export class UpdateSplashScreenInput extends PartialType(
   CreateSplashScreenInput,
 ) {
   @Field()
+  @IsNumber()
   id: number;
 }
