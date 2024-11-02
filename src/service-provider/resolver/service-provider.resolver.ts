@@ -1,12 +1,14 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
 import { ServiceAndProviderService } from '../services/service-provider.service';
 import { ServiceProvider } from '../../entities/service-provider.entity';
 import {
   CreateServiceInput,
   CreateServiceProviderInput,
+  DeleteServiceProvider,
   UpdateServiceProviderInput,
 } from '../dto/service';
 import { PaginateAndSort } from '../../modules/core/dto/pagination-and-sort.dto';
+import { SuccessResponse } from '../../common/utils/success.response';
 
 @Resolver(() => ServiceProvider)
 export class ServiceAndProviderResolver {
@@ -49,8 +51,28 @@ export class ServiceAndProviderResolver {
     return this.serviceProviderService.update(updateServiceProviderInput);
   }
 
+  @Mutation(() => SuccessResponse)
+  acceptServiceprovider(
+    @Args('id')
+    id: string,
+    @Context() ctx: any,
+  ) {
+    return this.serviceProviderService.accept(id, ctx.req.user);
+  }
+
+  @Mutation(() => SuccessResponse)
+  rejectServiceprovider(
+    @Args('id')
+    id: string,
+    @Context() ctx: any,
+  ) {
+    return this.serviceProviderService.reject(id, ctx.req.user);
+  }
+
   @Mutation(() => ServiceProvider)
-  removeServiceProvider(@Args('id') id: string) {
-    return this.serviceProviderService.remove(id);
+  removeServiceProvider(
+    @Args('deleteServiceProvider') deleteServiceProvider: DeleteServiceProvider,
+  ) {
+    return this.serviceProviderService.delete(deleteServiceProvider);
   }
 }

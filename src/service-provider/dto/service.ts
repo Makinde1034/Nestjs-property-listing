@@ -84,3 +84,10 @@ export class UpdateServiceInput extends PartialType(CreateServiceInput) {
   @IsString()
   id: string;
 }
+
+@InputType()
+export class DeleteServiceProvider {
+  @Field(() => [String])
+  @IsArray()
+  id: string[];
+}
