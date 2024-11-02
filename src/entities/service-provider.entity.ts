@@ -12,6 +12,7 @@ import BaseEntity from './base.entity';
 import { Service } from './services.entity';
 import { ServiceStatus } from './provider-service-status.entity';
 import { ServiceProviderStatus } from '../common/enums/status.enum';
+import { ActivityLog } from './activity-log.entity';
 
 @ObjectType()
 @Entity()
@@ -55,6 +56,13 @@ export class ServiceProvider extends BaseEntity {
   @Field(() => [Service])
   @OneToMany(() => Service, (servicesOffered) => servicesOffered.service)
   serviceOffered: Service[];
+
+  @Field(() => [ActivityLog])
+  @OneToMany(
+    () => ActivityLog,
+    (servicesOffered) => servicesOffered.serviceProvider,
+  )
+  activityLog: ActivityLog[];
 
   @Field(() => [ServiceStatus])
   @OneToMany(() => ServiceStatus, (status) => status.service)

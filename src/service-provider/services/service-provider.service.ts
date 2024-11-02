@@ -13,6 +13,10 @@ import { ActivityLogService } from '../../modules/activity-log/services/activity
 import { In } from 'typeorm';
 import { ServiceProviderStatus } from '../../common/enums/status.enum';
 import { ServiceStatusRepository } from '../repository/service-status.repository';
+import { User } from '../../entities';
+import { ActivityEnum } from '../../common/enums/activitys';
+import { SuccessResponse } from '../../common/utils/success.response';
+import { AppStrings } from '../../common/messages/app.strings';
 
 @Injectable()
 export class ServiceAndProviderService {
@@ -79,11 +83,23 @@ export class ServiceAndProviderService {
     return await this.serviceProviderRepository.findOneBy({ id });
   }
 
-  async accept(id: string) {
+  async accept(id: string, user: User) {
     try {
-      return await this.serviceProviderRepository.update(id, {
+      const { affected } = await this.serviceProviderRepository.update(id, {
         providerStatus: ServiceProviderStatus.ACCEPTED,
       });
+      await this.activityLogService.logActivity([
+        {
+          adminId: user.id,
+          action: ActivityEnum.UPDATED,
+          providerId: id,
+        },
+      ]);
+
+      await this.activityLogService.logActivity([
+        { adminId: user.id, action: ActivityEnum.UPDATED },
+      ]);
+      return new SuccessResponse(AppStrings.SUCCESSFULL);
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);

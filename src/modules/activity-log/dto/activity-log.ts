@@ -15,6 +15,7 @@ export class CreateActivityLog {
   articleId?: number;
   auctionId?: string;
   splashScreenId?: number;
+  providerId?: string;
 }
 
 @ObjectType()
