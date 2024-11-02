@@ -74,14 +74,7 @@ export class KnowledgeBaseCategoryService {
       const orderOptions = {
         [sortField]: sortDirection,
       };
-      if (findOption.placement) {
-        return await this.knowledgeBaseCategoryRepository.find({
-          where: { placement: findOption.placement },
-          take: findOption.take,
-          skip: findOption.skip,
-          order: orderOptions,
-        });
-      }
+
       return await this.knowledgeBaseCategoryRepository.find({
         take: findOption.take,
         skip: findOption.skip,

@@ -356,7 +356,6 @@ type ResponseTemplate {
 
 type Category {
   id: Int!
-  placement: String!
   arabicName: String!
   englishName: String!
   article: [Article!]!
@@ -398,6 +397,52 @@ type SplashScreen {
   updatedAt: DateTime!
 }
 
+type ServiceStatus {
+  id: ID!
+  serviceProvider: ServiceProvider!
+  serviceProviderId: String!
+  service: Service!
+  serviceId: String!
+  createdAt: DateTime!
+  status: String
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Service {
+  id: ID!
+  englishServiceName: String!
+  arabicServiceName: String!
+  active: Boolean
+  isWorkLicenseRequired: Boolean
+  icon: String
+  pricing: String
+  status: ServiceStatus!
+  service: ServiceProvider!
+  servicePrividerId: String!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type ServiceProvider {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  ibanCertificate: String
+  workLicense: String
+  idOrCr: String
+  iban: String
+  createdAt: DateTime!
+  providerStatus: String
+  deletedAt: DateTime!
+  serviceOffered: [Service!]!
+  activityLog: [ActivityLog!]!
+  status: [ServiceStatus!]!
+  coverageArea: String!
+  updatedAt: DateTime!
+}
+
 type ActivityLog {
   id: ID!
   user: User
@@ -408,6 +453,8 @@ type ActivityLog {
   responseTemplate: ResponseTemplate
   ticket: Ticket
   article: Article
+  serviceProvider: ServiceProvider
+  serviceProviderId: String!
   splashScreen: SplashScreen
   auction: Auction
   userId: String
@@ -909,51 +956,6 @@ type ActivityLogsResponse {
   total: Float!
 }
 
-type ServiceStatus {
-  id: ID!
-  serviceProvider: ServiceProvider!
-  serviceProviderId: String!
-  service: Service!
-  serviceId: String!
-  createdAt: DateTime!
-  status: String
-  deletedAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type Service {
-  id: ID!
-  englishServiceName: String!
-  arabicServiceName: String!
-  active: Boolean
-  isWorkLicenseRequired: Boolean
-  icon: String
-  pricing: String
-  status: ServiceStatus!
-  service: ServiceProvider!
-  servicePrividerId: String!
-  createdAt: DateTime!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type ServiceProvider {
-  id: ID!
-  firstName: String!
-  lastName: String!
-  ibanCertificate: String
-  workLicense: String
-  idOrCr: String
-  iban: String
-  createdAt: DateTime!
-  providerStatus: String
-  deletedAt: DateTime!
-  serviceOffered: [Service!]!
-  status: [ServiceStatus!]!
-  coverageArea: String!
-  updatedAt: DateTime!
-}
-
 type Query {
   app: String!
   findAllSplashScreen(findOption: SplashScreenFilterInput): SplashScreenResponse!
@@ -1229,7 +1231,6 @@ input CategoryFilterInput {
   sortField: String
   directionToSort: SortOrder
   where: WhereOption
-  placement: String
 }
 
 input ArticleFilterInput {
@@ -1269,7 +1270,7 @@ input AuditLogTrailsInput {
 type Mutation {
   createSplashScreen(createSplashScreenInput: CreateSplashScreenInput!): SplashScreen!
   updateSplashScreen(updateSplashScreenInput: UpdateSplashScreenInput!): SplashScreen!
-  deleteSplashScreen(deleteSplashScreenInput: DeleteSplashScreenInput!): SplashScreen!
+  deleteSplashScreen(deleteSplashScreenInput: DeleteSplashScreenInput!): SuccessResponse!
   register(RegisterInput: RegisterInput!): User!
   registerConfirm(RegisterConfirmInput: AuthRegisterConfirmDto!): String!
   login(loginInput: LoginInput!): LoginResponse!
@@ -1926,13 +1927,11 @@ input CreateReviewDto {
 }
 
 input CreateCategoryInput {
-  placement: String!
   arabicName: String!
   englishName: String!
 }
 
 input UpdateCategoryInput {
-  placement: String
   arabicName: String
   englishName: String
   id: Float!

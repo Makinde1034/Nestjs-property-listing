@@ -18,6 +18,7 @@ import {
   DeleteSplashScreenInput,
   SplashScreenFilterInput,
 } from '../dto/request/admin-request';
+import { SuccessResponse } from '../../../common/utils/success.response';
 
 @Resolver()
 export class SplashScreenResolver {
@@ -58,7 +59,7 @@ export class SplashScreenResolver {
     );
   }
 
-  @Mutation(() => SplashScreen, { name: 'deleteSplashScreen' })
+  @Mutation(() => SuccessResponse, { name: 'deleteSplashScreen' })
   async delete(
     @Args('deleteSplashScreenInput')
     deleteSplashScreenInput: DeleteSplashScreenInput,

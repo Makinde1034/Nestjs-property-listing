@@ -17,11 +17,11 @@ import { knowledgeBasePlacement } from '../../../../common/enums/knowledge-base'
 
 @InputType()
 export class CreateCategoryInput {
-  @IsString()
-  @IsNotEmpty()
-  @Field()
-  @IsEnum(knowledgeBasePlacement)
-  placement: string;
+  // @IsString()
+  // @IsNotEmpty()
+  // @Field()
+  // @IsEnum(knowledgeBasePlacement)
+  // placement: string;
 
   @IsString()
   @IsNotEmpty()
@@ -50,9 +50,4 @@ export class CategoryActionInput {
 }
 
 @InputType()
-export class CategoryFilterInput extends PaginateAndSort {
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  placement: string;
-}
+export class CategoryFilterInput extends PaginateAndSort {}

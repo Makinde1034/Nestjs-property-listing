@@ -17,6 +17,7 @@ import { Ticket } from './ticket.entity';
 import { Article } from './article.entity';
 import { SplashScreen } from './splash-screen.entity';
 import { Auction } from './auction-table.entity';
+import { ServiceProvider } from './service-provider.entity';
 
 @Entity()
 @ObjectType()
@@ -63,6 +64,14 @@ export class ActivityLog extends BaseEntity {
   @JoinTable({ name: 'articleId' })
   @ManyToOne(() => Article, (article) => article.articleActivityLog)
   article: Article;
+
+  @Field(() => ServiceProvider, { nullable: true })
+  @JoinTable({ name: 'serviceProviderId' })
+  @ManyToOne(() => Article, (article) => article.articleActivityLog)
+  serviceProvider: ServiceProvider;
+
+  @Field()
+  serviceProviderId: string;
 
   @Field(() => SplashScreen, { nullable: true })
   @JoinTable({ name: 'splashScreenId' })
