@@ -327,7 +327,6 @@ export class AuctionService {
             action: ActivityEnum.UPDATED,
             auctionId: element.id,
             details: JSON.stringify(auction.find((a) => a.id === element.id)),
-
           };
         });
 
@@ -446,7 +445,6 @@ export class AuctionService {
             adminId: user.id,
             action: ActivityEnum.UPDATED,
             auctionId: element,
-            
           };
         });
 
@@ -653,10 +651,10 @@ export class AuctionService {
       return await this.auctionRepository
         .createQueryBuilder('auction')
 
-        .orWhere('auction.titleInArabic LIKE :term', {
+        .orWhere('auction.titleInArabic ILIKE :term', {
           term: `%${searchParam}%`,
         })
-        .orWhere('auction.titleInArabic LIKE :term', {
+        .orWhere('auction.titleInArabic ILIKE :term', {
           term: `%${searchParam}%`,
         })
 

@@ -145,10 +145,10 @@ export class KnowledgeBaseCategoryService {
       return await this.knowledgeBaseCategoryRepository
         .createQueryBuilder('category')
 
-        .orWhere('category.englishName LIKE :term', {
+        .orWhere('category.englishName ILIKE :term', {
           term: `%${searchParam}%`,
         })
-        .orWhere('category.arabicName LIKE :term', {
+        .orWhere('category.arabicName ILIKE :term', {
           term: `%${searchParam}%`,
         })
         .take(10)

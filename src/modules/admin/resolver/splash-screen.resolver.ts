@@ -14,6 +14,10 @@ import { SplashScreenResponse } from '../dto/response/splash-screen-response';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { UseGuards } from '@nestjs/common';
 import { AccessTokenGuard } from '../../auth/guards';
+import {
+  DeleteSplashScreenInput,
+  SplashScreenFilterInput,
+} from '../dto/request/admin-request';
 
 @Resolver()
 export class SplashScreenResolver {
@@ -32,7 +36,7 @@ export class SplashScreenResolver {
 
   @Query(() => SplashScreenResponse, { name: 'findAllSplashScreen' })
   async findAll(
-    @Args('findOption', { nullable: true }) findOption: PaginateAndSort,
+    @Args('findOption', { nullable: true }) findOption: SplashScreenFilterInput,
   ) {
     return await this.splashScreenService.findAll(findOption);
   }
@@ -55,8 +59,11 @@ export class SplashScreenResolver {
   }
 
   @Mutation(() => SplashScreen, { name: 'deleteSplashScreen' })
-  async delete(@Args('id') id: number) {
-    return await this.splashScreenService.delete(id);
+  async delete(
+    @Args('deleteSplashScreenInput')
+    deleteSplashScreenInput: DeleteSplashScreenInput,
+  ) {
+    return await this.splashScreenService.delete(deleteSplashScreenInput);
   }
 
   @Query(() => SplashScreen, {

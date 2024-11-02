@@ -1,0 +1,86 @@
+import { InputType, Field, PartialType } from '@nestjs/graphql';
+import {
+  IsArray,
+  IsBoolean,
+  IsEnum,
+  IsOptional,
+  IsString,
+} from 'class-validator';
+import { ServiceProviderStatus } from '../../common/enums/status.enum';
+
+export class Pricing {
+  @Field()
+  @IsString()
+  type: string;
+
+  @Field()
+  @IsString()
+  price: number;
+}
+
+@InputType()
+export class CreateServiceProviderInput {
+  @Field()
+  @IsString()
+  firstName: string;
+
+  @Field()
+  @IsString()
+  lastName: string;
+
+  @Field({ nullable: true })
+  @IsString()
+  iban: string;
+
+  @Field(() => [String])
+  @IsArray()
+  @IsString()
+  serviceOffered: string[];
+
+  @Field()
+  @IsString()
+  coverageArea: string;
+}
+
+@InputType()
+export class UpdateServiceProviderInput extends PartialType(
+  CreateServiceProviderInput,
+) {
+  @Field()
+  @IsString()
+  id: string;
+}
+
+@InputType()
+export class CreateServiceInput {
+  @Field()
+  @IsString()
+  englishServiceName: string;
+
+  @Field()
+  @IsString()
+  arabicServiceName: string;
+
+  @Field({ nullable: true })
+  @IsBoolean()
+  active: boolean;
+
+  @Field({ nullable: true })
+  @IsBoolean()
+  isWorkLicenseRequired: boolean;
+
+  @Field(() => [Pricing])
+  @IsArray()
+  pricing: Pricing;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsEnum(ServiceProviderStatus)
+  providerServiceStatus: string;
+}
+@InputType()
+export class UpdateServiceInput extends PartialType(CreateServiceInput) {
+  @Field()
+  @IsString()
+  id: string;
+}

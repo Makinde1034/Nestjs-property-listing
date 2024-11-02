@@ -1,13 +1,18 @@
 import { Module } from '@nestjs/common';
-import { ServiceProviderService } from './services/service-provider.service';
-import { ServiceProviderResolver } from './resolver/service-provider.resolver';
+import { ServiceAndProviderService } from './services/service-provider.service';
+import { ServiceAndProviderResolver } from './resolver/service-provider.resolver';
 import { ServiceProviderRepository } from './repository/service-provider.repository';
+import { ServiceRepository } from './repository/services.repository';
+
+import { ServiceStatusRepository } from './repository/service-status.repository';
 
 @Module({
   providers: [
-    ServiceProviderResolver,
-    ServiceProviderService,
+    ServiceAndProviderResolver,
+    ServiceAndProviderService,
     ServiceProviderRepository,
+    ServiceRepository,
+    ServiceStatusRepository,
   ],
 })
 export class ServiceProviderModule {}

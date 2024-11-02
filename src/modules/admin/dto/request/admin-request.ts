@@ -4,8 +4,18 @@
  */
 
 import { InputType, Field, PartialType } from '@nestjs/graphql';
-import { IsOptional, IsEnum, IsNumber, IsString } from 'class-validator';
-import { TimePeriodForDashboard } from '../../../../common/enums/sort.enum';
+import {
+  IsOptional,
+  IsEnum,
+  IsNumber,
+  IsString,
+  IsArray,
+} from 'class-validator';
+import {
+  TimePeriod,
+  TimePeriodForDashboard,
+} from '../../../../common/enums/sort.enum';
+import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
 
 @InputType()
 export class AdminDashboardSort {
@@ -108,3 +118,21 @@ export class AdminDefaultInput {
 
 @InputType()
 export class UpdateAdminDefaultInput extends PartialType(AdminDefaultInput) {}
+
+@InputType()
+export class DeleteSplashScreenInput {
+  @IsArray()
+  @Field(() => [String])
+  id: string[];
+}
+
+@InputType()
+export class SplashScreenFilterInput extends PaginateAndSort {
+  @IsEnum(TimePeriod)
+  @Field()
+  timePeriod: string;
+
+  @IsString()
+  @Field()
+  placement: string;
+}

@@ -21,11 +21,25 @@ import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { AppStrings } from '../../../common/messages/app.strings';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { StorageService } from '../../file-handler/services/storage.service';
-import { LessThanOrEqual, MoreThan } from 'typeorm';
+import { Between, In, LessThanOrEqual, MoreThan } from 'typeorm';
 import { SplashScreen } from '../../../entities/splash-screen.entity';
 import { User } from '../../../entities';
 import { ActivityLogService } from '../../activity-log/services/activity-log.service';
 import { ActivityEnum } from '../../../common/enums/activitys';
+import {
+  DeleteSplashScreenInput,
+  SplashScreenFilterInput,
+} from '../dto/request/admin-request';
+import {
+  startOfDay,
+  endOfDay,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  startOfYear,
+  endOfYear,
+} from 'date-fns';
 @Injectable()
 export class SplashScreenService {
   constructor(
@@ -58,12 +72,34 @@ export class SplashScreenService {
     }
   }
 
-  async findAll(findOption: PaginateAndSort) {
+  async findAll(findOption: SplashScreenFilterInput) {
     try {
+      const now = new Date();
+      const whereCondition: any = {};
+      const dateField = 'createdAt';
+      switch (findOption.timePeriod) {
+        case 'today':
+          whereCondition[dateField] = Between(startOfDay(now), endOfDay(now));
+          break;
+        case 'week':
+          whereCondition[dateField] = Between(startOfWeek(now), endOfWeek(now));
+          break;
+        case 'month':
+          whereCondition[dateField] = Between(
+            startOfMonth(now),
+            endOfMonth(now),
+          );
+          break;
+        case 'year':
+          whereCondition[dateField] = Between(startOfYear(now), endOfYear(now));
+          break;
+      }
+
       const take = findOption.take ?? 20;
 
       const [splashScreen, total] =
         await this.splashScreenRepository.findAndCount({
+          where: whereCondition,
           take: Math.min(take, 20),
           skip: findOption.skip ?? 0,
         });
@@ -130,15 +166,16 @@ export class SplashScreenService {
     }
   }
 
-  async delete(id: number) {
+  async delete(deleteSplashScreenInput: DeleteSplashScreenInput) {
     try {
       const splashScreen = await this.splashScreenRepository.findOneByOrFail({
-        id,
+        id: In(deleteSplashScreenInput.id),
       });
       if (!splashScreen) {
         throw new BadRequestException(AppStrings.NOT_FOUND);
       }
-      const { affected } = await this.splashScreenRepository.softDelete(id);
+      const { affected } =
+        await this.splashScreenRepository.softDelete(splashScreen);
       if (affected > 0) {
         return new SuccessResponse(AppStrings.DELETED_SUCCESSFULLY);
       }
@@ -210,10 +247,10 @@ export class SplashScreenService {
       return await this.splashScreenRepository
         .createQueryBuilder('splashScreen')
 
-        .orWhere('splashScreen.title LIKE :term', {
+        .orWhere('splashScreen.title ILIKE :term', {
           term: `%${searchParam}%`,
         })
-        .orWhere('splashScreen.placement LIKE :term', {
+        .orWhere('splashScreen.placement ILIKE :term', {
           term: `%${searchParam}%`,
         })
         .take(10)

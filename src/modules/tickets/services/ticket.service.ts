@@ -392,20 +392,20 @@ export class TicketService {
         .leftJoinAndSelect('ticket.parentIssue', 'parentIssue')
         .leftJoinAndSelect('ticket.childIssue', 'childIssue')
 
-        .orWhere('user.firstName LIKE :term', { term: `%${searchParam}%` })
-        .orWhere('user.arabicFirstName LIKE :term', {
+        .orWhere('user.firstName ILIKE :term', { term: `%${searchParam}%` })
+        .orWhere('user.arabicFirstName ILIKE :term', {
           term: `%${searchParam}%`,
         })
-        .orWhere('parentIssue.arabicName LIKE :term', {
+        .orWhere('parentIssue.arabicName ILIKE :term', {
           term: `%${searchParam}%`,
         })
-        .orWhere('parentIssue.englishName LIKE :term', {
+        .orWhere('parentIssue.englishName ILIKE :term', {
           term: `%${searchParam}%`,
         })
-        .orWhere('childIssue.arabicName LIKE :term', {
+        .orWhere('childIssue.arabicName ILIKE :term', {
           term: `%${searchParam}%`,
         })
-        .orWhere('childIssue.englishName LIKE :term', {
+        .orWhere('childIssue.englishName ILIKE :term', {
           term: `%${searchParam}%`,
         })
         .getMany();
@@ -420,19 +420,19 @@ export class TicketService {
       return await this.responseTemplateRepostiory
         .createQueryBuilder('responseTemplate')
 
-        .orWhere('responseTemplate.templateText LIKE :term', {
+        .orWhere('responseTemplate.templateText ILIKE :term', {
           term: `%${searchParam}%`,
         })
 
-        .orWhere('responseTemplate.templateArabicText LIKE :term', {
+        .orWhere('responseTemplate.templateArabicText ILIKE :term', {
           term: `%${searchParam}%`,
         })
 
-        .orWhere('responseTemplate.templateArabicName LIKE :term', {
+        .orWhere('responseTemplate.templateArabicName ILIKE :term', {
           term: `%${searchParam}%`,
         })
 
-        .orWhere('responseTemplate.templateName LIKE :term', {
+        .orWhere('responseTemplate.templateName ILIKE :term', {
           term: `%${searchParam}%`,
         })
         .take(10)

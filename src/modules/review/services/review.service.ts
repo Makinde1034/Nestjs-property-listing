@@ -137,15 +137,15 @@ export class ReviewService {
         .createQueryBuilder('review')
         .leftJoinAndSelect('review.user', 'user')
 
-        .orWhere('user.name LIKE :term', {
+        .orWhere('user.name ILIKE :term', {
           term: `%${searchParam}%`,
         })
 
-        .orWhere('review.rating LIKE :term', {
+        .orWhere('review.rating ILIKE :term', {
           term: `%${searchParam}%`,
         })
 
-        .orWhere('review.service LIKE :term', {
+        .orWhere('review.service ILIKE :term', {
           term: `%${searchParam}%`,
         })
 

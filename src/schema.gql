@@ -909,13 +909,54 @@ type ActivityLogsResponse {
   total: Float!
 }
 
+type ServiceStatus {
+  id: ID!
+  serviceProvider: ServiceProvider!
+  serviceProviderId: String!
+  service: Service!
+  serviceId: String!
+  createdAt: DateTime!
+  status: String
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Service {
+  id: ID!
+  englishServiceName: String!
+  arabicServiceName: String!
+  active: Boolean
+  isWorkLicenseRequired: Boolean
+  icon: String
+  pricing: String
+  status: ServiceStatus!
+  service: ServiceProvider!
+  servicePrividerId: String!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type ServiceProvider {
   id: ID!
+  firstName: String!
+  lastName: String!
+  ibanCertificate: String
+  workLicense: String
+  idOrCr: String
+  iban: String
+  createdAt: DateTime!
+  providerStatus: String
+  deletedAt: DateTime!
+  serviceOffered: [Service!]!
+  status: [ServiceStatus!]!
+  coverageArea: String!
+  updatedAt: DateTime!
 }
 
 type Query {
   app: String!
-  findAllSplashScreen(findOption: PaginateAndSort): SplashScreenResponse!
+  findAllSplashScreen(findOption: SplashScreenFilterInput): SplashScreenResponse!
   findOneSplashScreen(id: Float!): SplashScreen!
   findDefaultSplashScreen: SplashScreen
   searchForSplashScreen(searchParam: String!): [SplashScreen!]!
@@ -1009,15 +1050,18 @@ type Query {
   searchForCategory(searchParam: String!): [Category!]!
   getActivityLogs(activityLogInput: ActivityLogInput!): ActivityLogsResponse!
   getAllActivityLogs(paginateAndSort: AuditLogTrailsInput): ActivityLogsResponse!
-  serviceProvider(id: String!): ServiceProvider!
+  findAllservices(paginateAndSort: PaginateAndSort!): [ServiceProvider!]!
+  findAllserviceProviders(id: String!): ServiceProvider!
 }
 
-input PaginateAndSort {
+input SplashScreenFilterInput {
   take: Float
   skip: Float
   sortField: String
   directionToSort: SortOrder
   where: WhereOption
+  timePeriod: String!
+  placement: String!
 }
 
 enum SortOrder {
@@ -1041,6 +1085,14 @@ input UserFilter {
   isBlocked: Boolean
   type: [String!]
   roles: [Float!]
+}
+
+input PaginateAndSort {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
 }
 
 input AttributeFilter {
@@ -1217,7 +1269,7 @@ input AuditLogTrailsInput {
 type Mutation {
   createSplashScreen(createSplashScreenInput: CreateSplashScreenInput!): SplashScreen!
   updateSplashScreen(updateSplashScreenInput: UpdateSplashScreenInput!): SplashScreen!
-  deleteSplashScreen(id: Float!): SplashScreen!
+  deleteSplashScreen(deleteSplashScreenInput: DeleteSplashScreenInput!): SplashScreen!
   register(RegisterInput: RegisterInput!): User!
   registerConfirm(RegisterConfirmInput: AuthRegisterConfirmDto!): String!
   login(loginInput: LoginInput!): LoginResponse!
@@ -1336,6 +1388,10 @@ input UpdateSplashScreenInput {
   startDate: DateTime
   endDate: DateTime
   id: Float!
+}
+
+input DeleteSplashScreenInput {
+  id: [String!]!
 }
 
 input RegisterInput {
@@ -1910,9 +1966,18 @@ input UpdateArticleInput {
 }
 
 input CreateServiceProviderInput {
-  id: String!
+  firstName: String!
+  lastName: String!
+  iban: String
+  serviceOffered: [String!]!
+  coverageArea: String!
 }
 
 input UpdateServiceProviderInput {
+  firstName: String
+  lastName: String
+  iban: String
+  serviceOffered: [String!]
+  coverageArea: String
   id: String!
 }

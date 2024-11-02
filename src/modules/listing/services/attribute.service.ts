@@ -326,11 +326,11 @@ export class AttributeService {
       return await this.attributeRepository
         .createQueryBuilder('attributes')
 
-        .where('attributes.englishName LIKE :term', {
+        .where('attributes.englishName ILIKE :term', {
           term: `%${searchParam}%`,
         })
 
-        .orWhere('attributes.arabicName LIKE :term', {
+        .orWhere('attributes.arabicName ILIKE :term', {
           term: `%${searchParam}%`,
         })
         .take(10)
@@ -346,11 +346,11 @@ export class AttributeService {
       return await this.attributeRepository
         .createQueryBuilder('attributeSets')
 
-        .where('attributeSets.englishName LIKE :term', {
+        .where('attributeSets.englishName ILIKE :term', {
           term: `%${searchParam}%`,
         })
 
-        .orWhere('attributeSets.arabicName LIKE :term', {
+        .orWhere('attributeSets.arabicName ILIKE :term', {
           term: `%${searchParam}%`,
         })
         .take(10)
