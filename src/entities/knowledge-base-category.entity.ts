@@ -20,9 +20,6 @@ export class Category {
   @PrimaryGeneratedColumn()
   @Field(() => Int)
   id: number;
-  @Column()
-  @Field()
-  placement: string;
 
   @Column()
   @Field()

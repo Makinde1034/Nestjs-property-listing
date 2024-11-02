@@ -356,7 +356,6 @@ type ResponseTemplate {
 
 type Category {
   id: Int!
-  placement: String!
   arabicName: String!
   englishName: String!
   article: [Article!]!
@@ -1232,7 +1231,6 @@ input CategoryFilterInput {
   sortField: String
   directionToSort: SortOrder
   where: WhereOption
-  placement: String
 }
 
 input ArticleFilterInput {
@@ -1929,13 +1927,11 @@ input CreateReviewDto {
 }
 
 input CreateCategoryInput {
-  placement: String!
   arabicName: String!
   englishName: String!
 }
 
 input UpdateCategoryInput {
-  placement: String
   arabicName: String
   englishName: String
   id: Float!
