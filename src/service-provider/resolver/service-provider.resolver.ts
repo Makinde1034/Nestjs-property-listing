@@ -34,45 +34,47 @@ export class ServiceAndProviderResolver {
   }
 
   @Query(() => [ServiceProvider], { name: 'findAllservices' })
-  findAll(@Args('paginateAndSort') paginateAndSort: PaginateAndSort) {
-    return this.serviceProviderService.findAllServiceProvider(paginateAndSort);
+  async findAll(@Args('paginateAndSort') paginateAndSort: PaginateAndSort) {
+    return await this.serviceProviderService.findAllServiceProvider(
+      paginateAndSort,
+    );
   }
 
   @Query(() => ServiceProvider, { name: 'findAllserviceProviders' })
-  findOne(@Args('id') id: string) {
-    return this.serviceProviderService.findOneServiceProvider(id);
+  async findOne(@Args('id') id: string) {
+    return await this.serviceProviderService.findOneServiceProvider(id);
   }
 
   @Mutation(() => ServiceProvider)
-  updateServiceProvider(
+  async updateServiceProvider(
     @Args('updateServiceProviderInput')
     updateServiceProviderInput: UpdateServiceProviderInput,
   ) {
-    return this.serviceProviderService.update(updateServiceProviderInput);
+    return await this.serviceProviderService.update(updateServiceProviderInput);
   }
 
   @Mutation(() => SuccessResponse)
-  acceptServiceprovider(
+  async acceptServiceprovider(
     @Args('id')
     id: string,
     @Context() ctx: any,
   ) {
-    return this.serviceProviderService.accept(id, ctx.req.user);
+    return await this.serviceProviderService.accept(id, ctx.req.user);
   }
 
   @Mutation(() => SuccessResponse)
-  rejectServiceprovider(
+  async rejectServiceprovider(
     @Args('id')
     id: string,
     @Context() ctx: any,
   ) {
-    return this.serviceProviderService.reject(id, ctx.req.user);
+    return await this.serviceProviderService.reject(id, ctx.req.user);
   }
 
   @Mutation(() => ServiceProvider)
-  removeServiceProvider(
+  async removeServiceProvider(
     @Args('deleteServiceProvider') deleteServiceProvider: DeleteServiceProvider,
   ) {
-    return this.serviceProviderService.delete(deleteServiceProvider);
+    return await this.serviceProviderService.delete(deleteServiceProvider);
   }
 }
