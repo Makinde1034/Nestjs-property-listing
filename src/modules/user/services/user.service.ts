@@ -758,27 +758,27 @@ export class UserService {
         // Combine all other conditions using OR logic
         .andWhere(
           new Brackets((qb) => {
-            qb.where('user.firstName LIKE :term', {
+            qb.where('user.firstName ILIKE :term', {
               term: `%${searchParam}%`,
             })
-              .orWhere('user.lastName LIKE :term', {
+              .orWhere('user.lastName ILIKE :term', {
                 term: `%${searchParam}%`,
               })
-              .orWhere('user.userType LIKE :term', {
+              .orWhere('user.userType ILIKE :term', {
                 term: `%${searchParam}%`,
               })
-              .orWhere('user.userLevel LIKE :term', {
+              .orWhere('user.userLevel ILIKE :term', {
                 term: `%${searchParam}%`,
               })
-              .orWhere('user.email LIKE :term', { term: `%${searchParam}%` })
-              .orWhere('user.status LIKE :term', { term: `%${searchParam}%` })
-              .orWhere('user.employeeId LIKE :term', {
+              .orWhere('user.email ILIKE :term', { term: `%${searchParam}%` })
+              .orWhere('user.status ILIKE :term', { term: `%${searchParam}%` })
+              .orWhere('user.employeeId ILIKE :term', {
                 term: `%${searchParam}%`,
               })
-              .orWhere('role.arabicName LIKE :term', {
+              .orWhere('role.arabicName ILIKE :term', {
                 term: `%${searchParam}%`,
               })
-              .orWhere('role.englishName LIKE :term', {
+              .orWhere('role.englishName ILIKE :term', {
                 term: `%${searchParam}%`,
               });
           }),
@@ -800,27 +800,27 @@ export class UserService {
         // Combine all other conditions using OR logic
         .andWhere(
           new Brackets((qb) => {
-            qb.where('user.firstName LIKE :term', {
+            qb.where('user.firstName ILIKE :term', {
               term: `%${searchParam}%`,
             })
-              .orWhere('user.lastName LIKE :term', {
+              .orWhere('user.lastName ILIKE :term', {
                 term: `%${searchParam}%`,
               })
-              .orWhere('user.userType LIKE :term', {
+              .orWhere('user.userType ILIKE :term', {
                 term: `%${searchParam}%`,
               })
-              .orWhere('user.userLevel LIKE :term', {
+              .orWhere('user.userLevel ILIKE :term', {
                 term: `%${searchParam}%`,
               })
-              .orWhere('user.email LIKE :term', { term: `%${searchParam}%` })
-              .orWhere('user.status LIKE :term', { term: `%${searchParam}%` })
-              .orWhere('user.employeeId LIKE :term', {
+              .orWhere('user.email ILIKE :term', { term: `%${searchParam}%` })
+              .orWhere('user.status ILIKE :term', { term: `%${searchParam}%` })
+              .orWhere('user.employeeId ILIKE :term', {
                 term: `%${searchParam}%`,
               })
-              .orWhere('role.arabicName LIKE :term', {
+              .orWhere('role.arabicName ILIKE :term', {
                 term: `%${searchParam}%`,
               })
-              .orWhere('role.englishName LIKE :term', {
+              .orWhere('role.englishName ILIKE :term', {
                 term: `%${searchParam}%`,
               });
           }),

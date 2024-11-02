@@ -1,31 +1,44 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
-import { ServiceProviderService } from '../services/service-provider.service';
+import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { ServiceAndProviderService } from '../services/service-provider.service';
 import { ServiceProvider } from '../../entities/service-provider.entity';
-import { CreateServiceProviderInput } from '../dto/create-service-provider.input';
-import { UpdateServiceProviderInput } from '../dto/update-service-provider.input';
+import {
+  CreateServiceInput,
+  CreateServiceProviderInput,
+  UpdateServiceProviderInput,
+} from '../dto/service';
+import { PaginateAndSort } from '../../modules/core/dto/pagination-and-sort.dto';
 
 @Resolver(() => ServiceProvider)
-export class ServiceProviderResolver {
+export class ServiceAndProviderResolver {
   constructor(
-    private readonly serviceProviderService: ServiceProviderService,
+    private readonly serviceProviderService: ServiceAndProviderService,
   ) {}
 
   @Mutation(() => ServiceProvider)
-  createServiceProvider(
+  async createServiceProvider(
     @Args('createServiceProviderInput')
     createServiceProviderInput: CreateServiceProviderInput,
   ) {
-    return this.serviceProviderService.create(createServiceProviderInput);
+    return await this.serviceProviderService.createProvider(
+      createServiceProviderInput,
+    );
   }
 
-  @Query(() => [ServiceProvider], { name: 'serviceProvider' })
-  findAll() {
-    return this.serviceProviderService.findAll();
+  async createService(
+    @Args('createServiceProviderInput')
+    createServiceInput: CreateServiceInput,
+  ) {
+    return await this.serviceProviderService.createService(createServiceInput);
   }
 
-  @Query(() => ServiceProvider, { name: 'serviceProvider' })
+  @Query(() => [ServiceProvider], { name: 'findAllservices' })
+  findAll(@Args('paginateAndSort') paginateAndSort: PaginateAndSort) {
+    return this.serviceProviderService.findAllServiceProvider(paginateAndSort);
+  }
+
+  @Query(() => ServiceProvider, { name: 'findAllserviceProviders' })
   findOne(@Args('id') id: string) {
-    return this.serviceProviderService.findOne(id);
+    return this.serviceProviderService.findOneServiceProvider(id);
   }
 
   @Mutation(() => ServiceProvider)
@@ -33,10 +46,7 @@ export class ServiceProviderResolver {
     @Args('updateServiceProviderInput')
     updateServiceProviderInput: UpdateServiceProviderInput,
   ) {
-    return this.serviceProviderService.update(
-      updateServiceProviderInput.id,
-      updateServiceProviderInput,
-    );
+    return this.serviceProviderService.update(updateServiceProviderInput);
   }
 
   @Mutation(() => ServiceProvider)

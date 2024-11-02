@@ -383,9 +383,9 @@ export class RoleService {
       return await this.roleRepository
         .createQueryBuilder('role')
 
-        .orWhere('role.arabicName LIKE :term', { term: `%${searchParam}%` })
+        .orWhere('role.arabicName ILIKE :term', { term: `%${searchParam}%` })
 
-        .orWhere('role.englishName LIKE :term', { term: `%${searchParam}%` })
+        .orWhere('role.englishName ILIKE :term', { term: `%${searchParam}%` })
         .take(10)
 
         .getMany();

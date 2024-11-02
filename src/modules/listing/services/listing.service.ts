@@ -2015,14 +2015,14 @@ export class ListingService {
         .leftJoinAndSelect('listing.user', 'user')
         .leftJoinAndSelect('listing.listingType', 'listingType')
 
-        .where('listing.title LIKE :term', { term: `%${searchParam}%` })
-        .orWhere('user.lastName LIKE :term', { term: `%${searchParam}%` })
-        .orWhere('user.firstName LIKE :term', { term: `%${searchParam}%` })
+        .where('listing.title ILIKE :term', { term: `%${searchParam}%` })
+        .orWhere('user.lastName ILIKE :term', { term: `%${searchParam}%` })
+        .orWhere('user.firstName ILIKE :term', { term: `%${searchParam}%` })
 
-        .orWhere('listingType.englishName LIKE :term', {
+        .orWhere('listingType.englishName ILIKE :term', {
           term: `%${searchParam}%`,
         })
-        .orWhere('listingType.arabicName LIKE :term', {
+        .orWhere('listingType.arabicName ILIKE :term', {
           term: `%${searchParam}%`,
         })
         .take(10)

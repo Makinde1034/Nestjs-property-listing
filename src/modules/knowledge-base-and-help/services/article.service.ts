@@ -288,19 +288,19 @@ export class ArticleService {
       return await this.articleRepository
         .createQueryBuilder('article')
         .leftJoinAndSelect('author.user', 'user')
-        .orWhere('article.title LIKE :term', {
+        .orWhere('article.title ILIKE :term', {
           term: `%${searchParam}%`,
         })
-        .orWhere('article.placement LIKE :term', {
+        .orWhere('article.placement ILIKE :term', {
           term: `%${searchParam}%`,
         })
-        .orWhere('article.title LIKE :term', {
+        .orWhere('article.title ILIKE :term', {
           term: `%${searchParam}%`,
         })
-        .orWhere('user.firstName LIKE :term', {
+        .orWhere('user.firstName ILIKE :term', {
           term: `%${searchParam}%`,
         })
-        .orWhere('user.arabicFirstName LIKE :term', {
+        .orWhere('user.arabicFirstName ILIKE :term', {
           term: `%${searchParam}%`,
         })
         .take(10)

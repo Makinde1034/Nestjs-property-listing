@@ -203,10 +203,10 @@ export class ListingTypeService {
       return await this.listingTypeRepository
         .queryBuilder('listingType')
 
-        .where('listingType.englishName LIKE :term', {
+        .where('listingType.englishName ILIKE :term', {
           term: `%${searchParam}%`,
         })
-        .orWhere('listingType.arabicName LIKE :term', {
+        .orWhere('listingType.arabicName ILIKE :term', {
           term: `%${searchParam}%`,
         })
         .take(10)
