@@ -54,7 +54,7 @@ export class Article {
 
   @Field(() => [ActivityLog], { nullable: true })
   @OneToMany(() => ActivityLog, (activityLogs) => activityLogs.ticket)
-  articleActivityLog: ActivityLog;
+  articleActivityLog: ActivityLog[];
 
   @Column()
   @Field()
