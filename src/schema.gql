@@ -437,7 +437,7 @@ type ServiceProvider {
   createdAt: DateTime!
   providerStatus: String
   deletedAt: DateTime!
-  serviceOffered: [Service!]!
+  serviceOffered: [Service!]
   activityLog: [ActivityLog!]!
   status: [ServiceStatus!]!
   coverageArea: String!

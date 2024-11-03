@@ -56,7 +56,7 @@ export class ServiceProvider extends BaseEntity {
   @DeleteDateColumn()
   deletedAt: Date;
 
-  @Field(() => [Service])
+  @Field(() => [Service], { nullable: true })
   @OneToMany(() => Service, (servicesOffered) => servicesOffered.service)
   serviceOffered: Service[];
 

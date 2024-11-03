@@ -1,6 +1,6 @@
 import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
 import { ServiceAndProviderService } from '../services/service-provider.service';
-import { ServiceProvider } from '../../entities/service-provider.entity';
+import { ServiceProvider } from '../../../entities/service-provider.entity';
 import {
   CreateServiceInput,
   CreateServiceProviderInput,
@@ -8,9 +8,9 @@ import {
   ServiceProviderInput,
   UpdateServiceProviderInput,
 } from '../dto/service';
-import { PaginateAndSort } from '../../modules/core/dto/pagination-and-sort.dto';
-import { SuccessResponse } from '../../common/utils/success.response';
-import { Service } from '../../entities/services.entity';
+import { PaginateAndSort } from '../../../modules/core/dto/pagination-and-sort.dto';
+import { SuccessResponse } from '../../../common/utils/success.response';
+import { Service } from '../../../entities/services.entity';
 
 @Resolver(() => ServiceProvider)
 export class ServiceAndProviderResolver {

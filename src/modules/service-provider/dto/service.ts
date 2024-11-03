@@ -6,7 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { ServiceProviderStatus } from '../../common/enums/status.enum';
+import { ServiceProviderStatus } from '../../../common/enums/status.enum';
 
 export class Pricing {
   @Field()

@@ -10,15 +10,15 @@ import {
 
 import { ServiceProviderRepository } from '../repository/service-provider.repository';
 import { ServiceRepository } from '../repository/services.repository';
-import { PaginateAndSort } from '../../modules/core/dto/pagination-and-sort.dto';
-import { ActivityLogService } from '../../modules/activity-log/services/activity-log.service';
+import { PaginateAndSort } from '../../../modules/core/dto/pagination-and-sort.dto';
+import { ActivityLogService } from '../../../modules/activity-log/services/activity-log.service';
 import { In } from 'typeorm';
-import { ServiceProviderStatus } from '../../common/enums/status.enum';
+import { ServiceProviderStatus } from '../../../common/enums/status.enum';
 import { ServiceStatusRepository } from '../repository/service-status.repository';
-import { User } from '../../entities';
-import { ActivityEnum } from '../../common/enums/activitys';
-import { SuccessResponse } from '../../common/utils/success.response';
-import { AppStrings } from '../../common/messages/app.strings';
+import { User } from '../../../entities';
+import { ActivityEnum } from '../../../common/enums/activitys';
+import { SuccessResponse } from '../../../common/utils/success.response';
+import { AppStrings } from '../../../common/messages/app.strings';
 
 @Injectable()
 export class ServiceAndProviderService {
