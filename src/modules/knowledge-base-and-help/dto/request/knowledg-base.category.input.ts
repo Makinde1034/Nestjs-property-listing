@@ -48,7 +48,6 @@ export class CategoryActionInput {
   @IsArray()
   id: number[];
 }
-
 @InputType()
 export class CategoryFilterInput extends PaginateAndSort {
   @IsOptional()
