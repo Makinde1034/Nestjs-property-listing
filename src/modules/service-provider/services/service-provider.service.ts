@@ -3,6 +3,7 @@ import {
   CreateServiceInput,
   CreateServiceProviderInput,
   DeleteServiceProvider,
+  ProvideNewService,
   ServiceProviderInput,
   UpdateServiceInput,
   UpdateServiceProviderInput,
@@ -183,9 +184,13 @@ export class ServiceAndProviderService {
   async updateServiceStatus(updateServiceInput: UpdateServiceInput) {
     try {
       const { id, providerServiceStatus } = updateServiceInput;
-      return await this.serviceStatusRepository.update(id, {
+      const { affected } = await this.serviceStatusRepository.update(id, {
         status: providerServiceStatus,
       });
+
+      if (affected > 0) {
+        return new SuccessResponse(AppStrings.SUCCESSFULL);
+      }
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -197,9 +202,12 @@ export class ServiceAndProviderService {
   ) {
     try {
       const { id, coverageArea } = updateServiceInput;
-      return await this.serviceProviderRepository.update(id, {
+      const { affected } = await this.serviceProviderRepository.update(id, {
         coverageArea: coverageArea,
       });
+      if (affected > 0) {
+        return new SuccessResponse(AppStrings.SUCCESSFULL);
+      }
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -209,16 +217,22 @@ export class ServiceAndProviderService {
   async acceptRequestAndStopRequest(updateServiceInput: UpdateServiceInput) {
     try {
       const { id, isActive } = updateServiceInput;
-      return await this.serviceStatusRepository.update(id, {
+      const { affected } = await this.serviceStatusRepository.update(id, {
         isActive: isActive,
       });
+
+      if (affected > 0) {
+        return new SuccessResponse(AppStrings.SUCCESSFULL);
+      }
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
     }
   }
 
-  async provideService(proideServiceInput): Promise<ServiceStatus> {
+  async provideService(
+    proideServiceInput: ProvideNewService,
+  ): Promise<ServiceStatus> {
     try {
       return await this.serviceStatusRepository.save(proideServiceInput);
     } catch (error) {
@@ -243,9 +257,13 @@ export class ServiceAndProviderService {
 
   async delete(deleteServiceProvider: DeleteServiceProvider) {
     try {
-      return await this.serviceProviderRepository.softDelete(
+      const { affected } = await this.serviceProviderRepository.softDelete(
         deleteServiceProvider.id,
       );
+
+      if (affected > 0) {
+        return new SuccessResponse(AppStrings.SUCCESSFULL);
+      }
     } catch (error) {
       this.logger.error(error);
       throw new BadRequestException(error);
@@ -254,7 +272,13 @@ export class ServiceAndProviderService {
 
   async deleteService(deleteServiceProvider: DeleteServiceProvider) {
     try {
-      return await this.serviceRepository.softDelete(deleteServiceProvider.id);
+      const { affected } = await this.serviceRepository.softDelete(
+        deleteServiceProvider.id,
+      );
+
+      if (affected > 0) {
+        return new SuccessResponse(AppStrings.SUCCESSFULL);
+      }
     } catch (error) {
       this.logger.error(error);
       throw new BadRequestException(error);

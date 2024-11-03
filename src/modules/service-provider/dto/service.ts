@@ -8,6 +8,7 @@ import {
 } from 'class-validator';
 import { ServiceProviderStatus } from '../../../common/enums/status.enum';
 
+@InputType()
 export class Pricing {
   @Field()
   @IsString()
@@ -102,4 +103,14 @@ export class ServiceProviderInput {
   @Field(() => [String])
   @IsArray()
   id: string[];
+}
+@InputType()
+export class ProvideNewService {
+  @Field()
+  @IsString()
+  providerId: string;
+
+  @Field()
+  @IsString()
+  serviceId: string;
 }
