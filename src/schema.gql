@@ -1383,6 +1383,10 @@ type Mutation {
   updateServiceProvider(updateServiceProviderInput: UpdateServiceProviderInput!): ServiceProvider!
   acceptServiceprovider(serviceProviderInput: ServiceProviderInput!): SuccessResponse!
   rejectServiceprovider(serviceProviderInput: ServiceProviderInput!): SuccessResponse!
+  updateServiceStatus(updateServiceStatus: UpdateServiceInput!): SuccessResponse!
+  updateProviderServiceCoverageArea(updateProviderServiceCoverageArea: UpdateServiceProviderInput!): SuccessResponse!
+  acceptRequestAndStopRequest(updateServiceStatus: UpdateServiceInput!): SuccessResponse!
+  provideService(provideService: ProvideNewService!): ServiceStatus!
   removeServiceProvider(deleteServiceProvider: DeleteServiceProvider!): ServiceProvider!
 }
 
@@ -1997,6 +2001,27 @@ input UpdateServiceProviderInput {
 
 input ServiceProviderInput {
   id: [String!]!
+}
+
+input UpdateServiceInput {
+  englishServiceName: String
+  arabicServiceName: String
+  active: Boolean
+  isWorkLicenseRequired: Boolean
+  pricing: [Pricing!]
+  providerServiceStatus: String
+  id: String!
+  isActive: Boolean
+}
+
+input Pricing {
+  type: String!
+  price: Float!
+}
+
+input ProvideNewService {
+  providerId: String!
+  serviceId: String!
 }
 
 input DeleteServiceProvider {
