@@ -1,12 +1,14 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
 import { ServiceAndProviderService } from '../services/service-provider.service';
 import { ServiceProvider } from '../../entities/service-provider.entity';
 import {
   CreateServiceInput,
   CreateServiceProviderInput,
+  DeleteServiceProvider,
   UpdateServiceProviderInput,
 } from '../dto/service';
 import { PaginateAndSort } from '../../modules/core/dto/pagination-and-sort.dto';
+import { SuccessResponse } from '../../common/utils/success.response';
 
 @Resolver(() => ServiceProvider)
 export class ServiceAndProviderResolver {
@@ -32,25 +34,47 @@ export class ServiceAndProviderResolver {
   }
 
   @Query(() => [ServiceProvider], { name: 'findAllservices' })
-  findAll(@Args('paginateAndSort') paginateAndSort: PaginateAndSort) {
-    return this.serviceProviderService.findAllServiceProvider(paginateAndSort);
+  async findAll(@Args('paginateAndSort') paginateAndSort: PaginateAndSort) {
+    return await this.serviceProviderService.findAllServiceProvider(
+      paginateAndSort,
+    );
   }
 
   @Query(() => ServiceProvider, { name: 'findAllserviceProviders' })
-  findOne(@Args('id') id: string) {
-    return this.serviceProviderService.findOneServiceProvider(id);
+  async findOne(@Args('id') id: string) {
+    return await this.serviceProviderService.findOneServiceProvider(id);
   }
 
   @Mutation(() => ServiceProvider)
-  updateServiceProvider(
+  async updateServiceProvider(
     @Args('updateServiceProviderInput')
     updateServiceProviderInput: UpdateServiceProviderInput,
   ) {
-    return this.serviceProviderService.update(updateServiceProviderInput);
+    return await this.serviceProviderService.update(updateServiceProviderInput);
+  }
+
+  @Mutation(() => SuccessResponse)
+  async acceptServiceprovider(
+    @Args('id')
+    id: string,
+    @Context() ctx: any,
+  ) {
+    return await this.serviceProviderService.accept(id, ctx.req.user);
+  }
+
+  @Mutation(() => SuccessResponse)
+  async rejectServiceprovider(
+    @Args('id')
+    id: string,
+    @Context() ctx: any,
+  ) {
+    return await this.serviceProviderService.reject(id, ctx.req.user);
   }
 
   @Mutation(() => ServiceProvider)
-  removeServiceProvider(@Args('id') id: string) {
-    return this.serviceProviderService.remove(id);
+  async removeServiceProvider(
+    @Args('deleteServiceProvider') deleteServiceProvider: DeleteServiceProvider,
+  ) {
+    return await this.serviceProviderService.delete(deleteServiceProvider);
   }
 }

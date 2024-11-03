@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
   CreateServiceInput,
   CreateServiceProviderInput,
+  DeleteServiceProvider,
   UpdateServiceInput,
   UpdateServiceProviderInput,
 } from '../dto/service';
@@ -99,18 +100,29 @@ export class ServiceAndProviderService {
       await this.activityLogService.logActivity([
         { adminId: user.id, action: ActivityEnum.UPDATED },
       ]);
-      return new SuccessResponse(AppStrings.SUCCESSFULL);
+
+      if (affected > 0) {
+        return new SuccessResponse(AppStrings.SUCCESSFULL);
+      }
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
     }
   }
 
-  async reject(id: string) {
+  async reject(id: string, user: User) {
     try {
-      return await this.serviceProviderRepository.update(id, {
+      const { affected } = await this.serviceProviderRepository.update(id, {
         providerStatus: ServiceProviderStatus.REJECTED,
       });
+
+      await this.activityLogService.logActivity([
+        { adminId: user.id, action: ActivityEnum.UPDATED },
+      ]);
+
+      if (affected > 0) {
+        return new SuccessResponse(AppStrings.SUCCESSFULL);
+      }
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -141,11 +153,13 @@ export class ServiceAndProviderService {
     }
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} serviceProvider`;
+  async delete(deleteServiceProvider: DeleteServiceProvider) {
+    return await this.serviceProviderRepository.softDelete(
+      deleteServiceProvider.id,
+    );
   }
 
-  async searchForTickets(searchParam: string) {
+  async searchForServiceProvider(searchParam: string) {
     try {
       return await this.serviceProviderRepository
         .createQueryBuilder('serviceProvider')

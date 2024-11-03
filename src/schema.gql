@@ -358,6 +358,7 @@ type Category {
   id: Int!
   arabicName: String!
   englishName: String!
+  placement: String
   article: [Article!]!
   createdAt: DateTime!
   updatedAt: DateTime!
@@ -1231,6 +1232,7 @@ input CategoryFilterInput {
   sortField: String
   directionToSort: SortOrder
   where: WhereOption
+  placement: String!
 }
 
 input ArticleFilterInput {
@@ -1371,7 +1373,9 @@ type Mutation {
   updateArticle(updateArticleInput: UpdateArticleInput!): Article!
   createServiceProvider(createServiceProviderInput: CreateServiceProviderInput!): ServiceProvider!
   updateServiceProvider(updateServiceProviderInput: UpdateServiceProviderInput!): ServiceProvider!
-  removeServiceProvider(id: String!): ServiceProvider!
+  acceptServiceprovider(id: String!): SuccessResponse!
+  rejectServiceprovider(id: String!): SuccessResponse!
+  removeServiceProvider(deleteServiceProvider: DeleteServiceProvider!): ServiceProvider!
 }
 
 input CreateSplashScreenInput {
@@ -1927,11 +1931,13 @@ input CreateReviewDto {
 }
 
 input CreateCategoryInput {
+  placement: String!
   arabicName: String!
   englishName: String!
 }
 
 input UpdateCategoryInput {
+  placement: String
   arabicName: String
   englishName: String
   id: Float!
@@ -1979,4 +1985,8 @@ input UpdateServiceProviderInput {
   serviceOffered: [String!]
   coverageArea: String
   id: String!
+}
+
+input DeleteServiceProvider {
+  id: [String!]!
 }

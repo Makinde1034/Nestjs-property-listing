@@ -29,6 +29,10 @@ export class Category {
   @Field()
   englishName: string;
 
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  placement: string;
+
   @Field(() => [Article])
   @OneToMany(() => Article, (article) => article.category)
   article: Article[];
