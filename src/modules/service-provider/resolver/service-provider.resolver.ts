@@ -64,7 +64,9 @@ export class ServiceAndProviderResolver {
     @Args('updateServiceProviderInput')
     updateServiceProviderInput: UpdateServiceProviderInput,
   ) {
-    return await this.serviceProviderService.update(updateServiceProviderInput);
+    return await this.serviceProviderService.updateProviderServiceCoverageArea(
+      updateServiceProviderInput,
+    );
   }
 
   @Mutation(() => SuccessResponse)

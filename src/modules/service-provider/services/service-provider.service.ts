@@ -180,17 +180,6 @@ export class ServiceAndProviderService {
     }
   }
 
-  async update(updateServiceProviderInput: UpdateServiceProviderInput) {
-    try {
-      const { id, serviceOffered, ...rest } = updateServiceProviderInput;
-
-      return await this.serviceProviderRepository.update(id, { ...rest });
-    } catch (error) {
-      this.logger.log(error);
-      throw new BadRequestException(error);
-    }
-  }
-
   async updateServiceStatus(updateServiceInput: UpdateServiceInput) {
     try {
       const { id, providerServiceStatus } = updateServiceInput;
@@ -203,7 +192,7 @@ export class ServiceAndProviderService {
     }
   }
 
-  async updateProviderServiceStatus(
+  async updateProviderServiceCoverageArea(
     updateServiceInput: UpdateServiceProviderInput,
   ) {
     try {

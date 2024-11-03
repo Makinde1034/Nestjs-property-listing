@@ -954,6 +954,11 @@ type ArticleResponse {
   total: Float!
 }
 
+type CategoryResponse {
+  category: [Category!]!
+  count: Float!
+}
+
 type ActivityLogsResponse {
   logs: [ActivityLog!]!
   total: Float!
@@ -1046,7 +1051,7 @@ type Query {
   searchForReview(searchParam: String!): [Review!]!
   findCities(findCities: PaginateAndSort): CityResponse!
   getChat(chatFilterInput: ChatFilterInput!): MessageResponse!
-  categories(findOption: CategoryFilterInput): [Category!]!
+  categories(findOption: CategoryFilterInput): CategoryResponse!
   knowledgeBaseCategory(id: Int!): Category!
   findManyArticles(findOption: ArticleFilterInput!): ArticleResponse!
   findOneArticle(id: Int!): Article!
