@@ -83,6 +83,11 @@ export class UpdateServiceInput extends PartialType(CreateServiceInput) {
   @Field()
   @IsString()
   id: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  isActive: boolean;
 }
 
 @InputType()

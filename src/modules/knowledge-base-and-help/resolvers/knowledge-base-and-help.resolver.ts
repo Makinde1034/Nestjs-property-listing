@@ -25,6 +25,7 @@ import { SuccessResponse } from '../../../common/utils/success.response';
 import { ArticleResponse } from '../dto/response/article';
 import { UseGuards } from '@nestjs/common';
 import { AccessTokenGuard } from '../../auth/guards';
+import { CategoryResponse } from '../dto/response/category';
 
 @Resolver(() => Article)
 export class KnowledgeBaseAndHelpResolver {
@@ -43,7 +44,7 @@ export class KnowledgeBaseAndHelpResolver {
     );
   }
 
-  @Query(() => [Category], { name: 'categories' })
+  @Query(() => CategoryResponse, { name: 'categories' })
   async findAll(
     @Args('findOption', { nullable: true }) findOption: CategoryFilterInput,
   ) {

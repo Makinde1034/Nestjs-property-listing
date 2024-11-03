@@ -62,6 +62,7 @@ export class KnowledgeBaseCategoryService {
   async findAll(findOption: CategoryFilterInput) {
     try {
       const sortField = findOption.sortField;
+      let orderOptions;
       const sortDirection: 'ASC' | 'DESC' = findOption.directionToSort as
         | 'ASC'
         | 'DESC';
@@ -70,16 +71,20 @@ export class KnowledgeBaseCategoryService {
         findOption.skip = 0;
         findOption.take = 20;
       }
+      if (!sortField) {
+        orderOptions = {
+          [sortField]: sortDirection,
+        };
+      }
 
-      const orderOptions = {
-        [sortField]: sortDirection,
-      };
+      const [category, count] =
+        await this.knowledgeBaseCategoryRepository.findAndCount({
+          take: findOption.take,
+          skip: findOption.skip,
+          order: orderOptions,
+        });
 
-      return await this.knowledgeBaseCategoryRepository.find({
-        take: findOption.take,
-        skip: findOption.skip,
-        order: orderOptions,
-      });
+      return { category, count };
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);

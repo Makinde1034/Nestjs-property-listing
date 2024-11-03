@@ -180,22 +180,37 @@ export class ServiceAndProviderService {
     }
   }
 
-  async update(updateServiceProviderInput: UpdateServiceProviderInput) {
+  async updateServiceStatus(updateServiceInput: UpdateServiceInput) {
     try {
-      const { id, serviceOffered, ...rest } = updateServiceProviderInput;
-
-      return await this.serviceProviderRepository.update(id, { ...rest });
+      const { id, providerServiceStatus } = updateServiceInput;
+      return await this.serviceStatusRepository.update(id, {
+        status: providerServiceStatus,
+      });
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
     }
   }
 
-  async updateServiceStatus(updateServiceInput: UpdateServiceInput) {
+  async updateProviderServiceCoverageArea(
+    updateServiceInput: UpdateServiceProviderInput,
+  ) {
     try {
-      const { id, providerServiceStatus } = updateServiceInput;
+      const { id, coverageArea } = updateServiceInput;
+      return await this.serviceProviderRepository.update(id, {
+        coverageArea: coverageArea,
+      });
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async acceptRequestAndStopRequest(updateServiceInput: UpdateServiceInput) {
+    try {
+      const { id, isActive } = updateServiceInput;
       return await this.serviceStatusRepository.update(id, {
-        status: providerServiceStatus,
+        isActive: isActive,
       });
     } catch (error) {
       this.logger.log(error);
