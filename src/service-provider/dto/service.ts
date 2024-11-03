@@ -91,3 +91,10 @@ export class DeleteServiceProvider {
   @IsArray()
   id: string[];
 }
+
+@InputType()
+export class ServiceProviderInput {
+  @Field(() => [String])
+  @IsArray()
+  id: string[];
+}

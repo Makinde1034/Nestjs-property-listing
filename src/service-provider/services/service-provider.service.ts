@@ -3,6 +3,7 @@ import {
   CreateServiceInput,
   CreateServiceProviderInput,
   DeleteServiceProvider,
+  ServiceProviderInput,
   UpdateServiceInput,
   UpdateServiceProviderInput,
 } from '../dto/service';
@@ -29,7 +30,6 @@ export class ServiceAndProviderService {
   ) {}
 
   logger = new Logger(ServiceAndProviderService.name);
-
   async createService(createServiceInput: CreateServiceInput) {
     try {
       const { pricing, ...rest } = createServiceInput;
@@ -93,6 +93,7 @@ export class ServiceAndProviderService {
       return await this.serviceProviderRepository.find({
         take: paginateAndSort.take ?? 20,
         skip: paginateAndSort.skip ?? 0,
+        relations: ['serviceOffered'],
       });
     } catch (error) {
       this.logger.error(error);
@@ -109,22 +110,30 @@ export class ServiceAndProviderService {
     }
   }
 
-  async accept(id: string, user: User) {
+  async accept(serviceProviderInput: ServiceProviderInput, user: User) {
     try {
-      const { affected } = await this.serviceProviderRepository.update(id, {
-        providerStatus: ServiceProviderStatus.ACCEPTED,
+      const serviceProvider = await this.serviceProviderRepository.find({
+        where: { id: In(serviceProviderInput.id) },
       });
-      await this.activityLogService.logActivity([
-        {
-          adminId: user.id,
-          action: ActivityEnum.UPDATED,
-          providerId: id,
-        },
-      ]);
 
-      await this.activityLogService.logActivity([
-        { adminId: user.id, action: ActivityEnum.UPDATED },
-      ]);
+      const { affected } = await this.serviceProviderRepository.update(
+        serviceProviderInput.id,
+        {
+          providerStatus: ServiceProviderStatus.ACCEPTED,
+        },
+      );
+      const activityToSave = serviceProvider.map((element) => {
+        return {
+          adminId: user.id,
+          action: ActivityEnum.DELETED,
+          details: JSON.stringify(
+            serviceProvider.find((a) => a.id === element.id),
+          ),
+          userId: element.id,
+        };
+      });
+
+      await this.activityLogService.logActivity(activityToSave);
 
       if (affected > 0) {
         return new SuccessResponse(AppStrings.SUCCESSFULL);
@@ -135,15 +144,31 @@ export class ServiceAndProviderService {
     }
   }
 
-  async reject(id: string, user: User) {
+  async reject(serviceProviderInput: ServiceProviderInput, user: User) {
     try {
-      const { affected } = await this.serviceProviderRepository.update(id, {
-        providerStatus: ServiceProviderStatus.REJECTED,
+      const serviceProvider = await this.serviceProviderRepository.find({
+        where: { id: In(serviceProviderInput.id) },
       });
 
-      await this.activityLogService.logActivity([
-        { adminId: user.id, action: ActivityEnum.UPDATED },
-      ]);
+      const { affected } = await this.serviceProviderRepository.update(
+        serviceProviderInput.id,
+        {
+          providerStatus: ServiceProviderStatus.REJECTED,
+        },
+      );
+
+      const activityToSave = serviceProvider.map((element) => {
+        return {
+          adminId: user.id,
+          action: ActivityEnum.DELETED,
+          details: JSON.stringify(
+            serviceProvider.find((a) => a.id === element.id),
+          ),
+          userId: element.id,
+        };
+      });
+
+      await this.activityLogService.logActivity(activityToSave);
 
       if (affected > 0) {
         return new SuccessResponse(AppStrings.SUCCESSFULL);

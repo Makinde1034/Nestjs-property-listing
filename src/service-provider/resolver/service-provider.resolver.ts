@@ -5,6 +5,7 @@ import {
   CreateServiceInput,
   CreateServiceProviderInput,
   DeleteServiceProvider,
+  ServiceProviderInput,
   UpdateServiceProviderInput,
 } from '../dto/service';
 import { PaginateAndSort } from '../../modules/core/dto/pagination-and-sort.dto';
@@ -68,20 +69,26 @@ export class ServiceAndProviderResolver {
 
   @Mutation(() => SuccessResponse)
   async acceptServiceprovider(
-    @Args('id')
-    id: string,
+    @Args('serviceProviderInput')
+    serviceProviderInput: ServiceProviderInput,
     @Context() ctx: any,
   ) {
-    return await this.serviceProviderService.accept(id, ctx.req.user);
+    return await this.serviceProviderService.accept(
+      serviceProviderInput,
+      ctx.req.user,
+    );
   }
 
   @Mutation(() => SuccessResponse)
   async rejectServiceprovider(
-    @Args('id')
-    id: string,
+    @Args('serviceProviderInput')
+    serviceProviderInput: ServiceProviderInput,
     @Context() ctx: any,
   ) {
-    return await this.serviceProviderService.reject(id, ctx.req.user);
+    return await this.serviceProviderService.reject(
+      serviceProviderInput,
+      ctx.req.user,
+    );
   }
 
   @Mutation(() => ServiceProvider)
