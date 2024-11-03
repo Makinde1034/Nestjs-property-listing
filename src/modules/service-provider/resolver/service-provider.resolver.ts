@@ -1,15 +1,16 @@
 import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
 import { ServiceAndProviderService } from '../services/service-provider.service';
-import { ServiceProvider } from '../../entities/service-provider.entity';
+import { ServiceProvider } from '../../../entities/service-provider.entity';
 import {
   CreateServiceInput,
   CreateServiceProviderInput,
   DeleteServiceProvider,
+  ServiceProviderInput,
   UpdateServiceProviderInput,
 } from '../dto/service';
-import { PaginateAndSort } from '../../modules/core/dto/pagination-and-sort.dto';
-import { SuccessResponse } from '../../common/utils/success.response';
-import { Service } from '../../entities/services.entity';
+import { PaginateAndSort } from '../../../modules/core/dto/pagination-and-sort.dto';
+import { SuccessResponse } from '../../../common/utils/success.response';
+import { Service } from '../../../entities/services.entity';
 
 @Resolver(() => ServiceProvider)
 export class ServiceAndProviderResolver {
@@ -68,20 +69,26 @@ export class ServiceAndProviderResolver {
 
   @Mutation(() => SuccessResponse)
   async acceptServiceprovider(
-    @Args('id')
-    id: string,
+    @Args('serviceProviderInput')
+    serviceProviderInput: ServiceProviderInput,
     @Context() ctx: any,
   ) {
-    return await this.serviceProviderService.accept(id, ctx.req.user);
+    return await this.serviceProviderService.accept(
+      serviceProviderInput,
+      ctx.req.user,
+    );
   }
 
   @Mutation(() => SuccessResponse)
   async rejectServiceprovider(
-    @Args('id')
-    id: string,
+    @Args('serviceProviderInput')
+    serviceProviderInput: ServiceProviderInput,
     @Context() ctx: any,
   ) {
-    return await this.serviceProviderService.reject(id, ctx.req.user);
+    return await this.serviceProviderService.reject(
+      serviceProviderInput,
+      ctx.req.user,
+    );
   }
 
   @Mutation(() => ServiceProvider)

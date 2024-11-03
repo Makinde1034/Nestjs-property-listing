@@ -437,7 +437,7 @@ type ServiceProvider {
   createdAt: DateTime!
   providerStatus: String
   deletedAt: DateTime!
-  serviceOffered: [Service!]!
+  serviceOffered: [Service!]
   activityLog: [ActivityLog!]!
   status: [ServiceStatus!]!
   coverageArea: String!
@@ -1234,7 +1234,7 @@ input CategoryFilterInput {
   sortField: String
   directionToSort: SortOrder
   where: WhereOption
-  placement: String!
+  placement: String
 }
 
 input ArticleFilterInput {
@@ -1375,8 +1375,8 @@ type Mutation {
   updateArticle(updateArticleInput: UpdateArticleInput!): Article!
   createServiceProvider(createServiceProviderInput: CreateServiceProviderInput!): ServiceProvider!
   updateServiceProvider(updateServiceProviderInput: UpdateServiceProviderInput!): ServiceProvider!
-  acceptServiceprovider(id: String!): SuccessResponse!
-  rejectServiceprovider(id: String!): SuccessResponse!
+  acceptServiceprovider(serviceProviderInput: ServiceProviderInput!): SuccessResponse!
+  rejectServiceprovider(serviceProviderInput: ServiceProviderInput!): SuccessResponse!
   removeServiceProvider(deleteServiceProvider: DeleteServiceProvider!): ServiceProvider!
 }
 
@@ -1987,6 +1987,10 @@ input UpdateServiceProviderInput {
   serviceOffered: [String!]
   coverageArea: String
   id: String!
+}
+
+input ServiceProviderInput {
+  id: [String!]!
 }
 
 input DeleteServiceProvider {

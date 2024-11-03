@@ -6,7 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { ServiceProviderStatus } from '../../common/enums/status.enum';
+import { ServiceProviderStatus } from '../../../common/enums/status.enum';
 
 export class Pricing {
   @Field()
@@ -87,6 +87,13 @@ export class UpdateServiceInput extends PartialType(CreateServiceInput) {
 
 @InputType()
 export class DeleteServiceProvider {
+  @Field(() => [String])
+  @IsArray()
+  id: string[];
+}
+
+@InputType()
+export class ServiceProviderInput {
   @Field(() => [String])
   @IsArray()
   id: string[];
