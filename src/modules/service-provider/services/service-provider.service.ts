@@ -19,6 +19,7 @@ import { User } from '../../../entities';
 import { ActivityEnum } from '../../../common/enums/activitys';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { AppStrings } from '../../../common/messages/app.strings';
+import { ServiceStatus } from '../../../entities/provider-service-status.entity';
 
 @Injectable()
 export class ServiceAndProviderService {
@@ -196,6 +197,29 @@ export class ServiceAndProviderService {
       return await this.serviceStatusRepository.update(id, {
         status: providerServiceStatus,
       });
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async provideService(proideServiceInput): Promise<ServiceStatus> {
+    try {
+      return await this.serviceStatusRepository.save(proideServiceInput);
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async stopProvidingService(proideServiceInput: ServiceProviderInput) {
+    try {
+      const { affected } = await this.serviceStatusRepository.softDelete(
+        proideServiceInput.id,
+      );
+      if (affected > 0) {
+        throw new SuccessResponse(AppStrings.SUCCESSFULL);
+      }
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);

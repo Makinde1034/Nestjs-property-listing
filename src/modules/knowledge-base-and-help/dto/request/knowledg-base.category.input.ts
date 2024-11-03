@@ -53,7 +53,7 @@ export class CategoryActionInput {
 export class CategoryFilterInput extends PaginateAndSort {
   @IsOptional()
   @IsString()
-  @Field()
+  @Field({ nullable: true })
   @IsEnum(knowledgeBasePlacement)
   placement: string;
 }

@@ -1234,7 +1234,7 @@ input CategoryFilterInput {
   sortField: String
   directionToSort: SortOrder
   where: WhereOption
-  placement: String!
+  placement: String
 }
 
 input ArticleFilterInput {
