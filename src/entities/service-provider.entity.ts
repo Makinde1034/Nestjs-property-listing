@@ -4,6 +4,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   OneToMany,
   OneToOne,
   UpdateDateColumn,
@@ -13,17 +14,19 @@ import { Service } from './services.entity';
 import { ServiceStatus } from './provider-service-status.entity';
 import { ServiceProviderStatus } from '../common/enums/status.enum';
 import { ActivityLog } from './activity-log.entity';
+import { User } from './user.entity';
 
 @ObjectType()
 @Entity()
 export class ServiceProvider extends BaseEntity {
-  @Column()
-  @Field()
-  firstName: string;
+  @OneToOne(() => User, (user) => user.serviceProvider)
+  @JoinColumn({ name: 'userId' })
+  @Field(() => User)
+  user: User;
 
   @Column()
   @Field()
-  lastName: string;
+  userId: string;
 
   @Column({ nullable: true })
   @Field({ nullable: true })

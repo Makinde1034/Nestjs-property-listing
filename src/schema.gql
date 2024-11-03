@@ -428,8 +428,8 @@ type Service {
 
 type ServiceProvider {
   id: ID!
-  firstName: String!
-  lastName: String!
+  user: User!
+  userId: String!
   ibanCertificate: String
   workLicense: String
   idOrCr: String
@@ -593,6 +593,7 @@ type User {
   biometricKey: String
   twoFaRequired: Boolean
   isBlocked: Boolean
+  serviceProvider: ServiceProvider!
   review: [Review!]
   listing: [Listing!]
   offer: [Offer!]
@@ -1053,8 +1054,9 @@ type Query {
   searchForCategory(searchParam: String!): [Category!]!
   getActivityLogs(activityLogInput: ActivityLogInput!): ActivityLogsResponse!
   getAllActivityLogs(paginateAndSort: AuditLogTrailsInput): ActivityLogsResponse!
-  findAllservices(paginateAndSort: PaginateAndSort!): [ServiceProvider!]!
+  findAllserviceProvider(paginateAndSort: PaginateAndSort!): [ServiceProvider!]!
   findAllserviceProviders(id: String!): ServiceProvider!
+  findAllServices(paginateAndSort: PaginateAndSort!): [Service!]!
 }
 
 input SplashScreenFilterInput {
