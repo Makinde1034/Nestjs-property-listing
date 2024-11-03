@@ -39,6 +39,10 @@ export class ServiceStatus extends BaseEntity {
   serviceId: string;
 
   @Field()
+  @Column({ default: true })
+  isActive: boolean;
+
+  @Field()
   @CreateDateColumn()
   createdAt: Date;
 

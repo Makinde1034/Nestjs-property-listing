@@ -203,6 +203,32 @@ export class ServiceAndProviderService {
     }
   }
 
+  async updateProviderServiceStatus(
+    updateServiceInput: UpdateServiceProviderInput,
+  ) {
+    try {
+      const { id, coverageArea } = updateServiceInput;
+      return await this.serviceProviderRepository.update(id, {
+        coverageArea: coverageArea,
+      });
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async acceptRequestAndStopRequest(updateServiceInput: UpdateServiceInput) {
+    try {
+      const { id, isActive } = updateServiceInput;
+      return await this.serviceStatusRepository.update(id, {
+        isActive: isActive,
+      });
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
   async provideService(proideServiceInput): Promise<ServiceStatus> {
     try {
       return await this.serviceStatusRepository.save(proideServiceInput);

@@ -404,6 +404,7 @@ type ServiceStatus {
   serviceProviderId: String!
   service: Service!
   serviceId: String!
+  isActive: Boolean!
   createdAt: DateTime!
   status: String
   deletedAt: DateTime!
