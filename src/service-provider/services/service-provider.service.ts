@@ -43,6 +43,32 @@ export class ServiceAndProviderService {
       throw new BadRequestException(error);
     }
   }
+
+  async findAllServices(paginateAndSort: PaginateAndSort) {
+    try {
+      return await this.serviceRepository.find({
+        take: paginateAndSort.take ?? 20,
+        skip: paginateAndSort.skip ?? 0,
+      });
+    } catch (error) {
+      this.logger.error(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async findOneService(id: string) {
+    try {
+      return await this.serviceRepository.findOneBy({ id });
+    } catch (error) {
+      this.logger.error(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  /**********************************
+   * Create Service Provider
+   **********************************/
+
   async createProvider(createServiceProviderInput: CreateServiceProviderInput) {
     try {
       const { serviceOffered, ...rest } = createServiceProviderInput;
@@ -62,26 +88,25 @@ export class ServiceAndProviderService {
     }
   }
 
-  async findAllServices(paginateAndSort: PaginateAndSort) {
-    return await this.serviceRepository.find({
-      take: paginateAndSort.take ?? 20,
-      skip: paginateAndSort.skip ?? 0,
-    });
-  }
-
-  async findOneService(id: string) {
-    return await this.serviceRepository.findOneBy({ id });
-  }
-
   async findAllServiceProvider(paginateAndSort: PaginateAndSort) {
-    return await this.serviceProviderRepository.find({
-      take: paginateAndSort.take ?? 20,
-      skip: paginateAndSort.skip ?? 0,
-    });
+    try {
+      return await this.serviceProviderRepository.find({
+        take: paginateAndSort.take ?? 20,
+        skip: paginateAndSort.skip ?? 0,
+      });
+    } catch (error) {
+      this.logger.error(error);
+      throw new BadRequestException(error);
+    }
   }
 
   async findOneServiceProvider(id: string) {
-    return await this.serviceProviderRepository.findOneBy({ id });
+    try {
+      return await this.serviceProviderRepository.findOneBy({ id });
+    } catch (error) {
+      this.logger.error(error);
+      throw new BadRequestException(error);
+    }
   }
 
   async accept(id: string, user: User) {
@@ -143,7 +168,6 @@ export class ServiceAndProviderService {
   async updateServiceStatus(updateServiceInput: UpdateServiceInput) {
     try {
       const { id, providerServiceStatus } = updateServiceInput;
-
       return await this.serviceStatusRepository.update(id, {
         status: providerServiceStatus,
       });
@@ -154,35 +178,78 @@ export class ServiceAndProviderService {
   }
 
   async delete(deleteServiceProvider: DeleteServiceProvider) {
-    return await this.serviceProviderRepository.softDelete(
-      deleteServiceProvider.id,
-    );
+    try {
+      return await this.serviceProviderRepository.softDelete(
+        deleteServiceProvider.id,
+      );
+    } catch (error) {
+      this.logger.error(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async deleteService(deleteServiceProvider: DeleteServiceProvider) {
+    try {
+      return await this.serviceRepository.softDelete(deleteServiceProvider.id);
+    } catch (error) {
+      this.logger.error(error);
+      throw new BadRequestException(error);
+    }
   }
 
   async searchForServiceProvider(searchParam: string) {
     try {
       return await this.serviceProviderRepository
         .createQueryBuilder('serviceProvider')
-        .leftJoinAndSelect('serviceProvider.reporter', 'user')
-        .leftJoinAndSelect('ticket.parentIssue', 'parentIssue')
-        .leftJoinAndSelect('ticket.childIssue', 'childIssue')
+        .leftJoinAndSelect('serviceProvider.user', 'user')
 
-        .orWhere('user.firstName ILIKE :term', { term: `%${searchParam}%` })
-        .orWhere('user.arabicFirstName ILIKE :term', {
-          term: `%${searchParam}%`,
-        })
-        .orWhere('parentIssue.arabicName ILIKE :term', {
-          term: `%${searchParam}%`,
-        })
-        .orWhere('parentIssue.englishName ILIKE :term', {
-          term: `%${searchParam}%`,
-        })
-        .orWhere('childIssue.arabicName ILIKE :term', {
-          term: `%${searchParam}%`,
-        })
-        .orWhere('childIssue.englishName ILIKE :term', {
-          term: `%${searchParam}%`,
-        })
+        // .orWhere('user.firstName ILIKE :term', { term: `%${searchParam}%` })
+        // .orWhere('user.arabicFirstName ILIKE :term', {
+        //   term: `%${searchParam}%`,
+        // })
+        // .orWhere('parentIssue.arabicName ILIKE :term', {
+        //   term: `%${searchParam}%`,
+        // })
+        // .orWhere('parentIssue.englishName ILIKE :term', {
+        //   term: `%${searchParam}%`,
+        // })
+        // .orWhere('childIssue.arabicName ILIKE :term', {
+        //   term: `%${searchParam}%`,
+        // })
+        // .orWhere('childIssue.englishName ILIKE :term', {
+        //   term: `%${searchParam}%`,
+        // })
+        .getMany();
+    } catch (error) {
+      this.logger.error('Error searching tickets', error);
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  async searchForService(searchParam: string) {
+    try {
+      return await this.serviceProviderRepository
+        .createQueryBuilder('service')
+        .leftJoinAndSelect('service.user', 'user')
+        // .leftJoinAndSelect('ticket.parentIssue', 'parentIssue')
+        // .leftJoinAndSelect('ticket.childIssue', 'childIssue')
+
+        // .orWhere('user.firstName ILIKE :term', { term: `%${searchParam}%` })
+        // .orWhere('user.arabicFirstName ILIKE :term', {
+        //   term: `%${searchParam}%`,
+        // })
+        // .orWhere('parentIssue.arabicName ILIKE :term', {
+        //   term: `%${searchParam}%`,
+        // })
+        // .orWhere('parentIssue.englishName ILIKE :term', {
+        //   term: `%${searchParam}%`,
+        // })
+        // .orWhere('childIssue.arabicName ILIKE :term', {
+        //   term: `%${searchParam}%`,
+        // })
+        // .orWhere('childIssue.englishName ILIKE :term', {
+        //   term: `%${searchParam}%`,
+        // })
         .getMany();
     } catch (error) {
       this.logger.error('Error searching tickets', error);

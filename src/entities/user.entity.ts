@@ -40,6 +40,7 @@ import { Article } from './article.entity';
 import { ActivityLog } from './activity-log.entity';
 import { Compare } from './compare.entity';
 import { AcceptedTerms } from './accepted-terms.entity';
+import { ServiceProvider } from './service-provider.entity';
 
 @Entity()
 @ObjectType()
@@ -160,6 +161,10 @@ export class User extends BaseEntity {
   @Column({ default: false })
   @Field({ nullable: true })
   isBlocked: boolean;
+
+  @OneToOne(() => ServiceProvider, (serviceProvider) => serviceProvider.user)
+  @Field(() => ServiceProvider)
+  serviceProvider: ServiceProvider;
 
   @Field(() => [Review], { nullable: true })
   @OneToMany(() => Review, (review) => review.user, { cascade: true })

@@ -9,6 +9,7 @@ import {
 } from '../dto/service';
 import { PaginateAndSort } from '../../modules/core/dto/pagination-and-sort.dto';
 import { SuccessResponse } from '../../common/utils/success.response';
+import { Service } from '../../entities/services.entity';
 
 @Resolver(() => ServiceProvider)
 export class ServiceAndProviderResolver {
@@ -33,7 +34,7 @@ export class ServiceAndProviderResolver {
     return await this.serviceProviderService.createService(createServiceInput);
   }
 
-  @Query(() => [ServiceProvider], { name: 'findAllservices' })
+  @Query(() => [ServiceProvider], { name: 'findAllserviceProvider' })
   async findAll(@Args('paginateAndSort') paginateAndSort: PaginateAndSort) {
     return await this.serviceProviderService.findAllServiceProvider(
       paginateAndSort,
@@ -43,6 +44,18 @@ export class ServiceAndProviderResolver {
   @Query(() => ServiceProvider, { name: 'findAllserviceProviders' })
   async findOne(@Args('id') id: string) {
     return await this.serviceProviderService.findOneServiceProvider(id);
+  }
+
+  @Query(() => [Service], { name: 'findAllServices' })
+  async findAllServices(
+    @Args('paginateAndSort') paginateAndSort: PaginateAndSort,
+  ) {
+    return await this.serviceProviderService.findAllServices(paginateAndSort);
+  }
+
+  @Query(() => ServiceProvider, { name: 'findAllserviceProviders' })
+  async findOneService(@Args('id') id: string) {
+    return await this.serviceProviderService.findOneService(id);
   }
 
   @Mutation(() => ServiceProvider)
