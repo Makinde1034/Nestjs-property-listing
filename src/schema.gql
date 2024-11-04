@@ -1957,7 +1957,7 @@ input CreateArticleInput {
   image: String
   categoryId: Float!
   title: String!
-  placement: String
+  placement: String!
   authorImage: String
   authorBio: String!
   language: String!
