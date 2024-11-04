@@ -6,6 +6,7 @@
 import { InputType, Int, Field, PartialType } from '@nestjs/graphql';
 import {
   IsArray,
+  IsBoolean,
   IsEnum,
   IsNotEmpty,
   IsNumber,
@@ -70,6 +71,16 @@ export class ArticleFilterInput extends PaginateAndSort {
   @IsOptional()
   @IsString()
   placement: string;
+
+  @IsOptional()
+  @IsBoolean()
+  @Field({ nullable: true })
+  published: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  @Field({ nullable: true })
+  categoryId: number;
 }
 
 @InputType()

@@ -374,7 +374,7 @@ type Article {
   authorImage: String
   user: User
   authorBio: String
-  category: Category!
+  category: Category
   articleActivityLog: [ActivityLog!]
   language: String!
   placement: String!
@@ -1058,8 +1058,6 @@ type Query {
   knowledgeBaseCategory(id: Int!): Category!
   findManyArticles(findOption: ArticleFilterInput!): ArticleResponse!
   findOneArticle(id: Int!): Article!
-  publishArticle(articlePublishInput: ArticlePublishInput!): SuccessResponse!
-  unpublishArticle(articlePublishInput: ArticlePublishInput!): SuccessResponse!
   searchForCategory(searchParam: String!): [Category!]!
   getActivityLogs(activityLogInput: ActivityLogInput!): ActivityLogsResponse!
   getAllActivityLogs(paginateAndSort: AuditLogTrailsInput): ActivityLogsResponse!
@@ -1252,10 +1250,8 @@ input ArticleFilterInput {
   directionToSort: SortOrder
   where: WhereOption
   placement: String
-}
-
-input ArticlePublishInput {
-  id: [Float!]!
+  published: Boolean
+  categoryId: Float
 }
 
 input ActivityLogInput {
@@ -1379,6 +1375,8 @@ type Mutation {
   updateKnowledgeBaseCategory(updateKnowledgeBaseCategoryInput: UpdateCategoryInput!): Category!
   deleteCategory(categoryActionInput: CategoryActionInput!): SuccessResponse!
   createArticle(createArticleInput: CreateArticleInput!): Article!
+  publishArticle(articlePublishInput: ArticlePublishInput!): SuccessResponse!
+  unpublishArticle(articlePublishInput: ArticlePublishInput!): SuccessResponse!
   deleteArticle(id: Float!): SuccessResponse!
   updateArticle(updateArticleInput: UpdateArticleInput!): Article!
   createServiceProvider(createServiceProviderInput: CreateServiceProviderInput!): ServiceProvider!
@@ -1969,6 +1967,10 @@ input CreateArticleInput {
   authorImage: String
   authorBio: String!
   language: String!
+}
+
+input ArticlePublishInput {
+  id: [Float!]!
 }
 
 input UpdateArticleInput {
