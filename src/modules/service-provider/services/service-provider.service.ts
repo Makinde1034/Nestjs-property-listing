@@ -159,7 +159,7 @@ export class ServiceAndProviderService {
           details: JSON.stringify(
             serviceProvider.find((a) => a.id === element.id),
           ),
-          userId: element.id,
+          serviceProviderId: element.id,
         };
       });
 
@@ -194,7 +194,7 @@ export class ServiceAndProviderService {
           details: JSON.stringify(
             serviceProvider.find((a) => a.id === element.id),
           ),
-          userId: element.id,
+          serviceProviderId: element.id,
         };
       });
 

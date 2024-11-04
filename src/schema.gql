@@ -456,7 +456,7 @@ type ActivityLog {
   ticket: Ticket
   article: Article
   serviceProvider: ServiceProvider
-  serviceProviderId: String!
+  serviceProviderId: String
   splashScreen: SplashScreen
   auction: Auction
   service: Service

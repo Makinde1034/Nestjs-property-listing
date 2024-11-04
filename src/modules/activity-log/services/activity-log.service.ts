@@ -14,8 +14,9 @@ export class ActivityLogService {
   constructor(private readonly activityLogRepository: ActivityLogRepository) {}
   async logActivity(createActivityLog: CreateActivityLog[]) {
     try {
-      await this.activityLogRepository.insert(createActivityLog);
+      return await this.activityLogRepository.insert(createActivityLog);
     } catch (error) {
+      console.log(error);
       this.logger.log(error);
     }
   }
