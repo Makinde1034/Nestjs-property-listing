@@ -1939,13 +1939,11 @@ input CreateReviewDto {
 }
 
 input CreateCategoryInput {
-  placement: String!
   arabicName: String!
   englishName: String!
 }
 
 input UpdateCategoryInput {
-  placement: String
   arabicName: String
   englishName: String
   id: Float!

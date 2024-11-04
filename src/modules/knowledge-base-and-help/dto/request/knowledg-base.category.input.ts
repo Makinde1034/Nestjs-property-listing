@@ -20,12 +20,6 @@ export class CreateCategoryInput {
   @IsString()
   @IsNotEmpty()
   @Field()
-  @IsEnum(knowledgeBasePlacement)
-  placement: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @Field()
   arabicName: string;
 
   @IsString()
