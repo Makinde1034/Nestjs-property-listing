@@ -374,7 +374,7 @@ type Article {
   authorImage: String
   user: User
   authorBio: String
-  category: Category!
+  category: Category
   articleActivityLog: [ActivityLog!]
   language: String!
   placement: String!
@@ -1252,6 +1252,8 @@ input ArticleFilterInput {
   directionToSort: SortOrder
   where: WhereOption
   placement: String
+  published: Boolean
+  categoryId: Float
 }
 
 input ArticlePublishInput {

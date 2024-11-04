@@ -67,18 +67,35 @@ export class ArticleService {
         skip,
         sortField,
         directionToSort,
+        published,
+        categoryId,
       } = findOption;
-      const orderOptions = {
-        [sortField]: directionToSort,
-      };
 
-      const take = initialTake <= 20 ? initialTake : 20;
+      // Set default pagination and limit `take` to 20
+      const take = initialTake && initialTake <= 20 ? initialTake : 20;
+
+      // Initialize order options only if `sortField` is defined
+      let orderOptions;
+      if (sortField) {
+        orderOptions = {
+          [sortField]: directionToSort as 'ASC' | 'DESC',
+        };
+      }
+
+      // Set up the `where` conditions only if `placement` is provided
+      const whereConditions: any = {};
+      if (placement) whereConditions.placement = placement;
+      if (published !== undefined) whereConditions.published = published;
+      if (categoryId) {
+        whereConditions.category = { id: categoryId };
+      }
+      // Execute the query with optional filtering, pagination, and ordering
       const [article, total] = await this.articleRepository.findAndCount({
-        where: { placement: placement },
+        where: whereConditions,
         take,
         skip,
         order: orderOptions,
-        relations: ['category', 'user'],
+        relations: ['category', 'user'], // Adjust as needed
       });
 
       return { article, total };
