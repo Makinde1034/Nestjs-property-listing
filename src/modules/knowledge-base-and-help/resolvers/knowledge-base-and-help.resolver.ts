@@ -111,7 +111,7 @@ export class KnowledgeBaseAndHelpResolver {
   }
 
   @Mutation(() => SuccessResponse)
-  async delete(@Args('id') id: number) {
+  async deleteArticle(@Args('id') id: number) {
     return await this.articleService.remove(id);
   }
 

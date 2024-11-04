@@ -32,14 +32,26 @@ export class ServiceAndProviderService {
   ) {}
 
   logger = new Logger(ServiceAndProviderService.name);
-  async createService(createServiceInput: CreateServiceInput) {
+  async createService(createServiceInput: CreateServiceInput, user: User) {
     try {
       const { pricing, ...rest } = createServiceInput;
 
-      return await this.serviceRepository.save({
+      const data = await this.serviceRepository.save({
         ...rest,
-        prcing: JSON.stringify(createServiceInput.pricing),
+        pricing: JSON.stringify(createServiceInput.pricing),
       });
+
+      await this.activityLogService.logActivity([
+        {
+          adminId: user.id,
+          action: ActivityEnum.CREATED,
+          details: JSON.stringify(data),
+
+          serviceId: data.id,
+        },
+      ]);
+
+      return data;
     } catch (error) {
       this.logger.error(error);
       throw new BadRequestException(error);

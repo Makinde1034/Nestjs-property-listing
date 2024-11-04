@@ -421,7 +421,6 @@ type Service {
   pricing: String
   status: ServiceStatus!
   service: ServiceProvider!
-  servicePrividerId: String!
   createdAt: DateTime!
   deletedAt: DateTime!
   updatedAt: DateTime!
@@ -439,6 +438,7 @@ type ServiceProvider {
   providerStatus: String
   deletedAt: DateTime!
   serviceOffered: [Service!]
+  serviceId: String!
   activityLog: [ActivityLog!]!
   status: [ServiceStatus!]!
   coverageArea: String!
@@ -459,7 +459,9 @@ type ActivityLog {
   serviceProviderId: String!
   splashScreen: SplashScreen
   auction: Auction
+  service: Service
   userId: String
+  serviceId: String
   auctionId: String
   adminId: String
   ticketId: String
@@ -1377,9 +1379,10 @@ type Mutation {
   updateKnowledgeBaseCategory(updateKnowledgeBaseCategoryInput: UpdateCategoryInput!): Category!
   deleteCategory(categoryActionInput: CategoryActionInput!): SuccessResponse!
   createArticle(createArticleInput: CreateArticleInput!): Article!
-  delete(id: Float!): SuccessResponse!
+  deleteArticle(id: Float!): SuccessResponse!
   updateArticle(updateArticleInput: UpdateArticleInput!): Article!
   createServiceProvider(createServiceProviderInput: CreateServiceProviderInput!): ServiceProvider!
+  createService(createServiceInput: CreateServiceInput!): Service!
   updateServiceProvider(updateServiceProviderInput: UpdateServiceProviderInput!): ServiceProvider!
   acceptServiceprovider(serviceProviderInput: ServiceProviderInput!): SuccessResponse!
   rejectServiceprovider(serviceProviderInput: ServiceProviderInput!): SuccessResponse!
@@ -1988,6 +1991,20 @@ input CreateServiceProviderInput {
   coverageArea: String!
 }
 
+input CreateServiceInput {
+  englishServiceName: String!
+  arabicServiceName: String!
+  active: Boolean
+  isWorkLicenseRequired: Boolean
+  pricing: [Pricing!]!
+  providerServiceStatus: String
+}
+
+input Pricing {
+  type: String!
+  price: Float!
+}
+
 input UpdateServiceProviderInput {
   firstName: String
   lastName: String
@@ -2010,11 +2027,6 @@ input UpdateServiceInput {
   providerServiceStatus: String
   id: String!
   isActive: Boolean
-}
-
-input Pricing {
-  type: String!
-  price: Float!
 }
 
 input ProvideNewService {
