@@ -51,6 +51,11 @@ export class KnowledgeBaseAndHelpResolver {
     return await this.knowledgeBaseCategoryService.findAll(findOption);
   }
 
+  @Query(() => String, { name: 'placement' })
+  async placement() {
+    return await this.knowledgeBaseCategoryService.placement();
+  }
+
   @Query(() => Category, { name: 'knowledgeBaseCategory' })
   async findOne(@Args('id', { type: () => Int }) id: number) {
     return await this.knowledgeBaseCategoryService.findOne(id);
@@ -66,7 +71,7 @@ export class KnowledgeBaseAndHelpResolver {
     );
   }
 
-  @Mutation(() => SuccessResponse)
+  @Mutation(() => SuccessResponse, { name: 'deleteCategory' })
   async removeKnowledgeBaseCatecory(
     @Args('categoryActionInput') categoryActionInput: CategoryActionInput,
   ) {
@@ -120,7 +125,7 @@ export class KnowledgeBaseAndHelpResolver {
 
   @Query(() => [Category], { name: 'searchForCategory' })
   @UseGuards(AccessTokenGuard)
-  async searchForSplashScreen(@Args('searchParam') searchParam: string) {
+  async searchForCategory(@Args('searchParam') searchParam: string) {
     return await this.knowledgeBaseCategoryService.searchForCategory(
       searchParam,
     );
