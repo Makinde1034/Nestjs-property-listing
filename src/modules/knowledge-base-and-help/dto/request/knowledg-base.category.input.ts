@@ -43,10 +43,4 @@ export class CategoryActionInput {
   id: number[];
 }
 @InputType()
-export class CategoryFilterInput extends PaginateAndSort {
-  @IsOptional()
-  @IsString()
-  @Field({ nullable: true })
-  @IsEnum(knowledgeBasePlacement)
-  placement: string;
-}
+export class CategoryFilterInput extends PaginateAndSort {}
