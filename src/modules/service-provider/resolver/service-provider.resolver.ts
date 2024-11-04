@@ -20,7 +20,6 @@ export class ServiceAndProviderResolver {
   constructor(
     private readonly serviceProviderService: ServiceAndProviderService,
   ) {}
-
   @Mutation(() => ServiceProvider)
   async createServiceProvider(
     @Args('createServiceProviderInput')
@@ -30,12 +29,16 @@ export class ServiceAndProviderResolver {
       createServiceProviderInput,
     );
   }
-
+  @Mutation(() => Service, { name: 'createService' })
   async createService(
-    @Args('createServiceProviderInput')
+    @Args('createServiceInput')
     createServiceInput: CreateServiceInput,
+    @Context() ctx: any,
   ) {
-    return await this.serviceProviderService.createService(createServiceInput);
+    return await this.serviceProviderService.createService(
+      createServiceInput,
+      ctx.req.user,
+    );
   }
 
   @Query(() => [ServiceProvider], { name: 'findAllserviceProvider' })

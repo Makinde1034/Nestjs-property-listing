@@ -5,6 +5,7 @@ import {
   DeleteDateColumn,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToMany,
   OneToOne,
   UpdateDateColumn,
@@ -57,8 +58,13 @@ export class ServiceProvider extends BaseEntity {
   deletedAt: Date;
 
   @Field(() => [Service], { nullable: true })
-  @OneToMany(() => Service, (servicesOffered) => servicesOffered.service)
+  @JoinColumn({ name: 'serviceId' })
+  @ManyToOne(() => Service, (servicesOffered) => servicesOffered.service)
   serviceOffered: Service[];
+
+  @Field()
+  @Column()
+  serviceId: string;
 
   @Field(() => [ActivityLog])
   @OneToMany(

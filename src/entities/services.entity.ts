@@ -6,6 +6,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   OneToOne,
   UpdateDateColumn,
 } from 'typeorm';
@@ -45,16 +46,11 @@ export class Service extends BaseEntity {
   status: ServiceStatus;
 
   @Field(() => ServiceProvider)
-  @JoinColumn({ name: 'servicePrividerId' })
-  @ManyToOne(
+  @OneToMany(
     () => ServiceProvider,
     (servicesProvider) => servicesProvider.serviceOffered,
   )
   service: ServiceProvider[];
-
-  @Field()
-  @Column()
-  servicePrividerId: string;
 
   @Field()
   @CreateDateColumn()

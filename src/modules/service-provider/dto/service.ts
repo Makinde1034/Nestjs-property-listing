@@ -63,6 +63,7 @@ export class CreateServiceInput {
   arabicServiceName: string;
 
   @Field({ nullable: true })
+  @IsOptional()
   @IsBoolean()
   active: boolean;
 
