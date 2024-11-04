@@ -1240,7 +1240,6 @@ input CategoryFilterInput {
   sortField: String
   directionToSort: SortOrder
   where: WhereOption
-  placement: String
 }
 
 input ArticleFilterInput {
@@ -1374,7 +1373,7 @@ type Mutation {
   updateResponseTemplate(updateResponseTemplateInput: UpdateResponseTemplateInput!): ResponseTemplate!
   createReview(createReviewDto: CreateReviewDto!): Review!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
-  updateKnowledgeBaseCatecory(updateKnowledgeBaseCategoryInput: UpdateCategoryInput!): Category!
+  updateKnowledgeBaseCategory(updateKnowledgeBaseCategoryInput: UpdateCategoryInput!): Category!
   removeKnowledgeBaseCatecory(categoryActionInput: CategoryActionInput!): SuccessResponse!
   createArticle(createArticleInput: CreateArticleInput!): Article!
   delete(id: Float!): SuccessResponse!
@@ -1939,13 +1938,11 @@ input CreateReviewDto {
 }
 
 input CreateCategoryInput {
-  placement: String!
   arabicName: String!
   englishName: String!
 }
 
 input UpdateCategoryInput {
-  placement: String
   arabicName: String
   englishName: String
   id: Float!

@@ -20,12 +20,6 @@ export class CreateCategoryInput {
   @IsString()
   @IsNotEmpty()
   @Field()
-  @IsEnum(knowledgeBasePlacement)
-  placement: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @Field()
   arabicName: string;
 
   @IsString()
@@ -49,10 +43,4 @@ export class CategoryActionInput {
   id: number[];
 }
 @InputType()
-export class CategoryFilterInput extends PaginateAndSort {
-  @IsOptional()
-  @IsString()
-  @Field({ nullable: true })
-  @IsEnum(knowledgeBasePlacement)
-  placement: string;
-}
+export class CategoryFilterInput extends PaginateAndSort {}

@@ -56,8 +56,8 @@ export class KnowledgeBaseAndHelpResolver {
     return await this.knowledgeBaseCategoryService.findOne(id);
   }
 
-  @Mutation(() => Category)
-  async updateKnowledgeBaseCatecory(
+  @Mutation(() => Category, { name: 'updateKnowledgeBaseCategory' })
+  async updateKnowledgeBaseCategory(
     @Args('updateKnowledgeBaseCategoryInput')
     updateKnowledgeBaseAndHelpInput: UpdateCategoryInput,
   ) {
