@@ -20,6 +20,10 @@ import {
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { AppStrings } from '../../../common/messages/app.strings';
 import { In } from 'typeorm';
+import {
+  knowledgeBaseMainPlacement,
+  knowledgeBaseNeedHelpPlacement,
+} from '../../../common/enums/knowledge-base';
 
 @Injectable()
 export class KnowledgeBaseCategoryService {
@@ -28,6 +32,19 @@ export class KnowledgeBaseCategoryService {
   ) {}
 
   logger = new Logger(KnowledgeBaseCategoryService.name);
+
+  async placement() {
+    try {
+      const placement = knowledgeBaseMainPlacement;
+      const needHelp = knowledgeBaseNeedHelpPlacement;
+      const data = JSON.stringify({
+        main: placement,
+        needHelp: needHelp,
+      });
+
+      return data;
+    } catch (error) {}
+  }
   async createCategory(createCategoryInput: CreateCategoryInput) {
     try {
       return await this.knowledgeBaseCategoryRepository.save(
@@ -127,6 +144,7 @@ export class KnowledgeBaseCategoryService {
       if (affected > 0) {
         return new SuccessResponse(AppStrings.DELETED_SUCCESSFULLY);
       }
+      throw new BadRequestException(AppStrings.NOT_FOUND);
     } catch (error) {
       this.logger.log(error);
 

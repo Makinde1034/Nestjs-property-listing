@@ -37,7 +37,7 @@ export class ArticleService {
     private readonly activityLogService: ActivityLogService,
   ) {}
   logger = new Logger(ArticleService.name);
-  async create(createArticleInput: CreateArticleInput) {
+  async create(createArticleInput: CreateArticleInput, user: User) {
     try {
       const category = await this.knowledgeBaseCategoryRepository.findOneBy({
         id: createArticleInput.categoryId,
@@ -48,6 +48,7 @@ export class ArticleService {
       return await this.articleRepository.save({
         ...createArticleInput,
         category,
+        user,
       });
     } catch (error) {
       if (error instanceof HttpException) {
@@ -77,7 +78,7 @@ export class ArticleService {
         take,
         skip,
         order: orderOptions,
-        relations: ['category'],
+        relations: ['category', 'user'],
       });
 
       return { article, total };
@@ -91,7 +92,7 @@ export class ArticleService {
     try {
       const article = await this.articleRepository.findOne({
         where: { id },
-        relations: ['category'],
+        relations: ['category', 'user'],
       });
 
       if (!article) {
@@ -260,7 +261,9 @@ export class ArticleService {
 
   async uploadProfileImage(id: number, file: Express.Multer.File[]) {
     try {
-      const article = await this.articleRepository.findOne({ where: { id } });
+      const article = await this.articleRepository.findOne({
+        where: { id: id },
+      });
 
       if (!article) {
         throw new NotFoundException(AppStrings.NOT_FOUND);

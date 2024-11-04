@@ -1,4 +1,4 @@
-export enum knowledgeBasePlacement {
+export enum knowledgeBaseNeedHelpPlacement {
   USER_VERIFICATION = 'User Verification',
   CREATE_LISTING = 'Create Listing',
   REPORT_FLAG_LISTING = 'Report/Flag Listing',
@@ -13,7 +13,10 @@ export enum knowledgeBasePlacement {
   SERVICE_MARKED_DONE = 'Service Marked as Done',
   PROMOTING_LISTING = 'Promoting Listing',
 
+  USER_AUTHENTICATION = 'User Authentication',
+}
+
+export enum knowledgeBaseMainPlacement {
   NEED_HELP = 'Need help',
   BLOG = 'Blog',
-  USER_AUTHENTICATION = 'User Authentication',
 }

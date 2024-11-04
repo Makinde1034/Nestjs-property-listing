@@ -13,7 +13,8 @@ import {
   IsString,
 } from 'class-validator';
 import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
-import { knowledgeBasePlacement } from '../../../../common/enums/knowledge-base';
+import { knowledgeBaseNeedHelpPlacement } from '../../../../common/enums/knowledge-base';
+import { LanguageEnum } from '../../../../common/enums/language.enum';
 
 @InputType()
 export class CreateArticleInput {
@@ -37,9 +38,9 @@ export class CreateArticleInput {
   @IsNotEmpty()
   title: string;
 
-  @Field({ nullable: true })
+  @Field()
   @IsOptional()
-  @IsEnum(knowledgeBasePlacement)
+  @IsEnum(knowledgeBaseNeedHelpPlacement)
   placement: string;
 
   @Field({ nullable: true })
@@ -53,8 +54,7 @@ export class CreateArticleInput {
   authorBio: string;
 
   @Field()
-  @IsString()
-  @IsNotEmpty()
+  @IsEnum(LanguageEnum)
   language: string;
 }
 
@@ -64,7 +64,6 @@ export class UpdateArticleInput extends PartialType(CreateArticleInput) {
   @IsNumber()
   id: number;
 }
-
 @InputType()
 export class ArticleFilterInput extends PaginateAndSort {
   @Field({ nullable: true })

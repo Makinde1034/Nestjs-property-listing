@@ -5,12 +5,15 @@ import {
   CreateServiceInput,
   CreateServiceProviderInput,
   DeleteServiceProvider,
+  ProvideNewService,
   ServiceProviderInput,
+  UpdateServiceInput,
   UpdateServiceProviderInput,
 } from '../dto/service';
 import { PaginateAndSort } from '../../../modules/core/dto/pagination-and-sort.dto';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { Service } from '../../../entities/services.entity';
+import { ServiceStatus } from '../../../entities/provider-service-status.entity';
 
 @Resolver(() => ServiceProvider)
 export class ServiceAndProviderResolver {
@@ -90,6 +93,48 @@ export class ServiceAndProviderResolver {
     return await this.serviceProviderService.reject(
       serviceProviderInput,
       ctx.req.user,
+    );
+  }
+
+  @Mutation(() => SuccessResponse)
+  async updateServiceStatus(
+    @Args('updateServiceStatus')
+    serviceProviderInput: UpdateServiceInput,
+    @Context() ctx: any,
+  ) {
+    return await this.serviceProviderService.updateServiceStatus(
+      serviceProviderInput,
+    );
+  }
+
+  @Mutation(() => SuccessResponse)
+  async updateProviderServiceCoverageArea(
+    @Args('updateProviderServiceCoverageArea')
+    updateServiceInput: UpdateServiceProviderInput,
+    @Context() ctx: any,
+  ) {
+    return await this.serviceProviderService.updateProviderServiceCoverageArea(
+      updateServiceInput,
+    );
+  }
+
+  @Mutation(() => SuccessResponse)
+  async acceptRequestAndStopRequest(
+    @Args('updateServiceStatus')
+    serviceProviderInput: UpdateServiceInput,
+  ) {
+    return await this.serviceProviderService.acceptRequestAndStopRequest(
+      serviceProviderInput,
+    );
+  }
+
+  @Mutation(() => ServiceStatus)
+  async provideService(
+    @Args('provideService')
+    serviceProviderInput: ProvideNewService,
+  ) {
+    return await this.serviceProviderService.provideService(
+      serviceProviderInput,
     );
   }
 

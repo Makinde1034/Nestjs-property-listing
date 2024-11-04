@@ -22,21 +22,21 @@ export class KnowledgeBaseAndHelpController {
   @UseGuards(RestAccessTokenGuard)
   @UseInterceptors(AnyFilesInterceptor())
   async uploadImage(
-    @Query('articleId') articleId: number,
+    @Query('id') id: number,
     @UploadedFiles()
     file: Express.Multer.File[],
   ) {
-    return await this.articleService.uploadImage(articleId, file);
+    return await this.articleService.uploadImage(id, file);
   }
 
   @Post('profile-image-upload')
   @UseGuards(RestAccessTokenGuard)
   @UseInterceptors(AnyFilesInterceptor())
   async uploadProfileImage(
-    @Query('articleId') articleId: number,
+    @Query('id') id: number,
     @UploadedFiles()
     file: Express.Multer.File[],
   ) {
-    return await this.articleService.uploadProfileImage(articleId, file);
+    return await this.articleService.uploadProfileImage(id, file);
   }
 }

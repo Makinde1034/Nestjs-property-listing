@@ -372,7 +372,7 @@ type Article {
   image: String
   title: String!
   authorImage: String
-  user: User!
+  user: User
   authorBio: String
   category: Category!
   articleActivityLog: [ActivityLog!]
@@ -1052,6 +1052,7 @@ type Query {
   findCities(findCities: PaginateAndSort): CityResponse!
   getChat(chatFilterInput: ChatFilterInput!): MessageResponse!
   categories(findOption: CategoryFilterInput): CategoryResponse!
+  placement: String!
   knowledgeBaseCategory(id: Int!): Category!
   findManyArticles(findOption: ArticleFilterInput!): ArticleResponse!
   findOneArticle(id: Int!): Article!
@@ -1374,7 +1375,7 @@ type Mutation {
   createReview(createReviewDto: CreateReviewDto!): Review!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   updateKnowledgeBaseCategory(updateKnowledgeBaseCategoryInput: UpdateCategoryInput!): Category!
-  removeKnowledgeBaseCatecory(categoryActionInput: CategoryActionInput!): SuccessResponse!
+  deleteCategory(categoryActionInput: CategoryActionInput!): SuccessResponse!
   createArticle(createArticleInput: CreateArticleInput!): Article!
   delete(id: Float!): SuccessResponse!
   updateArticle(updateArticleInput: UpdateArticleInput!): Article!
@@ -1382,6 +1383,10 @@ type Mutation {
   updateServiceProvider(updateServiceProviderInput: UpdateServiceProviderInput!): ServiceProvider!
   acceptServiceprovider(serviceProviderInput: ServiceProviderInput!): SuccessResponse!
   rejectServiceprovider(serviceProviderInput: ServiceProviderInput!): SuccessResponse!
+  updateServiceStatus(updateServiceStatus: UpdateServiceInput!): SuccessResponse!
+  updateProviderServiceCoverageArea(updateProviderServiceCoverageArea: UpdateServiceProviderInput!): SuccessResponse!
+  acceptRequestAndStopRequest(updateServiceStatus: UpdateServiceInput!): SuccessResponse!
+  provideService(provideService: ProvideNewService!): ServiceStatus!
   removeServiceProvider(deleteServiceProvider: DeleteServiceProvider!): ServiceProvider!
 }
 
@@ -1957,7 +1962,7 @@ input CreateArticleInput {
   image: String
   categoryId: Float!
   title: String!
-  placement: String
+  placement: String!
   authorImage: String
   authorBio: String!
   language: String!
@@ -1994,6 +1999,27 @@ input UpdateServiceProviderInput {
 
 input ServiceProviderInput {
   id: [String!]!
+}
+
+input UpdateServiceInput {
+  englishServiceName: String
+  arabicServiceName: String
+  active: Boolean
+  isWorkLicenseRequired: Boolean
+  pricing: [Pricing!]
+  providerServiceStatus: String
+  id: String!
+  isActive: Boolean
+}
+
+input Pricing {
+  type: String!
+  price: Float!
+}
+
+input ProvideNewService {
+  providerId: String!
+  serviceId: String!
 }
 
 input DeleteServiceProvider {
