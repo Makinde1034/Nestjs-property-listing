@@ -1058,8 +1058,6 @@ type Query {
   knowledgeBaseCategory(id: Int!): Category!
   findManyArticles(findOption: ArticleFilterInput!): ArticleResponse!
   findOneArticle(id: Int!): Article!
-  publishArticle(articlePublishInput: ArticlePublishInput!): SuccessResponse!
-  unpublishArticle(articlePublishInput: ArticlePublishInput!): SuccessResponse!
   searchForCategory(searchParam: String!): [Category!]!
   getActivityLogs(activityLogInput: ActivityLogInput!): ActivityLogsResponse!
   getAllActivityLogs(paginateAndSort: AuditLogTrailsInput): ActivityLogsResponse!
@@ -1256,10 +1254,6 @@ input ArticleFilterInput {
   categoryId: Float
 }
 
-input ArticlePublishInput {
-  id: [Float!]!
-}
-
 input ActivityLogInput {
   take: Float
   skip: Float
@@ -1381,6 +1375,8 @@ type Mutation {
   updateKnowledgeBaseCategory(updateKnowledgeBaseCategoryInput: UpdateCategoryInput!): Category!
   deleteCategory(categoryActionInput: CategoryActionInput!): SuccessResponse!
   createArticle(createArticleInput: CreateArticleInput!): Article!
+  publishArticle(articlePublishInput: ArticlePublishInput!): SuccessResponse!
+  unpublishArticle(articlePublishInput: ArticlePublishInput!): SuccessResponse!
   deleteArticle(id: Float!): SuccessResponse!
   updateArticle(updateArticleInput: UpdateArticleInput!): Article!
   createServiceProvider(createServiceProviderInput: CreateServiceProviderInput!): ServiceProvider!
@@ -1971,6 +1967,10 @@ input CreateArticleInput {
   authorImage: String
   authorBio: String!
   language: String!
+}
+
+input ArticlePublishInput {
+  id: [Float!]!
 }
 
 input UpdateArticleInput {
