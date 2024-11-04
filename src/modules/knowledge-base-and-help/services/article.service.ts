@@ -260,7 +260,9 @@ export class ArticleService {
 
   async uploadProfileImage(id: number, file: Express.Multer.File[]) {
     try {
-      const article = await this.articleRepository.findOne({ where: { id } });
+      const article = await this.articleRepository.findOne({
+        where: { id: id },
+      });
 
       if (!article) {
         throw new NotFoundException(AppStrings.NOT_FOUND);

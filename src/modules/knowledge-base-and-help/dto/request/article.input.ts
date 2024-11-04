@@ -64,7 +64,6 @@ export class UpdateArticleInput extends PartialType(CreateArticleInput) {
   @IsNumber()
   id: number;
 }
-
 @InputType()
 export class ArticleFilterInput extends PaginateAndSort {
   @Field({ nullable: true })

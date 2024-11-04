@@ -12,6 +12,7 @@ import { Article } from '../../entities/article.entity';
 import { KnowledgeBaseCategoryRepository } from './repositories/knowledge-base-category.repository';
 import { Category } from '../../entities/knowledge-base-category.entity';
 import { KnowledgeBaseCategoryService } from './services/category.services';
+import { KnowledgeBaseAndHelpController } from './controller/knowledeg-base-and-help.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Article, Category])],
@@ -22,5 +23,6 @@ import { KnowledgeBaseCategoryService } from './services/category.services';
     KnowledgeBaseCategoryRepository,
     KnowledgeBaseCategoryService,
   ],
+  controllers: [KnowledgeBaseAndHelpController],
 })
 export class KnowledgeBaseAndHelpModule {}
