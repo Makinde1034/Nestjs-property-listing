@@ -96,7 +96,6 @@ export class KnowledgeBaseAndHelpResolver {
   async findOneArticle(@Args('id', { type: () => Int }) id: number) {
     return await this.articleService.findOne(id);
   }
-
   @Query(() => SuccessResponse, { name: 'publishArticle' })
   async publish(
     @Args('articlePublishInput') articlePublishInput: ArticlePublishInput,
