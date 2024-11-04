@@ -372,7 +372,7 @@ type Article {
   image: String
   title: String!
   authorImage: String
-  user: User!
+  user: User
   authorBio: String
   category: Category!
   articleActivityLog: [ActivityLog!]

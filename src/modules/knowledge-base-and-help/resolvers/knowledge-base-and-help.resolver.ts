@@ -82,8 +82,9 @@ export class KnowledgeBaseAndHelpResolver {
   async createArticle(
     @Args('createArticleInput')
     createArticleInput: CreateArticleInput,
+    @Context() ctx: any,
   ) {
-    return await this.articleService.create(createArticleInput);
+    return await this.articleService.create(createArticleInput, ctx.req.user);
   }
 
   @Query(() => ArticleResponse, { name: 'findManyArticles' })
