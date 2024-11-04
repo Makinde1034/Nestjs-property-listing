@@ -13,7 +13,7 @@ import {
   IsString,
 } from 'class-validator';
 import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
-import { knowledgeBasePlacement } from '../../../../common/enums/knowledge-base';
+import { knowledgeBaseNeedHelpPlacement } from '../../../../common/enums/knowledge-base';
 import { LanguageEnum } from '../../../../common/enums/language.enum';
 
 @InputType()
@@ -40,7 +40,7 @@ export class CreateArticleInput {
 
   @Field()
   @IsOptional()
-  @IsEnum(knowledgeBasePlacement)
+  @IsEnum(knowledgeBaseNeedHelpPlacement)
   placement: string;
 
   @Field({ nullable: true })

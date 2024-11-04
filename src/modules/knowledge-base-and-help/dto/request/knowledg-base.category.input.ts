@@ -13,7 +13,6 @@ import {
   IsString,
 } from 'class-validator';
 import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
-import { knowledgeBasePlacement } from '../../../../common/enums/knowledge-base';
 
 @InputType()
 export class CreateCategoryInput {

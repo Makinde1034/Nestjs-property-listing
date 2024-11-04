@@ -7,6 +7,7 @@ import { Field, Int, ObjectType } from '@nestjs/graphql';
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -48,6 +49,6 @@ export class Category {
 
   @Column()
   @Field()
-  @CreateDateColumn()
+  @DeleteDateColumn()
   deletedAt: Date;
 }

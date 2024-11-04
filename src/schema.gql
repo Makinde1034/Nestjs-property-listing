@@ -1052,6 +1052,7 @@ type Query {
   findCities(findCities: PaginateAndSort): CityResponse!
   getChat(chatFilterInput: ChatFilterInput!): MessageResponse!
   categories(findOption: CategoryFilterInput): CategoryResponse!
+  placement: String!
   knowledgeBaseCategory(id: Int!): Category!
   findManyArticles(findOption: ArticleFilterInput!): ArticleResponse!
   findOneArticle(id: Int!): Article!
@@ -1374,7 +1375,7 @@ type Mutation {
   createReview(createReviewDto: CreateReviewDto!): Review!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   updateKnowledgeBaseCategory(updateKnowledgeBaseCategoryInput: UpdateCategoryInput!): Category!
-  removeKnowledgeBaseCatecory(categoryActionInput: CategoryActionInput!): SuccessResponse!
+  deleteCategory(categoryActionInput: CategoryActionInput!): SuccessResponse!
   createArticle(createArticleInput: CreateArticleInput!): Article!
   delete(id: Float!): SuccessResponse!
   updateArticle(updateArticleInput: UpdateArticleInput!): Article!
