@@ -14,6 +14,10 @@ import { PaginateAndSort } from '../../../modules/core/dto/pagination-and-sort.d
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { Service } from '../../../entities/services.entity';
 import { ServiceStatus } from '../../../entities/provider-service-status.entity';
+import {
+  ServiceProviderResponse,
+  ServiceResponse,
+} from '../dto/service.response';
 
 @Resolver(() => ServiceProvider)
 export class ServiceAndProviderResolver {
@@ -24,9 +28,11 @@ export class ServiceAndProviderResolver {
   async createServiceProvider(
     @Args('createServiceProviderInput')
     createServiceProviderInput: CreateServiceProviderInput,
+    @Context() ctx: any,
   ) {
     return await this.serviceProviderService.createProvider(
       createServiceProviderInput,
+      ctx.req.user,
     );
   }
   @Mutation(() => Service, { name: 'createService' })
@@ -41,7 +47,7 @@ export class ServiceAndProviderResolver {
     );
   }
 
-  @Query(() => [ServiceProvider], { name: 'findAllserviceProvider' })
+  @Query(() => ServiceProviderResponse, { name: 'findAllServiceProviders' })
   async findAll(@Args('paginateAndSort') paginateAndSort: PaginateAndSort) {
     return await this.serviceProviderService.findAllServiceProvider(
       paginateAndSort,
@@ -53,14 +59,14 @@ export class ServiceAndProviderResolver {
     return await this.serviceProviderService.findOneServiceProvider(id);
   }
 
-  @Query(() => [Service], { name: 'findAllServices' })
+  @Query(() => ServiceResponse, { name: 'findAllService' })
   async findAllServices(
     @Args('paginateAndSort') paginateAndSort: PaginateAndSort,
   ) {
     return await this.serviceProviderService.findAllServices(paginateAndSort);
   }
 
-  @Query(() => ServiceProvider, { name: 'findAllserviceProviders' })
+  @Query(() => ServiceProvider, { name: 'findOneServiceProviders' })
   async findOneService(@Args('id') id: string) {
     return await this.serviceProviderService.findOneService(id);
   }

@@ -21,22 +21,13 @@ export class Pricing {
 
 @InputType()
 export class CreateServiceProviderInput {
-  @Field()
-  @IsString()
-  firstName: string;
-
-  @Field()
-  @IsString()
-  lastName: string;
-
   @Field({ nullable: true })
   @IsString()
   iban: string;
 
-  @Field(() => [String])
-  @IsArray()
+  @Field()
   @IsString()
-  serviceOffered: string[];
+  serviceOffered: string;
 
   @Field()
   @IsString()
