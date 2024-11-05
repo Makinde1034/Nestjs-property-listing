@@ -5,37 +5,49 @@ import {
   CreateServiceInput,
   CreateServiceProviderInput,
   DeleteServiceProvider,
+  ProvideNewService,
   ServiceProviderInput,
+  UpdateServiceInput,
   UpdateServiceProviderInput,
 } from '../dto/service';
 import { PaginateAndSort } from '../../../modules/core/dto/pagination-and-sort.dto';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { Service } from '../../../entities/services.entity';
+import { ServiceStatus } from '../../../entities/provider-service-status.entity';
+import {
+  ServiceProviderResponse,
+  ServiceResponse,
+} from '../dto/service.response';
 
 @Resolver(() => ServiceProvider)
 export class ServiceAndProviderResolver {
   constructor(
     private readonly serviceProviderService: ServiceAndProviderService,
   ) {}
-
   @Mutation(() => ServiceProvider)
   async createServiceProvider(
     @Args('createServiceProviderInput')
     createServiceProviderInput: CreateServiceProviderInput,
+    @Context() ctx: any,
   ) {
     return await this.serviceProviderService.createProvider(
       createServiceProviderInput,
+      ctx.req.user,
+    );
+  }
+  @Mutation(() => Service, { name: 'createService' })
+  async createService(
+    @Args('createServiceInput')
+    createServiceInput: CreateServiceInput,
+    @Context() ctx: any,
+  ) {
+    return await this.serviceProviderService.createService(
+      createServiceInput,
+      ctx.req.user,
     );
   }
 
-  async createService(
-    @Args('createServiceProviderInput')
-    createServiceInput: CreateServiceInput,
-  ) {
-    return await this.serviceProviderService.createService(createServiceInput);
-  }
-
-  @Query(() => [ServiceProvider], { name: 'findAllserviceProvider' })
+  @Query(() => ServiceProviderResponse, { name: 'findAllServiceProviders' })
   async findAll(@Args('paginateAndSort') paginateAndSort: PaginateAndSort) {
     return await this.serviceProviderService.findAllServiceProvider(
       paginateAndSort,
@@ -47,14 +59,14 @@ export class ServiceAndProviderResolver {
     return await this.serviceProviderService.findOneServiceProvider(id);
   }
 
-  @Query(() => [Service], { name: 'findAllServices' })
+  @Query(() => ServiceResponse, { name: 'findAllService' })
   async findAllServices(
     @Args('paginateAndSort') paginateAndSort: PaginateAndSort,
   ) {
     return await this.serviceProviderService.findAllServices(paginateAndSort);
   }
 
-  @Query(() => ServiceProvider, { name: 'findAllserviceProviders' })
+  @Query(() => ServiceProvider, { name: 'findOneServiceProviders' })
   async findOneService(@Args('id') id: string) {
     return await this.serviceProviderService.findOneService(id);
   }
@@ -90,6 +102,48 @@ export class ServiceAndProviderResolver {
     return await this.serviceProviderService.reject(
       serviceProviderInput,
       ctx.req.user,
+    );
+  }
+
+  @Mutation(() => SuccessResponse)
+  async updateServiceStatus(
+    @Args('updateServiceStatus')
+    serviceProviderInput: UpdateServiceInput,
+    @Context() ctx: any,
+  ) {
+    return await this.serviceProviderService.updateServiceStatus(
+      serviceProviderInput,
+    );
+  }
+
+  @Mutation(() => SuccessResponse)
+  async updateProviderServiceCoverageArea(
+    @Args('updateProviderServiceCoverageArea')
+    updateServiceInput: UpdateServiceProviderInput,
+    @Context() ctx: any,
+  ) {
+    return await this.serviceProviderService.updateProviderServiceCoverageArea(
+      updateServiceInput,
+    );
+  }
+
+  @Mutation(() => SuccessResponse)
+  async acceptRequestAndStopRequest(
+    @Args('updateServiceStatus')
+    serviceProviderInput: UpdateServiceInput,
+  ) {
+    return await this.serviceProviderService.acceptRequestAndStopRequest(
+      serviceProviderInput,
+    );
+  }
+
+  @Mutation(() => ServiceStatus)
+  async provideService(
+    @Args('provideService')
+    serviceProviderInput: ProvideNewService,
+  ) {
+    return await this.serviceProviderService.provideService(
+      serviceProviderInput,
     );
   }
 

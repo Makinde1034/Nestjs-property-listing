@@ -40,7 +40,7 @@ export class Article {
   @Field({ nullable: true })
   authorImage: string;
 
-  @Field(() => User)
+  @Field(() => User, { nullable: true })
   @ManyToOne(() => User, (user) => user.article)
   user: User;
 
@@ -48,7 +48,7 @@ export class Article {
   @Field({ nullable: true })
   authorBio: string;
 
-  @Field(() => Category)
+  @Field(() => Category, { nullable: true })
   @ManyToOne(() => Category, (category) => category.article)
   category: Category;
 

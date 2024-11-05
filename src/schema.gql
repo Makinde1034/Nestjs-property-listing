@@ -372,9 +372,9 @@ type Article {
   image: String
   title: String!
   authorImage: String
-  user: User!
+  user: User
   authorBio: String
-  category: Category!
+  category: Category
   articleActivityLog: [ActivityLog!]
   language: String!
   placement: String!
@@ -421,7 +421,6 @@ type Service {
   pricing: String
   status: ServiceStatus!
   service: ServiceProvider!
-  servicePrividerId: String!
   createdAt: DateTime!
   deletedAt: DateTime!
   updatedAt: DateTime!
@@ -439,6 +438,7 @@ type ServiceProvider {
   providerStatus: String
   deletedAt: DateTime!
   serviceOffered: [Service!]
+  serviceId: String!
   activityLog: [ActivityLog!]!
   status: [ServiceStatus!]!
   coverageArea: String!
@@ -456,10 +456,12 @@ type ActivityLog {
   ticket: Ticket
   article: Article
   serviceProvider: ServiceProvider
-  serviceProviderId: String!
+  serviceProviderId: String
   splashScreen: SplashScreen
   auction: Auction
+  service: Service
   userId: String
+  serviceId: String
   auctionId: String
   adminId: String
   ticketId: String
@@ -964,6 +966,16 @@ type ActivityLogsResponse {
   total: Float!
 }
 
+type ServiceResponse {
+  service: [Service!]!
+  count: Float!
+}
+
+type ServiceProviderResponse {
+  serviceProvider: [ServiceProvider!]!
+  count: Float!
+}
+
 type Query {
   app: String!
   findAllSplashScreen(findOption: SplashScreenFilterInput): SplashScreenResponse!
@@ -1056,14 +1068,13 @@ type Query {
   knowledgeBaseCategory(id: Int!): Category!
   findManyArticles(findOption: ArticleFilterInput!): ArticleResponse!
   findOneArticle(id: Int!): Article!
-  publishArticle(articlePublishInput: ArticlePublishInput!): SuccessResponse!
-  unpublishArticle(articlePublishInput: ArticlePublishInput!): SuccessResponse!
   searchForCategory(searchParam: String!): [Category!]!
   getActivityLogs(activityLogInput: ActivityLogInput!): ActivityLogsResponse!
   getAllActivityLogs(paginateAndSort: AuditLogTrailsInput): ActivityLogsResponse!
-  findAllserviceProvider(paginateAndSort: PaginateAndSort!): [ServiceProvider!]!
+  findAllServiceProviders(paginateAndSort: PaginateAndSort!): ServiceProviderResponse!
   findAllserviceProviders(id: String!): ServiceProvider!
-  findAllServices(paginateAndSort: PaginateAndSort!): [Service!]!
+  findAllService(paginateAndSort: PaginateAndSort!): ServiceResponse!
+  findOneServiceProviders(id: String!): ServiceProvider!
 }
 
 input SplashScreenFilterInput {
@@ -1250,10 +1261,8 @@ input ArticleFilterInput {
   directionToSort: SortOrder
   where: WhereOption
   placement: String
-}
-
-input ArticlePublishInput {
-  id: [Float!]!
+  published: Boolean
+  categoryId: Float
 }
 
 input ActivityLogInput {
@@ -1377,12 +1386,23 @@ type Mutation {
   updateKnowledgeBaseCategory(updateKnowledgeBaseCategoryInput: UpdateCategoryInput!): Category!
   deleteCategory(categoryActionInput: CategoryActionInput!): SuccessResponse!
   createArticle(createArticleInput: CreateArticleInput!): Article!
+<<<<<<< HEAD
   delete(articleDeleteInput: ArticleDeleteInput!): SuccessResponse!
+=======
+  publishArticle(articlePublishInput: ArticlePublishInput!): SuccessResponse!
+  unpublishArticle(articlePublishInput: ArticlePublishInput!): SuccessResponse!
+  deleteArticle(id: Float!): SuccessResponse!
+>>>>>>> origin
   updateArticle(updateArticleInput: UpdateArticleInput!): Article!
   createServiceProvider(createServiceProviderInput: CreateServiceProviderInput!): ServiceProvider!
+  createService(createServiceInput: CreateServiceInput!): Service!
   updateServiceProvider(updateServiceProviderInput: UpdateServiceProviderInput!): ServiceProvider!
   acceptServiceprovider(serviceProviderInput: ServiceProviderInput!): SuccessResponse!
   rejectServiceprovider(serviceProviderInput: ServiceProviderInput!): SuccessResponse!
+  updateServiceStatus(updateServiceStatus: UpdateServiceInput!): SuccessResponse!
+  updateProviderServiceCoverageArea(updateProviderServiceCoverageArea: UpdateServiceProviderInput!): SuccessResponse!
+  acceptRequestAndStopRequest(updateServiceStatus: UpdateServiceInput!): SuccessResponse!
+  provideService(provideService: ProvideNewService!): ServiceStatus!
   removeServiceProvider(deleteServiceProvider: DeleteServiceProvider!): ServiceProvider!
 }
 
@@ -1964,7 +1984,11 @@ input CreateArticleInput {
   language: String!
 }
 
+<<<<<<< HEAD
 input ArticleDeleteInput {
+=======
+input ArticlePublishInput {
+>>>>>>> origin
   id: [Float!]!
 }
 
@@ -1981,24 +2005,50 @@ input UpdateArticleInput {
 }
 
 input CreateServiceProviderInput {
-  firstName: String!
-  lastName: String!
   iban: String
-  serviceOffered: [String!]!
+  serviceOffered: String!
   coverageArea: String!
 }
 
+input CreateServiceInput {
+  englishServiceName: String!
+  arabicServiceName: String!
+  active: Boolean
+  isWorkLicenseRequired: Boolean
+  pricing: [Pricing!]!
+  providerServiceStatus: String
+}
+
+input Pricing {
+  type: String!
+  price: Float!
+}
+
 input UpdateServiceProviderInput {
-  firstName: String
-  lastName: String
   iban: String
-  serviceOffered: [String!]
+  serviceOffered: String
   coverageArea: String
   id: String!
 }
 
 input ServiceProviderInput {
   id: [String!]!
+}
+
+input UpdateServiceInput {
+  englishServiceName: String
+  arabicServiceName: String
+  active: Boolean
+  isWorkLicenseRequired: Boolean
+  pricing: [Pricing!]
+  providerServiceStatus: String
+  id: String!
+  isActive: Boolean
+}
+
+input ProvideNewService {
+  providerId: String!
+  serviceId: String!
 }
 
 input DeleteServiceProvider {

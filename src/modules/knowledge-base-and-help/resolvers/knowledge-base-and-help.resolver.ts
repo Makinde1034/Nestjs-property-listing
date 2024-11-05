@@ -83,8 +83,9 @@ export class KnowledgeBaseAndHelpResolver {
   async createArticle(
     @Args('createArticleInput')
     createArticleInput: CreateArticleInput,
+    @Context() ctx: any,
   ) {
-    return await this.articleService.create(createArticleInput);
+    return await this.articleService.create(createArticleInput, ctx.req.user);
   }
 
   @Query(() => ArticleResponse, { name: 'findManyArticles' })
@@ -96,15 +97,14 @@ export class KnowledgeBaseAndHelpResolver {
   async findOneArticle(@Args('id', { type: () => Int }) id: number) {
     return await this.articleService.findOne(id);
   }
-
-  @Query(() => SuccessResponse, { name: 'publishArticle' })
+  @Mutation(() => SuccessResponse, { name: 'publishArticle' })
   async publish(
     @Args('articlePublishInput') articlePublishInput: ArticlePublishInput,
   ) {
     return await this.articleService.publish(articlePublishInput);
   }
 
-  @Query(() => SuccessResponse, { name: 'unpublishArticle' })
+  @Mutation(() => SuccessResponse, { name: 'unpublishArticle' })
   async unPublish(
     @Args('articlePublishInput') articlePublishInput: ArticlePublishInput,
   ) {

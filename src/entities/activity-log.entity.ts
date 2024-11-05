@@ -18,6 +18,7 @@ import { Article } from './article.entity';
 import { SplashScreen } from './splash-screen.entity';
 import { Auction } from './auction-table.entity';
 import { ServiceProvider } from './service-provider.entity';
+import { Service } from './services.entity';
 
 @Entity()
 @ObjectType()
@@ -67,12 +68,12 @@ export class ActivityLog extends BaseEntity {
 
   @Field(() => ServiceProvider, { nullable: true })
   @JoinTable({ name: 'serviceProviderId' })
-  @ManyToOne(() => Article, (article) => article.articleActivityLog)
+  @ManyToOne(() => ServiceProvider, (serviceProvider) => serviceProvider)
   serviceProvider: ServiceProvider;
 
-  @Field()
+  @Field({ nullable: true })
+  @Column({ nullable: true })
   serviceProviderId: string;
-
   @Field(() => SplashScreen, { nullable: true })
   @JoinTable({ name: 'splashScreenId' })
   @ManyToOne(
@@ -86,9 +87,18 @@ export class ActivityLog extends BaseEntity {
   @ManyToOne(() => Auction, (auction) => auction.actionActivityLog)
   auction: Auction;
 
+  @Field(() => Service, { nullable: true })
+  @JoinTable({ name: 'serviceId' })
+  @ManyToOne(() => Service, (service) => service)
+  service: Service;
+
   @Field({ nullable: true })
   @Column({ nullable: true })
   userId: string;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  serviceId: string;
 
   @Field({ nullable: true })
   @Column({ nullable: true })

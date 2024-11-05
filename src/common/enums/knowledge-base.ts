@@ -13,8 +13,6 @@ export enum knowledgeBaseNeedHelpPlacement {
   SERVICE_MARKED_DONE = 'Service Marked as Done',
   PROMOTING_LISTING = 'Promoting Listing',
 
-  NEED_HELP = 'Need help',
-  BLOG = 'Blog',
   USER_AUTHENTICATION = 'User Authentication',
 }
 

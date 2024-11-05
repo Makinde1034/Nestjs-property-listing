@@ -3,6 +3,7 @@ import {
   CreateServiceInput,
   CreateServiceProviderInput,
   DeleteServiceProvider,
+  ProvideNewService,
   ServiceProviderInput,
   UpdateServiceInput,
   UpdateServiceProviderInput,
@@ -31,26 +32,48 @@ export class ServiceAndProviderService {
   ) {}
 
   logger = new Logger(ServiceAndProviderService.name);
-  async createService(createServiceInput: CreateServiceInput) {
+  async createService(createServiceInput: CreateServiceInput, user: User) {
     try {
       const { pricing, ...rest } = createServiceInput;
 
-      return await this.serviceRepository.save({
+      const data = await this.serviceRepository.save({
         ...rest,
-        prcing: JSON.stringify(createServiceInput.pricing),
+        pricing: JSON.stringify(createServiceInput.pricing),
       });
+
+      await this.activityLogService.logActivity([
+        {
+          adminId: user.id,
+          action: ActivityEnum.CREATED,
+          details: JSON.stringify(data),
+
+          serviceId: data.id,
+        },
+      ]);
+
+      return data;
     } catch (error) {
       this.logger.error(error);
       throw new BadRequestException(error);
     }
   }
-
   async findAllServices(paginateAndSort: PaginateAndSort) {
     try {
-      return await this.serviceRepository.find({
+      const whereOption =
+        paginateAndSort?.where?.fieldToChose &&
+        paginateAndSort?.where?.whereParam
+          ? {
+              [paginateAndSort.where.fieldToChose]:
+                paginateAndSort.where.whereParam,
+            }
+          : {};
+      const [service, count] = await this.serviceRepository.findAndCount({
         take: paginateAndSort.take ?? 20,
         skip: paginateAndSort.skip ?? 0,
+        where: { ...whereOption },
       });
+
+      return { service, count };
     } catch (error) {
       this.logger.error(error);
       throw new BadRequestException(error);
@@ -70,16 +93,20 @@ export class ServiceAndProviderService {
    * Create Service Provider
    **********************************/
 
-  async createProvider(createServiceProviderInput: CreateServiceProviderInput) {
+  async createProvider(
+    createServiceProviderInput: CreateServiceProviderInput,
+    user: User,
+  ) {
     try {
       const { serviceOffered, ...rest } = createServiceProviderInput;
 
-      const services = await this.serviceRepository.find({
-        where: { id: In(createServiceProviderInput.serviceOffered) },
+      const service = await this.serviceRepository.findOne({
+        where: { id: createServiceProviderInput.serviceOffered },
       });
       const serviceProvider = await this.serviceProviderRepository.save({
         ...rest,
-        serviceOffered: services,
+        serviceId: service.id,
+        user,
       });
 
       return serviceProvider;
@@ -91,11 +118,13 @@ export class ServiceAndProviderService {
 
   async findAllServiceProvider(paginateAndSort: PaginateAndSort) {
     try {
-      return await this.serviceProviderRepository.find({
-        take: paginateAndSort.take ?? 20,
-        skip: paginateAndSort.skip ?? 0,
-        relations: ['serviceOffered'],
-      });
+      const [serviceProvider, count] =
+        await this.serviceProviderRepository.findAndCount({
+          take: paginateAndSort.take ?? 20,
+          skip: paginateAndSort.skip ?? 0,
+          relations: ['serviceOffered'],
+        });
+      return { serviceProvider, count };
     } catch (error) {
       this.logger.error(error);
       throw new BadRequestException(error);
@@ -126,11 +155,11 @@ export class ServiceAndProviderService {
       const activityToSave = serviceProvider.map((element) => {
         return {
           adminId: user.id,
-          action: ActivityEnum.DELETED,
+          action: ActivityEnum.UPDATED,
           details: JSON.stringify(
             serviceProvider.find((a) => a.id === element.id),
           ),
-          userId: element.id,
+          serviceProviderId: element.id,
         };
       });
 
@@ -161,11 +190,11 @@ export class ServiceAndProviderService {
       const activityToSave = serviceProvider.map((element) => {
         return {
           adminId: user.id,
-          action: ActivityEnum.DELETED,
+          action: ActivityEnum.UPDATED,
           details: JSON.stringify(
             serviceProvider.find((a) => a.id === element.id),
           ),
-          userId: element.id,
+          serviceProviderId: element.id,
         };
       });
 
@@ -183,9 +212,13 @@ export class ServiceAndProviderService {
   async updateServiceStatus(updateServiceInput: UpdateServiceInput) {
     try {
       const { id, providerServiceStatus } = updateServiceInput;
-      return await this.serviceStatusRepository.update(id, {
+      const { affected } = await this.serviceStatusRepository.update(id, {
         status: providerServiceStatus,
       });
+
+      if (affected > 0) {
+        return new SuccessResponse(AppStrings.SUCCESSFULL);
+      }
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -197,9 +230,12 @@ export class ServiceAndProviderService {
   ) {
     try {
       const { id, coverageArea } = updateServiceInput;
-      return await this.serviceProviderRepository.update(id, {
+      const { affected } = await this.serviceProviderRepository.update(id, {
         coverageArea: coverageArea,
       });
+      if (affected > 0) {
+        return new SuccessResponse(AppStrings.SUCCESSFULL);
+      }
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -209,16 +245,22 @@ export class ServiceAndProviderService {
   async acceptRequestAndStopRequest(updateServiceInput: UpdateServiceInput) {
     try {
       const { id, isActive } = updateServiceInput;
-      return await this.serviceStatusRepository.update(id, {
+      const { affected } = await this.serviceStatusRepository.update(id, {
         isActive: isActive,
       });
+
+      if (affected > 0) {
+        return new SuccessResponse(AppStrings.SUCCESSFULL);
+      }
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
     }
   }
 
-  async provideService(proideServiceInput): Promise<ServiceStatus> {
+  async provideService(
+    proideServiceInput: ProvideNewService,
+  ): Promise<ServiceStatus> {
     try {
       return await this.serviceStatusRepository.save(proideServiceInput);
     } catch (error) {
@@ -243,9 +285,13 @@ export class ServiceAndProviderService {
 
   async delete(deleteServiceProvider: DeleteServiceProvider) {
     try {
-      return await this.serviceProviderRepository.softDelete(
+      const { affected } = await this.serviceProviderRepository.softDelete(
         deleteServiceProvider.id,
       );
+
+      if (affected > 0) {
+        return new SuccessResponse(AppStrings.SUCCESSFULL);
+      }
     } catch (error) {
       this.logger.error(error);
       throw new BadRequestException(error);
@@ -254,7 +300,13 @@ export class ServiceAndProviderService {
 
   async deleteService(deleteServiceProvider: DeleteServiceProvider) {
     try {
-      return await this.serviceRepository.softDelete(deleteServiceProvider.id);
+      const { affected } = await this.serviceRepository.softDelete(
+        deleteServiceProvider.id,
+      );
+
+      if (affected > 0) {
+        return new SuccessResponse(AppStrings.SUCCESSFULL);
+      }
     } catch (error) {
       this.logger.error(error);
       throw new BadRequestException(error);
