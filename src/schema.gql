@@ -1063,9 +1063,9 @@ type Query {
   searchForReview(searchParam: String!): [Review!]!
   findCities(findCities: PaginateAndSort): CityResponse!
   getChat(chatFilterInput: ChatFilterInput!): MessageResponse!
-  categories(findOption: CategoryFilterInput): CategoryResponse!
+  findAllcategories(findOption: CategoryFilterInput): CategoryResponse!
   placement: String!
-  knowledgeBaseCategory(id: Int!): Category!
+  findOneCategory(id: Int!): Category!
   findManyArticles(findOption: ArticleFilterInput!): ArticleResponse!
   findOneArticle(id: Int!): Article!
   searchForCategory(searchParam: String!): [Category!]!

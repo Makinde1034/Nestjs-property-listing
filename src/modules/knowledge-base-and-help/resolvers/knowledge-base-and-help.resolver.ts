@@ -45,7 +45,7 @@ export class KnowledgeBaseAndHelpResolver {
     );
   }
 
-  @Query(() => CategoryResponse, { name: 'categories' })
+  @Query(() => CategoryResponse, { name: 'findAllcategories' })
   async findAll(
     @Args('findOption', { nullable: true }) findOption: CategoryFilterInput,
   ) {
@@ -57,7 +57,7 @@ export class KnowledgeBaseAndHelpResolver {
     return await this.knowledgeBaseCategoryService.placement();
   }
 
-  @Query(() => Category, { name: 'knowledgeBaseCategory' })
+  @Query(() => Category, { name: 'findOneCategory' })
   async findOne(@Args('id', { type: () => Int }) id: number) {
     return await this.knowledgeBaseCategoryService.findOne(id);
   }
