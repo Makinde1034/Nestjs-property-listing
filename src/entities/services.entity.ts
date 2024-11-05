@@ -4,14 +4,10 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinColumn,
-  ManyToOne,
   OneToMany,
-  OneToOne,
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
-import { ServiceProvider } from './service-provider.entity';
 import { ServiceStatus } from './provider-service-status.entity';
 
 @ObjectType()
@@ -41,16 +37,9 @@ export class Service extends BaseEntity {
   @Field({ nullable: true })
   pricing: string;
 
-  @Field(() => ServiceStatus)
-  @OneToOne(() => ServiceStatus, (status) => status.service)
-  status: ServiceStatus;
-
-  @Field(() => ServiceProvider)
-  @OneToMany(
-    () => ServiceProvider,
-    (servicesProvider) => servicesProvider.serviceOffered,
-  )
-  service: ServiceProvider[];
+  @Field(() => [ServiceStatus])
+  @OneToMany(() => ServiceStatus, (status) => status.service)
+  status: ServiceStatus[];
 
   @Field()
   @CreateDateColumn()

@@ -21,7 +21,7 @@ export class ServiceStatus extends BaseEntity {
   @JoinColumn({ name: 'serviceProviderId' })
   @ManyToOne(
     () => ServiceProvider,
-    (servicesProvider) => servicesProvider.serviceOffered,
+    (servicesProvider) => servicesProvider.servicesOffered,
   )
   serviceProvider: ServiceProvider;
 

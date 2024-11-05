@@ -110,7 +110,7 @@ export class KnowledgeBaseAndHelpResolver {
   }
 
   @Mutation(() => SuccessResponse)
-  async delete(
+  async deleteArticle(
     @Args('articleDeleteInput') articleDeleteInput: ArticleDeleteInput,
   ) {
     return await this.articleService.remove(articleDeleteInput);
