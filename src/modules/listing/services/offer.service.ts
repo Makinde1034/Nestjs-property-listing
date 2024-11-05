@@ -117,11 +117,11 @@ export class OfferService {
         );
       }
 
-      // If (user.id == listing.user.id) {
-      //   Throw new BadRequestException(
-      //     'The creator of a listing cannot create an offer on  that listing',
-      //   );
-      // }
+      if (user.id == listing.user.id) {
+        throw new BadRequestException(
+          'The creator of a listing cannot create an offer on  that listing',
+        );
+      }
       if (offer.length > 0) {
         throw new BadRequestException(
           `Minimum Offer must be greater than ${offer[0].price}`,
@@ -315,7 +315,7 @@ export class OfferService {
     try {
       const { id, listingId, ...rest } = updateOfferInput;
 
-      const [offer, scope] = await Promise.all([
+      const [offer, scope, currentOffer] = await Promise.all([
         // Fetch offer and highest offer in a single query
         this.offerRepository
           .createQueryBuilder('offer')
@@ -345,6 +345,7 @@ export class OfferService {
         this.notificationScopeRepository.findOne({
           where: { name: NotificationScopesEnum.UPDATE_OFFER },
         }),
+        await this.offerRepository.findOneBy({ id }),
       ]);
 
       const { maxPrice } = offer;
@@ -382,6 +383,9 @@ export class OfferService {
         throw new BadRequestException(
           `Minimum Offer must be greater than ${highestOfferPrice}`,
         );
+      }
+      if (currentOffer.status == OfferListEnum.EXPIRED) {
+        throw new BadRequestException(`Offer expired`);
       }
 
       // Validate minimum price requirement
