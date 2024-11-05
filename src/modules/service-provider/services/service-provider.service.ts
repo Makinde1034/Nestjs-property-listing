@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import {
   CreateServiceInput,
   CreateServiceProviderInput,
@@ -99,18 +104,32 @@ export class ServiceAndProviderService {
   ) {
     try {
       const { serviceOffered, ...rest } = createServiceProviderInput;
+      const alreadyExisting = await this.serviceProviderRepository.find({
+        where: { userId: user.id },
+      });
+
+      console.log(alreadyExisting);
+      if (alreadyExisting.length > 0) {
+        throw new BadRequestException(AppStrings.RESOURCE_ALREADY_EXISTS);
+      }
 
       const service = await this.serviceRepository.findOne({
         where: { id: createServiceProviderInput.serviceOffered },
       });
       const serviceProvider = await this.serviceProviderRepository.save({
         ...rest,
-        serviceId: service.id,
         user,
       });
 
+      await this.serviceStatusRepository.save({
+        serviceId: service.id,
+        serviceProviderId: serviceProvider.id,
+      });
       return serviceProvider;
     } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
       this.logger.error(error);
       throw new BadRequestException(error);
     }
@@ -122,7 +141,6 @@ export class ServiceAndProviderService {
         await this.serviceProviderRepository.findAndCount({
           take: paginateAndSort.take ?? 20,
           skip: paginateAndSort.skip ?? 0,
-          relations: ['serviceOffered'],
         });
       return { serviceProvider, count };
     } catch (error) {
@@ -133,7 +151,14 @@ export class ServiceAndProviderService {
 
   async findOneServiceProvider(id: string) {
     try {
-      return await this.serviceProviderRepository.findOneBy({ id });
+      const [provider, serviceProvided] = await Promise.all([
+        this.serviceProviderRepository.findOneBy({ id }),
+        this.serviceStatusRepository.find({
+          where: { serviceProviderId: id },
+        }),
+      ]);
+
+      return { serviceProvided, provider };
     } catch (error) {
       this.logger.error(error);
       throw new BadRequestException(error);
@@ -145,6 +170,10 @@ export class ServiceAndProviderService {
       const serviceProvider = await this.serviceProviderRepository.find({
         where: { id: In(serviceProviderInput.id) },
       });
+
+      if (serviceProvider.length == 0) {
+        throw new BadRequestException(AppStrings.NOT_FOUND);
+      }
 
       const { affected } = await this.serviceProviderRepository.update(
         serviceProviderInput.id,
@@ -180,6 +209,10 @@ export class ServiceAndProviderService {
         where: { id: In(serviceProviderInput.id) },
       });
 
+      if (serviceProvider.length == 0) {
+        throw new BadRequestException(AppStrings.NOT_FOUND);
+      }
+
       const { affected } = await this.serviceProviderRepository.update(
         serviceProviderInput.id,
         {
@@ -204,6 +237,9 @@ export class ServiceAndProviderService {
         return new SuccessResponse(AppStrings.SUCCESSFULL);
       }
     } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
       this.logger.log(error);
       throw new BadRequestException(error);
     }

@@ -398,6 +398,20 @@ type SplashScreen {
   updatedAt: DateTime!
 }
 
+type Service {
+  id: ID!
+  englishServiceName: String!
+  arabicServiceName: String!
+  active: Boolean
+  isWorkLicenseRequired: Boolean
+  icon: String
+  pricing: String
+  status: [ServiceStatus!]!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type ServiceStatus {
   id: ID!
   serviceProvider: ServiceProvider!
@@ -407,21 +421,6 @@ type ServiceStatus {
   isActive: Boolean!
   createdAt: DateTime!
   status: String
-  deletedAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type Service {
-  id: ID!
-  englishServiceName: String!
-  arabicServiceName: String!
-  active: Boolean
-  isWorkLicenseRequired: Boolean
-  icon: String
-  pricing: String
-  status: ServiceStatus!
-  service: ServiceProvider!
-  createdAt: DateTime!
   deletedAt: DateTime!
   updatedAt: DateTime!
 }
@@ -437,10 +436,8 @@ type ServiceProvider {
   createdAt: DateTime!
   providerStatus: String
   deletedAt: DateTime!
-  serviceOffered: [Service!]
-  serviceId: String!
   activityLog: [ActivityLog!]!
-  status: [ServiceStatus!]!
+  servicesOffered: [ServiceStatus!]!
   coverageArea: String!
   updatedAt: DateTime!
 }
@@ -976,6 +973,11 @@ type ServiceProviderResponse {
   count: Float!
 }
 
+type OneServiceProviderResponse {
+  provider: ServiceProvider!
+  serviceProvided: [ServiceStatus!]!
+}
+
 type Query {
   app: String!
   findAllSplashScreen(findOption: SplashScreenFilterInput): SplashScreenResponse!
@@ -1063,16 +1065,16 @@ type Query {
   searchForReview(searchParam: String!): [Review!]!
   findCities(findCities: PaginateAndSort): CityResponse!
   getChat(chatFilterInput: ChatFilterInput!): MessageResponse!
-  categories(findOption: CategoryFilterInput): CategoryResponse!
+  findAllcategories(findOption: CategoryFilterInput): CategoryResponse!
   placement: String!
-  knowledgeBaseCategory(id: Int!): Category!
+  findOneCategory(id: Int!): Category!
   findManyArticles(findOption: ArticleFilterInput!): ArticleResponse!
   findOneArticle(id: Int!): Article!
   searchForCategory(searchParam: String!): [Category!]!
   getActivityLogs(activityLogInput: ActivityLogInput!): ActivityLogsResponse!
   getAllActivityLogs(paginateAndSort: AuditLogTrailsInput): ActivityLogsResponse!
   findAllServiceProviders(paginateAndSort: PaginateAndSort!): ServiceProviderResponse!
-  findAllserviceProviders(id: String!): ServiceProvider!
+  findOneServiceProvider(id: String!): OneServiceProviderResponse!
   findAllService(paginateAndSort: PaginateAndSort!): ServiceResponse!
   findOneServiceProviders(id: String!): ServiceProvider!
 }
@@ -1388,13 +1390,13 @@ type Mutation {
   createArticle(createArticleInput: CreateArticleInput!): Article!
   publishArticle(articlePublishInput: ArticlePublishInput!): SuccessResponse!
   unpublishArticle(articlePublishInput: ArticlePublishInput!): SuccessResponse!
-  delete(articleDeleteInput: ArticleDeleteInput!): SuccessResponse!
+  deleteArticle(articleDeleteInput: ArticleDeleteInput!): SuccessResponse!
   updateArticle(updateArticleInput: UpdateArticleInput!): Article!
   createServiceProvider(createServiceProviderInput: CreateServiceProviderInput!): ServiceProvider!
   createService(createServiceInput: CreateServiceInput!): Service!
   updateServiceProvider(updateServiceProviderInput: UpdateServiceProviderInput!): ServiceProvider!
-  acceptServiceprovider(serviceProviderInput: ServiceProviderInput!): SuccessResponse!
-  rejectServiceprovider(serviceProviderInput: ServiceProviderInput!): SuccessResponse!
+  acceptServiceProvider(serviceProviderInput: ServiceProviderInput!): SuccessResponse!
+  rejectServiceProvider(serviceProviderInput: ServiceProviderInput!): SuccessResponse!
   updateServiceStatus(updateServiceStatus: UpdateServiceInput!): SuccessResponse!
   updateProviderServiceCoverageArea(updateProviderServiceCoverageArea: UpdateServiceProviderInput!): SuccessResponse!
   acceptRequestAndStopRequest(updateServiceStatus: UpdateServiceInput!): SuccessResponse!

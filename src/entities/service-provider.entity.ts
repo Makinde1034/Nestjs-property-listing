@@ -5,13 +5,11 @@ import {
   DeleteDateColumn,
   Entity,
   JoinColumn,
-  ManyToOne,
   OneToMany,
   OneToOne,
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
-import { Service } from './services.entity';
 import { ServiceStatus } from './provider-service-status.entity';
 import { ServiceProviderStatus } from '../common/enums/status.enum';
 import { ActivityLog } from './activity-log.entity';
@@ -57,15 +55,6 @@ export class ServiceProvider extends BaseEntity {
   @DeleteDateColumn()
   deletedAt: Date;
 
-  @Field(() => [Service], { nullable: true })
-  @JoinColumn({ name: 'serviceId' })
-  @ManyToOne(() => Service, (servicesOffered) => servicesOffered.service)
-  serviceOffered: Service[];
-
-  @Field()
-  @Column()
-  serviceId: string;
-
   @Field(() => [ActivityLog])
   @OneToMany(
     () => ActivityLog,
@@ -75,7 +64,7 @@ export class ServiceProvider extends BaseEntity {
 
   @Field(() => [ServiceStatus])
   @OneToMany(() => ServiceStatus, (status) => status.service)
-  status: ServiceStatus[];
+  servicesOffered: ServiceStatus[];
 
   @Field()
   @Column()

@@ -174,8 +174,9 @@ export class SplashScreenService {
       if (!splashScreen) {
         throw new BadRequestException(AppStrings.NOT_FOUND);
       }
-      const { affected } =
-        await this.splashScreenRepository.softDelete(splashScreen);
+      const { affected } = await this.splashScreenRepository.softDelete(
+        deleteSplashScreenInput.id,
+      );
       if (affected > 0) {
         return new SuccessResponse(AppStrings.DELETED_SUCCESSFULLY);
       }

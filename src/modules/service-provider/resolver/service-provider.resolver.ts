@@ -15,6 +15,7 @@ import { SuccessResponse } from '../../../common/utils/success.response';
 import { Service } from '../../../entities/services.entity';
 import { ServiceStatus } from '../../../entities/provider-service-status.entity';
 import {
+  OneServiceProviderResponse,
   ServiceProviderResponse,
   ServiceResponse,
 } from '../dto/service.response';
@@ -55,8 +56,8 @@ export class ServiceAndProviderResolver {
     );
   }
 
-  @Query(() => ServiceProvider, { name: 'findAllserviceProviders' })
-  async findOne(@Args('id') id: string) {
+  @Query(() => OneServiceProviderResponse, { name: 'findOneServiceProvider' })
+  async findOne(@Args('id') id: string): Promise<OneServiceProviderResponse> {
     return await this.serviceProviderService.findOneServiceProvider(id);
   }
 
@@ -83,7 +84,7 @@ export class ServiceAndProviderResolver {
   }
 
   @Mutation(() => SuccessResponse)
-  async acceptServiceprovider(
+  async acceptServiceProvider(
     @Args('serviceProviderInput')
     serviceProviderInput: ServiceProviderInput,
     @Context() ctx: any,
@@ -95,7 +96,7 @@ export class ServiceAndProviderResolver {
   }
 
   @Mutation(() => SuccessResponse)
-  async rejectServiceprovider(
+  async rejectServiceProvider(
     @Args('serviceProviderInput')
     serviceProviderInput: ServiceProviderInput,
     @Context() ctx: any,
