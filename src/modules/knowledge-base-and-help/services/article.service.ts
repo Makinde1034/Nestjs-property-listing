@@ -11,6 +11,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import {
+  ArticleDeleteInput,
   ArticleFilterInput,
   ArticlePublishInput,
   CreateArticleInput,
@@ -226,16 +227,20 @@ export class ArticleService {
     }
   }
 
-  async remove(id: number) {
+  async remove(articleDeleteInput: ArticleDeleteInput) {
     try {
-      const category = await this.articleRepository.findOneBy({
-        id,
+      const category = await this.articleRepository.find({
+        where: {
+          id: In(articleDeleteInput.id),
+        },
       });
 
       if (!category) {
         throw new NotFoundException(AppStrings.NOT_FOUND);
       }
-      const { affected } = await this.articleRepository.softDelete(id);
+      const { affected } = await this.articleRepository.softDelete(
+        articleDeleteInput.id,
+      );
 
       if (affected > 0) {
         return new SuccessResponse(AppStrings.DELETED_SUCCESSFULLY);
