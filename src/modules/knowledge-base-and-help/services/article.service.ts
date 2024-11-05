@@ -60,6 +60,50 @@ export class ArticleService {
       }
     }
   }
+
+  async findAllKnowledgeBase(findOption: ArticleFilterInput) {
+    try {
+      const {
+        take: initialTake,
+        skip,
+        sortField,
+        directionToSort,
+        published,
+        categoryId,
+      } = findOption;
+
+      // Set default pagination and limit `take` to 20
+      const take = initialTake && initialTake <= 20 ? initialTake : 20;
+
+      // Initialize order options only if `sortField` is defined
+      let orderOptions;
+      if (sortField) {
+        orderOptions = {
+          [sortField]: directionToSort as 'ASC' | 'DESC',
+        };
+      }
+
+      // Set up the `where` conditions only if `placement` is provided
+      const whereConditions: any = {};
+      if (published !== undefined) whereConditions.published = published;
+      if (categoryId) {
+        whereConditions.category = { id: categoryId };
+      }
+      // Execute the query with optional filtering, pagination, and ordering
+      const [article, total] = await this.articleRepository.findAndCount({
+        where: { placement: null, ...whereConditions },
+        take,
+        skip,
+        order: orderOptions,
+        relations: ['category', 'user'],
+      });
+
+      return { article, total };
+    } catch (error) {
+      this.logger.error(error);
+      throw new BadRequestException(error);
+    }
+  }
   async findAll(findOption: ArticleFilterInput) {
     try {
       const {

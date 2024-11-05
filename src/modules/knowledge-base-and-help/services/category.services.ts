@@ -19,16 +19,19 @@ import {
 } from '../dto/request/knowledg-base.category.input';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { AppStrings } from '../../../common/messages/app.strings';
-import { In } from 'typeorm';
+import { In, IsNull } from 'typeorm';
 import {
   knowledgeBaseMainPlacement,
   knowledgeBaseNeedHelpPlacement,
 } from '../../../common/enums/knowledge-base';
+import { ArticleRepository } from '../repositories/article.repository';
+import { Article } from '../../../entities/article.entity';
 
 @Injectable()
 export class KnowledgeBaseCategoryService {
   constructor(
     private readonly knowledgeBaseCategoryRepository: KnowledgeBaseCategoryRepository,
+    private readonly articleRepository: ArticleRepository,
   ) {}
 
   logger = new Logger(KnowledgeBaseCategoryService.name);
@@ -133,13 +136,23 @@ export class KnowledgeBaseCategoryService {
         },
       });
 
-      if (!category) {
+      if (category.length === 0) {
         throw new NotFoundException(AppStrings.NOT_FOUND);
       }
+
       const { affected } =
         await this.knowledgeBaseCategoryRepository.softDelete(
           categoryActionInput.id,
         );
+
+      await this.articleRepository
+        .createQueryBuilder()
+        .update(Article)
+        .set({
+          published: false,
+        })
+        .where('categoryId IN (:...ids)', { ids: categoryActionInput.id })
+        .execute();
 
       if (affected > 0) {
         return new SuccessResponse(AppStrings.DELETED_SUCCESSFULLY);
