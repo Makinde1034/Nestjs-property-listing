@@ -80,3 +80,11 @@ export class ArticlePublishInput {
   @IsArray()
   id: number[];
 }
+
+@InputType()
+export class ArticleDeleteInput {
+  @Field(() => [Number])
+  @IsOptional()
+  @IsArray()
+  id: number[];
+}

@@ -8,6 +8,7 @@ import { Resolver, Mutation, Args, Query, Int, Context } from '@nestjs/graphql';
 import { Article } from '../../../entities/article.entity';
 import { ArticleService } from '../services/article.service';
 import {
+  ArticleDeleteInput,
   ArticleFilterInput,
   ArticlePublishInput,
   CreateArticleInput,
@@ -111,8 +112,10 @@ export class KnowledgeBaseAndHelpResolver {
   }
 
   @Mutation(() => SuccessResponse)
-  async delete(@Args('id') id: number) {
-    return await this.articleService.remove(id);
+  async delete(
+    @Args('articleDeleteInput') articleDeleteInput: ArticleDeleteInput,
+  ) {
+    return await this.articleService.remove(articleDeleteInput);
   }
 
   @Mutation(() => Article)
