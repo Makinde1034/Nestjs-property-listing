@@ -49,7 +49,7 @@ export class Article {
   authorBio: string;
 
   @Field(() => Category, { nullable: true })
-  @ManyToOne(() => Category, (category) => category.article)
+  @ManyToOne(() => Category, (category) => category.article, { nullable: true })
   category: Category;
 
   @Field(() => [ActivityLog], { nullable: true })
@@ -60,8 +60,8 @@ export class Article {
   @Field()
   language: string;
 
-  @Column()
-  @Field()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   placement: string;
 
   @Column({ default: false })

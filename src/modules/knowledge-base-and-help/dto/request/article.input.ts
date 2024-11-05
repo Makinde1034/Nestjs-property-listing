@@ -39,7 +39,7 @@ export class CreateArticleInput {
   @IsNotEmpty()
   title: string;
 
-  @Field()
+  @Field({ nullable: true })
   @IsOptional()
   @IsEnum(knowledgeBaseNeedHelpPlacement)
   placement: string;

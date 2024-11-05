@@ -87,8 +87,15 @@ export class KnowledgeBaseAndHelpResolver {
   }
 
   @Query(() => ArticleResponse, { name: 'findManyArticles' })
-  async findManyArticles(@Args('findOption') placement: ArticleFilterInput) {
-    return await this.articleService.findAll(placement);
+  async findManyArticles(@Args('findOption') findOption: ArticleFilterInput) {
+    return await this.articleService.findAll(findOption);
+  }
+
+  @Query(() => ArticleResponse, { name: 'findManyArticlesKnowledgeBase' })
+  async findAllKnowledgeBase(
+    @Args('findOption') findOption: ArticleFilterInput,
+  ) {
+    return await this.articleService.findAllKnowledgeBase(findOption);
   }
 
   @Query(() => Article, { name: 'findOneArticle' })
@@ -129,5 +136,10 @@ export class KnowledgeBaseAndHelpResolver {
     return await this.knowledgeBaseCategoryService.searchForCategory(
       searchParam,
     );
+  }
+  @Query(() => [Category], { name: 'searchForArticles' })
+  @UseGuards(AccessTokenGuard)
+  async searchForArticles(@Args('searchParam') searchParam: string) {
+    return await this.articleService.searchForArticles(searchParam);
   }
 }

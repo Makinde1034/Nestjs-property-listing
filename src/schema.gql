@@ -359,7 +359,7 @@ type Category {
   arabicName: String!
   englishName: String!
   placement: String
-  article: [Article!]!
+  article: [Article!]
   createdAt: DateTime!
   updatedAt: DateTime!
   deletedAt: DateTime!
@@ -377,7 +377,7 @@ type Article {
   category: Category
   articleActivityLog: [ActivityLog!]
   language: String!
-  placement: String!
+  placement: String
   published: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
@@ -1069,8 +1069,10 @@ type Query {
   placement: String!
   findOneCategory(id: Int!): Category!
   findManyArticles(findOption: ArticleFilterInput!): ArticleResponse!
+  findManyArticlesKnowledgeBase(findOption: ArticleFilterInput!): ArticleResponse!
   findOneArticle(id: Int!): Article!
   searchForCategory(searchParam: String!): [Category!]!
+  searchForArticles(searchParam: String!): [Category!]!
   getActivityLogs(activityLogInput: ActivityLogInput!): ActivityLogsResponse!
   getAllActivityLogs(paginateAndSort: AuditLogTrailsInput): ActivityLogsResponse!
   findAllServiceProviders(paginateAndSort: PaginateAndSort!): ServiceProviderResponse!
@@ -1976,7 +1978,7 @@ input CreateArticleInput {
   image: String
   categoryId: Float!
   title: String!
-  placement: String!
+  placement: String
   authorImage: String
   authorBio: String!
   language: String!
