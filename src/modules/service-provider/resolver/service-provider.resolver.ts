@@ -35,6 +35,7 @@ export class ServiceAndProviderResolver {
       ctx.req.user,
     );
   }
+
   @Mutation(() => Service, { name: 'createService' })
   async createService(
     @Args('createServiceInput')

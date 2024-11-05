@@ -62,14 +62,12 @@ export class KnowledgeBaseAndHelpResolver {
     return await this.knowledgeBaseCategoryService.findOne(id);
   }
 
-  @Mutation(() => Category, { name: 'updateKnowledgeBaseCategory' })
+  @Mutation(() => Category, { name: 'updateCategory' })
   async updateKnowledgeBaseCategory(
-    @Args('updateKnowledgeBaseCategoryInput')
-    updateKnowledgeBaseAndHelpInput: UpdateCategoryInput,
+    @Args('updateCategoryInput')
+    updateCategoryInput: UpdateCategoryInput,
   ) {
-    return await this.knowledgeBaseCategoryService.update(
-      updateKnowledgeBaseAndHelpInput,
-    );
+    return await this.knowledgeBaseCategoryService.update(updateCategoryInput);
   }
 
   @Mutation(() => SuccessResponse, { name: 'deleteCategory' })
@@ -125,7 +123,6 @@ export class KnowledgeBaseAndHelpResolver {
   ) {
     return await this.articleService.update(updateArticleInput, ctx.req.user);
   }
-
   @Query(() => [Category], { name: 'searchForCategory' })
   @UseGuards(AccessTokenGuard)
   async searchForCategory(@Args('searchParam') searchParam: string) {

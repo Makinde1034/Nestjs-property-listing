@@ -1383,16 +1383,12 @@ type Mutation {
   updateResponseTemplate(updateResponseTemplateInput: UpdateResponseTemplateInput!): ResponseTemplate!
   createReview(createReviewDto: CreateReviewDto!): Review!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
-  updateKnowledgeBaseCategory(updateKnowledgeBaseCategoryInput: UpdateCategoryInput!): Category!
+  updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
   deleteCategory(categoryActionInput: CategoryActionInput!): SuccessResponse!
   createArticle(createArticleInput: CreateArticleInput!): Article!
-<<<<<<< HEAD
-  delete(articleDeleteInput: ArticleDeleteInput!): SuccessResponse!
-=======
   publishArticle(articlePublishInput: ArticlePublishInput!): SuccessResponse!
   unpublishArticle(articlePublishInput: ArticlePublishInput!): SuccessResponse!
-  deleteArticle(id: Float!): SuccessResponse!
->>>>>>> origin
+  delete(articleDeleteInput: ArticleDeleteInput!): SuccessResponse!
   updateArticle(updateArticleInput: UpdateArticleInput!): Article!
   createServiceProvider(createServiceProviderInput: CreateServiceProviderInput!): ServiceProvider!
   createService(createServiceInput: CreateServiceInput!): Service!
@@ -1984,11 +1980,11 @@ input CreateArticleInput {
   language: String!
 }
 
-<<<<<<< HEAD
-input ArticleDeleteInput {
-=======
 input ArticlePublishInput {
->>>>>>> origin
+  id: [Float!]!
+}
+
+input ArticleDeleteInput {
   id: [Float!]!
 }
 
