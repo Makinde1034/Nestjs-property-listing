@@ -68,12 +68,12 @@ export class ActivityLog extends BaseEntity {
 
   @Field(() => ServiceProvider, { nullable: true })
   @JoinTable({ name: 'serviceProviderId' })
-  @ManyToOne(() => Article, (article) => article.articleActivityLog)
+  @ManyToOne(() => ServiceProvider, (serviceProvider) => serviceProvider)
   serviceProvider: ServiceProvider;
 
-  @Field()
+  @Field({ nullable: true })
+  @Column({ nullable: true })
   serviceProviderId: string;
-
   @Field(() => SplashScreen, { nullable: true })
   @JoinTable({ name: 'splashScreenId' })
   @ManyToOne(

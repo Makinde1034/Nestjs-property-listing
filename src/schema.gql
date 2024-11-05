@@ -456,7 +456,7 @@ type ActivityLog {
   ticket: Ticket
   article: Article
   serviceProvider: ServiceProvider
-  serviceProviderId: String!
+  serviceProviderId: String
   splashScreen: SplashScreen
   auction: Auction
   service: Service
@@ -966,6 +966,16 @@ type ActivityLogsResponse {
   total: Float!
 }
 
+type ServiceResponse {
+  service: [Service!]!
+  count: Float!
+}
+
+type ServiceProviderResponse {
+  serviceProvider: [ServiceProvider!]!
+  count: Float!
+}
+
 type Query {
   app: String!
   findAllSplashScreen(findOption: SplashScreenFilterInput): SplashScreenResponse!
@@ -1061,9 +1071,10 @@ type Query {
   searchForCategory(searchParam: String!): [Category!]!
   getActivityLogs(activityLogInput: ActivityLogInput!): ActivityLogsResponse!
   getAllActivityLogs(paginateAndSort: AuditLogTrailsInput): ActivityLogsResponse!
-  findAllserviceProvider(paginateAndSort: PaginateAndSort!): [ServiceProvider!]!
+  findAllServiceProviders(paginateAndSort: PaginateAndSort!): ServiceProviderResponse!
   findAllserviceProviders(id: String!): ServiceProvider!
-  findAllServices(paginateAndSort: PaginateAndSort!): [Service!]!
+  findAllService(paginateAndSort: PaginateAndSort!): ServiceResponse!
+  findOneServiceProviders(id: String!): ServiceProvider!
 }
 
 input SplashScreenFilterInput {
@@ -1986,10 +1997,8 @@ input UpdateArticleInput {
 }
 
 input CreateServiceProviderInput {
-  firstName: String!
-  lastName: String!
   iban: String
-  serviceOffered: [String!]!
+  serviceOffered: String!
   coverageArea: String!
 }
 
@@ -2008,10 +2017,8 @@ input Pricing {
 }
 
 input UpdateServiceProviderInput {
-  firstName: String
-  lastName: String
   iban: String
-  serviceOffered: [String!]
+  serviceOffered: String
   coverageArea: String
   id: String!
 }

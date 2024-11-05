@@ -57,13 +57,23 @@ export class ServiceAndProviderService {
       throw new BadRequestException(error);
     }
   }
-
   async findAllServices(paginateAndSort: PaginateAndSort) {
     try {
-      return await this.serviceRepository.find({
+      const whereOption =
+        paginateAndSort?.where?.fieldToChose &&
+        paginateAndSort?.where?.whereParam
+          ? {
+              [paginateAndSort.where.fieldToChose]:
+                paginateAndSort.where.whereParam,
+            }
+          : {};
+      const [service, count] = await this.serviceRepository.findAndCount({
         take: paginateAndSort.take ?? 20,
         skip: paginateAndSort.skip ?? 0,
+        where: { ...whereOption },
       });
+
+      return { service, count };
     } catch (error) {
       this.logger.error(error);
       throw new BadRequestException(error);
@@ -83,16 +93,20 @@ export class ServiceAndProviderService {
    * Create Service Provider
    **********************************/
 
-  async createProvider(createServiceProviderInput: CreateServiceProviderInput) {
+  async createProvider(
+    createServiceProviderInput: CreateServiceProviderInput,
+    user: User,
+  ) {
     try {
       const { serviceOffered, ...rest } = createServiceProviderInput;
 
-      const services = await this.serviceRepository.find({
-        where: { id: In(createServiceProviderInput.serviceOffered) },
+      const service = await this.serviceRepository.findOne({
+        where: { id: createServiceProviderInput.serviceOffered },
       });
       const serviceProvider = await this.serviceProviderRepository.save({
         ...rest,
-        serviceOffered: services,
+        serviceId: service.id,
+        user,
       });
 
       return serviceProvider;
@@ -104,11 +118,13 @@ export class ServiceAndProviderService {
 
   async findAllServiceProvider(paginateAndSort: PaginateAndSort) {
     try {
-      return await this.serviceProviderRepository.find({
-        take: paginateAndSort.take ?? 20,
-        skip: paginateAndSort.skip ?? 0,
-        relations: ['serviceOffered'],
-      });
+      const [serviceProvider, count] =
+        await this.serviceProviderRepository.findAndCount({
+          take: paginateAndSort.take ?? 20,
+          skip: paginateAndSort.skip ?? 0,
+          relations: ['serviceOffered'],
+        });
+      return { serviceProvider, count };
     } catch (error) {
       this.logger.error(error);
       throw new BadRequestException(error);
@@ -139,11 +155,11 @@ export class ServiceAndProviderService {
       const activityToSave = serviceProvider.map((element) => {
         return {
           adminId: user.id,
-          action: ActivityEnum.DELETED,
+          action: ActivityEnum.UPDATED,
           details: JSON.stringify(
             serviceProvider.find((a) => a.id === element.id),
           ),
-          userId: element.id,
+          serviceProviderId: element.id,
         };
       });
 
@@ -174,11 +190,11 @@ export class ServiceAndProviderService {
       const activityToSave = serviceProvider.map((element) => {
         return {
           adminId: user.id,
-          action: ActivityEnum.DELETED,
+          action: ActivityEnum.UPDATED,
           details: JSON.stringify(
             serviceProvider.find((a) => a.id === element.id),
           ),
-          userId: element.id,
+          serviceProviderId: element.id,
         };
       });
 
