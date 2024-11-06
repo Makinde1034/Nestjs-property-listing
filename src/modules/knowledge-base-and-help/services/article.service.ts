@@ -120,7 +120,6 @@ export class ArticleService {
   async findAll(findOption: ArticleFilterInput) {
     try {
       const {
-        placement,
         take: initialTake,
         skip,
         sortField,
@@ -132,33 +131,46 @@ export class ArticleService {
       // Set default pagination and limit `take` to 20
       const take = initialTake && initialTake <= 20 ? initialTake : 20;
 
-      // Initialize order options only if `sortField` is defined
-      let orderOptions;
-      if (sortField) {
-        orderOptions = {
-          [sortField]: directionToSort as 'ASC' | 'DESC',
-        };
+      // Initialize query builder for articles
+      const queryBuilder = this.articleRepository.createQueryBuilder('article');
+
+      // Enforce `placement` to not be NULL
+      queryBuilder.where('article.placement IS NOT NULL');
+
+      // Add additional filtering conditions
+      if (published !== undefined) {
+        queryBuilder.andWhere('article.published = :published', { published });
+      }
+      if (categoryId) {
+        queryBuilder.andWhere('article.categoryId = :categoryId', {
+          categoryId,
+        });
       }
 
-      // Set up the `where` conditions only if `placement` is provided
-      const whereConditions: any = {};
-      if (placement) whereConditions.placement = placement;
-      if (published !== undefined) whereConditions.published = published;
-      if (categoryId) {
-        whereConditions.category = { id: categoryId };
+      // Apply sorting if `sortField` and `directionToSort` are provided
+      if (sortField && directionToSort) {
+        queryBuilder.orderBy(
+          `article.${sortField}`,
+          directionToSort as 'ASC' | 'DESC',
+        );
+      } else {
+        queryBuilder.orderBy('article.createdAt', 'DESC'); // Example default sort
       }
-      // Execute the query with optional filtering, pagination, and ordering
-      const [article, total] = await this.articleRepository.findAndCount({
-        where: whereConditions,
-        take,
-        skip,
-        order: orderOptions,
-        relations: ['category', 'user'], // Adjust as needed
-      });
+
+      // Apply pagination
+      queryBuilder.take(take).skip(skip);
+
+      // Join related entities
+      queryBuilder
+        .leftJoinAndSelect('article.category', 'category')
+        .leftJoinAndSelect('article.user', 'user');
+
+      // Execute the query and get results with the total count
+      const [article, total] = await queryBuilder.getManyAndCount();
 
       return { article, total };
     } catch (error) {
-      this.logger.error(error);
+      this.logger.error({ error, findOption }); // Log additional context if needed
       throw new BadRequestException(error);
     }
   }
@@ -370,6 +382,36 @@ export class ArticleService {
       return await this.articleRepository
         .createQueryBuilder('article')
         .leftJoinAndSelect('author.user', 'user')
+        .where('article.placement IS NOT NULL')
+        .orWhere('article.title ILIKE :term', {
+          term: `%${searchParam}%`,
+        })
+        .orWhere('article.placement ILIKE :term', {
+          term: `%${searchParam}%`,
+        })
+        .orWhere('article.title ILIKE :term', {
+          term: `%${searchParam}%`,
+        })
+        .orWhere('user.firstName ILIKE :term', {
+          term: `%${searchParam}%`,
+        })
+        .orWhere('user.arabicFirstName ILIKE :term', {
+          term: `%${searchParam}%`,
+        })
+        .take(10)
+        .getMany();
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async searchForArticlesKnowledgeBase(searchParam: string) {
+    try {
+      return await this.articleRepository
+        .createQueryBuilder('article')
+        .leftJoinAndSelect('author.user', 'user')
+        .where('article.placement IS NULL')
         .orWhere('article.title ILIKE :term', {
           term: `%${searchParam}%`,
         })

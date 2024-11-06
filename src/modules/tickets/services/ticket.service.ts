@@ -5,6 +5,7 @@
 
 import {
   BadRequestException,
+  HttpException,
   Injectable,
   Logger,
   NotFoundException,
@@ -29,6 +30,7 @@ import { SuccessResponse } from '../../../common/utils/success.response';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { ActivityEnum } from '../../../common/enums/activitys';
 import { ActivityLogService } from '../../activity-log/services/activity-log.service';
+import { NotFoundError } from 'rxjs';
 @Injectable()
 export class TicketService {
   constructor(
@@ -232,6 +234,9 @@ export class TicketService {
 
       throw new BadRequestException('Invalid status update');
     } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
       this.logger.error('Error updating tickets', error.stack);
       throw new BadRequestException(error.message);
     }

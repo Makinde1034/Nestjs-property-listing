@@ -137,9 +137,20 @@ export class KnowledgeBaseAndHelpResolver {
       searchParam,
     );
   }
-  @Query(() => [Category], { name: 'searchForArticles' })
+
+  @Query(() => [Article], { name: 'searchForArticles' })
   @UseGuards(AccessTokenGuard)
   async searchForArticles(@Args('searchParam') searchParam: string) {
     return await this.articleService.searchForArticles(searchParam);
+  }
+
+  @Query(() => [Article], { name: 'searchForArticlesKnowledgeBase' })
+  @UseGuards(AccessTokenGuard)
+  async searchForArticlesKnowledgeBase(
+    @Args('searchParam') searchParam: string,
+  ) {
+    return await this.articleService.searchForArticlesKnowledgeBase(
+      searchParam,
+    );
   }
 }

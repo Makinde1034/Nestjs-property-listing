@@ -41,9 +41,6 @@ import { AttributeDto } from '../dtos/request/attributes.dto';
 import { CreatePromotionInput } from '../dtos/request/promotion-input';
 import { Promotion } from '../../../entities/promotion.entity';
 
-import { AdminGuard } from '../../auth/guards/admin.guard';
-
-// Import { SuccessResponse } from '../../../common/response';
 import { CreateSearchHistoryInput } from '../dtos/request/create-search-history';
 
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
@@ -72,6 +69,8 @@ import { CreateAutoBidInput } from '../dtos/request/auto-bid';
 import { Public } from '../../auth/decorators/permision.decorator';
 import { UserTwoGuard } from '../../auth/guards/level-two.guard';
 import { Compare } from '../../../entities/compare.entity';
+import { Permissions } from '../../../common/decorator/permission';
+import { PermissionsEnum } from '../../../common/enums/permission.enum';
 
 @Resolver()
 export class ListingResolver {
@@ -165,7 +164,8 @@ export class ListingResolver {
     return listing;
   }
 
-  @UseGuards(AccessTokenGuard, PermissionsGuard, AdminGuard)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions(PermissionsEnum.LISTINGS_VIEW_DETAILS)
   @Query(() => AdminListingResponse, { name: 'findListingsForAdmin' })
   async getListingsForAdmin(
     @Args('paginateAndSort', { nullable: true })
@@ -176,14 +176,14 @@ export class ListingResolver {
     return data;
   }
 
-  @UseGuards(AdminGuard)
+  @Permissions(PermissionsEnum.LISTINGS_VIEW_DETAILS)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Query(() => Listing, { name: 'findOneListingForAdmin' })
   async getOneListingForAdmin(@Args('id') id: string) {
     return await this.listingService.getOneListingForAdmin(id);
   }
 
-  @UseGuards(AdminGuard)
+  @Permissions(PermissionsEnum.LISTINGS_VIEW_DETAILS)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Mutation(() => SuccessResponse, { name: 'unfeatureAListing' })
   async unfeatureAListing(@Args('id') id: string, @Context() ctx: any) {
@@ -234,12 +234,12 @@ export class ListingResolver {
     return await this.listingAttributeService.findListingAttribute(listingId);
   }
 
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
-  @UseGuards(AdminGuard)
   @Query(() => FlaggedListingResponse, {
     nullable: true,
     name: 'viewFlaggedListings',
   })
+  @Permissions(PermissionsEnum.LISTINGS_MULTI_ACTIONS)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async viewFlaggedListings(
     @Args('findManyOptions', { nullable: true })
     findManyOptions?: PaginateAndSort,
@@ -248,11 +248,12 @@ export class ListingResolver {
   }
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)
-  @UseGuards(AdminGuard)
+  @Permissions(PermissionsEnum.LISTINGS_MULTI_ACTIONS)
   @Query(() => FlagListing, {
     nullable: true,
     name: 'flaggedListing',
   })
+  @Permissions(PermissionsEnum.LISTINGS_MULTI_ACTIONS)
   async flaggedListings(
     @Args('id')
     listingId: string,
@@ -261,6 +262,7 @@ export class ListingResolver {
   }
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions(PermissionsEnum.LISTINGS_MULTI_ACTIONS)
   @Mutation(() => SuccessResponse, { name: 'flagListing' })
   async flagListing(
     @Context() ctx: any,
@@ -282,7 +284,7 @@ export class ListingResolver {
   }
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)
-  @UseGuards(AdminGuard)
+  @Permissions(PermissionsEnum.LISTINGS_DELETE)
   @Mutation(() => SuccessResponse, { name: 'deleteListing' })
   async deleteListing(
     @Context() ctx: any,
@@ -291,7 +293,7 @@ export class ListingResolver {
     return await this.listingService.deleteListing(ctx.req.user, listingId);
   }
 
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @UseGuards(AccessTokenGuard)
   @Query(() => SearchHistoryResponse, {
     nullable: true,
     name: 'getSearchHistory',
@@ -429,14 +431,14 @@ export class ListingResolver {
    *
    ********************************************/
 
-  @UseGuards(AdminGuard)
+  @Permissions(PermissionsEnum.LISTINGS_VIEW_DETAILS)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Query(() => Listing, { name: 'findOneListingsForAdmin' })
   async getOneListingsForAdmin(@Args('listingId') listingId: string) {
     return await this.listingService.getOneListingForAdmin(listingId);
   }
 
-  @UseGuards(AdminGuard)
+  @Permissions(PermissionsEnum.LISTINGS_MULTI_ACTIONS)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Mutation(() => SuccessResponse, { name: 'adminDisableListing' })
   async adminDisableListing(
@@ -444,7 +446,7 @@ export class ListingResolver {
   ) {
     return await this.listingService.disableListing(listingActionInput);
   }
-  @UseGuards(AdminGuard)
+  @Permissions(PermissionsEnum.LISTINGS_MULTI_ACTIONS)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Mutation(() => SuccessResponse, { name: 'enableListing' })
   async adminEnableListing(
@@ -456,7 +458,7 @@ export class ListingResolver {
       ctx.req.user,
     );
   }
-  @UseGuards(AdminGuard)
+  @Permissions(PermissionsEnum.LISTINGS_DELETE)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Mutation(() => SuccessResponse, { name: 'deleteListing' })
   async adminDeleteListing(
@@ -466,7 +468,7 @@ export class ListingResolver {
     return await this.listingService.deleteListing(ctx.req.user, listingId);
   }
 
-  @UseGuards(AdminGuard)
+  @Permissions(PermissionsEnum.LISTINGS_MULTI_ACTIONS)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Mutation(() => Feature, { name: 'createFeature' })
   async createFeature(
@@ -483,7 +485,7 @@ export class ListingResolver {
    * Auction
    **********************************/
 
-  @UseGuards(AdminGuard)
+  @Permissions(PermissionsEnum.AUCTIONS_CREATE)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Mutation(() => Auction, { name: 'createAuction' })
   async createAuction(
@@ -492,7 +494,7 @@ export class ListingResolver {
     return await this.auctionService.create(createAuction);
   }
 
-  @UseGuards(AdminGuard)
+  @Permissions(PermissionsEnum.AUCTIONS_EDIT)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Mutation(() => Auction, { name: 'updateAuction' })
   async updateAuction(
@@ -502,7 +504,7 @@ export class ListingResolver {
     return await this.auctionService.update(updateAuctionInput, ctx.req.user);
   }
 
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @UseGuards(AccessTokenGuard)
   @Query(() => Auction, { name: 'getAuction' })
   async findOneAuction(@Args('id') id: string) {
     return await this.auctionService.findOne(id);
@@ -523,15 +525,8 @@ export class ListingResolver {
     return await this.auctionService.findAllUpcoming(paginateAndSort);
   }
 
-  // @UseGuards(AccessTokenGuard, PermissionsGuard)
-  // @Query(() => AuctionResponse, { name: 'getPaticipantOfAuction' })
-  // async getPaticipantOfAuction(
-  //   @Args('findManyOption') paginateAndSort: PaginateAndSort,
-  // ) {
-  //   return await this.auctionService.getParticipantOfAuction(paginateAndSort);
-  // }
-
   @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions(PermissionsEnum.AUCTIONS_READ)
   @Query(() => AuctionResponse, { name: 'getAllAuction' })
   async getAllAuction(
     @Args('findManyOption') findManyOption: AdminAuctionFilter,
@@ -539,7 +534,7 @@ export class ListingResolver {
     return await this.auctionService.findAll(findManyOption);
   }
 
-  @UseGuards(AdminGuard)
+  @Permissions(PermissionsEnum.AUCTIONS_DELETE)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Mutation(() => SuccessResponse, { name: 'deleteAuction' })
   async deleteAuction(
@@ -549,7 +544,7 @@ export class ListingResolver {
     return await this.auctionService.delete(auctionActionInput, ctx.req.user);
   }
 
-  @UseGuards(AdminGuard)
+  @Permissions(PermissionsEnum.AUCTIONS_STATUS_DEACTIVATE_REACTIVATE)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Mutation(() => SuccessResponse, { name: 'reactivateAuction' })
   async reactivateAuction(
@@ -562,7 +557,7 @@ export class ListingResolver {
     );
   }
 
-  @UseGuards(AdminGuard)
+  @Permissions(PermissionsEnum.AUCTIONS_STATUS_DEACTIVATE_REACTIVATE)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Mutation(() => SuccessResponse, { name: 'cancleAuction' })
   async cancleAuction(
@@ -579,7 +574,7 @@ export class ListingResolver {
    * Aution Participant
    *******************************/
 
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @UseGuards(AccessTokenGuard)
   @Mutation(() => AuctionParticipant, { name: 'addAuctionParticipant' })
   async createAuctionParticipant(
     @Args('createAuctionParticipantInput')
@@ -590,7 +585,7 @@ export class ListingResolver {
     );
   }
 
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @UseGuards(AccessTokenGuard)
   @Query(() => AuctionParticipantResponse, { name: 'getListingsAuction' })
   async getListingsAuction(
     @Args('findManyOption') paginateAndSort: PaginateAndSort,
@@ -598,30 +593,30 @@ export class ListingResolver {
     return await this.auctionService.getParticipantOfAuction(paginateAndSort);
   }
 
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @UseGuards(AccessTokenGuard)
   @Mutation(() => SuccessResponse, { name: 'deleteSavedHistory' })
   async deleteSavedHistory(@Args('id') id: string) {
     return await this.listingService.deleteSavedHistory(id);
   }
 
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @UseGuards(AccessTokenGuard)
   @Mutation(() => SuccessResponse, { name: 'unpublishAListing' })
   async unPublishListing(@Args('id') id: string, @Context() ctx: any) {
     return await this.listingService.unPublishListing(id, ctx.req.user);
   }
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @UseGuards(AccessTokenGuard)
   @Mutation(() => SuccessResponse, { name: 'publishAListing' })
   async publishListing(@Args('id') id: string, @Context() ctx: any) {
     return await this.listingService.publishListing(id, ctx.req.user);
   }
 
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @UseGuards(AccessTokenGuard)
   @Mutation(() => SuccessResponse, { name: 'stopPromotion' })
   async stopPromotion(@Args('id') id: string, @Context() ctx: any) {
     return await this.listingService.stopPromotion(id, ctx.req.user);
   }
 
-  @UseGuards(AccessTokenGuard, PermissionsGuard, UserTwoGuard)
+  @UseGuards(AccessTokenGuard, UserTwoGuard)
   @Mutation(() => Bids, { name: 'createBid' })
   async createBid(
     @Args('createBidInput') createBidInput: CreateBidInput,
@@ -630,13 +625,13 @@ export class ListingResolver {
     return await this.auctionService.bidOnAuction(createBidInput, ctx.req.user);
   }
 
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @UseGuards(AccessTokenGuard)
   @Query(() => [Bids], { name: 'findNewestBid' })
   async findNewestBid(@Args('findBidInput') findBidInput: FindBidInput) {
     return await this.auctionService.fetchBidsOnAuction(findBidInput);
   }
 
-  @UseGuards(AccessTokenGuard, PermissionsGuard, UserTwoGuard)
+  @UseGuards(AccessTokenGuard, UserTwoGuard)
   @Mutation(() => AutoBid, { name: 'autoBidOnAuction' })
   async createAutoBidOnAuction(
     @Args('createAutoBidInput') createAutoBidInput: CreateAutoBidInput,

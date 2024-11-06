@@ -140,20 +140,25 @@ export class UserService {
 
       /************************************************
        *Bypass Nafath
-       *
        ************************************************/
       //TODO: remove before going live
       if (result.test) {
-        await this.usersRepository.update(user.id, {
+        let updatedUser;
+        const { affected } = await this.usersRepository.update(user.id, {
           userLevel: UserLevelEnum.LEVEL_2,
           isDataVerified: true,
         });
 
+        if (affected > 0) {
+          updatedUser = await this.usersRepository.findOneBy({
+            id: user.id,
+          });
+        }
+
         await this.nafathLogsRepository.save({ ...result, userId: user.id });
-        this.performActionWithDelay(user);
+        this.performActionWithDelay(updatedUser);
         return { random: result.random };
       }
-
       /*************************************************/
     } catch (error) {
       if (error instanceof HttpException) {
@@ -163,7 +168,6 @@ export class UserService {
       }
     }
   }
-
   /************************************************
    *Bypass Nafath
    *
@@ -724,7 +728,9 @@ export class UserService {
         ...(level ? { userLevel: In(level) } : {}),
         ...(status ? { status: In(status) } : {}),
         isBlocked: isBlocked ?? undefined,
-        userType: Not(UserProfileTypeEnum.STAFF),
+        userType: Not(
+          In[(UserProfileTypeEnum.STAFF, UserProfileTypeEnum.ADMIN)],
+        ),
       };
 
       // Build order options
@@ -1015,8 +1021,9 @@ export class UserService {
         ...(type ? { type: In(type) } : {}),
         ...(roles ? { roles: { id: In(roles) } } : {}),
         ...(isBlocked !== undefined ? { isBlocked } : {}),
-        userType: UserProfileTypeEnum.STAFF,
+        userType: In([UserProfileTypeEnum.STAFF, UserProfileTypeEnum.ADMIN]),
       };
+
       // Build order options
       const orderOptions = sortField ? { [sortField]: direction || 'ASC' } : {};
 

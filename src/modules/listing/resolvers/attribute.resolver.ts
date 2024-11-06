@@ -25,6 +25,7 @@ import {
   AttributeSetResponse,
 } from '../dtos/response/attribute.response';
 import { Public } from '../../auth/decorators/permision.decorator';
+import { PermissionsEnum } from '../../../common/enums/permission.enum';
 
 @Resolver()
 export class AttributeResolver {
@@ -53,7 +54,7 @@ export class AttributeResolver {
    * @returns {Promise<Attribute>}
    */
   @Mutation(() => Attribute)
-  @Permissions('create-attribute-set')
+  @Permissions(PermissionsEnum.LISTING_ATTRIBUTES_CREATE)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async createAttribute(
     @Args('RequestInput') RequestInput: AttributeInput,
@@ -69,7 +70,7 @@ export class AttributeResolver {
    * @returns {Promise<Attribute>}
    */
   @Mutation(() => Attribute)
-  @Permissions('update-attribute-set')
+  @Permissions(PermissionsEnum.LISTING_ATTRIBUTES_EDIT)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async updateAttribute(
     @Args('RequestInput') RequestInput: AttributeUpdateInput,
@@ -85,7 +86,7 @@ export class AttributeResolver {
    * @returns {Promise<string>}
    */
   @Mutation(() => String)
-  @Permissions('delete-attribute-set')
+  @Permissions(PermissionsEnum.LISTING_ATTRIBUTES_DELETE)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async deleteAttribute(
     @Args('RequestInput') RequestInput: AttributeDeleteInput,
@@ -125,7 +126,7 @@ export class AttributeResolver {
    * @returns {Promise<AttributeSet>}
    */
   @Mutation(() => AttributeSet)
-  @Permissions('create-attribute-set')
+  @Permissions(PermissionsEnum.LISTING_ATTRIBUTES_CREATE)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async createAttributeSet(
     @Args('RequestInput') RequestInput: AttributeSetInput,
@@ -142,7 +143,7 @@ export class AttributeResolver {
    */
 
   @Mutation(() => AttributeSet)
-  @Permissions('update-attribute-set')
+  @Permissions(PermissionsEnum.LISTING_ATTRIBUTES_EDIT)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async updateAttributeSet(
     @Args('RequestInput') RequestInput: AttributeSetUpdateInput,
@@ -158,7 +159,7 @@ export class AttributeResolver {
    * @returns {Promise<string>}
    */
   @Mutation(() => String)
-  @Permissions('delete-attribute-set')
+  @Permissions(PermissionsEnum.LISTING_ATTRIBUTES_DELETE)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async deleteAttributeSet(
     @Args('RequestInput') RequestInput: AttributeDeleteInput,
