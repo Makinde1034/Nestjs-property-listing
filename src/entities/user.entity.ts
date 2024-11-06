@@ -39,7 +39,6 @@ import { FlagListing } from './flag-listing.entity';
 import { Article } from './article.entity';
 import { ActivityLog } from './activity-log.entity';
 import { Compare } from './compare.entity';
-import { AcceptedTerms } from './accepted-terms.entity';
 import { ServiceProvider } from './service-provider.entity';
 
 @Entity()
@@ -57,13 +56,13 @@ export class User extends BaseEntity {
   @Field({ nullable: true })
   termsOfServiceVersion: string;
 
-  @Column()
+  @Column({ nullable: true })
   @Field({ nullable: true })
   currentTermOfservice: string;
 
-  @Field(() => [AcceptedTerms])
-  @OneToMany(() => AcceptedTerms, (term) => term.user, {})
-  term: AcceptedTerms[];
+  // @Field(() => [AcceptedTerms], { nullable: true })
+  // @OneToMany(() => AcceptedTerms, (term) => term.user, { nullable: true })
+  // term: AcceptedTerms[];
 
   @Column({ nullable: true })
   @Field({ nullable: true })
@@ -207,7 +206,7 @@ export class User extends BaseEntity {
   city: string;
 
   @Column({ default: false })
-  @Field({})
+  @Field({ nullable: true })
   isDataVerified: boolean;
 
   @Field(() => [Article])
