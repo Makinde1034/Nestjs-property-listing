@@ -1,6 +1,13 @@
-import { Column, Entity } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  UpdateDateColumn,
+} from 'typeorm';
 import BaseEntity from './base.entity';
 import { Field, ObjectType } from '@nestjs/graphql';
+
 @Entity()
 @ObjectType()
 export class WorkFlow extends BaseEntity {
@@ -19,6 +26,7 @@ export class WorkFlow extends BaseEntity {
   @Column()
   @Field()
   numberOfApproval: number;
+
   @Column({ type: 'simple-array' })
   @Field(() => Array)
   approvalOneRole: string[];
@@ -26,4 +34,16 @@ export class WorkFlow extends BaseEntity {
   @Column({ type: 'simple-array' })
   @Field(() => Array)
   approvalTwoRole: string[];
+
+  @Field()
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @Field()
+  @DeleteDateColumn()
+  deletedAt: Date;
+
+  @Field()
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

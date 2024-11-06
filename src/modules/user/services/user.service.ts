@@ -1019,8 +1019,9 @@ export class UserService {
         ...(type ? { type: In(type) } : {}),
         ...(roles ? { roles: { id: In(roles) } } : {}),
         ...(isBlocked !== undefined ? { isBlocked } : {}),
-        userType: UserProfileTypeEnum.STAFF,
+        userType: In([UserProfileTypeEnum.STAFF, UserProfileTypeEnum.ADMIN]),
       };
+
       // Build order options
       const orderOptions = sortField ? { [sortField]: direction || 'ASC' } : {};
 
