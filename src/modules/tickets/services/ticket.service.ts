@@ -235,6 +235,8 @@ export class TicketService {
 
       return updatedTickets;
     } catch (error) {
+      this.logger.error('Error updating tickets', error);
+
       if (error instanceof HttpException) {
         throw error;
       }
