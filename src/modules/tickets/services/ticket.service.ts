@@ -187,15 +187,25 @@ export class TicketService {
    * @async
    * @param {User} user
    * @param {UpdateTicketInput} input
-   * @returns {Promise<Ticket>}
+   * @returns {Promise<Ticket[]>}
    */
   async updateTicket(user: User, input: UpdateTicketInput): Promise<Ticket[]> {
     try {
       const { ticketId, status } = input;
+
+      // Validate status before fetching tickets
+      if (
+        ![
+          TicketStatus.IN_PROGRESS,
+          TicketStatus.CLOSE,
+          TicketStatus.OPEN,
+        ].includes(status)
+      ) {
+        throw new BadRequestException('Invalid status update');
+      }
+
       const tickets = await this.ticketRepository.find({
-        where: {
-          id: In(ticketId),
-        },
+        where: { id: In(ticketId) },
       });
 
       if (tickets.length === 0) {
@@ -203,42 +213,35 @@ export class TicketService {
       }
 
       // Prepare tickets for update
-      const ticketToUpdate = tickets.map((ticket) => {
-        const updatedTicket: Partial<Ticket> = {
-          status,
-          assignedAt: ticket.assignedAt ?? new Date(),
-          isOpen: status !== TicketStatus.CLOSE,
-          support: user,
-        };
-        return { ...ticket, ...updatedTicket };
-      });
+      const ticketToUpdate = tickets.map((ticket) => ({
+        ...ticket,
+        status,
+        assignedAt: ticket.assignedAt ?? new Date(),
+        isOpen: status !== TicketStatus.CLOSE,
+        support: user,
+      }));
 
       // Save and return the updated tickets
-      if (
-        status === TicketStatus.IN_PROGRESS ||
-        status === TicketStatus.CLOSE ||
-        status === TicketStatus.OPEN
-      ) {
-        const ticket = await this.ticketRepository.save(ticketToUpdate);
+      const updatedTickets = await this.ticketRepository.save(ticketToUpdate);
 
-        const activityToSave = ticket.map((element) => {
-          return {
-            adminId: user.id,
-            action: ActivityEnum.UPDATED,
-            ticketId: element.id,
-          };
-        });
+      // Log activity for each ticket updated
+      const activityToSave = updatedTickets.map((element) => ({
+        adminId: user.id,
+        action: ActivityEnum.UPDATED,
+        ticketId: element.id,
+      }));
 
-        await this.activityLogService.logActivity(activityToSave);
-      }
+      await this.activityLogService.logActivity(activityToSave);
 
-      throw new BadRequestException('Invalid status update');
+      return updatedTickets;
     } catch (error) {
+      this.logger.error('Error updating tickets', error);
+
       if (error instanceof HttpException) {
         throw error;
       }
       this.logger.error('Error updating tickets', error.stack);
-      throw new BadRequestException(error.message);
+      throw new BadRequestException('An error occurred while updating tickets');
     }
   }
 
