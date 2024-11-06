@@ -11,11 +11,12 @@ import { TimePeriod } from '../../../common/enums/sort.enum';
 
 @InputType()
 export class FindManyReviewDto extends PaginateAndSort {
-  @Field()
+  @Field({ nullable: true })
   @IsNumber()
+  @IsOptional()
   rating: number;
 
-  @Field({ defaultValue: false })
+  @Field({ nullable: true })
   @IsOptional()
   @IsEnum(TimePeriod)
   timePeriod: string;
