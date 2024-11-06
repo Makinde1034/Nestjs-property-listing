@@ -142,4 +142,14 @@ export class KnowledgeBaseAndHelpResolver {
   async searchForArticles(@Args('searchParam') searchParam: string) {
     return await this.articleService.searchForArticles(searchParam);
   }
+
+  @Query(() => [Article], { name: 'searchForArticlesKnowledgeBase' })
+  @UseGuards(AccessTokenGuard)
+  async searchForArticlesKnowledgeBase(
+    @Args('searchParam') searchParam: string,
+  ) {
+    return await this.articleService.searchForArticlesKnowledgeBase(
+      searchParam,
+    );
+  }
 }

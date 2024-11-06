@@ -1062,6 +1062,7 @@ type Query {
   findOneArticle(id: Int!): Article!
   searchForCategory(searchParam: String!): [Category!]!
   searchForArticles(searchParam: String!): [Article!]!
+  searchForArticlesKnowledgeBase(searchParam: String!): [Article!]!
   getActivityLogs(activityLogInput: ActivityLogInput!): ActivityLogsResponse!
   getAllActivityLogs(paginateAndSort: AuditLogTrailsInput): ActivityLogsResponse!
   findAllServiceProviders(paginateAndSort: PaginateAndSort!): ServiceProviderResponse!
