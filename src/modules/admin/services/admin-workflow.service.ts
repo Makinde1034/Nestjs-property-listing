@@ -13,4 +13,22 @@ export class AdminWorkflowService {
       throw new BadRequestException(error);
     }
   }
+
+  async findAllWorkflow(paginateAndSort) {
+    try {
+      return await this.workflowRepository.findAndCount({});
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async findOneWorkflow(id: string) {
+    try {
+      return await this.workflowRepository.findOneBy({ id });
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
 }
