@@ -728,7 +728,9 @@ export class UserService {
         ...(level ? { userLevel: In(level) } : {}),
         ...(status ? { status: In(status) } : {}),
         isBlocked: isBlocked ?? undefined,
-        userType: Not(UserProfileTypeEnum.STAFF),
+        userType: Not(
+          In[(UserProfileTypeEnum.STAFF, UserProfileTypeEnum.ADMIN)],
+        ),
       };
 
       // Build order options
