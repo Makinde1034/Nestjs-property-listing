@@ -552,23 +552,12 @@ type Compare {
   updatedAt: DateTime!
 }
 
-type AcceptedTerms {
-  id: ID!
-  version: String!
-  user: User!
-  userId: String!
-  createdAt: DateTime!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
-}
-
 type User {
   id: ID!
   userType: String!
   userLevel: String!
   termsOfServiceVersion: String
   currentTermOfservice: String
-  term: [AcceptedTerms!]!
   firstName: String
   arabicFirstName: String
   arabicLastName: String
@@ -604,7 +593,7 @@ type User {
   chat: Chat!
   nationality: String
   city: String
-  isDataVerified: Boolean!
+  isDataVerified: Boolean
   article: [Article!]!
   nationalIdentity: NationalIdentity
   company: Company
