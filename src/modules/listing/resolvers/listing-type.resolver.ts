@@ -18,6 +18,7 @@ import { AdminGuard } from '../../auth/guards/admin.guard';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { ListingTypesResponse } from '../dtos/response/listingType.response';
 import { Public } from '../../auth/decorators/permision.decorator';
+import { PermissionsEnum } from '../../../common/enums/permission.enum';
 
 @Resolver()
 export class ListingTypeResolver {
@@ -29,6 +30,7 @@ export class ListingTypeResolver {
    * @async
    * @returns {Promise<ListingType[]>}
    */ @Public()
+  // @Permissions('listing-type-and-attributes-view-listing-types')
   @Query(() => ListingTypesResponse)
   async fetchListingTypes(
     @Args('findOptions', { nullable: true }) findOptions: PaginateAndSort,
@@ -37,6 +39,7 @@ export class ListingTypeResolver {
   }
   @Public()
   @Query(() => ListingType)
+  // @Permissions('listing-type-and-attributes-view-listing-types')
   async fetchOneListingTypes(@Args('id') id: string): Promise<ListingType> {
     return await this.listingTypeService.findOne(id);
   }
@@ -49,7 +52,7 @@ export class ListingTypeResolver {
    * @returns {Promise<ListingType>}
    */
   @Mutation(() => ListingType)
-  @Permissions('create-listing-type')
+  @Permissions(PermissionsEnum.LISTING_TYPE_CREATE)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async createListingType(
     @Args('RequestInput') RequestInput: ListingTypeInput,
@@ -70,7 +73,7 @@ export class ListingTypeResolver {
    * @returns {Promise<ListingType>}
    */
   @Mutation(() => ListingType)
-  @Permissions('update-listing-type')
+  @Permissions(PermissionsEnum.LISTING_TYPE_EDIT)
   @UseGuards(AccessTokenGuard, AdminGuard)
   async updateListingType(
     @Args('RequestInput') RequestInput: ListingTypeUpdateInput,
@@ -90,7 +93,7 @@ export class ListingTypeResolver {
    * @returns {Promise<string>}
    */
   @Mutation(() => String)
-  @Permissions('delete-listing-type')
+  @Permissions(PermissionsEnum.LISTING_TYPE_DELETE)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async deleteListingType(
     @Args('RequestInput') RequestInput: ListingTypeDeleteInput,
@@ -104,6 +107,7 @@ export class ListingTypeResolver {
 
   @Query(() => [ListingType], { name: 'searchForListingType' })
   @UseGuards(AccessTokenGuard)
+  @Permissions(PermissionsEnum.LISTING_TYPE_VIEW)
   async searchForListingType(@Args('searchParam') searchParam: string) {
     return await this.listingTypeService.searchForListingType(searchParam);
   }
