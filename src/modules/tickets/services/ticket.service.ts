@@ -241,7 +241,10 @@ export class TicketService {
         throw error;
       }
       this.logger.error('Error updating tickets', error.stack);
-      throw new BadRequestException('An error occurred while updating tickets');
+      throw new BadRequestException(
+        'An error occurred while updating tickets',
+        error,
+      );
     }
   }
 
