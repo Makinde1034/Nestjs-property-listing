@@ -145,12 +145,12 @@ export class TicketService {
       // Calculate counts for open and closed tickets using separate subqueries
       const openCount = await this.ticketRepository
         .createQueryBuilder('ticket')
-        .where(`${quotedColumnName('closedAt')} IS NULL`)
+        .where(`${quotedColumnName('status')} = :status`, { status: 'open' })
         .getCount();
 
       const closedCount = await this.ticketRepository
         .createQueryBuilder('ticket')
-        .where(`${quotedColumnName('closedAt')} IS NOT NULL`)
+        .where(`${quotedColumnName('status')} = :status`, { status: 'close' })
         .getCount();
 
       const agingCount = await this.ticketRepository
