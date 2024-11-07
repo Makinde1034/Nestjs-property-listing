@@ -219,6 +219,7 @@ export class TicketService {
         assignedAt: ticket.assignedAt ?? new Date(),
         isOpen: status !== TicketStatus.CLOSE,
         support: user,
+        closedAt: status === TicketStatus.CLOSE ? new Date() : null,
       }));
 
       // Save and return the updated tickets
