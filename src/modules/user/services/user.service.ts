@@ -83,6 +83,10 @@ import { SseService } from '../../app/client.service';
 import { MessageEvent } from '../../app/request/app';
 import { ActivityEnum } from '../../../common/enums/activitys';
 import { ActivityLogService } from '../../activity-log/services/activity-log.service';
+import { ActionService } from '../../admin/services/action.service';
+import { AdminWorkflowService } from '../../admin/services/admin-workflow.service';
+import { WorkflowRepository } from '../../admin/repositories/workflow.repository';
+import { WorkflowActionStatus } from '../../../common/enums/status.enum';
 
 @Injectable()
 export class UserService {
@@ -102,6 +106,8 @@ export class UserService {
     private readonly nafathLogsRepository: NafathLogsRepository,
     private readonly sseService: SseService,
     private readonly activityLogsService: ActivityLogService,
+    private readonly actionService: ActionService,
+    private readonly workflowService: AdminWorkflowService,
   ) {
     this.frontEndUrl = this.configService.get('ADMIN_FRONTEND_URL');
   }
@@ -217,15 +223,6 @@ export class UserService {
    ************************************************/
   //TODO: remove before going live
 
-  // triggerNotification(userId: string, payload: MessageEvent) {
-  //   const client = this.clientsService.getClient(userId);
-  //   console.log(client);
-  //   if (client) {
-  //     client.next(payload); // Send the notification/event
-  //   } else {
-  //     console.warn(`No client connected for userId: ${userId}`);
-  //   }
-  // }
   async finalizeUpgradeUser(
     data?: NafathWebHookResponse,
     userData?: NafathUserResponse,
@@ -955,26 +952,89 @@ export class UserService {
    * @param {CreateStaffInput} input
    * @returns {Promise<Staff>}
    */
-  async createStaff(input: CreateStaffInput, admin: User): Promise<User> {
+  async createStaff(
+    input: CreateStaffInput,
+    admin: User,
+  ): Promise<SuccessResponse> {
     try {
-      const roles = await this.roleRepository.find({
-        where: { id: In([...input.roles]) },
-      });
+      // Fetch roles, check for existing user, and get workflow config concurrently
+      const [roles, existingUser, actionConfig] = await Promise.all([
+        this.roleRepository.find({
+          where: { id: In([...input.roles]) },
+        }),
+        this.usersRepository.findOne({
+          where: [{ email: input.email }, { phone: input.phone }],
+        }),
+        this.workflowService.findOneWorkflowByDocumentname(
+          this.usersRepository.metadata.name,
+        ),
+      ]);
+
+      // If user already exists, throw error
+      if (existingUser) {
+        throw new BadRequestException(
+          'User with email or phone already exists',
+        );
+      }
+
+      // Generate a password, employeeId, and hash the password only once
       const password = generateRandomToken(8);
+      const employeeId = generateOtp();
+      const salt = await bcrypt.genSalt();
+      const hashedPassword = await bcrypt.hash(password, salt);
+
+      // Prepare staff data
       const staffData: Partial<User> = {
         ...input,
         roles,
-        password,
-        employeeId: `${generateOtp()}`,
+        password: hashedPassword,
+        employeeId: JSON.stringify(employeeId),
         userType: 'staff',
         twoFaRequired: true,
       };
-      const staff = await this.createUser(staffData);
+
+      // Create the user entity
+      const staff = this.usersRepository.create(staffData);
+
+      // Handle action request if a workflow is found
+      if (actionConfig) {
+        await this.actionService.createActionRequest(
+          {
+            document: this.usersRepository.metadata.name,
+            actionType: 'create',
+            targetEntityId: null,
+            user: admin,
+            payload: JSON.stringify(staff),
+            event: JSON.stringify([
+              RegisterEventAction.STAFF_CREATED,
+              new StaffCreatedEventDto({ staff }),
+            ]),
+          },
+          admin,
+        );
+
+        // Log the activity
+        await this.activityLogsService.logActivity([
+          {
+            adminId: admin.id,
+            action: ActivityEnum.CREATED,
+            details: JSON.stringify(staff),
+            userId: staff.id,
+          },
+        ]);
+
+        // Respond with pending approval message
+        return new SuccessResponse('Action is awaiting approval');
+      }
+
+      // If no workflow, create staff directly
+      await this.createUser(staff);
       this.eventEmitter.emit(
         RegisterEventAction.STAFF_CREATED,
         new StaffCreatedEventDto({ staff }),
       );
 
+      // Log the activity for direct creation
       await this.activityLogsService.logActivity([
         {
           adminId: admin.id,
@@ -983,9 +1043,16 @@ export class UserService {
           userId: staff.id,
         },
       ]);
-      return staff;
+
+      // Return success response
+      return new SuccessResponse('Staff created successfully');
     } catch (error) {
-      throw new BadRequestException(error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new BadRequestException(
+        error.message || 'An unexpected error occurred',
+      );
     }
   }
 
@@ -1140,9 +1207,14 @@ export class UserService {
     const usersToUpdate: DeepPartial<User>[] = [];
     const notFoundIds: string[] = [];
 
-    const users = await this.usersRepository.find({
-      where: { id: In(userId) },
-    });
+    const [users, actionConfig] = await Promise.all([
+      this.usersRepository.find({
+        where: { id: In(userId) },
+      }),
+      this.workflowService.findOneWorkflowByDocumentname(
+        this.usersRepository.metadata.name,
+      ),
+    ]);
 
     if (users.length < userId.length) {
       const foundUserIds = users.map((user) => user.id);
@@ -1154,6 +1226,33 @@ export class UserService {
     users.forEach((user) => {
       usersToUpdate.push({ id: user.id, isBlocked: action, disabledAt });
     });
+
+    if (actionConfig) {
+      await this.actionService.createActionRequest(
+        {
+          document: this.usersRepository.metadata.name,
+          actionType: 'update',
+          targetEntityId: null,
+          user: admin,
+          payload: JSON.stringify(usersToUpdate),
+        },
+        admin,
+      );
+
+      const activityToSave = users.map((element) => {
+        return {
+          adminId: admin.id,
+          action: ActivityEnum.BLOCKED,
+          details: JSON.stringify(users.find((a) => a.id === element.id)),
+          userId: element.id,
+        };
+      });
+
+      await this.activityLogsService.logActivity(activityToSave);
+
+      // Respond with pending approval message
+      return new SuccessResponse('Action is awaiting approval', usersToUpdate);
+    }
 
     const updatedUsers = await this.usersRepository.save(usersToUpdate);
 
@@ -1173,6 +1272,18 @@ export class UserService {
     });
 
     await this.activityLogsService.logActivity(activityToSave);
+
+    await this.actionService.createActionRequest(
+      {
+        document: this.usersRepository.metadata.name,
+        actionType: 'update',
+        targetEntityId: null,
+        user: admin,
+        payload: JSON.stringify(usersToUpdate),
+        status: WorkflowActionStatus.ACCEPTED,
+      },
+      admin,
+    );
 
     return new SuccessResponse(
       `You have successfully ${action ? 'blocked' : 'unblocked'} the selected users`,

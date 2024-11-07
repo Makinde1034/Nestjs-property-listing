@@ -552,12 +552,25 @@ type Compare {
   updatedAt: DateTime!
 }
 
+type ActionRequest {
+  id: Float!
+  payload: String!
+  status: String!
+  user: User!
+  admin: User!
+  event: String
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type User {
   id: ID!
   userType: String!
   userLevel: String!
   termsOfServiceVersion: String
   currentTermOfservice: String
+  requests: [ActionRequest!]!
   firstName: String
   arabicFirstName: String
   arabicLastName: String
@@ -683,6 +696,19 @@ type SuccessResponse {
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
 scalar JSON
+
+type WorkFlow {
+  id: ID!
+  name: String!
+  document: String!
+  isActive: Boolean!
+  numberOfApproval: Float!
+  approvalOneRole: [String!]!
+  approvalTwoRole: [String!]!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
 
 type UserResponse {
   users: [User!]!
@@ -903,6 +929,11 @@ type SplashScreenResponse {
   total: Float!
 }
 
+type WorkFlowResponse {
+  workflow: [WorkFlow!]!
+  count: Float!
+}
+
 type TicketAnalysisResponse {
   open: Float!
   closed: Float!
@@ -1040,6 +1071,8 @@ type Query {
   saiiFees(findOptions: AdminDashboardSort): SaiiFees!
   financialVsOrder(findOptions: AdminDashboardSort!): [FinancialVsOrder!]!
   fetchCoupons: [Coupon!]!
+  findAllWorkFlow(findOption: WorkflowInputFilter!): WorkFlowResponse!
+  findOneWorkFlow(id: String!): WorkFlow!
   fetchIssues(placement: String): [ParentIssue!]!
   fetchChildIssues(parentId: String!): [ChildIssue!]!
   getTicket(ticketId: String!): Ticket!
@@ -1212,6 +1245,14 @@ input AdminDashboardSort {
   value: Float! = 0
 }
 
+input WorkflowInputFilter {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
+}
+
 input ListTicketInput {
   take: Float
   skip: Float
@@ -1297,7 +1338,7 @@ type Mutation {
   updateTerm: SuccessResponse!
   forceUpdate(version: String!): SuccessResponse!
   resetPasswordAdmin(ResetInput: UserActionInput!): SuccessResponse!
-  createStaff(RequestInput: CreateStaffInput!): User!
+  createStaff(RequestInput: CreateStaffInput!): SuccessResponse!
   staffConfirmation(RequestInput: StaffConfirmDto!): String!
   upgradeUser(userUpgradeInput: UserUpgradeInput!): NafathAuthenticationResponseToUser!
   blockUser(RequestInput: UserActionInput!): SuccessResponse!
@@ -1364,6 +1405,10 @@ type Mutation {
   updateCoupon(updateCouponsInput: UpdateCouponInput!): Coupon!
   deleteCoupons(deleteCouponsInput: DeleteCouponInput!): SuccessResponse!
   deactivateCoupons(deactivateCoupons: DeactivateCouponInput!): SuccessResponse!
+  createWorkFlow(createWorkflowInput: CreateWorkflowInput!): WorkFlow!
+  updateWorkFlow: WorkFlow!
+  approveAction(action: Actions!): SuccessResponse!
+  deleteWorkFlow: WorkFlow!
   createIssue(input: CreateIssueInput!): ParentIssue!
   updateIssue(RequestInput: UpdateIssueInput!): ParentIssue!
   deleteIssue(id: String!): SuccessResponse!
@@ -1889,6 +1934,19 @@ input DeleteCouponInput {
 
 input DeactivateCouponInput {
   id: [String!]!
+}
+
+input CreateWorkflowInput {
+  name: String!
+  document: String!
+  isActive: Boolean!
+  numberOfApproval: Float!
+  approvalOneRole: [String!]!
+  approvalTwoRole: [String!]!
+}
+
+input Actions {
+  id: [Float!]!
 }
 
 input CreateIssueInput {

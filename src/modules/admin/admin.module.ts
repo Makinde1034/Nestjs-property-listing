@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { ListingRepository } from '../listing/repositories/listing.repository';
 import { UserRepository } from '../user/repositories';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -25,7 +25,12 @@ import { SplashScreenResolver } from './resolver/splash-screen.resolver';
 import { SplashScreenController } from './controller/splash-screen-controller';
 import { CouponRepository } from './repositories/coupons.repository';
 import { AuctionBidRangeRepository } from '../listing/repositories/auction-bid-range.repository';
-
+import { WorkFlowResolver } from './resolver/workflow.resolver';
+import { WorkflowRepository } from './repositories/workflow.repository';
+import { AdminWorkflowService } from './services/admin-workflow.service';
+import { ActionRequestRepository } from './repositories/action.repository';
+import { ActionService } from './services/action.service';
+@Global()
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -55,6 +60,11 @@ import { AuctionBidRangeRepository } from '../listing/repositories/auction-bid-r
     SplashScreenResolver,
     CouponRepository,
     AuctionBidRangeRepository,
+    WorkFlowResolver,
+    WorkflowRepository,
+    AdminWorkflowService,
+    ActionRequestRepository,
+    ActionService,
   ],
   controllers: [SplashScreenController],
   exports: [
@@ -65,6 +75,8 @@ import { AuctionBidRangeRepository } from '../listing/repositories/auction-bid-r
     TicketRepository,
     CouponRepository,
     ListingRepository,
+    ActionService,
+    AdminWorkflowService,
   ],
 })
 export class AdminModule {}

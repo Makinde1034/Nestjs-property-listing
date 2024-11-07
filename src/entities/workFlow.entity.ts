@@ -28,11 +28,11 @@ export class WorkFlow extends BaseEntity {
   numberOfApproval: number;
 
   @Column({ type: 'simple-array' })
-  @Field(() => Array)
+  @Field(() => [String])
   approvalOneRole: string[];
 
   @Column({ type: 'simple-array' })
-  @Field(() => Array)
+  @Field(() => [String])
   approvalTwoRole: string[];
 
   @Field()
