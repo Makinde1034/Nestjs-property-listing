@@ -145,12 +145,12 @@ export class TicketService {
       // Calculate counts for open and closed tickets using separate subqueries
       const openCount = await this.ticketRepository
         .createQueryBuilder('ticket')
-        .where(`${quotedColumnName('closedAt')} IS NULL`)
+        .where(`${quotedColumnName('status')} = :status`, { status: 'open' })
         .getCount();
 
       const closedCount = await this.ticketRepository
         .createQueryBuilder('ticket')
-        .where(`${quotedColumnName('closedAt')} IS NOT NULL`)
+        .where(`${quotedColumnName('status')} = :status`, { status: 'close' })
         .getCount();
 
       const agingCount = await this.ticketRepository
@@ -219,6 +219,7 @@ export class TicketService {
         assignedAt: ticket.assignedAt ?? new Date(),
         isOpen: status !== TicketStatus.CLOSE,
         support: user,
+        closedAt: status === TicketStatus.CLOSE ? new Date() : null,
       }));
 
       // Save and return the updated tickets
@@ -241,7 +242,10 @@ export class TicketService {
         throw error;
       }
       this.logger.error('Error updating tickets', error.stack);
-      throw new BadRequestException('An error occurred while updating tickets');
+      throw new BadRequestException(
+        'An error occurred while updating tickets',
+        error,
+      );
     }
   }
 

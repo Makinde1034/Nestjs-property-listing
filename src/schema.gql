@@ -1227,8 +1227,8 @@ input FindManyReviewDto {
   sortField: String
   directionToSort: SortOrder
   where: WhereOption
-  rating: Float!
-  timePeriod: String! = "false"
+  rating: Float
+  timePeriod: String
 }
 
 input ChatFilterInput {

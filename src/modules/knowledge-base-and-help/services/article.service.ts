@@ -381,7 +381,7 @@ export class ArticleService {
     try {
       return await this.articleRepository
         .createQueryBuilder('article')
-        .leftJoinAndSelect('author.user', 'user')
+        .leftJoinAndSelect('article.user', 'user')
         .where('article.placement IS NOT NULL')
         .orWhere('article.title ILIKE :term', {
           term: `%${searchParam}%`,
@@ -410,7 +410,7 @@ export class ArticleService {
     try {
       return await this.articleRepository
         .createQueryBuilder('article')
-        .leftJoinAndSelect('author.user', 'user')
+        .leftJoinAndSelect('article.user', 'user')
         .where('article.placement IS NULL')
         .orWhere('article.title ILIKE :term', {
           term: `%${searchParam}%`,

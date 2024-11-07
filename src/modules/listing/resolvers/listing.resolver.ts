@@ -86,7 +86,7 @@ export class ListingResolver {
    * Create Listing
    *************************/
 
-  @UseGuards(AccessTokenGuard, PermissionsGuard, UserTwoGuard)
+  @UseGuards(AccessTokenGuard, UserTwoGuard)
   @Mutation(() => Listing, { name: 'createListing' })
   async createListing(
     @Args('createListing') createListingDto: CreateListingDto,

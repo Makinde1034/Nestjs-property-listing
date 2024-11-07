@@ -133,27 +133,29 @@ export class ReviewService {
 
   async searchForReview(searchParam: string) {
     try {
-      return await this.reviewRepository
+      const queryBuilder = this.reviewRepository
         .createQueryBuilder('review')
         .leftJoinAndSelect('review.user', 'user')
 
-        .orWhere('user.name ILIKE :term', {
-          term: `%${searchParam}%`,
+        // Search by user name
+        .orWhere('user.name ILIKE :term', { term: `%${searchParam}%` })
+
+        // Search by rating if searchParam is numeric
+        .orWhere('review.rating = :rating', {
+          rating: !isNaN(Number(searchParam)) ? Number(searchParam) : undefined,
         })
 
-        .orWhere('review.rating ILIKE :term', {
-          term: `%${searchParam}%`,
-        })
+        // Search by service name
+        .orWhere('review.service ILIKE :term', { term: `%${searchParam}%` })
 
-        .orWhere('review.service ILIKE :term', {
-          term: `%${searchParam}%`,
-        })
+        .take(10);
 
-        .take(10)
-        .getMany();
+      return await queryBuilder.getMany();
     } catch (error) {
-      this.logger.log(error);
-      throw new BadRequestException(error);
+      this.logger.error(error.message);
+      throw new BadRequestException(
+        'An error occurred while searching for reviews.',
+      );
     }
   }
 }
