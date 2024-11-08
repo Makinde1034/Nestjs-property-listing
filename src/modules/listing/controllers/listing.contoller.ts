@@ -26,16 +26,16 @@ import { AuctionService } from '../services/auction.service';
 @Controller('listing')
 export class ListingController {
   constructor(
-    private listingService: ListingService,
+    private readonly listingService: ListingService,
     private readonly auctionService: AuctionService,
   ) {}
   @Post('listing-image-upload')
   @UseGuards(RestAccessTokenGuard)
   @UseInterceptors(AnyFilesInterceptor())
   async uploadListingImage(
+    @UploadedFiles() files: Express.Multer.File[],
     @Body() feature: ListingImageFormDataInput,
     @Query() query: ListingImageInput,
-    @UploadedFiles() files: Express.Multer.File[],
   ) {
     return await this.listingService.uploadListingImage(feature, query, files);
   }

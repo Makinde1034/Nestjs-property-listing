@@ -100,6 +100,7 @@ export class UserResolver {
   }
 
   @Mutation(() => SuccessResponse, { name: 'updateTerm' })
+  @Public()
   @UseGuards(AccessTokenGuard)
   async updateTerm(@Context() ctx: any): Promise<SuccessResponse> {
     return await this.userService.updateTerm(ctx.req.user);
