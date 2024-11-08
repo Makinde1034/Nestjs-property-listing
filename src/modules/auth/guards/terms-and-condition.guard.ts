@@ -16,7 +16,7 @@ import { IS_PUBLIC_KEY } from '../decorators/permision.decorator';
 import { Reflector } from '@nestjs/core';
 
 @Injectable()
-export class UserTwoGuard implements CanActivate {
+export class TermsAndConditionGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
