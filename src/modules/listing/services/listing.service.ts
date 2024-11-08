@@ -508,9 +508,9 @@ export class ListingService {
         total = count;
       }
 
-      const listingToPerse = [...result];
+      const listingToParse = [...result];
 
-      const listing = listingToPerse.map((element) => {
+      const listing = listingToParse.map((element) => {
         return this.transformListing(element);
       });
 
@@ -1234,8 +1234,9 @@ export class ListingService {
     files: Express.Multer.File[],
   ) {
     try {
-      let numberOfimagesWithinDistance: number;
-      let verified: boolean = false;
+      let numberOfimagesWithinDistance = 0;
+      let verified = false;
+
       const listing = await this.listingRepository.findOne({
         where: { id: query.listingId },
         relations: ['gpsCoordinate'],
@@ -1245,73 +1246,89 @@ export class ListingService {
         throw new BadRequestException('Listing not found');
       }
 
+      if (!listing.gpsCoordinate) {
+        throw new BadRequestException(
+          'Listing GPS coordinates not found for listing',
+        );
+      }
+
       const results = await Promise.all(
         files.map(async (file) => await getLocationFromImage(file.buffer)),
       );
-      results.forEach((element) => {
-        const distance = haversine(
-          element?.latitude,
-          element?.longitude,
-          listing.gpsCoordinate?.lat,
-          listing.gpsCoordinate?.lng,
-        );
 
-        if (distance * 1000 < 500) {
-          numberOfimagesWithinDistance = numberOfimagesWithinDistance + 1;
+      results.forEach((element) => {
+        if (element?.latitude && element?.longitude) {
+          const distance = haversine(
+            element.latitude,
+            element.longitude,
+            listing.gpsCoordinate.lat,
+            listing.gpsCoordinate.lng,
+          );
+
+          if (distance * 1000 < 500) {
+            numberOfimagesWithinDistance++;
+          }
         }
       });
 
-      //Convert distance in kilometer to meter
+      if (numberOfimagesWithinDistance === files.length) {
+        verified = true;
+      }
 
       const existingImages: any[] = listing.images
         ? JSON.parse(listing.images)
         : [];
 
-      // Upload the new files
       const uploadPromises = files.map((file) =>
         this.storageService.upload(file),
       );
       const uploadedUrls = await Promise.all(uploadPromises);
-
-      if (numberOfimagesWithinDistance == files.length) {
-        verified = true;
-      }
+      console.log(query.imageId);
 
       if (query.imageId) {
-        // Update existing image
-        let imageUpdated = false;
-        existingImages.map((image, index) => {
-          if (image.id == query.imageId) {
-            existingImages[index].url = uploadedUrls[0];
-            // Assuming single file upload
-            imageUpdated = true;
-          }
-        });
+        if (files.length > 1) {
+          throw new BadRequestException(
+            'Only one file can be uploaded when updating an existing image',
+          );
+        }
 
-        if (!imageUpdated) {
+        if (!uploadedUrls.length) {
+          throw new BadRequestException('File upload failed');
+        }
+
+        const imageIndex = existingImages.findIndex(
+          (image) => image.id === query.imageId,
+        );
+
+        if (imageIndex > -1) {
+          // This will work correctly even if imageIndex is 0
+          existingImages[imageIndex].url = uploadedUrls[0];
+          existingImages[imageIndex].isFeatured = feature.feature
+            ? true
+            : false;
+          existingImages[imageIndex].isDeleted = false;
+        } else {
           throw new BadRequestException('Image ID not found');
         }
       } else {
-        // Add new images
         const newImages = uploadedUrls.map((url, index) => ({
-          id: (existingImages.length + index).toString(), // Generate unique ID
+          id: (existingImages.length + index).toString(),
           url,
           isFeatured: feature.feature,
           isDeleted: false,
-          isPanorama: false, // Default value
-          verified: verified,
+          isPanorama: false,
+          verified,
         }));
         existingImages.push(...newImages);
       }
 
-      // Stringify the updated images array for storage
       const stringifiedImages = JSON.stringify(existingImages);
 
-      // Save the updated images to the database
       await this.listingRepository.update(query.listingId, {
         images: stringifiedImages,
         isListingVerified: verified,
       });
+
       return new SuccessResponse(AppStrings.UPLOAD_SUCCESSFUL, existingImages);
     } catch (error) {
       console.log(error);
@@ -1324,6 +1341,7 @@ export class ListingService {
       );
     }
   }
+
   async uploadPanoramaImage(
     id: string,
     files: Express.Multer.File[],
@@ -1950,9 +1968,8 @@ export class ListingService {
       throw new BadRequestException(error);
     }
   }
-  async deleteListingImage(listingId: string, imageId: string[]) {
+  async deleteListingImage(listingId: string, imageIds: string[]) {
     try {
-      let imageIds;
       const listing = await this.listingRepository.findOne({
         where: { id: listingId },
       });
@@ -1960,33 +1977,23 @@ export class ListingService {
       if (!listing) {
         throw new BadRequestException('Listing not found');
       }
-      if (imageId?.length) {
-        imageIds = [...imageId];
-      } else {
-        imageIds = [imageId];
-      }
-      const existingImages: any[] = listing.images
-        ? JSON.parse(listing.images)
-        : [];
-      let updatedImages = [];
 
-      if (imageIds.length > 0) {
-        // Update the isDeleted flag for the specified imageIds
-
-        updatedImages = existingImages.map((image) => {
-          if (imageIds.includes(image.id)) {
-            image.isDeleted = true; // Mark the image as deleted
-          }
-          return image; // Return the image (updated or not) to form the new array
-        });
-      } else {
-        // If no imageIds are provided, mark all images as deleted
-        updatedImages = existingImages.map((image) => {
-          image.isDeleted = true;
-          return image;
-        });
+      let existingImages: any[];
+      try {
+        existingImages = listing.images ? JSON.parse(listing.images) : [];
+      } catch (error) {
+        throw new BadRequestException('Invalid image data');
       }
 
+      const updatedImages = existingImages.map((image) => {
+        // If specific image IDs are provided, delete only those; otherwise, delete all
+        if (!imageIds.length || imageIds.includes(image.id)) {
+          image.isDeleted = true; // Mark the image as deleted
+        }
+        return image;
+      });
+
+      // Convert the updated images back to a JSON string
       const stringifiedImages = JSON.stringify(updatedImages);
 
       // Update the listing with the modified images array
@@ -1999,7 +2006,7 @@ export class ListingService {
         updatedImages,
       );
     } catch (error) {
-      this.logger.log(error);
+      this.logger.error(error.message || error);
       if (error instanceof HttpException) {
         throw error;
       }
@@ -2037,12 +2044,15 @@ export class ListingService {
     try {
       const { images, ...rest } = listing;
 
-      // Attempt to parse images only if it's JSON format
-      let parsedImages: string;
+      let parsedImages: any[] | string = images;
+
+      // Attempt to parse images only if it looks like JSON
       if (isJsonString(images)) {
-        parsedImages = JSON.parse(images);
-      } else {
-        parsedImages = images; // Use original images if not JSON
+        try {
+          parsedImages = JSON.parse(images);
+        } catch (parseError) {
+          console.log('Failed to parse images JSON:', parseError);
+        }
       }
 
       const filteredImages = Array.isArray(parsedImages)
@@ -2051,10 +2061,12 @@ export class ListingService {
 
       return {
         ...rest,
-        images: filteredImages,
+        images: JSON.stringify(filteredImages),
       };
     } catch (error) {
-      return listing; // Return the original listing if transformation fails
+      console.error('Error transforming listing:', error);
+      listing.images = listing.images ?? null; // Set images to null if it’s undefined or null
+      return listing; // Return original listing if transformation fails
     }
   }
 

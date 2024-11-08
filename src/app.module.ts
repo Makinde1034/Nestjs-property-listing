@@ -48,6 +48,7 @@ import { SseService } from './modules/app/client.service';
 import { SseModule } from './modules/app/event.module';
 import { ActivityLogModule } from './modules/activity-log/activity-log.module';
 import { ServiceProviderModule } from './modules/service-provider/service-provider.module';
+import { TermsAndConditionGuard } from './modules/auth/guards/terms-and-condition.guard';
 
 @Module({
   imports: [
@@ -125,6 +126,10 @@ import { ServiceProviderModule } from './modules/service-provider/service-provid
     {
       provide: APP_GUARD,
       useClass: GlobalPermissionsGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: TermsAndConditionGuard,
     },
   ],
   exports: [],

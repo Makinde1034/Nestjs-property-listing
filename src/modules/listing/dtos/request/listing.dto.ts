@@ -185,9 +185,9 @@ export class ListingImageInput {
   @IsUUID()
   listingId: string;
 
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  imageId: number;
+  imageId: string;
 
   @IsNumber()
   @IsOptional()
@@ -215,5 +215,5 @@ export class CompareListingInput {
 export class ListingImageFormDataInput {
   @IsBoolean()
   @IsOptional()
-  feature: boolean;
+  feature: boolean = false; // Set default value to false
 }

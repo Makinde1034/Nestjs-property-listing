@@ -39,6 +39,10 @@ export class GlobalPermissionsGuard implements CanActivate {
       throw new UnauthorizedException();
     }
 
+    if (user.userType === 'admin') {
+      return true;
+    }
+
     if (
       user.status === UserStatus.DISABLED ||
       user.isBlocked ||
