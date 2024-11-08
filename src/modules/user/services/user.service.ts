@@ -1044,6 +1044,18 @@ export class UserService {
         },
       ]);
 
+      await this.actionService.createActionRequest(
+        {
+          document: this.usersRepository.metadata.name,
+          actionType: 'create',
+          targetEntityId: null,
+          user: admin,
+          payload: JSON.stringify(staff),
+          status: WorkflowActionStatus.ACCEPTED,
+        },
+        admin,
+      );
+
       // Return success response
       return new SuccessResponse('Staff created successfully');
     } catch (error) {
@@ -1299,9 +1311,15 @@ export class UserService {
     const usersToUpdate: DeepPartial<User>[] = [];
     const notFoundIds: string[] = [];
 
-    const users = await this.usersRepository.find({
-      where: { id: In(userId) },
-    });
+    const [users, actionConfig] = await Promise.all([
+      this.usersRepository.find({
+        where: { id: In(userId) },
+      }),
+
+      this.workflowService.findOneWorkflowByDocumentname(
+        this.usersRepository.metadata.name,
+      ),
+    ]);
 
     if (users.length < userId.length) {
       const foundUserIds = users.map((user) => user.id);
@@ -1314,6 +1332,31 @@ export class UserService {
     users.forEach((user) => {
       usersToUpdate.push({ id: user.id, status, deletedAt });
     });
+
+    if (actionConfig) {
+      await this.actionService.createActionRequest(
+        {
+          document: this.usersRepository.metadata.name,
+          actionType: 'update',
+          targetEntityId: null,
+          user: admin,
+          payload: JSON.stringify(usersToUpdate),
+        },
+        admin,
+      );
+
+      const activityToSave = users.map((element) => {
+        return {
+          adminId: admin.id,
+          action: ActivityEnum.DELETED,
+          details: JSON.stringify(users.find((a) => a.id === element.id)),
+          userId: element.id,
+        };
+      });
+
+      await this.activityLogsService.logActivity(activityToSave);
+      return new SuccessResponse('Action is awaiting approval', users);
+    }
 
     const updatedUsers = await this.usersRepository.save(usersToUpdate);
 

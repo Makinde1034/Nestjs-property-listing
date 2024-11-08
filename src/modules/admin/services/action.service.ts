@@ -38,8 +38,12 @@ export class ActionService {
 
       const repository = this.dataSource.getRepository(targetEntity);
 
+      if (actionRequest.actionType === 'update' && targetEntityId == null) {
+        await repository.save(JSON.parse(actionRequest.payload));
+      }
+
       // Handle 'update' action type
-      if (actionRequest.actionType === 'update' && targetEntityId) {
+      else if (actionRequest.actionType === 'update' && targetEntityId) {
         const entity = await repository.findOne({
           where: { id: targetEntityId },
         });
@@ -92,7 +96,7 @@ export class ActionService {
       const actionRequest = this.actionRequestRepository.create({
         actionType,
         targetEntity: document,
-        targetEntityId,
+        targetEntityId: targetEntityId ? String(input.targetEntityId) : null,
         payload,
         user,
         event: event,

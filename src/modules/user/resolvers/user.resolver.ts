@@ -45,29 +45,39 @@ export class UserResolver {
 
   @Query(() => User, { name: 'getOneUser' })
   @UseGuards(AccessTokenGuard)
+  @Permissions(PermissionsEnum.USER_MANAGEMENT_VIEW)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async getOneUser(@Args('id') id: string) {
     return await this.userService.findUserById(id, ['roles']);
   }
 
   @Query(() => [User], { name: 'searchForUsers' })
   @UseGuards(AccessTokenGuard)
+  @Permissions(PermissionsEnum.USER_MANAGEMENT_VIEW)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async searchForUser(@Args('searchParam') searchParam: string) {
     return await this.userService.searchForUsers(searchParam);
   }
 
   @Query(() => [User], { name: 'searchForEmployee' })
   @UseGuards(AccessTokenGuard)
+  @Permissions(PermissionsEnum.USER_MANAGEMENT_VIEW)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async searchForEmployee(@Args('searchParam') searchParam: string) {
     return await this.userService.searchForEmployee(searchParam);
   }
 
   @Query(() => UserResponse, { name: 'findAllUser' })
   @UseGuards(AccessTokenGuard)
+  @Permissions(PermissionsEnum.USER_MANAGEMENT_VIEW)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async findAllUser(@Args('userFilterInput') userFilterInput: UserFilter) {
     return await this.userService.findAllUser(userFilterInput);
   }
   @Query(() => UserResponse, { name: 'getEmployees' })
   @UseGuards(AccessTokenGuard)
+  @Permissions(PermissionsEnum.USER_MANAGEMENT_VIEW)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async getEmployees(
     @Context() ctx: any,
     @Args('userFilterInput', { nullable: true }) userFilterInput: UserFilter,
@@ -76,7 +86,8 @@ export class UserResolver {
   }
 
   @Query(() => UserResponse, { name: 'findAllCustomers' })
-  @UseGuards(AdminGuard)
+  @Permissions(PermissionsEnum.USER_MANAGEMENT_VIEW)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   @UseGuards(AccessTokenGuard)
   async findAllCustomers(@Args('userFilterInput') userFilterInput: UserFilter) {
     return await this.userService.findAllCustomers(userFilterInput);
@@ -115,7 +126,8 @@ export class UserResolver {
     return await this.userService.forceUpdate(version);
   }
 
-  @UseGuards(AccessTokenGuard, AdminGuard)
+  @Permissions(PermissionsEnum.USER_MANAGEMENT_RESET_PASSWORD)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Mutation(() => SuccessResponse)
   async resetPasswordAdmin(
     @Args('ResetInput') ResetInput: UserActionInput,
