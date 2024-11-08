@@ -147,8 +147,32 @@ export class UserService {
         const { affected } = await this.usersRepository.update(user.id, {
           userLevel: UserLevelEnum.LEVEL_2,
           isDataVerified: true,
+          phone: userUpgradeInput.phoneNumber,
+          dateOfBirth: '1924-12-01 00:00:00.000',
+          arabicFirstName: user.firstName,
+          arabicLastName: user.lastName,
+          middleName: user.lastName,
+
+          nationality: 'Saudi Arabia',
         });
 
+        if (!user.nationalIdentity) {
+          await this.nationalIdentityRepository.save({
+            nationality: 'Saudi Arabia',
+            identityNumber: userUpgradeInput.id,
+            type: userUpgradeInput.idType,
+            user,
+          });
+        } else {
+          await this.nationalIdentityRepository.update(
+            user.nationalIdentity.id,
+            {
+              nationality: 'Saudi Arabia',
+              identityNumber: userUpgradeInput.id,
+              type: userUpgradeInput.idType,
+            },
+          );
+        }
         if (affected > 0) {
           updatedUser = await this.usersRepository.findOneBy({
             id: user.id,
@@ -232,9 +256,12 @@ export class UserService {
           const user = await this.usersRepository.findOneBy({
             id: nafathLog.userId,
           });
-          //TODO switch to event emiter
+          const payload: MessageEvent = {
+            type: ServerSentEvents.SUCCESS,
+            data: user,
+          };
 
-          // this.eventController.triggerEventForUser(user.id, {});
+          this.sseService.sendEvent(user.id, payload);
         }
       }
     } catch (error) {

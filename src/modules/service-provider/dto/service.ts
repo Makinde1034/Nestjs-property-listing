@@ -82,7 +82,6 @@ export class UpdateServiceInput extends PartialType(CreateServiceInput) {
   @IsBoolean()
   isActive: boolean;
 }
-
 @InputType()
 export class DeleteServiceProvider {
   @Field(() => [String])
@@ -96,11 +95,12 @@ export class ServiceProviderInput {
   @IsArray()
   id: string[];
 }
+
 @InputType()
 export class ProvideNewService {
   @Field()
   @IsString()
-  providerId: string;
+  serviceProviderId: string;
 
   @Field()
   @IsString()

@@ -31,7 +31,7 @@ export class ServiceStatus extends BaseEntity {
 
   @Field(() => Service)
   @JoinColumn({ name: 'serviceId' })
-  @OneToOne(() => Service, (services) => services.status)
+  @ManyToOne(() => Service, (services) => services.status)
   service: Service;
 
   @Field()

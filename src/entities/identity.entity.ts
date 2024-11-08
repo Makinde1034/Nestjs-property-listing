@@ -18,7 +18,7 @@ export class NationalIdentity extends BaseEntity {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
-  type: NationalIdentityType;
+  type: string;
 
   @Column({ nullable: true })
   @Field({ nullable: true })
