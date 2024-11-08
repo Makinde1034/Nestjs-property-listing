@@ -28,9 +28,9 @@ export class IdentityInput {
   nationality: string;
 
   @Field()
-  @IsEnum(NationalIdentityType)
   @IsNotEmpty()
-  type: NationalIdentityType;
+  @IsString()
+  type: string;
 
   @Field()
   @IsString()

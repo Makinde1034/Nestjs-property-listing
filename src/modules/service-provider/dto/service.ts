@@ -82,7 +82,6 @@ export class UpdateServiceInput extends PartialType(CreateServiceInput) {
   @IsBoolean()
   isActive: boolean;
 }
-
 @InputType()
 export class DeleteServiceProvider {
   @Field(() => [String])
