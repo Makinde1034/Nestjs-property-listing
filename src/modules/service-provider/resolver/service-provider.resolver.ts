@@ -68,7 +68,7 @@ export class ServiceAndProviderResolver {
     return await this.serviceProviderService.findAllServices(paginateAndSort);
   }
 
-  @Query(() => ServiceProvider, { name: 'findOneServiceProviders' })
+  @Query(() => ServiceProvider, { name: 'findOneService' })
   async findOneService(@Args('id') id: string) {
     return await this.serviceProviderService.findOneService(id);
   }

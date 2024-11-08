@@ -1068,7 +1068,7 @@ type Query {
   findAllServiceProviders(paginateAndSort: PaginateAndSort!): ServiceProviderResponse!
   findOneServiceProvider(id: String!): OneServiceProviderResponse!
   findAllService(paginateAndSort: PaginateAndSort!): ServiceResponse!
-  findOneServiceProviders(id: String!): ServiceProvider!
+  findOneService(id: String!): ServiceProvider!
 }
 
 input SplashScreenFilterInput {
@@ -2037,7 +2037,7 @@ input UpdateServiceInput {
 }
 
 input ProvideNewService {
-  providerId: String!
+  serviceProviderId: String!
   serviceId: String!
 }
 
