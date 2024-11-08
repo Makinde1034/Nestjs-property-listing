@@ -102,14 +102,15 @@ export class ServiceAndProviderService {
     createServiceProviderInput: CreateServiceProviderInput,
     user: User,
   ) {
+    console.log(user);
     try {
       const { serviceOffered, ...rest } = createServiceProviderInput;
-      const alreadyExisting = await this.serviceProviderRepository.find({
+      const alreadyExisting = await this.serviceProviderRepository.findOne({
         where: { userId: user.id },
       });
-
       console.log(alreadyExisting);
-      if (alreadyExisting.length > 0) {
+
+      if (alreadyExisting) {
         throw new BadRequestException(AppStrings.RESOURCE_ALREADY_EXISTS);
       }
 

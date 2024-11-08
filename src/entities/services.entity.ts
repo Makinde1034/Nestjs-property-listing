@@ -36,7 +36,6 @@ export class Service extends BaseEntity {
   @Column()
   @Field({ nullable: true })
   pricing: string;
-
   @Field(() => [ServiceStatus])
   @OneToMany(() => ServiceStatus, (status) => status.service)
   status: ServiceStatus[];
