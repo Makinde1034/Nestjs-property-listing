@@ -1,6 +1,7 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AdminWorkflowService } from '../services/admin-workflow.service';
 import {
+  Actions,
   CreateWorkflowInput,
   UpdateWorkflowInput,
   WorkflowInputFilter,
@@ -11,16 +12,23 @@ import { UseGuards } from '@nestjs/common';
 import { Permissions } from '../../../common/decorator/permission';
 import { PermissionsEnum } from '../../../common/enums/permission.enum';
 import { PermissionsGuard } from '../../auth/guards';
+import { ActionService } from '../services/action.service';
+import { SuccessResponse } from '../../../common/utils/success.response';
 
 @Resolver()
 export class WorkFlowResolver {
-  constructor(private readonly workFlowService: AdminWorkflowService) {}
+  constructor(
+    private readonly workFlowService: AdminWorkflowService,
+    private readonly actionService: ActionService,
+  ) {}
 
   @UseGuards(PermissionsGuard)
   @Permissions(PermissionsEnum.WORKFLOW_CREATE)
   @Mutation(() => WorkFlow)
-  async createWorkFlow(createWorkFlowInput: CreateWorkflowInput) {
-    return await this.workFlowService.createWorkFlow(createWorkFlowInput);
+  async createWorkFlow(
+    @Args('createWorkflowInput') createWorkflowInput: CreateWorkflowInput,
+  ) {
+    return await this.workFlowService.createWorkFlow(createWorkflowInput);
   }
   @UseGuards(PermissionsGuard)
   @Permissions(PermissionsEnum.WORKFLOW_READ)
@@ -41,6 +49,12 @@ export class WorkFlowResolver {
   @Mutation(() => WorkFlow)
   async updateWorkFlow(updateWorkFlowInput: UpdateWorkflowInput) {
     return await this.workFlowService.update(updateWorkFlowInput);
+  }
+  @UseGuards(PermissionsGuard)
+  @Permissions(PermissionsEnum.WORKFLOW_EDIT)
+  @Mutation(() => SuccessResponse)
+  async approveAction(@Args('action') actions: Actions) {
+    return await this.actionService.applyApprovedRequest(actions);
   }
 
   @UseGuards(PermissionsGuard)

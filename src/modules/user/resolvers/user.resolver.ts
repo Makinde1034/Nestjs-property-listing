@@ -28,12 +28,12 @@ import {
   NafathAuthenticationResponseToUser,
   UserUpgradeInput,
 } from '../dtos/response/nafath';
+import { PermissionsEnum } from '../../../common/enums/permission.enum';
 @Resolver()
 export class UserResolver {
   constructor(private readonly userService: UserService) {}
   /**
    * User
-   *
    * @returns { Promise<User>}
    */
   @Query(() => User, { name: 'user' })
@@ -45,29 +45,39 @@ export class UserResolver {
 
   @Query(() => User, { name: 'getOneUser' })
   @UseGuards(AccessTokenGuard)
+  @Permissions(PermissionsEnum.USER_MANAGEMENT_VIEW)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async getOneUser(@Args('id') id: string) {
     return await this.userService.findUserById(id, ['roles']);
   }
 
   @Query(() => [User], { name: 'searchForUsers' })
   @UseGuards(AccessTokenGuard)
+  @Permissions(PermissionsEnum.USER_MANAGEMENT_VIEW)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async searchForUser(@Args('searchParam') searchParam: string) {
     return await this.userService.searchForUsers(searchParam);
   }
 
   @Query(() => [User], { name: 'searchForEmployee' })
   @UseGuards(AccessTokenGuard)
+  @Permissions(PermissionsEnum.USER_MANAGEMENT_VIEW)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async searchForEmployee(@Args('searchParam') searchParam: string) {
     return await this.userService.searchForEmployee(searchParam);
   }
 
   @Query(() => UserResponse, { name: 'findAllUser' })
   @UseGuards(AccessTokenGuard)
+  @Permissions(PermissionsEnum.USER_MANAGEMENT_VIEW)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async findAllUser(@Args('userFilterInput') userFilterInput: UserFilter) {
     return await this.userService.findAllUser(userFilterInput);
   }
   @Query(() => UserResponse, { name: 'getEmployees' })
   @UseGuards(AccessTokenGuard)
+  @Permissions(PermissionsEnum.USER_MANAGEMENT_VIEW)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async getEmployees(
     @Context() ctx: any,
     @Args('userFilterInput', { nullable: true }) userFilterInput: UserFilter,
@@ -76,7 +86,8 @@ export class UserResolver {
   }
 
   @Query(() => UserResponse, { name: 'findAllCustomers' })
-  @UseGuards(AdminGuard)
+  @Permissions(PermissionsEnum.USER_MANAGEMENT_VIEW)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   @UseGuards(AccessTokenGuard)
   async findAllCustomers(@Args('userFilterInput') userFilterInput: UserFilter) {
     return await this.userService.findAllCustomers(userFilterInput);
@@ -114,7 +125,9 @@ export class UserResolver {
   ): Promise<SuccessResponse> {
     return await this.userService.forceUpdate(version);
   }
-  @UseGuards(AccessTokenGuard, AdminGuard)
+
+  @Permissions(PermissionsEnum.USER_MANAGEMENT_RESET_PASSWORD)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Mutation(() => SuccessResponse)
   async resetPasswordAdmin(
     @Args('ResetInput') ResetInput: UserActionInput,
@@ -129,13 +142,13 @@ export class UserResolver {
    * @param {CreateStaffInput} inputDto
    * @returns {Promise<User>}
    */
-  @Mutation(() => User)
-  @Permissions('create-user')
+  @Mutation(() => SuccessResponse)
+  @Permissions(PermissionsEnum.USER_MANAGEMENT_CREATE)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async createStaff(
     @Args('RequestInput') inputDto: CreateStaffInput,
     @Context() ctx: any,
-  ): Promise<User> {
+  ): Promise<SuccessResponse> {
     return await this.userService.createStaff(inputDto, ctx.req.user);
   }
 
@@ -146,6 +159,7 @@ export class UserResolver {
    * @returns {Promise<User>}
    */
   @Mutation(() => String)
+  @UseGuards(AccessTokenGuard)
   async staffConfirmation(
     @Args('RequestInput') inputDto: StaffConfirmDto,
   ): Promise<string> {
@@ -173,7 +187,8 @@ export class UserResolver {
    * @returns {Promise<User>}
    */
   @Mutation(() => SuccessResponse)
-  @UseGuards(AccessTokenGuard)
+  @Permissions(PermissionsEnum.USER_MANAGEMENT_EDIT_STATUS)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async blockUser(
     @Args('RequestInput') inputDto: UserActionInput,
     @Context() ctx: any,
@@ -182,7 +197,8 @@ export class UserResolver {
   }
 
   @Mutation(() => SuccessResponse)
-  @UseGuards(AccessTokenGuard)
+  @Permissions(PermissionsEnum.USER_MANAGEMENT_DELETE)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async deleteUser(
     @Args('RequestInput') inputDto: DeleteUserInput,
     @Context() ctx: any,
@@ -204,7 +220,6 @@ export class UserResolver {
 
   /**
    * Update User Password
-   *
    * @async
    * @param {any} ctx
    * @param {PasswordInput} inputDto

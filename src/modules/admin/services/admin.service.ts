@@ -61,6 +61,9 @@ import { SuccessResponse } from '../../../common/utils/success.response';
 import { AppStrings } from '../../../common/messages/app.strings';
 import { CouponEnum } from '../../../common/enums/coupons.enum';
 import { AuctionBidRangeRepository } from '../../listing/repositories/auction-bid-range.repository';
+import { User } from '../../../entities';
+import { AdminWorkflowService } from './admin-workflow.service';
+import { ActionService } from './action.service';
 
 @Injectable()
 export class AdminService {
@@ -73,6 +76,9 @@ export class AdminService {
     private readonly adminRepository: AdminRepository,
     private readonly couponRepository: CouponRepository,
     private readonly auctionBidRangeRepository: AuctionBidRangeRepository,
+
+    private readonly workflowService: AdminWorkflowService,
+    private readonly actionService: ActionService,
   ) {}
 
   logger = new Logger(AdminService.name);
@@ -152,7 +158,7 @@ export class AdminService {
     const result = await this.ticketsRepository
       .createQueryBuilder('ticket')
       .select(
-        'AVG(EXTRACT(EPOCH FROM (ticket.assignedAt - ticket.closedAt)))',
+        'AVG(EXTRACT(EPOCH FROM (ticket.closedAt - ticket.assignedAt)))',
         'avgTimeDifference',
       )
       .where('ticket.assignedAt IS NOT NULL AND ticket.closedAt IS NOT NULL')
@@ -171,7 +177,7 @@ export class AdminService {
     const result = await this.ticketsRepository
       .createQueryBuilder('ticket')
       .select(
-        'AVG(EXTRACT(EPOCH FROM (ticket.createdAt - ticket."closedAt")))',
+        'AVG(EXTRACT(EPOCH FROM (ticket."closedAt" - ticket.createdAt)))',
         'avgTimeDifference',
       )
       .where('ticket.createdAt IS NOT NULL AND ticket.closedAt IS NOT NULL')
@@ -580,13 +586,39 @@ export class AdminService {
     }
   }
 
-  async createCoupon(createCouponInput: CreateCouponInput) {
+  async createCoupon(createCouponInput: CreateCouponInput, admin: User) {
     try {
+      const actionConfig =
+        await this.workflowService.findOneWorkflowByDocumentname(
+          this.userRepository.metadata.name,
+        );
+
       const code = generateRandomArray(1, 6);
-      return await this.couponRepository.save({
+      const data = this.couponRepository.create({
         code: slugify(code[0].toUpperCase()),
         ...createCouponInput,
       });
+
+      if (actionConfig) {
+        await this.actionService.createActionRequest(
+          {
+            document: this.couponRepository.metadata.name,
+            actionType: 'create',
+            targetEntityId: null,
+            user: admin,
+            payload: JSON.stringify(data),
+          },
+          admin,
+        );
+        return new SuccessResponse('Action awaiting aproval');
+      }
+      const coupon = await this.couponRepository.save({
+        code: slugify(code[0].toUpperCase()),
+        ...createCouponInput,
+      });
+      if (coupon) {
+        return new SuccessResponse(AppStrings.SUCCESSFULL);
+      }
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -658,11 +690,16 @@ export class AdminService {
     }
   }
 
-  async updateCoupon(updateCouponInput: UpdateCouponInput) {
+  async updateCoupon(updateCouponInput: UpdateCouponInput, admin: User) {
     try {
-      const coupons = await this.couponRepository.findOne({
-        where: { id: updateCouponInput.id },
-      });
+      const [actionConfig, coupons] = await Promise.all([
+        this.workflowService.findOneWorkflowByDocumentname(
+          this.userRepository.metadata.name,
+        ),
+        this.couponRepository.findOne({
+          where: { id: updateCouponInput.id },
+        }),
+      ]);
 
       const updatedCoupons: Partial<Coupon> = {
         startDate: updateCouponInput.startDate ?? coupons.startDate,
@@ -672,30 +709,67 @@ export class AdminService {
         discountValue: updateCouponInput.discountValue ?? coupons.discountValue,
       };
 
+      if (actionConfig) {
+        await this.actionService.createActionRequest(
+          {
+            document: this.couponRepository.metadata.name,
+            actionType: 'update',
+            targetEntityId: null,
+            user: admin,
+            payload: JSON.stringify(updatedCoupons),
+          },
+          admin,
+        );
+        return new SuccessResponse('Awaiting action approval');
+      }
+
       const { affected } = await this.couponRepository.update(
         coupons.id,
         updatedCoupons,
       );
 
       if (affected) {
-        return await this.couponRepository.findOneBy({ id: coupons.id });
+        const data = await this.couponRepository.findOneBy({ id: coupons.id });
+
+        return new SuccessResponse(AppStrings.SUCCESSFULL, data);
       }
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
     }
   }
-  async deleteCoupon(deleteCouponInput: DeleteCouponInput) {
+  async deleteCoupon(deleteCouponInput: DeleteCouponInput, admin: User) {
     try {
-      const coupons = await this.couponRepository.find({
-        where: { id: In(deleteCouponInput.id) },
-      });
+      const [actionConfig, coupons] = await Promise.all([
+        this.workflowService.findOneWorkflowByDocumentname(
+          this.userRepository.metadata.name,
+        ),
+        this.couponRepository.find({
+          where: { id: In(deleteCouponInput.id) },
+        }),
+      ]);
       const deletedCoupons = coupons.map((element) => {
         const coupon: Partial<Coupon> = {
           deletedAt: new Date(),
         };
         return { ...element, ...coupon };
       });
+
+      if (actionConfig) {
+        await this.actionService.createActionRequest(
+          {
+            document: this.couponRepository.metadata.name,
+            actionType: 'update',
+            targetEntityId: null,
+            user: admin,
+            payload: JSON.stringify(deletedCoupons),
+          },
+          admin,
+        );
+
+        return new SuccessResponse('Awaiting action approval');
+      }
+
       await this.couponRepository.save(deletedCoupons);
       return new SuccessResponse(AppStrings.DELETED_SUCCESSFULLY);
     } catch (error) {
@@ -704,17 +778,40 @@ export class AdminService {
     }
   }
 
-  async deactivateCoupon(deactivateCouponInput: DeactivateCouponInput) {
+  async deactivateCoupon(
+    deactivateCouponInput: DeactivateCouponInput,
+    admin: User,
+  ) {
     try {
-      const coupons = await this.couponRepository.find({
-        where: { id: In(deactivateCouponInput.id) },
-      });
+      const [actionConfig, coupons] = await Promise.all([
+        this.workflowService.findOneWorkflowByDocumentname(
+          this.userRepository.metadata.name,
+        ),
+        this.couponRepository.find({
+          where: { id: In(deactivateCouponInput.id) },
+        }),
+      ]);
       const deactivateCoupon = coupons.map((element) => {
         const coupon: Partial<Coupon> = {
           deactived: true,
         };
         return { ...element, ...coupon };
       });
+
+      if (actionConfig) {
+        await this.actionService.createActionRequest(
+          {
+            document: this.couponRepository.metadata.name,
+            actionType: 'create',
+            targetEntityId: null,
+            user: admin,
+            payload: JSON.stringify(deactivateCoupon),
+          },
+          admin,
+        );
+
+        return new SuccessResponse('Awaiting action approval');
+      }
       await this.couponRepository.save(deactivateCoupon);
 
       return new SuccessResponse(AppStrings.SUCCESSFULL);

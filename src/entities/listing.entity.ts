@@ -148,7 +148,7 @@ export class Listing extends BaseEntity {
   @Column({ default: false })
   isListingFlagged: boolean;
 
-  @Field()
+  @Field({ nullable: true })
   @Index()
   @Column({ default: false })
   isListingVerified: boolean;

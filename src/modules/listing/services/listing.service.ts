@@ -851,6 +851,7 @@ export class ListingService {
             'listing.isListingRented',
             'listing.isListingPromoted',
             'listing.price',
+            'listing.isListingVerified',
           ])
           .leftJoin('listing.listingType', 'listingType')
           .leftJoin('listing.user', 'user')
@@ -943,6 +944,7 @@ export class ListingService {
           isListingRented: true,
           isListingFeatured: true,
           isListingDisabled: true,
+          isListingVerified: true,
           images: true,
 
           listingType: {
@@ -1021,6 +1023,7 @@ export class ListingService {
           isListingRented: true,
           isListingFeatured: true,
           isListingDisabled: true,
+          isListingVerified: true,
           negotiable: true,
           createdAt: true,
           deletedAt: true,
@@ -1079,6 +1082,8 @@ export class ListingService {
           isListingRented: true,
           isListingFeatured: true,
           isListingDisabled: true,
+
+          isListingVerified: true,
           negotiable: true,
           createdAt: true,
           deletedAt: true,

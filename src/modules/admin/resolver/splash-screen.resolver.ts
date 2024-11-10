@@ -13,17 +13,21 @@ import { SplashScreenService } from '../services/splash-screen.service';
 import { SplashScreenResponse } from '../dto/response/splash-screen-response';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { UseGuards } from '@nestjs/common';
-import { AccessTokenGuard } from '../../auth/guards';
+import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
 import {
   DeleteSplashScreenInput,
   SplashScreenFilterInput,
 } from '../dto/request/admin-request';
 import { SuccessResponse } from '../../../common/utils/success.response';
+import { Permissions } from '../../../common/decorator/permission';
+import { PermissionsEnum } from '../../../common/enums/permission.enum';
 
 @Resolver()
 export class SplashScreenResolver {
   constructor(private readonly splashScreenService: SplashScreenService) {}
   @Mutation(() => SplashScreen, { name: 'createSplashScreen' })
+  @Permissions(PermissionsEnum.KNOWLEDGE_BASE_CREATE)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async create(
     @Args('createSplashScreenInput')
     createSplashScreenInput: CreateSplashScreenInput,
@@ -34,19 +38,22 @@ export class SplashScreenResolver {
       ctx.req.user,
     );
   }
-
+  @Permissions(PermissionsEnum.KNOWLEDGE_BASE_READ)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Query(() => SplashScreenResponse, { name: 'findAllSplashScreen' })
   async findAll(
     @Args('findOption', { nullable: true }) findOption: SplashScreenFilterInput,
   ) {
     return await this.splashScreenService.findAll(findOption);
   }
-
+  @Permissions(PermissionsEnum.KNOWLEDGE_BASE_READ)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Query(() => SplashScreen, { name: 'findOneSplashScreen' })
   async findOne(@Args('id') id: number) {
     return await this.splashScreenService.findOne(id);
   }
-
+  @Permissions(PermissionsEnum.KNOWLEDGE_BASE_EDIT)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Mutation(() => SplashScreen, { name: 'updateSplashScreen' })
   async update(
     @Args('updateSplashScreenInput')
@@ -58,13 +65,18 @@ export class SplashScreenResolver {
       ctx.req.user,
     );
   }
-
+  @Permissions(PermissionsEnum.KNOWLEDGE_BASE_DELETE)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Mutation(() => SuccessResponse, { name: 'deleteSplashScreen' })
   async delete(
     @Args('deleteSplashScreenInput')
     deleteSplashScreenInput: DeleteSplashScreenInput,
+    @Context() ctx: any,
   ) {
-    return await this.splashScreenService.delete(deleteSplashScreenInput);
+    return await this.splashScreenService.delete(
+      deleteSplashScreenInput,
+      ctx.req.user,
+    );
   }
 
   @Query(() => SplashScreen, {
@@ -74,7 +86,8 @@ export class SplashScreenResolver {
   async findDefault() {
     return await this.splashScreenService.fetchDefault();
   }
-
+  @Permissions(PermissionsEnum.KNOWLEDGE_BASE_READ)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Query(() => [SplashScreen], { name: 'searchForSplashScreen' })
   @UseGuards(AccessTokenGuard)
   async searchForSplashScreen(@Args('searchParam') searchParam: string) {

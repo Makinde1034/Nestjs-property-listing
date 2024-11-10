@@ -17,6 +17,7 @@ import { Permissions } from 'src/common/decorator/permission';
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { Public } from '../../auth/decorators/permision.decorator';
+import { PermissionsEnum } from '../../../common/enums/permission.enum';
 
 @Resolver()
 export class IssueResolver {
@@ -33,7 +34,7 @@ export class IssueResolver {
    * @returns {Promise<Issue>}
    */
   @Mutation(() => ParentIssue)
-  @Permissions('create-issues-categories')
+  @Permissions(PermissionsEnum.ISSUES_CATEGORIES_CREATE)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async createIssue(
     @Args('input') RequestInput: CreateIssueInput,
@@ -48,7 +49,8 @@ export class IssueResolver {
    * @returns {Promise<Issue>}
    */
   @Mutation(() => ParentIssue)
-  @UseGuards(AccessTokenGuard, AdminGuard)
+  @Permissions(PermissionsEnum.ISSUES_CATEGORIES_READ)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async updateIssue(
     @Args('RequestInput') RequestInput: UpdateIssueInput,
   ): Promise<ParentIssue> {
@@ -79,15 +81,15 @@ export class IssueResolver {
    * @returns {Promise<SuccessResponse>}
    */
   @Mutation(() => SuccessResponse)
-  @Permissions('delete-issues-categories')
   @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions(PermissionsEnum.ISSUES_CATEGORIES_DELETE)
   async deleteIssue(@Args('id') id: string) {
     return await this.issueService.deleteIssue(id);
   }
 
   @Mutation(() => ParentIssue)
-  @Permissions('create-issues-categories')
   @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions(PermissionsEnum.ISSUES_CATEGORIES_CREATE)
   async createChildIssue(
     @Args('input') input: CreateChildIssueInput,
   ): Promise<ChildIssue> {
@@ -95,7 +97,8 @@ export class IssueResolver {
   }
 
   @Mutation(() => ParentIssue)
-  @UseGuards(AccessTokenGuard, AdminGuard)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions(PermissionsEnum.ISSUES_CATEGORIES_CREATE)
   async updateChildIssue(
     @Args('RequestInput') RequestInput: UpdateIssueInput,
   ): Promise<ChildIssue> {
@@ -111,8 +114,8 @@ export class IssueResolver {
     return await this.issueService.findAllChildIssues(parentId);
   }
   @Mutation(() => SuccessResponse)
-  @Permissions('delete-issues-categories')
   @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions(PermissionsEnum.ISSUES_CATEGORIES_DELETE)
   async deleteChildIssue(@Args('id') id: string) {
     return await this.issueService.deleteChildIssue(id);
   }

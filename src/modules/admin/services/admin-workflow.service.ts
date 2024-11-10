@@ -36,6 +36,17 @@ export class AdminWorkflowService {
     }
   }
 
+  async findOneWorkflowByDocumentname(document: string) {
+    try {
+      return await this.workflowRepository.findOne({
+        where: { document: document },
+      });
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
   async delete(id: string) {
     try {
       return await this.workflowRepository.softDelete({ id });

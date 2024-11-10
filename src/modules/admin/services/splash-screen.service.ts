@@ -17,7 +17,6 @@ import {
   CreateSplashScreenInput,
   UpdateSplashScreenInput,
 } from '../dto/request/create-splash-screen';
-import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { AppStrings } from '../../../common/messages/app.strings';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { StorageService } from '../../file-handler/services/storage.service';
@@ -40,23 +39,48 @@ import {
   startOfYear,
   endOfYear,
 } from 'date-fns';
+import { AdminWorkflowService } from './admin-workflow.service';
+import { ActionService } from './action.service';
 @Injectable()
 export class SplashScreenService {
   constructor(
     private readonly splashScreenRepository: SplashScreenRepository,
     private readonly storageService: StorageService,
-
     private readonly activityLogService: ActivityLogService,
+    private readonly workflowService: AdminWorkflowService,
+    private readonly actionService: ActionService,
   ) {}
   logger = new Logger(SplashScreenService.name);
-  async create(createSplashScreen: CreateSplashScreenInput, user: User) {
+  async create(createSplashScreen: CreateSplashScreenInput, admin: User) {
     try {
+      const actionConfig =
+        await this.workflowService.findOneWorkflowByDocumentname(
+          this.splashScreenRepository.metadata.name,
+        );
+
       const splashScreen =
-        await this.splashScreenRepository.save(createSplashScreen);
+        this.splashScreenRepository.create(createSplashScreen);
+
+      if (actionConfig) {
+        await this.actionService.createActionRequest(
+          {
+            document: this.splashScreenRepository.metadata.name,
+            actionType: 'create',
+            targetEntityId: null,
+            user: admin,
+            payload: JSON.stringify(splashScreen),
+          },
+          admin,
+        );
+
+        return new SuccessResponse('Awaiting action Approval');
+      }
+
+      const data = await this.splashScreenRepository.save(createSplashScreen);
 
       await this.activityLogService.logActivity([
         {
-          adminId: user.id,
+          adminId: admin.id,
           action: ActivityEnum.CREATED,
 
           details: JSON.stringify(SplashScreen),
@@ -65,7 +89,7 @@ export class SplashScreenService {
         },
       ]);
 
-      return splashScreen;
+      return new SuccessResponse(AppStrings.SUCCESSFULL, data);
     } catch (error) {
       this.logger.error(error);
       throw new BadGatewayException(error);
@@ -129,16 +153,40 @@ export class SplashScreenService {
     }
   }
 
-  async update(updateSplashScreenInput: UpdateSplashScreenInput, user: User) {
+  async update(updateSplashScreenInput: UpdateSplashScreenInput, admin: User) {
     try {
       const { id, ...rest } = updateSplashScreenInput;
-      const splashScreen = await this.splashScreenRepository.findOneBy({
-        id,
-      });
+
+      const [splashScreen, actionConfig] = await Promise.all([
+        this.splashScreenRepository.findOneBy({
+          id,
+        }),
+
+        this.workflowService.findOneWorkflowByDocumentname(
+          this.splashScreenRepository.metadata.name,
+        ),
+      ]);
+
       if (!splashScreen) {
         throw new BadRequestException(AppStrings.NOT_FOUND);
       }
+
+      if (actionConfig) {
+        await this.actionService.createActionRequest(
+          {
+            document: this.splashScreenRepository.metadata.name,
+            actionType: 'update',
+            targetEntityId: id.toString(),
+            user: admin,
+            payload: JSON.stringify(rest),
+          },
+          admin,
+        );
+        return new SuccessResponse('Action is awaiting approval');
+      }
+
       const { affected } = await this.splashScreenRepository.update(id, rest);
+
       if (affected > 0) {
         const splashScreen = await this.splashScreenRepository.findOneByOrFail({
           id,
@@ -146,14 +194,14 @@ export class SplashScreenService {
 
         await this.activityLogService.logActivity([
           {
-            adminId: user.id,
+            adminId: admin.id,
             action: ActivityEnum.UPDATED,
             details: JSON.stringify(SplashScreen),
             splashScreenId: splashScreen.id,
           },
         ]);
 
-        return splashScreen;
+        return new SuccessResponse(AppStrings.SUCCESSFULL, splashScreen);
       }
     } catch (error) {
       this.logger.log(error);
@@ -166,14 +214,36 @@ export class SplashScreenService {
     }
   }
 
-  async delete(deleteSplashScreenInput: DeleteSplashScreenInput) {
+  async delete(deleteSplashScreenInput: DeleteSplashScreenInput, admin: User) {
     try {
-      const splashScreen = await this.splashScreenRepository.findOneByOrFail({
-        id: In(deleteSplashScreenInput.id),
-      });
+      const [splashScreen, actionConfig] = await Promise.all([
+        this.splashScreenRepository.findOneByOrFail({
+          id: In(deleteSplashScreenInput.id),
+        }),
+
+        this.workflowService.findOneWorkflowByDocumentname(
+          this.splashScreenRepository.metadata.name,
+        ),
+      ]);
+
       if (!splashScreen) {
         throw new BadRequestException(AppStrings.NOT_FOUND);
       }
+      splashScreen.deletedAt = new Date();
+
+      if (actionConfig) {
+        await this.actionService.createActionRequest(
+          {
+            document: this.splashScreenRepository.metadata.name,
+            actionType: 'update',
+            targetEntityId: splashScreen.id.toString(),
+            user: admin,
+            payload: JSON.stringify(splashScreen),
+          },
+          admin,
+        );
+      }
+
       const { affected } = await this.splashScreenRepository.softDelete(
         deleteSplashScreenInput.id,
       );

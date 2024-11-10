@@ -40,6 +40,7 @@ import { Article } from './article.entity';
 import { ActivityLog } from './activity-log.entity';
 import { Compare } from './compare.entity';
 import { ServiceProvider } from './service-provider.entity';
+import { ActionRequest } from './request.action.entity';
 
 @Entity()
 @ObjectType()
@@ -59,6 +60,10 @@ export class User extends BaseEntity {
   @Column({ default: 'v1' })
   @Field({ nullable: true })
   currentTermOfservice: string;
+
+  @Field(() => [ActionRequest])
+  @OneToMany(() => ActionRequest, (request) => request.user)
+  requests: ActionRequest[];
 
   // @Field(() => [AcceptedTerms], { nullable: true })
   // @OneToMany(() => AcceptedTerms, (term) => term.user, { nullable: true })
