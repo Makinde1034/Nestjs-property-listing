@@ -158,7 +158,7 @@ export class AdminService {
     const result = await this.ticketsRepository
       .createQueryBuilder('ticket')
       .select(
-        'AVG(EXTRACT(EPOCH FROM (ticket.assignedAt - ticket.closedAt)))',
+        'AVG(EXTRACT(EPOCH FROM (ticket.closedAt - ticket.assignedAt)))',
         'avgTimeDifference',
       )
       .where('ticket.assignedAt IS NOT NULL AND ticket.closedAt IS NOT NULL')
@@ -177,7 +177,7 @@ export class AdminService {
     const result = await this.ticketsRepository
       .createQueryBuilder('ticket')
       .select(
-        'AVG(EXTRACT(EPOCH FROM (ticket.createdAt - ticket."closedAt")))',
+        'AVG(EXTRACT(EPOCH FROM (ticket."closedAt" - ticket.createdAt)))',
         'avgTimeDifference',
       )
       .where('ticket.createdAt IS NOT NULL AND ticket.closedAt IS NOT NULL')
