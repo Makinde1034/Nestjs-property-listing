@@ -1,22 +1,3 @@
-// import { Injectable } from '@nestjs/common';
-// import { Subject, filter } from 'rxjs';
-// import { EventPayload } from './request/app';
-
-// @Injectable()
-// export class EventsService {
-//   private readonly eventSubject = new Subject<EventPayload>();
-
-//   subscribe(userId: string) {
-//     return this.eventSubject.pipe(filter((event) => event.userId === userId));
-//   }
-
-//   emit(userId: string, data: any) {
-//     console.log(userId, data);
-//     console.log(this.eventSubject);
-//     this.eventSubject.next({ userId, data });
-//   }
-// }
-
 import { Injectable, Logger } from '@nestjs/common';
 import { Subject } from 'rxjs';
 import { MessageEvent } from './request/app'; // Import your MessageEvent type
@@ -38,7 +19,6 @@ export class SseService {
       `Client removed for userId: ${userId}. Total clients: ${this.clients.size}`,
     );
   }
-
   /**
    * Retrieves the client's Subject<MessageEvent>
    * @param userId string

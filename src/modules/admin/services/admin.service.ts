@@ -223,7 +223,6 @@ export class AdminService {
       const quarter = Math.ceil((date.getMonth() + 1) / 3); // Calculate the quarter
       return { year, quarter };
     });
-
     // Query for sold items in the past year
     const soldItems = await this.listingRepository
       .createQueryBuilder('listing')
