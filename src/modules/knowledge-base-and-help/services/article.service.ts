@@ -44,7 +44,7 @@ export class ArticleService {
         id: createArticleInput.categoryId,
       });
       if (!category) {
-        throw new NotFoundException(AppStrings.NOT_FOUND);
+        throw new NotFoundException('category not found');
       }
       return await this.articleRepository.save({
         ...createArticleInput,
