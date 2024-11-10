@@ -230,6 +230,7 @@ export class ListingResolver {
   }
 
   @Query(() => [ListingAttributes], { name: 'fetchListingAttribute' })
+  @Public()
   async fetchListingAttribute(@Args('listingId') listingId: string) {
     return await this.listingAttributeService.findListingAttribute(listingId);
   }

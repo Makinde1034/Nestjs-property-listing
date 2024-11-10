@@ -25,8 +25,10 @@ import {
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { ArticleResponse } from '../dto/response/article';
 import { UseGuards } from '@nestjs/common';
-import { AccessTokenGuard } from '../../auth/guards';
+import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
 import { CategoryResponse } from '../dto/response/category';
+import { PermissionsEnum } from '../../../common/enums/permission.enum';
+import { Permissions } from '../../../common/decorator/permission';
 
 @Resolver(() => Article)
 export class KnowledgeBaseAndHelpResolver {
@@ -36,6 +38,8 @@ export class KnowledgeBaseAndHelpResolver {
   ) {}
 
   @Mutation(() => Category)
+  @Permissions(PermissionsEnum.CMS_CATEGORIES_CREATE)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async createCategory(
     @Args('createCategoryInput')
     createCategoryInput: CreateCategoryInput,
@@ -63,6 +67,8 @@ export class KnowledgeBaseAndHelpResolver {
   }
 
   @Mutation(() => Category, { name: 'updateCategory' })
+  @Permissions(PermissionsEnum.CMS_CATEGORIES_EDIT)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async updateKnowledgeBaseCategory(
     @Args('updateCategoryInput')
     updateCategoryInput: UpdateCategoryInput,
@@ -71,6 +77,8 @@ export class KnowledgeBaseAndHelpResolver {
   }
 
   @Mutation(() => SuccessResponse, { name: 'deleteCategory' })
+  @Permissions(PermissionsEnum.CMS_CATEGORIES_DELETE)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async removeKnowledgeBaseCatecory(
     @Args('categoryActionInput') categoryActionInput: CategoryActionInput,
   ) {
@@ -78,6 +86,8 @@ export class KnowledgeBaseAndHelpResolver {
   }
 
   @Mutation(() => Article)
+  @Permissions(PermissionsEnum.CMS_CREATE_CONTENT)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async createArticle(
     @Args('createArticleInput')
     createArticleInput: CreateArticleInput,
@@ -103,6 +113,8 @@ export class KnowledgeBaseAndHelpResolver {
     return await this.articleService.findOne(id);
   }
   @Mutation(() => SuccessResponse, { name: 'publishArticle' })
+  @Permissions(PermissionsEnum.CMS_CREATE_CONTENT)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async publish(
     @Args('articlePublishInput') articlePublishInput: ArticlePublishInput,
   ) {
@@ -110,6 +122,8 @@ export class KnowledgeBaseAndHelpResolver {
   }
 
   @Mutation(() => SuccessResponse, { name: 'unpublishArticle' })
+  @Permissions(PermissionsEnum.CMS_CREATE_CONTENT)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async unPublish(
     @Args('articlePublishInput') articlePublishInput: ArticlePublishInput,
   ) {
@@ -117,6 +131,8 @@ export class KnowledgeBaseAndHelpResolver {
   }
 
   @Mutation(() => SuccessResponse)
+  @Permissions(PermissionsEnum.CMS_DELETE_CONTENT)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async deleteArticle(
     @Args('articleDeleteInput') articleDeleteInput: ArticleDeleteInput,
   ) {
@@ -124,6 +140,8 @@ export class KnowledgeBaseAndHelpResolver {
   }
 
   @Mutation(() => Article)
+  @Permissions(PermissionsEnum.CMS_EDIT_CONTENT)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async updateArticle(
     @Args('updateArticleInput') updateArticleInput: UpdateArticleInput,
     @Context() ctx: any,
