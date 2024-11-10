@@ -42,10 +42,10 @@ import { KnowledgeBaseAndHelpModule } from './modules/knowledge-base-and-help/kn
 import { InAppModule } from './modules/in-app-services/in-app.module';
 import { GlobalPermissionsGuard } from './modules/auth/guards/global-permission-guard';
 import { APP_GUARD } from '@nestjs/core';
-import { AppResolver } from './modules/app/app.resolver';
-import { AppController } from './modules/app/app.controller';
-import { SseService } from './modules/app/client.service';
-import { SseModule } from './modules/app/event.module';
+import { AppResolver } from './modules/sse/app.resolver';
+import { AppController } from './modules/sse/app.controller';
+import { SseService } from './modules/sse/client.service';
+import { SseModule } from './modules/sse/event.module';
 import { ActivityLogModule } from './modules/activity-log/activity-log.module';
 import { ServiceProviderModule } from './modules/service-provider/service-provider.module';
 import { TermsAndConditionGuard } from './modules/auth/guards/terms-and-condition.guard';

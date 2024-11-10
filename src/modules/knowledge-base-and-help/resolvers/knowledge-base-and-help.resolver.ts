@@ -29,6 +29,7 @@ import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
 import { CategoryResponse } from '../dto/response/category';
 import { PermissionsEnum } from '../../../common/enums/permission.enum';
 import { Permissions } from '../../../common/decorator/permission';
+import { Public } from '../../auth/decorators/permision.decorator';
 
 @Resolver(() => Article)
 export class KnowledgeBaseAndHelpResolver {
@@ -95,12 +96,20 @@ export class KnowledgeBaseAndHelpResolver {
   ) {
     return await this.articleService.create(createArticleInput, ctx.req.user);
   }
-
+  @UseGuards(AccessTokenGuard)
   @Query(() => ArticleResponse, { name: 'findManyArticles' })
   async findManyArticles(@Args('findOption') findOption: ArticleFilterInput) {
     return await this.articleService.findAll(findOption);
   }
 
+  @Public()
+  @Query(() => ArticleResponse, { name: 'findManyArticles' })
+  async findManyArticlesCustomer(
+    @Args('findOption') findOption: ArticleFilterInput,
+  ) {
+    return await this.articleService.findAll(findOption);
+  }
+  @UseGuards(AccessTokenGuard)
   @Query(() => ArticleResponse, { name: 'findManyArticlesKnowledgeBase' })
   async findAllKnowledgeBase(
     @Args('findOption') findOption: ArticleFilterInput,
@@ -112,6 +121,12 @@ export class KnowledgeBaseAndHelpResolver {
   async findOneArticle(@Args('id', { type: () => Int }) id: number) {
     return await this.articleService.findOne(id);
   }
+  @Query(() => Article, { name: 'findOneArticle' })
+  @Public()
+  async findOneArticleCustomer(@Args('id', { type: () => Int }) id: number) {
+    return await this.articleService.findOne(id);
+  }
+
   @Mutation(() => SuccessResponse, { name: 'publishArticle' })
   @Permissions(PermissionsEnum.CMS_CREATE_CONTENT)
   @UseGuards(AccessTokenGuard, PermissionsGuard)

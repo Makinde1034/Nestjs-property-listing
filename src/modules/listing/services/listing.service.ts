@@ -206,7 +206,6 @@ export class ListingService {
       }
     }
   }
-
   async findAllListingsForOwner(data: AttributeDto, user?: User) {
     try {
       let { sortField, directionToSort } = data;

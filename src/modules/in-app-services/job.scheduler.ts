@@ -59,7 +59,7 @@ export class JobService {
 
   @Cron(CronExpression.EVERY_5_SECONDS)
   async test() {
-    // Await this.notifyUsersAboutUpcomingAuctions();
+    await this.sendAlertOnIncompleteOffers();
   }
 
   @Cron(CronExpression.EVERY_12_HOURS, { timeZone: 'Africa/Cairo' })
@@ -117,6 +117,7 @@ export class JobService {
 
   async sendAlertOnIncompleteOffers() {
     try {
+      console.log('here');
       const currentDate = new Date();
       const targetDate = new Date();
       targetDate.setDate(currentDate.getDate() + 1);
