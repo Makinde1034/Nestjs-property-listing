@@ -14,6 +14,7 @@ import { User } from 'src/entities';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { RoleService } from '../../user/services';
 import { PERMISSION_KEY } from '../../../common/decorator/permission';
+import { AppStrings } from '../../../common/messages/app.strings';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
@@ -46,6 +47,8 @@ export class PermissionsGuard implements CanActivate {
       return true;
     }
 
-    throw new ForbiddenException();
+    throw new ForbiddenException(
+      'You do not have the required permission to perform this action',
+    );
   }
 }

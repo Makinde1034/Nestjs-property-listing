@@ -226,6 +226,7 @@ type AuctionParticipant {
   bidCount: Float
   listing: Listing!
   minimumPrice: Float!
+  startPrice: Float!
   auction: Auction!
   bid: Auction!
   createdAt: DateTime!
@@ -1835,6 +1836,7 @@ input AuctionActionInput {
 
 input CreateAuctionParticipantInput {
   minimumPrice: Float!
+  startingPrice: Float!
   auctionId: String!
   listingId: String!
 }

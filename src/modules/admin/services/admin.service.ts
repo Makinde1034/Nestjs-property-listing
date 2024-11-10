@@ -242,7 +242,7 @@ export class AdminService {
       .createQueryBuilder('offer')
       .select('EXTRACT(YEAR FROM offer.createdAt)::int', 'year')
       .addSelect('EXTRACT(QUARTER FROM offer.createdAt)::int', 'quarter')
-      .addSelect('SUM(offer.offerPrice)::float', 'totalOrdered')
+      .addSelect('SUM(offer.price)::float', 'totalOrdered')
       .where('offer.createdAt BETWEEN :startOfYear AND :endOfYear', {
         startOfYear: startOfYearDate,
         endOfYear: endOfYearDate,
