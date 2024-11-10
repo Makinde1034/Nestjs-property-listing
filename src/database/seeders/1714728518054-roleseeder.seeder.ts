@@ -33,21 +33,21 @@ export class RoleSeeder implements Seeder {
     } else {
       this.logger.debug(`Permissions fetched: ${permissions.length}`);
     }
-    if (role.length > 0) {
-      this.logger.debug(`Seeding for: ${RoleSeeder.name} Already completed`);
-    } else {
-      // Transform permissions to only include id
-      const permissionIds = permissions.map((permission) => ({
-        id: permission.id,
-      }));
+    // if (role.length > 0) {
+    //   this.logger.debug(`Seeding for: ${RoleSeeder.name} Already completed`);
+    // } else {
+    // Transform permissions to only include id
+    const permissionIds = permissions.map((permission) => ({
+      id: permission.id,
+    }));
 
-      // Assuming roleFactory is an array and assigning permissionIds to each role
-      roleFactory.permissions = permissionIds;
-      roleFactory.user = user;
+    // Assuming roleFactory is an array and assigning permissionIds to each role
+    roleFactory[0].permissions = permissionIds;
+    roleFactory[0].user = user;
 
-      const repository = dataSource.getRepository(Role);
-      await repository.save(roleFactory);
-      this.logger.debug(`Seeding for: ${Role.name} finished`);
-    }
+    const repository = dataSource.getRepository(Role);
+    await repository.save(roleFactory);
+    this.logger.debug(`Seeding for: ${Role.name} finished`);
+    // }
   }
 }

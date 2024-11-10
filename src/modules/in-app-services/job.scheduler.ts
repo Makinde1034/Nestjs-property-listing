@@ -124,7 +124,7 @@ export class JobService {
 
       const user = await this.userRepository.findOne({
         where: {
-          userType: 'admin',
+          roles: { englishName: 'Request finalizer' },
         },
       });
 
