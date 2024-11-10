@@ -24,6 +24,10 @@ import {
   endOfMonth,
   startOfMonth,
   subMonths,
+  startOfDay,
+  endOfDay,
+  endOfWeek,
+  startOfWeek,
 } from 'date-fns';
 
 import { Between, In } from 'typeorm';
@@ -64,6 +68,8 @@ import { AuctionBidRangeRepository } from '../../listing/repositories/auction-bi
 import { User } from '../../../entities';
 import { AdminWorkflowService } from './admin-workflow.service';
 import { ActionService } from './action.service';
+import { TimePeriod } from '../../../common/enums/sort.enum';
+import { TransactionRepository } from '../../payment/repository/transaction.repository';
 
 @Injectable()
 export class AdminService {
@@ -79,6 +85,7 @@ export class AdminService {
 
     private readonly workflowService: AdminWorkflowService,
     private readonly actionService: ActionService,
+    private readonly transactionRepository: TransactionRepository,
   ) {}
 
   logger = new Logger(AdminService.name);
@@ -209,76 +216,164 @@ export class AdminService {
     return saiiFees;
   }
 
+  // async financialVsOrder(findOptions: AdminDashboardSort) {
+  //   const oneYearAgo = subYears(new Date(), findOptions.value);
+  //   const startOfYearDate = startOfYear(oneYearAgo);
+  //   const endOfYearDate = endOfYear(oneYearAgo);
+
+  //   // Create a list of all quarters for the past year
+  //   const quarters = eachQuarterOfInterval({
+  //     start: startOfYearDate,
+  //     end: endOfYearDate,
+  //   }).map((date) => {
+  //     const year = date.getFullYear();
+  //     const quarter = Math.ceil((date.getMonth() + 1) / 3); // Calculate the quarter
+  //     return { year, quarter };
+  //   });
+  //   // Query for sold items in the past year
+  //   const soldItems = await this.listingRepository
+  //     .createQueryBuilder('listing')
+  //     .select('EXTRACT(YEAR FROM listing.soldDate)::int', 'year')
+  //     .addSelect('EXTRACT(QUARTER FROM listing.soldDate)::int', 'quarter')
+  //     .addSelect('SUM(listing.price)::float', 'totalSold')
+  //     .where('listing.soldDate BETWEEN :startOfYear AND :endOfYear', {
+  //       startOfYear: startOfYearDate,
+  //       endOfYear: endOfYearDate,
+  //     })
+  //     .groupBy('year, quarter')
+  //     .orderBy('year, quarter')
+  //     .getRawMany();
+
+  //   // Query for placed orders in the past year
+  //   const placedOrders = await this.offerRepository
+  //     .createQueryBuilder('offer')
+  //     .select('EXTRACT(YEAR FROM offer.createdAt)::int', 'year')
+  //     .addSelect('EXTRACT(QUARTER FROM offer.createdAt)::int', 'quarter')
+  //     .addSelect('SUM(offer.price)::float', 'totalOrdered')
+  //     .where('offer.createdAt BETWEEN :startOfYear AND :endOfYear', {
+  //       startOfYear: startOfYearDate,
+  //       endOfYear: endOfYearDate,
+  //     })
+  //     .groupBy('year, quarter')
+  //     .orderBy('year, quarter')
+  //     .getRawMany();
+
+  //   // Initialize the combined results with all quarters set to zero
+  //   const combined = quarters.reduce((acc, { year, quarter }) => {
+  //     acc[`${year}-Q${quarter}`] = {
+  //       year,
+  //       quarter,
+  //       totalSold: 0,
+  //       totalOrdered: 0,
+  //     };
+  //     return acc;
+  //   }, {});
+
+  //   // Update combined results with actual data
+  //   soldItems.forEach((item) => {
+  //     const key = `${item.year}-Q${item.quarter}`;
+  //     if (combined[key]) {
+  //       combined[key].totalSold = parseFloat(item.totalSold);
+  //     }
+  //   });
+
+  //   placedOrders.forEach((item) => {
+  //     const key = `${item.year}-Q${item.quarter}`;
+  //     if (combined[key]) {
+  //       combined[key].totalOrdered = parseFloat(item.totalOrdered);
+  //     }
+  //   });
+
+  //   // Convert the combined results object to an array
+  //   const result: FinancialVsOrder[] = Object.values(combined);
+
+  //   return result;
+  // }
+
   async financialVsOrder(findOptions: AdminDashboardSort) {
-    const oneYearAgo = subYears(new Date(), findOptions.value);
-    const startOfYearDate = startOfYear(oneYearAgo);
-    const endOfYearDate = endOfYear(oneYearAgo);
+    const currentDate = new Date();
+    let startDate, endDate, groupByInterval;
 
-    // Create a list of all quarters for the past year
-    const quarters = eachQuarterOfInterval({
-      start: startOfYearDate,
-      end: endOfYearDate,
-    }).map((date) => {
-      const year = date.getFullYear();
-      const quarter = Math.ceil((date.getMonth() + 1) / 3); // Calculate the quarter
-      return { year, quarter };
-    });
-    // Query for sold items in the past year
-    const soldItems = await this.listingRepository
-      .createQueryBuilder('listing')
-      .select('EXTRACT(YEAR FROM listing.soldDate)::int', 'year')
-      .addSelect('EXTRACT(QUARTER FROM listing.soldDate)::int', 'quarter')
-      .addSelect('SUM(listing.price)::float', 'totalSold')
-      .where('listing.soldDate BETWEEN :startOfYear AND :endOfYear', {
-        startOfYear: startOfYearDate,
-        endOfYear: endOfYearDate,
+    // Determine date range and grouping based on timePeriod
+    switch (findOptions.timePeriod) {
+      case TimePeriod.Today:
+        startDate = startOfDay(currentDate);
+        endDate = endOfDay(currentDate);
+        groupByInterval = 'category';
+        break;
+      case TimePeriod.Week:
+        startDate = startOfWeek(currentDate);
+        endDate = endOfWeek(currentDate);
+        groupByInterval = 'day';
+        break;
+      case TimePeriod.Month:
+        startDate = startOfMonth(currentDate);
+        endDate = endOfMonth(currentDate);
+        groupByInterval = 'day';
+        break;
+      case TimePeriod.Year:
+        const oneYearAgo = subYears(currentDate, findOptions.value);
+        startDate = startOfYear(oneYearAgo);
+        endDate = endOfYear(oneYearAgo);
+        groupByInterval = 'month';
+        break;
+      default:
+        throw new Error('Invalid time period');
+    }
+
+    // Query transactions and group by the specified interval
+    const transactions = await this.transactionRepository
+      .createQueryBuilder('transactionLog')
+      .select(
+        `EXTRACT(${groupByInterval.toUpperCase()} FROM transactionLog.createdAt)::int`,
+        groupByInterval,
+      )
+      .addSelect('transactionLog.category', 'fee')
+      .addSelect(
+        'COALESCE(SUM(transactionLog.amount), 0)::float',
+        'totalAmount',
+      )
+      .addSelect('COALESCE(COUNT(transactionLog.id), 0)::int', 'totalOrder')
+      .where('transactionLog.createdAt BETWEEN :startDate AND :endDate', {
+        startDate,
+        endDate,
       })
-      .groupBy('year, quarter')
-      .orderBy('year, quarter')
+      .groupBy(
+        `EXTRACT(${groupByInterval.toUpperCase()} FROM transactionLog.createdAt), transactionLog.category`,
+      )
+      .orderBy(`${groupByInterval}`)
       .getRawMany();
 
-    // Query for placed orders in the past year
-    const placedOrders = await this.offerRepository
-      .createQueryBuilder('offer')
-      .select('EXTRACT(YEAR FROM offer.createdAt)::int', 'year')
-      .addSelect('EXTRACT(QUARTER FROM offer.createdAt)::int', 'quarter')
-      .addSelect('SUM(offer.price)::float', 'totalOrdered')
-      .where('offer.createdAt BETWEEN :startOfYear AND :endOfYear', {
-        startOfYear: startOfYearDate,
-        endOfYear: endOfYearDate,
-      })
-      .groupBy('year, quarter')
-      .orderBy('year, quarter')
-      .getRawMany();
+    // Initialize result structure
+    let result = [];
 
-    // Initialize the combined results with all quarters set to zero
-    const combined = quarters.reduce((acc, { year, quarter }) => {
-      acc[`${year}-Q${quarter}`] = {
-        year,
-        quarter,
-        totalSold: 0,
-        totalOrdered: 0,
-      };
-      return acc;
-    }, {});
+    if (findOptions.timePeriod === TimePeriod.Today) {
+      const dailyData = transactions.map((t) => ({
+        fee: t.fee,
+        totalAmount: parseFloat(t.totalAmount),
+        totalOrder: t.totalOrder,
+      }));
+      result.push(dailyData);
+    } else {
+      const intervalCount =
+        groupByInterval === 'day'
+          ? findOptions.timePeriod === TimePeriod.Week
+            ? 7
+            : 30
+          : 12;
 
-    // Update combined results with actual data
-    soldItems.forEach((item) => {
-      const key = `${item.year}-Q${item.quarter}`;
-      if (combined[key]) {
-        combined[key].totalSold = parseFloat(item.totalSold);
+      for (let i = 0; i < intervalCount; i++) {
+        const intervalData = transactions
+          .filter((t) => parseInt(t[groupByInterval]) === i + 1)
+          .map((t) => ({
+            fee: t.fee ?? 0,
+            totalAmount: parseFloat(t.totalAmount) ?? 0,
+            totalOrder: t.totalOrder ?? 0,
+          }));
+        result.push(intervalData);
       }
-    });
-
-    placedOrders.forEach((item) => {
-      const key = `${item.year}-Q${item.quarter}`;
-      if (combined[key]) {
-        combined[key].totalOrdered = parseFloat(item.totalOrdered);
-      }
-    });
-
-    // Convert the combined results object to an array
-    const result: FinancialVsOrder[] = Object.values(combined);
+    }
+    console.log(result);
 
     return result;
   }

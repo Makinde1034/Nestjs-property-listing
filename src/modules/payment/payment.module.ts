@@ -13,10 +13,17 @@ import { HttpModule } from '@nestjs/axios';
 import { HyperPayService } from './service-providers/hyper-pay.service';
 import { AdminRepository } from '../admin/repositories/admin.repository';
 import { InvoiceService } from './services/invoice.service';
-import { AdminModule } from '../admin/admin.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { TransactionRepository } from './repository/transaction.repository';
+import { TransactionLog } from '../../entities/transaction-log.entity';
+import { GeneralLedger } from '../../entities/general-ledger.entity';
 
 @Module({
-  imports: [FilehandlerModule, HttpModule, AdminModule],
+  imports: [
+    TypeOrmModule.forFeature([TransactionLog, GeneralLedger]),
+    FilehandlerModule,
+    HttpModule,
+  ],
   providers: [
     PaymentResolver,
     PaymentService,
@@ -24,6 +31,7 @@ import { AdminModule } from '../admin/admin.module';
     HyperPayService,
     AdminRepository,
     InvoiceService,
+    TransactionRepository,
   ],
   controllers: [PaymentController],
   exports: [InvoiceRepository, PaymentService, HyperPayService, InvoiceService],

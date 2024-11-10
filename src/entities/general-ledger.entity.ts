@@ -6,7 +6,7 @@
 import { Entity, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import BaseEntity from './base.entity';
 
-@Entity('general_ledger')
+@Entity()
 export class GeneralLedger extends BaseEntity {
   @Column({ type: 'varchar', length: 100 })
   accountNumber: string;
