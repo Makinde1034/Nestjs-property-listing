@@ -61,6 +61,10 @@ export class CreateAuctionParticipantInput {
   minimumPrice: number;
 
   @Field()
+  @IsNumber()
+  startingPrice: number;
+
+  @Field()
   @IsUUID()
   auctionId: string;
 

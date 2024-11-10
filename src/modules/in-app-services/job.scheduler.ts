@@ -59,7 +59,7 @@ export class JobService {
 
   @Cron(CronExpression.EVERY_5_SECONDS)
   async test() {
-    await this.sendAlertOnIncompleteOffers();
+    // await this.sendAlertOnIncompleteOffers();
   }
 
   @Cron(CronExpression.EVERY_12_HOURS, { timeZone: 'Africa/Cairo' })
@@ -124,7 +124,7 @@ export class JobService {
 
       const user = await this.userRepository.findOne({
         where: {
-          userType: 'admin',
+          roles: { englishName: 'Request finalizer' },
         },
       });
 
