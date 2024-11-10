@@ -103,7 +103,7 @@ export class KnowledgeBaseAndHelpResolver {
   }
 
   @Public()
-  @Query(() => ArticleResponse, { name: 'findManyArticles' })
+  @Query(() => ArticleResponse, { name: 'findManyArticlesCustomer' })
   async findManyArticlesCustomer(
     @Args('findOption') findOption: ArticleFilterInput,
   ) {
@@ -121,7 +121,7 @@ export class KnowledgeBaseAndHelpResolver {
   async findOneArticle(@Args('id', { type: () => Int }) id: number) {
     return await this.articleService.findOne(id);
   }
-  @Query(() => Article, { name: 'findOneArticle' })
+  @Query(() => Article, { name: 'findOneArticleCustomer' })
   @Public()
   async findOneArticleCustomer(@Args('id', { type: () => Int }) id: number) {
     return await this.articleService.findOne(id);

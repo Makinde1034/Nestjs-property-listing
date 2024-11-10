@@ -1091,8 +1091,10 @@ type Query {
   placement: String!
   findOneCategory(id: Int!): Category!
   findManyArticles(findOption: ArticleFilterInput!): ArticleResponse!
+  findManyArticlesCustomer(findOption: ArticleFilterInput!): ArticleResponse!
   findManyArticlesKnowledgeBase(findOption: ArticleFilterInput!): ArticleResponse!
   findOneArticle(id: Int!): Article!
+  findOneArticleCustomer(id: Int!): Article!
   searchForCategory(searchParam: String!): [Category!]!
   searchForArticles(searchParam: String!): [Article!]!
   searchForArticlesKnowledgeBase(searchParam: String!): [Article!]!
