@@ -92,7 +92,7 @@ export class AuctionParticipantResponse {
   @Field(() => Auction, { nullable: true })
   auctions: Auction;
 
-  @Field(() => [AuctionParticipant])
+  @Field(() => [AuctionParticipant], { nullable: true })
   listing: AuctionParticipant[];
 
   @Field(() => Int)
