@@ -198,6 +198,7 @@ type Auction {
   imageLink: String
   actionActivityLog: [ActivityLog!]
   maxListing: Float!
+  auctionParticipantCount: Float!
   auctionParticipant: [AuctionParticipant!]!
   status: String!
   deletedAt: DateTime!

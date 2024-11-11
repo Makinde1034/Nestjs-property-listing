@@ -1348,8 +1348,10 @@ export class ListingService {
 
   async uploadPanoramaImage(
     id: string,
+
     files: Express.Multer.File[],
     imageId: string,
+    feature: ListingImageFormDataInput,
   ) {
     try {
       let numberOfimagesWithinDistance: number;
@@ -1394,6 +1396,9 @@ export class ListingService {
           if (image.id == imageId) {
             existingImages[index].url = uploadedUrls[0]; // Assuming single file upload
             imageUpdated = true;
+            existingImages[index].isFeature = feature.feature;
+            existingImages[index].isDeleted = false;
+            existingImages[index].isPanorama = true;
           }
         });
 
@@ -1408,6 +1413,7 @@ export class ListingService {
           isDeleted: false,
           isPanorama: true,
           verified: verified,
+          isFeature: feature.feature,
         }));
 
         existingImages.push(...newImages);
@@ -1608,6 +1614,7 @@ export class ListingService {
       throw new BadRequestException(error?.messages | error.data);
     }
   }
+
   async flaggedListing(id: string) {
     try {
       const flaggedListing = await this.flagListingRepository.findOne({

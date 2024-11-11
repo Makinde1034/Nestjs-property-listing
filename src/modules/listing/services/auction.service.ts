@@ -144,7 +144,14 @@ export class AuctionService {
 
       const [auctions, total] = await this.auctionRepository
         .createQueryBuilder('auction')
+
         .where(`CURRENT_DATE > auction.startDate and auction.deletedAt IS NULL`)
+
+        .loadRelationCountAndMap(
+          'auction.auctionParticipantCount', // Mapping the bid count to `bidCount`
+          'auction.auctionParticipant', // Relation to count
+          'auctionParticipant',
+        )
         .take(paginateAndSort.take)
         .skip(paginateAndSort.skip)
         .orderBy(

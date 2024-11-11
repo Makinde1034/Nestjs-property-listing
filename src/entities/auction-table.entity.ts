@@ -56,6 +56,9 @@ export class Auction extends BaseEntity {
   @Field()
   maxListing: number;
 
+  @Field()
+  auctionParticipantCount: number;
+
   @Field(() => [AuctionParticipant])
   @OneToMany(
     () => AuctionParticipant,
