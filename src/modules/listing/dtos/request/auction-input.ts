@@ -5,6 +5,7 @@
 
 import { Field, InputType, PartialType } from '@nestjs/graphql';
 import { IsArray, IsDate, IsNumber, IsString, IsUUID } from 'class-validator';
+import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
 
 @InputType()
 export class CreateAuctionInput {
@@ -71,4 +72,11 @@ export class CreateAuctionParticipantInput {
   @Field()
   @IsUUID()
   listingId: string;
+}
+
+@InputType()
+export class FetchAuctionParticipantInput extends PaginateAndSort {
+  @Field()
+  @IsString()
+  id: string;
 }

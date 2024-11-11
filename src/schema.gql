@@ -826,6 +826,7 @@ type AuctionResponse {
 }
 
 type AuctionParticipantResponse {
+  auctions: Auction
   listing: [AuctionParticipant!]!
   total: Int!
 }
@@ -1050,7 +1051,8 @@ type Query {
   findManyForOwner(findOptions: FindOfferInput!): OfferOwnerResponse!
   getWishlist: [Wishlist!]!
   findOneListingsForAdmin(listingId: String!): Listing!
-  getAuction(id: String!): Auction!
+  id(id: String!): Auction!
+  findOneAuctionWithParticipant(fetchAuctionParticipantInput: FetchAuctionParticipantInput!): AuctionParticipantResponse!
   getAllRunningAuction(findManyOption: PaginateAndSort!): AuctionResponse!
   getAllUpcomingAuction(findManyOption: PaginateAndSort!): AuctionResponse!
   getAllAuction(findManyOption: AdminAuctionFilter!): AuctionResponse!
@@ -1226,6 +1228,15 @@ input FindOfferInput {
   directionToSort: SortOrder
   where: WhereOption
   listingId: String
+}
+
+input FetchAuctionParticipantInput {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
+  id: String!
 }
 
 input AdminAuctionFilter {

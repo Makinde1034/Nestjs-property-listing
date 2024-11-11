@@ -89,6 +89,9 @@ export class AuctionResponse {
 
 @ObjectType()
 export class AuctionParticipantResponse {
+  @Field(() => Auction, { nullable: true })
+  auctions: Auction;
+
   @Field(() => [AuctionParticipant])
   listing: AuctionParticipant[];
 

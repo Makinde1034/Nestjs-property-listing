@@ -53,6 +53,7 @@ import {
   AuctionActionInput,
   CreateAuctionInput,
   CreateAuctionParticipantInput,
+  FetchAuctionParticipantInput,
   UpdateAuctionInput,
 } from '../dtos/request/auction-input';
 import { AuctionService } from '../services/auction.service';
@@ -506,10 +507,27 @@ export class ListingResolver {
   }
 
   @UseGuards(AccessTokenGuard)
-  @Query(() => Auction, { name: 'getAuction' })
-  async findOneAuction(@Args('id') id: string) {
+  @Query(() => Auction, { name: 'id' })
+  async findOneAuction(
+    @Args('id')
+    id: string,
+  ) {
     return await this.auctionService.findOne(id);
   }
+
+  @UseGuards(AccessTokenGuard)
+  @Query(() => AuctionParticipantResponse, {
+    name: 'findOneAuctionWithParticipant',
+  })
+  async findOneAuctionWithParticipant(
+    @Args('fetchAuctionParticipantInput')
+    fetchAuctionParticipantInput: FetchAuctionParticipantInput,
+  ) {
+    return await this.auctionService.findOneAuctionWithParticipants(
+      fetchAuctionParticipantInput,
+    );
+  }
+
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Query(() => AuctionResponse, { name: 'getAllRunningAuction' })
   async getAllRunningAuction(
