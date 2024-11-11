@@ -5,10 +5,10 @@
 
 import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
-import { Transaction } from '../../../entities/transaction-entity';
+import { TransactionLog } from '../../../entities/transaction-log.entity';
 @Injectable()
-export class TransactionRepository extends Repository<Transaction> {
-  constructor(private dataSource: DataSource) {
-    super(Transaction, dataSource.createEntityManager());
+export class TransactionRepository extends Repository<TransactionLog> {
+  constructor(private readonly dataSource: DataSource) {
+    super(TransactionLog, dataSource.createEntityManager());
   }
 }

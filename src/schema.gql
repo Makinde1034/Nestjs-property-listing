@@ -864,6 +864,34 @@ type InvoiceResponse {
   total: Float!
 }
 
+type TicketAnalysisResponse {
+  open: Float!
+  closed: Float!
+  aging: Float!
+}
+
+type TicketResponse {
+  ticket: [Ticket!]
+  total: Float!
+  analysis: TicketAnalysisResponse!
+}
+
+type ResponseTemplateResponse {
+  responseTemplate: [ResponseTemplate!]
+  total: Float!
+}
+
+type ReviewResponse {
+  reviews: [Review!]!
+  total: Float!
+  averageRating: String!
+}
+
+type CityResponse {
+  city: [CityEntitity!]!
+  total: Int!
+}
+
 type UserCity {
   user_city: String
   total: Float
@@ -919,8 +947,7 @@ type UserGenderCount {
 }
 
 type FinancialVsOrder {
-  year: Float
-  quarter: Float
+  fee: Float
   totalSold: Float
   totalOrdered: Float
 }
@@ -933,34 +960,6 @@ type SplashScreenResponse {
 type WorkFlowResponse {
   workflow: [WorkFlow!]!
   count: Float!
-}
-
-type TicketAnalysisResponse {
-  open: Float!
-  closed: Float!
-  aging: Float!
-}
-
-type TicketResponse {
-  ticket: [Ticket!]
-  total: Float!
-  analysis: TicketAnalysisResponse!
-}
-
-type ResponseTemplateResponse {
-  responseTemplate: [ResponseTemplate!]
-  total: Float!
-}
-
-type ReviewResponse {
-  reviews: [Review!]!
-  total: Float!
-  averageRating: String!
-}
-
-type CityResponse {
-  city: [CityEntitity!]!
-  total: Int!
 }
 
 type MessageResponse {
@@ -1061,19 +1060,6 @@ type Query {
   adPackages: [AdPackage!]!
   adPackage(id: String!): AdPackage!
   fetchInvoice(findOption: PaginateAndSort!): InvoiceResponse!
-  listingStats(findOptions: AdminDashboardSort!): ListingStats!
-  adminDefault: AdminDefault!
-  totalUser(findOptions: AdminDashboardSort!): UserDemography!
-  userCount(findOptions: AdminDashboardSort!): [UserGenderCount!]!
-  nationality(findOptions: AdminDashboardSort!): [UserCountryCount!]!
-  userAgeCount(findOptions: AdminDashboardSort!): [UserAgeRange!]!
-  userFunnel(findOptions: AdminDashboardSort): UserFunneling!
-  averageResponse: ResponseTime!
-  saiiFees(findOptions: AdminDashboardSort): SaiiFees!
-  financialVsOrder(findOptions: AdminDashboardSort!): [FinancialVsOrder!]!
-  fetchCoupons: [Coupon!]!
-  findAllWorkFlow(findOption: WorkflowInputFilter!): WorkFlowResponse!
-  findOneWorkFlow(id: String!): WorkFlow!
   fetchIssues(placement: String): [ParentIssue!]!
   fetchChildIssues(parentId: String!): [ChildIssue!]!
   getTicket(ticketId: String!): Ticket!
@@ -1087,6 +1073,19 @@ type Query {
   findManyReviews(findMayOptions: FindManyReviewDto): ReviewResponse!
   searchForReview(searchParam: String!): [Review!]!
   findCities(findCities: PaginateAndSort): CityResponse!
+  listingStats(findOptions: AdminDashboardSort!): ListingStats!
+  adminDefault: AdminDefault!
+  totalUser(findOptions: AdminDashboardSort!): UserDemography!
+  userCount(findOptions: AdminDashboardSort!): [UserGenderCount!]!
+  nationality(findOptions: AdminDashboardSort!): [UserCountryCount!]!
+  userAgeCount(findOptions: AdminDashboardSort!): [UserAgeRange!]!
+  userFunnel(findOptions: AdminDashboardSort): UserFunneling!
+  averageResponse: ResponseTime!
+  saiiFees(findOptions: AdminDashboardSort): SaiiFees!
+  financialVsOrder(findOptions: AdminDashboardSort!): [FinancialVsOrder!]!
+  fetchCoupons: [Coupon!]!
+  findAllWorkFlow(findOption: WorkflowInputFilter!): WorkFlowResponse!
+  findOneWorkFlow(id: String!): WorkFlow!
   getChat(chatFilterInput: ChatFilterInput!): MessageResponse!
   findAllcategories(findOption: CategoryFilterInput): CategoryResponse!
   placement: String!
@@ -1243,19 +1242,6 @@ input FindBidInput {
   listingId: String!
 }
 
-input AdminDashboardSort {
-  timePeriod: String! = "false"
-  value: Float! = 0
-}
-
-input WorkflowInputFilter {
-  take: Float
-  skip: Float
-  sortField: String
-  directionToSort: SortOrder
-  where: WhereOption
-}
-
 input ListTicketInput {
   take: Float
   skip: Float
@@ -1273,6 +1259,19 @@ input FindManyReviewDto {
   where: WhereOption
   rating: Float
   timePeriod: String
+}
+
+input AdminDashboardSort {
+  timePeriod: String! = "false"
+  value: Float! = 0
+}
+
+input WorkflowInputFilter {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
 }
 
 input ChatFilterInput {
@@ -1402,16 +1401,6 @@ type Mutation {
   initializePayment(paymentInput: InitiatePaymentInput!): InitiatePaymentResponse!
   preAuthorisedPayment(paymentInput: PreAuthorisedPaymentInput!): InitiatePaymentResponse!
   verifyPayment(verifyPaymentInput: VerifyPaymentInput!): verifyPaymentResponse!
-  createCoupon(createCouponsInput: CreateCouponInput!): Coupon!
-  updateAdminDefault(updateAdminDefaultInput: UpdateAdminDefaultInput!): AdminDefault!
-  updateAuctionBidRangeSetting(createCouponsInput: UpdateAdminDefaultInput!): AdminDefault!
-  updateCoupon(updateCouponsInput: UpdateCouponInput!): Coupon!
-  deleteCoupons(deleteCouponsInput: DeleteCouponInput!): SuccessResponse!
-  deactivateCoupons(deactivateCoupons: DeactivateCouponInput!): SuccessResponse!
-  createWorkFlow(createWorkflowInput: CreateWorkflowInput!): WorkFlow!
-  updateWorkFlow: WorkFlow!
-  approveAction(action: Actions!): SuccessResponse!
-  deleteWorkFlow: WorkFlow!
   createIssue(input: CreateIssueInput!): ParentIssue!
   updateIssue(RequestInput: UpdateIssueInput!): ParentIssue!
   deleteIssue(id: String!): SuccessResponse!
@@ -1424,6 +1413,16 @@ type Mutation {
   deleteResponseTemplate(deleteResponseTemplate: DeleteResponsetemplate!): SuccessResponse!
   updateResponseTemplate(updateResponseTemplateInput: UpdateResponseTemplateInput!): ResponseTemplate!
   createReview(createReviewDto: CreateReviewDto!): Review!
+  createCoupon(createCouponsInput: CreateCouponInput!): Coupon!
+  updateAdminDefault(updateAdminDefaultInput: UpdateAdminDefaultInput!): AdminDefault!
+  updateAuctionBidRangeSetting(createCouponsInput: UpdateAdminDefaultInput!): AdminDefault!
+  updateCoupon(updateCouponsInput: UpdateCouponInput!): Coupon!
+  deleteCoupons(deleteCouponsInput: DeleteCouponInput!): SuccessResponse!
+  deactivateCoupons(deactivateCoupons: DeactivateCouponInput!): SuccessResponse!
+  createWorkFlow(createWorkflowInput: CreateWorkflowInput!): WorkFlow!
+  updateWorkFlow: WorkFlow!
+  approveAction(action: Actions!): SuccessResponse!
+  deleteWorkFlow: WorkFlow!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
   deleteCategory(categoryActionInput: CategoryActionInput!): SuccessResponse!
@@ -1891,6 +1890,63 @@ input VerifyPaymentInput {
   checkoutId: String
 }
 
+input CreateIssueInput {
+  placement: String!
+  englishName: String!
+  arabicName: String!
+  sequentialId: Float!
+}
+
+input UpdateIssueInput {
+  placement: String
+  englishName: String
+  arabicName: String
+  sequentialId: Float
+  id: String!
+}
+
+input CreateChildIssueInput {
+  parentId: String!
+  englishName: String!
+  arabicName: String!
+  sequentialId: Float!
+}
+
+input CreateTicketInput {
+  issueId: String!
+  childIssueId: String!
+}
+
+input UpdateTicketInput {
+  ticketId: [String!]!
+  status: String!
+}
+
+input CreateResponseTemplateInput {
+  templateName: String!
+  templateArabicName: String!
+  templateText: String!
+  templateArabicText: String!
+}
+
+input DeleteResponsetemplate {
+  id: [String!]!
+}
+
+input UpdateResponseTemplateInput {
+  templateName: String
+  templateArabicName: String
+  templateText: String
+  templateArabicText: String
+  id: String!
+}
+
+input CreateReviewDto {
+  rating: Float!
+  comment: String
+  reviewType: String!
+}
+
 input CreateCouponInput {
   maxUse: Float!
   discountType: String!
@@ -1951,63 +2007,6 @@ input CreateWorkflowInput {
 
 input Actions {
   id: [Float!]!
-}
-
-input CreateIssueInput {
-  placement: String!
-  englishName: String!
-  arabicName: String!
-  sequentialId: Float!
-}
-
-input UpdateIssueInput {
-  placement: String
-  englishName: String
-  arabicName: String
-  sequentialId: Float
-  id: String!
-}
-
-input CreateChildIssueInput {
-  parentId: String!
-  englishName: String!
-  arabicName: String!
-  sequentialId: Float!
-}
-
-input CreateTicketInput {
-  issueId: String!
-  childIssueId: String!
-}
-
-input UpdateTicketInput {
-  ticketId: [String!]!
-  status: String!
-}
-
-input CreateResponseTemplateInput {
-  templateName: String!
-  templateArabicName: String!
-  templateText: String!
-  templateArabicText: String!
-}
-
-input DeleteResponsetemplate {
-  id: [String!]!
-}
-
-input UpdateResponseTemplateInput {
-  templateName: String
-  templateArabicName: String
-  templateText: String
-  templateArabicText: String
-  id: String!
-}
-
-input CreateReviewDto {
-  rating: Float!
-  comment: String
-  reviewType: String!
 }
 
 input CreateCategoryInput {

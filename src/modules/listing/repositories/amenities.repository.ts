@@ -10,7 +10,7 @@ import { Amenities } from '../../../entities/amenities.entity';
 
 @Injectable()
 export class AmenitiesRepository extends Repository<Amenities> {
-  constructor(private dataSource: DataSource) {
+  constructor(private readonly dataSource: DataSource) {
     super(Amenities, dataSource.createEntityManager());
   }
 }

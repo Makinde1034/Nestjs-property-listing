@@ -72,7 +72,7 @@ import { CompareRepository } from './repositories/compare.repository';
     AdPackageModule,
     PaymentModule,
     NotificationModule,
-    AdminModule,
+    // AdminModule,
   ],
   controllers: [ListingController, ListingTypeController],
   providers: [

@@ -14,6 +14,9 @@ export enum knowledgeBaseNeedHelpPlacement {
   PROMOTING_LISTING = 'Promoting Listing',
 
   USER_AUTHENTICATION = 'User Authentication',
+
+  NEED_HELP = 'Need help',
+  BLOG = 'Blog',
 }
 
 export enum knowledgeBaseMainPlacement {

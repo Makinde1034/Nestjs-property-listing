@@ -77,6 +77,7 @@ import { ActionService } from './services/action.service';
     ListingRepository,
     ActionService,
     AdminWorkflowService,
+    TransactionRepository,
   ],
 })
 export class AdminModule {}

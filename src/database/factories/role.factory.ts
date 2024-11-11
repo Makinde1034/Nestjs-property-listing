@@ -7,7 +7,7 @@ import { DeepPartial } from 'typeorm';
 import { Role } from '../../entities';
 
 /******************************************************************
- *You have to refactor role seeder if any role is added here
+ *You have to refactor/ review role seeder if any role is added here
  *******************************************************************/
 export const roleFactory: DeepPartial<Role[]> = [
   {

@@ -7,14 +7,14 @@ import { Entity, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 import BaseEntity from './base.entity';
 import { PaymentStatus } from '../common/enums/status.enum';
-import { Field } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 
 @Entity()
-export class Transaction extends BaseEntity {
+@ObjectType()
+export class TransactionLog extends BaseEntity {
   @Column('decimal', { precision: 10, scale: 2 })
   @Field()
   amount: number;
-
   @Column('decimal', { precision: 10, scale: 2 })
   @Field()
   fee: number;
@@ -35,10 +35,13 @@ export class Transaction extends BaseEntity {
   @Field()
   reference: string;
 
+  @Column()
+  @Field()
+  category: string;
+
   @UpdateDateColumn()
   @Field()
   updatedAt: Date;
-
   @CreateDateColumn()
   @Field()
   createdAt: Date;

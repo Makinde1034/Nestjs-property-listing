@@ -11,17 +11,14 @@ import {
   IsString,
   IsArray,
 } from 'class-validator';
-import {
-  TimePeriod,
-  TimePeriodForDashboard,
-} from '../../../../common/enums/sort.enum';
+import { TimePeriod } from '../../../../common/enums/sort.enum';
 import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
 
 @InputType()
 export class AdminDashboardSort {
   @Field({ defaultValue: false })
   @IsOptional()
-  @IsEnum(TimePeriodForDashboard)
+  @IsEnum(TimePeriod)
   timePeriod: string;
 
   @Field({ defaultValue: false })

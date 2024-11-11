@@ -126,9 +126,8 @@ export class AdminDashboard {
 @ObjectType()
 export class FinancialVsOrder {
   @Field({ nullable: true })
-  year: number;
-  @Field({ nullable: true })
-  quarter: number;
+  fee: number;
+
   @Field({ nullable: true })
   totalSold: number;
   @Field({ nullable: true })
