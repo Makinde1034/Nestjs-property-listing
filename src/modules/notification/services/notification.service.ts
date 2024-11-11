@@ -41,8 +41,7 @@ import { MailInput } from '../../mail/mail.dto';
 import { SuccessResponse } from '../../../common/utils/success.response';
 
 import { AdminNotificationPreferenceRepository } from '../repositories/admin.repository';
-import {} from '../../user/dtos/request';
-import { AdminNotificationPreference } from '../../../entities/admin-notification-prefrence.entity';
+import { SseService } from '../../sse/client.service';
 
 @Injectable()
 export class NotificationService {
@@ -57,6 +56,7 @@ export class NotificationService {
     private readonly adminNotificationPreferenceRepository: AdminNotificationPreferenceRepository,
 
     private readonly notificationScope: NotificationScopeRepository,
+    private readonly sseService: SseService,
   ) {}
 
   /**
@@ -464,10 +464,66 @@ export class NotificationService {
       /************************
        * Web Notification (future)
        ************************/
+
+      if (userPrefRecipients?.desktop) {
+        this.logger.log('Sending notifications');
+        this.sendDesktopNotificationToUser(
+          recipient,
+          event,
+          scope,
+          recipientFormat[1],
+        );
+      }
+
+      if (userPrefOwner?.desktop) {
+        this.logger.log('Sending notifications');
+        this.sendDesktopNotificationToUser(
+          owner,
+          event,
+          scope,
+          recipientFormat[0],
+        );
+      }
       // Add web notification logic when needed
     } catch (error) {
       this.logger.error('Error sending notifications', error);
       throw new BadRequestException(error);
+    }
+  }
+
+  private sendDesktopNotificationToUser(
+    user: User,
+    event: string,
+    scope: string,
+    format: string,
+  ) {
+    if (user) {
+      const messageData = getMessageData(
+        user.firstName,
+        user.arabicFirstName,
+        event,
+        scope,
+        format,
+      );
+
+      const subject: string =
+        user.language === 'en'
+          ? messageData[0]?.title
+          : messageData[0]?.arabicTitle;
+      const text =
+        user.language === 'en'
+          ? messageData[0]?.body
+          : messageData[0]?.arabicBody;
+
+      this.sendEmailNotification(
+        user,
+        {
+          title: subject,
+          message: text,
+        },
+
+        null,
+      );
     }
   }
 
