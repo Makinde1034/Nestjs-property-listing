@@ -57,11 +57,13 @@ export class ListingController {
     @Query('listingId') listingId: string,
     @Query('imageId') imageId: string,
     @UploadedFiles() file: Express.Multer.File[],
+    @Body() feature: ListingImageFormDataInput,
   ) {
     return await this.listingService.uploadPanoramaImage(
       listingId,
       file,
       imageId,
+      feature,
     );
   }
 
