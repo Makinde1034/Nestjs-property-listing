@@ -15,6 +15,7 @@ import {
   AuctionActionInput,
   CreateAuctionInput,
   CreateAuctionParticipantInput,
+  FetchAuctionParticipantInput,
   UpdateAuctionInput,
 } from '../dtos/request/auction-input';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
@@ -51,7 +52,8 @@ import {
   endOfYear,
 } from 'date-fns';
 import { AuctionParticipant } from '../../../entities/auction-participant.entity';
-import { Bids } from '../../../entities/bids.entity';
+import { AuctionParticipantResponse } from '../dtos/response/listing.response';
+import { String } from 'aws-sdk/clients/acm';
 
 @Injectable()
 export class AuctionService {
@@ -90,10 +92,42 @@ export class AuctionService {
 
   async findOne(id: string) {
     try {
-      return await this.auctionRepository.findOneOrFail({ where: { id: id } });
+      const result = await this.auctionRepository.findOneOrFail({
+        where: { id },
+      });
+      return result;
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(AppStrings.AUCTION_NOT_FOUND);
+    }
+  }
+  async findOneAuctionWithParticipants(
+    paginateAndSort: FetchAuctionParticipantInput,
+  ): Promise<AuctionParticipantResponse> {
+    try {
+      const { id, skip = 0, take = 20 } = paginateAndSort; // Default pagination if not provided
+
+      const [auction, [participants, total]] = await Promise.all([
+        this.auctionRepository.findOneOrFail({
+          where: { id },
+        }),
+        this.auctionParticipantRepository
+          .createQueryBuilder('auctionParticipant')
+          .where('auctionParticipant.auctionId = :id', { id })
+          .skip(skip)
+          .take(take)
+          .getManyAndCount(),
+      ]);
+
+      return { auctions: auction, listing: participants, total };
+    } catch (error) {
+      this.logger.error('Error fetching auction with participants:', error);
+      if (error.name === 'EntityNotFound') {
+        throw new BadRequestException(AppStrings.AUCTION_NOT_FOUND);
+      }
+      throw new BadRequestException(
+        error.message || 'Error fetching auction data',
+      );
     }
   }
 
@@ -197,6 +231,7 @@ export class AuctionService {
         .where(
           `CURRENT_DATE < auction.startDate AND CURRENT_DATE > CURRENT_DATE - INTERVAL '${adminDefault.daysToAuctionRegistrationStart} days'`,
         )
+
         .take(paginateAndSort.take)
         .skip(paginateAndSort.skip)
         .orderBy(
@@ -346,7 +381,9 @@ export class AuctionService {
   async addListingToAuction(data: CreateAuctionParticipantInput) {
     try {
       const adminDefault = await this.adminService.adminDefault();
-      const auction = await this.findOne(data.auctionId);
+      const auction = await this.auctionRepository.findOneBy({
+        id: data.auctionId,
+      });
 
       if (!auction.imageLink) {
         throw new BadRequestException(
@@ -541,7 +578,7 @@ export class AuctionService {
     try {
       //TODO: add payment check
       const [auction, listing] = await Promise.all([
-        this.findOne(createAutoBidInput.auctionId),
+        this.auctionRepository.findOneBy({ id: createAutoBidInput.auctionId }),
         this.listingRepository.findOneBy({ id: createAutoBidInput.listingId }),
       ]);
 
