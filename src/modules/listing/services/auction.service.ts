@@ -148,7 +148,7 @@ export class AuctionService {
         .where(`CURRENT_DATE > auction.startDate and auction.deletedAt IS NULL`)
 
         .loadRelationCountAndMap(
-          'auction.auctionParticipantCount', // Mapping the bid count to `bidCount`
+          'auction.auctionParticipantCount',
           'auction.auctionParticipant', // Relation to count
           'auctionParticipant',
         )
@@ -202,6 +202,11 @@ export class AuctionService {
 
       const [auctions, total] = await this.auctionRepository
         .createQueryBuilder('auction')
+        .loadRelationCountAndMap(
+          'auction.auctionParticipantCount', // Mapping the bid count to `bidCount`
+          'auction.auctionParticipant', // Relation to count
+          'auctionParticipant',
+        )
         .take(paginateAndSort.take)
         .skip(paginateAndSort.skip)
         .where(whereOption, { whereParam: where?.whereParam })
@@ -234,6 +239,11 @@ export class AuctionService {
 
       const [auctions, total] = await this.auctionRepository
         .createQueryBuilder('auction')
+        .loadRelationCountAndMap(
+          'auction.auctionParticipantCount',
+          'auction.auctionParticipant', // Relation to count
+          'auctionParticipant',
+        )
 
         .where(
           `CURRENT_DATE < auction.startDate AND CURRENT_DATE > CURRENT_DATE - INTERVAL '${adminDefault.daysToAuctionRegistrationStart} days'`,
