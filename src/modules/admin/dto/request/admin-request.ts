@@ -15,13 +15,13 @@ import { TimePeriod } from '../../../../common/enums/sort.enum';
 import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
 
 @InputType()
-export class AdminDashboardSort {
+export class AdminDashboardSort extends PaginateAndSort {
   @Field({ defaultValue: false })
   @IsOptional()
   @IsEnum(TimePeriod)
   timePeriod: string;
 
-  @Field({ defaultValue: false })
+  @Field({ defaultValue: false, nullable: true })
   @IsOptional()
   value: number;
 }

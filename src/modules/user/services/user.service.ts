@@ -753,8 +753,8 @@ export class UserService {
         ...(status ? { status: In(status) } : {}),
         isBlocked: isBlocked ?? undefined,
         userType: Not(
-          In[(UserProfileTypeEnum.STAFF, UserProfileTypeEnum.ADMIN)],
-        ),
+          In([UserProfileTypeEnum.STAFF, UserProfileTypeEnum.ADMIN]),
+        ), // Corrected line
       };
 
       // Build order options
