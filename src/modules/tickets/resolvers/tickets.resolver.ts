@@ -25,6 +25,9 @@ import { ResponseTemplate } from '../../../entities/response-template.entity';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { Public } from '../../auth/decorators/permision.decorator';
+import { ArticleFilterInput } from '../../knowledge-base-and-help/dto/request/article.input';
+import { AdminDashboardSort } from '../../admin/dto/request/admin-request';
+import { PermissionsEnum } from '../../../common/enums/permission.enum';
 
 @Resolver()
 @Public()
@@ -40,7 +43,7 @@ export class TicketsResolver {
   @Mutation(() => Ticket)
   @UseGuards(AccessTokenGuard)
   @Public()
-  // @Permissions('create-support-tickets')
+  // @Permissions(PermissionsEnum.Ticket)
   async createTicket(
     @Args('RequestInput') RequestInput: CreateTicketInput,
     @Context() ctx: any,
@@ -89,13 +92,23 @@ export class TicketsResolver {
    */
   @Query(() => TicketResponse)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
-  @Permissions('read-support-tickets')
+  @Permissions(PermissionsEnum.SUPPORT_TICKETS_READ)
   async listTicketsForAdminAndStaff(
     @Context() ctx: any,
     @Args({ name: 'findOptions', nullable: true, type: () => ListTicketInput })
     input: ListTicketInput,
   ) {
     return await this.ticketService.listTicketsForAdminAndStaff(input);
+  }
+  @Query(() => TicketResponse)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions(PermissionsEnum.DASHBOARD_SUPPORT_RESPONSE_CARD)
+  async listTicketsForAdminDashboard(
+    @Context() ctx: any,
+    @Args('findOptions')
+    input: AdminDashboardSort,
+  ) {
+    return await this.ticketService.listTicketsForAdminDashboard(input);
   }
 
   /**
@@ -105,7 +118,7 @@ export class TicketsResolver {
    * @returns {Promise<Ticket[]>}
    */
   @Mutation(() => [Ticket])
-  @Permissions('update-support-tickets')
+  @Permissions(PermissionsEnum.SUPPORT_TICKETS_CHANGE_STATUS)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async manageTicket(
     @Args('RequestInput') RequestInput: UpdateTicketInput,
@@ -114,7 +127,7 @@ export class TicketsResolver {
     return await this.ticketService.updateTicket(ctx.req.user, RequestInput);
   }
 
-  @Permissions('create-support-tickets')
+  @Permissions(PermissionsEnum.RESPONSE_TEMPLATES_CREATE)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Mutation(() => ResponseTemplate)
   async createResponseTemplate(
@@ -130,7 +143,7 @@ export class TicketsResolver {
     );
   }
 
-  @Permissions('create-support-tickets')
+  @Permissions(PermissionsEnum.RESPONSE_TEMPLATES_READ)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Query(() => ResponseTemplate)
   async fetchOneResponseTemplate(
@@ -140,7 +153,7 @@ export class TicketsResolver {
     return await this.ticketService.findOneResponseTemplate(id);
   }
 
-  @Permissions('create-support-tickets')
+  @Permissions(PermissionsEnum.RESPONSE_TEMPLATES_READ)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Query(() => ResponseTemplateResponse)
   async fetchResponseTemplate(
@@ -149,7 +162,7 @@ export class TicketsResolver {
     return await this.ticketService.findAllResponseTemplate(findOption);
   }
 
-  @Permissions('create-support-tickets')
+  @Permissions(PermissionsEnum.RESPONSE_TEMPLATES_DELETE)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Mutation(() => SuccessResponse)
   async deleteResponseTemplate(
@@ -166,7 +179,7 @@ export class TicketsResolver {
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Public()
-  @Permissions('create-support-tickets')
+  @Permissions(PermissionsEnum.RESPONSE_TEMPLATES_EDIT)
   @Mutation(() => ResponseTemplate)
   async updateResponseTemplate(
     @Context()
@@ -181,12 +194,14 @@ export class TicketsResolver {
   }
 
   @Query(() => [Ticket], { name: 'searchForTickets' })
+  @Permissions(PermissionsEnum.SUPPORT_TICKETS_READ)
   @UseGuards(AccessTokenGuard)
   async searchForTickets(@Args('searchParam') searchParam: string) {
     return await this.ticketService.searchForTickets(searchParam);
   }
 
   @Query(() => [ResponseTemplate], { name: 'searchForResponseTemplate' })
+  @Permissions(PermissionsEnum.RESPONSE_TEMPLATES_READ)
   @UseGuards(AccessTokenGuard)
   async searchForResponseTemplate(@Args('searchParam') searchParam: string) {
     return await this.ticketService.searchForResponseTemplate(searchParam);

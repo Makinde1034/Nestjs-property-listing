@@ -40,7 +40,7 @@ import { Permissions } from 'src/common/decorator/permission';
 @Resolver()
 @UseGuards(AccessTokenGuard)
 export class AdminResolver {
-  constructor(private adminService: AdminService) {}
+  constructor(private readonly adminService: AdminService) {}
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.DASHBOARD_LISTINGS_FUNNEL)
   @Query(() => ListingStats, { name: 'listingStats' })
@@ -49,6 +49,7 @@ export class AdminResolver {
   ): Promise<ListingStats> {
     return await this.adminService.listingStats(findOption);
   }
+
   @Query(() => AdminDefault, { name: 'adminDefault' })
   async adminDefault() {
     return await this.adminService.adminDefault();
@@ -59,6 +60,7 @@ export class AdminResolver {
   async totalUser(@Args('findOptions') findOption: AdminDashboardSort) {
     return await this.adminService.userDemography(findOption);
   }
+
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.DASHBOARD_USERS_FUNNEL)
   @Query(() => [UserGenderCount], { name: 'userCount' })

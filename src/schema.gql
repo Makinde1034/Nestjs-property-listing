@@ -1065,6 +1065,7 @@ type Query {
   getTicket(ticketId: String!): Ticket!
   listTickets(findOptions: ListTicketInput): [Ticket!]!
   listTicketsForAdminAndStaff(findOptions: ListTicketInput): TicketResponse!
+  listTicketsForAdminDashboard(findOptions: AdminDashboardSort!): TicketResponse!
   fetchOneResponseTemplate(id: String!): ResponseTemplate!
   fetchResponseTemplate(findOption: PaginateAndSort): ResponseTemplateResponse!
   searchForTickets(searchParam: String!): [Ticket!]!
@@ -1251,6 +1252,16 @@ input ListTicketInput {
   status: String
 }
 
+input AdminDashboardSort {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
+  timePeriod: String! = "false"
+  value: Float = 0
+}
+
 input FindManyReviewDto {
   take: Float
   skip: Float
@@ -1259,11 +1270,6 @@ input FindManyReviewDto {
   where: WhereOption
   rating: Float
   timePeriod: String
-}
-
-input AdminDashboardSort {
-  timePeriod: String! = "false"
-  value: Float! = 0
 }
 
 input WorkflowInputFilter {

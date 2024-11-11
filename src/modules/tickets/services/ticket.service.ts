@@ -23,7 +23,7 @@ import { AppStrings } from 'src/common/messages/app.strings';
 import { Ticket, User } from 'src/entities';
 import { IssueRepository } from '../../issue/repositories';
 import { TicketStatus } from 'src/common/enums';
-import { FindManyOptions, In } from 'typeorm';
+import { Between, FindManyOptions, In } from 'typeorm';
 import { ChildIssueRepository } from '../../issue/repositories/child-issue.repository';
 import { ResponseTemplateRepository } from '../repositories/response-template.repository';
 import { SuccessResponse } from '../../../common/utils/success.response';
@@ -31,6 +31,17 @@ import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { ActivityEnum } from '../../../common/enums/activitys';
 import { ActivityLogService } from '../../activity-log/services/activity-log.service';
 import { NotFoundError } from 'rxjs';
+import { AdminFilterAndSort } from '../../listing/dtos/request';
+import {
+  startOfDay,
+  endOfDay,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  startOfYear,
+  endOfYear,
+} from 'date-fns';
 @Injectable()
 export class TicketService {
   constructor(
@@ -145,12 +156,16 @@ export class TicketService {
       // Calculate counts for open and closed tickets using separate subqueries
       const openCount = await this.ticketRepository
         .createQueryBuilder('ticket')
-        .where(`${quotedColumnName('status')} = :status`, { status: 'open' })
+        .where(`${quotedColumnName('status')} = :status`, {
+          status: TicketStatus.OPEN,
+        })
         .getCount();
 
       const closedCount = await this.ticketRepository
         .createQueryBuilder('ticket')
-        .where(`${quotedColumnName('status')} = :status`, { status: 'close' })
+        .where(`${quotedColumnName('status')} = :status`, {
+          status: TicketStatus.CLOSE,
+        })
         .getCount();
 
       const agingCount = await this.ticketRepository
@@ -169,6 +184,66 @@ export class TicketService {
 
       // Return the results including the ticket list, total count, and analysis
       return { ticket: tickets, total: count, analysis };
+    } catch (error) {
+      // Log the error for debugging and throw a user-friendly exception
+      this.logger.error(
+        `Error fetching tickets: ${error.message}`,
+        error.stack,
+      );
+      throw new BadRequestException(
+        'Failed to fetch tickets. Please try again later.',
+      );
+    }
+  }
+
+  async listTicketsForAdminDashboard(paginateAndSort?: AdminFilterAndSort) {
+    try {
+      const now = new Date();
+      const whereCondition: any = {};
+      const dateField = 'createdAt';
+
+      switch (paginateAndSort.timePeriod) {
+        case 'today':
+          whereCondition[dateField] = Between(startOfDay(now), endOfDay(now));
+          break;
+        case 'week':
+          whereCondition[dateField] = Between(startOfWeek(now), endOfWeek(now));
+          break;
+        case 'month':
+          whereCondition[dateField] = Between(
+            startOfMonth(now),
+            endOfMonth(now),
+          );
+          break;
+        case 'year':
+          whereCondition[dateField] = Between(startOfYear(now), endOfYear(now));
+          break;
+      }
+
+      // Validate and limit the number of results per request
+      const take =
+        paginateAndSort.take && paginateAndSort.take <= 20
+          ? paginateAndSort.take
+          : 20;
+      const skip = paginateAndSort.skip || 0;
+
+      // Create a query builder instance for the Ticket entity
+      const queryBuilder = this.ticketRepository.createQueryBuilder('ticket');
+
+      // Build the main query to fetch ticket entities with pagination and joins
+      const [tickets, count] = await queryBuilder
+        .leftJoinAndSelect('ticket.parentIssue', 'parentIssue')
+        .leftJoinAndSelect('ticket.childIssue', 'childIssue')
+        .leftJoinAndSelect('ticket.reporter', 'reporter')
+
+        .where(whereCondition)
+
+        .take(take)
+        .skip(skip)
+        .getManyAndCount();
+
+      // Return the results including the ticket list, total count, and analysis
+      return { ticket: tickets, total: count };
     } catch (error) {
       // Log the error for debugging and throw a user-friendly exception
       this.logger.error(
