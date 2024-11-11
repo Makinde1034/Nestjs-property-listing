@@ -126,6 +126,7 @@ export class ArticleService {
         directionToSort,
         published,
         categoryId,
+        placement,
       } = findOption;
 
       // Set default pagination and limit `take` to 20
@@ -141,6 +142,11 @@ export class ArticleService {
       if (published !== undefined) {
         queryBuilder.andWhere('article.published = :published', { published });
       }
+
+      if (placement !== undefined) {
+        queryBuilder.andWhere('article.placement = :placement', { placement });
+      }
+
       if (categoryId) {
         queryBuilder.andWhere('article.categoryId = :categoryId', {
           categoryId,
