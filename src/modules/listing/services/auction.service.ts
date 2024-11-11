@@ -203,7 +203,7 @@ export class AuctionService {
       const [auctions, total] = await this.auctionRepository
         .createQueryBuilder('auction')
         .loadRelationCountAndMap(
-          'auction.auctionParticipantCount', // Mapping the bid count to `bidCount`
+          'auction.auctionParticipantCount',
           'auction.auctionParticipant', // Relation to count
           'auctionParticipant',
         )
