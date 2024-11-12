@@ -28,7 +28,7 @@ import { CreateBidInput, FindBidInput } from '../dtos/request/bids';
 import { generateOtp } from '../../../common/utils/functions';
 import { User } from '../../../entities';
 import { AdminService } from '../../admin/services/admin.service';
-import { Between, In, QueryFailedError } from 'typeorm';
+import { Between, In } from 'typeorm';
 import { AutoBidRepository } from '../repositories/auto-bid.repository';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { CreateAutoBidInput } from '../dtos/request/auto-bid';
@@ -51,8 +51,13 @@ import {
   startOfYear,
   endOfYear,
 } from 'date-fns';
+
+import { MessageEvent } from '../../sse/request/app';
+
 import { AuctionParticipant } from '../../../entities/auction-participant.entity';
 import { AuctionParticipantResponse } from '../dtos/response/listing.response';
+import { SseService } from '../../sse/client.service';
+import { ServerSentEvents } from '../../../common/enums';
 
 @Injectable()
 export class AuctionService {
@@ -66,6 +71,8 @@ export class AuctionService {
     private readonly autoBidRepository: AutoBidRepository,
     private readonly storageService: StorageService,
     private readonly activityLogsService: ActivityLogService,
+
+    private readonly sseService: SseService,
   ) {}
   logger = new Logger(AuctionService.name);
   async create(auctionInput: CreateAuctionInput) {
@@ -607,6 +614,13 @@ export class AuctionService {
       if (bid) {
         await this.autobid(bid.price, auctionParticipant, bidInput);
       }
+
+      const payload: MessageEvent = {
+        type: ServerSentEvents.SUCCESS,
+        data: bid,
+      };
+
+      this.sseService.sendEvent(user.id, payload);
 
       return bid;
     } catch (error) {

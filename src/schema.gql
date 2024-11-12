@@ -1060,6 +1060,7 @@ type Query {
   getListingsAuction(findManyOption: PaginateAndSort!): AuctionParticipantResponse!
   findNewestBid(findBidInput: FindBidInput!): [Bids!]!
   searchForListing(searchParam: String!): [Listing!]!
+  searchForAuction(searchParam: String!): [Auction!]!
   adPackages: [AdPackage!]!
   adPackage(id: String!): AdPackage!
   fetchInvoice(findOption: PaginateAndSort!): InvoiceResponse!

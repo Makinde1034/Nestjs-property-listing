@@ -667,4 +667,10 @@ export class ListingResolver {
   async searchForListing(@Args('searchParam') searchParam: string) {
     return await this.listingService.searchForListing(searchParam);
   }
+
+  @Query(() => [Auction], { name: 'searchForAuction' })
+  @UseGuards(AccessTokenGuard)
+  async searchForAuction(@Args('searchParam') searchParam: string) {
+    return await this.listingService.searchForListing(searchParam);
+  }
 }

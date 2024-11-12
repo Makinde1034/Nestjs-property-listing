@@ -10,6 +10,8 @@ export enum ServicesOffered {
   RENTING = 'Renting',
   BUYING = 'Buying',
   MAKE_OFFER = 'Making offer',
+
+  AUCTION = 'Auction',
 }
 
 registerEnumType(ServicesOffered, {
