@@ -213,7 +213,7 @@ export class SplashScreenService {
   async delete(deleteSplashScreenInput: DeleteSplashScreenInput, admin: User) {
     try {
       const [splashScreen, actionConfig] = await Promise.all([
-        this.splashScreenRepository.findOneByOrFail({
+        this.splashScreenRepository.findOneBy({
           id: In(deleteSplashScreenInput.id),
         }),
 
