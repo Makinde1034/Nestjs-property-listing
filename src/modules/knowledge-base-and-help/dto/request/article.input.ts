@@ -3,7 +3,13 @@
  * For license. See license.txt
  */
 
-import { InputType, Int, Field, PartialType } from '@nestjs/graphql';
+import {
+  InputType,
+  Int,
+  Field,
+  PartialType,
+  ObjectType,
+} from '@nestjs/graphql';
 import {
   IsArray,
   IsBoolean,
@@ -19,6 +25,18 @@ import {
   knowledgeBaseNeedHelpPlacement,
 } from '../../../../common/enums/knowledge-base';
 import { LanguageEnum } from '../../../../common/enums/language.enum';
+@InputType()
+export class MetaData {
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  metadata: string;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  metadataDescription: string;
+}
 
 @InputType()
 export class CreateArticleInput {
@@ -32,10 +50,9 @@ export class CreateArticleInput {
   @IsOptional()
   image: string;
 
-  @Field({ nullable: true })
-  @IsString()
+  @Field(() => MetaData, { nullable: true })
   @IsOptional()
-  metadata: string;
+  metadata: MetaData;
 
   @Field()
   @IsNumber()

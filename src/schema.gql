@@ -373,7 +373,7 @@ type Article {
   content: String!
   image: String
   title: String!
-  metadata: String!
+  metadata: String
   authorImage: String
   user: User
   authorBio: String
@@ -2047,13 +2047,18 @@ input CategoryActionInput {
 input CreateArticleInput {
   content: String!
   image: String
-  metadata: String
+  metadata: MetaData
   categoryId: Float!
   title: String!
   placement: String
   authorImage: String
   authorBio: String!
   language: String!
+}
+
+input MetaData {
+  metadata: String
+  metadataDescription: String
 }
 
 input ArticlePublishInput {
@@ -2067,7 +2072,7 @@ input ArticleDeleteInput {
 input UpdateArticleInput {
   content: String
   image: String
-  metadata: String
+  metadata: MetaData
   categoryId: Float
   title: String
   placement: String
