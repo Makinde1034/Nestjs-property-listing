@@ -32,6 +32,11 @@ export class CreateArticleInput {
   @IsOptional()
   image: string;
 
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  metadata: string;
+
   @Field()
   @IsNumber()
   @IsNotEmpty()

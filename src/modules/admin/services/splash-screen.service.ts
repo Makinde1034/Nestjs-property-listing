@@ -212,46 +212,51 @@ export class SplashScreenService {
 
   async delete(deleteSplashScreenInput: DeleteSplashScreenInput, admin: User) {
     try {
-      const [splashScreen, actionConfig] = await Promise.all([
-        this.splashScreenRepository.findOneBy({
-          id: In(deleteSplashScreenInput.id),
+      const [splashScreens, actionConfig] = await Promise.all([
+        this.splashScreenRepository.find({
+          where: { id: In(deleteSplashScreenInput.id) },
         }),
-
         this.workflowService.findOneWorkflowByDocumentname(
           this.splashScreenRepository.metadata.name,
         ),
       ]);
 
-      if (!splashScreen) {
+      if (splashScreens.length === 0) {
         throw new BadRequestException(AppStrings.NOT_FOUND);
       }
-      splashScreen.deletedAt = new Date();
 
       if (actionConfig) {
-        await this.actionService.createActionRequest(
-          {
-            document: this.splashScreenRepository.metadata.name,
-            actionType: 'update',
-            targetEntityId: splashScreen.id.toString(),
-            user: admin,
-            payload: JSON.stringify(splashScreen),
-          },
-          admin,
+        for (const element of splashScreens) {
+          element.deletedAt = new Date();
+          await this.actionService.createActionRequest(
+            {
+              document: this.splashScreenRepository.metadata.name,
+              actionType: 'update',
+              targetEntityId: element.id.toString(),
+              user: admin,
+              payload: JSON.stringify(element),
+            },
+            admin,
+          );
+        }
+        return new SuccessResponse('Awaiting approval');
+      } else {
+        // Batch delete operation if no actionConfig is needed
+        const { affected } = await this.splashScreenRepository.softDelete(
+          deleteSplashScreenInput.id,
         );
-      }
-
-      const { affected } = await this.splashScreenRepository.softDelete(
-        deleteSplashScreenInput.id,
-      );
-      if (affected > 0) {
-        return new SuccessResponse(AppStrings.DELETED_SUCCESSFULLY);
+        if (affected > 0) {
+          return new SuccessResponse(AppStrings.DELETED_SUCCESSFULLY);
+        }
       }
     } catch (error) {
-      this.logger.log(error);
+      this.logger.error(error.stack || error);
       if (error instanceof HttpException) {
         throw error;
       } else {
-        throw new UnprocessableEntityException(error);
+        throw new UnprocessableEntityException(
+          error.message || 'An error occurred',
+        );
       }
     }
   }
