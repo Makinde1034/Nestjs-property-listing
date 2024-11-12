@@ -49,6 +49,34 @@ export class AppController {
     return clientSubject.asObservable();
   }
 
+  @Sse('/bids')
+  @Public()
+  async sendBids(
+    @Query('userId') userId: string,
+    @Query('token') token: string,
+    @Res() res: Response,
+  ): Promise<Observable<MessageEvent>> {
+    if (!token || !userId) {
+      throw new BadRequestException('Missing token or userId');
+    }
+
+    const user =
+      await this.authenticationService.getUserFromAuthenticationToken(token);
+
+    if (!user) {
+      this.logger.warn('Authentication failed');
+      throw new UnauthorizedException('Authentication failed');
+    }
+
+    const clientSubject = new Subject<MessageEvent>();
+    this.sseService.addClient(userId, clientSubject);
+    res.on('close', () => {
+      this.sseService.removeClient(userId);
+      clientSubject.complete();
+    });
+    return clientSubject.asObservable();
+  }
+
   @Sse('/verification')
   @Public()
   async sendEvents(

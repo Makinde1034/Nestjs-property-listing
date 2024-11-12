@@ -1307,9 +1307,9 @@ export class ListingService {
         if (imageIndex > -1) {
           // This will work correctly even if imageIndex is 0
           existingImages[imageIndex].url = uploadedUrls[0];
-          existingImages[imageIndex].isFeatured = feature.feature
-            ? true
-            : false;
+          existingImages[imageIndex].isFeatured = feature.feature;
+          existingImages[imageIndex].isPanorama = false;
+
           existingImages[imageIndex].isDeleted = false;
         } else {
           throw new BadRequestException('Image ID not found');
@@ -1396,7 +1396,7 @@ export class ListingService {
           if (image.id == imageId) {
             existingImages[index].url = uploadedUrls[0]; // Assuming single file upload
             imageUpdated = true;
-            existingImages[index].isFeature = feature.feature;
+            existingImages[index].isFeatured = feature.feature;
             existingImages[index].isDeleted = false;
             existingImages[index].isPanorama = true;
           }
