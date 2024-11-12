@@ -209,33 +209,50 @@ export class ArticleService {
 
   async update(updateArticleInput: UpdateArticleInput, user: User) {
     try {
-      const { id, metadata, ...rest } = updateArticleInput;
+      const { id, metadata, categoryId, ...rest } = updateArticleInput;
       let stringifiedMetadata;
-      const article = await this.articleRepository.findOneBy({ id });
-
-      stringifiedMetadata = JSON.stringify(metadata);
-      if (metadata) {
-        stringifiedMetadata = JSON.stringify(metadata);
-      }
+      const article = await this.articleRepository.findOne({
+        where: { id },
+        relations: ['category'], // load category relation if not loaded by default
+      });
 
       if (!article) {
         throw new NotFoundException(AppStrings.NOT_FOUND);
       }
-      const { affected } = await this.articleRepository.update(id, {
-        metadata: stringifiedMetadata,
-        ...rest,
-      });
 
-      if (affected > 0) {
-        await this.activityLogService.logActivity([
-          {
-            adminId: user.id,
-            action: ActivityEnum.UPDATED,
-            articleId: article.id,
-          },
-        ]);
-        return await this.articleRepository.findOneBy({ id });
+      // Update metadata if provided
+      if (metadata) {
+        stringifiedMetadata = JSON.stringify(metadata);
+        article.metadata = stringifiedMetadata;
       }
+
+      // Update category relation if categoryId is provided
+      if (categoryId) {
+        const category = await this.knowledgeBaseCategoryRepository.findOneBy({
+          id: categoryId,
+        });
+        if (!category) {
+          throw new NotFoundException('Category not found');
+        }
+        article.category = category;
+      }
+
+      // Apply other updates
+      Object.assign(article, rest);
+
+      // Save updated article
+      const updatedArticle = await this.articleRepository.save(article);
+
+      // Log activity
+      await this.activityLogService.logActivity([
+        {
+          adminId: user.id,
+          action: ActivityEnum.UPDATED,
+          articleId: article.id,
+        },
+      ]);
+
+      return updatedArticle;
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
