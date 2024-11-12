@@ -1396,7 +1396,7 @@ export class ListingService {
           if (image.id == imageId) {
             existingImages[index].url = uploadedUrls[0]; // Assuming single file upload
             imageUpdated = true;
-            existingImages[index].isFeature = feature.feature;
+            existingImages[index].isFeatured = feature.feature;
             existingImages[index].isDeleted = false;
             existingImages[index].isPanorama = true;
           }
