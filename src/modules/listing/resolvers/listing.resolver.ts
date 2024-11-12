@@ -507,7 +507,7 @@ export class ListingResolver {
   }
 
   @UseGuards(AccessTokenGuard)
-  @Query(() => Auction, { name: 'id' })
+  @Query(() => Auction, { name: 'getAuction' })
   async findOneAuction(
     @Args('id')
     id: string,
