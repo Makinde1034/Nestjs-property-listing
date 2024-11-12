@@ -53,7 +53,6 @@ import {
 } from 'date-fns';
 import { AuctionParticipant } from '../../../entities/auction-participant.entity';
 import { AuctionParticipantResponse } from '../dtos/response/listing.response';
-import { String } from 'aws-sdk/clients/acm';
 
 @Injectable()
 export class AuctionService {
@@ -145,7 +144,10 @@ export class AuctionService {
       const [auctions, total] = await this.auctionRepository
         .createQueryBuilder('auction')
 
-        .where(`CURRENT_DATE > auction.startDate and auction.deletedAt IS NULL`)
+        .where(
+          `CURRENT_DATE > auction.startDate AND auction.deletedAt IS NULL AND auction.status = :statusOne`,
+          { statusOne: AuctionEnum.ACTIVE },
+        )
 
         .loadRelationCountAndMap(
           'auction.auctionParticipantCount',
@@ -327,7 +329,7 @@ export class AuctionService {
       const auctionsToUpdate = auction.map((element) => {
         const { status, ...rest } = element;
         return {
-          status: AuctionEnum.CANCLED,
+          status: AuctionEnum.CANCELED,
           ...rest,
         };
       });
@@ -397,15 +399,38 @@ export class AuctionService {
 
   async addListingToAuction(data: CreateAuctionParticipantInput) {
     try {
-      const adminDefault = await this.adminService.adminDefault();
-      const auction = await this.auctionRepository.findOneBy({
-        id: data.auctionId,
-      });
+      const { auctionId, ...rest } = data;
 
-      if (!auction.imageLink) {
+      const [adminDefault, auction, participant, listing] = await Promise.all([
+        this.adminService.adminDefault(),
+        this.auctionRepository.findOneBy({
+          id: auctionId,
+        }),
+        this.auctionParticipantRepository.find({
+          where: { listingId: data.listingId },
+        }),
+
+        this.listingRepository.findOneBy({ id: data.listingId }),
+      ]);
+
+      if (!auction) {
+        throw new BadRequestException('Auction Not Found');
+      }
+
+      if (!auction?.imageLink) {
         throw new BadRequestException(
           AppStrings.AUCTION_IS_NOT_COMPLETELY_SET_UP,
         );
+      }
+
+      if (participant.length > 0) {
+        throw new BadRequestException(
+          'Listing has already been added to this auction',
+        );
+      }
+
+      if (!listing) {
+        throw new BadRequestException('Listing Not Found');
       }
 
       const now = new Date();
@@ -428,17 +453,20 @@ export class AuctionService {
         throw new BadRequestException(AppStrings.AUCTION_REGISTATION_HAS_ENDED);
       }
 
-      return await this.auctionParticipantRepository.save({ ...data, auction });
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else if (
-        error instanceof QueryFailedError &&
-        error.driverError.code === '23505'
-      ) {
+      if (participant.length > 0) {
         throw new BadRequestException(
           'Listing has already been added to this auction',
         );
+      }
+
+      return await this.auctionParticipantRepository.save({
+        ...rest,
+        auction,
+        listing,
+      });
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
       } else {
         this.logger.error('Failed to add listing to auction', error.stack);
         throw new BadRequestException('An unexpected error occurred');

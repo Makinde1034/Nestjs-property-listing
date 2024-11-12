@@ -85,7 +85,6 @@ import { ActivityEnum } from '../../../common/enums/activitys';
 import { ActivityLogService } from '../../activity-log/services/activity-log.service';
 import { ActionService } from '../../admin/services/action.service';
 import { AdminWorkflowService } from '../../admin/services/admin-workflow.service';
-import { WorkflowRepository } from '../../admin/repositories/workflow.repository';
 import { WorkflowActionStatus } from '../../../common/enums/status.enum';
 
 @Injectable()
