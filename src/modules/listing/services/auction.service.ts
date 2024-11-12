@@ -145,7 +145,7 @@ export class AuctionService {
         .createQueryBuilder('auction')
 
         .where(
-          `CURRENT_DATE > auction.startDate AND auction.deletedAt IS NULL AND auction.status = :statusOne`,
+          `CURRENT_DATE >= auction.startDate AND auction.deletedAt IS NULL AND auction.status = :statusOne`,
           { statusOne: AuctionEnum.ACTIVE },
         )
 
@@ -248,7 +248,8 @@ export class AuctionService {
         )
 
         .where(
-          `CURRENT_DATE < auction.startDate AND CURRENT_DATE > CURRENT_DATE - INTERVAL '${adminDefault.daysToAuctionRegistrationStart} days'`,
+          `CURRENT_DATE < auction.startDate AND CURRENT_DATE > CURRENT_DATE - INTERVAL '${adminDefault.daysToAuctionRegistrationStart} days', AND auction.status = :status`,
+          { status: AuctionEnum.ACTIVE },
         )
 
         .take(paginateAndSort.take)
