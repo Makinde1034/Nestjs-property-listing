@@ -40,14 +40,17 @@ export class ArticleService {
   logger = new Logger(ArticleService.name);
   async create(createArticleInput: CreateArticleInput, user: User) {
     try {
+      let { metadata } = createArticleInput;
       const category = await this.knowledgeBaseCategoryRepository.findOneBy({
         id: createArticleInput.categoryId,
       });
       if (!category) {
         throw new NotFoundException('category not found');
       }
+      const stringifiedMetadata = JSON.stringify(metadata);
       return await this.articleRepository.save({
         ...createArticleInput,
+        metadata: stringifiedMetadata,
         category,
         user,
       });
@@ -206,13 +209,22 @@ export class ArticleService {
 
   async update(updateArticleInput: UpdateArticleInput, user: User) {
     try {
-      const { id, ...rest } = updateArticleInput;
+      const { id, metadata, ...rest } = updateArticleInput;
+      let stringifiedMetadata;
       const article = await this.articleRepository.findOneBy({ id });
+
+      stringifiedMetadata = JSON.stringify(metadata);
+      if (metadata) {
+        stringifiedMetadata = JSON.stringify(metadata);
+      }
 
       if (!article) {
         throw new NotFoundException(AppStrings.NOT_FOUND);
       }
-      const { affected } = await this.articleRepository.update(id, rest);
+      const { affected } = await this.articleRepository.update(id, {
+        metadata: stringifiedMetadata,
+        ...rest,
+      });
 
       if (affected > 0) {
         await this.activityLogService.logActivity([

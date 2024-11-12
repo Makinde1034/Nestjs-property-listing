@@ -25,7 +25,7 @@ import { PermissionsEnum } from '../../../common/enums/permission.enum';
 @Resolver()
 export class SplashScreenResolver {
   constructor(private readonly splashScreenService: SplashScreenService) {}
-  @Mutation(() => SplashScreen, { name: 'createSplashScreen' })
+  @Mutation(() => SuccessResponse, { name: 'createSplashScreen' })
   @Permissions(PermissionsEnum.KNOWLEDGE_BASE_CREATE)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async create(
@@ -38,6 +38,7 @@ export class SplashScreenResolver {
       ctx.req.user,
     );
   }
+
   @Permissions(PermissionsEnum.KNOWLEDGE_BASE_READ)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Query(() => SplashScreenResponse, { name: 'findAllSplashScreen' })

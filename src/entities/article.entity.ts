@@ -38,6 +38,9 @@ export class Article {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
+  metadata: string;
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   authorImage: string;
 
   @Field(() => User, { nullable: true })
