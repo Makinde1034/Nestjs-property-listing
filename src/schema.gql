@@ -828,7 +828,7 @@ type AuctionResponse {
 
 type AuctionParticipantResponse {
   auctions: Auction
-  listing: [AuctionParticipant!]!
+  listing: [AuctionParticipant!]
   total: Int!
 }
 
@@ -1052,7 +1052,7 @@ type Query {
   findManyForOwner(findOptions: FindOfferInput!): OfferOwnerResponse!
   getWishlist: [Wishlist!]!
   findOneListingsForAdmin(listingId: String!): Listing!
-  id(id: String!): Auction!
+  getAuction(id: String!): Auction!
   findOneAuctionWithParticipant(fetchAuctionParticipantInput: FetchAuctionParticipantInput!): AuctionParticipantResponse!
   getAllRunningAuction(findManyOption: PaginateAndSort!): AuctionResponse!
   getAllUpcomingAuction(findManyOption: PaginateAndSort!): AuctionResponse!
