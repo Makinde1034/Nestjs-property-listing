@@ -1343,7 +1343,7 @@ input AuditLogTrailsInput {
 }
 
 type Mutation {
-  createSplashScreen(createSplashScreenInput: CreateSplashScreenInput!): SplashScreen!
+  createSplashScreen(createSplashScreenInput: CreateSplashScreenInput!): SuccessResponse!
   updateSplashScreen(updateSplashScreenInput: UpdateSplashScreenInput!): SplashScreen!
   deleteSplashScreen(deleteSplashScreenInput: DeleteSplashScreenInput!): SuccessResponse!
   register(RegisterInput: RegisterInput!): User!

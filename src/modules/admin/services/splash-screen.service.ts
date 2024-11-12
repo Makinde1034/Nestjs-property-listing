@@ -118,9 +118,7 @@ export class SplashScreenService {
           whereCondition[dateField] = Between(startOfYear(now), endOfYear(now));
           break;
       }
-
       const take = findOption.take ?? 20;
-
       const [splashScreen, total] =
         await this.splashScreenRepository.findAndCount({
           where: whereCondition,
@@ -191,7 +189,6 @@ export class SplashScreenService {
         const splashScreen = await this.splashScreenRepository.findOneByOrFail({
           id,
         });
-
         await this.activityLogService.logActivity([
           {
             adminId: admin.id,
@@ -205,7 +202,6 @@ export class SplashScreenService {
       }
     } catch (error) {
       this.logger.log(error);
-
       if (error instanceof HttpException) {
         throw error;
       } else {
