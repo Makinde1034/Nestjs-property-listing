@@ -115,7 +115,6 @@ export class PushNotificationService {
           },
         );
       }
-
       return new SuccessResponse();
     }
   }

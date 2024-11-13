@@ -232,7 +232,7 @@ export class JobService {
 
       //Filter out the correct scope
       const scope: NotificationScope = notificationPreference.find(
-        (element) => element.name == NotificationScopesEnum.UPCOMING_EVENTS,
+        (element) => element.name == NotificationScopesEnum.UPCOMING_AUCTION,
       );
 
       // Filter auctions for notifications based on time frames
@@ -315,7 +315,7 @@ export class JobService {
       await this.notificationScopeRepository.find();
     //Filter out the correct scope
     const scope: NotificationScope = notificationPreference.find((element) => {
-      if (element.name == NotificationScopesEnum.UPCOMING_EVENTS) {
+      if (element.name == NotificationScopesEnum.UPCOMING_AUCTION) {
         return element;
       }
     });
@@ -330,12 +330,11 @@ export class JobService {
 
     auctions.forEach((element) => {
       if (oneDayNotification.length) {
-        this.notificationService.sendNotification({
+        this.notificationService.prepareNotification({
           creatorId: element.listing.userId,
           scope: scope,
-          event: 'Daily',
+          event: scope.name,
           recipientFormat: ['Users enlisted to bid and sellers', null],
-          type: null,
         });
       }
     });
@@ -371,7 +370,7 @@ export class JobService {
       await this.notificationScopeRepository.find();
     //Filter out the correct scope
     const scope: NotificationScope = notificationPreference.find((element) => {
-      if (element.name == NotificationScopesEnum.UPCOMING_EVENTS) {
+      if (element.name == NotificationScopesEnum.UPCOMING_AUCTION) {
         return element;
       }
     });

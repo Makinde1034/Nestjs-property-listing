@@ -325,6 +325,7 @@ export class UserService {
         where: { id },
         relations,
       });
+      await this.createDefaultNotifications(user);
       return user;
     } catch (error) {
       this.logger.log(error);

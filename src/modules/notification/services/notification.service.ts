@@ -7,7 +7,6 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { NotificationRepository } from '../repositories';
 import {
   CreateNotificationScopeInput,
-  CreateNotificationScopePreferenceInput,
   NotificationEventDto,
   NotificationInput,
   UpdateAdminNotificationPreferenceScope,
@@ -27,7 +26,6 @@ import { AppStrings } from 'src/common/messages/app.strings';
 import { MailgunEmailService } from '../../mail/services/implementations';
 import {
   EmailNotificationPayload,
-  NotificationEventInput,
   PushNotificationPayload,
   SendNotificationInput,
 } from 'src/common/interface';
@@ -37,24 +35,19 @@ import {
   NotificationType,
   ServerSentEvents,
 } from 'src/common/enums';
-import { In } from 'typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { getMessageData } from '../../../common/messages/alert-messages';
 import { NotificationScopesEnum } from '../../../common/enums/notification-scope.enum';
-import { MailInput } from '../../mail/mail.dto';
 import { SuccessResponse } from '../../../common/utils/success.response';
-
 import { AdminNotificationPreferenceRepository } from '../repositories/admin.repository';
 import { SseService } from '../../sse/client.service';
 import { ConfigService } from '@nestjs/config';
-
 import { MessageEvent } from '../../sse/request/app';
 
 @Injectable()
 export class NotificationService {
   private readonly logger = new Logger(NotificationService.name);
   private readonly frontEndUrl: string;
-
   constructor(
     private readonly notificationRepository: NotificationRepository,
     private readonly userRepository: UserRepository,
@@ -99,10 +92,17 @@ export class NotificationService {
     return AppStrings.NOTIFICATION_SENT_SUCCESSFULLY;
   }
 
-  async sendNotification(notificationInput: SendNotificationInput) {
+  async prepareNotification(notificationInput: SendNotificationInput) {
     try {
-      const { creatorId, receiverId, scope, event, recipientFormat, count } =
-        notificationInput;
+      let {
+        creatorId,
+        receiverId,
+        scope,
+        recipientFormat,
+        event,
+        count,
+        attachment,
+      } = notificationInput;
 
       // Get user information for buyer and seller along with their notification preferences
       const [buyer, seller] = await Promise.all([
@@ -127,17 +127,13 @@ export class NotificationService {
       );
 
       const scopeName = scope.name as NotificationScopesEnum;
+      event = event || scope.name;
 
       // Define scopes that trigger notifications
-      const notificationScopes = [
-        NotificationScopesEnum.CREATE_OFFER,
-        NotificationScopesEnum.UPDATE_OFFER,
-        NotificationScopesEnum.ACCEPTED,
-        NotificationScopesEnum.RESPONSE,
-        NotificationScopesEnum.UPCOMING_EVENTS,
-      ];
+      const notificationScopes = Object.values(NotificationScopesEnum);
 
       // If scope matches one of the predefined notification scopes, send the notification
+      console.log(scopeName);
       if (notificationScopes.includes(scopeName)) {
         this.SendNotificationBasedOnPreference(
           userPrefBuyer,
@@ -145,10 +141,10 @@ export class NotificationService {
           seller,
           buyer,
           event,
-          scope.name,
+          scope.scopeGroup,
           recipientFormat,
-          notificationInput.type,
           count,
+          attachment,
         );
       }
     } catch (error) {
@@ -166,8 +162,8 @@ export class NotificationService {
     event?: string,
     scope?: string,
     recipientFormat?: [string, string],
-    type?: string,
-    countInEnglish?: number,
+    count?: number,
+    attachment?: Buffer,
   ) {
     try {
       /************************
@@ -182,22 +178,14 @@ export class NotificationService {
           event,
           scope,
           recipientFormat[1],
-          type,
-          null,
-          countInEnglish,
+          count,
+          attachment,
         );
       }
 
       if (userPrefOwner?.email) {
         this.logger.log('Sending notifications');
-        this.sendEmailToUser(
-          owner,
-          event,
-          scope,
-          recipientFormat[0],
-          type,
-          recipient,
-        );
+        this.sendEmailToUser(owner, event, scope, recipientFormat[0], null);
       }
 
       /************************
@@ -223,10 +211,9 @@ export class NotificationService {
         );
       }
 
-      /************************
-       * Web Notification (future)
-       ************************/
-
+      /*********************
+       * Web Notification
+       ********************/
       if (userPrefRecipients?.desktop) {
         this.logger.log('Sending notifications');
         this.sendDesktopNotificationToUser(
@@ -259,38 +246,51 @@ export class NotificationService {
     scope: string,
     format: string,
   ) {
-    if (user) {
-      const messageData = getMessageData(
-        user.firstName,
-        user.arabicFirstName,
-        event,
-        scope,
-        format,
-      );
+    try {
+      if (user) {
+        const messageData = getMessageData(
+          user.firstName,
+          user.arabicFirstName,
+          event,
+          scope,
+          format,
+        );
+        const subject: string =
+          user.language === 'en'
+            ? messageData[0]?.title
+            : messageData[0]?.arabicTitle;
+        const text =
+          user.language === 'en'
+            ? messageData[0]?.body
+            : messageData[0]?.arabicBody;
 
-      const subject: string =
-        user.language === 'en'
-          ? messageData[0]?.title
-          : messageData[0]?.arabicTitle;
-      const text =
-        user.language === 'en'
-          ? messageData[0]?.body
-          : messageData[0]?.arabicBody;
+        const payload: MessageEvent = {
+          type: ServerSentEvents.SUCCESS,
+          data: {
+            subject: subject,
+            text: text,
+          },
+        };
 
-      const payload: MessageEvent = {
-        type: ServerSentEvents.SUCCESS,
-        data: {
-          subject: subject,
-          text: text,
-        },
-      };
+        this.sseService.sendEvent(user.id, payload);
 
-      this.sseService.sendEvent(user.id, payload);
+        this.saveNotificationLog({
+          title: subject,
+          message: text,
+          type: NotificationType.SYSTEM_NOTIFICATION,
+        });
+      }
+    } catch (error) {
+      this.logger.log(error);
     }
   }
 
   async sendPushNotification(data: PushNotificationPayload): Promise<void> {
-    await this.pushNotificationService.sendPushNotification(data);
+    try {
+      await this.pushNotificationService.sendPushNotification(data);
+    } catch (error) {
+      this.logger.log(error);
+    }
   }
 
   /**
@@ -304,18 +304,12 @@ export class NotificationService {
   async sendEmailNotification(
     user?: User,
     data?: EmailNotificationPayload,
-    category?: string,
-    mailInput?: MailInput,
+    attachment?: Buffer,
   ): Promise<void> {
-    switch (category) {
-      case 'offer':
-        await this.mailService.sendOfferMail(mailInput);
-        break;
-
-      default:
-        await this.mailService.sendEmailNotification(user, data);
-
-        break;
+    try {
+      await this.mailService.sendEmailNotification(user, data, attachment);
+    } catch (error) {
+      this.logger.log(error);
     }
   }
 
@@ -327,37 +321,47 @@ export class NotificationService {
     event: string,
     scope: string,
     format: string,
-    type: string,
-    additionalUser?: User,
-    countInEnglish?: number,
+    count?: number,
+    attachment?: Buffer,
   ) {
-    if (user) {
-      const messageData = getMessageData(
-        user.firstName,
-        user.arabicFirstName,
-        event,
-        scope,
-        format,
-        countInEnglish,
-      );
+    try {
+      if (user) {
+        const messageData = getMessageData(
+          user.firstName,
+          user.arabicFirstName,
+          event,
+          scope,
+          format,
+          count,
+        );
 
-      const subject: string =
-        user.language === 'en'
-          ? messageData[0]?.title
-          : messageData[0]?.arabicTitle;
-      const text =
-        user.language === 'en'
-          ? messageData[0]?.body
-          : messageData[0]?.arabicBody;
-      this.sendEmailNotification(
-        user,
-        {
+        const subject: string =
+          user.language === 'en'
+            ? messageData[0]?.title
+            : messageData[0]?.arabicTitle;
+        const text =
+          user.language === 'en'
+            ? messageData[0]?.body
+            : messageData[0]?.arabicBody;
+
+        //send mail
+        this.sendEmailNotification(
+          user,
+          {
+            title: subject,
+            message: text,
+          },
+          attachment,
+        );
+
+        this.saveNotificationLog({
           title: subject,
           message: text,
-        },
-        type,
-        null,
-      );
+          type: NotificationType.EMAIL_NOTIFICATION,
+        });
+      }
+    } catch (error) {
+      this.logger.log(error);
     }
   }
 
@@ -370,30 +374,42 @@ export class NotificationService {
     scope: string,
     format: string,
   ) {
-    const messageData = getMessageData(
-      user.firstName,
-      user.arabicFirstName,
-      event,
-      scope,
-      format,
-    );
+    try {
+      const messageData = getMessageData(
+        user.firstName,
+        user.arabicFirstName,
+        event,
+        scope,
+        format,
+      );
 
-    const title =
-      user.language === 'en'
-        ? messageData[0].title
-        : messageData[0].arabicTitle;
-    const message =
-      user.language === 'en' ? messageData[0].body : messageData[0].arabicBody;
+      const title =
+        user.language === 'en'
+          ? messageData[0].title
+          : messageData[0].arabicTitle;
+      const message =
+        user.language === 'en'
+          ? messageData[0].body
+          : messageData[0].arabicBody;
 
-    this.sendPushNotification({
-      title,
-      message,
-      deviceType: '',
+      this.sendPushNotification({
+        title,
+        message,
+        deviceType: '',
 
-      notificationToken: user.notificationToken,
-      userId: user.id,
-      redirectLink: this.frontEndUrl,
-    });
+        notificationToken: user.notificationToken,
+        userId: user.id,
+        redirectLink: this.frontEndUrl,
+      });
+
+      this.saveNotificationLog({
+        title: title,
+        message: message,
+        type: NotificationType.PUSH_NOTIFICATION,
+      });
+    } catch (error) {
+      this.logger.log(error);
+    }
   }
 
   //Notification  actions

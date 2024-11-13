@@ -124,6 +124,7 @@ export class MailgunEmailService implements MailSendService {
   async sendEmailNotification(
     user?: User,
     data?: EmailNotificationPayload,
+    attachment?: Buffer,
   ): Promise<void> {
     const { message, title } = data;
 
@@ -132,6 +133,7 @@ export class MailgunEmailService implements MailSendService {
         from: this.MAIL_FROM,
         subject: title,
         to: user.email,
+        attachment: attachment,
         template: EMAIL_NOTIFICATION_TEMPLATE_NAME,
         'h:X-Mailgun-Variables': JSON.stringify({
           user_name: loadUserName(user),
@@ -175,22 +177,22 @@ export class MailgunEmailService implements MailSendService {
     }
   }
 
-  async sendOfferMail(data: MailInput): Promise<void> {
-    try {
-      const mailgunData: MailgunMessageData = {
-        from: this.MAIL_FROM,
-        text: data.text,
-        subject: data.subject,
-        to: data.email,
-      };
-      await this.sendMail(mailgunData);
+  // async sendOfferMail(data: MailInput): Promise<void> {
+  //   try {
+  //     const mailgunData: MailgunMessageData = {
+  //       from: this.MAIL_FROM,
+  //       text: data.text,
+  //       subject: data.subject,
+  //       to: data.email,
+  //     };
+  //     await this.sendMail(mailgunData);
 
-      this.logger.debug('Email Sent');
-    } catch (error) {
-      this.logger.log('Failed to send mail because of:', error);
-      this.logger.debug(error);
-    }
-  }
+  //     this.logger.debug('Email Sent');
+  //   } catch (error) {
+  //     this.logger.log('Failed to send mail because of:', error);
+  //     this.logger.debug(error);
+  //   }
+  // }
   async sendEmailInvoice(user: User, invoice: Buffer): Promise<void> {
     try {
       const mailgunData: MailgunMessageData = {
