@@ -12,6 +12,7 @@ import { NotificationEventListener } from './events';
 import { NotificationRepository } from './repositories';
 
 import { AdminNotificationPreferenceRepository } from './repositories/admin.repository';
+import { NotificationTokenRepository } from './repositories/notification-token.repository';
 @Module({
   imports: [TypeOrmModule.forFeature([Notification])],
   providers: [
@@ -21,11 +22,13 @@ import { AdminNotificationPreferenceRepository } from './repositories/admin.repo
     NotificationRepository,
     NotificationEventListener,
     AdminNotificationPreferenceRepository,
+    NotificationTokenRepository,
   ],
   exports: [
     PushNotificationService,
     NotificationRepository,
     AdminNotificationPreferenceRepository,
+    NotificationTokenRepository,
   ],
 })
 export class NotificationModule {}

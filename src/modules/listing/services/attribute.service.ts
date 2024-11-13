@@ -341,10 +341,11 @@ export class AttributeService {
       throw new BadRequestException(error);
     }
   }
+
   async searchForAttributeSets(searchParam: string) {
     try {
-      return await this.attributeRepository
-        .createQueryBuilder('attributeSets')
+      return await this.attributeSetRepository
+        .queryBuilder('attributeSets')
 
         .where('attributeSets.englishName ILIKE :term', {
           term: `%${searchParam}%`,
@@ -353,8 +354,7 @@ export class AttributeService {
         .orWhere('attributeSets.arabicName ILIKE :term', {
           term: `%${searchParam}%`,
         })
-        .take(10)
-
+        .take(20)
         .getMany();
     } catch (error) {
       this.logger.log(error);

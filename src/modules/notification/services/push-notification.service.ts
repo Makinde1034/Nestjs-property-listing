@@ -7,6 +7,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import * as firebase from 'firebase-admin';
 import { PushNotificationPayload } from 'src/common/interface';
 import StorageConfig from '../../../database/seeders/config/serviceAccount/storage-config';
+import { SuccessResponse } from '../../../common/utils/success.response';
+import { NotificationTokenRepository } from '../repositories/notification-token.repository';
 
 firebase.initializeApp({
   credential: firebase.credential.cert({
@@ -18,15 +20,19 @@ firebase.initializeApp({
 
 @Injectable()
 export class PushNotificationService {
-  private logger = new Logger(PushNotificationService.name);
+  constructor(
+    private readonly notificationTokenRepository: NotificationTokenRepository,
+  ) {}
+  logger = new Logger(PushNotificationService.name);
 
   /**
    * Update User Profile
-   *
+   
    * @async
    * @param {PushNotificationPayload} notification
    * @returns {Promise<void>}
    */
+
   async sendPushNotification(
     notification: PushNotificationPayload,
   ): Promise<void> {
@@ -75,5 +81,39 @@ export class PushNotificationService {
 
         this.logger.debug('Error sending notification:', error);
       });
+  }
+
+  async configureNotification(
+    notification: PushNotificationPayload,
+    userId: string,
+  ) {
+    const userNotificationToken =
+      await this.notificationTokenRepository.findOne({
+        where: {
+          userId: userId,
+        },
+      });
+
+    if (!userNotificationToken) {
+      await this.notificationTokenRepository.save({
+        status: false,
+        token: notification.notificationToken,
+        userId: userId,
+        device_type: notification.deviceType,
+      });
+      return new SuccessResponse();
+    } else {
+      if (userNotificationToken?.deviceType != notification.deviceType) {
+        await this.notificationTokenRepository.update(
+          userNotificationToken.id,
+          {
+            token: notification.notificationToken,
+            deviceType: notification.deviceType,
+          },
+        );
+      }
+
+      return new SuccessResponse();
+    }
   }
 }

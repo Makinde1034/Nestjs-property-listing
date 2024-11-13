@@ -54,7 +54,7 @@ export class AppController {
   async sendBids(
     @Query('userId') userId: string,
     @Query('token') token: string,
-    @Query('listingId')
+    @Query('participantId')
     @Res()
     res: Response,
   ): Promise<Observable<MessageEvent>> {

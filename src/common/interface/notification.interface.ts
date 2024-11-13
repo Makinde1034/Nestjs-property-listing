@@ -11,6 +11,7 @@ export interface EmailNotificationPayload {
 }
 
 export interface PushNotificationPayload extends EmailNotificationPayload {
+  deviceType: string;
   notificationToken: string;
   redirectLink?: string;
   userId: string;
@@ -25,6 +26,7 @@ export interface NotificationEventInput {
   deepLink?: string;
   data?: SendNotificationInput;
 }
+
 export interface SendNotificationInput {
   creatorId: string;
   receiverId?: string;
