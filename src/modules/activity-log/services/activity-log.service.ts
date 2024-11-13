@@ -46,7 +46,6 @@ export class ActivityLogService {
           const numericId = parseInt(id, 10);
           query
             .orWhere('activityLog.roleId = :id', { numericId })
-
             .orWhere('activityLog.articleId = :id', { id: numericId })
             .orWhere('activityLog.splashScreenId = :id', { id: numericId });
         }
