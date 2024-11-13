@@ -252,6 +252,12 @@ export class AuctionService {
         paginateAndSort.take = 20;
       }
 
+      const startDateThreshold = new Date();
+      startDateThreshold.setDate(
+        startDateThreshold.getDate() -
+          adminDefault.daysToAuctionRegistrationStart,
+      );
+
       const [auctions, total] = await this.auctionRepository
         .createQueryBuilder('auction')
         .loadRelationCountAndMap(
@@ -261,8 +267,8 @@ export class AuctionService {
         )
 
         .where(
-          `CURRENT_DATE < auction.startDate AND CURRENT_DATE > CURRENT_DATE - INTERVAL '${adminDefault.daysToAuctionRegistrationStart} days', AND auction.status = :status`,
-          { status: AuctionEnum.ACTIVE },
+          `CURRENT_DATE < auction.startDate AND auction.startDate > :startDateThreshold AND auction.status = :status`,
+          { status: AuctionEnum.ACTIVE, startDateThreshold },
         )
 
         .take(paginateAndSort.take)
@@ -280,7 +286,6 @@ export class AuctionService {
       throw new BadRequestException(error.message || 'Error fetching auctions');
     }
   }
-
   async update(updateAuctionInput: UpdateAuctionInput, user: User) {
     try {
       const { id, ...rest } = updateAuctionInput;
