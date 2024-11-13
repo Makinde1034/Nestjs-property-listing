@@ -466,6 +466,9 @@ type ActivityLog {
   adminId: String
   ticketId: String
   roleId: Float
+  attributeId: String
+  attributeSetId: String
+  listingTypeId: String
   responseTemplateId: String
   listingId: String
   articleId: Float
