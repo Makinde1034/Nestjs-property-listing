@@ -3,12 +3,11 @@
  * For license. See license.txt
  */
 
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as firebase from 'firebase-admin';
 import { PushNotificationPayload } from 'src/common/interface';
 import StorageConfig from '../../../database/seeders/config/serviceAccount/storage-config';
 import { SuccessResponse } from '../../../common/utils/success.response';
-import { ConfigService } from '@nestjs/config';
 import { NotificationTokenRepository } from '../repositories/notification-token.repository';
 
 firebase.initializeApp({
@@ -22,18 +21,13 @@ firebase.initializeApp({
 @Injectable()
 export class PushNotificationService {
   constructor(
-    private readonly configService: ConfigService,
     private readonly notificationTokenRepository: NotificationTokenRepository,
-  ) {
-    // const config = this.configService.get<FireBaseConfig>(
-    //   getFireBaseConfigName(),
-    // );
-  }
-  private logger = new Logger(PushNotificationService.name);
+  ) {}
+  logger = new Logger(PushNotificationService.name);
 
   /**
    * Update User Profile
-   *
+   
    * @async
    * @param {PushNotificationPayload} notification
    * @returns {Promise<void>}

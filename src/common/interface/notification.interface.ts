@@ -26,6 +26,7 @@ export interface NotificationEventInput {
   deepLink?: string;
   data?: SendNotificationInput;
 }
+
 export interface SendNotificationInput {
   creatorId: string;
   receiverId?: string;

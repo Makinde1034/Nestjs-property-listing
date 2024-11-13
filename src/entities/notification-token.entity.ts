@@ -1,4 +1,4 @@
-import { Field } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 import {
   Column,
   CreateDateColumn,
@@ -9,6 +9,7 @@ import {
 import BaseEntity from './base.entity';
 
 @Entity()
+@ObjectType()
 export class NotificationToken extends BaseEntity {
   @Field()
   @Column()
