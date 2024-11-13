@@ -32,7 +32,11 @@ import {
   SendNotificationInput,
 } from 'src/common/interface';
 import { PushNotificationService } from './push-notification.service';
-import { NotificationEvent, NotificationType } from 'src/common/enums';
+import {
+  NotificationEvent,
+  NotificationType,
+  ServerSentEvents,
+} from 'src/common/enums';
 import { In } from 'typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { getMessageData } from '../../../common/messages/alert-messages';
@@ -42,10 +46,15 @@ import { SuccessResponse } from '../../../common/utils/success.response';
 
 import { AdminNotificationPreferenceRepository } from '../repositories/admin.repository';
 import { SseService } from '../../sse/client.service';
+import { ConfigService } from '@nestjs/config';
+
+import { MessageEvent } from '../../sse/request/app';
 
 @Injectable()
 export class NotificationService {
   private readonly logger = new Logger(NotificationService.name);
+  private readonly frontEndUrl: string;
+
   constructor(
     private readonly notificationRepository: NotificationRepository,
     private readonly userRepository: UserRepository,
@@ -54,10 +63,13 @@ export class NotificationService {
     private readonly pushNotificationService: PushNotificationService,
     private readonly eventEmitter: EventEmitter2,
     private readonly adminNotificationPreferenceRepository: AdminNotificationPreferenceRepository,
+    private readonly configService: ConfigService,
 
     private readonly notificationScope: NotificationScopeRepository,
     private readonly sseService: SseService,
-  ) {}
+  ) {
+    this.frontEndUrl = this.configService.get('FRONT_END_URL');
+  }
 
   /**
    * Send Notification Message
@@ -85,256 +97,6 @@ export class NotificationService {
       }),
     );
     return AppStrings.NOTIFICATION_SENT_SUCCESSFULLY;
-  }
-
-  /**
-   * Send Notification Message
-   *
-   * @async
-   * @param {NotificationEventInput} notification
-   * @returns {Promise<string>}
-   */
-  async handleNotificationEvent(
-    notification: NotificationEventInput,
-  ): Promise<void> {
-    try {
-      const {
-        recipients,
-        isEmail,
-        isPushNotification,
-        title,
-        message,
-        deepLink,
-      } = notification;
-      const users = await this.userRepository.find({
-        where: { id: In([...recipients]) },
-      });
-
-      await Promise.all(
-        users.map(async (user) => {
-          const emailData: EmailNotificationPayload = {
-            title,
-            message,
-          };
-          if (isEmail) {
-            // Send EMail notification
-            await this.sendEmailNotification(user, emailData);
-          }
-
-          const pushNotificationData: PushNotificationPayload = {
-            ...emailData,
-            notificationToken: user.notificationToken,
-            redirectLink: deepLink,
-            userId: user.id,
-          };
-
-          if (isPushNotification) {
-            // Send EMail notification
-            await this.sendPushNotification(pushNotificationData);
-          }
-
-          const notificationLog: Partial<Notification> = {
-            ...emailData,
-            recipient: user,
-            type: this.getNotificationType(isEmail, isPushNotification),
-          };
-          await this.saveNotificationLog(notificationLog);
-        }),
-      );
-    } catch (error) {
-      this.logger.error(error);
-    }
-  }
-
-  /**
-   * Get Notification type
-   *
-   * @param {boolean} isEmail
-   * @param {boolean} isPushNotifcation
-   * @returns {NotificationType}
-   */
-  getNotificationType(
-    isEmail: boolean,
-    isPushNotifcation: boolean,
-  ): NotificationType {
-    let notificationType: NotificationType;
-
-    if (isEmail && isPushNotifcation) {
-      notificationType = NotificationType.ALL;
-    } else if (isEmail) {
-      notificationType = NotificationType.EMAIL_NOTIFICATION;
-    } else if (isPushNotifcation) {
-      notificationType = NotificationType.PUSH_NOTIFICATION;
-    } else {
-      notificationType = NotificationType.SYSTEM_NOTIFICATION;
-    }
-    return notificationType;
-  }
-
-  /**
-   * Save Notification Log
-   *
-   * @async
-   * @param {Partial<Notification>} data
-   * @returns {Promise<Notification>}
-   */
-  async saveNotificationLog(
-    data: Partial<Notification>,
-  ): Promise<Notification> {
-    return await this.notificationRepository.save(data);
-  }
-
-  /**
-   * Send Push Notification
-   *
-   * @async
-   * @param {Partial<PushNotificationPayload>} data
-   * @returns {Promise<void>}
-   */
-
-  async sendPushNotification(data: PushNotificationPayload): Promise<void> {
-    await this.pushNotificationService.sendPushNotification(data);
-  }
-
-  /**
-   * Send Email Notification
-   *
-   * @async
-   * @param {User } user
-   * @param {EmailNotificationPayload} data
-   * @returns {Promise<void>}
-   */
-  async sendEmailNotification(
-    user?: User,
-    data?: EmailNotificationPayload,
-    category?: string,
-    mailInput?: MailInput,
-  ): Promise<void> {
-    switch (category) {
-      case 'offer':
-        await this.mailService.sendOfferMail(mailInput);
-        break;
-
-      default:
-        await this.mailService.sendEmailNotification(user, data);
-
-        break;
-    }
-  }
-
-  /**
-   * Mark Notification as read
-   *
-   * @async
-   * @param {string} id
-   * @returns {Promise<Notification>}
-   */
-  async updateNotification(id: string): Promise<Notification> {
-    const { affected } = await this.notificationRepository.update(id, {
-      read: true,
-    });
-
-    if (affected) {
-      return await this.notificationRepository.findOneBy({ id });
-    }
-  }
-
-  /**
-   * List user's Notification
-   *
-   * @async
-   * @param {User} user
-   * @returns {Promise<Notification[]>}
-   */
-  async find(user: User): Promise<Notification[]> {
-    return await this.notificationRepository.find({
-      where: { recipient: { id: user.id } },
-    });
-  }
-  /**
-   * List system NotificationScopes
-   *
-   * @async
-   * @returns {Promise<NotificationScope[]>}
-   */
-  async listNotificationScopes(): Promise<NotificationScope[]> {
-    return await this.notificationScopeRepository.find();
-  }
-
-  async updateNotificationScope(
-    input: UpdateAdminNotificationScope,
-  ): Promise<SuccessResponse> {
-    try {
-      const { id, ...rest } = input;
-      const notificationScope = await this.notificationScopeRepository.findOne({
-        where: { id },
-      });
-      const { affected } = await this.notificationScopeRepository.update(
-        notificationScope.id,
-        rest,
-      );
-
-      if (affected > 0) {
-        const notificationScope =
-          await this.notificationScopeRepository.findOne({
-            where: { id },
-          });
-        return new SuccessResponse(AppStrings.SUCCESSFULL, notificationScope);
-      }
-    } catch (error) {
-      this.logger.log(error);
-      throw new BadRequestException(error);
-    }
-  }
-
-  async updateAdminNotificationScopePreference(
-    input: UpdateAdminNotificationPreferenceScope,
-  ): Promise<SuccessResponse> {
-    try {
-      const { id, ...rest } = input;
-      const notificationScope =
-        await this.adminNotificationPreferenceRepository.findOne({
-          where: { id },
-        });
-      const { affected } =
-        await this.adminNotificationPreferenceRepository.update(
-          notificationScope.id,
-          rest,
-        );
-
-      if (affected > 0) {
-        const notificationScope =
-          await this.adminNotificationPreferenceRepository.findOne({
-            where: { id },
-          });
-        return new SuccessResponse(AppStrings.SUCCESSFULL, notificationScope);
-      }
-    } catch (error) {
-      this.logger.log(error);
-      throw new BadRequestException(error);
-    }
-  }
-
-  async createAdminNotificationScope(
-    input: CreateNotificationScopeInput,
-  ): Promise<NotificationScope> {
-    try {
-      const notificationScope = await this.notificationScope.save(input);
-
-      if (notificationScope) {
-        await this.adminNotificationPreferenceRepository.save({
-          email: true,
-          desktop: true,
-          mobile: true,
-          scope: notificationScope,
-        });
-      }
-
-      return notificationScope;
-    } catch (error) {
-      this.logger.log(error);
-      throw new BadRequestException(error);
-    }
   }
 
   async sendNotification(notificationInput: SendNotificationInput) {
@@ -515,15 +277,45 @@ export class NotificationService {
           ? messageData[0]?.body
           : messageData[0]?.arabicBody;
 
-      this.sendEmailNotification(
-        user,
-        {
-          title: subject,
-          message: text,
+      const payload: MessageEvent = {
+        type: ServerSentEvents.SUCCESS,
+        data: {
+          subject: subject,
+          text: text,
         },
+      };
 
-        null,
-      );
+      this.sseService.sendEvent(user.id, payload);
+    }
+  }
+
+  async sendPushNotification(data: PushNotificationPayload): Promise<void> {
+    await this.pushNotificationService.sendPushNotification(data);
+  }
+
+  /**
+   * Send Email Notification
+   *
+   * @async
+   * @param {User } user
+   * @param {EmailNotificationPayload} data
+   * @returns {Promise<void>}
+   */
+  async sendEmailNotification(
+    user?: User,
+    data?: EmailNotificationPayload,
+    category?: string,
+    mailInput?: MailInput,
+  ): Promise<void> {
+    switch (category) {
+      case 'offer':
+        await this.mailService.sendOfferMail(mailInput);
+        break;
+
+      default:
+        await this.mailService.sendEmailNotification(user, data);
+
+        break;
     }
   }
 
@@ -593,12 +385,236 @@ export class NotificationService {
     const message =
       user.language === 'en' ? messageData[0].body : messageData[0].arabicBody;
 
-    this.sendUsersNotification({
-      recipients: [user.id],
-      isPushNotification: true,
-      isEmail: false,
+    this.sendPushNotification({
       title,
       message,
+      deviceType: '',
+
+      notificationToken: user.notificationToken,
+      userId: user.id,
+      redirectLink: this.frontEndUrl,
     });
+  }
+
+  //Notification  actions
+
+  /**
+   * Send Notification Message
+   *
+   * @async
+   * @param {NotificationEventInput} notification
+   * @returns {Promise<string>}
+   */
+  // async handleNotificationEvent(
+  //   notification: NotificationEventInput,
+  // ): Promise<void> {
+  //   try {
+  //     const {
+  //       recipients,
+  //       isEmail,
+  //       isPushNotification,
+  //       title,
+  //       message,
+  //       deepLink,
+  //     } = notification;
+  //     const users = await this.userRepository.find({
+  //       where: { id: In([...recipients]) },
+  //     });
+
+  //     await Promise.all(
+  //       users.map(async (user) => {
+  //         const emailData: EmailNotificationPayload = {
+  //           title,
+  //           message,
+  //         };
+  //         if (isEmail) {
+  //           // Send EMail notification
+  //           await this.sendEmailNotification(user, emailData);
+  //         }
+
+  //         const pushNotificationData: PushNotificationPayload = {
+  //           ...emailData,
+  //           notificationToken: user.notificationToken,
+  //           redirectLink: deepLink,
+  //           userId: user.id,
+  //         };
+
+  //         if (isPushNotification) {
+  //           // Send EMail notification
+  //           await this.sendPushNotification(pushNotificationData);
+  //         }
+
+  //         const notificationLog: Partial<Notification> = {
+  //           ...emailData,
+  //           recipient: user,
+  //           type: this.getNotificationType(isEmail, isPushNotification),
+  //         };
+  //         await this.saveNotificationLog(notificationLog);
+  //       }),
+  //     );
+  //   } catch (error) {
+  //     this.logger.error(error);
+  //   }
+  // }
+
+  /**
+   * Get Notification type
+   *
+   * @param {boolean} isEmail
+   * @param {boolean} isPushNotifcation
+   * @returns {NotificationType}
+   */
+  getNotificationType(
+    isEmail: boolean,
+    isPushNotifcation: boolean,
+  ): NotificationType {
+    let notificationType: NotificationType;
+
+    if (isEmail && isPushNotifcation) {
+      notificationType = NotificationType.ALL;
+    } else if (isEmail) {
+      notificationType = NotificationType.EMAIL_NOTIFICATION;
+    } else if (isPushNotifcation) {
+      notificationType = NotificationType.PUSH_NOTIFICATION;
+    } else {
+      notificationType = NotificationType.SYSTEM_NOTIFICATION;
+    }
+    return notificationType;
+  }
+
+  /**
+   * Save Notification Log
+   *
+   * @async
+   * @param {Partial<Notification>} data
+   * @returns {Promise<Notification>}
+   */
+  async saveNotificationLog(
+    data: Partial<Notification>,
+  ): Promise<Notification> {
+    return await this.notificationRepository.save(data);
+  }
+
+  /**
+   * Send Push Notification
+   *
+   * @async
+   * @param {Partial<PushNotificationPayload>} data
+   * @returns {Promise<void>}
+   */
+
+  /**
+   * Mark Notification as read
+   *
+   * @async
+   * @param {string} id
+   * @returns {Promise<Notification>}
+   */
+  async updateNotification(id: string): Promise<Notification> {
+    const { affected } = await this.notificationRepository.update(id, {
+      read: true,
+    });
+
+    if (affected) {
+      return await this.notificationRepository.findOneBy({ id });
+    }
+  }
+
+  /**
+   * List user's Notification
+   *
+   * @async
+   * @param {User} user
+   * @returns {Promise<Notification[]>}
+   */
+  async find(user: User): Promise<Notification[]> {
+    return await this.notificationRepository.find({
+      where: { recipient: { id: user.id } },
+    });
+  }
+  /**
+   * List system NotificationScopes
+   *
+   * @async
+   * @returns {Promise<NotificationScope[]>}
+   */
+  async listNotificationScopes(): Promise<NotificationScope[]> {
+    return await this.notificationScopeRepository.find();
+  }
+
+  async updateNotificationScope(
+    input: UpdateAdminNotificationScope,
+  ): Promise<SuccessResponse> {
+    try {
+      const { id, ...rest } = input;
+      const notificationScope = await this.notificationScopeRepository.findOne({
+        where: { id },
+      });
+      const { affected } = await this.notificationScopeRepository.update(
+        notificationScope.id,
+        rest,
+      );
+
+      if (affected > 0) {
+        const notificationScope =
+          await this.notificationScopeRepository.findOne({
+            where: { id },
+          });
+        return new SuccessResponse(AppStrings.SUCCESSFULL, notificationScope);
+      }
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async updateAdminNotificationScopePreference(
+    input: UpdateAdminNotificationPreferenceScope,
+  ): Promise<SuccessResponse> {
+    try {
+      const { id, ...rest } = input;
+      const notificationScope =
+        await this.adminNotificationPreferenceRepository.findOne({
+          where: { id },
+        });
+      const { affected } =
+        await this.adminNotificationPreferenceRepository.update(
+          notificationScope.id,
+          rest,
+        );
+
+      if (affected > 0) {
+        const notificationScope =
+          await this.adminNotificationPreferenceRepository.findOne({
+            where: { id },
+          });
+        return new SuccessResponse(AppStrings.SUCCESSFULL, notificationScope);
+      }
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async createAdminNotificationScope(
+    input: CreateNotificationScopeInput,
+  ): Promise<NotificationScope> {
+    try {
+      const notificationScope = await this.notificationScope.save(input);
+
+      if (notificationScope) {
+        await this.adminNotificationPreferenceRepository.save({
+          email: true,
+          desktop: true,
+          mobile: true,
+          scope: notificationScope,
+        });
+      }
+
+      return notificationScope;
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
   }
 }
