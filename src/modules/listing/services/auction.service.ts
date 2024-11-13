@@ -119,6 +119,12 @@ export class AuctionService {
         }),
         this.auctionParticipantRepository
           .createQueryBuilder('auctionParticipant')
+          .leftJoinAndSelect('auctionParticipant.listing', 'listing')
+          .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
+          .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
+          .leftJoinAndSelect('listing.listingType', 'listingType')
+          .leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate')
+
           .where('auctionParticipant.auctionId = :id', { id })
           .skip(skip)
           .take(take)
