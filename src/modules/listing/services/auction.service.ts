@@ -112,19 +112,24 @@ export class AuctionService {
   ): Promise<AuctionParticipantResponse> {
     try {
       const { id, skip = 0, take = 20 } = paginateAndSort; // Default pagination if not provided
-
       const [auction, [participants, total]] = await Promise.all([
         this.auctionRepository.findOneOrFail({
           where: { id },
         }),
+
         this.auctionParticipantRepository
           .createQueryBuilder('auctionParticipant')
+          .leftJoinAndSelect(
+            'auctionParticipant.bid',
+            'bids',
+            'bids.price = (SELECT MAX(b.price) FROM Bids b WHERE b."auctionParticipantId" = auctionParticipant.id)',
+          )
+
           .leftJoinAndSelect('auctionParticipant.listing', 'listing')
           .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
           .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
           .leftJoinAndSelect('listing.listingType', 'listingType')
           .leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate')
-
           .where('auctionParticipant.auctionId = :id', { id })
           .skip(skip)
           .take(take)

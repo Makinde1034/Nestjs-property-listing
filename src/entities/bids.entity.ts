@@ -20,7 +20,7 @@ import { AuctionParticipant } from './auction-participant.entity';
 @ObjectType()
 export class Bids {
   @PrimaryGeneratedColumn('uuid')
-  @Field()
+  @Field({ nullable: true })
   id: string;
 
   @Column()
@@ -32,7 +32,7 @@ export class Bids {
   bidNumber: number;
 
   @Column('decimal', { precision: 12, scale: 2 })
-  @Field()
+  @Field({ nullable: true })
   price: number;
 
   @Column()
