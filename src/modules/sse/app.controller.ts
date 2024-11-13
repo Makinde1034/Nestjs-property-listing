@@ -54,7 +54,9 @@ export class AppController {
   async sendBids(
     @Query('userId') userId: string,
     @Query('token') token: string,
-    @Res() res: Response,
+    @Query('listingId')
+    @Res()
+    res: Response,
   ): Promise<Observable<MessageEvent>> {
     if (!token || !userId) {
       throw new BadRequestException('Missing token or userId');

@@ -173,6 +173,8 @@ export class UserResolver {
    * @returns {}
    */
   @Mutation(() => NafathAuthenticationResponseToUser)
+  @UseGuards(AccessTokenGuard)
+  @Public()
   async upgradeUser(
     @Args('userUpgradeInput') userUpgradeInput: UserUpgradeInput,
     @Context() ctx: any,
