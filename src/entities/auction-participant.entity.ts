@@ -47,7 +47,7 @@ export class AuctionParticipant extends BaseEntity {
   @ManyToOne(() => Auction, (auction) => auction.auctionParticipant)
   auction: Auction;
 
-  @Field(() => Auction)
+  @Field(() => Bids, { nullable: true })
   @OneToMany(() => Bids, (bid) => bid.auctionParticipant)
   bid: Bids;
 

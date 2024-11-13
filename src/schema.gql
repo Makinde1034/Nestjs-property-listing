@@ -207,10 +207,10 @@ type Auction {
 }
 
 type Bids {
-  id: String!
+  id: String
   userId: String!
   bidNumber: Float!
-  price: Float!
+  price: Float
   auctionId: String!
   auctionParticipant: Listing!
   auctionParticipantId: String!
@@ -229,7 +229,7 @@ type AuctionParticipant {
   minimumPrice: Float!
   startPrice: Float!
   auction: Auction!
-  bid: Auction!
+  bid: Bids
   createdAt: DateTime!
   deletedAt: DateTime!
   updatedAt: DateTime!
