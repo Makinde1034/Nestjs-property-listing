@@ -457,30 +457,30 @@ export class NotificationService {
   //   }
   // }
 
-  /**
-   * Get Notification type
-   *
-   * @param {boolean} isEmail
-   * @param {boolean} isPushNotifcation
-   * @returns {NotificationType}
-   */
-  getNotificationType(
-    isEmail: boolean,
-    isPushNotifcation: boolean,
-  ): NotificationType {
-    let notificationType: NotificationType;
+  // /**
+  //  * Get Notification type
+  //  *
+  //  * @param {boolean} isEmail
+  //  * @param {boolean} isPushNotifcation
+  //  * @returns {NotificationType}
+  //  */
+  // getNotificationType(
+  //   isEmail: boolean,
+  //   isPushNotifcation: boolean,
+  // ): NotificationType {
+  //   let notificationType: NotificationType;
 
-    if (isEmail && isPushNotifcation) {
-      notificationType = NotificationType.ALL;
-    } else if (isEmail) {
-      notificationType = NotificationType.EMAIL_NOTIFICATION;
-    } else if (isPushNotifcation) {
-      notificationType = NotificationType.PUSH_NOTIFICATION;
-    } else {
-      notificationType = NotificationType.SYSTEM_NOTIFICATION;
-    }
-    return notificationType;
-  }
+  //   if (isEmail && isPushNotifcation) {
+  //     notificationType = NotificationType.ALL;
+  //   } else if (isEmail) {
+  //     notificationType = NotificationType.EMAIL_NOTIFICATION;
+  //   } else if (isPushNotifcation) {
+  //     notificationType = NotificationType.PUSH_NOTIFICATION;
+  //   } else {
+  //     notificationType = NotificationType.SYSTEM_NOTIFICATION;
+  //   }
+  //   return notificationType;
+  // }
 
   /**
    * Save Notification Log

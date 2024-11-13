@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { NotificationResolver } from './notification.resolver';
 import { NotificationService, PushNotificationService } from './services';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -13,6 +13,8 @@ import { NotificationRepository } from './repositories';
 
 import { AdminNotificationPreferenceRepository } from './repositories/admin.repository';
 import { NotificationTokenRepository } from './repositories/notification-token.repository';
+
+@Global()
 @Module({
   imports: [TypeOrmModule.forFeature([Notification])],
   providers: [
