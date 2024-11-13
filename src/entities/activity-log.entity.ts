@@ -118,6 +118,18 @@ export class ActivityLog extends BaseEntity {
 
   @Field({ nullable: true })
   @Column({ nullable: true })
+  attributeId: string;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  attributeSetId: string;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  listingTypeId: string;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
   responseTemplateId: string;
 
   @Field({ nullable: true })

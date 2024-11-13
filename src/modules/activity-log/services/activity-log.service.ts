@@ -37,13 +37,15 @@ export class ActivityLogService {
             .orWhere('activityLog.listingId = :id', { id })
             .orWhere('activityLog.ticketId = :id', { id })
             .orWhere('activityLog.responseTemplateId = :id', { id })
-            .orWhere('activityLog.auctionId = :id', { id });
+            .orWhere('activityLog.auctionId = :id', { id })
+            .orWhere('activityLog.attributeId = :id', { id })
+            .orWhere('activityLog.listingTypeId = :id', { id })
+            .orWhere('activityLog.attributeSetId = :id', { id });
         } else {
           // Only perform these conditions if `id` is not a UUID (assumed to be an integer)
           const numericId = parseInt(id, 10);
           query
             .orWhere('activityLog.roleId = :id', { numericId })
-
             .orWhere('activityLog.articleId = :id', { id: numericId })
             .orWhere('activityLog.splashScreenId = :id', { id: numericId });
         }
