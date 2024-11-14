@@ -1,8 +1,4 @@
-/*
- * Copyright (c) 2024, Waseet LLC. All rights reserved.
- * For license. See license.txt
- */
-
+import { Field, ObjectType } from '@nestjs/graphql';
 import {
   Column,
   CreateDateColumn,
@@ -11,26 +7,25 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
-import { Field, ObjectType } from '@nestjs/graphql';
 
 @Entity()
 @ObjectType()
-export class AutoBid extends BaseEntity {
-  @Field()
+export class BidRegistration extends BaseEntity {
   @Column()
-  listingId: string;
+  @Field()
+  autoBid: boolean;
 
-  @Field()
   @Column()
+  @Field()
+  userId: string;
+
+  @Column()
+  @Field()
   auctionId: string;
 
-  @Field()
   @Column()
-  price: number;
-
   @Field()
-  @Column()
-  userId: string;
+  listingId: string;
 
   @Field()
   @CreateDateColumn()

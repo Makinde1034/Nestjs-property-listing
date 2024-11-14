@@ -63,7 +63,11 @@ import { ListingAttributes } from '../../../entities/listing-attributes.entity';
 import { ListingAttributeService } from '../services/listing-attributes.service';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { FlagListing } from '../../../entities/flag-listing.entity';
-import { CreateBidInput, FindBidInput } from '../dtos/request/bids';
+import {
+  BidRegistrationInput,
+  CreateBidInput,
+  FindBidInput,
+} from '../dtos/request/bids';
 import { Bids } from '../../../entities/bids.entity';
 import { AutoBid } from '../../../entities/auto-bid.entity';
 import { CreateAutoBidInput } from '../dtos/request/auto-bid';
@@ -72,6 +76,7 @@ import { UserTwoGuard } from '../../auth/guards/level-two.guard';
 import { Compare } from '../../../entities/compare.entity';
 import { Permissions } from '../../../common/decorator/permission';
 import { PermissionsEnum } from '../../../common/enums/permission.enum';
+import { BidRegistration } from '../../../entities/bid-registration.entity';
 
 @Resolver()
 export class ListingResolver {
@@ -658,6 +663,18 @@ export class ListingResolver {
   ) {
     return await this.auctionService.createAutoBidOnAuction(
       createAutoBidInput,
+      ctx.req.user,
+    );
+  }
+
+  @UseGuards(AccessTokenGuard, UserTwoGuard)
+  @Mutation(() => BidRegistration, { name: 'registerToBid' })
+  async registerToBid(
+    @Args('bidRegistrationInput') bidRegistrationInput: BidRegistrationInput,
+    @Context() ctx: any,
+  ) {
+    return await this.auctionService.registerToBid(
+      bidRegistrationInput,
       ctx.req.user,
     );
   }

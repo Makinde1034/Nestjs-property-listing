@@ -483,6 +483,10 @@ export class TicketService {
         .orWhere('user.arabicFirstName ILIKE :term', {
           term: `%${searchParam}%`,
         })
+
+        .orWhere('user.employeeId ILIKE :term', {
+          term: `%${searchParam}%`,
+        })
         .orWhere('parentIssue.arabicName ILIKE :term', {
           term: `%${searchParam}%`,
         })

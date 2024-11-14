@@ -861,6 +861,10 @@ export class UserService {
               .orWhere('user.userLevel ILIKE :term', {
                 term: `%${searchParam}%`,
               })
+
+              .orWhere('user.employeeId ILIKE :term', {
+                term: `%${searchParam}%`,
+              })
               .orWhere('user.email ILIKE :term', { term: `%${searchParam}%` })
               .orWhere('user.status ILIKE :term', { term: `%${searchParam}%` })
               .orWhere('user.employeeId ILIKE :term', {

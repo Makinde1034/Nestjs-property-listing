@@ -38,10 +38,11 @@ export class ListingTypeController {
   @Post('/attribute/upload')
   @UseGuards(RestAccessTokenGuard, PermissionsGuard)
   async uploadAttributeIcon(
-    @Query('attributId') attributId: string,
+    @Query('attributeId') attributeId: string,
     @UploadedFile() icon: Express.Multer.File,
   ): Promise<Attribute> {
-    return await this.attributeService.uploadAttributeIcon(attributId, icon);
+    console.log(attributeId);
+    return await this.attributeService.uploadAttributeIcon(attributeId, icon);
   }
 
   /**

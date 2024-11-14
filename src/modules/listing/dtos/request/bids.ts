@@ -4,7 +4,7 @@
  */
 
 import { Field, InputType } from '@nestjs/graphql';
-import { IsNumber, IsPositive, IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsPositive, IsString } from 'class-validator';
 @InputType()
 export class CreateBidInput {
   userId: string;
@@ -23,6 +23,28 @@ export class CreateBidInput {
   @Field()
   @IsString()
   listingId: string;
+
+  @Field()
+  @IsString()
+  reference: string;
+}
+@InputType()
+export class BidRegistrationInput {
+  @Field()
+  @IsString()
+  userId: string;
+
+  @Field()
+  @IsString()
+  auctionId: string;
+
+  @Field()
+  @IsString()
+  listingId: string;
+
+  @Field()
+  @IsString()
+  reference: string;
 }
 
 @InputType()

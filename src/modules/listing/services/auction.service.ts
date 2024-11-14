@@ -24,7 +24,11 @@ import { AppStrings } from '../../../common/messages/app.strings';
 
 import { removeDaysFromDate } from '../../../common/utils/helper';
 import { BidsRepository } from '../repositories/bids.repository';
-import { CreateBidInput, FindBidInput } from '../dtos/request/bids';
+import {
+  BidRegistrationInput,
+  CreateBidInput,
+  FindBidInput,
+} from '../dtos/request/bids';
 import { generateOtp } from '../../../common/utils/functions';
 import { User } from '../../../entities';
 import { AdminService } from '../../admin/services/admin.service';
@@ -58,6 +62,7 @@ import { AuctionParticipant } from '../../../entities/auction-participant.entity
 import { AuctionParticipantResponse } from '../dtos/response/listing.response';
 import { SseService } from '../../sse/client.service';
 import { ServerSentEvents } from '../../../common/enums';
+import { BidRegistrationRepository } from '../repositories/bid-registration.repository';
 
 @Injectable()
 export class AuctionService {
@@ -71,6 +76,8 @@ export class AuctionService {
     private readonly autoBidRepository: AutoBidRepository,
     private readonly storageService: StorageService,
     private readonly activityLogsService: ActivityLogService,
+
+    private readonly bidRegistrationRepository: BidRegistrationRepository,
 
     private readonly sseService: SseService,
   ) {}
@@ -652,6 +659,7 @@ export class AuctionService {
     user: User,
   ) {
     try {
+      const { reference, ...rest } = createAutoBidInput;
       //TODO: add payment check
       const [auction, listing] = await Promise.all([
         this.auctionRepository.findOneBy({ id: createAutoBidInput.auctionId }),
@@ -667,13 +675,11 @@ export class AuctionService {
       }
 
       const autoBid = await this.autoBidRepository.save({
-        ...createAutoBidInput,
+        ...rest,
         userId: user.id,
       });
 
-      if (autoBid) {
-        return autoBid;
-      }
+      return autoBid;
     } catch (error) {
       this.logger.error(error);
       if (error instanceof HttpException) {
@@ -711,7 +717,7 @@ export class AuctionService {
           .getOne(),
       ]);
 
-      const bidsToMake: CreateBidInput[] = autoBids.map((element) => {
+      const bidsToMake = autoBids.map((element) => {
         return {
           auctionparticipantId: auctionParticipant,
 
@@ -809,6 +815,32 @@ export class AuctionService {
           error.message || 'An unexpected error occurred during image upload',
         );
       }
+    }
+  }
+
+  async registerToBid(data: BidRegistrationInput, user: User) {
+    try {
+      const [auction, listing] = await Promise.all([
+        this.auctionRepository.findOneBy({ id: data.auctionId }),
+        this.listingRepository.findOneBy({ id: data.listingId }),
+      ]);
+
+      if (!auction) {
+        throw new BadRequestException('Auction not Found');
+      }
+
+      if (!listing) {
+        throw new BadRequestException('Listing not Found');
+      }
+
+      await this.bidRegistrationRepository.save({ ...data, userId: user.id });
+    } catch (error) {
+      this.logger.log(error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new BadRequestException(error);
     }
   }
 }
