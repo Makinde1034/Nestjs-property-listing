@@ -92,7 +92,9 @@ export class AttributeService {
   ): Promise<Attribute> {
     try {
       let imageUrl: string;
-      const attribute = await this.attributeRepository.findOneBy({ id });
+      const attribute = await this.attributeRepository.findOne({
+        where: { id },
+      });
 
       if (!attribute) {
         throw new BadRequestException(AppStrings.NOT_FOUND);
