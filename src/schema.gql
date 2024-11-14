@@ -235,6 +235,23 @@ type AuctionParticipant {
   updatedAt: DateTime!
 }
 
+type Invoice {
+  id: Float!
+  price: Float!
+  userId: String!
+  listing: Listing
+  listingType: ListingType
+  type: String!
+  status: String!
+  file: String
+  listingTypeId: String
+  listingId: String
+  vat: Float!
+  expireAt: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type Listing {
   id: ID!
   ownership: String
@@ -245,6 +262,7 @@ type Listing {
   poaNumber: String
   rentingOption: String
   auctionParticipant: AuctionParticipant!
+  invoice: Invoice
   listingType: ListingType
   listingTypeId: String
   gpsCoordinate: GpsCoordinate
@@ -340,6 +358,7 @@ type ListingType {
   listing: Listing!
   attributeSets: [AttributeSet!]
   createdAt: DateTime!
+  invoice: Invoice
   deletedAt: DateTime!
   updatedAt: DateTime!
 }
@@ -839,19 +858,6 @@ type AuctionParticipantResponse {
 type SearchHistoryResponse {
   searchHistory: [SearchHistory!]
   total: Int!
-}
-
-type Invoice {
-  id: Float!
-  price: Float!
-  userId: String!
-  type: String!
-  status: String!
-  file: String
-  vat: Float!
-  expireAt: DateTime!
-  createdAt: DateTime!
-  updatedAt: DateTime!
 }
 
 type InitiatePaymentResponse {

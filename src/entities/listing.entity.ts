@@ -29,6 +29,7 @@ import { ListingAttributes } from './listing-attributes.entity';
 import { GpsCoordinate } from './gps-coordinates.entity';
 import { AuctionParticipant } from './auction-participant.entity';
 import { ActivityLog } from './activity-log.entity';
+import { Invoice } from './invoice.entity';
 
 @Entity()
 @ObjectType()
@@ -68,6 +69,10 @@ export class Listing extends BaseEntity {
   @Field(() => AuctionParticipant)
   @OneToOne(() => AuctionParticipant, (listing) => listing.listing)
   auctionParticipant: AuctionParticipant;
+
+  @Field(() => Invoice, { nullable: true })
+  @OneToOne(() => Invoice, (invoice) => invoice.listing, { nullable: true })
+  invoice: Invoice;
 
   @Field(() => ListingType, { nullable: true })
   @JoinColumn({ name: 'listingTypeId' })
