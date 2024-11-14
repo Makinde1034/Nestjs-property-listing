@@ -57,7 +57,6 @@ export class NotificationService {
     private readonly eventEmitter: EventEmitter2,
     private readonly adminNotificationPreferenceRepository: AdminNotificationPreferenceRepository,
     private readonly configService: ConfigService,
-
     private readonly notificationScope: NotificationScopeRepository,
     private readonly sseService: SseService,
   ) {

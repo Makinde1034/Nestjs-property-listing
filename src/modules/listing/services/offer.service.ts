@@ -120,11 +120,11 @@ export class OfferService {
         );
       }
 
-      // if (user.id == listing.user.id) {
-      //   throw new BadRequestException(
-      //     'The creator of a listing cannot create an offer on  that listing',
-      //   );
-      // }
+      if (user.id == listing.user.id) {
+        throw new BadRequestException(
+          'The creator of a listing cannot create an offer on  that listing',
+        );
+      }
       if (offer.length > 0) {
         throw new BadRequestException(
           `Minimum Offer must be greater than ${offer[0].price}`,
@@ -185,9 +185,7 @@ export class OfferService {
         creatorId: user.id,
         receiverId: seller.id,
         scope: scope,
-        // event: NotificationScopesEnum.CREATE_OFFER,
         recipientFormat: ['Seller', 'Offer Creator'],
-        // type: 'offer',
       });
       return offerPayload;
     } catch (error) {
@@ -449,12 +447,9 @@ export class OfferService {
 
         this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
           creatorId: user.id,
-          receiverId: offer.listingUser_id,
+          receiverId: seller.id,
           scope: scope,
-          event: NotificationScopesEnum.UPDATE_OFFER,
           recipientFormat: ['Seller', 'Offer Creator'],
-          title: NotificationTitlesEnum.OFFER_EDITED,
-          type: 'offer',
         });
 
         //TODO: switch to event emitter
@@ -542,13 +537,20 @@ export class OfferService {
           );
 
           // Send notification (event emitter can be used here)
+          // this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
+          //   creatorId: user.id,
+          //   receiverId: offer.listing.user.id,
+          //   scope: notificationPreference,
+          //   event: NotificationScopesEnum.OFFER_RESPONSE,
+          //   recipientFormat: ['Seller', 'Offer Creator'],
+          //   type: null,
+          // });
+
           this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
             creatorId: user.id,
             receiverId: offer.listing.user.id,
             scope: notificationPreference,
-            event: NotificationScopesEnum.OFFER_RESPONSE,
             recipientFormat: ['Seller', 'Offer Creator'],
-            type: null,
           });
 
           // Return the updated offer
@@ -615,13 +617,20 @@ export class OfferService {
           );
 
           // Send notification (event emitter can be used here)
+          // this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
+          //   creatorId: user.id,
+          //   receiverId: offer.listing.user.id,
+          //   scope: notificationPreference,
+          //   event: NotificationScopesEnum.OFFER_RESPONSE,
+          //   recipientFormat: ['Seller', 'Offer Creator'],
+          //   type: null,
+          // });
+
           this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
             creatorId: user.id,
             receiverId: offer.listing.user.id,
             scope: notificationPreference,
-            event: NotificationScopesEnum.OFFER_RESPONSE,
             recipientFormat: ['Seller', 'Offer Creator'],
-            type: null,
           });
 
           // Return the updated offer
