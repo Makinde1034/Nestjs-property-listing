@@ -12,7 +12,7 @@ import { SendNotificationInput } from '../../../common/interface';
 
 @Injectable()
 export class NotificationEventListener {
-  private logger = new Logger(NotificationEventListener.name);
+  logger = new Logger(NotificationEventListener.name);
   constructor(private readonly notificationService: NotificationService) {}
 
   @OnEvent(NotificationEvent.SEND_NOTIFICATION, { async: true })
@@ -21,7 +21,8 @@ export class NotificationEventListener {
       `Started Handling ${NotificationEvent.SEND_NOTIFICATION} event.`,
       new Date(),
     );
-    await this.notificationService.sendNotification(payload);
+
+    await this.notificationService.prepareNotification(payload);
     this.logger.debug(
       `Finished Handling ${NotificationEvent.SEND_NOTIFICATION}`,
       new Date(),

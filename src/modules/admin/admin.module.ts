@@ -7,8 +7,17 @@ import { Global, Module } from '@nestjs/common';
 import { ListingRepository } from '../listing/repositories/listing.repository';
 import { UserRepository } from '../user/repositories';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ParentIssue, Listing, User, Ticket } from '../../entities';
-import { OfferRepository } from '../listing/repositories';
+import {
+  ParentIssue,
+  Listing,
+  User,
+  Ticket,
+  ListingType,
+} from '../../entities';
+import {
+  ListingTypeRepository,
+  OfferRepository,
+} from '../listing/repositories';
 import { Offer } from '../../entities/offer.entity';
 import { AdminResolver } from './resolver/admin.resolver';
 import { UserTrackingRepository } from '../user/repositories/user-tracking-repository';
@@ -30,6 +39,7 @@ import { WorkflowRepository } from './repositories/workflow.repository';
 import { AdminWorkflowService } from './services/admin-workflow.service';
 import { ActionRequestRepository } from './repositories/action.repository';
 import { ActionService } from './services/action.service';
+import { InvoiceRepository } from '../payment/repositories/invoice.repository';
 @Global()
 @Module({
   imports: [
@@ -42,6 +52,7 @@ import { ActionService } from './services/action.service';
       Ticket,
       SplashScreen,
       SplashScreen,
+      ListingType,
     ]),
   ],
   providers: [
@@ -65,6 +76,8 @@ import { ActionService } from './services/action.service';
     AdminWorkflowService,
     ActionRequestRepository,
     ActionService,
+    ListingTypeRepository,
+    InvoiceRepository,
   ],
   controllers: [SplashScreenController],
   exports: [

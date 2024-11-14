@@ -86,6 +86,11 @@ import { ActivityLogService } from '../../activity-log/services/activity-log.ser
 import { ActionService } from '../../admin/services/action.service';
 import { AdminWorkflowService } from '../../admin/services/admin-workflow.service';
 import { WorkflowActionStatus } from '../../../common/enums/status.enum';
+import { PushNotificationService } from '../../notification/services';
+import {
+  PushNotificationinput,
+  PushNotificationPayload,
+} from '../../../common/interface';
 
 @Injectable()
 export class UserService {
@@ -107,6 +112,7 @@ export class UserService {
     private readonly activityLogsService: ActivityLogService,
     private readonly actionService: ActionService,
     private readonly workflowService: AdminWorkflowService,
+    private readonly pushNotificationService: PushNotificationService,
   ) {
     this.frontEndUrl = this.configService.get('ADMIN_FRONTEND_URL');
   }
@@ -129,6 +135,19 @@ export class UserService {
       return user;
     } catch (error) {
       this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async setupNotification(payload: PushNotificationinput, user: User) {
+    try {
+      return await this.pushNotificationService.configureNotification(
+        payload,
+        user.id,
+      );
+    } catch (error) {
+      this.logger.log(error);
+
       throw new BadRequestException(error);
     }
   }
@@ -306,6 +325,7 @@ export class UserService {
         where: { id },
         relations,
       });
+      await this.createDefaultNotifications(user);
       return user;
     } catch (error) {
       this.logger.log(error);

@@ -10,7 +10,10 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ListingRepository } from '../../listing/repositories/listing.repository';
-import { OfferRepository } from '../../listing/repositories';
+import {
+  ListingTypeRepository,
+  OfferRepository,
+} from '../../listing/repositories';
 
 import { UserRepository } from '../../user/repositories';
 
@@ -70,6 +73,7 @@ import { AdminWorkflowService } from './admin-workflow.service';
 import { ActionService } from './action.service';
 import { TimePeriod } from '../../../common/enums/sort.enum';
 import { TransactionRepository } from '../../payment/repository/transaction.repository';
+import { InvoiceRepository } from '../../payment/repositories/invoice.repository';
 
 @Injectable()
 export class AdminService {
@@ -86,6 +90,8 @@ export class AdminService {
     private readonly workflowService: AdminWorkflowService,
     private readonly actionService: ActionService,
     private readonly transactionRepository: TransactionRepository,
+    private readonly listingTypeRepository: ListingTypeRepository,
+    private readonly invoiceRepository: InvoiceRepository,
   ) {}
 
   logger = new Logger(AdminService.name);
@@ -200,95 +206,44 @@ export class AdminService {
   }
 
   //TODO implement when payment gateway is completed
+  async saiiFees(findOptions: AdminDashboardSort) {
+    try {
+      console.log('here');
+      // Fetch all listing types and invoices
+      const [listingTypes, invoice] = await Promise.all([
+        this.listingTypeRepository.queryBuilder('listingType').getMany(),
+        this.invoiceRepository
+          .createQueryBuilder('invoice')
+          .where('invoice.listingType IS NOT NULL')
+          .getMany(),
+      ]);
 
-  saiiFees(findOptions: AdminDashboardSort) {
-    const saiiFees: SaiiFees = {
-      total: 95000 + findOptions.value,
-      group: [
-        { type: 'land', fees: 30000 },
-        { type: 'apartment', fees: 20000 },
-        { type: 'building', fees: 10000 },
+      // Calculate total sum of all invoices
+      const totalSum = invoice.reduce((acc, element) => acc + element.price, 0);
 
-        { type: 'farm', fees: 35000 },
-      ],
-    };
+      // Group invoices by listingType and calculate fees for each type
+      const feesByType = invoice.reduce((acc, element) => {
+        const type = element.listingType.englishName;
+        acc[type] = (acc[type] || 0) + element.price;
+        return acc;
+      }, {});
 
-    return saiiFees;
+      // Prepare grouped fees for each listing type
+      const group = listingTypes.map((value) => ({
+        type: value.englishName,
+        fees: feesByType[value.englishName] || 0,
+      }));
+
+      // Create the final result object
+      const saiiFees: SaiiFees = {
+        total: totalSum,
+        group: group,
+      };
+      return saiiFees;
+    } catch (error) {
+      console.log(error);
+    }
   }
-
-  // async financialVsOrder(findOptions: AdminDashboardSort) {
-  //   const oneYearAgo = subYears(new Date(), findOptions.value);
-  //   const startOfYearDate = startOfYear(oneYearAgo);
-  //   const endOfYearDate = endOfYear(oneYearAgo);
-
-  //   // Create a list of all quarters for the past year
-  //   const quarters = eachQuarterOfInterval({
-  //     start: startOfYearDate,
-  //     end: endOfYearDate,
-  //   }).map((date) => {
-  //     const year = date.getFullYear();
-  //     const quarter = Math.ceil((date.getMonth() + 1) / 3); // Calculate the quarter
-  //     return { year, quarter };
-  //   });
-  //   // Query for sold items in the past year
-  //   const soldItems = await this.listingRepository
-  //     .createQueryBuilder('listing')
-  //     .select('EXTRACT(YEAR FROM listing.soldDate)::int', 'year')
-  //     .addSelect('EXTRACT(QUARTER FROM listing.soldDate)::int', 'quarter')
-  //     .addSelect('SUM(listing.price)::float', 'totalSold')
-  //     .where('listing.soldDate BETWEEN :startOfYear AND :endOfYear', {
-  //       startOfYear: startOfYearDate,
-  //       endOfYear: endOfYearDate,
-  //     })
-  //     .groupBy('year, quarter')
-  //     .orderBy('year, quarter')
-  //     .getRawMany();
-
-  //   // Query for placed orders in the past year
-  //   const placedOrders = await this.offerRepository
-  //     .createQueryBuilder('offer')
-  //     .select('EXTRACT(YEAR FROM offer.createdAt)::int', 'year')
-  //     .addSelect('EXTRACT(QUARTER FROM offer.createdAt)::int', 'quarter')
-  //     .addSelect('SUM(offer.price)::float', 'totalOrdered')
-  //     .where('offer.createdAt BETWEEN :startOfYear AND :endOfYear', {
-  //       startOfYear: startOfYearDate,
-  //       endOfYear: endOfYearDate,
-  //     })
-  //     .groupBy('year, quarter')
-  //     .orderBy('year, quarter')
-  //     .getRawMany();
-
-  //   // Initialize the combined results with all quarters set to zero
-  //   const combined = quarters.reduce((acc, { year, quarter }) => {
-  //     acc[`${year}-Q${quarter}`] = {
-  //       year,
-  //       quarter,
-  //       totalSold: 0,
-  //       totalOrdered: 0,
-  //     };
-  //     return acc;
-  //   }, {});
-
-  //   // Update combined results with actual data
-  //   soldItems.forEach((item) => {
-  //     const key = `${item.year}-Q${item.quarter}`;
-  //     if (combined[key]) {
-  //       combined[key].totalSold = parseFloat(item.totalSold);
-  //     }
-  //   });
-
-  //   placedOrders.forEach((item) => {
-  //     const key = `${item.year}-Q${item.quarter}`;
-  //     if (combined[key]) {
-  //       combined[key].totalOrdered = parseFloat(item.totalOrdered);
-  //     }
-  //   });
-
-  //   // Convert the combined results object to an array
-  //   const result: FinancialVsOrder[] = Object.values(combined);
-
-  //   return result;
-  // }
 
   async financialVsOrder(findOptions: AdminDashboardSort) {
     const currentDate = new Date();

@@ -21,7 +21,7 @@ export class AppController {
   ) {}
 
   logger = new Logger();
-  @Sse('/notifcation')
+  @Sse('/notification')
   @Public()
   async sendNotification(
     @Query('userId') userId: string,

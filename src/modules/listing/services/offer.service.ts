@@ -30,7 +30,10 @@ import {
   NotificationScopeRepository,
   UserRepository,
 } from '../../user/repositories';
-import { NotificationScopesEnum } from '../../../common/enums/notification-scope.enum';
+import {
+  NotificationScopesEnum,
+  NotificationTitlesEnum,
+} from '../../../common/enums/notification-scope.enum';
 
 import { AuctionEnum, OfferListEnum } from '../../../common/enums/status.enum';
 import { AdminService } from '../../admin/services/admin.service';
@@ -46,9 +49,9 @@ import { NotificationEvent } from '../../../common/enums';
 export class OfferService {
   constructor(
     private readonly offerRepository: OfferRepository,
-    private paymentService: PaymentService,
-    private listingService: ListingService,
-    private userRepository: UserRepository,
+    private readonly paymentService: PaymentService,
+    private readonly listingService: ListingService,
+    private readonly userRepository: UserRepository,
     private readonly notificationScopeRepository: NotificationScopeRepository,
     private readonly adminDefaultService: AdminService,
     private readonly listingRepository: ListingRepository,
@@ -176,14 +179,13 @@ export class OfferService {
           }
         },
       );
+
       //TODO:switch to an emited event
       this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
         creatorId: user.id,
         receiverId: seller.id,
         scope: scope,
-        event: NotificationScopesEnum.CREATE_OFFER,
         recipientFormat: ['Seller', 'Offer Creator'],
-        type: 'offer',
       });
       return offerPayload;
     } catch (error) {
@@ -445,11 +447,9 @@ export class OfferService {
 
         this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
           creatorId: user.id,
-          receiverId: offer.listingUser_id,
+          receiverId: seller.id,
           scope: scope,
-          event: NotificationScopesEnum.UPDATE_OFFER,
           recipientFormat: ['Seller', 'Offer Creator'],
-          type: 'offer',
         });
 
         //TODO: switch to event emitter
@@ -532,18 +532,25 @@ export class OfferService {
           const notificationPreference = await entityManager.findOne(
             NotificationScope,
             {
-              where: { name: NotificationScopesEnum.RESPONSE },
+              where: { name: NotificationScopesEnum.OFFER_RESPONSE },
             },
           );
 
           // Send notification (event emitter can be used here)
+          // this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
+          //   creatorId: user.id,
+          //   receiverId: offer.listing.user.id,
+          //   scope: notificationPreference,
+          //   event: NotificationScopesEnum.OFFER_RESPONSE,
+          //   recipientFormat: ['Seller', 'Offer Creator'],
+          //   type: null,
+          // });
+
           this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
             creatorId: user.id,
             receiverId: offer.listing.user.id,
             scope: notificationPreference,
-            event: NotificationScopesEnum.RESPONSE,
             recipientFormat: ['Seller', 'Offer Creator'],
-            type: null,
           });
 
           // Return the updated offer
@@ -605,18 +612,25 @@ export class OfferService {
           const notificationPreference = await entityManager.findOne(
             NotificationScope,
             {
-              where: { name: NotificationScopesEnum.RESPONSE },
+              where: { name: NotificationScopesEnum.OFFER_RESPONSE },
             },
           );
 
           // Send notification (event emitter can be used here)
+          // this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
+          //   creatorId: user.id,
+          //   receiverId: offer.listing.user.id,
+          //   scope: notificationPreference,
+          //   event: NotificationScopesEnum.OFFER_RESPONSE,
+          //   recipientFormat: ['Seller', 'Offer Creator'],
+          //   type: null,
+          // });
+
           this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
             creatorId: user.id,
             receiverId: offer.listing.user.id,
             scope: notificationPreference,
-            event: NotificationScopesEnum.RESPONSE,
             recipientFormat: ['Seller', 'Offer Creator'],
-            type: null,
           });
 
           // Return the updated offer

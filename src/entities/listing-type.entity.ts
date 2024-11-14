@@ -12,12 +12,14 @@ import {
   JoinTable,
   ManyToMany,
   OneToMany,
+  OneToOne,
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
 import { AttributeSet } from './attribute-set.entity';
 import { Listing } from './listing.entity';
 import { ActivityLog } from './activity-log.entity';
+import { Invoice } from './invoice.entity';
 
 @Entity()
 @ObjectType()
@@ -52,6 +54,10 @@ export class ListingType extends BaseEntity {
   @Field()
   @CreateDateColumn()
   createdAt: Date;
+
+  @Field(() => Invoice, { nullable: true })
+  @OneToOne(() => Invoice, (invoice) => invoice.listingType)
+  invoice: Invoice;
 
   @Field()
   @DeleteDateColumn()

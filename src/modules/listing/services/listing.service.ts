@@ -23,7 +23,7 @@ import {
   ListingImageInput,
   UpdateListingDto,
 } from '../dtos/request/listing.dto';
-import { Attribute, Listing, User } from '../../../entities';
+import { Attribute, Listing, NotificationScope, User } from '../../../entities';
 
 import { ForbiddenError } from '@nestjs/apollo';
 import { StorageService } from '../../file-handler/services/storage.service';
@@ -65,7 +65,7 @@ import { NotificationService } from '../../notification/services';
 import { AttributeService } from './attribute.service';
 import { ListingAttributeRepository } from '../repositories/listing-attributes.repository';
 import { ListingTypeService } from './listing-type.service';
-import { FurnishingStatusEnum } from '../../../common/enums';
+import { FurnishingStatusEnum, NotificationEvent } from '../../../common/enums';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { GpsCoordinateRepository } from '../repositories/gps-coordinate.repository';
 import { AttributeRepository } from '../repositories';
@@ -75,6 +75,9 @@ import { ActivityLogService } from '../../activity-log/services/activity-log.ser
 import { ActivityEnum } from '../../../common/enums/activitys';
 import { Feature } from '../../../entities/feature.entity';
 import { CompareRepository } from '../repositories/compare.repository';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { NotificationScopeRepository } from '../../user/repositories';
+import { NotificationScopesEnum } from '../../../common/enums/notification-scope.enum';
 
 @Injectable()
 export class ListingService {
@@ -98,6 +101,8 @@ export class ListingService {
     private readonly compareRepository: CompareRepository,
 
     private readonly activityLogsService: ActivityLogService,
+    private readonly eventEmitter: EventEmitter2,
+    private readonly notificationScopeRepository: NotificationScopeRepository,
   ) {}
   logger = new Logger(ListingService.name);
 
@@ -251,6 +256,22 @@ export class ListingService {
       const [listing, count] = await query.getManyAndCount();
       const result = listing.map((element) => {
         return this.transformListing(element);
+      });
+
+      const notificationPreference =
+        await this.notificationScopeRepository.find();
+      const scope: NotificationScope = notificationPreference.find(
+        (element) => {
+          if (element.name == NotificationScopesEnum.LISTING_CREATED) {
+            return element;
+          }
+        },
+      );
+
+      this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+        creatorId: user.id,
+        scope: scope,
+        recipientFormat: ['Owner', null],
       });
 
       return { listing: result, total: count };

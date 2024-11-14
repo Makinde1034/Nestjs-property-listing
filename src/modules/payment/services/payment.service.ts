@@ -145,7 +145,11 @@ export class PaymentService {
         listingid: listing.id,
       };
 
-      const invoice = await this.invoiceRepository.save(payload);
+      const invoice = await this.invoiceRepository.save({
+        ...payload,
+        listingType: listing.listingType,
+        listing,
+      });
 
       const qrcode = await this.qrcodeService.generateQrCode(
         `${this.appDefaultConfig.customerFrontEndUrl}?${invoice.id}`,

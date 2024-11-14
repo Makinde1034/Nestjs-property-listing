@@ -5,7 +5,10 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import * as firebase from 'firebase-admin';
-import { PushNotificationPayload } from 'src/common/interface';
+import {
+  PushNotificationinput,
+  PushNotificationPayload,
+} from 'src/common/interface';
 import StorageConfig from '../../../database/seeders/config/serviceAccount/storage-config';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { NotificationTokenRepository } from '../repositories/notification-token.repository';
@@ -84,7 +87,7 @@ export class PushNotificationService {
   }
 
   async configureNotification(
-    notification: PushNotificationPayload,
+    notification: PushNotificationinput,
     userId: string,
   ) {
     const userNotificationToken =
@@ -112,7 +115,6 @@ export class PushNotificationService {
           },
         );
       }
-
       return new SuccessResponse();
     }
   }

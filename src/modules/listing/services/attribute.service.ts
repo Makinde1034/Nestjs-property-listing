@@ -227,6 +227,7 @@ export class AttributeService {
    * @param {AttributeDeleteInput} data
    * @returns {Promise<string>}
    */
+
   async deleteAttribute(data: AttributeDeleteInput): Promise<string> {
     const attribute = await this.attributeRepository.findOneOrFail({
       where: { id: data.id },

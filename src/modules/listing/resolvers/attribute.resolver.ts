@@ -80,7 +80,6 @@ export class AttributeResolver {
 
   /**
    * Delete Attribute
-   *
    * @async
    * @param {AttributeDeleteInput} RequestInput
    * @returns {Promise<string>}

@@ -242,7 +242,6 @@ export class User extends BaseEntity {
     (preference) => preference.user,
     {
       cascade: true,
-      eager: true,
     },
   )
   notificationPreference: UserNotificationPreference[];
@@ -253,7 +252,6 @@ export class User extends BaseEntity {
     eager: true,
   })
   searchHistory: SearchHistory;
-
   @Exclude()
   @Field({ nullable: true })
   @Column({ nullable: true })

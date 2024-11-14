@@ -29,6 +29,10 @@ import {
   UserUpgradeInput,
 } from '../dtos/response/nafath';
 import { PermissionsEnum } from '../../../common/enums/permission.enum';
+import {
+  PushNotificationinput,
+  PushNotificationPayload,
+} from '../../../common/interface';
 @Resolver()
 export class UserResolver {
   constructor(private readonly userService: UserService) {}
@@ -181,6 +185,21 @@ export class UserResolver {
   ): Promise<NafathAuthenticationResponseToUser> {
     return await this.userService.verifyUser(userUpgradeInput, ctx.req.user);
   }
+
+  @Mutation(() => SuccessResponse)
+  @UseGuards(AccessTokenGuard)
+  @Public()
+  async setUpNotification(
+    @Args('pushNotificationPayload')
+    pushNotificationInput: PushNotificationinput,
+    @Context() ctx: any,
+  ) {
+    return await this.userService.setupNotification(
+      pushNotificationInput,
+      ctx.req.user,
+    );
+  }
+
   /**
    * Block User
    *
