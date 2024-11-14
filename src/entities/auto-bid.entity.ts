@@ -26,6 +26,10 @@ export class AutoBid extends BaseEntity {
 
   @Field()
   @Column()
+  price: number;
+
+  @Field()
+  @Column()
   userId: string;
 
   @Field()

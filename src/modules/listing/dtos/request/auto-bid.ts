@@ -4,9 +4,14 @@
  */
 
 import { Field, InputType } from '@nestjs/graphql';
-import { IsString } from 'class-validator';
+import { IsNumber, IsPositive, IsString } from 'class-validator';
 @InputType()
 export class CreateAutoBidInput {
+  @Field()
+  @IsNumber()
+  @IsPositive()
+  price: number;
+
   @Field()
   @IsString()
   listingId: string;
@@ -14,4 +19,8 @@ export class CreateAutoBidInput {
   @Field()
   @IsString()
   auctionId: string;
+
+  @Field()
+  @IsString()
+  reference: string;
 }

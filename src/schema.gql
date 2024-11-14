@@ -803,6 +803,7 @@ type AutoBid {
   id: ID!
   listingId: String!
   auctionId: String!
+  price: Float!
   userId: String!
   createdAt: DateTime!
   deletedAt: DateTime!
@@ -1879,11 +1880,14 @@ input CreateBidInput {
   price: Float!
   auctionId: String!
   listingId: String!
+  reference: String!
 }
 
 input CreateAutoBidInput {
+  price: Float!
   listingId: String!
   auctionId: String!
+  reference: String!
 }
 
 input CreateAdPackageInput {

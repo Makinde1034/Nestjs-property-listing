@@ -652,6 +652,7 @@ export class AuctionService {
     user: User,
   ) {
     try {
+      const { reference, ...rest } = createAutoBidInput;
       //TODO: add payment check
       const [auction, listing] = await Promise.all([
         this.auctionRepository.findOneBy({ id: createAutoBidInput.auctionId }),
@@ -667,13 +668,11 @@ export class AuctionService {
       }
 
       const autoBid = await this.autoBidRepository.save({
-        ...createAutoBidInput,
+        ...rest,
         userId: user.id,
       });
 
-      if (autoBid) {
-        return autoBid;
-      }
+      return autoBid;
     } catch (error) {
       this.logger.error(error);
       if (error instanceof HttpException) {
@@ -711,7 +710,7 @@ export class AuctionService {
           .getOne(),
       ]);
 
-      const bidsToMake: CreateBidInput[] = autoBids.map((element) => {
+      const bidsToMake = autoBids.map((element) => {
         return {
           auctionparticipantId: auctionParticipant,
 
