@@ -810,6 +810,17 @@ type AutoBid {
   updatedAt: DateTime!
 }
 
+type BidRegistration {
+  id: ID!
+  autoBid: Boolean!
+  userId: String!
+  auctionId: String!
+  listingId: String!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type ListingResponse {
   listing: [Listing!]!
   total: Int!
@@ -1426,6 +1437,7 @@ type Mutation {
   stopPromotion(id: String!): SuccessResponse!
   createBid(createBidInput: CreateBidInput!): Bids!
   autoBidOnAuction(createAutoBidInput: CreateAutoBidInput!): AutoBid!
+  registerToBid(bidRegistrationInput: BidRegistrationInput!): BidRegistration!
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!
@@ -1887,6 +1899,13 @@ input CreateAutoBidInput {
   price: Float!
   listingId: String!
   auctionId: String!
+  reference: String!
+}
+
+input BidRegistrationInput {
+  userId: String!
+  auctionId: String!
+  listingId: String!
   reference: String!
 }
 

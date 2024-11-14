@@ -54,6 +54,7 @@ import { AutoBidRepository } from './repositories/auto-bid.repository';
 import { AutoBid } from '../../entities/auto-bid.entity';
 import { AuctionBidRangeRepository } from './repositories/auction-bid-range.repository';
 import { CompareRepository } from './repositories/compare.repository';
+import { BidRegistrationRepository } from './repositories/bid-registration.repository';
 
 @Module({
   imports: [
@@ -112,6 +113,7 @@ import { CompareRepository } from './repositories/compare.repository';
     AutoBidRepository,
     AuctionBidRangeRepository,
     CompareRepository,
+    BidRegistrationRepository,
   ],
   exports: [ListingTypeService],
 })

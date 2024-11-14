@@ -28,6 +28,24 @@ export class CreateBidInput {
   @IsString()
   reference: string;
 }
+@InputType()
+export class BidRegistrationInput {
+  @Field()
+  @IsString()
+  userId: string;
+
+  @Field()
+  @IsString()
+  auctionId: string;
+
+  @Field()
+  @IsString()
+  listingId: string;
+
+  @Field()
+  @IsString()
+  reference: string;
+}
 
 @InputType()
 export class FindBidInput {
