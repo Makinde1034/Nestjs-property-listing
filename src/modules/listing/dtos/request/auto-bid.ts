@@ -8,11 +8,6 @@ import { IsNumber, IsPositive, IsString } from 'class-validator';
 @InputType()
 export class CreateAutoBidInput {
   @Field()
-  @IsNumber()
-  @IsPositive()
-  price: number;
-
-  @Field()
   @IsString()
   listingId: string;
 
