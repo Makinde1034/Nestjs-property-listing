@@ -30,11 +30,19 @@ export class WorkFlowResolver {
   ) {
     return await this.workFlowService.createWorkFlow(createWorkflowInput);
   }
+
   @UseGuards(PermissionsGuard)
   @Permissions(PermissionsEnum.WORKFLOW_READ)
   @Query(() => WorkFlowResponse)
   async findAllWorkFlow(@Args('findOption') findOption: WorkflowInputFilter) {
     return await this.workFlowService.findAllWorkflow(findOption);
+  }
+
+  @UseGuards(PermissionsGuard)
+  @Permissions(PermissionsEnum.WORKFLOW_READ)
+  @Query(() => SuccessResponse)
+  async findAllDocument() {
+    return await this.workFlowService.findAllDocument();
   }
 
   @UseGuards(PermissionsGuard)
@@ -47,7 +55,9 @@ export class WorkFlowResolver {
   @UseGuards(PermissionsGuard)
   @Permissions(PermissionsEnum.WORKFLOW_EDIT)
   @Mutation(() => WorkFlow)
-  async updateWorkFlow(updateWorkFlowInput: UpdateWorkflowInput) {
+  async updateWorkFlow(
+    @Args('updateWorkFlowInput') updateWorkFlowInput: UpdateWorkflowInput,
+  ) {
     return await this.workFlowService.update(updateWorkFlowInput);
   }
   @UseGuards(PermissionsGuard)
