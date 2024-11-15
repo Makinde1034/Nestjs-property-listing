@@ -78,6 +78,7 @@ export class RoleService {
           adminId: user.id,
           action: ActivityEnum.DELETED,
           roleId: element.id,
+          details: JSON.stringify(element),
         };
       });
 

@@ -303,6 +303,8 @@ export class TicketService {
       // Log activity for each ticket updated
       const activityToSave = updatedTickets.map((element) => ({
         adminId: user.id,
+
+        details: JSON.stringify(element),
         action: ActivityEnum.UPDATED,
         ticketId: element.id,
       }));
@@ -403,6 +405,7 @@ export class TicketService {
           adminId: admin.id,
           action: ActivityEnum.DELETED,
           responseTemplateId: element.id,
+          details: JSON.stringify(element),
         };
       });
 
