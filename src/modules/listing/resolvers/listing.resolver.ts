@@ -77,6 +77,7 @@ import { Compare } from '../../../entities/compare.entity';
 import { Permissions } from '../../../common/decorator/permission';
 import { PermissionsEnum } from '../../../common/enums/permission.enum';
 import { BidRegistration } from '../../../entities/bid-registration.entity';
+import { AuctionBidRange } from '../../../entities/auction-bid-range.entity';
 
 @Resolver()
 export class ListingResolver {
@@ -677,6 +678,11 @@ export class ListingResolver {
       bidRegistrationInput,
       ctx.req.user,
     );
+  }
+  @UseGuards(AccessTokenGuard, UserTwoGuard)
+  @Query(() => [AuctionBidRange], { name: 'bidRange' })
+  async bidRange() {
+    return await this.auctionService.bidRange();
   }
 
   @Query(() => [Listing], { name: 'searchForListing' })

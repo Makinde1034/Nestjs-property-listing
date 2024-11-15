@@ -155,13 +155,15 @@ export class ListingTypeService {
     data: ListingTypeDeleteInput,
     admin: User,
   ): Promise<string> {
+    const listingType = await this.listingTypeRepository.findById(data.id);
     await this.listingTypeRepository.softDelete(data.id);
 
     await this.activityLogService.logActivity([
       {
         adminId: admin.id,
         action: ActivityEnum.DELETED,
-        listingTypeId: data.id,
+        listingTypeId: listingType.id,
+        details: JSON.stringify(listingType),
       },
     ]);
     return AppStrings.LISTINGTYPE_DELETED_SUCCESSFULLY;

@@ -83,9 +83,9 @@ export class SplashScreenService {
           adminId: admin.id,
           action: ActivityEnum.CREATED,
 
-          details: JSON.stringify(SplashScreen),
+          details: JSON.stringify(data),
 
-          splashScreenId: splashScreen.id,
+          splashScreenId: data.id,
         },
       ]);
 
@@ -193,7 +193,7 @@ export class SplashScreenService {
           {
             adminId: admin.id,
             action: ActivityEnum.UPDATED,
-            details: JSON.stringify(SplashScreen),
+            details: JSON.stringify(splashScreen),
             splashScreenId: splashScreen.id,
           },
         ]);

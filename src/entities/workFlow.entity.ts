@@ -23,6 +23,10 @@ export class WorkFlow extends BaseEntity {
   @Field()
   isActive: boolean;
 
+  @Field({ nullable: true })
+  @Column()
+  action: string;
+
   @Column()
   @Field()
   numberOfApproval: number;

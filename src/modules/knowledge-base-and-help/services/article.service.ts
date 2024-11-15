@@ -249,6 +249,7 @@ export class ArticleService {
           adminId: user.id,
           action: ActivityEnum.UPDATED,
           articleId: article.id,
+          details: JSON.stringify(updatedArticle),
         },
       ]);
 

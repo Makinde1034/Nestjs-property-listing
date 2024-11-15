@@ -791,6 +791,19 @@ export class AuctionService {
     }
   }
 
+  async bidRange() {
+    try {
+      const data = await this.auctionBidRangeRepository
+        .createQueryBuilder('AuctionBidRange')
+        .getMany();
+
+      return data;
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
   async uploadAuctionImage(id: string, file: Express.Multer.File[]) {
     try {
       const listing = await this.auctionRepository.findOne({ where: { id } });
