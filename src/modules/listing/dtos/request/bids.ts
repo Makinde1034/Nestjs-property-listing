@@ -32,15 +32,15 @@ export class CreateBidInput {
 export class BidRegistrationInput {
   @Field()
   @IsString()
-  userId: string;
-
-  @Field()
-  @IsString()
   auctionId: string;
 
   @Field()
   @IsString()
   listingId: string;
+
+  @Field()
+  @IsBoolean()
+  autoBid: boolean;
 
   @Field()
   @IsString()
