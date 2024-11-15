@@ -55,7 +55,9 @@ export class WorkFlowResolver {
   @UseGuards(PermissionsGuard)
   @Permissions(PermissionsEnum.WORKFLOW_EDIT)
   @Mutation(() => WorkFlow)
-  async updateWorkFlow(updateWorkFlowInput: UpdateWorkflowInput) {
+  async updateWorkFlow(
+    @Args('updateWorkFlowInput') updateWorkFlowInput: UpdateWorkflowInput,
+  ) {
     return await this.workFlowService.update(updateWorkFlowInput);
   }
   @UseGuards(PermissionsGuard)
