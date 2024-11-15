@@ -11,7 +11,7 @@ import { WorkFlowResponse } from '../dto/response/workflow';
 import { UseGuards } from '@nestjs/common';
 import { Permissions } from '../../../common/decorator/permission';
 import { PermissionsEnum } from '../../../common/enums/permission.enum';
-import { PermissionsGuard } from '../../auth/guards';
+import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
 import { ActionService } from '../services/action.service';
 import { SuccessResponse } from '../../../common/utils/success.response';
 
@@ -72,5 +72,13 @@ export class WorkFlowResolver {
   @Mutation(() => WorkFlow)
   async deleteWorkFlow(id: string) {
     return await this.workFlowService.delete(id);
+  }
+
+  @Permissions(PermissionsEnum.KNOWLEDGE_BASE_READ)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Query(() => [WorkFlow], { name: 'searchForworkflow' })
+  @UseGuards(AccessTokenGuard)
+  async searchForworkflow(@Args('searchParam') searchParam: string) {
+    return await this.workFlowService.searchForworkflow(searchParam);
   }
 }
