@@ -87,4 +87,20 @@ export class AdminWorkflowService {
       throw new BadRequestException(error);
     }
   }
+
+  async searchForworkflow(searchParam: string) {
+    try {
+      return await this.workflowRepository
+        .createQueryBuilder('workflow')
+
+        .where('workflow.name ILIKE :term', { term: `%${searchParam}%` })
+        .orWhere('workflow.document ILIKE :term', { term: `%${searchParam}%` })
+
+        .take(10)
+        .getMany();
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
 }

@@ -1114,6 +1114,7 @@ type Query {
   findAllWorkFlow(findOption: WorkflowInputFilter!): WorkFlowResponse!
   findAllDocument: SuccessResponse!
   findOneWorkFlow(id: String!): WorkFlow!
+  searchForworkflow(searchParam: String!): [WorkFlow!]!
   getChat(chatFilterInput: ChatFilterInput!): MessageResponse!
   findAllcategories(findOption: CategoryFilterInput): CategoryResponse!
   placement: String!
