@@ -5,9 +5,15 @@ import {
   UpdateWorkflowInput,
   WorkflowInputFilter,
 } from '../dto/request/workflow';
+import { DataSource } from 'typeorm';
+import { SuccessResponse } from '../../../common/utils/success.response';
+import { AppStrings } from '../../../common/messages/app.strings';
 @Injectable()
 export class AdminWorkflowService {
-  constructor(private readonly workflowRepository: WorkflowRepository) {}
+  constructor(
+    private readonly workflowRepository: WorkflowRepository,
+    private readonly dataSource: DataSource,
+  ) {}
   logger = new Logger(AdminWorkflowService.name);
   async createWorkFlow(createWorkFlowInput: CreateWorkflowInput) {
     try {
@@ -23,6 +29,20 @@ export class AdminWorkflowService {
       const [workflow, total] = await this.workflowRepository.findAndCount({});
 
       return { workflow, total };
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async findAllDocument(): Promise<SuccessResponse> {
+    try {
+      // Get all entity metadata and map to table names
+      const data = this.dataSource.entityMetadatas.map(
+        (metadata) => metadata.tableName,
+      );
+
+      return new SuccessResponse(AppStrings.SUCCESSFULL, data);
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);

@@ -40,6 +40,13 @@ export class WorkFlowResolver {
 
   @UseGuards(PermissionsGuard)
   @Permissions(PermissionsEnum.WORKFLOW_READ)
+  @Query(() => SuccessResponse)
+  async findAllDocument() {
+    return await this.workFlowService.findAllDocument();
+  }
+
+  @UseGuards(PermissionsGuard)
+  @Permissions(PermissionsEnum.WORKFLOW_READ)
   @Query(() => WorkFlow)
   async findOneWorkFlow(@Args('id') id: string) {
     return await this.workFlowService.findOneWorkflow(id);

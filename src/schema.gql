@@ -1112,6 +1112,7 @@ type Query {
   financialVsOrder(findOptions: AdminDashboardSort!): [FinancialVsOrder!]!
   fetchCoupons: [Coupon!]!
   findAllWorkFlow(findOption: WorkflowInputFilter!): WorkFlowResponse!
+  findAllDocument: SuccessResponse!
   findOneWorkFlow(id: String!): WorkFlow!
   getChat(chatFilterInput: ChatFilterInput!): MessageResponse!
   findAllcategories(findOption: CategoryFilterInput): CategoryResponse!
