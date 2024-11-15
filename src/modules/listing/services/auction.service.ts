@@ -833,7 +833,10 @@ export class AuctionService {
         throw new BadRequestException('Listing not Found');
       }
 
-      await this.bidRegistrationRepository.save({ ...data, userId: user.id });
+      return await this.bidRegistrationRepository.save({
+        ...data,
+        userId: user.id,
+      });
     } catch (error) {
       this.logger.log(error);
 

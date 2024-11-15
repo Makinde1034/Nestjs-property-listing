@@ -1902,9 +1902,9 @@ input CreateAutoBidInput {
 }
 
 input BidRegistrationInput {
-  userId: String!
   auctionId: String!
   listingId: String!
+  autoBid: Boolean!
   reference: String!
 }
 
