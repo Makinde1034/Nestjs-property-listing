@@ -1440,6 +1440,7 @@ type Mutation {
   createBid(createBidInput: CreateBidInput!): Bids!
   autoBidOnAuction(createAutoBidInput: CreateAutoBidInput!): AutoBid!
   registerToBid(bidRegistrationInput: BidRegistrationInput!): BidRegistration!
+  bidRange: BidRegistration!
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!

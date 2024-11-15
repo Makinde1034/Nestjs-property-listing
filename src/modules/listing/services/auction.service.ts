@@ -790,6 +790,16 @@ export class AuctionService {
       throw new BadRequestException(error);
     }
   }
+  async bidRange() {
+    try {
+      return await this.auctionRepository
+        .createQueryBuilder('AuctionBidRange')
+        .getMany();
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
 
   async uploadAuctionImage(id: string, file: Express.Multer.File[]) {
     try {

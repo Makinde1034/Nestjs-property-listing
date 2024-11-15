@@ -678,6 +678,11 @@ export class ListingResolver {
       ctx.req.user,
     );
   }
+  @UseGuards(AccessTokenGuard, UserTwoGuard)
+  @Mutation(() => BidRegistration, { name: 'bidRange' })
+  async bidRange() {
+    return await this.auctionService.bidRange();
+  }
 
   @Query(() => [Listing], { name: 'searchForListing' })
   @UseGuards(AccessTokenGuard)
