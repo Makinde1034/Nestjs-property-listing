@@ -799,6 +799,16 @@ type Coupon {
   updatedAt: DateTime!
 }
 
+type AuctionBidRange {
+  id: ID!
+  lowerBound: Float!
+  upperBound: Float!
+  increment: Float!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type AutoBid {
   id: ID!
   listingId: String!
@@ -1081,6 +1091,7 @@ type Query {
   getAllAuction(findManyOption: AdminAuctionFilter!): AuctionResponse!
   getListingsAuction(findManyOption: PaginateAndSort!): AuctionParticipantResponse!
   findNewestBid(findBidInput: FindBidInput!): [Bids!]!
+  bidRange: [AuctionBidRange!]!
   searchForListing(searchParam: String!): [Listing!]!
   searchForAuction(searchParam: String!): [Auction!]!
   adPackages: [AdPackage!]!
@@ -1440,7 +1451,6 @@ type Mutation {
   createBid(createBidInput: CreateBidInput!): Bids!
   autoBidOnAuction(createAutoBidInput: CreateAutoBidInput!): AutoBid!
   registerToBid(bidRegistrationInput: BidRegistrationInput!): BidRegistration!
-  bidRange: BidRegistration!
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!

@@ -792,9 +792,11 @@ export class AuctionService {
   }
   async bidRange() {
     try {
-      return await this.auctionRepository
+      const data = await this.auctionBidRangeRepository
         .createQueryBuilder('AuctionBidRange')
         .getMany();
+
+      return data;
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
