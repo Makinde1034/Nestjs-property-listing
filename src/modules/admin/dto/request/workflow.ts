@@ -12,12 +12,12 @@ export class CreateWorkflowInput {
   document: string;
 
   @Field()
-  @IsBoolean()
-  isActive: boolean;
-
-  @Field()
   @IsString()
   action: string;
+
+  @Field()
+  @IsBoolean()
+  isActive: boolean;
 
   @Field()
   @IsNumber()

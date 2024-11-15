@@ -2070,8 +2070,8 @@ input DeactivateCouponInput {
 input CreateWorkflowInput {
   name: String!
   document: String!
-  isActive: Boolean!
   action: String!
+  isActive: Boolean!
   numberOfApproval: Float!
   approvalOneRole: [String!]!
   approvalTwoRole: [String!]!
@@ -2080,8 +2080,8 @@ input CreateWorkflowInput {
 input UpdateWorkflowInput {
   name: String
   document: String
-  isActive: Boolean
   action: String
+  isActive: Boolean
   numberOfApproval: Float
   approvalOneRole: [String!]
   approvalTwoRole: [String!]
