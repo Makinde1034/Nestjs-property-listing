@@ -16,6 +16,10 @@ export class CreateWorkflowInput {
   isActive: boolean;
 
   @Field()
+  @IsString()
+  action: string;
+
+  @Field()
   @IsNumber()
   numberOfApproval: number;
 
@@ -27,7 +31,6 @@ export class CreateWorkflowInput {
   @IsArray()
   approvalTwoRole: string[];
 }
-
 @InputType()
 export class UpdateWorkflowInput extends PartialType(CreateWorkflowInput) {
   @Field()

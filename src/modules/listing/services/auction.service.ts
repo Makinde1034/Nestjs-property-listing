@@ -790,6 +790,7 @@ export class AuctionService {
       throw new BadRequestException(error);
     }
   }
+
   async bidRange() {
     try {
       const data = await this.auctionBidRangeRepository
