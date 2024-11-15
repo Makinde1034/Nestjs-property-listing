@@ -20,7 +20,9 @@ export class AdminWorkflowService {
 
   async findAllWorkflow(paginateAndSort: WorkflowInputFilter) {
     try {
-      return await this.workflowRepository.findAndCount({});
+      const [workflow, total] = await this.workflowRepository.findAndCount({});
+
+      return { workflow, total };
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);

@@ -982,8 +982,8 @@ type SplashScreenResponse {
 }
 
 type WorkFlowResponse {
-  workflow: [WorkFlow!]!
-  count: Float!
+  workflow: [WorkFlow!]
+  total: Float!
 }
 
 type MessageResponse {

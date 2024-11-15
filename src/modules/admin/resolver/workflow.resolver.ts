@@ -30,6 +30,7 @@ export class WorkFlowResolver {
   ) {
     return await this.workFlowService.createWorkFlow(createWorkflowInput);
   }
+
   @UseGuards(PermissionsGuard)
   @Permissions(PermissionsEnum.WORKFLOW_READ)
   @Query(() => WorkFlowResponse)
