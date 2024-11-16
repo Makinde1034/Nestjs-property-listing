@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { WorkflowRepository } from '../repositories/workflow.repository';
 import {
+  ActionsInput,
   CreateWorkflowInput,
   UpdateWorkflowInput,
   WorkflowActionInput,
@@ -70,9 +71,9 @@ export class AdminWorkflowService {
     }
   }
 
-  async delete(id: string) {
+  async delete(actionInput: ActionsInput) {
     try {
-      return await this.workflowRepository.softDelete({ id });
+      return await this.workflowRepository.softDelete(actionInput.id);
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);

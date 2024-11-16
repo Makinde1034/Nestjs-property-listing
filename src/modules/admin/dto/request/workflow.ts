@@ -38,6 +38,12 @@ export class UpdateWorkflowInput extends PartialType(CreateWorkflowInput) {
 }
 
 @InputType()
+export class ActionsInput {
+  @Field(() => [String])
+  @IsArray()
+  id: string[];
+}
+@InputType()
 export class Actions {
   @Field(() => [Number])
   @IsArray()
@@ -46,9 +52,9 @@ export class Actions {
 
 @InputType()
 export class WorkflowActionInput {
-  @Field(() => [Number])
+  @Field(() => [String])
   @IsArray()
-  id: number[];
+  id: string[];
 
   @Field()
   @IsBoolean()
