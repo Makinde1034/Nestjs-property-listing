@@ -1480,7 +1480,7 @@ type Mutation {
   updateWorkFlow(updateWorkFlowInput: UpdateWorkflowInput!): WorkFlow!
   activateAndDeactivateWorkflow(updateWorkFlowInput: WorkflowActionInput!): SuccessResponse!
   approveAction(action: Actions!): SuccessResponse!
-  deleteWorkFlow(actionInput: ActionsInput!): WorkFlow!
+  deleteWorkFlow(actionInput: ActionsInput!): SuccessResponse!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
   deleteCategory(categoryActionInput: CategoryActionInput!): SuccessResponse!

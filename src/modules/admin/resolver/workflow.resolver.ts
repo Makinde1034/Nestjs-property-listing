@@ -81,7 +81,7 @@ export class WorkFlowResolver {
 
   @UseGuards(PermissionsGuard)
   @Permissions(PermissionsEnum.WORKFLOW_DELETE)
-  @Mutation(() => WorkFlow)
+  @Mutation(() => SuccessResponse)
   async deleteWorkFlow(@Args('actionInput') actionInput: ActionsInput) {
     return await this.workFlowService.delete(actionInput);
   }
