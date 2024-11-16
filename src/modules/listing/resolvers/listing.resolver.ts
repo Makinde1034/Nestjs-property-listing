@@ -269,8 +269,7 @@ export class ListingResolver {
     return await this.listingService.flaggedListing(listingId);
   }
 
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
-  @Permissions(PermissionsEnum.LISTINGS_MULTI_ACTIONS)
+  @UseGuards(AccessTokenGuard)
   @Mutation(() => SuccessResponse, { name: 'flagListing' })
   async flagListing(
     @Context() ctx: any,

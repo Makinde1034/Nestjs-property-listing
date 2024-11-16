@@ -3,9 +3,10 @@ import { WorkflowRepository } from '../repositories/workflow.repository';
 import {
   CreateWorkflowInput,
   UpdateWorkflowInput,
+  WorkflowActionInput,
   WorkflowInputFilter,
 } from '../dto/request/workflow';
-import { DataSource } from 'typeorm';
+import { DataSource, In } from 'typeorm';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { AppStrings } from '../../../common/messages/app.strings';
 @Injectable()
@@ -85,6 +86,31 @@ export class AdminWorkflowService {
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
+    }
+  }
+
+  async reactivateAndDeactivate(updateWorkflow: WorkflowActionInput) {
+    try {
+      const { id, isActive } = updateWorkflow;
+
+      // Fetch workflows by IDs
+      const workflows = await this.workflowRepository.find({
+        where: { id: In(id) },
+      });
+
+      // Map through workflows to update their `isActive` property
+      const workflowsToUpdate = workflows.map((workflow) => ({
+        ...workflow,
+        isActive: isActive,
+      }));
+
+      // Save the updated workflows back to the repository
+      const data = await this.workflowRepository.save(workflowsToUpdate);
+
+      return new SuccessResponse(AppStrings.SUCCESSFULL, data);
+    } catch (error) {
+      this.logger.error('Error updating workflow status:', error);
+      throw new BadRequestException('Failed to update workflow status');
     }
   }
 

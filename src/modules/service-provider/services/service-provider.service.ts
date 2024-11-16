@@ -354,22 +354,6 @@ export class ServiceAndProviderService {
         .createQueryBuilder('serviceProvider')
         .leftJoinAndSelect('serviceProvider.user', 'user')
 
-        // .orWhere('user.firstName ILIKE :term', { term: `%${searchParam}%` })
-        // .orWhere('user.arabicFirstName ILIKE :term', {
-        //   term: `%${searchParam}%`,
-        // })
-        // .orWhere('parentIssue.arabicName ILIKE :term', {
-        //   term: `%${searchParam}%`,
-        // })
-        // .orWhere('parentIssue.englishName ILIKE :term', {
-        //   term: `%${searchParam}%`,
-        // })
-        // .orWhere('childIssue.arabicName ILIKE :term', {
-        //   term: `%${searchParam}%`,
-        // })
-        // .orWhere('childIssue.englishName ILIKE :term', {
-        //   term: `%${searchParam}%`,
-        // })
         .getMany();
     } catch (error) {
       this.logger.error('Error searching tickets', error);
@@ -382,25 +366,7 @@ export class ServiceAndProviderService {
       return await this.serviceProviderRepository
         .createQueryBuilder('service')
         .leftJoinAndSelect('service.user', 'user')
-        // .leftJoinAndSelect('ticket.parentIssue', 'parentIssue')
-        // .leftJoinAndSelect('ticket.childIssue', 'childIssue')
 
-        // .orWhere('user.firstName ILIKE :term', { term: `%${searchParam}%` })
-        // .orWhere('user.arabicFirstName ILIKE :term', {
-        //   term: `%${searchParam}%`,
-        // })
-        // .orWhere('parentIssue.arabicName ILIKE :term', {
-        //   term: `%${searchParam}%`,
-        // })
-        // .orWhere('parentIssue.englishName ILIKE :term', {
-        //   term: `%${searchParam}%`,
-        // })
-        // .orWhere('childIssue.arabicName ILIKE :term', {
-        //   term: `%${searchParam}%`,
-        // })
-        // .orWhere('childIssue.englishName ILIKE :term', {
-        //   term: `%${searchParam}%`,
-        // })
         .getMany();
     } catch (error) {
       this.logger.error('Error searching tickets', error);
