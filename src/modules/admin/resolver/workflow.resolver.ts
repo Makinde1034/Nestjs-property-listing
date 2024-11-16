@@ -4,6 +4,7 @@ import {
   Actions,
   CreateWorkflowInput,
   UpdateWorkflowInput,
+  WorkflowActionInput,
   WorkflowInputFilter,
 } from '../dto/request/workflow';
 import { WorkFlow } from '../../../entities/workFlow.entity';
@@ -59,6 +60,16 @@ export class WorkFlowResolver {
     @Args('updateWorkFlowInput') updateWorkFlowInput: UpdateWorkflowInput,
   ) {
     return await this.workFlowService.update(updateWorkFlowInput);
+  }
+  @UseGuards(PermissionsGuard)
+  @Permissions(PermissionsEnum.WORKFLOW_EDIT)
+  @Mutation(() => SuccessResponse)
+  async activateAndDeactivateWorkflow(
+    @Args('updateWorkFlowInput') workflowActionInput: WorkflowActionInput,
+  ) {
+    return await this.workFlowService.reactivateAndDeactivate(
+      workflowActionInput,
+    );
   }
   @UseGuards(PermissionsGuard)
   @Permissions(PermissionsEnum.WORKFLOW_EDIT)

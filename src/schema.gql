@@ -1478,6 +1478,7 @@ type Mutation {
   deactivateCoupons(deactivateCoupons: DeactivateCouponInput!): SuccessResponse!
   createWorkFlow(createWorkflowInput: CreateWorkflowInput!): WorkFlow!
   updateWorkFlow(updateWorkFlowInput: UpdateWorkflowInput!): WorkFlow!
+  activateAndDeactivateWorkflow(updateWorkFlowInput: WorkflowActionInput!): SuccessResponse!
   approveAction(action: Actions!): SuccessResponse!
   deleteWorkFlow: WorkFlow!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
@@ -2086,6 +2087,11 @@ input UpdateWorkflowInput {
   approvalOneRole: [String!]
   approvalTwoRole: [String!]
   id: String!
+}
+
+input WorkflowActionInput {
+  id: [Float!]!
+  isActive: Boolean!
 }
 
 input Actions {

@@ -45,4 +45,15 @@ export class Actions {
 }
 
 @InputType()
+export class WorkflowActionInput {
+  @Field(() => [Number])
+  @IsArray()
+  id: number[];
+
+  @Field()
+  @IsBoolean()
+  isActive: boolean;
+}
+
+@InputType()
 export class WorkflowInputFilter extends PaginateAndSort {}
