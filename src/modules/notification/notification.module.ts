@@ -13,6 +13,7 @@ import { NotificationRepository } from './repositories';
 
 import { AdminNotificationPreferenceRepository } from './repositories/admin.repository';
 import { NotificationTokenRepository } from './repositories/notification-token.repository';
+import { NotificationMessagesRepository } from './repositories/notification-message.repository';
 
 @Global()
 @Module({
@@ -25,12 +26,14 @@ import { NotificationTokenRepository } from './repositories/notification-token.r
     NotificationEventListener,
     AdminNotificationPreferenceRepository,
     NotificationTokenRepository,
+    NotificationMessagesRepository,
   ],
   exports: [
     PushNotificationService,
     NotificationRepository,
     AdminNotificationPreferenceRepository,
     NotificationTokenRepository,
+    NotificationMessagesRepository,
   ],
 })
 export class NotificationModule {}

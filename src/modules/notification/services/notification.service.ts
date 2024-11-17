@@ -6,11 +6,13 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { NotificationRepository } from '../repositories';
 import {
+  CreateNotificationMessage,
   CreateNotificationScopeInput,
   NotificationEventDto,
   NotificationInput,
   UpdateAdminNotificationPreferenceScope,
   UpdateAdminNotificationScope,
+  UpdateNotificationMessage,
 } from '../dtos';
 import {
   Notification,
@@ -43,6 +45,7 @@ import { AdminNotificationPreferenceRepository } from '../repositories/admin.rep
 import { SseService } from '../../sse/client.service';
 import { ConfigService } from '@nestjs/config';
 import { MessageEvent } from '../../sse/request/app';
+import { NotificationMessagesRepository } from '../repositories/notification-message.repository';
 
 @Injectable()
 export class NotificationService {
@@ -59,6 +62,8 @@ export class NotificationService {
     private readonly configService: ConfigService,
     private readonly notificationScope: NotificationScopeRepository,
     private readonly sseService: SseService,
+
+    private readonly notificationMesageRepository: NotificationMessagesRepository,
   ) {
     this.frontEndUrl = this.configService.get('FRONT_END_URL');
   }
@@ -239,6 +244,26 @@ export class NotificationService {
     }
   }
 
+  /**
+   * Send Email Notification
+   *
+   * @async
+   * @param {User } user
+   * @param {EmailNotificationPayload} data
+   * @returns {Promise<void>}
+   */
+  async sendEmailNotification(
+    user?: User,
+    data?: EmailNotificationPayload,
+    attachment?: Buffer,
+  ): Promise<void> {
+    try {
+      await this.mailService.sendEmailNotification(user, data, attachment);
+    } catch (error) {
+      this.logger.log(error);
+    }
+  }
+
   private sendDesktopNotificationToUser(
     user: User,
     event: string,
@@ -287,26 +312,6 @@ export class NotificationService {
   async sendPushNotification(data: PushNotificationPayload): Promise<void> {
     try {
       await this.pushNotificationService.sendPushNotification(data);
-    } catch (error) {
-      this.logger.log(error);
-    }
-  }
-
-  /**
-   * Send Email Notification
-   *
-   * @async
-   * @param {User } user
-   * @param {EmailNotificationPayload} data
-   * @returns {Promise<void>}
-   */
-  async sendEmailNotification(
-    user?: User,
-    data?: EmailNotificationPayload,
-    attachment?: Buffer,
-  ): Promise<void> {
-    try {
-      await this.mailService.sendEmailNotification(user, data, attachment);
     } catch (error) {
       this.logger.log(error);
     }
@@ -629,6 +634,37 @@ export class NotificationService {
       return notificationScope;
     } catch (error) {
       this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async addNotificationMessage(
+    createNotificationMessage: CreateNotificationMessage,
+  ) {
+    try {
+      const data = await this.notificationMesageRepository.save(
+        createNotificationMessage,
+      );
+
+      return new SuccessResponse(AppStrings.SUCCESSFULL, data);
+    } catch (error) {
+      this.logger.error(error);
+
+      throw new BadRequestException(error);
+    }
+  }
+
+  async updateNotificationMessage(
+    updateNotificationMessage: UpdateNotificationMessage,
+  ) {
+    try {
+      const { id, ...rest } = updateNotificationMessage;
+      const data = await this.notificationMesageRepository.update(id, rest);
+
+      return new SuccessResponse(AppStrings.SUCCESSFULL, data);
+    } catch (error) {
+      this.logger.error(error);
+
       throw new BadRequestException(error);
     }
   }
