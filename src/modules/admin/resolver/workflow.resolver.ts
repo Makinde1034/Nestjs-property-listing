@@ -2,6 +2,7 @@ import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AdminWorkflowService } from '../services/admin-workflow.service';
 import {
   Actions,
+  ActionsInput,
   CreateWorkflowInput,
   UpdateWorkflowInput,
   WorkflowActionInput,
@@ -80,9 +81,9 @@ export class WorkFlowResolver {
 
   @UseGuards(PermissionsGuard)
   @Permissions(PermissionsEnum.WORKFLOW_DELETE)
-  @Mutation(() => WorkFlow)
-  async deleteWorkFlow(id: string) {
-    return await this.workFlowService.delete(id);
+  @Mutation(() => SuccessResponse)
+  async deleteWorkFlow(@Args('actionInput') actionInput: ActionsInput) {
+    return await this.workFlowService.delete(actionInput);
   }
 
   @Permissions(PermissionsEnum.KNOWLEDGE_BASE_READ)

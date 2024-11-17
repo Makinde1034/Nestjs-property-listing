@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { WorkflowRepository } from '../repositories/workflow.repository';
 import {
+  ActionsInput,
   CreateWorkflowInput,
   UpdateWorkflowInput,
   WorkflowActionInput,
@@ -70,12 +71,29 @@ export class AdminWorkflowService {
     }
   }
 
-  async delete(id: string) {
+  async delete(actionInput: ActionsInput) {
     try {
-      return await this.workflowRepository.softDelete({ id });
+      // Perform soft delete based on IDs in actionInput
+      const { affected } = await this.workflowRepository.softDelete({
+        id: In(actionInput.id), // Use the `In` operator to delete multiple rows by ID
+      });
+
+      if (affected && affected > 0) {
+        // Return a success response if rows were affected
+        return new SuccessResponse(AppStrings.SUCCESSFULL, {
+          affected,
+          message: `${affected} workflow(s) successfully deleted.`,
+        });
+      } else {
+        // Handle case where no rows were deleted
+        throw new BadRequestException(AppStrings.NOT_FOUND); // Replace `AppStrings.NOT_FOUND` with an appropriate error message
+      }
     } catch (error) {
-      this.logger.log(error);
-      throw new BadRequestException(error);
+      // Log and throw the error
+      this.logger.error('Error deleting workflows:', error);
+      throw new BadRequestException(
+        error.message || 'Failed to delete workflows.',
+      );
     }
   }
 
