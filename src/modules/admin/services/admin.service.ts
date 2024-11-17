@@ -51,6 +51,7 @@ import {
 import { TicketRepository } from '../../tickets/repositories';
 import {
   AdminDashboardSort,
+  AdminDefaultInput,
   UpdateAdminDefaultInput,
 } from '../dto/request/admin-request';
 import { AdminRepository } from '../repositories/admin.repository';
@@ -123,20 +124,20 @@ export class AdminService {
       const min = adminDefaultInput.minBidRange;
       const max = adminDefaultInput.maxBidRange;
       const increment = adminDefaultInput.bidIncrement;
+      const id = adminDefaultInput.bidIncrementId;
 
       const bidPriceRange = await this.auctionBidRangeRepository
         .createQueryBuilder('auctionBidRange')
         .where(
-          'auctionBidRange.lowerBound >= :min AND auctionBidRange.upperBound <= :max',
-          { min, max },
+          ' id = :id OR auctionBidRange.lowerBound >= :min AND auctionBidRange.upperBound <= :max',
+          { id, min, max },
         )
         .getOne();
-      const { lowerBound, upperBound, ...rest } = result;
 
       if (bidPriceRange) {
-        const updatedRange = { ...rest, lowerBound: min, upperBound: max };
-
-        result = await this.auctionBidRangeRepository.save(updatedRange);
+        result = await this.auctionBidRangeRepository.update(id, {
+          increment: increment,
+        });
       } else {
         result = await this.auctionBidRangeRepository.save({
           lowerBound: min,
@@ -868,5 +869,19 @@ export class AdminService {
       this.logger.log(error);
       throw new BadRequestException(error);
     }
+  }
+
+  async updateBidIncrement(data: AdminDefaultInput) {
+    try {
+      const { bidIncrementId, bidIncrement } = data;
+      const bidRange = await this.auctionBidRangeRepository.findOne({
+        where: { id: bidIncrementId },
+      });
+
+      await this.auctionBidRangeRepository.update(
+        { id: bidRange.id },
+        { increment: bidIncrement },
+      );
+    } catch (error) {}
   }
 }

@@ -23,8 +23,20 @@ export class AdminDefault extends BaseEntity {
   city: string;
 
   @Field()
+  @Column()
+  promptRatingTime: number;
+
+  @Field()
+  @Column()
+  ticketAging: number;
+
+  @Field()
   @Column({ type: 'decimal' })
-  saii: number;
+  saiiFromSale: number;
+
+  @Field()
+  @Column({ type: 'decimal' })
+  saiiForRent: number;
 
   @Field()
   @Column({ type: 'decimal' })
@@ -41,10 +53,6 @@ export class AdminDefault extends BaseEntity {
   @Field()
   @Column({ nullable: true })
   ratingPrompt: number;
-
-  @Field()
-  @Column({ nullable: true })
-  ticketAging: number;
 
   @Field()
   @Column({ default: 100 })

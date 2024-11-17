@@ -765,12 +765,14 @@ type AdminDefault {
   minimumOfferPercentage: Float!
   street: String!
   city: String!
-  saii: Float!
+  promptRatingTime: Float!
+  ticketAging: Float!
+  saiiFromSale: Float!
+  saiiForRent: Float!
   vat: Float!
   paymentType: String!
   dataRetention: Float!
   ratingPrompt: Float!
-  ticketAging: Float!
   auctionHeldAmount: Float!
   fallBackDefaultBidIncrement: Float!
   state: String!
@@ -2033,6 +2035,7 @@ input UpdateAdminDefaultInput {
   bidIncrement: Float
   maxBidRange: Float
   paymentType: String
+  bidIncrementId: String
   saii: Float
   saiiForRent: Float
   dataRetention: Float
