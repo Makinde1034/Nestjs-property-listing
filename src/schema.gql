@@ -1329,7 +1329,7 @@ input WorkflowInputFilter {
   sortField: String
   directionToSort: SortOrder
   where: WhereOption
-  isActive: Boolean!
+  isActive: Boolean
 }
 
 input ChatFilterInput {
