@@ -1482,8 +1482,9 @@ type Mutation {
   updateCoupon(updateCouponsInput: UpdateCouponInput!): Coupon!
   deleteCoupons(deleteCouponsInput: DeleteCouponInput!): SuccessResponse!
   deactivateCoupons(deactivateCoupons: DeactivateCouponInput!): SuccessResponse!
+  systemFeatureSetting(systemFeatureSetting: SystemFeatureSettingInput!): SuccessResponse!
   createWorkFlow(createWorkflowInput: CreateWorkflowInput!): WorkFlow!
-  updateWorkFlow(updateWorkFlowInput: UpdateWorkflowInput!): WorkFlow!
+  updateWorkFlow(updateWorkFlowInput: UpdateWorkflowInput!): SuccessResponse!
   activateAndDeactivateWorkflow(updateWorkFlowInput: WorkflowActionInput!): SuccessResponse!
   approveAction(action: Actions!): SuccessResponse!
   deleteWorkFlow(actionInput: ActionsInput!): SuccessResponse!
@@ -2106,6 +2107,16 @@ input DeleteCouponInput {
 
 input DeactivateCouponInput {
   id: [String!]!
+}
+
+input SystemFeatureSettingInput {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
+  id: [String!]!
+  isActive: Boolean
 }
 
 input CreateWorkflowInput {

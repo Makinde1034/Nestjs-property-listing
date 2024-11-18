@@ -1,7 +1,7 @@
 import { DeepPartial } from 'typeorm';
-import { SystemSetting } from '../../entities/system-features.entity';
+import { SystemFeatureSetting } from '../../entities/system-features.entity';
 
-export const SystemFactory: DeepPartial<SystemSetting>[] = [
+export const SystemFactory: DeepPartial<SystemFeatureSetting>[] = [
   {
     englishName: 'Auctions Creation',
     arabicName: 'إنشاء المزادات',

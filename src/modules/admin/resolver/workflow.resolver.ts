@@ -60,7 +60,7 @@ export class WorkFlowResolver {
 
   @UseGuards(PermissionsGuard)
   @Permissions(PermissionsEnum.WORKFLOW_EDIT)
-  @Mutation(() => WorkFlow)
+  @Mutation(() => SuccessResponse)
   async updateWorkFlow(
     @Args('updateWorkFlowInput') updateWorkFlowInput: UpdateWorkflowInput,
     @Context() ctx: any,

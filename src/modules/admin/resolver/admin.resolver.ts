@@ -36,6 +36,7 @@ import { Coupon } from '../../../entities/coupon.entity';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { PermissionsEnum } from '../../../common/enums/permission.enum';
 import { Permissions } from 'src/common/decorator/permission';
+import { SystemFeatureSettingInput } from '../dto/request/workflow';
 
 @Resolver()
 @UseGuards(AccessTokenGuard)
@@ -193,6 +194,21 @@ export class AdminResolver {
   ) {
     return await this.adminService.deactivateCoupon(
       deactivateCouponsInput,
+      ctx.req.user,
+    );
+  }
+
+  @UseGuards(AdminGuard)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions(PermissionsEnum.SYSTEM_SETTINGS_EDIT)
+  @Mutation(() => SuccessResponse, { name: 'systemFeatureSetting' })
+  async systemFeatureSetting(
+    @Args('systemFeatureSetting')
+    systemFeatureSetting: SystemFeatureSettingInput,
+    @Context() ctx: any,
+  ) {
+    return await this.adminService.activateAndDeactivateFeatures(
+      systemFeatureSetting,
       ctx.req.user,
     );
   }

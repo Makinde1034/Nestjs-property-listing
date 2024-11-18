@@ -40,6 +40,7 @@ import { AdminWorkflowService } from './services/admin-workflow.service';
 import { ActionRequestRepository } from './repositories/action.repository';
 import { ActionService } from './services/action.service';
 import { InvoiceRepository } from '../payment/repositories/invoice.repository';
+import { SettingFeatureRepository } from './repositories/feature-setting.repository';
 @Global()
 @Module({
   imports: [
@@ -78,6 +79,8 @@ import { InvoiceRepository } from '../payment/repositories/invoice.repository';
     ActionService,
     ListingTypeRepository,
     InvoiceRepository,
+
+    SettingFeatureRepository,
   ],
 
   controllers: [SplashScreenController],
@@ -92,6 +95,7 @@ import { InvoiceRepository } from '../payment/repositories/invoice.repository';
     ActionService,
     AdminWorkflowService,
     TransactionRepository,
+    SettingFeatureRepository,
   ],
 })
 export class AdminModule {}

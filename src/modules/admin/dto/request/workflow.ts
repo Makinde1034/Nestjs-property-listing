@@ -40,6 +40,7 @@ export class CreateWorkflowInput {
 @InputType()
 export class UpdateWorkflowInput extends PartialType(CreateWorkflowInput) {
   @Field()
+  @IsString()
   id: string;
 }
 
@@ -69,6 +70,18 @@ export class WorkflowActionInput {
 
 @InputType()
 export class WorkflowInputFilter extends PaginateAndSort {
+  @Field({ nullable: true })
+  @IsBoolean()
+  @IsOptional()
+  isActive: boolean;
+}
+
+@InputType()
+export class SystemFeatureSettingInput extends PaginateAndSort {
+  @Field(() => [String])
+  @IsArray()
+  id: string[];
+
   @Field({ nullable: true })
   @IsBoolean()
   @IsOptional()
