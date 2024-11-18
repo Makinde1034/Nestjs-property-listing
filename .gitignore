@@ -57,6 +57,7 @@ pids
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 .firebase
 
+/v8-compile-cache-0
 
 
 /src/config/database/
