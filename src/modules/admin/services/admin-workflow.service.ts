@@ -11,16 +11,28 @@ import { DataSource, In } from 'typeorm';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { AppStrings } from '../../../common/messages/app.strings';
 import { WorkFlowResponse } from '../dto/response/workflow';
+import { ActivityLogService } from '../../activity-log/services/activity-log.service';
+import { User } from '../../../entities';
+import { ActivityEnum } from '../../../common/enums/activitys';
 @Injectable()
 export class AdminWorkflowService {
   constructor(
     private readonly workflowRepository: WorkflowRepository,
     private readonly dataSource: DataSource,
+    private readonly activityLogService: ActivityLogService,
   ) {}
   logger = new Logger(AdminWorkflowService.name);
-  async createWorkFlow(createWorkFlowInput: CreateWorkflowInput) {
+  async createWorkFlow(createWorkFlowInput: CreateWorkflowInput, admin: User) {
     try {
-      return await this.workflowRepository.save(createWorkFlowInput);
+      const data = await this.workflowRepository.save(createWorkFlowInput);
+      await this.activityLogService.logActivity([
+        {
+          adminId: admin.id,
+          action: ActivityEnum.CREATED,
+          details: JSON.stringify(data),
+          workflowId: data.id,
+        },
+      ]);
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -91,12 +103,24 @@ export class AdminWorkflowService {
     }
   }
 
-  async delete(actionInput: ActionsInput) {
+  async delete(actionInput: ActionsInput, admin: User) {
     try {
+      const workflowToDelete = await this.workflowRepository.find({
+        where: { id: In(actionInput.id) },
+      });
       // Perform soft delete based on IDs in actionInput
       const { affected } = await this.workflowRepository.softDelete({
         id: In(actionInput.id), // Use the `In` operator to delete multiple rows by ID
       });
+
+      const activityToSave = workflowToDelete.map((element) => ({
+        adminId: admin.id,
+        details: JSON.stringify(element),
+        action: ActivityEnum.DELETED,
+        workflowId: element.id,
+      }));
+
+      await this.activityLogService.logActivity(activityToSave);
 
       if (affected && affected > 0) {
         // Return a success response if rows were affected
@@ -117,10 +141,19 @@ export class AdminWorkflowService {
     }
   }
 
-  async update(updateWorkflow: UpdateWorkflowInput) {
+  async update(updateWorkflow: UpdateWorkflowInput, admin: User) {
     try {
       const { id, ...rest } = updateWorkflow;
-      return await this.workflowRepository.update(id, rest);
+      const data = await this.workflowRepository.update(id, rest);
+
+      await this.activityLogService.logActivity([
+        {
+          adminId: admin.id,
+          action: ActivityEnum.CREATED,
+          details: JSON.stringify(data),
+          workflowId: id,
+        },
+      ]);
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);

@@ -144,6 +144,10 @@ export class ActivityLog extends BaseEntity {
   @Column({ nullable: true })
   splashScreenId: number;
 
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  workflowId: string;
+
   @Column()
   @Field({ nullable: true })
   action: string;

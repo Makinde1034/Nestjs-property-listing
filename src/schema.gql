@@ -492,6 +492,7 @@ type ActivityLog {
   listingId: String
   articleId: Float
   splashScreenId: Float
+  workflowId: String
   action: String
   details: String
   createdAt: DateTime
@@ -1383,7 +1384,7 @@ input AuditLogTrailsInput {
 
 type Mutation {
   createSplashScreen(createSplashScreenInput: CreateSplashScreenInput!): SuccessResponse!
-  updateSplashScreen(updateSplashScreenInput: UpdateSplashScreenInput!): SplashScreen!
+  updateSplashScreen(updateSplashScreenInput: UpdateSplashScreenInput!): SuccessResponse!
   deleteSplashScreen(deleteSplashScreenInput: DeleteSplashScreenInput!): SuccessResponse!
   register(RegisterInput: RegisterInput!): User!
   registerConfirm(RegisterConfirmInput: AuthRegisterConfirmDto!): String!
