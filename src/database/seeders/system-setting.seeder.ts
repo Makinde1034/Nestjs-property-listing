@@ -6,9 +6,8 @@
 import { Logger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { Seeder, SeederFactoryManager } from 'typeorm-extension';
-import { NotificationMessageFactory } from '../factories/notification-message.factory';
-import { NotificationMessages } from '../../entities/notification-message.entity';
-import { SystemSetting } from '../../entities/system-features.entity';
+
+import { SystemFeatureSetting } from '../../entities/system-features.entity';
 import { SystemFactory } from '../factories/system-setting.factory';
 
 export class SystemSettingSeeder implements Seeder {
@@ -22,7 +21,7 @@ export class SystemSettingSeeder implements Seeder {
       `Seeding For : ${SystemSettingSeeder.name}....`,
       factoryManager,
     );
-    const repository = dataSource.getRepository(SystemSetting);
+    const repository = dataSource.getRepository(SystemFeatureSetting);
 
     await repository.save(SystemFactory);
     this.logger.debug(`Seeding for: ${SystemSettingSeeder.name} finished`);

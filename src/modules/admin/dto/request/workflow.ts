@@ -74,3 +74,15 @@ export class WorkflowInputFilter extends PaginateAndSort {
   @IsOptional()
   isActive: boolean;
 }
+
+@InputType()
+export class SystemFeatureSettingInput extends PaginateAndSort {
+  @Field(() => [String])
+  @IsArray()
+  id: string[];
+
+  @Field({ nullable: true })
+  @IsBoolean()
+  @IsOptional()
+  isActive: boolean;
+}

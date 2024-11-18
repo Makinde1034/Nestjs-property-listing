@@ -9,7 +9,7 @@ import BaseEntity from './base.entity';
 import { Field } from '@nestjs/graphql';
 
 @Entity()
-export class SystemSetting extends BaseEntity {
+export class SystemFeatureSetting extends BaseEntity {
   @Field()
   @Column()
   englishName: string;

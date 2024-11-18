@@ -75,6 +75,8 @@ import { ActionService } from './action.service';
 import { TimePeriod } from '../../../common/enums/sort.enum';
 import { TransactionRepository } from '../../payment/repository/transaction.repository';
 import { InvoiceRepository } from '../../payment/repositories/invoice.repository';
+import { SettingFeatureRepository } from '../repositories/feature-setting.repository';
+import { SystemFeatureSettingInput } from '../dto/request/workflow';
 
 @Injectable()
 export class AdminService {
@@ -93,6 +95,7 @@ export class AdminService {
     private readonly transactionRepository: TransactionRepository,
     private readonly listingTypeRepository: ListingTypeRepository,
     private readonly invoiceRepository: InvoiceRepository,
+    private readonly systemFeatureRepository: SettingFeatureRepository,
   ) {}
 
   logger = new Logger(AdminService.name);
@@ -209,7 +212,6 @@ export class AdminService {
   //TODO implement when payment gateway is completed
   async saiiFees(findOptions: AdminDashboardSort) {
     try {
-      console.log('here');
       // Fetch all listing types and invoices
       const [listingTypes, invoice] = await Promise.all([
         this.listingTypeRepository.queryBuilder('listingType').getMany(),
@@ -329,7 +331,6 @@ export class AdminService {
         result.push(intervalData);
       }
     }
-    console.log(result);
 
     return result;
   }
@@ -882,6 +883,32 @@ export class AdminService {
         { id: bidRange.id },
         { increment: bidIncrement },
       );
-    } catch (error) {}
+    } catch (error) {
+      this.logger.error(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async activateAndDeactivateFeatures(
+    data: SystemFeatureSettingInput,
+    admin: User,
+  ) {
+    try {
+      const feature = await this.systemFeatureRepository.find({
+        where: { id: In(data.id) },
+      });
+
+      const settingToUpdate = feature.map((element) => ({
+        ...feature,
+        isActive: data.isActive,
+      }));
+
+      const updated = await this.systemFeatureRepository.save(settingToUpdate);
+
+      return new SuccessResponse(AppStrings.SUCCESSFULL, updated);
+    } catch (error) {
+      this.logger.error(error);
+      throw new BadRequestException(error);
+    }
   }
 }
