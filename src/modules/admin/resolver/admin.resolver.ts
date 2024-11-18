@@ -197,6 +197,7 @@ export class AdminResolver {
       ctx.req.user,
     );
   }
+
   @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.COUPONS_CHANGE_STATUS)
