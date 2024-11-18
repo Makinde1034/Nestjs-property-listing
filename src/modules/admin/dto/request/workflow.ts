@@ -37,6 +37,7 @@ export class CreateWorkflowInput {
   @IsArray()
   approvalTwoRole: string[];
 }
+
 @InputType()
 export class UpdateWorkflowInput extends PartialType(CreateWorkflowInput) {
   @Field()
@@ -50,6 +51,7 @@ export class ActionsInput {
   @IsArray()
   id: string[];
 }
+
 @InputType()
 export class Actions {
   @Field(() => [Number])
