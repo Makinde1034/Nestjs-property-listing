@@ -26,16 +26,12 @@ export class AdminWorkflowService {
       throw new BadRequestException(error);
     }
   }
+
   async findAllWorkflow(
     paginateAndSort: WorkflowInputFilter,
   ): Promise<WorkFlowResponse> {
     try {
-      const {
-        skip = 0,
-        take = 10,
-
-        isActive,
-      } = paginateAndSort;
+      const { skip = 0, take = 10, isActive } = paginateAndSort;
 
       const queryOptions: any = {};
 

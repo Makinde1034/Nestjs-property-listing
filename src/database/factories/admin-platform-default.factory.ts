@@ -15,11 +15,8 @@ export const AdminPlatformDefaultFactory: Partial<AdminDefault> = {
   paymentType: 'DB',
   saiiForRent: 2.5,
   saiiFromSale: 2.5,
-
   ticketAging: 24,
-
   promptRatingTime: 10,
-
   vat: 15,
   daysToAuctionRegistrationStart: 7,
   daysToAuctionRegistrationEnd: 7,
