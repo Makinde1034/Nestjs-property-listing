@@ -200,7 +200,7 @@ export class AdminResolver {
 
   @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
-  @Permissions(PermissionsEnum.COUPONS_CHANGE_STATUS)
+  @Permissions(PermissionsEnum.SYSTEM_SETTINGS_EDIT)
   @Mutation(() => SuccessResponse, { name: 'systemFeatureSetting' })
   async systemFeatureSetting(
     @Args('systemFeatureSetting')
