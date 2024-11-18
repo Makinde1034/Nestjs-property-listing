@@ -55,7 +55,7 @@ export class SplashScreenResolver {
   }
   @Permissions(PermissionsEnum.KNOWLEDGE_BASE_EDIT)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
-  @Mutation(() => SplashScreen, { name: 'updateSplashScreen' })
+  @Mutation(() => SuccessResponse, { name: 'updateSplashScreen' })
   async update(
     @Args('updateSplashScreenInput')
     updateSplashScreenInput: UpdateSplashScreenInput,
