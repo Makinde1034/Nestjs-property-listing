@@ -1,4 +1,4 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AdminWorkflowService } from '../services/admin-workflow.service';
 import {
   Actions,
@@ -29,8 +29,12 @@ export class WorkFlowResolver {
   @Mutation(() => WorkFlow)
   async createWorkFlow(
     @Args('createWorkflowInput') createWorkflowInput: CreateWorkflowInput,
+    @Context() ctx: any,
   ) {
-    return await this.workFlowService.createWorkFlow(createWorkflowInput);
+    return await this.workFlowService.createWorkFlow(
+      createWorkflowInput,
+      ctx.req.user,
+    );
   }
 
   @UseGuards(PermissionsGuard)
@@ -59,8 +63,9 @@ export class WorkFlowResolver {
   @Mutation(() => WorkFlow)
   async updateWorkFlow(
     @Args('updateWorkFlowInput') updateWorkFlowInput: UpdateWorkflowInput,
+    @Context() ctx: any,
   ) {
-    return await this.workFlowService.update(updateWorkFlowInput);
+    return await this.workFlowService.update(updateWorkFlowInput, ctx.req.user);
   }
   @UseGuards(PermissionsGuard)
   @Permissions(PermissionsEnum.WORKFLOW_EDIT)
@@ -82,8 +87,11 @@ export class WorkFlowResolver {
   @UseGuards(PermissionsGuard)
   @Permissions(PermissionsEnum.WORKFLOW_DELETE)
   @Mutation(() => SuccessResponse)
-  async deleteWorkFlow(@Args('actionInput') actionInput: ActionsInput) {
-    return await this.workFlowService.delete(actionInput);
+  async deleteWorkFlow(
+    @Args('actionInput') actionInput: ActionsInput,
+    @Context() ctx: any,
+  ) {
+    return await this.workFlowService.delete(actionInput, ctx.req.user);
   }
 
   @Permissions(PermissionsEnum.KNOWLEDGE_BASE_READ)

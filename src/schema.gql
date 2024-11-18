@@ -492,6 +492,7 @@ type ActivityLog {
   listingId: String
   articleId: Float
   splashScreenId: Float
+  workflowId: String
   action: String
   details: String
   createdAt: DateTime

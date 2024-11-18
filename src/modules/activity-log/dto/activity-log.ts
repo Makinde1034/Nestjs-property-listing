@@ -16,7 +16,7 @@ export class CreateActivityLog {
   auctionId?: string;
   splashScreenId?: number;
   providerId?: string;
-
+  workflowId?: string;
   serviceId?: string;
 }
 
