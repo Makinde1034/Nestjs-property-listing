@@ -62,4 +62,8 @@ export class WorkflowActionInput {
 }
 
 @InputType()
-export class WorkflowInputFilter extends PaginateAndSort {}
+export class WorkflowInputFilter extends PaginateAndSort {
+  @Field()
+  @IsBoolean()
+  isActive: boolean;
+}

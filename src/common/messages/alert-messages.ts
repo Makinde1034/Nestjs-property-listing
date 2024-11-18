@@ -111,6 +111,7 @@ export function getMessageData(
       arabicBody:
         'مرحبًا [الاسم الأول]، للأسف لم يكن عرضك الأعلى. نقدر مشاركتك.',
     },
+
     {
       scope: 'Live Auction',
       event: 'Results',

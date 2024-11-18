@@ -2113,6 +2113,9 @@ export class ListingService {
             listingIds: compareListingInput.id,
           })
           .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
+
+          .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
+
           .leftJoinAndSelect('listing.listingType', 'listingType')
 
           .getMany(),
