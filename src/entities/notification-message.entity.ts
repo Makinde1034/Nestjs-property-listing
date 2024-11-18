@@ -14,16 +14,16 @@ export class NotificationMessages extends BaseEntity {
   @Column()
   scope: string;
 
-  @Field()
-  @Column()
+  @Field({ nullable: true })
+  @Column({ nullable: true })
   event: string;
 
   @Field({ nullable: true })
   @Column({ nullable: true })
   timing: string;
 
-  @Field()
-  @Column()
+  @Field({ nullable: true })
+  @Column({ nullable: true })
   email: boolean;
 
   @Field({ nullable: true })
@@ -34,32 +34,32 @@ export class NotificationMessages extends BaseEntity {
   @Column({ nullable: true })
   icon: string;
 
-  @Field()
-  @Column()
+  @Field({ nullable: true })
+  @Column({ nullable: true })
   pushNotification: boolean;
 
-  @Field()
-  @Column()
+  @Field({ nullable: true })
+  @Column({ nullable: true })
   systemNotification: boolean;
 
-  @Field()
-  @Column()
+  @Field({ nullable: true })
+  @Column({ nullable: true })
   recipients: string;
 
-  @Field()
-  @Column()
+  @Field({ nullable: true })
+  @Column({ nullable: true })
   title: string;
 
-  @Field()
-  @Column()
+  @Field({ nullable: true })
+  @Column({ nullable: true })
   body: string;
 
-  @Field()
-  @Column()
+  @Field({ nullable: true })
+  @Column({ nullable: true })
   arabicTitle: string;
 
-  @Field()
-  @Column()
+  @Field({ nullable: true })
+  @Column({ nullable: true })
   arabicBody: string;
 
   @CreateDateColumn()

@@ -1,7 +1,7 @@
 import { DeepPartial } from 'typeorm';
 import { NotificationMessages } from '../../entities/notification-message.entity';
 
-export const NotificationScopeFactory: DeepPartial<NotificationMessages[]> = [
+export const NotificationMessageFactory: DeepPartial<NotificationMessages>[] = [
   {
     scope: 'Offers',
     event: 'Create',
@@ -352,17 +352,5 @@ export const NotificationScopeFactory: DeepPartial<NotificationMessages[]> = [
     body: 'Your service provider has reported their job as completed. Please confirm if the service is done.',
     arabicTitle: 'تأكيد إتمام الخدمة',
     arabicBody: 'أبلغ مقدم الخدمة عن إكمال عمله. يرجى تأكيد إتمام الخدمة.',
-  },
-  {
-    scope: 'Request available',
-    event: null,
-    email: null,
-    pushNotification: null,
-    systemNotification: null,
-    recipients: null,
-    title: null,
-    body: null,
-    arabicTitle: null,
-    arabicBody: null,
   },
 ];

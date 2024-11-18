@@ -79,6 +79,7 @@ import { InvoiceRepository } from '../payment/repositories/invoice.repository';
     ListingTypeRepository,
     InvoiceRepository,
   ],
+
   controllers: [SplashScreenController],
   exports: [
     AdminService,
