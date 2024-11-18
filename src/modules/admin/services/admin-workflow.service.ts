@@ -10,6 +10,7 @@ import {
 import { DataSource, In } from 'typeorm';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { AppStrings } from '../../../common/messages/app.strings';
+import { WorkFlowResponse } from '../dto/response/workflow';
 @Injectable()
 export class AdminWorkflowService {
   constructor(
@@ -25,15 +26,38 @@ export class AdminWorkflowService {
       throw new BadRequestException(error);
     }
   }
-
-  async findAllWorkflow(paginateAndSort: WorkflowInputFilter) {
+  async findAllWorkflow(
+    paginateAndSort: WorkflowInputFilter,
+  ): Promise<WorkFlowResponse> {
     try {
-      const [workflow, total] = await this.workflowRepository.findAndCount({});
+      const {
+        skip = 0,
+        take = 10,
+
+        isActive,
+      } = paginateAndSort;
+
+      const queryOptions: any = {};
+
+      // Apply filtering if 'isActive' is provided
+      if (isActive !== undefined) {
+        queryOptions.where = { isActive };
+      }
+      if (paginateAndSort.take) {
+        queryOptions.skip = skip;
+        queryOptions.take = take;
+      }
+
+      // Build the query options
+      const [workflow, total] =
+        await this.workflowRepository.findAndCount(queryOptions);
 
       return { workflow, total };
     } catch (error) {
-      this.logger.log(error);
-      throw new BadRequestException(error);
+      this.logger.error('Error fetching workflows', error);
+      throw new BadRequestException(
+        'Failed to retrieve workflows. Please try again.',
+      );
     }
   }
 

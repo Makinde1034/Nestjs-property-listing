@@ -1,5 +1,11 @@
 import { Field, InputType, PartialType } from '@nestjs/graphql';
-import { IsArray, IsBoolean, IsNumber, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
 @InputType()
 export class CreateWorkflowInput {
@@ -62,4 +68,9 @@ export class WorkflowActionInput {
 }
 
 @InputType()
-export class WorkflowInputFilter extends PaginateAndSort {}
+export class WorkflowInputFilter extends PaginateAndSort {
+  @Field({ nullable: true })
+  @IsBoolean()
+  @IsOptional()
+  isActive: boolean;
+}
