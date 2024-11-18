@@ -43,7 +43,7 @@ import { Offer } from '../../../entities/offer.entity';
 
 import { AuctionParticipantRepository } from '../repositories/auction-participant.repository';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { NotificationEvent } from '../../../common/enums';
+import { NotificationEvent, Purpose } from '../../../common/enums';
 
 @Injectable()
 export class OfferService {
@@ -105,6 +105,7 @@ export class OfferService {
         await this.getMinimumOfferForAListingAndUser(
           createOfferDto.price,
           listing.price,
+          listing.purpose,
         );
 
       if (!listing.negotiable) {
@@ -219,16 +220,28 @@ export class OfferService {
   async getMinimumOfferForAListingAndUser(
     offerPrice: number,
     listingPrice: number,
+    purchaseType: string,
   ): Promise<[number, number, number]> {
     try {
+      let vat: number, saii: number;
       const adminDefault = await this.adminDefaultService.adminDefault();
       const minimumPrice =
         (adminDefault.minimumOfferPercentage / 100) * listingPrice;
 
-      const saii = (adminDefault.saii / 100) * offerPrice;
-      const vat =
-        (adminDefault.vat / 100) * (adminDefault.saii / 100) * offerPrice;
-
+      if (purchaseType == Purpose.RENT) {
+        saii = (adminDefault.saiiForRent / 100) * offerPrice;
+        vat =
+          (adminDefault.vat / 100) *
+          (adminDefault.saiiForRent / 100) *
+          offerPrice;
+      }
+      if (purchaseType == Purpose.SALE) {
+        saii = (adminDefault.saiiFromSale / 100) * offerPrice;
+        vat =
+          (adminDefault.vat / 100) *
+          (adminDefault.saiiFromSale / 100) *
+          offerPrice;
+      }
       const minimumListingPrice = minimumPrice;
       return [minimumListingPrice, saii, vat];
     } catch (error) {
@@ -328,6 +341,7 @@ export class OfferService {
             'offer.id',
             'offer.price',
             'listing.id',
+            'listing.purpose',
             'listingUser.id',
             'listingUser.email',
             'listingUser.firstName',
@@ -357,6 +371,7 @@ export class OfferService {
         await this.getMinimumOfferForAListingAndUser(
           rest.price,
           offer.listing_price,
+          offer.listing.purpose,
         );
 
       // Validate if offer exists

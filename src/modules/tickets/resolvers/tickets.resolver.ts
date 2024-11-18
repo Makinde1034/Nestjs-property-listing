@@ -25,7 +25,7 @@ import { ResponseTemplate } from '../../../entities/response-template.entity';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { Public } from '../../auth/decorators/permision.decorator';
-import { ArticleFilterInput } from '../../knowledge-base-and-help/dto/request/article.input';
+
 import { AdminDashboardSort } from '../../admin/dto/request/admin-request';
 import { PermissionsEnum } from '../../../common/enums/permission.enum';
 

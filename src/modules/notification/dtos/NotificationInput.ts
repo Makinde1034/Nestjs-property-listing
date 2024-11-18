@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Field, InputType, ObjectType, PartialType } from '@nestjs/graphql';
+import { Field, InputType, PartialType } from '@nestjs/graphql';
 import {
   IsArray,
   IsBoolean,
@@ -13,7 +13,6 @@ import {
   IsString,
 } from 'class-validator';
 import { NotificationEventInput } from 'src/common/interface';
-import { NotificationItemInput } from '../../user/dtos/request';
 
 @InputType()
 export class NotificationInput {
@@ -73,12 +72,15 @@ export class CreateNotificationScopePreferenceInput {
 @InputType()
 export class CreateNotificationScopeInput {
   @Field()
+  @IsString()
   name: string;
 
   @Field({ nullable: true })
+  @IsString()
   description: string;
 
   @Field({ nullable: true })
+  @IsString()
   scopeGroup: string;
 }
 
@@ -94,6 +96,71 @@ export class UpdateAdminNotificationScope extends PartialType(
 @InputType()
 export class UpdateAdminNotificationPreferenceScope extends PartialType(
   CreateNotificationScopePreferenceInput,
+) {
+  @Field()
+  @IsNumber()
+  id: string;
+}
+
+@InputType()
+export class CreateNotificationMessage {
+  @Field()
+  @IsString()
+  scope: string;
+
+  @Field()
+  @IsString()
+  event: string;
+
+  @Field()
+  @IsBoolean()
+  email: boolean;
+
+  @Field()
+  @IsBoolean()
+  pushNotification: boolean;
+
+  @Field()
+  @IsBoolean()
+  systemNotification: boolean;
+
+  @Field({ nullable: true })
+  @IsString()
+  timing: string;
+
+  @Field({ nullable: true })
+  @IsString()
+  duration: string;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  emailTemplate: string;
+
+  @Field()
+  @IsString()
+  recipients: string;
+
+  @Field()
+  @IsString()
+  title: string;
+
+  @Field()
+  @IsString()
+  body: string;
+
+  @Field()
+  @IsString()
+  arabicTitle: string;
+
+  @Field()
+  @IsString()
+  arabicBody: string;
+}
+
+@InputType()
+export class UpdateNotificationMessage extends PartialType(
+  CreateNotificationMessage,
 ) {
   @Field()
   @IsNumber()

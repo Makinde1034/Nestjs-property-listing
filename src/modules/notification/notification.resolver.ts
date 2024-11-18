@@ -7,15 +7,18 @@ import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { NotificationService } from './services';
 import { Notification, NotificationScope } from 'src/entities';
 import { UseGuards } from '@nestjs/common';
-import { AccessTokenGuard } from '../auth/guards';
+import { AccessTokenGuard, PermissionsGuard } from '../auth/guards';
 import {
+  CreateNotificationMessage,
   CreateNotificationScopeInput,
-  CreateNotificationScopePreferenceInput,
   NotificationInput,
   UpdateAdminNotificationPreferenceScope,
   UpdateAdminNotificationScope,
+  UpdateNotificationMessage,
 } from './dtos';
 import { SuccessResponse } from '../../common/utils/success.response';
+import { PermissionsEnum } from '../../common/enums/permission.enum';
+import { Permissions } from '../../common/decorator/permission';
 
 @Resolver()
 export class NotificationResolver {
@@ -75,7 +78,8 @@ export class NotificationResolver {
   }
 
   @Mutation(() => NotificationScope)
-  @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions(PermissionsEnum.SYSTEM_SETTINGS_EDIT)
   async createAdminNotificationScope(
     @Args('requestInput') requestInput: CreateNotificationScopeInput,
   ): Promise<NotificationScope> {
@@ -85,7 +89,8 @@ export class NotificationResolver {
   }
 
   @Mutation(() => SuccessResponse)
-  @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions(PermissionsEnum.SYSTEM_SETTINGS_EDIT)
   async updateAdminNotificationPreference(
     @Args('requestInput') requestInput: UpdateAdminNotificationPreferenceScope,
   ): Promise<SuccessResponse> {
@@ -94,9 +99,32 @@ export class NotificationResolver {
     );
   }
 
+  @Mutation(() => SuccessResponse)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions(PermissionsEnum.SYSTEM_SETTINGS_EDIT)
+  async updateNotificationMessage(
+    @Args('updateNotificationMessageInput')
+    updateNotificationMessageInput: UpdateNotificationMessage,
+  ): Promise<SuccessResponse> {
+    return this.notificationService.updateNotificationMessage(
+      updateNotificationMessageInput,
+    );
+  }
+
+  @Mutation(() => SuccessResponse)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions(PermissionsEnum.SYSTEM_SETTINGS_EDIT)
+  async createNotificationMessage(
+    @Args('updateNotificationMessage')
+    createNotificationMessageInput: CreateNotificationMessage,
+  ): Promise<SuccessResponse> {
+    return this.notificationService.addNotificationMessage(
+      createNotificationMessageInput,
+    );
+  }
+
   /**
    * List notification scopes
-   *
    * @async
    * @returns {Promise<NotificationScope[]>}
    */

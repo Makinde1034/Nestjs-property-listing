@@ -765,12 +765,14 @@ type AdminDefault {
   minimumOfferPercentage: Float!
   street: String!
   city: String!
-  saii: Float!
+  promptRatingTime: Float!
+  ticketAging: Float!
+  saiiFromSale: Float!
+  saiiForRent: Float!
   vat: Float!
   paymentType: String!
   dataRetention: Float!
   ratingPrompt: Float!
-  ticketAging: Float!
   auctionHeldAmount: Float!
   fallBackDefaultBidIncrement: Float!
   state: String!
@@ -1413,6 +1415,8 @@ type Mutation {
   updateNotificationScope(requestInput: UpdateAdminNotificationScope!): SuccessResponse!
   createAdminNotificationScope(requestInput: CreateNotificationScopeInput!): NotificationScope!
   updateAdminNotificationPreference(requestInput: UpdateAdminNotificationPreferenceScope!): SuccessResponse!
+  updateNotificationMessage(updateNotificationMessageInput: UpdateNotificationMessage!): SuccessResponse!
+  createNotificationMessage(updateNotificationMessage: CreateNotificationMessage!): SuccessResponse!
   createListingType(RequestInput: ListingTypeInput!): ListingType!
   updateListingType(RequestInput: ListingTypeUpdateInput!): ListingType!
   deleteListingType(RequestInput: ListingTypeDeleteInput!): String!
@@ -1721,6 +1725,39 @@ input UpdateAdminNotificationPreferenceScope {
   desktop: Boolean
   mobile: Boolean
   id: String!
+}
+
+input UpdateNotificationMessage {
+  scope: String
+  event: String
+  email: Boolean
+  pushNotification: Boolean
+  systemNotification: Boolean
+  timing: String
+  duration: String
+  emailTemplate: String
+  recipients: String
+  title: String
+  body: String
+  arabicTitle: String
+  arabicBody: String
+  id: String!
+}
+
+input CreateNotificationMessage {
+  scope: String!
+  event: String!
+  email: Boolean!
+  pushNotification: Boolean!
+  systemNotification: Boolean!
+  timing: String
+  duration: String
+  emailTemplate: String
+  recipients: String!
+  title: String!
+  body: String!
+  arabicTitle: String!
+  arabicBody: String!
 }
 
 input ListingTypeInput {
@@ -2033,6 +2070,7 @@ input UpdateAdminDefaultInput {
   bidIncrement: Float
   maxBidRange: Float
   paymentType: String
+  bidIncrementId: String
   saii: Float
   saiiForRent: Float
   dataRetention: Float

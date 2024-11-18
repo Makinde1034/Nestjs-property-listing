@@ -49,6 +49,10 @@ export class AdminDefaultInput {
   paymentType: string;
 
   @Field()
+  @IsString()
+  bidIncrementId: string;
+
+  @Field()
   @IsNumber()
   saii: number;
 
