@@ -899,7 +899,7 @@ export class AdminService {
       });
 
       const settingToUpdate = feature.map((element) => ({
-        ...feature,
+        ...element,
         isActive: data.isActive,
       }));
 

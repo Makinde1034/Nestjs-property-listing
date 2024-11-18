@@ -144,16 +144,22 @@ export class AdminWorkflowService {
   async update(updateWorkflow: UpdateWorkflowInput, admin: User) {
     try {
       const { id, ...rest } = updateWorkflow;
-      const data = await this.workflowRepository.update(id, rest);
+      const { affected } = await this.workflowRepository.update(id, rest);
 
       await this.activityLogService.logActivity([
         {
           adminId: admin.id,
           action: ActivityEnum.CREATED,
-          details: JSON.stringify(data),
+          details: JSON.stringify(rest),
           workflowId: id,
         },
       ]);
+
+      if (affected) {
+        return new SuccessResponse(AppStrings.SUCCESSFULL);
+      }
+
+      return new BadRequestException('Unable to update workflow');
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);

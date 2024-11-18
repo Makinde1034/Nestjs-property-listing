@@ -40,6 +40,7 @@ export class CreateWorkflowInput {
 @InputType()
 export class UpdateWorkflowInput extends PartialType(CreateWorkflowInput) {
   @Field()
+  @IsString()
   id: string;
 }
 

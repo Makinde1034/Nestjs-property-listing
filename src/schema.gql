@@ -1484,7 +1484,7 @@ type Mutation {
   deactivateCoupons(deactivateCoupons: DeactivateCouponInput!): SuccessResponse!
   systemFeatureSetting(systemFeatureSetting: SystemFeatureSettingInput!): SuccessResponse!
   createWorkFlow(createWorkflowInput: CreateWorkflowInput!): WorkFlow!
-  updateWorkFlow(updateWorkFlowInput: UpdateWorkflowInput!): WorkFlow!
+  updateWorkFlow(updateWorkFlowInput: UpdateWorkflowInput!): SuccessResponse!
   activateAndDeactivateWorkflow(updateWorkFlowInput: WorkflowActionInput!): SuccessResponse!
   approveAction(action: Actions!): SuccessResponse!
   deleteWorkFlow(actionInput: ActionsInput!): SuccessResponse!
