@@ -21,8 +21,19 @@ export class NotificationMessageSeeder implements Seeder {
       factoryManager,
     );
     const repository = dataSource.getRepository(NotificationMessages);
+    const notificationMessage = await repository.find();
 
-    await repository.save(NotificationMessageFactory);
+    if (notificationMessage.length > 0) {
+      this.logger.debug(
+        `Seeding for: ${NotificationMessages.name} Already completed`,
+      );
+    } else {
+      await repository.save(
+        NotificationMessageFactory as Partial<NotificationMessages>,
+      );
+
+      await repository.save(NotificationMessageFactory);
+    }
     this.logger.debug(
       `Seeding for: ${NotificationMessageSeeder.name} finished`,
     );

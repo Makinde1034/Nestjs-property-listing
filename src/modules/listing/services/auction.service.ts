@@ -595,12 +595,11 @@ export class AuctionService {
         throw new NotFoundException('Listing not registered in auction');
       }
 
-      if (auctionParticipant.startPrice < bidInput.price) {
+      if (auctionParticipant.startingPrice > bidInput.price) {
         throw new NotFoundException(
-          ` Minimum open bid price is ${auctionParticipant.startPrice}`,
+          ` Minimum open bid price is ${auctionParticipant.startingPrice}`,
         );
       }
-
       // Determine appropriate increment based on bid price range
       const increment = auctionBidRanges.find(
         (range) =>

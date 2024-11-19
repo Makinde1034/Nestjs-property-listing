@@ -226,8 +226,7 @@ type AuctionParticipant {
   listingId: String!
   bidCount: Float
   listing: Listing!
-  minimumPrice: Float!
-  startPrice: Float!
+  startingPrice: Float!
   auction: Auction!
   bid: Bids
   createdAt: DateTime!
@@ -808,6 +807,7 @@ type AuctionBidRange {
   lowerBound: Float!
   upperBound: Float!
   increment: Float!
+  heldAmount: Float
   createdAt: DateTime!
   deletedAt: DateTime!
   updatedAt: DateTime!

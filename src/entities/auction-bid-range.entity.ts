@@ -28,6 +28,10 @@ export class AuctionBidRange extends BaseEntity {
   @Column()
   increment: number;
 
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  heldAmount: number;
+
   @Field()
   @CreateDateColumn()
   createdAt: Date;
