@@ -10,6 +10,7 @@ export const AuctionBidRangeFactory = [
     upperBound: 1,
 
     increment: 1,
+    heldAmount: 20,
   },
 
   {
@@ -18,6 +19,7 @@ export const AuctionBidRangeFactory = [
     upperBound: 5,
 
     increment: 10,
+    heldAmount: 200,
   },
 
   {
@@ -26,6 +28,8 @@ export const AuctionBidRangeFactory = [
     upperBound: 10,
 
     increment: 25,
+
+    heldAmount: 2000,
   },
 
   {
@@ -34,6 +38,7 @@ export const AuctionBidRangeFactory = [
     upperBound: 25,
 
     increment: 50,
+    heldAmount: 20000,
   },
 
   {
@@ -42,5 +47,6 @@ export const AuctionBidRangeFactory = [
     upperBound: 50,
 
     increment: 100,
+    heldAmount: 200000,
   },
 ];

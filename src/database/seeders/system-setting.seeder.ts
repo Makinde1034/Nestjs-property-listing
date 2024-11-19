@@ -22,6 +22,15 @@ export class SystemSettingSeeder implements Seeder {
       factoryManager,
     );
     const repository = dataSource.getRepository(SystemFeatureSetting);
+    const data = await repository.find();
+
+    if (data.length > 0) {
+      this.logger.debug(
+        `Seeding for: ${SystemSettingSeeder.name} Already completed`,
+      );
+    } else {
+      await repository.save(data as Partial<SystemFeatureSetting>);
+    }
 
     await repository.save(SystemFactory);
     this.logger.debug(`Seeding for: ${SystemSettingSeeder.name} finished`);
