@@ -12,6 +12,7 @@ export const clients = new Map<
 >();
 
 // Add or remove clients globally
+
 export function addClient(
   userId: string,
   client: Subject<MessageEvent>,
@@ -23,7 +24,10 @@ export function addClient(
     userClients = new Map<string | null, Subject<MessageEvent>>();
     clients.set(userId, userClients);
   }
-  userClients.set(participantId || null, client);
+
+  const data = userClients.set(participantId || null, client);
+
+  console.log(data);
   // clients.set(userId, client);
 
   // auctionClients.set(participantId, client);
