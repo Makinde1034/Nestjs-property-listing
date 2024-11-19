@@ -196,6 +196,12 @@ export class ListingResolver {
   async unfeatureAListing(@Args('id') id: string, @Context() ctx: any) {
     return await this.listingService.unfeatureAListing(id, ctx.req.user);
   }
+  @Permissions(PermissionsEnum.AUCTIONS_READ)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Query(() => [String], { name: 'getAllUsersForParticipant' })
+  async getAllUsersForParticipant(@Args('id') id: string) {
+    return await this.auctionService.getAllUsersForParticipant(id);
+  }
 
   @UseGuards(AccessTokenGuard)
   @UseGuards(AccessTokenGuard, PermissionsGuard)

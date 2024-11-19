@@ -1075,6 +1075,7 @@ type Query {
   findOneListingForOwner(id: String!): Listing!
   findListingsForAdmin(paginateAndSort: AdminFilterAndSort): AdminListingResponse!
   findOneListingForAdmin(id: String!): Listing!
+  getAllUsersForParticipant(id: String!): [String!]!
   findOneListingForAuthenticatedBuyer(id: String!): Listing!
   findOneForUnauthenticatedBuyer(id: String!): Listing!
   findListingForBuyerAuthenticated(findManyOptions: CreateSearchHistoryInput): ListingResponse!
