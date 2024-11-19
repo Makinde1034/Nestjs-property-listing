@@ -39,6 +39,10 @@ export class AuctionParticipant extends BaseEntity {
   @Column({ default: 0 })
   startingPrice: number;
 
+  @Field()
+  @Column({ default: 0 })
+  minimumPrice: number;
+
   @Field(() => Auction)
   @ManyToOne(() => Auction, (auction) => auction.auctionParticipant)
   auction: Auction;

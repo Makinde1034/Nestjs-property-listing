@@ -14,7 +14,7 @@ export class SseService {
     participantId?: string,
   ) {
     addClient(userId, client, participantId);
-    this.logger.log(`Client added for userId: ${userId}`);
+    this.logger.log(`Client added for userId: ${userId} and ${participantId}`);
   }
 
   removeClient(userId: string, participantId?: string) {
@@ -31,7 +31,7 @@ export class SseService {
     userId: string,
     participantId?: string,
   ): Subject<MessageEvent> | undefined {
-    return getClient(userId);
+    return getClient(userId, participantId);
   }
 
   /**
@@ -42,7 +42,7 @@ export class SseService {
   sendEvent(userId: string, payload: MessageEvent, participantId?: string) {
     console.log(this.clients);
 
-    const client = this.getClient(userId);
+    const client = this.getClient(userId, participantId);
     if (client) {
       client.next(payload);
       this.logger.log(`Event sent to userId: ${userId}`);

@@ -227,6 +227,7 @@ type AuctionParticipant {
   bidCount: Float
   listing: Listing!
   startingPrice: Float!
+  minimumPrice: Float!
   auction: Auction!
   bid: Bids
   createdAt: DateTime!
