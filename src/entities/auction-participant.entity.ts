@@ -50,7 +50,6 @@ export class AuctionParticipant extends BaseEntity {
   @Field(() => Bids, { nullable: true })
   @OneToMany(() => Bids, (bid) => bid.auctionParticipant)
   bid: Bids;
-
   @Field()
   @CreateDateColumn()
   createdAt: Date;
