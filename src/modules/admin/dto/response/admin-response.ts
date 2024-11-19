@@ -126,12 +126,12 @@ export class AdminDashboard {
 @ObjectType()
 export class FinancialVsOrder {
   @Field({ nullable: true })
-  fee: number;
+  fee: string;
 
   @Field({ nullable: true })
-  totalSold: number;
+  totalAmount: number;
   @Field({ nullable: true })
-  totalOrdered: number;
+  totalOrder: number;
 }
 
 export class CouponResponse {

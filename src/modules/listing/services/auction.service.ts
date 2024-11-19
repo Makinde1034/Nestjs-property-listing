@@ -673,7 +673,6 @@ export class AuctionService {
         : new BadRequestException(error.message);
     }
   }
-
   async createAutoBidOnAuction(
     createAutoBidInput: CreateAutoBidInput,
     user: User,
