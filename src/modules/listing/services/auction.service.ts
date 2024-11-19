@@ -131,7 +131,6 @@ export class AuctionService {
             'bids',
             'bids.price = (SELECT MAX(b.price) FROM Bids b WHERE b."auctionParticipantId" = auctionParticipant.id)',
           )
-
           .leftJoinAndSelect('auctionParticipant.listing', 'listing')
           .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
           .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
@@ -151,6 +150,28 @@ export class AuctionService {
       }
       throw new BadRequestException(
         error.message || 'Error fetching auction data',
+      );
+    }
+  }
+
+  async getAllUsersForParticipant(participantId: string): Promise<string[]> {
+    try {
+      const userIds = await this.auctionParticipantRepository
+        .createQueryBuilder('auctionParticipant')
+        .leftJoin('auctionParticipant.listing', 'listing')
+        .leftJoin('listing.user', 'user')
+        .select('user.id', 'userId') // Select user ID
+        .where('auctionParticipant.id = :participantId', { participantId }) // Adjusted column name
+        .getRawMany();
+
+      return userIds.map((record) => record.userId);
+    } catch (error) {
+      this.logger.error(
+        `Error fetching users for participant ${participantId}:`,
+        error,
+      );
+      throw new BadRequestException(
+        error.message || 'Error fetching user data',
       );
     }
   }
