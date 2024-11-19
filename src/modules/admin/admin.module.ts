@@ -79,7 +79,6 @@ import { SettingFeatureRepository } from './repositories/feature-setting.reposit
     ActionService,
     ListingTypeRepository,
     InvoiceRepository,
-
     SettingFeatureRepository,
   ],
 
