@@ -643,7 +643,7 @@ export class AuctionService {
         data: bid,
       };
 
-      this.sseService.sendEvent(user.id, payload);
+      this.sseService.sendEvent(user.id, payload, auctionParticipant.id);
 
       return bid;
     } catch (error) {

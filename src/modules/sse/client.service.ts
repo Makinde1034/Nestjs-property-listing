@@ -8,13 +8,17 @@ export class SseService {
   clients: Map<string, Subject<MessageEvent>> = new Map();
   private readonly logger = new Logger(SseService.name);
 
-  addClient(userId: string, client: Subject<MessageEvent>) {
-    addClient(userId, client);
+  addClient(
+    userId: string,
+    client: Subject<MessageEvent>,
+    participantId?: string,
+  ) {
+    addClient(userId, client, participantId);
     this.logger.log(`Client added for userId: ${userId}`);
   }
 
-  removeClient(userId: string) {
-    removeClient(userId);
+  removeClient(userId: string, participantId?: string) {
+    removeClient(userId, participantId);
     this.logger.log(
       `Client removed for userId: ${userId}. Total clients: ${this.clients.size}`,
     );
@@ -23,7 +27,10 @@ export class SseService {
    * Retrieves the client's Subject<MessageEvent>
    * @param userId string
    */
-  getClient(userId: string): Subject<MessageEvent> | undefined {
+  getClient(
+    userId: string,
+    participantId?: string,
+  ): Subject<MessageEvent> | undefined {
     return getClient(userId);
   }
 
@@ -32,7 +39,7 @@ export class SseService {
    * @param userId string
    * @param payload MessageEvent
    */
-  sendEvent(userId: string, payload: MessageEvent) {
+  sendEvent(userId: string, payload: MessageEvent, participantId?: string) {
     console.log(this.clients);
 
     const client = this.getClient(userId);

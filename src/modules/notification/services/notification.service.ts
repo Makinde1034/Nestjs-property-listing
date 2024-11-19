@@ -46,6 +46,7 @@ import { SseService } from '../../sse/client.service';
 import { ConfigService } from '@nestjs/config';
 import { MessageEvent } from '../../sse/request/app';
 import { NotificationMessagesRepository } from '../repositories/notification-message.repository';
+import { NotificationMessages } from '../../../entities/notification-message.entity';
 
 @Injectable()
 export class NotificationService {
@@ -137,7 +138,11 @@ export class NotificationService {
       const notificationScopes = Object.values(NotificationScopesEnum);
 
       // If scope matches one of the predefined notification scopes, send the notification
-      console.log(scopeName);
+      const messages = await this.notificationMesageRepository.find({
+        where: { scope: scope.scopeGroup, event: event },
+      });
+      console.log(scope.scopeGroup, event);
+      console.log('fkldlfjaldjaf', messages);
       if (notificationScopes.includes(scopeName)) {
         this.SendNotificationBasedOnPreference(
           userPrefBuyer,
@@ -149,6 +154,7 @@ export class NotificationService {
           recipientFormat,
           count,
           attachment,
+          messages,
         );
       }
     } catch (error) {
@@ -168,6 +174,7 @@ export class NotificationService {
     recipientFormat?: [string, string],
     count?: number,
     attachment?: Buffer,
+    messages?: NotificationMessages[],
   ) {
     try {
       /************************
@@ -184,6 +191,7 @@ export class NotificationService {
           recipientFormat[1],
           count,
           attachment,
+          messages,
         );
       }
 
@@ -202,6 +210,7 @@ export class NotificationService {
           event,
           scope,
           recipientFormat[1],
+          messages,
         );
       }
 
@@ -212,6 +221,7 @@ export class NotificationService {
           event,
           scope,
           recipientFormat[0],
+          messages,
         );
       }
 
@@ -225,6 +235,8 @@ export class NotificationService {
           event,
           scope,
           recipientFormat[1],
+
+          messages,
         );
       }
 
@@ -235,6 +247,8 @@ export class NotificationService {
           event,
           scope,
           recipientFormat[0],
+
+          messages,
         );
       }
       // Add web notification logic when needed
@@ -256,9 +270,18 @@ export class NotificationService {
     user?: User,
     data?: EmailNotificationPayload,
     attachment?: Buffer,
+    messages?: NotificationMessages[],
   ): Promise<void> {
     try {
       await this.mailService.sendEmailNotification(user, data, attachment);
+    } catch (error) {
+      this.logger.log(error);
+    }
+  }
+
+  async sendPushNotification(data: PushNotificationPayload): Promise<void> {
+    try {
+      await this.pushNotificationService.sendPushNotification(data);
     } catch (error) {
       this.logger.log(error);
     }
@@ -269,10 +292,11 @@ export class NotificationService {
     event: string,
     scope: string,
     format: string,
+    messages?: NotificationMessages[],
   ) {
     try {
       if (user) {
-        const messageData = getMessageData(
+        const messageData = this.getMessage(
           user.firstName,
           user.arabicFirstName,
           event,
@@ -309,14 +333,6 @@ export class NotificationService {
     }
   }
 
-  async sendPushNotification(data: PushNotificationPayload): Promise<void> {
-    try {
-      await this.pushNotificationService.sendPushNotification(data);
-    } catch (error) {
-      this.logger.log(error);
-    }
-  }
-
   /**
    * Helper method to send email notification.
    */
@@ -327,10 +343,11 @@ export class NotificationService {
     format: string,
     count?: number,
     attachment?: Buffer,
+    message?: NotificationMessages[],
   ) {
     try {
       if (user) {
-        const messageData = getMessageData(
+        const messageData = this.getMessage(
           user.firstName,
           user.arabicFirstName,
           event,
@@ -369,17 +386,15 @@ export class NotificationService {
     }
   }
 
-  /**
-   * Helper method to send push notification.
-   */
   private sendPushNotificationToUser(
     user: User,
     event: string,
     scope: string,
     format: string,
+    messages?: NotificationMessages[],
   ) {
     try {
-      const messageData = getMessageData(
+      const messageData = this.getMessage(
         user.firstName,
         user.arabicFirstName,
         event,
@@ -415,6 +430,54 @@ export class NotificationService {
       this.logger.log(error);
     }
   }
+
+  getMessage(
+    username: string,
+    arabicUsername: string,
+    event: string,
+    scope: string,
+    recipient: string,
+    count?: number,
+    messages?: Array<NotificationMessages>,
+  ) {
+    const filteredMessages = messages.filter(
+      (message) =>
+        message.scope === scope &&
+        message.event === event &&
+        message.recipients === recipient,
+    );
+
+    if (filteredMessages.length === 0) {
+      this.logger.log('No matching message found');
+    }
+
+    const message = filteredMessages[0]; // Assuming we take the first match
+
+    // Replace placeholders in the desired message's body
+    message.body = this.replacePlaceholders(message.body, { username, count });
+    message.arabicBody = this.replacePlaceholders(message.arabicBody, {
+      username: arabicUsername,
+      count,
+    });
+
+    return message;
+  }
+
+  replacePlaceholders(
+    text: string,
+    placeholders: { username: string; count?: number },
+  ): string {
+    if (!text) return '';
+    return text.replace(/{{(.*?)}}/g, (_, key: keyof typeof placeholders) => {
+      return placeholders[key] !== undefined
+        ? String(placeholders[key])
+        : `{{${key}}}`;
+    });
+  }
+
+  /**
+   * Helper method to send push notification.
+   */
 
   //Notification  actions
 

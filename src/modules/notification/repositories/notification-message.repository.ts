@@ -4,7 +4,6 @@
  */
 
 import { Injectable } from '@nestjs/common';
-import { Notification } from '../../../entities';
 
 import { DataSource, Repository } from 'typeorm';
 import { NotificationMessages } from '../../../entities/notification-message.entity';
@@ -12,6 +11,6 @@ import { NotificationMessages } from '../../../entities/notification-message.ent
 @Injectable()
 export class NotificationMessagesRepository extends Repository<NotificationMessages> {
   constructor(private readonly dataSource: DataSource) {
-    super(Notification, dataSource.createEntityManager());
+    super(NotificationMessages, dataSource.createEntityManager());
   }
 }

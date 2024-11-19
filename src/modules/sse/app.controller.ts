@@ -54,9 +54,8 @@ export class AppController {
   async sendBids(
     @Query('userId') userId: string,
     @Query('token') token: string,
-    @Query('participantId')
-    @Res()
-    res: Response,
+    @Query('participantId') participantId: string,
+    @Res() res: Response,
   ): Promise<Observable<MessageEvent>> {
     if (!token || !userId) {
       throw new BadRequestException('Missing token or userId');
@@ -71,11 +70,20 @@ export class AppController {
     }
 
     const clientSubject = new Subject<MessageEvent>();
-    this.sseService.addClient(userId, clientSubject);
+
+    // Add the client with their participantId
+    this.sseService.addClient(
+      userId,
+      clientSubject,
+      participantId ?? undefined,
+    );
+
+    // Handle connection closure
     res.on('close', () => {
       this.sseService.removeClient(userId);
       clientSubject.complete();
     });
+
     return clientSubject.asObservable();
   }
 

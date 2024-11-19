@@ -121,11 +121,11 @@ export class OfferService {
         );
       }
 
-      if (user.id == listing.user.id) {
-        throw new BadRequestException(
-          'The creator of a listing cannot create an offer on  that listing',
-        );
-      }
+      // if (user.id == listing.user.id) {
+      //   throw new BadRequestException(
+      //     'The creator of a listing cannot create an offer on  that listing',
+      //   );
+      // }
       if (offer.length > 0) {
         throw new BadRequestException(
           `Minimum Offer must be greater than ${offer[0].price}`,
