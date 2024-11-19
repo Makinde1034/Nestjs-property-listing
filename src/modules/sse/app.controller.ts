@@ -72,11 +72,15 @@ export class AppController {
     const clientSubject = new Subject<MessageEvent>();
 
     // Add the client with their participantId
-    this.sseService.addClient(userId, clientSubject, participantId);
+    this.sseService.addClient(
+      userId,
+      clientSubject,
+      participantId ?? undefined,
+    );
 
     // Handle connection closure
     res.on('close', () => {
-      this.sseService.removeClient(userId, participantId);
+      this.sseService.removeClient(userId);
       clientSubject.complete();
     });
 
