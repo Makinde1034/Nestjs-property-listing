@@ -10,76 +10,76 @@ import { Field, ObjectType } from '@nestjs/graphql';
 @Entity()
 @ObjectType()
 export class AdminDefault extends BaseEntity {
-  @Field()
+  @Field({ nullable: true })
   @Column()
   minimumOfferPercentage: number;
 
-  @Field()
+  @Field({ nullable: true })
   @Column()
   street: string;
 
-  @Field()
+  @Field({ nullable: true })
   @Column()
   city: string;
 
-  @Field()
+  @Field({ nullable: true })
   @Column()
   promptRatingTime: number;
 
-  @Field()
+  @Field({ nullable: true })
   @Column()
   ticketAging: number;
 
-  @Field()
+  @Field({ nullable: true })
   @Column({ type: 'decimal' })
   saiiFromSale: number;
 
-  @Field()
+  @Field({ nullable: true })
   @Column({ type: 'decimal' })
   saiiForRent: number;
 
-  @Field()
+  @Field({ nullable: true })
   @Column({ type: 'decimal' })
   vat: number;
 
-  @Field()
+  @Field({ nullable: true })
   @Column()
   paymentType: string;
 
-  @Field()
+  @Field({ nullable: true })
   @Column({ nullable: true })
   dataRetention: number;
 
-  @Field()
+  @Field({ nullable: true })
   @Column({ nullable: true })
   ratingPrompt: number;
 
-  @Field()
+  @Field({ nullable: true })
   @Column({ default: 100 })
   auctionHeldAmount: number;
 
-  @Field()
+  @Field({ nullable: true })
   @Column({ default: 1000 })
   fallBackDefaultBidIncrement: number;
 
-  @Field()
+  @Field({ nullable: true })
   @Column()
   state: string;
-  @Field()
+  @Field({ nullable: true })
   @Column()
   country: string;
-  @Field()
+  @Field({ nullable: true })
   @Column()
   countryISOCode: string;
-  @Field()
+  @Field({ nullable: true })
   @Column()
   postcode: string;
 
-  @Field()
+  @Field({ nullable: true })
   @Column()
   merchantTransactionId: string;
 
-  @Field()
+  @Field({ nullable: true })
   @Column()
   daysToAuctionRegistrationEnd: number;
 
@@ -87,15 +87,15 @@ export class AdminDefault extends BaseEntity {
   @Column({ default: 2 })
   maximumDaysForOfferExpiration: number;
 
-  @Field()
+  @Field({ nullable: true })
   @Column()
   daysToAuctionRegistrationStart: number;
 
-  @Field()
+  @Field({ nullable: true })
   @CreateDateColumn()
   createdAt: Date;
 
-  @Field()
+  @Field({ nullable: true })
   @UpdateDateColumn()
   updatedAt: Date;
 }
