@@ -266,9 +266,11 @@ export class HyperPayService {
       );
 
       const data = await (await lastValueFrom(response)).data;
+      console.log(data);
 
       return data;
     } catch (error) {
+      console.log('here', error);
       this.logger.error('Error creating checkout', error);
       if (error instanceof HttpException) {
         throw error;
@@ -310,6 +312,8 @@ export class HyperPayService {
       );
       return response.data;
     } catch (error) {
+      console.log('here', error.response.data);
+
       this.logger.error('Error creating checkout', error);
       if (error instanceof HttpException) {
         throw error;

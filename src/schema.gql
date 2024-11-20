@@ -764,29 +764,29 @@ type AttributeResponse {
 
 type AdminDefault {
   id: ID!
-  minimumOfferPercentage: Float!
-  street: String!
-  city: String!
-  promptRatingTime: Float!
-  ticketAging: Float!
-  saiiFromSale: Float!
-  saiiForRent: Float!
-  vat: Float!
-  paymentType: String!
-  dataRetention: Float!
-  ratingPrompt: Float!
-  auctionHeldAmount: Float!
-  fallBackDefaultBidIncrement: Float!
-  state: String!
-  country: String!
-  countryISOCode: String!
-  postcode: String!
-  merchantTransactionId: String!
-  daysToAuctionRegistrationEnd: Float!
+  minimumOfferPercentage: Float
+  street: String
+  city: String
+  promptRatingTime: Float
+  ticketAging: Float
+  saiiFromSale: Float
+  saiiForRent: Float
+  vat: Float
+  paymentType: String
+  dataRetention: Float
+  ratingPrompt: Float
+  auctionHeldAmount: Float
+  fallBackDefaultBidIncrement: Float
+  state: String
+  country: String
+  countryISOCode: String
+  postcode: String
+  merchantTransactionId: String
+  daysToAuctionRegistrationEnd: Float
   maximumDaysForOfferExpiration: Float!
-  daysToAuctionRegistrationStart: Float!
-  createdAt: DateTime!
-  updatedAt: DateTime!
+  daysToAuctionRegistrationStart: Float
+  createdAt: DateTime
+  updatedAt: DateTime
 }
 
 type Coupon {
