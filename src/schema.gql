@@ -1955,6 +1955,7 @@ input CreateBidInput {
 input CreateAutoBidInput {
   listingId: String!
   auctionId: String!
+  price: Float!
   reference: String!
 }
 
