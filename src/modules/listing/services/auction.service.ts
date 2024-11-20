@@ -114,16 +114,20 @@ export class AuctionService {
       throw new BadRequestException(AppStrings.AUCTION_NOT_FOUND);
     }
   }
+
   async findOneAuctionWithParticipants(
     paginateAndSort: FetchAuctionParticipantInput,
   ): Promise<AuctionParticipantResponse> {
     try {
       const { id, skip = 0, take = 20 } = paginateAndSort; // Default pagination if not provided
+
       const [auction, [participants, total]] = await Promise.all([
+        // Fetch the auction details
         this.auctionRepository.findOneOrFail({
           where: { id },
         }),
 
+        // Fetch participants with their bids, including userId for each bid
         this.auctionParticipantRepository
           .createQueryBuilder('auctionParticipant')
           .leftJoinAndSelect(
@@ -131,6 +135,7 @@ export class AuctionService {
             'bids',
             'bids.price = (SELECT MAX(b.price) FROM Bids b WHERE b."auctionParticipantId" = auctionParticipant.id)',
           )
+
           .leftJoinAndSelect('auctionParticipant.listing', 'listing')
           .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
           .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
@@ -142,7 +147,15 @@ export class AuctionService {
           .getManyAndCount(),
       ]);
 
-      return { auctions: auction, listing: participants, total };
+      // Transform the data to include userId array within the participant object
+      const transformedParticipants = participants.map((participant) => ({
+        ...participant,
+        userId: participant.bid // Collect userId from bids
+          .map((bid) => bid.userId)
+          .filter((userId) => userId), // Exclude null/undefined values
+      }));
+
+      return { auctions: auction, participant: transformedParticipants, total };
     } catch (error) {
       this.logger.error('Error fetching auction with participants:', error);
       if (error.name === 'EntityNotFound') {
@@ -154,27 +167,67 @@ export class AuctionService {
     }
   }
 
-  async getAllUsersForParticipant(participantId: string): Promise<string[]> {
-    try {
-      const userIds = await this.auctionParticipantRepository
-        .createQueryBuilder('auctionParticipant')
-        .leftJoin('auctionParticipant.listing', 'listing')
-        .leftJoin('listing.user', 'user')
-        .select('user.id', 'userId') // Select user ID
-        .where('auctionParticipant.id = :participantId', { participantId }) // Adjusted column name
-        .getRawMany();
+  // async findOneAuctionWithParticipants(
+  //   paginateAndSort: FetchAuctionParticipantInput,
+  // ): Promise<AuctionParticipantResponse> {
+  //   try {
+  //     const { id, skip = 0, take = 20 } = paginateAndSort; // Default pagination if not provided
+  //     const [auction, [participants, total]] = await Promise.all([
+  //       this.auctionRepository.findOneOrFail({
+  //         where: { id },
+  //       }),
 
-      return userIds.map((record) => record.userId);
-    } catch (error) {
-      this.logger.error(
-        `Error fetching users for participant ${participantId}:`,
-        error,
-      );
-      throw new BadRequestException(
-        error.message || 'Error fetching user data',
-      );
-    }
-  }
+  //       this.auctionParticipantRepository
+  //         .createQueryBuilder('auctionParticipant')
+  //         .leftJoinAndSelect(
+  //           'auctionParticipant.bid',
+  //           'bids',
+  //           'bids.price = (SELECT MAX(b.price) FROM Bids b WHERE b."auctionParticipantId" = auctionParticipant.id)',
+  //         )
+  //         .leftJoinAndSelect('auctionParticipant.listing', 'listing')
+  //         .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
+  //         .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
+  //         .leftJoinAndSelect('listing.listingType', 'listingType')
+  //         .leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate')
+  //         .where('auctionParticipant.auctionId = :id', { id })
+  //         .skip(skip)
+  //         .take(take)
+  //         .getManyAndCount(),
+  //     ]);
+
+  //     return { auctions: auction, listing: participants, total };
+  //   } catch (error) {
+  //     this.logger.error('Error fetching auction with participants:', error);
+  //     if (error.name === 'EntityNotFound') {
+  //       throw new BadRequestException(AppStrings.AUCTION_NOT_FOUND);
+  //     }
+  //     throw new BadRequestException(
+  //       error.message || 'Error fetching auction data',
+  //     );
+  //   }
+  // }
+
+  // async getAllUsersForParticipant(participantId: string): Promise<string[]> {
+  //   try {
+  //     const userIds = await this.auctionParticipantRepository
+  //       .createQueryBuilder('auctionParticipant')
+  //       .leftJoin('auctionParticipant.listing', 'listing')
+  //       .leftJoin('listing.user', 'user')
+  //       .select('user.id', 'userId') // Select user ID
+  //       .where('auctionParticipant.id = :participantId', { participantId }) // Adjusted column name
+  //       .getRawMany();
+
+  //     return userIds.map((record) => record.userId);
+  //   } catch (error) {
+  //     this.logger.error(
+  //       `Error fetching users for participant ${participantId}:`,
+  //       error,
+  //     );
+  //     throw new BadRequestException(
+  //       error.message || 'Error fetching user data',
+  //     );
+  //   }
+  // }
 
   async findAllRunning(paginateAndSort: PaginateAndSort) {
     try {

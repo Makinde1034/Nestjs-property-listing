@@ -27,6 +27,9 @@ export class AuctionParticipant extends BaseEntity {
   @Column()
   listingId: string;
 
+  @Field(() => [String], { nullable: true })
+  userId: string[];
+
   @Field({ nullable: true })
   bidCount: number;
 
@@ -47,9 +50,9 @@ export class AuctionParticipant extends BaseEntity {
   @ManyToOne(() => Auction, (auction) => auction.auctionParticipant)
   auction: Auction;
 
-  @Field(() => Bids, { nullable: true })
+  @Field(() => [Bids], { nullable: true })
   @OneToMany(() => Bids, (bid) => bid.auctionParticipant)
-  bid: Bids;
+  bid: Bids[];
   @Field()
   @CreateDateColumn()
   createdAt: Date;

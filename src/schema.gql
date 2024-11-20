@@ -224,12 +224,13 @@ type Bids {
 type AuctionParticipant {
   id: ID!
   listingId: String!
+  userId: [String!]
   bidCount: Float
   listing: Listing!
   startingPrice: Float!
   minimumPrice: Float!
   auction: Auction!
-  bid: Bids
+  bid: [Bids!]
   createdAt: DateTime!
   deletedAt: DateTime!
   updatedAt: DateTime!
@@ -878,7 +879,7 @@ type AuctionResponse {
 
 type AuctionParticipantResponse {
   auctions: Auction
-  listing: [AuctionParticipant!]
+  participant: [AuctionParticipant!]
   total: Int!
 }
 
@@ -1075,7 +1076,6 @@ type Query {
   findOneListingForOwner(id: String!): Listing!
   findListingsForAdmin(paginateAndSort: AdminFilterAndSort): AdminListingResponse!
   findOneListingForAdmin(id: String!): Listing!
-  getAllUsersForParticipant(id: String!): [String!]!
   findOneListingForAuthenticatedBuyer(id: String!): Listing!
   findOneForUnauthenticatedBuyer(id: String!): Listing!
   findListingForBuyerAuthenticated(findManyOptions: CreateSearchHistoryInput): ListingResponse!
