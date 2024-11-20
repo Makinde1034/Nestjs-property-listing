@@ -83,7 +83,6 @@ export class AppController {
       this.sseService.removeClient(userId);
       clientSubject.complete();
     });
-
     return clientSubject.asObservable();
   }
 
