@@ -257,7 +257,7 @@ export class AdminService {
       case TimePeriod.Today:
         startDate = startOfDay(currentDate);
         endDate = endOfDay(currentDate);
-        groupByInterval = 'category';
+        groupByInterval = 'hour';
         break;
       case TimePeriod.Week:
         startDate = startOfWeek(currentDate);
@@ -280,38 +280,43 @@ export class AdminService {
     }
 
     // Query transactions and group by the specified interval
-    const transactions = await this.transactionRepository
-      .createQueryBuilder('transactionLog')
+    const transactions = await this.invoiceRepository
+      .createQueryBuilder('invoice')
       .select(
-        `EXTRACT(${groupByInterval.toUpperCase()} FROM transactionLog.createdAt)::int`,
+        `EXTRACT(${groupByInterval.toUpperCase()} FROM invoice.createdAt)::int`,
         groupByInterval,
       )
-      .addSelect('transactionLog.category', 'fee')
-      .addSelect(
-        'COALESCE(SUM(transactionLog.amount), 0)::float',
-        'totalAmount',
-      )
-      .addSelect('COALESCE(COUNT(transactionLog.id), 0)::int', 'totalOrder')
-      .where('transactionLog.createdAt BETWEEN :startDate AND :endDate', {
+      .addSelect('invoice.type', 'fee')
+      .addSelect('COALESCE(SUM(invoice.price), 0)::float', 'totalAmount')
+      .addSelect('COALESCE(COUNT(invoice.id), 0)::int', 'totalOrder')
+      .where('invoice.createdAt BETWEEN :startDate AND :endDate', {
         startDate,
         endDate,
       })
       .groupBy(
-        `EXTRACT(${groupByInterval.toUpperCase()} FROM transactionLog.createdAt), transactionLog.category`,
+        `EXTRACT(${groupByInterval.toUpperCase()} FROM invoice.createdAt), invoice.type`,
       )
       .orderBy(`${groupByInterval}`)
       .getRawMany();
 
     // Initialize result structure
-    let result = [];
+    const result: FinancialVsOrder[] = [];
 
+    // Handle different cases
     if (findOptions.timePeriod === TimePeriod.Today) {
       const dailyData = transactions.map((t) => ({
-        fee: t.fee,
+        fee: t.fee, // Use fee from transactions
         totalAmount: parseFloat(t.totalAmount),
-        totalOrder: t.totalOrder,
+        totalOrder: parseInt(t.totalOrder),
       }));
-      result.push(dailyData);
+      result.push(...dailyData);
+    } else if (findOptions.timePeriod === TimePeriod.Year) {
+      const yearlyData = transactions.map((t) => ({
+        fee: t.fee, // Use fee from transactions
+        totalAmount: parseFloat(t.totalAmount) ?? 0,
+        totalOrder: parseInt(t.totalOrder) ?? 0,
+      }));
+      result.push(...yearlyData);
     } else {
       const intervalCount =
         groupByInterval === 'day'
@@ -324,14 +329,29 @@ export class AdminService {
         const intervalData = transactions
           .filter((t) => parseInt(t[groupByInterval]) === i + 1)
           .map((t) => ({
-            fee: t.fee ?? 0,
-            totalAmount: parseFloat(t.totalAmount) ?? 0,
-            totalOrder: t.totalOrder ?? 0,
+            fee: t.fee, // Use fee from transactions
+            totalAmount: parseFloat(t.totalAmount) || 0,
+            totalOrder: parseInt(t.totalOrder) || 0,
           }));
-        result.push(intervalData);
+
+        const totalAmount = intervalData.reduce(
+          (sum, data) => sum + data.totalAmount,
+          0,
+        );
+        const totalOrder = intervalData.reduce(
+          (sum, data) => sum + data.totalOrder,
+          0,
+        );
+
+        result.push({
+          fee: intervalData.length ? intervalData[0].fee : null, // Keep the first fee of the interval
+          totalAmount,
+          totalOrder,
+        });
       }
     }
 
+    console.log(result);
     return result;
   }
 

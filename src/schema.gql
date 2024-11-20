@@ -986,9 +986,9 @@ type UserGenderCount {
 }
 
 type FinancialVsOrder {
-  fee: Float
-  totalSold: Float
-  totalOrdered: Float
+  fee: String
+  totalAmount: Float
+  totalOrder: Float
 }
 
 type SplashScreenResponse {
