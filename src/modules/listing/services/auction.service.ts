@@ -135,7 +135,6 @@ export class AuctionService {
             'bids',
             'bids.price = (SELECT MAX(b.price) FROM Bids b WHERE b."auctionParticipantId" = auctionParticipant.id)',
           )
-
           .leftJoinAndSelect('auctionParticipant.listing', 'listing')
           .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
           .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
