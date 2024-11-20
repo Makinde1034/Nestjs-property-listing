@@ -597,6 +597,7 @@ export class AuctionService {
   async bidOnAuction(bidInput: CreateBidInput, user: User) {
     try {
       // Fetch necessary details concurrently
+
       const [auctionParticipant, auctionBidRanges, highestBid] =
         await Promise.all([
           this.auctionParticipantRepository.findOne({
@@ -633,7 +634,7 @@ export class AuctionService {
         (await this.adminService.adminDefault()).fallBackDefaultBidIncrement;
 
       // Validate minimum bid price
-      if (bidInput.price < highestBid.price) {
+      if (highestBid && bidInput?.price < highestBid?.price) {
         throw new BadRequestException(
           `MInimum bid must be more ${Math.floor(highestBid.price + incrementValue)}`,
         );
@@ -667,10 +668,10 @@ export class AuctionService {
 
       return bid;
     } catch (error) {
-      this.logger.error(error);
+      this.logger.debug(error);
       throw error instanceof HttpException
         ? error
-        : new BadRequestException(error.message);
+        : new BadRequestException(error);
     }
   }
   async createAutoBidOnAuction(
