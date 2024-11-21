@@ -83,7 +83,7 @@ export class NotificationResolver {
   async createAdminNotificationScope(
     @Args('requestInput') requestInput: CreateNotificationScopeInput,
   ): Promise<NotificationScope> {
-    return await this.notificationService.createAdminNotificationScope(
+    return await this.notificationService.createAdminNotificationScopePreference(
       requestInput,
     );
   }
@@ -122,7 +122,6 @@ export class NotificationResolver {
       createNotificationMessageInput,
     );
   }
-
   /**
    * List notification scopes
    * @async

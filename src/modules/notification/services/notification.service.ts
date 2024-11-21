@@ -321,7 +321,6 @@ export class NotificationService {
         };
 
         this.sseService.sendEvent(user.id, payload);
-
         this.saveNotificationLog({
           title: subject,
           message: text,
@@ -478,12 +477,10 @@ export class NotificationService {
   /**
    * Helper method to send push notification.
    */
-
   //Notification  actions
 
   /**
    * Send Notification Message
-   *
    * @async
    * @param {NotificationEventInput} notification
    * @returns {Promise<string>}
@@ -679,7 +676,16 @@ export class NotificationService {
     }
   }
 
-  async createAdminNotificationScope(
+  async fetchNotificationScopes() {
+    try {
+      const admin = await this.userRepository.findOne({
+        where: { userType: 'admin' },
+      });
+      const data = await this.adminNotificationPreferenceRepository.findOne({});
+    } catch (error) {}
+  }
+
+  async createAdminNotificationScopePreference(
     input: CreateNotificationScopeInput,
   ): Promise<NotificationScope> {
     try {
