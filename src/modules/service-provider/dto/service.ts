@@ -6,7 +6,10 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { ServiceProviderStatus } from '../../../common/enums/status.enum';
+import {
+  ServiceProvided,
+  ServiceProviderStatus,
+} from '../../../common/enums/status.enum';
 
 @InputType()
 export class Pricing {
@@ -105,4 +108,13 @@ export class ProvideNewService {
   @Field()
   @IsString()
   serviceId: string;
+}
+
+@InputType()
+export class RequestForService {
+  @Field()
+  serviceProvidedId: string;
+
+  @Field()
+  listingId: string;
 }

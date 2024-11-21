@@ -253,6 +253,18 @@ type Invoice {
   updatedAt: DateTime!
 }
 
+type ServiceRequested {
+  id: ID!
+  userId: String!
+  user: User!
+  serviceProvidedId: String!
+  listing: [Listing!]!
+  status: String!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type Listing {
   id: ID!
   ownership: String
@@ -262,6 +274,7 @@ type Listing {
   deedNumber: String
   poaNumber: String
   rentingOption: String
+  serviceRequested: ServiceRequested!
   auctionParticipant: AuctionParticipant!
   invoice: Invoice
   listingType: ListingType
@@ -429,13 +442,13 @@ type Service {
   isWorkLicenseRequired: Boolean
   icon: String
   pricing: String
-  status: [ServiceStatus!]!
+  status: [ServiceProvided!]!
   createdAt: DateTime!
   deletedAt: DateTime!
   updatedAt: DateTime!
 }
 
-type ServiceStatus {
+type ServiceProvided {
   id: ID!
   serviceProvider: ServiceProvider!
   serviceProviderId: String!
@@ -460,7 +473,7 @@ type ServiceProvider {
   providerStatus: String
   deletedAt: DateTime!
   activityLog: [ActivityLog!]!
-  servicesOffered: [ServiceStatus!]!
+  servicesOffered: [ServiceProvided!]!
   coverageArea: String!
   updatedAt: DateTime!
 }
@@ -1054,7 +1067,7 @@ type ServiceProviderResponse {
 
 type OneServiceProviderResponse {
   provider: ServiceProvider!
-  serviceProvided: [ServiceStatus!]!
+  serviceProvided: [ServiceProvided!]!
 }
 
 type Query {
@@ -1526,8 +1539,9 @@ type Mutation {
   updateServiceStatus(updateServiceStatus: UpdateServiceInput!): SuccessResponse!
   updateProviderServiceCoverageArea(updateProviderServiceCoverageArea: UpdateServiceProviderInput!): SuccessResponse!
   acceptRequestAndStopRequest(updateServiceStatus: UpdateServiceInput!): SuccessResponse!
-  provideService(provideService: ProvideNewService!): ServiceStatus!
+  provideService(provideService: ProvideNewService!): ServiceProvided!
   removeServiceProvider(deleteServiceProvider: DeleteServiceProvider!): ServiceProvider!
+  requestForService(requestForService: RequestForService!): ServiceRequested!
 }
 
 input CreateSplashScreenInput {
@@ -2278,4 +2292,9 @@ input ProvideNewService {
 
 input DeleteServiceProvider {
   id: [String!]!
+}
+
+input RequestForService {
+  serviceProvidedId: String!
+  listingId: String!
 }

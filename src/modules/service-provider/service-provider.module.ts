@@ -4,8 +4,9 @@ import { ServiceAndProviderResolver } from './resolver/service-provider.resolver
 import { ServiceProviderRepository } from './repository/service-provider.repository';
 import { ServiceRepository } from './repository/services.repository';
 
-import { ServiceStatusRepository } from './repository/service-status.repository';
+import { ServiceProvidedRepository } from './repository/service-provided.repository';
 import { ServiceAndProviderService } from './services/service-provider.service';
+import { ServiceRequestedRepository } from './repository/requested-service.repository';
 
 @Module({
   providers: [
@@ -13,7 +14,8 @@ import { ServiceAndProviderService } from './services/service-provider.service';
     ServiceAndProviderService,
     ServiceProviderRepository,
     ServiceRepository,
-    ServiceStatusRepository,
+    ServiceProvidedRepository,
+    ServiceRequestedRepository,
   ],
 })
 export class ServiceProviderModule {}
