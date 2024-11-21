@@ -9,6 +9,7 @@ import {
   CreateServiceProviderInput,
   DeleteServiceProvider,
   ProvideNewService,
+  RequestForService,
   ServiceProviderInput,
   UpdateServiceInput,
   UpdateServiceProviderInput,
@@ -20,12 +21,13 @@ import { PaginateAndSort } from '../../../modules/core/dto/pagination-and-sort.d
 import { ActivityLogService } from '../../../modules/activity-log/services/activity-log.service';
 import { In } from 'typeorm';
 import { ServiceProviderStatus } from '../../../common/enums/status.enum';
-import { ServiceStatusRepository } from '../repository/service-status.repository';
+import { ServiceProvidedRepository } from '../repository/service-provided.repository';
 import { User } from '../../../entities';
 import { ActivityEnum } from '../../../common/enums/activitys';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { AppStrings } from '../../../common/messages/app.strings';
-import { ServiceStatus } from '../../../entities/provider-service-status.entity';
+import { ServiceProvided } from '../../../entities/service-provided.entity';
+import { ServiceRequestedRepository } from '../repository/requested-service.repository';
 
 @Injectable()
 export class ServiceAndProviderService {
@@ -33,57 +35,17 @@ export class ServiceAndProviderService {
     private readonly serviceProviderRepository: ServiceProviderRepository,
     private readonly serviceRepository: ServiceRepository,
     private readonly activityLogService: ActivityLogService,
-    private readonly serviceStatusRepository: ServiceStatusRepository,
+    private readonly serviceProvidedRepository: ServiceProvidedRepository,
+
+    private readonly serviceRequestedRepository: ServiceRequestedRepository,
   ) {}
 
   logger = new Logger(ServiceAndProviderService.name);
-  async createService(createServiceInput: CreateServiceInput, user: User) {
-    try {
-      const { pricing, ...rest } = createServiceInput;
 
-      const data = await this.serviceRepository.save({
-        ...rest,
-        pricing: JSON.stringify(createServiceInput.pricing),
-      });
-
-      await this.activityLogService.logActivity([
-        {
-          adminId: user.id,
-          action: ActivityEnum.CREATED,
-          details: JSON.stringify(data),
-
-          serviceId: data.id,
-        },
-      ]);
-
-      return data;
-    } catch (error) {
-      this.logger.error(error);
-      throw new BadRequestException(error);
-    }
-  }
-  async findAllServices(paginateAndSort: PaginateAndSort) {
-    try {
-      const whereOption =
-        paginateAndSort?.where?.fieldToChose &&
-        paginateAndSort?.where?.whereParam
-          ? {
-              [paginateAndSort.where.fieldToChose]:
-                paginateAndSort.where.whereParam,
-            }
-          : {};
-      const [service, count] = await this.serviceRepository.findAndCount({
-        take: paginateAndSort.take ?? 20,
-        skip: paginateAndSort.skip ?? 0,
-        where: { ...whereOption },
-      });
-
-      return { service, count };
-    } catch (error) {
-      this.logger.error(error);
-      throw new BadRequestException(error);
-    }
-  }
+  /**
+   *
+   * Service Provider
+   */
 
   async findOneService(id: string) {
     try {
@@ -120,7 +82,7 @@ export class ServiceAndProviderService {
         user,
       });
 
-      await this.serviceStatusRepository.save({
+      await this.serviceProvidedRepository.save({
         serviceId: service.id,
         serviceProviderId: serviceProvider.id,
       });
@@ -152,7 +114,7 @@ export class ServiceAndProviderService {
     try {
       const [provider, serviceProvided] = await Promise.all([
         this.serviceProviderRepository.findOneBy({ id }),
-        this.serviceStatusRepository.find({
+        this.serviceProvidedRepository.find({
           where: { serviceProviderId: id },
         }),
       ]);
@@ -244,22 +206,6 @@ export class ServiceAndProviderService {
     }
   }
 
-  async updateServiceStatus(updateServiceInput: UpdateServiceInput) {
-    try {
-      const { id, providerServiceStatus } = updateServiceInput;
-      const { affected } = await this.serviceStatusRepository.update(id, {
-        status: providerServiceStatus,
-      });
-
-      if (affected > 0) {
-        return new SuccessResponse(AppStrings.SUCCESSFULL);
-      }
-    } catch (error) {
-      this.logger.log(error);
-      throw new BadRequestException(error);
-    }
-  }
-
   async updateProviderServiceCoverageArea(
     updateServiceInput: UpdateServiceProviderInput,
   ) {
@@ -277,27 +223,11 @@ export class ServiceAndProviderService {
     }
   }
 
-  async acceptRequestAndStopRequest(updateServiceInput: UpdateServiceInput) {
-    try {
-      const { id, isActive } = updateServiceInput;
-      const { affected } = await this.serviceStatusRepository.update(id, {
-        isActive: isActive,
-      });
-
-      if (affected > 0) {
-        return new SuccessResponse(AppStrings.SUCCESSFULL);
-      }
-    } catch (error) {
-      this.logger.log(error);
-      throw new BadRequestException(error);
-    }
-  }
-
   async provideService(
     proideServiceInput: ProvideNewService,
-  ): Promise<ServiceStatus> {
+  ): Promise<ServiceProvided> {
     try {
-      return await this.serviceStatusRepository.save(proideServiceInput);
+      return await this.serviceProvidedRepository.save(proideServiceInput);
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -306,7 +236,7 @@ export class ServiceAndProviderService {
 
   async stopProvidingService(proideServiceInput: ServiceProviderInput) {
     try {
-      const { affected } = await this.serviceStatusRepository.softDelete(
+      const { affected } = await this.serviceProvidedRepository.softDelete(
         proideServiceInput.id,
       );
       if (affected > 0) {
@@ -333,6 +263,123 @@ export class ServiceAndProviderService {
     }
   }
 
+  async searchForServiceProvider(searchParam: string) {
+    try {
+      return await this.serviceProviderRepository
+        .createQueryBuilder('serviceProvider')
+        .leftJoinAndSelect('serviceProvider.user', 'user')
+        .orWhere('serviceProvider.coverageArea ILIKE :term', {
+          term: `%${searchParam}%`,
+        })
+
+        .getMany();
+    } catch (error) {
+      this.logger.error('Error searching tickets', error);
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  /**
+   * Services
+   *
+   */
+  async createService(createServiceInput: CreateServiceInput, user: User) {
+    try {
+      const { pricing, ...rest } = createServiceInput;
+
+      const data = await this.serviceRepository.save({
+        ...rest,
+        pricing: JSON.stringify(createServiceInput.pricing),
+      });
+
+      await this.activityLogService.logActivity([
+        {
+          adminId: user.id,
+          action: ActivityEnum.CREATED,
+          details: JSON.stringify(data),
+
+          serviceId: data.id,
+        },
+      ]);
+
+      return data;
+    } catch (error) {
+      this.logger.error(error);
+      throw new BadRequestException(error);
+    }
+  }
+  async findAllServices(paginateAndSort: PaginateAndSort) {
+    try {
+      const whereOption =
+        paginateAndSort?.where?.fieldToChose &&
+        paginateAndSort?.where?.whereParam
+          ? {
+              [paginateAndSort.where.fieldToChose]:
+                paginateAndSort.where.whereParam,
+            }
+          : {};
+      const [service, count] = await this.serviceRepository.findAndCount({
+        take: paginateAndSort.take ?? 20,
+        skip: paginateAndSort.skip ?? 0,
+        where: { ...whereOption },
+      });
+
+      return { service, count };
+    } catch (error) {
+      this.logger.error(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async updateServiceStatus(updateServiceInput: UpdateServiceInput) {
+    try {
+      const { id, providerServiceStatus } = updateServiceInput;
+      const { affected } = await this.serviceProvidedRepository.update(id, {
+        status: providerServiceStatus,
+      });
+
+      if (affected > 0) {
+        return new SuccessResponse(AppStrings.SUCCESSFULL);
+      }
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async requestForService(
+    requestForServiceInput: RequestForService,
+    user: User,
+  ) {
+    try {
+      const data = await this.serviceRequestedRepository.save({
+        ...requestForServiceInput,
+        userId: user.id,
+      });
+
+      return data;
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async acceptRequestAndStopRequest(updateServiceInput: UpdateServiceInput) {
+    try {
+      const { id, isActive } = updateServiceInput;
+      const { affected } = await this.serviceProvidedRepository.update(id, {
+        isActive: isActive,
+      });
+
+      if (affected > 0) {
+        return new SuccessResponse(AppStrings.SUCCESSFULL);
+      }
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
   async deleteService(deleteServiceProvider: DeleteServiceProvider) {
     try {
       const { affected } = await this.serviceRepository.softDelete(
@@ -348,25 +395,17 @@ export class ServiceAndProviderService {
     }
   }
 
-  async searchForServiceProvider(searchParam: string) {
-    try {
-      return await this.serviceProviderRepository
-        .createQueryBuilder('serviceProvider')
-        .leftJoinAndSelect('serviceProvider.user', 'user')
-
-        .getMany();
-    } catch (error) {
-      this.logger.error('Error searching tickets', error);
-      throw new BadRequestException(error.message);
-    }
-  }
-
   async searchForService(searchParam: string) {
     try {
-      return await this.serviceProviderRepository
+      return await this.serviceRepository
         .createQueryBuilder('service')
         .leftJoinAndSelect('service.user', 'user')
-
+        .orWhere('serviceProvider.englishServiceName ILIKE :term', {
+          term: `%${searchParam}%`,
+        })
+        .orWhere('serviceProvider.arabicServiceName ILIKE :term', {
+          term: `%${searchParam}%`,
+        })
         .getMany();
     } catch (error) {
       this.logger.error('Error searching tickets', error);

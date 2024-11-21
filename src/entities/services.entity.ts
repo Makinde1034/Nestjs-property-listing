@@ -8,7 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
-import { ServiceStatus } from './provider-service-status.entity';
+import { ServiceProvided } from './service-provided.entity';
 
 @ObjectType()
 @Entity()
@@ -36,9 +36,9 @@ export class Service extends BaseEntity {
   @Column()
   @Field({ nullable: true })
   pricing: string;
-  @Field(() => [ServiceStatus])
-  @OneToMany(() => ServiceStatus, (status) => status.service)
-  status: ServiceStatus[];
+  @Field(() => [ServiceProvided])
+  @OneToMany(() => ServiceProvided, (status) => status.service)
+  status: ServiceProvided[];
 
   @Field()
   @CreateDateColumn()
