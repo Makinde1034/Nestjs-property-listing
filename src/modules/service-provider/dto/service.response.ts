@@ -1,7 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Service } from '../../../entities/services.entity';
 import { ServiceProvider } from '../../../entities/service-provider.entity';
-import { ServiceStatus } from '../../../entities/provider-service-status.entity';
+import { ServiceProvided } from '../../../entities/service-provided.entity';
 @ObjectType()
 export class ServiceResponse {
   @Field(() => [Service])
@@ -25,6 +25,6 @@ export class OneServiceProviderResponse {
   @Field()
   provider: ServiceProvider;
 
-  @Field(() => [ServiceStatus])
-  serviceProvided: ServiceStatus[];
+  @Field(() => [ServiceProvided])
+  serviceProvided: ServiceProvided[];
 }

@@ -10,7 +10,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
-import { ServiceStatus } from './provider-service-status.entity';
+import { ServiceProvided } from './service-provided.entity';
 import { ServiceProviderStatus } from '../common/enums/status.enum';
 import { ActivityLog } from './activity-log.entity';
 import { User } from './user.entity';
@@ -62,9 +62,9 @@ export class ServiceProvider extends BaseEntity {
   )
   activityLog: ActivityLog[];
 
-  @Field(() => [ServiceStatus])
-  @OneToMany(() => ServiceStatus, (status) => status.service)
-  servicesOffered: ServiceStatus[];
+  @Field(() => [ServiceProvided])
+  @OneToMany(() => ServiceProvided, (status) => status.service)
+  servicesOffered: ServiceProvided[];
 
   @Field()
   @Column()

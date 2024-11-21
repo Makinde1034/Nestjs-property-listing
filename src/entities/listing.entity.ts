@@ -30,6 +30,7 @@ import { GpsCoordinate } from './gps-coordinates.entity';
 import { AuctionParticipant } from './auction-participant.entity';
 import { ActivityLog } from './activity-log.entity';
 import { Invoice } from './invoice.entity';
+import { ServiceRequested } from './service-requested.entity';
 
 @Entity()
 @ObjectType()
@@ -66,6 +67,12 @@ export class Listing extends BaseEntity {
   @Index()
   rentingOption: string;
 
+  @Field(() => ServiceRequested)
+  @ManyToOne(
+    () => ServiceRequested,
+    (serviceRequested) => serviceRequested.listing,
+  )
+  serviceRequested: ServiceRequested;
   @Field(() => AuctionParticipant)
   @OneToOne(() => AuctionParticipant, (listing) => listing.listing)
   auctionParticipant: AuctionParticipant;

@@ -6,6 +6,7 @@ import {
   CreateServiceProviderInput,
   DeleteServiceProvider,
   ProvideNewService,
+  RequestForService,
   ServiceProviderInput,
   UpdateServiceInput,
   UpdateServiceProviderInput,
@@ -13,12 +14,15 @@ import {
 import { PaginateAndSort } from '../../../modules/core/dto/pagination-and-sort.dto';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { Service } from '../../../entities/services.entity';
-import { ServiceStatus } from '../../../entities/provider-service-status.entity';
+import { ServiceProvided } from '../../../entities/service-provided.entity';
 import {
   OneServiceProviderResponse,
   ServiceProviderResponse,
   ServiceResponse,
 } from '../dto/service.response';
+import { ServiceRequested } from '../../../entities/service-requested.entity';
+import { UseGuards } from '@nestjs/common';
+import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
 
 @Resolver(() => ServiceProvider)
 export class ServiceAndProviderResolver {
@@ -139,7 +143,7 @@ export class ServiceAndProviderResolver {
     );
   }
 
-  @Mutation(() => ServiceStatus)
+  @Mutation(() => ServiceProvided)
   async provideService(
     @Args('provideService')
     serviceProviderInput: ProvideNewService,
@@ -154,5 +158,17 @@ export class ServiceAndProviderResolver {
     @Args('deleteServiceProvider') deleteServiceProvider: DeleteServiceProvider,
   ) {
     return await this.serviceProviderService.delete(deleteServiceProvider);
+  }
+
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Mutation(() => ServiceRequested)
+  async requestForService(
+    @Args('requestForService') requestForService: RequestForService,
+    @Context() ctx: any,
+  ) {
+    return await this.serviceProviderService.requestForService(
+      requestForService,
+      ctx.req.user,
+    );
   }
 }

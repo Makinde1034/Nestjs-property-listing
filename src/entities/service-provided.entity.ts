@@ -6,7 +6,6 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
@@ -16,7 +15,7 @@ import { ProviderServiceStatus } from '../common/enums/status.enum';
 
 @ObjectType()
 @Entity()
-export class ServiceStatus extends BaseEntity {
+export class ServiceProvided extends BaseEntity {
   @Field(() => ServiceProvider)
   @JoinColumn({ name: 'serviceProviderId' })
   @ManyToOne(
