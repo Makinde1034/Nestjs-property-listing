@@ -1060,6 +1060,11 @@ type ServiceResponse {
   count: Float!
 }
 
+type RequestedServiceResponse {
+  request: [Service!]!
+  total: Float!
+}
+
 type ServiceProviderResponse {
   serviceProvider: [ServiceProvider!]!
   count: Float!
@@ -1183,6 +1188,7 @@ type Query {
   findOneServiceProvider(id: String!): OneServiceProviderResponse!
   findAllService(paginateAndSort: PaginateAndSort!): ServiceResponse!
   findOneService(id: String!): ServiceProvider!
+  ViewServiceRequest(paginateAndSort: PaginateAndSort!): RequestedServiceResponse!
 }
 
 input SplashScreenFilterInput {

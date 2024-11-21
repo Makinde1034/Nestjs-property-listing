@@ -17,6 +17,7 @@ import { Service } from '../../../entities/services.entity';
 import { ServiceProvided } from '../../../entities/service-provided.entity';
 import {
   OneServiceProviderResponse,
+  RequestedServiceResponse,
   ServiceProviderResponse,
   ServiceResponse,
 } from '../dto/service.response';
@@ -168,6 +169,17 @@ export class ServiceAndProviderResolver {
   ) {
     return await this.serviceProviderService.requestForService(
       requestForService,
+      ctx.req.user,
+    );
+  }
+
+  @Query(() => RequestedServiceResponse, { name: 'ViewServiceRequest' })
+  async ViewServiceRequest(
+    @Args('paginateAndSort') paginateAndSort: PaginateAndSort,
+    @Context() ctx: any,
+  ): Promise<RequestedServiceResponse> {
+    return await this.serviceProviderService.ViewServiceRequest(
+      paginateAndSort,
       ctx.req.user,
     );
   }
