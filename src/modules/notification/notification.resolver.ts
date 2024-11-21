@@ -19,6 +19,7 @@ import {
 import { SuccessResponse } from '../../common/utils/success.response';
 import { PermissionsEnum } from '../../common/enums/permission.enum';
 import { Permissions } from '../../common/decorator/permission';
+import { NotificationMessages } from '../../entities/notification-message.entity';
 
 @Resolver()
 export class NotificationResolver {
@@ -131,5 +132,12 @@ export class NotificationResolver {
   @UseGuards(AccessTokenGuard)
   async listNotificationScopes(): Promise<NotificationScope[]> {
     return await this.notificationService.listNotificationScopes();
+  }
+
+  @Query(() => [NotificationMessages])
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions(PermissionsEnum.SYSTEM_SETTINGS_VIEW)
+  async findNotificationControl(): Promise<NotificationMessages[]> {
+    return await this.notificationService.findNotificationControl();
   }
 }

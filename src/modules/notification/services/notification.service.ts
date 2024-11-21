@@ -676,13 +676,27 @@ export class NotificationService {
     }
   }
 
+  async findNotificationControl() {
+    try {
+      const notificationControl =
+        await this.notificationMesageRepository.find();
+      return notificationControl;
+    } catch (error) {
+      this.logger.error(error);
+      throw new BadRequestException(error);
+    }
+  }
+
   async fetchNotificationScopes() {
     try {
       const admin = await this.userRepository.findOne({
         where: { userType: 'admin' },
       });
-      const data = await this.adminNotificationPreferenceRepository.findOne({});
-    } catch (error) {}
+      const data = await this.adminNotificationPreferenceRepository.find();
+    } catch (error) {
+      this.logger.error(error);
+      throw new BadRequestException(error);
+    }
   }
 
   async createAdminNotificationScopePreference(
