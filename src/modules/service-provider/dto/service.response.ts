@@ -2,6 +2,7 @@ import { Field, ObjectType } from '@nestjs/graphql';
 import { Service } from '../../../entities/services.entity';
 import { ServiceProvider } from '../../../entities/service-provider.entity';
 import { ServiceProvided } from '../../../entities/service-provided.entity';
+import { ServiceRequested } from '../../../entities/service-requested.entity';
 @ObjectType()
 export class ServiceResponse {
   @Field(() => [Service])
@@ -9,6 +10,14 @@ export class ServiceResponse {
 
   @Field()
   count: number;
+}
+@ObjectType()
+export class RequestedServiceResponse {
+  @Field(() => [Service])
+  request: ServiceRequested[];
+
+  @Field()
+  total: number;
 }
 
 @ObjectType()

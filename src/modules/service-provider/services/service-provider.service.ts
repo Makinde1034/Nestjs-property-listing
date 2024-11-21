@@ -364,6 +364,34 @@ export class ServiceAndProviderService {
     }
   }
 
+  async ViewServiceRequest(paginateAndSort: PaginateAndSort, user: User) {
+    try {
+      const [request, total] = await this.serviceRequestedRepository
+        .createQueryBuilder('serviceRequested')
+        .leftJoin('serviceRequested.user', 'user')
+        .leftJoin('serviceRequested.listing', 'listing')
+        .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
+        .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
+        .leftJoinAndSelect('listing.listingType', 'listingType')
+        .select([
+          'user.id',
+          'user.lastName',
+          'user.firstName',
+          'user.arabicFirstName',
+          'user.arabicLastName',
+        ])
+        .where('serviceRequest.userId = :userId', { userId: user.id })
+        .take(paginateAndSort.take)
+        .skip(paginateAndSort.skip)
+        .getManyAndCount();
+
+      return { request, total };
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
   async acceptRequestAndStopRequest(updateServiceInput: UpdateServiceInput) {
     try {
       const { id, isActive } = updateServiceInput;

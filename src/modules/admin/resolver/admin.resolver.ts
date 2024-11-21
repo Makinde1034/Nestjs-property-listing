@@ -37,6 +37,7 @@ import { SuccessResponse } from '../../../common/utils/success.response';
 import { PermissionsEnum } from '../../../common/enums/permission.enum';
 import { Permissions } from 'src/common/decorator/permission';
 import { SystemFeatureSettingInput } from '../dto/request/workflow';
+import { SystemFeatureSetting } from '../../../entities/system-features.entity';
 
 @Resolver()
 @UseGuards(AccessTokenGuard)
@@ -159,6 +160,13 @@ export class AdminResolver {
   }
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions(PermissionsEnum.SYSTEM_SETTINGS_VIEW)
+  @Query(() => [SystemFeatureSetting], { name: 'findAllFeatures' })
+  async findAllFeatures() {
+    return await this.adminService.findAllFeatures();
+  }
+
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.COUPONS_EDIT)
   @Mutation(() => Coupon, { name: 'updateCoupon' })
   async updateCoupons(
@@ -202,7 +210,7 @@ export class AdminResolver {
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.SYSTEM_SETTINGS_EDIT)
   @Mutation(() => SuccessResponse, { name: 'systemFeatureSetting' })
-  async systemFeatureSetting(
+  async activateAndDeactivateFeatures(
     @Args('systemFeatureSetting')
     systemFeatureSetting: SystemFeatureSettingInput,
     @Context() ctx: any,

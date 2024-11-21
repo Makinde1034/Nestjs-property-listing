@@ -79,7 +79,7 @@ export class WorkflowInputFilter extends PaginateAndSort {
 }
 
 @InputType()
-export class SystemFeatureSettingInput extends PaginateAndSort {
+export class SystemFeatureSettingInput {
   @Field(() => [String])
   @IsArray()
   id: string[];
