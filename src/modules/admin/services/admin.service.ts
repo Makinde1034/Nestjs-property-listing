@@ -940,4 +940,14 @@ export class AdminService {
       throw new BadRequestException(error);
     }
   }
+  async findAllFeatures(admin?: User) {
+    try {
+      const feature = await this.systemFeatureRepository.find();
+
+      return feature;
+    } catch (error) {
+      this.logger.error(error);
+      throw new BadRequestException(error);
+    }
+  }
 }
