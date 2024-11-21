@@ -19,7 +19,9 @@ export class UserTwoGuard implements CanActivate {
     const ctx = GqlExecutionContext.create(context).getContext();
     const user: User = ctx?.req?.user; // Ensure user is correctly extracted
 
-    const isRequiredLevel = user && user.userLevel === UserLevelEnum.LEVEL_2;
+    const isRequiredLevel =
+      (user && user.userLevel === UserLevelEnum.LEVEL_2) ||
+      user.userType == 'admin';
     if (!isRequiredLevel) {
       throw new ForbiddenException(AppStrings.THIS_IS_ONLY_FOR_LEVEL_TWO_USER);
     }

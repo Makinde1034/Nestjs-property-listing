@@ -102,6 +102,15 @@ export class AdminService {
 
   async updateSystemSetting(adminDefaultInput: UpdateAdminDefaultInput) {
     try {
+      const id = adminDefaultInput.bidIncrementId;
+      const heldAmount = adminDefaultInput.auctionHeldAmount;
+
+      if (heldAmount) {
+        await this.auctionBidRangeRepository.update(id, {
+          heldAmount: heldAmount,
+        });
+      }
+
       const adminDefault = await this.adminDefault();
       const { affected } = await this.adminRepository.update(
         adminDefault.id,

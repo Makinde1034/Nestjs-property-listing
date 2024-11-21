@@ -738,6 +738,25 @@ type WorkFlow {
   updatedAt: DateTime!
 }
 
+type NotificationMessages {
+  id: ID!
+  scope: String!
+  event: String
+  timing: String
+  email: Boolean
+  emailTemplate: String
+  icon: String
+  pushNotification: Boolean
+  systemNotification: Boolean
+  recipients: String
+  title: String
+  body: String
+  arabicTitle: String
+  arabicBody: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type UserResponse {
   users: [User!]!
   total: Float!
@@ -1060,6 +1079,7 @@ type Query {
   getRole(id: Float!): Role!
   listNotifications: [Notification!]!
   listNotificationScopes: [NotificationScope!]!
+  findNotificationControl: [NotificationMessages!]!
   fetchListingTypes(findOptions: PaginateAndSort): ListingTypesResponse!
   fetchOneListingTypes(id: String!): ListingType!
   searchForListingType(searchParam: String!): [ListingType!]!

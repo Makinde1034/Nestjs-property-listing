@@ -110,18 +110,21 @@ export const NotificationScopeFactory: NotificationScope[] = [
     description:
       'Receive notification when a service provider application is accepted',
   },
+
   {
     id: 18,
     scopeGroup: 'Service',
     name: 'Delivered',
     description: 'Receive notification when a service is delivered',
   },
+
   {
     id: 19,
     scopeGroup: 'Workflow Events',
     name: 'Approval Request',
     description: 'Receive notification for admin approval requests',
   },
+
   {
     id: 20,
     scopeGroup: 'Request Management',
