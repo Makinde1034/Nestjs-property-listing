@@ -687,6 +687,17 @@ export class NotificationService {
     }
   }
 
+  async findOneNotificationControl(id: string) {
+    try {
+      const notificationControl =
+        await this.notificationMesageRepository.findOneBy({ id });
+      return notificationControl;
+    } catch (error) {
+      this.logger.error(error);
+      throw new BadRequestException(error);
+    }
+  }
+
   async fetchNotificationScopes() {
     try {
       const admin = await this.userRepository.findOne({

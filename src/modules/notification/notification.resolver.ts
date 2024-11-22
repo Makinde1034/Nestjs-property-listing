@@ -140,4 +140,13 @@ export class NotificationResolver {
   async findNotificationControl(): Promise<NotificationMessages[]> {
     return await this.notificationService.findNotificationControl();
   }
+
+  @Query(() => NotificationMessages)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions(PermissionsEnum.SYSTEM_SETTINGS_VIEW)
+  async findOneNotificationControl(
+    @Args('id') id: string,
+  ): Promise<NotificationMessages> {
+    return await this.notificationService.findOneNotificationControl(id);
+  }
 }
