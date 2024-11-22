@@ -8,7 +8,6 @@ import { DataSource } from 'typeorm';
 import { Seeder, SeederFactoryManager } from 'typeorm-extension';
 
 import { SystemFeatureSetting } from '../../entities/system-features.entity';
-import { SystemFactory } from '../factories/system-setting.factory';
 
 export class SystemSettingSeeder implements Seeder {
   track = false;
@@ -32,7 +31,6 @@ export class SystemSettingSeeder implements Seeder {
       await repository.save(data as Partial<SystemFeatureSetting>);
     }
 
-    await repository.save(SystemFactory);
     this.logger.debug(`Seeding for: ${SystemSettingSeeder.name} finished`);
   }
 }

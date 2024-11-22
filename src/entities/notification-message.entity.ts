@@ -24,6 +24,10 @@ export class NotificationMessages extends BaseEntity {
 
   @Field({ nullable: true })
   @Column({ nullable: true })
+  period: string;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
   email: boolean;
 
   @Field({ nullable: true })

@@ -756,6 +756,7 @@ type NotificationMessages {
   scope: String!
   event: String
   timing: String
+  period: String
   email: Boolean
   emailTemplate: String
   icon: String

@@ -31,8 +31,6 @@ export class NotificationMessageSeeder implements Seeder {
       await repository.save(
         NotificationMessageFactory as Partial<NotificationMessages>,
       );
-
-      await repository.save(NotificationMessageFactory);
     }
     this.logger.debug(
       `Seeding for: ${NotificationMessageSeeder.name} finished`,
