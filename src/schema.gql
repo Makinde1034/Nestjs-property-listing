@@ -1203,6 +1203,7 @@ type Query {
   findAllService(paginateAndSort: PaginateAndSort!): ServiceResponse!
   findOneService(id: String!): ServiceProvider!
   ViewServiceRequest(paginateAndSort: PaginateAndSort!): RequestedServiceResponse!
+  ViewServiceRequested(paginateAndSort: PaginateAndSort!): RequestedServiceResponse!
 }
 
 input SplashScreenFilterInput {
@@ -1560,6 +1561,11 @@ type Mutation {
   updateProviderServiceCoverageArea(updateProviderServiceCoverageArea: UpdateServiceProviderInput!): SuccessResponse!
   acceptRequestAndStopRequest(updateServiceStatus: UpdateServiceInput!): SuccessResponse!
   provideService(provideService: ProvideNewService!): ServiceProvided!
+  cancleService(id: String!): SuccessResponse!
+  appealService(id: String!): SuccessResponse!
+  confirmService(id: String!): SuccessResponse!
+  acceptService(id: String!): SuccessResponse!
+  rejectService(id: String!): SuccessResponse!
   removeServiceProvider(deleteServiceProvider: DeleteServiceProvider!): ServiceProvider!
   requestForService(requestForService: RequestForService!): ServiceRequested!
 }
