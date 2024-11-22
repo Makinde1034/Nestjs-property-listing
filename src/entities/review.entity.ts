@@ -37,6 +37,10 @@ export class Review extends BaseEntity {
 
   @Column()
   @Field()
+  providerId: string;
+
+  @Column()
+  @Field()
   @IsEnum(ServicesOffered)
   reviewType: string;
 

@@ -4,7 +4,7 @@
  */
 
 import { Field, InputType } from '@nestjs/graphql';
-import { IsEnum, IsNumber, IsOptional } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { ServicesOffered } from '../../../common/enums';
 
 import { IsRange } from '../../../common/decorator/is-range-of';
@@ -22,6 +22,10 @@ export class CreateReviewDto {
   @Field()
   @IsEnum(ServicesOffered)
   reviewType: string;
+
+  @Field()
+  @IsString()
+  providerId: string;
 
   userId?: string;
 }

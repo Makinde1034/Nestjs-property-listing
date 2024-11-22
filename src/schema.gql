@@ -558,6 +558,7 @@ type Review {
   comment: String!
   user: User!
   userId: String!
+  providerId: String!
   reviewType: String!
   createdAt: DateTime!
   updatedAt: DateTime!
@@ -2121,6 +2122,7 @@ input CreateReviewDto {
   rating: Float!
   comment: String
   reviewType: String!
+  providerId: String!
 }
 
 input CreateCouponInput {
