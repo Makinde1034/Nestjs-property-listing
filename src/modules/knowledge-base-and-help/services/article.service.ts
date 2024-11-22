@@ -28,6 +28,7 @@ import { StorageService } from '../../file-handler/services/storage.service';
 import { ActivityLogService } from '../../activity-log/services/activity-log.service';
 import { ActivityEnum } from '../../../common/enums/activitys';
 import { User } from '../../../entities';
+import { WhereOption } from '../../core/dto/where-option.dto';
 
 @Injectable()
 export class ArticleService {
@@ -130,7 +131,9 @@ export class ArticleService {
         published,
         categoryId,
         placement,
+        where,
       } = findOption;
+      let whereOption = {};
 
       // Set default pagination and limit `take` to 20
       const take = initialTake && initialTake <= 20 ? initialTake : 20;
@@ -140,6 +143,12 @@ export class ArticleService {
 
       // Enforce `placement` to not be NULL
       queryBuilder.where('article.placement IS NOT NULL');
+
+      if (where) {
+        whereOption = ` article.${where.fieldToChose} IS ${where.whereParam} AND 'article.placement IS NOT NULL'`;
+      } else {
+        whereOption = 'article.placement IS NOT NULL';
+      }
 
       // Add additional filtering conditions
       if (published !== undefined) {
