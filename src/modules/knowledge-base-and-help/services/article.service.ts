@@ -131,6 +131,7 @@ export class ArticleService {
         categoryId,
         placement,
         where,
+        language,
       } = findOption;
       let whereOption = {};
 
@@ -144,11 +145,18 @@ export class ArticleService {
       queryBuilder.where('article.placement IS NOT NULL');
 
       if (where) {
-        whereOption = ` article.${where.fieldToChose} IS ${where.whereParam} AND 'article.placement IS NOT NULL'`;
+        queryBuilder.where(
+          `article.${where.fieldToChose} IS ${where.whereParam} AND 'article.placement IS NOT NULL'`,
+        );
       } else {
-        whereOption = 'article.placement IS NOT NULL';
+        queryBuilder.where('article.placement IS NOT NULL');
       }
 
+      if (language) {
+        queryBuilder.where(`article.language= :language`, {
+          language: language,
+        });
+      }
       // Add additional filtering conditions
       if (published !== undefined) {
         queryBuilder.andWhere('article.published = :published', { published });

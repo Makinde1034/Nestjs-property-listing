@@ -107,6 +107,10 @@ export class ArticleFilterInput extends PaginateAndSort {
   @IsNumber()
   @Field({ nullable: true })
   categoryId: number;
+
+  @Field()
+  @IsEnum(LanguageEnum)
+  language: string;
 }
 
 @InputType()

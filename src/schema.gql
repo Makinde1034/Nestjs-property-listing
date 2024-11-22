@@ -1417,6 +1417,7 @@ input ArticleFilterInput {
   placement: String
   published: Boolean
   categoryId: Float
+  language: String!
 }
 
 input ActivityLogInput {
