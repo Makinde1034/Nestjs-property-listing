@@ -10,7 +10,7 @@ export enum ServicesOffered {
   RENTING = 'Renting',
   BUYING = 'Buying',
   MAKE_OFFER = 'Making offer',
-
+  SERVICE_PROVIDER = 'Service Provider',
   AUCTION = 'Auction',
 }
 
