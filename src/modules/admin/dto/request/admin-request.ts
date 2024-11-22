@@ -32,25 +32,25 @@ export class AdminDefaultInput {
   @IsNumber()
   minimumOfferPercentage: number;
 
-  @Field()
-  @IsNumber()
-  minBidRange: number;
+  // @Field()
+  // @IsNumber()
+  // minBidRange: number;
 
-  @Field()
-  @IsNumber()
-  bidIncrement: number;
+  // @Field()
+  // @IsNumber()
+  // bidIncrement: number;
 
-  @Field()
-  @IsNumber()
-  maxBidRange: number;
+  // @Field()
+  // @IsNumber()
+  // maxBidRange: number;
 
   @Field()
   @IsString()
   paymentType: string;
 
-  @Field()
-  @IsString()
-  bidIncrementId: string;
+  // @Field()
+  // @IsString()
+  // bidIncrementId: string;
 
   @Field()
   @IsNumber()
@@ -72,9 +72,9 @@ export class AdminDefaultInput {
   @IsNumber()
   ticketAging: number;
 
-  @Field()
-  @IsNumber()
-  auctionHeldAmount: number;
+  // @Field()
+  // @IsNumber()
+  // auctionHeldAmount: number;
 
   @Field()
   @IsNumber()
@@ -118,7 +118,11 @@ export class AdminDefaultInput {
 }
 
 @InputType()
-export class UpdateAdminDefaultInput extends PartialType(AdminDefaultInput) {}
+export class UpdateAdminDefaultInput extends PartialType(AdminDefaultInput) {
+  @Field(() => [BidRange])
+  @IsArray()
+  bidRange: BidRange[];
+}
 
 @InputType()
 export class DeleteSplashScreenInput {
@@ -136,4 +140,16 @@ export class SplashScreenFilterInput extends PaginateAndSort {
   @IsString()
   @Field()
   placement: string;
+}
+@InputType()
+export class BidRange {
+  @IsString()
+  @Field()
+  id: string;
+  @IsString()
+  @Field()
+  bidIncrement: number;
+  @IsString()
+  @Field()
+  heldAmount: number;
 }

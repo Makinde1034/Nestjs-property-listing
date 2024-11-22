@@ -102,15 +102,6 @@ export class AdminService {
 
   async updateSystemSetting(adminDefaultInput: UpdateAdminDefaultInput) {
     try {
-      const id = adminDefaultInput.bidIncrementId;
-      const heldAmount = adminDefaultInput.auctionHeldAmount;
-
-      if (heldAmount) {
-        await this.auctionBidRangeRepository.update(id, {
-          heldAmount: heldAmount,
-        });
-      }
-
       const adminDefault = await this.adminDefault();
       const { affected } = await this.adminRepository.update(
         adminDefault.id,
@@ -133,30 +124,26 @@ export class AdminService {
   ) {
     try {
       let result;
-      const min = adminDefaultInput.minBidRange;
-      const max = adminDefaultInput.maxBidRange;
-      const increment = adminDefaultInput.bidIncrement;
-      const id = adminDefaultInput.bidIncrementId;
-
       const bidPriceRange = await this.auctionBidRangeRepository
         .createQueryBuilder('auctionBidRange')
-        .where(
-          ' id = :id OR auctionBidRange.lowerBound >= :min AND auctionBidRange.upperBound <= :max',
-          { id, min, max },
-        )
-        .getOne();
+        .getMany();
 
-      if (bidPriceRange) {
-        result = await this.auctionBidRangeRepository.update(id, {
-          increment: increment,
-        });
-      } else {
-        result = await this.auctionBidRangeRepository.save({
-          lowerBound: min,
-          upperBound: max,
-          increment: increment,
-        });
-      }
+      bidPriceRange.forEach((element) => {
+        const data = adminDefaultInput.bidRange.find(
+          (value) => element.id === value.id,
+        );
+
+        if (data) {
+          // Use assignment to modify properties
+          element.increment = element.increment ?? data.bidIncrement;
+          element.heldAmount = element.heldAmount ?? data.heldAmount;
+        }
+      });
+
+      // Return the modified bidPriceRange or perform further processing
+
+      await this.auctionBidRangeRepository.save(bidPriceRange);
+
       return new SuccessResponse(AppStrings.SUCCESSFULL, result);
     } catch (error) {
       this.logger.error(error);
@@ -897,23 +884,6 @@ export class AdminService {
       return new SuccessResponse(AppStrings.SUCCESSFULL);
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
-    }
-  }
-
-  async updateBidIncrement(data: AdminDefaultInput) {
-    try {
-      const { bidIncrementId, bidIncrement } = data;
-      const bidRange = await this.auctionBidRangeRepository.findOne({
-        where: { id: bidIncrementId },
-      });
-
-      await this.auctionBidRangeRepository.update(
-        { id: bidRange.id },
-        { increment: bidIncrement },
-      );
-    } catch (error) {
-      this.logger.error(error);
       throw new BadRequestException(error);
     }
   }

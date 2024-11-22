@@ -1111,6 +1111,7 @@ type Query {
   listNotifications: [Notification!]!
   listNotificationScopes: [NotificationScope!]!
   findNotificationControl: [NotificationMessages!]!
+  findOneNotificationControl(id: String!): NotificationMessages!
   fetchListingTypes(findOptions: PaginateAndSort): ListingTypesResponse!
   fetchOneListingTypes(id: String!): ListingType!
   searchForListingType(searchParam: String!): [ListingType!]!
@@ -2132,17 +2133,12 @@ input CreateCouponInput {
 
 input UpdateAdminDefaultInput {
   minimumOfferPercentage: Float
-  minBidRange: Float
-  bidIncrement: Float
-  maxBidRange: Float
   paymentType: String
-  bidIncrementId: String
   saii: Float
   saiiForRent: Float
   dataRetention: Float
   ratingPrompt: Float
   ticketAging: Float
-  auctionHeldAmount: Float
   vat: Float
   daysToAuctionRegistrationStart: Float
   daysToAuctionRegistrationEnd: Float
@@ -2153,6 +2149,13 @@ input UpdateAdminDefaultInput {
   state: String
   country: String
   countryISOCode: String
+  bidRange: [BidRange!]!
+}
+
+input BidRange {
+  id: String!
+  bidIncrement: Float!
+  heldAmount: Float!
 }
 
 input UpdateCouponInput {
