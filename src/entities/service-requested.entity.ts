@@ -11,9 +11,9 @@ import {
 } from 'typeorm';
 import BaseEntity from './base.entity';
 import { IsEnum } from 'class-validator';
-import { ServiceProvided } from '../common/enums/status.enum';
 import { User } from './user.entity';
 import { Listing } from './listing.entity';
+import { ServiceProvidedStatus } from '../common/enums/service-provider';
 
 @Entity()
 @ObjectType()
@@ -35,9 +35,9 @@ export class ServiceRequested extends BaseEntity {
   @OneToMany(() => Listing, (listing) => listing.serviceRequested)
   listing: Listing[];
 
-  @Column({ default: ServiceProvided.PENDING })
+  @Column({ default: ServiceProvidedStatus.PENDING })
   @Field()
-  @IsEnum(ServiceProvided)
+  @IsEnum(ServiceProvidedStatus)
   status: string;
 
   @Field()

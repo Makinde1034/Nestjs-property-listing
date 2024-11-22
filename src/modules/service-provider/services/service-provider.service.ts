@@ -28,6 +28,7 @@ import { SuccessResponse } from '../../../common/utils/success.response';
 import { AppStrings } from '../../../common/messages/app.strings';
 import { ServiceProvided } from '../../../entities/service-provided.entity';
 import { ServiceRequestedRepository } from '../repository/requested-service.repository';
+import { ServiceProvidedStatus } from '../../../common/enums/service-provider';
 
 @Injectable()
 export class ServiceAndProviderService {
@@ -334,6 +335,7 @@ export class ServiceAndProviderService {
   async updateServiceStatus(updateServiceInput: UpdateServiceInput) {
     try {
       const { id, providerServiceStatus } = updateServiceInput;
+
       const { affected } = await this.serviceProvidedRepository.update(id, {
         status: providerServiceStatus,
       });
@@ -364,6 +366,70 @@ export class ServiceAndProviderService {
     }
   }
 
+  async cancleService(id: string, user: User) {
+    try {
+      const data = await this.serviceRequestedRepository.update(id, {
+        status: ServiceProvidedStatus.CANCELED,
+      });
+
+      return data;
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async appealService(id: string, user: User) {
+    try {
+      const data = await this.serviceRequestedRepository.update(id, {
+        status: ServiceProvidedStatus.APPEALED,
+      });
+
+      return data;
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async confirmService(id: string, user: User) {
+    try {
+      const data = await this.serviceRequestedRepository.update(id, {
+        status: ServiceProvidedStatus.COMPLETED,
+      });
+
+      return data;
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async acceptService(id: string, user: User) {
+    try {
+      const data = await this.serviceRequestedRepository.update(id, {
+        status: ServiceProvidedStatus.ACCEPTED,
+      });
+      return data;
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async rejectService(id: string, user: User) {
+    try {
+      const data = await this.serviceRequestedRepository.update(id, {
+        status: ServiceProvidedStatus.REJECTED,
+      });
+
+      return new SuccessResponse(AppStrings.SUCCESSFULL);
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
   async ViewServiceRequest(paginateAndSort: PaginateAndSort, user: User) {
     try {
       const [request, total] = await this.serviceRequestedRepository
@@ -385,6 +451,42 @@ export class ServiceAndProviderService {
         .skip(paginateAndSort.skip)
         .getManyAndCount();
 
+      return { request, total };
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async ViewServiceRequested(paginateAndSort: PaginateAndSort, user: User) {
+    try {
+      const serviceprovider = await this.serviceProviderRepository.findOne({
+        where: { userId: user.id },
+      });
+      const [request, total] = await this.serviceRequestedRepository
+        .createQueryBuilder('serviceRequested')
+        .leftJoin('serviceRequested.user', 'user')
+        .leftJoin('serviceRequested.listing', 'listing')
+        .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
+        .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
+        .leftJoinAndSelect('listing.listingType', 'listingType')
+        .select([
+          'user.id',
+          'user.lastName',
+          'user.firstName',
+          'user.arabicFirstName',
+          'user.arabicLastName',
+        ])
+        .where(
+          'listingAttributes.name  = :city AND listingAttributes.value = :coverageArea',
+          {
+            city: 'City',
+            coverageArea: serviceprovider.coverageArea,
+          },
+        )
+        .take(paginateAndSort.take)
+        .skip(paginateAndSort.skip)
+        .getManyAndCount();
       return { request, total };
     } catch (error) {
       this.logger.log(error);

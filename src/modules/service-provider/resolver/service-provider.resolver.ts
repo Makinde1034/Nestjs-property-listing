@@ -154,6 +154,27 @@ export class ServiceAndProviderResolver {
     );
   }
 
+  @Mutation(() => SuccessResponse)
+  async cancleService(@Args('id') id: string, @Context() ctx: any) {
+    return await this.serviceProviderService.cancleService(id, ctx.req.user);
+  }
+  @Mutation(() => SuccessResponse)
+  async appealService(@Args('id') id: string, @Context() ctx: any) {
+    return await this.serviceProviderService.appealService(id, ctx.req.user);
+  }
+  @Mutation(() => SuccessResponse)
+  async confirmService(@Args('id') id: string, @Context() ctx: any) {
+    return await this.serviceProviderService.confirmService(id, ctx.req.user);
+  }
+  @Mutation(() => SuccessResponse)
+  async acceptService(@Args('id') id: string, @Context() ctx: any) {
+    return await this.serviceProviderService.acceptService(id, ctx.req.user);
+  }
+  @Mutation(() => SuccessResponse)
+  async rejectService(@Args('id') id: string, @Context() ctx: any) {
+    return await this.serviceProviderService.rejectService(id, ctx.req.user);
+  }
+
   @Mutation(() => ServiceProvider)
   async removeServiceProvider(
     @Args('deleteServiceProvider') deleteServiceProvider: DeleteServiceProvider,
@@ -179,6 +200,17 @@ export class ServiceAndProviderResolver {
     @Context() ctx: any,
   ): Promise<RequestedServiceResponse> {
     return await this.serviceProviderService.ViewServiceRequest(
+      paginateAndSort,
+      ctx.req.user,
+    );
+  }
+
+  @Query(() => RequestedServiceResponse, { name: 'ViewServiceRequested' })
+  async ViewServiceRequested(
+    @Args('paginateAndSort') paginateAndSort: PaginateAndSort,
+    @Context() ctx: any,
+  ): Promise<RequestedServiceResponse> {
+    return await this.serviceProviderService.ViewServiceRequested(
       paginateAndSort,
       ctx.req.user,
     );

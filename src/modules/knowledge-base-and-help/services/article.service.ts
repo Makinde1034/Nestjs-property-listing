@@ -28,7 +28,6 @@ import { StorageService } from '../../file-handler/services/storage.service';
 import { ActivityLogService } from '../../activity-log/services/activity-log.service';
 import { ActivityEnum } from '../../../common/enums/activitys';
 import { User } from '../../../entities';
-import { WhereOption } from '../../core/dto/where-option.dto';
 
 @Injectable()
 export class ArticleService {
