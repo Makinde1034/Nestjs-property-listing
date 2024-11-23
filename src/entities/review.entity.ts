@@ -35,8 +35,8 @@ export class Review extends BaseEntity {
   @Field()
   userId: string;
 
-  @Column()
-  @Field()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   providerId: string;
 
   @Column()
