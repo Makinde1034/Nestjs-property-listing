@@ -184,9 +184,9 @@ export class ArticleService {
         .leftJoinAndSelect('article.user', 'user');
 
       // Execute the query and fetch results
-      const [articles, total] = await queryBuilder.getManyAndCount();
+      const [article, total] = await queryBuilder.getManyAndCount();
 
-      return { articles, total };
+      return { article, total };
     } catch (error) {
       this.logger.error('Error fetching articles', { error, findOption });
       throw new BadRequestException('Error fetching articles');
