@@ -507,6 +507,7 @@ type ActivityLog {
   articleId: Float
   splashScreenId: Float
   workflowId: String
+  couponId: String
   action: String
   details: String
   createdAt: DateTime

@@ -18,6 +18,8 @@ export class CreateActivityLog {
   providerId?: string;
   workflowId?: string;
   serviceId?: string;
+
+  couponId?: string;
 }
 
 @ObjectType()
