@@ -558,7 +558,7 @@ type Review {
   comment: String!
   user: User!
   userId: String!
-  providerId: String!
+  providerId: String
   reviewType: String!
   createdAt: DateTime!
   updatedAt: DateTime!
@@ -1417,6 +1417,7 @@ input ArticleFilterInput {
   placement: String
   published: Boolean
   categoryId: Float
+  language: String!
 }
 
 input ActivityLogInput {
