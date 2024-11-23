@@ -888,6 +888,49 @@ export class AdminService {
     }
   }
 
+  async reactivateCoupon(
+    deactivateCouponInput: DeactivateCouponInput,
+    admin: User,
+  ) {
+    try {
+      const [actionConfig, coupons] = await Promise.all([
+        this.workflowService.findOneWorkflowByDocumentname(
+          this.userRepository.metadata.name,
+        ),
+        this.couponRepository.find({
+          where: { id: In(deactivateCouponInput.id) },
+        }),
+      ]);
+      const deactivateCoupon = coupons.map((element) => {
+        const coupon: Partial<Coupon> = {
+          deactived: false,
+        };
+        return { ...element, ...coupon };
+      });
+
+      if (actionConfig) {
+        await this.actionService.createActionRequest(
+          {
+            document: this.couponRepository.metadata.name,
+            actionType: 'create',
+            targetEntityId: null,
+            user: admin,
+            payload: JSON.stringify(deactivateCoupon),
+          },
+          admin,
+        );
+
+        return new SuccessResponse('Awaiting action approval');
+      }
+      await this.couponRepository.save(deactivateCoupon);
+
+      return new SuccessResponse(AppStrings.SUCCESSFULL);
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
   async activateAndDeactivateFeatures(
     data: SystemFeatureSettingInput,
     admin: User,

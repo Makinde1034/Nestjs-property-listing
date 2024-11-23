@@ -208,6 +208,20 @@ export class AdminResolver {
 
   @UseGuards(AdminGuard)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions(PermissionsEnum.COUPONS_CHANGE_STATUS)
+  @Mutation(() => SuccessResponse, { name: 'reactivateCoupon' })
+  async reactivateCoupons(
+    @Args('deactivateCoupons') deactivateCouponsInput: DeactivateCouponInput,
+    @Context() ctx: any,
+  ) {
+    return await this.adminService.reactivateCoupon(
+      deactivateCouponsInput,
+      ctx.req.user,
+    );
+  }
+
+  @UseGuards(AdminGuard)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.SYSTEM_SETTINGS_EDIT)
   @Mutation(() => SuccessResponse, { name: 'systemFeatureSetting' })
   async activateAndDeactivateFeatures(
