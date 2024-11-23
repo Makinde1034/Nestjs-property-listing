@@ -826,7 +826,11 @@ type AdminDefault {
 type Coupon {
   id: String!
   code: String!
+  name: String
+  appliedTo: String
   maxUse: Float!
+  type: String!
+  usage: String!
   currentUse: Float!
   discountType: String!
   discountValue: Float!
@@ -2128,7 +2132,11 @@ input CreateReviewDto {
 }
 
 input CreateCouponInput {
+  name: String!
   maxUse: Float!
+  isActive: Boolean!
+  appliedTo: String!
+  usage: String!
   discountType: String!
   discountValue: Float!
   startDate: DateTime!
@@ -2163,7 +2171,11 @@ input BidRange {
 }
 
 input UpdateCouponInput {
+  name: String
   maxUse: Float
+  isActive: Boolean
+  appliedTo: String
+  usage: String
   discountType: String
   discountValue: Float
   startDate: DateTime

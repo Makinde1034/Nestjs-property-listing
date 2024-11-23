@@ -6,6 +6,7 @@
 import { Field, InputType, PartialType } from '@nestjs/graphql';
 import {
   IsArray,
+  IsBoolean,
   IsDate,
   IsEnum,
   IsNumber,
@@ -17,8 +18,24 @@ import { CouponEnum } from '../../../../common/enums/coupons.enum';
 @InputType()
 export class CreateCouponInput {
   @Field()
+  @IsString()
+  name: string;
+
+  @Field()
   @IsNumber()
   maxUse: number;
+
+  @Field()
+  @IsBoolean()
+  isActive: boolean;
+
+  @Field()
+  @IsString()
+  appliedTo: string;
+
+  @Field()
+  @IsString()
+  usage: string;
 
   @Field()
   @IsEnum(CouponEnum)

@@ -24,9 +24,25 @@ export class Coupon {
   @Column()
   code: string;
 
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  name: string;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  appliedTo: string;
+
   @Field()
   @Column()
   maxUse: number;
+
+  @Field()
+  @Column()
+  type: string;
+
+  @Field()
+  @Column()
+  usage: string;
 
   @Field()
   @Column()

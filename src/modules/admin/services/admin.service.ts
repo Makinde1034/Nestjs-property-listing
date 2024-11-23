@@ -963,4 +963,33 @@ export class AdminService {
       throw new BadRequestException(error);
     }
   }
+
+  async searchForCoupon(searchParam: string) {
+    try {
+      return await this.couponRepository
+        .createQueryBuilder('coupon')
+        .leftJoinAndSelect('article.user', 'user')
+        .where('article.placement IS NOT NULL')
+        .orWhere('article.title ILIKE :term', {
+          term: `%${searchParam}%`,
+        })
+        .orWhere('article.placement ILIKE :term', {
+          term: `%${searchParam}%`,
+        })
+        .orWhere('article.title ILIKE :term', {
+          term: `%${searchParam}%`,
+        })
+        .orWhere('user.firstName ILIKE :term', {
+          term: `%${searchParam}%`,
+        })
+        .orWhere('user.arabicFirstName ILIKE :term', {
+          term: `%${searchParam}%`,
+        })
+        .take(10)
+        .getMany();
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
 }
