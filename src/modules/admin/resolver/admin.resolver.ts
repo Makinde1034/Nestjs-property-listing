@@ -234,4 +234,10 @@ export class AdminResolver {
       ctx.req.user,
     );
   }
+
+  @Query(() => [Coupon], { name: 'searchForCoupon' })
+  @UseGuards(AccessTokenGuard)
+  async searchForCoupon(@Args('searchParam') searchParam: string) {
+    return await this.adminService.searchForCoupon(searchParam);
+  }
 }

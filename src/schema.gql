@@ -1186,6 +1186,7 @@ type Query {
   financialVsOrder(findOptions: AdminDashboardSort!): [FinancialVsOrder!]!
   fetchCoupons: [Coupon!]!
   findAllFeatures: [SystemFeatureSetting!]!
+  searchForCoupon(searchParam: String!): [Coupon!]!
   findAllWorkFlow(findOption: WorkflowInputFilter!): WorkFlowResponse!
   findAllDocument: SuccessResponse!
   findOneWorkFlow(id: String!): WorkFlow!
