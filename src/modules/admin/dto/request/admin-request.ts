@@ -54,7 +54,7 @@ export class AdminDefaultInput {
 
   @Field()
   @IsNumber()
-  saii: number;
+  saiiForSale: number;
 
   @Field()
   @IsNumber()
