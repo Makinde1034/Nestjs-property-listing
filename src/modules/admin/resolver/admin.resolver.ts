@@ -5,7 +5,6 @@
 
 import { AdminService } from '../services/admin.service';
 import {
-  CouponResponse,
   FinancialVsOrder,
   ListingStats,
   ResponseTime,
@@ -40,6 +39,7 @@ import { Permissions } from 'src/common/decorator/permission';
 import { SystemFeatureSettingInput } from '../dto/request/workflow';
 import { SystemFeatureSetting } from '../../../entities/system-features.entity';
 import { AdminFilterAndSort } from '../../listing/dtos/request';
+import { CouponResponse } from '../dto/response/coupons';
 
 @Resolver()
 @UseGuards(AccessTokenGuard)
