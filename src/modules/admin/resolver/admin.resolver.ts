@@ -162,6 +162,12 @@ export class AdminResolver {
   ) {
     return await this.adminService.fetchCoupons(couponFilterInput);
   }
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions(PermissionsEnum.COUPONS_VIEW)
+  @Query(() => Coupon, { name: 'fetchCoupons' })
+  async findOne(@Args('id') id: string) {
+    return await this.adminService.findOne(id);
+  }
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.SYSTEM_SETTINGS_VIEW)

@@ -658,6 +658,15 @@ export class AdminService {
     }
   }
 
+  async findOne(id: string) {
+    try {
+      return await this.couponRepository.findOneBy({ id });
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(AppStrings.NOT_FOUND);
+    }
+  }
+
   async createCoupon(createCouponInput: CreateCouponInput, admin: User) {
     try {
       const actionConfig =
