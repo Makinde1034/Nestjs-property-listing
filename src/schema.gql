@@ -804,7 +804,7 @@ type AdminDefault {
   city: String
   promptRatingTime: Float
   ticketAging: Float
-  saiiFromSale: Float
+  saiiForSale: Float
   saiiForRent: Float
   vat: Float
   paymentType: String
