@@ -44,6 +44,8 @@ async function bootstrap() {
     trackingMiddleware.use(req, res, next);
   });
 
+  app.use(new TimeoutMiddleware().use);
+
   app.enableShutdownHooks();
   await app.listen(PORT, HOST);
   console.log(`Application is running on: ${await app.getUrl()}`);

@@ -1043,6 +1043,11 @@ type FinancialVsOrder {
   totalOrder: Float
 }
 
+type CouponResponse {
+  coupon: [Coupon!]!
+  total: Float!
+}
+
 type SplashScreenResponse {
   splashScreen: [SplashScreen!]!
   total: Float!
@@ -1185,7 +1190,7 @@ type Query {
   averageResponse: ResponseTime!
   saiiFees(findOptions: AdminDashboardSort): SaiiFees!
   financialVsOrder(findOptions: AdminDashboardSort!): [FinancialVsOrder!]!
-  fetchCoupons: [Coupon!]!
+  fetchCoupons(id: String!): Coupon!
   findAllFeatures: [SystemFeatureSetting!]!
   searchForCoupon(searchParam: String!): [Coupon!]!
   findAllWorkFlow(findOption: WorkflowInputFilter!): WorkFlowResponse!
@@ -2148,7 +2153,7 @@ input CreateCouponInput {
 input UpdateAdminDefaultInput {
   minimumOfferPercentage: Float
   paymentType: String
-  saii: Float
+  saiiForSale: Float
   saiiForRent: Float
   dataRetention: Float
   ratingPrompt: Float

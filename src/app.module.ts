@@ -41,7 +41,7 @@ import { SplashScreenResolver } from './modules/admin/resolver/splash-screen.res
 import { KnowledgeBaseAndHelpModule } from './modules/knowledge-base-and-help/knowledge-base-and-help.module';
 import { InAppModule } from './modules/in-app-services/in-app.module';
 import { GlobalPermissionsGuard } from './modules/auth/guards/global-permission-guard';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AppResolver } from './modules/sse/app.resolver';
 import { AppController } from './modules/sse/app.controller';
 import { SseService } from './modules/sse/client.service';
@@ -49,6 +49,7 @@ import { SseModule } from './modules/sse/event.module';
 import { ActivityLogModule } from './modules/activity-log/activity-log.module';
 import { ServiceProviderModule } from './modules/service-provider/service-provider.module';
 import { TermsAndConditionGuard } from './modules/auth/guards/terms-and-condition.guard';
+import { TimerInterceptor } from './common/interceptors/request-timer';
 
 @Module({
   imports: [
