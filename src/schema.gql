@@ -2168,7 +2168,7 @@ input UpdateAdminDefaultInput {
   state: String
   country: String
   countryISOCode: String
-  bidRange: [BidRange!]!
+  bidRange: [BidRange!]
 }
 
 input BidRange {
