@@ -28,7 +28,7 @@ export class SystemSettingSeeder implements Seeder {
         `Seeding for: ${SystemSettingSeeder.name} Already completed`,
       );
     } else {
-      await repository.save(data as Partial<SystemFeatureSetting>);
+      await repository.save(data);
     }
 
     this.logger.debug(`Seeding for: ${SystemSettingSeeder.name} finished`);

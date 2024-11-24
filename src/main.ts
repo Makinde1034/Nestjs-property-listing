@@ -6,7 +6,11 @@
 import { NestFactory, Reflector } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { I18nMiddleware } from 'nestjs-i18n';
-import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  LogLevel,
+  ValidationPipe,
+} from '@nestjs/common';
 import { TrackingMiddleware } from './common/interceptors/user-visit';
 import { UserTrackingService } from './modules/user/services/user.tracking.service';
 import { TimeoutMiddleware } from './common/interceptors/timeout.middleware';
@@ -14,6 +18,7 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
+    logger: ['log', 'error', 'warn', 'debug', 'verbose'] as LogLevel[],
     forceCloseConnections: true,
   });
 
@@ -22,6 +27,9 @@ async function bootstrap() {
   const HOST = configService.get('HOST');
   app.enableCors();
   app.use(I18nMiddleware);
+
+  app.use(new TimeoutMiddleware().use);
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -43,8 +51,6 @@ async function bootstrap() {
     const trackingMiddleware = new TrackingMiddleware(UsertrackingService);
     trackingMiddleware.use(req, res, next);
   });
-
-  app.use(new TimeoutMiddleware().use);
 
   app.enableShutdownHooks();
   await app.listen(PORT, HOST);

@@ -132,6 +132,11 @@ import { TimerInterceptor } from './common/interceptors/request-timer';
       provide: APP_GUARD,
       useClass: TermsAndConditionGuard,
     },
+
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TimerInterceptor,
+    },
   ],
   exports: [],
 })
