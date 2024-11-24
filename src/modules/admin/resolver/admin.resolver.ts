@@ -5,6 +5,7 @@
 
 import { AdminService } from '../services/admin.service';
 import {
+  CouponResponse,
   FinancialVsOrder,
   ListingStats,
   ResponseTime,
@@ -155,7 +156,7 @@ export class AdminResolver {
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.COUPONS_VIEW)
-  @Query(() => [Coupon], { name: 'fetchCoupons' })
+  @Query(() => CouponResponse, { name: 'fetchCoupons' })
   async fetchCoupons(
     @Args('couponFilterInput') couponFilterInput: AdminFilterAndSort,
   ) {

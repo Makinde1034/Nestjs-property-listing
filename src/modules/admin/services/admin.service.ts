@@ -726,7 +726,7 @@ export class AdminService {
           whereCondition[dateField] = Between(startOfYear(now), endOfYear(now));
           break;
       }
-      return await this.couponRepository
+      const [coupon, total] = await this.couponRepository
         .createQueryBuilder('coupons')
         .where(whereCondition, {
           whereParam: couponFilterInput.where?.whereParam,
@@ -734,6 +734,8 @@ export class AdminService {
         .take(couponFilterInput.take)
         .skip(couponFilterInput.skip)
         .getManyAndCount();
+
+      return { coupon, total };
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
