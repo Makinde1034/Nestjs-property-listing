@@ -38,6 +38,8 @@ import { PermissionsEnum } from '../../../common/enums/permission.enum';
 import { Permissions } from 'src/common/decorator/permission';
 import { SystemFeatureSettingInput } from '../dto/request/workflow';
 import { SystemFeatureSetting } from '../../../entities/system-features.entity';
+import { AdminFilterAndSort } from '../../listing/dtos/request';
+import { CouponResponse } from '../dto/response/coupons';
 
 @Resolver()
 @UseGuards(AccessTokenGuard)
@@ -154,9 +156,11 @@ export class AdminResolver {
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.COUPONS_VIEW)
-  @Query(() => [Coupon], { name: 'fetchCoupons' })
-  async fetchCoupons() {
-    return await this.adminService.fetchCoupons();
+  @Query(() => CouponResponse, { name: 'fetchCoupons' })
+  async fetchCoupons(
+    @Args('couponFilterInput') couponFilterInput: AdminFilterAndSort,
+  ) {
+    return await this.adminService.fetchCoupons(couponFilterInput);
   }
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)
