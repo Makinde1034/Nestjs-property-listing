@@ -119,7 +119,8 @@ export class AdminDefaultInput {
 
 @InputType()
 export class UpdateAdminDefaultInput extends PartialType(AdminDefaultInput) {
-  @Field(() => [BidRange])
+  @Field(() => [BidRange], { nullable: true })
+  @IsOptional()
   @IsArray()
   bidRange: BidRange[];
 }

@@ -14,7 +14,7 @@ export const AdminPlatformDefaultFactory: Partial<AdminDefault> = {
   countryISOCode: 'SAR',
   paymentType: 'DB',
   saiiForRent: 2.5,
-  saiiFromSale: 2.5,
+  saiiForSale: 2.5,
   ticketAging: 24,
   promptRatingTime: 10,
   vat: 15,

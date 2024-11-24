@@ -236,10 +236,10 @@ export class OfferService {
           offerPrice;
       }
       if (purchaseType == Purpose.SALE) {
-        saii = (adminDefault.saiiFromSale / 100) * offerPrice;
+        saii = (adminDefault.saiiForSale / 100) * offerPrice;
         vat =
           (adminDefault.vat / 100) *
-          (adminDefault.saiiFromSale / 100) *
+          (adminDefault.saiiForSale / 100) *
           offerPrice;
       }
       const minimumListingPrice = minimumPrice;

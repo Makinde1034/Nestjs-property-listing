@@ -804,7 +804,7 @@ type AdminDefault {
   city: String
   promptRatingTime: Float
   ticketAging: Float
-  saiiFromSale: Float
+  saiiForSale: Float
   saiiForRent: Float
   vat: Float
   paymentType: String
@@ -1548,7 +1548,7 @@ type Mutation {
   createReview(createReviewDto: CreateReviewDto!): Review!
   createCoupon(createCouponsInput: CreateCouponInput!): Coupon!
   updateAdminDefault(updateAdminDefaultInput: UpdateAdminDefaultInput!): AdminDefault!
-  updateAuctionBidRangeSetting(createCouponsInput: UpdateAdminDefaultInput!): AdminDefault!
+  updateAuctionBidRangeSetting(createCouponsInput: UpdateAdminDefaultInput!): SuccessResponse!
   updateCoupon(updateCouponsInput: UpdateCouponInput!): Coupon!
   deleteCoupons(deleteCouponsInput: DeleteCouponInput!): SuccessResponse!
   deactivateCoupons(deactivateCoupons: DeactivateCouponInput!): SuccessResponse!
@@ -2168,7 +2168,7 @@ input UpdateAdminDefaultInput {
   state: String
   country: String
   countryISOCode: String
-  bidRange: [BidRange!]!
+  bidRange: [BidRange!]
 }
 
 input BidRange {

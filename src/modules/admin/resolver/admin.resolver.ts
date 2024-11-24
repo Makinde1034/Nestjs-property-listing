@@ -144,7 +144,7 @@ export class AdminResolver {
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.SYSTEM_SETTINGS_EDIT)
-  @Mutation(() => AdminDefault, { name: 'updateAuctionBidRangeSetting' })
+  @Mutation(() => SuccessResponse, { name: 'updateAuctionBidRangeSetting' })
   async updateAuctionBidRangeSetting(
     @Args('createCouponsInput')
     updateAdminDefaultInput: UpdateAdminDefaultInput,

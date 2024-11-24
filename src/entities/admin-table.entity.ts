@@ -32,7 +32,7 @@ export class AdminDefault extends BaseEntity {
 
   @Field({ nullable: true })
   @Column({ type: 'decimal' })
-  saiiFromSale: number;
+  saiiForSale: number;
 
   @Field({ nullable: true })
   @Column({ type: 'decimal' })

@@ -654,10 +654,9 @@ export class AdminService {
       return result[0];
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException('Failed to fetch user age count');
+      throw new BadRequestException('Failed to fetch');
     }
   }
-
   async findOne(id: string) {
     try {
       return await this.couponRepository.findOneBy({ id });
