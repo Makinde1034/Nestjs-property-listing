@@ -79,6 +79,7 @@ import { SettingFeatureRepository } from '../repositories/feature-setting.reposi
 import { SystemFeatureSettingInput } from '../dto/request/workflow';
 import { ActivityLogService } from '../../activity-log/services/activity-log.service';
 import { ActivityEnum } from '../../../common/enums/activitys';
+import { AdminFilterAndSort } from '../../listing/dtos/request';
 
 @Injectable()
 export class AdminService {
@@ -703,9 +704,36 @@ export class AdminService {
     }
   }
 
-  async fetchCoupons() {
+  async fetchCoupons(couponFilterInput: AdminFilterAndSort) {
     try {
-      return await this.couponRepository.find({});
+      const now = new Date();
+      const whereCondition: any = {};
+      const dateField = 'createdAt';
+      switch (couponFilterInput.timePeriod) {
+        case 'today':
+          whereCondition[dateField] = Between(startOfDay(now), endOfDay(now));
+          break;
+        case 'week':
+          whereCondition[dateField] = Between(startOfWeek(now), endOfWeek(now));
+          break;
+        case 'month':
+          whereCondition[dateField] = Between(
+            startOfMonth(now),
+            endOfMonth(now),
+          );
+          break;
+        case 'year':
+          whereCondition[dateField] = Between(startOfYear(now), endOfYear(now));
+          break;
+      }
+      return await this.couponRepository
+        .createQueryBuilder('coupons')
+        .where(whereCondition, {
+          whereParam: couponFilterInput.where?.whereParam,
+        })
+        .take(couponFilterInput.take)
+        .skip(couponFilterInput.skip)
+        .getManyAndCount();
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
