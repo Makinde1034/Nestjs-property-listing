@@ -1548,7 +1548,7 @@ type Mutation {
   createReview(createReviewDto: CreateReviewDto!): Review!
   createCoupon(createCouponsInput: CreateCouponInput!): Coupon!
   updateAdminDefault(updateAdminDefaultInput: UpdateAdminDefaultInput!): AdminDefault!
-  updateAuctionBidRangeSetting(createCouponsInput: UpdateAdminDefaultInput!): AdminDefault!
+  updateAuctionBidRangeSetting(createCouponsInput: UpdateAdminDefaultInput!): SuccessResponse!
   updateCoupon(updateCouponsInput: UpdateCouponInput!): Coupon!
   deleteCoupons(deleteCouponsInput: DeleteCouponInput!): SuccessResponse!
   deactivateCoupons(deactivateCoupons: DeactivateCouponInput!): SuccessResponse!
