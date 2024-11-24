@@ -77,6 +77,8 @@ import { TransactionRepository } from '../../payment/repository/transaction.repo
 import { InvoiceRepository } from '../../payment/repositories/invoice.repository';
 import { SettingFeatureRepository } from '../repositories/feature-setting.repository';
 import { SystemFeatureSettingInput } from '../dto/request/workflow';
+import { ActivityLogService } from '../../activity-log/services/activity-log.service';
+import { ActivityEnum } from '../../../common/enums/activitys';
 
 @Injectable()
 export class AdminService {
@@ -96,6 +98,8 @@ export class AdminService {
     private readonly listingTypeRepository: ListingTypeRepository,
     private readonly invoiceRepository: InvoiceRepository,
     private readonly systemFeatureRepository: SettingFeatureRepository,
+
+    private readonly activityLogService: ActivityLogService,
   ) {}
 
   logger = new Logger(AdminService.name);
@@ -660,9 +664,7 @@ export class AdminService {
           this.userRepository.metadata.name,
         );
 
-      const code = generateRandomArray(1, 6);
       const data = this.couponRepository.create({
-        code: slugify(code[0].toUpperCase()),
         ...createCouponInput,
       });
 
@@ -680,12 +682,21 @@ export class AdminService {
         return new SuccessResponse('Action awaiting aproval');
       }
       const coupon = await this.couponRepository.save({
-        code: slugify(code[0].toUpperCase()),
         ...createCouponInput,
       });
       if (coupon) {
         return new SuccessResponse(AppStrings.SUCCESSFULL);
       }
+
+      // Log activity
+      await this.activityLogService.logActivity([
+        {
+          adminId: admin.id,
+          action: ActivityEnum.CREATED,
+          couponId: coupon.id,
+          details: JSON.stringify(coupon),
+        },
+      ]);
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -798,6 +809,15 @@ export class AdminService {
       if (affected) {
         const data = await this.couponRepository.findOneBy({ id: coupons.id });
 
+        await this.activityLogService.logActivity([
+          {
+            adminId: admin.id,
+            action: ActivityEnum.UPDATED,
+            couponId: data.id,
+            details: JSON.stringify(data),
+          },
+        ]);
+
         return new SuccessResponse(AppStrings.SUCCESSFULL, data);
       }
     } catch (error) {
@@ -805,6 +825,7 @@ export class AdminService {
       throw new BadRequestException(error);
     }
   }
+
   async deleteCoupon(deleteCouponInput: DeleteCouponInput, admin: User) {
     try {
       const [actionConfig, coupons] = await Promise.all([
@@ -888,6 +909,49 @@ export class AdminService {
     }
   }
 
+  async reactivateCoupon(
+    deactivateCouponInput: DeactivateCouponInput,
+    admin: User,
+  ) {
+    try {
+      const [actionConfig, coupons] = await Promise.all([
+        this.workflowService.findOneWorkflowByDocumentname(
+          this.userRepository.metadata.name,
+        ),
+        this.couponRepository.find({
+          where: { id: In(deactivateCouponInput.id) },
+        }),
+      ]);
+      const deactivateCoupon = coupons.map((element) => {
+        const coupon: Partial<Coupon> = {
+          deactived: false,
+        };
+        return { ...element, ...coupon };
+      });
+
+      if (actionConfig) {
+        await this.actionService.createActionRequest(
+          {
+            document: this.couponRepository.metadata.name,
+            actionType: 'create',
+            targetEntityId: null,
+            user: admin,
+            payload: JSON.stringify(deactivateCoupon),
+          },
+          admin,
+        );
+
+        return new SuccessResponse('Awaiting action approval');
+      }
+      await this.couponRepository.save(deactivateCoupon);
+
+      return new SuccessResponse(AppStrings.SUCCESSFULL);
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
   async activateAndDeactivateFeatures(
     data: SystemFeatureSettingInput,
     admin: User,
@@ -917,6 +981,25 @@ export class AdminService {
       return feature;
     } catch (error) {
       this.logger.error(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async searchForCoupon(searchParam: string) {
+    try {
+      return await this.couponRepository
+        .createQueryBuilder('coupon')
+        .orWhere('coupon.name ILIKE :term', {
+          term: `%${searchParam}%`,
+        })
+        .orWhere('coupon.appliedTo ILIKE :term', {
+          term: `%${searchParam}%`,
+        })
+
+        .take(10)
+        .getMany();
+    } catch (error) {
+      this.logger.log(error);
       throw new BadRequestException(error);
     }
   }

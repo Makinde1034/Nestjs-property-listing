@@ -239,6 +239,18 @@ export class SplashScreenService {
             admin,
           );
         }
+
+        const activityToSave = splashScreens.map((element) => {
+          return {
+            adminId: admin.id,
+            action: ActivityEnum.DELETED,
+            splashScreenId: element.id,
+            details: JSON.stringify(element),
+          };
+        });
+
+        await this.activityLogService.logActivity(activityToSave);
+
         return new SuccessResponse('Awaiting approval');
       } else {
         // Batch delete operation if no actionConfig is needed

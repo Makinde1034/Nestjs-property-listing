@@ -507,6 +507,7 @@ type ActivityLog {
   articleId: Float
   splashScreenId: Float
   workflowId: String
+  couponId: String
   action: String
   details: String
   createdAt: DateTime
@@ -826,7 +827,11 @@ type AdminDefault {
 type Coupon {
   id: String!
   code: String!
+  name: String
+  appliedTo: String
   maxUse: Float!
+  type: String!
+  usage: String!
   currentUse: Float!
   discountType: String!
   discountValue: Float!
@@ -1182,6 +1187,7 @@ type Query {
   financialVsOrder(findOptions: AdminDashboardSort!): [FinancialVsOrder!]!
   fetchCoupons: [Coupon!]!
   findAllFeatures: [SystemFeatureSetting!]!
+  searchForCoupon(searchParam: String!): [Coupon!]!
   findAllWorkFlow(findOption: WorkflowInputFilter!): WorkFlowResponse!
   findAllDocument: SuccessResponse!
   findOneWorkFlow(id: String!): WorkFlow!
@@ -1541,6 +1547,7 @@ type Mutation {
   updateCoupon(updateCouponsInput: UpdateCouponInput!): Coupon!
   deleteCoupons(deleteCouponsInput: DeleteCouponInput!): SuccessResponse!
   deactivateCoupons(deactivateCoupons: DeactivateCouponInput!): SuccessResponse!
+  reactivateCoupon(deactivateCoupons: DeactivateCouponInput!): SuccessResponse!
   systemFeatureSetting(systemFeatureSetting: SystemFeatureSettingInput!): SuccessResponse!
   createWorkFlow(createWorkflowInput: CreateWorkflowInput!): WorkFlow!
   updateWorkFlow(updateWorkFlowInput: UpdateWorkflowInput!): SuccessResponse!
@@ -2127,7 +2134,11 @@ input CreateReviewDto {
 }
 
 input CreateCouponInput {
+  name: String!
   maxUse: Float!
+  isActive: Boolean!
+  appliedTo: String!
+  usage: String!
   discountType: String!
   discountValue: Float!
   startDate: DateTime!
@@ -2162,7 +2173,11 @@ input BidRange {
 }
 
 input UpdateCouponInput {
+  name: String
   maxUse: Float
+  isActive: Boolean
+  appliedTo: String
+  usage: String
   discountType: String
   discountValue: Float
   startDate: DateTime
