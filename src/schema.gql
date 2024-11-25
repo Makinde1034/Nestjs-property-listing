@@ -1491,6 +1491,7 @@ type Mutation {
   updateAdminNotificationPreference(requestInput: UpdateAdminNotificationPreferenceScope!): SuccessResponse!
   updateNotificationMessage(updateNotificationMessageInput: UpdateNotificationMessage!): SuccessResponse!
   createNotificationMessage(updateNotificationMessage: CreateNotificationMessage!): SuccessResponse!
+  updateNotificationMessageScope(updateNotificationMessage: UpdateNotificationMessageScope!): SuccessResponse!
   createListingType(RequestInput: ListingTypeInput!): ListingType!
   updateListingType(RequestInput: ListingTypeUpdateInput!): ListingType!
   deleteListingType(RequestInput: ListingTypeDeleteInput!): String!
@@ -1844,6 +1845,17 @@ input CreateNotificationMessage {
   body: String!
   arabicTitle: String!
   arabicBody: String!
+}
+
+input UpdateNotificationMessageScope {
+  notificationMessageScope: [NotificationMessageScope!]!
+}
+
+input NotificationMessageScope {
+  id: String!
+  email: Boolean!
+  pushNotification: Boolean!
+  systemNotification: Boolean!
 }
 
 input ListingTypeInput {
