@@ -163,32 +163,6 @@ export class AdminService {
         await this.auctionBidRangeRepository.save(settingToUpdate);
 
       return new SuccessResponse(AppStrings.SUCCESSFULL, updated);
-
-      // const notificationMessage = await this.notificationMesageRepository.find({
-      //   // where: { id: In },
-      // });
-      // let result;
-      // const bidPriceRange = await this.auctionBidRangeRepository
-      //   .createQueryBuilder('auctionBidRange')
-      //   .getMany();
-
-      // bidPriceRange.forEach((element) => {
-      //   const data = adminDefaultInput.bidRange.find(
-      //     (value) => element.id === value.id,
-      //   );
-
-      //   if (data) {
-      //     // Use assignment to modify properties
-      //     element.increment = element.increment ?? data.bidIncrement;
-      //     element.heldAmount = element.heldAmount ?? data.heldAmount;
-      //   }
-      // });
-
-      // // Return the modified bidPriceRange or perform further processing
-
-      // await this.auctionBidRangeRepository.save(bidPriceRange);
-
-      // return new SuccessResponse(AppStrings.SUCCESSFULL, result);
     } catch (error) {
       this.logger.error(error);
       if (error instanceof HttpException) {
