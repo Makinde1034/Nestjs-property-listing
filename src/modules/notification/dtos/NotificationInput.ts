@@ -166,3 +166,28 @@ export class UpdateNotificationMessage extends PartialType(
   @IsNumber()
   id: string;
 }
+
+@InputType()
+export class NotificationMessageScope {
+  @Field()
+  @IsNumber()
+  id: string;
+
+  @Field()
+  @IsBoolean()
+  email: boolean;
+
+  @Field()
+  @IsBoolean()
+  pushNotification: boolean;
+
+  @Field()
+  @IsBoolean()
+  systemNotification: boolean;
+}
+@InputType()
+export class UpdateNotificationMessageScope {
+  @Field(() => [NotificationMessageScope])
+  @IsArray()
+  notificationMessageScope: NotificationMessageScope[];
+}

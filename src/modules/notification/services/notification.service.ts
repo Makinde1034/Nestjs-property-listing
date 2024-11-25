@@ -13,6 +13,7 @@ import {
   UpdateAdminNotificationPreferenceScope,
   UpdateAdminNotificationScope,
   UpdateNotificationMessage,
+  UpdateNotificationMessageScope,
 } from '../dtos';
 import {
   Notification,
@@ -47,6 +48,7 @@ import { ConfigService } from '@nestjs/config';
 import { MessageEvent } from '../../sse/request/app';
 import { NotificationMessagesRepository } from '../repositories/notification-message.repository';
 import { NotificationMessages } from '../../../entities/notification-message.entity';
+import { In } from 'typeorm';
 
 @Injectable()
 export class NotificationService {
@@ -756,6 +758,62 @@ export class NotificationService {
       const data = await this.notificationMesageRepository.update(id, rest);
 
       return new SuccessResponse(AppStrings.SUCCESSFULL, data);
+    } catch (error) {
+      this.logger.error(error);
+
+      throw new BadRequestException(error);
+    }
+  }
+
+  async updateNotificationMessageScope(
+    updateNotificationMessage: UpdateNotificationMessageScope,
+  ) {
+    try {
+      // Step 1: Create a lookup for the system feature settings by id
+      const settingsMap = new Map(
+        updateNotificationMessage.notificationMessageScope.map((feature) => [
+          feature.id,
+          feature,
+        ]),
+      );
+
+      // Step 2: Retrieve the features from the database
+      const notificationMessage = await this.notificationMesageRepository.find({
+        where: {
+          id: In(
+            updateNotificationMessage.notificationMessageScope.map(
+              (feature) => feature.id,
+            ),
+          ),
+        },
+      });
+
+      // Step 3: Prepare the features to be updated
+      const settingToUpdate = notificationMessage.map((feature) => {
+        const featureData = settingsMap.get(feature.id);
+        if (featureData) {
+          // If setting data exists for this feature, update it
+          return {
+            ...feature,
+            email: featureData.email ?? feature.email,
+            pushNotification:
+              featureData.pushNotification ?? feature.pushNotification,
+            systemNotification:
+              featureData.systemNotification ?? feature.systemNotification,
+          };
+        }
+        return feature; // No update if no setting data found
+      });
+
+      // Step 4: Save the updated features to the repository
+      const updated =
+        await this.notificationMesageRepository.save(settingToUpdate);
+
+      return new SuccessResponse(AppStrings.SUCCESSFULL, updated);
+
+      // const notificationMessage = await this.notificationMesageRepository.find({
+      //   // where: { id: In },
+      // });
     } catch (error) {
       this.logger.error(error);
 
