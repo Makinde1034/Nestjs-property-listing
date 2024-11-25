@@ -1817,11 +1817,11 @@ input UpdateAdminNotificationPreferenceScope {
 input UpdateNotificationMessage {
   scope: String
   event: String
+  period: String
   email: Boolean
   pushNotification: Boolean
   systemNotification: Boolean
   timing: String
-  duration: String
   emailTemplate: String
   recipients: String
   title: String
@@ -1834,11 +1834,11 @@ input UpdateNotificationMessage {
 input CreateNotificationMessage {
   scope: String!
   event: String!
+  period: String!
   email: Boolean!
   pushNotification: Boolean!
   systemNotification: Boolean!
   timing: String
-  duration: String
   emailTemplate: String
   recipients: String!
   title: String!

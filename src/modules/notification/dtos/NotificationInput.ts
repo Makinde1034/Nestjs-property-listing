@@ -113,6 +113,10 @@ export class CreateNotificationMessage {
   event: string;
 
   @Field()
+  @IsString()
+  period: string;
+
+  @Field()
   @IsBoolean()
   email: boolean;
 
@@ -127,10 +131,6 @@ export class CreateNotificationMessage {
   @Field({ nullable: true })
   @IsString()
   timing: string;
-
-  @Field({ nullable: true })
-  @IsString()
-  duration: string;
 
   @Field({ nullable: true })
   @IsString()
