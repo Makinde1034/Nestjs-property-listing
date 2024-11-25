@@ -149,4 +149,16 @@ export class NotificationResolver {
   ): Promise<NotificationMessages> {
     return await this.notificationService.findOneNotificationControl(id);
   }
+
+  // @Mutation(() => SuccessResponse)
+  // @UseGuards(AccessTokenGuard, PermissionsGuard)
+  // @Permissions(PermissionsEnum.SYSTEM_SETTINGS_EDIT)
+  // async createNotificationMessage(
+  //   @Args('updateNotificationMessage')
+  //   createNotificationMessageInput: CreateNotificationMessage,
+  // ): Promise<SuccessResponse> {
+  //   return this.notificationService.addNotificationMessage(
+  //     createNotificationMessageInput,
+  //   );
+  // }
 }

@@ -9,3 +9,8 @@ export enum UserProfileTypeEnum {
   STAFF = 'staff',
   ADMIN = 'admin',
 }
+
+export enum UserInterfaceType {
+  SERVICE_PROVIDER = 'service provider',
+  USER = 'user',
+}

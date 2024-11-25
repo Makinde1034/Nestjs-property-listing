@@ -637,6 +637,7 @@ type User {
   biometricKey: String
   twoFaRequired: Boolean
   isBlocked: Boolean
+  interface: String
   serviceProvider: ServiceProvider!
   review: [Review!]
   listing: [Listing!]
@@ -1478,6 +1479,7 @@ type Mutation {
   updateNotificationPreference(RequestInput: NotificationPrefenceInput!): User!
   changePassword(RequestInput: PasswordInput!): User!
   updateUserData(updateUserInput: UpdateUserData!): User!
+  switchUserInterface(switchInterfaceInput: SwitchInterfaceInput!): SuccessResponse!
   assignRoleToUser(assignRoleInput: AssignRoleInput!): User!
   createRole(RequestInput: RoleInputDto!): Role!
   updateRole(RequestInput: RoleUpdateInputDto!): Role!
@@ -1748,6 +1750,10 @@ input UpdateUserData {
   dateOfBirth: DateTime
   roles: [Float!]
   id: String!
+}
+
+input SwitchInterfaceInput {
+  interface: String!
 }
 
 input AssignRoleInput {

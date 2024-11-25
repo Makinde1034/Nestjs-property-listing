@@ -1414,4 +1414,19 @@ export class UserService {
       this.logger.log(error);
     }
   }
+
+  async switchUserInterface(payload, user: User) {
+    try {
+      const data = await this.usersRepository.update(user.id, {
+        interface: payload.interface,
+      });
+
+      if (data.affected > 0) {
+        return new SuccessResponse(AppStrings.SUCCESSFULL);
+      }
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
 }
