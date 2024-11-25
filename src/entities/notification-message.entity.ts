@@ -20,6 +20,14 @@ export class NotificationMessages extends BaseEntity {
 
   @Field({ nullable: true })
   @Column({ nullable: true })
+  directToWeb: string;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  directToMobile: string;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
   timing: string;
 
   @Field({ nullable: true })
