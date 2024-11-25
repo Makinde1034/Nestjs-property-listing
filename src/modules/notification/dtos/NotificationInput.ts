@@ -114,6 +114,14 @@ export class CreateNotificationMessage {
 
   @Field()
   @IsString()
+  directToWeb: string;
+
+  @Field()
+  @IsString()
+  directToMobile: string;
+
+  @Field()
+  @IsString()
   period: string;
 
   @Field()
@@ -163,7 +171,7 @@ export class UpdateNotificationMessage extends PartialType(
   CreateNotificationMessage,
 ) {
   @Field()
-  @IsNumber()
+  @IsString()
   id: string;
 }
 

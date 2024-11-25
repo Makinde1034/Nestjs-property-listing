@@ -758,6 +758,8 @@ type NotificationMessages {
   id: ID!
   scope: String!
   event: String
+  directToWeb: String
+  directToMobile: String
   timing: String
   period: String
   email: Boolean
@@ -1817,6 +1819,8 @@ input UpdateAdminNotificationPreferenceScope {
 input UpdateNotificationMessage {
   scope: String
   event: String
+  directToWeb: String
+  directToMobile: String
   period: String
   email: Boolean
   pushNotification: Boolean
@@ -1834,6 +1838,8 @@ input UpdateNotificationMessage {
 input CreateNotificationMessage {
   scope: String!
   event: String!
+  directToWeb: String!
+  directToMobile: String!
   period: String!
   email: Boolean!
   pushNotification: Boolean!
