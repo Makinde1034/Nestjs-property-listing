@@ -15,6 +15,7 @@ import {
   UpdateAdminNotificationPreferenceScope,
   UpdateAdminNotificationScope,
   UpdateNotificationMessage,
+  UpdateNotificationMessageScope,
 } from './dtos';
 import { SuccessResponse } from '../../common/utils/success.response';
 import { PermissionsEnum } from '../../common/enums/permission.enum';
@@ -121,6 +122,17 @@ export class NotificationResolver {
   ): Promise<SuccessResponse> {
     return this.notificationService.addNotificationMessage(
       createNotificationMessageInput,
+    );
+  }
+  @Mutation(() => SuccessResponse)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions(PermissionsEnum.SYSTEM_SETTINGS_EDIT)
+  async updateNotificationMessageScope(
+    @Args('updateNotificationMessage')
+    updateNotificationMessage: UpdateNotificationMessageScope,
+  ): Promise<SuccessResponse> {
+    return this.notificationService.updateNotificationMessageScope(
+      updateNotificationMessage,
     );
   }
   /**
