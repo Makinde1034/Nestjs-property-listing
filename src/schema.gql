@@ -2199,7 +2199,11 @@ input DeactivateCouponInput {
 }
 
 input SystemFeatureSettingInput {
-  id: [String!]!
+  SystemFeatureSetting: [SystemFeature!]!
+}
+
+input SystemFeature {
+  id: String!
   isActive: Boolean
 }
 

@@ -995,15 +995,33 @@ export class AdminService {
     admin: User,
   ) {
     try {
-      const feature = await this.systemFeatureRepository.find({
-        where: { id: In(data.id) },
+      // Step 1: Create a lookup for the system feature settings by id
+      const settingsMap = new Map(
+        data.SystemFeatureSetting.map((feature) => [feature.id, feature]),
+      );
+
+      // Step 2: Retrieve the features from the database
+      const features = await this.systemFeatureRepository.find({
+        where: {
+          id: In(data.SystemFeatureSetting.map((feature) => feature.id)),
+        },
       });
 
-      const settingToUpdate = feature.map((element) => ({
-        ...element,
-        isActive: data.isActive,
-      }));
+      // Step 3: Prepare the features to be updated
+      const settingToUpdate = features.map((feature) => {
+        const featureData = settingsMap.get(feature.id);
+        if (featureData) {
+          // If setting data exists for this feature, update it
+          return {
+            ...feature,
+            isActive: featureData.isActive,
+          };
+        }
+        // Optionally handle the case where no matching setting is found
+        return feature; // No update if no setting data found
+      });
 
+      // Step 4: Save the updated features to the repository
       const updated = await this.systemFeatureRepository.save(settingToUpdate);
 
       return new SuccessResponse(AppStrings.SUCCESSFULL, updated);
@@ -1012,6 +1030,7 @@ export class AdminService {
       throw new BadRequestException(error);
     }
   }
+
   async findAllFeatures(admin?: User) {
     try {
       const feature = await this.systemFeatureRepository.find();
