@@ -1550,7 +1550,7 @@ type Mutation {
   createReview(createReviewDto: CreateReviewDto!): Review!
   createCoupon(createCouponsInput: CreateCouponInput!): Coupon!
   updateAdminDefault(updateAdminDefaultInput: UpdateAdminDefaultInput!): AdminDefault!
-  updateAuctionBidRangeSetting(createCouponsInput: UpdateAdminDefaultInput!): SuccessResponse!
+  updateAuctionBidRangeSetting(updateAuctionBidRangeSettingInput: UpdateAdminDefaultInput!): SuccessResponse!
   updateCoupon(updateCouponsInput: UpdateCouponInput!): Coupon!
   deleteCoupons(deleteCouponsInput: DeleteCouponInput!): SuccessResponse!
   deactivateCoupons(deactivateCoupons: DeactivateCouponInput!): SuccessResponse!
@@ -2179,8 +2179,8 @@ input UpdateAdminDefaultInput {
 
 input BidRange {
   id: String!
-  bidIncrement: Float!
-  heldAmount: Float!
+  bidIncrement: Float
+  heldAmount: Float
 }
 
 input UpdateCouponInput {

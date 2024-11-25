@@ -146,7 +146,7 @@ export class AdminResolver {
   @Permissions(PermissionsEnum.SYSTEM_SETTINGS_EDIT)
   @Mutation(() => SuccessResponse, { name: 'updateAuctionBidRangeSetting' })
   async updateAuctionBidRangeSetting(
-    @Args('createCouponsInput')
+    @Args('updateAuctionBidRangeSettingInput')
     updateAdminDefaultInput: UpdateAdminDefaultInput,
   ) {
     return await this.adminService.updateAuctionBidRangeSetting(
