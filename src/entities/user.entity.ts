@@ -166,6 +166,10 @@ export class User extends BaseEntity {
   @Field({ nullable: true })
   isBlocked: boolean;
 
+  @Column({ default: false })
+  @Field({ nullable: true })
+  interface: string;
+
   @OneToOne(() => ServiceProvider, (serviceProvider) => serviceProvider.user)
   @Field(() => ServiceProvider)
   serviceProvider: ServiceProvider;

@@ -13,6 +13,7 @@ import {
 } from 'class-validator';
 import { TimePeriod } from '../../../../common/enums/sort.enum';
 import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
+import { Optional } from '@nestjs/common';
 
 @InputType()
 export class AdminDashboardSort extends PaginateAndSort {
@@ -148,9 +149,11 @@ export class BidRange {
   @Field()
   id: string;
   @IsString()
-  @Field()
+  @Field({ nullable: true })
+  @Optional()
   bidIncrement: number;
   @IsString()
-  @Field()
+  @Field({ nullable: true })
+  @Optional()
   heldAmount: number;
 }

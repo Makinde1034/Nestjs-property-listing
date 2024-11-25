@@ -128,28 +128,41 @@ export class AdminService {
     adminDefaultInput: UpdateAdminDefaultInput,
   ) {
     try {
-      let result;
-      const bidPriceRange = await this.auctionBidRangeRepository
-        .createQueryBuilder('auctionBidRange')
-        .getMany();
+      // Step 1: Create a lookup for the system feature settings by id
+      const settingsMap = new Map(
+        adminDefaultInput.bidRange.map((element) => [element.id, element]),
+      );
 
-      bidPriceRange.forEach((element) => {
-        const data = adminDefaultInput.bidRange.find(
-          (value) => element.id === value.id,
-        );
+      const ids = adminDefaultInput.bidRange.map((element) => element.id);
 
-        if (data) {
-          // Use assignment to modify properties
-          element.increment = element.increment ?? data.bidIncrement;
-          element.heldAmount = element.heldAmount ?? data.heldAmount;
-        }
+      // Step 2: Retrieve the features from the database
+      const bidRange = await this.auctionBidRangeRepository.find({
+        where: {
+          id: In(ids),
+        },
       });
 
-      // Return the modified bidPriceRange or perform further processing
+      console.log(bidRange);
 
-      await this.auctionBidRangeRepository.save(bidPriceRange);
+      // Step 3: Prepare the features to be updated
+      const settingToUpdate = bidRange.map((feature) => {
+        const dataToUpdate = settingsMap.get(feature.id);
+        if (dataToUpdate) {
+          // If setting data exists for this feature, update it
+          return {
+            ...feature,
+            bidIncrement: dataToUpdate.bidIncrement ?? feature.increment,
+            pushNotification: dataToUpdate.heldAmount ?? feature.heldAmount,
+          };
+        }
+        return feature; // No update if no setting data found
+      });
 
-      return new SuccessResponse(AppStrings.SUCCESSFULL, result);
+      // Step 4: Save the updated features to the repository
+      const updated =
+        await this.auctionBidRangeRepository.save(settingToUpdate);
+
+      return new SuccessResponse(AppStrings.SUCCESSFULL, updated);
     } catch (error) {
       this.logger.error(error);
       if (error instanceof HttpException) {

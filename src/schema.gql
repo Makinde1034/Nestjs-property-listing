@@ -637,6 +637,7 @@ type User {
   biometricKey: String
   twoFaRequired: Boolean
   isBlocked: Boolean
+  interface: String
   serviceProvider: ServiceProvider!
   review: [Review!]
   listing: [Listing!]
@@ -1478,6 +1479,7 @@ type Mutation {
   updateNotificationPreference(RequestInput: NotificationPrefenceInput!): User!
   changePassword(RequestInput: PasswordInput!): User!
   updateUserData(updateUserInput: UpdateUserData!): User!
+  switchUserInterface(switchInterfaceInput: SwitchInterfaceInput!): SuccessResponse!
   assignRoleToUser(assignRoleInput: AssignRoleInput!): User!
   createRole(RequestInput: RoleInputDto!): Role!
   updateRole(RequestInput: RoleUpdateInputDto!): Role!
@@ -1548,7 +1550,7 @@ type Mutation {
   createReview(createReviewDto: CreateReviewDto!): Review!
   createCoupon(createCouponsInput: CreateCouponInput!): Coupon!
   updateAdminDefault(updateAdminDefaultInput: UpdateAdminDefaultInput!): AdminDefault!
-  updateAuctionBidRangeSetting(createCouponsInput: UpdateAdminDefaultInput!): SuccessResponse!
+  updateAuctionBidRangeSetting(updateAuctionBidRangeSettingInput: UpdateAdminDefaultInput!): SuccessResponse!
   updateCoupon(updateCouponsInput: UpdateCouponInput!): Coupon!
   deleteCoupons(deleteCouponsInput: DeleteCouponInput!): SuccessResponse!
   deactivateCoupons(deactivateCoupons: DeactivateCouponInput!): SuccessResponse!
@@ -1748,6 +1750,10 @@ input UpdateUserData {
   dateOfBirth: DateTime
   roles: [Float!]
   id: String!
+}
+
+input SwitchInterfaceInput {
+  interface: String!
 }
 
 input AssignRoleInput {
@@ -2173,8 +2179,8 @@ input UpdateAdminDefaultInput {
 
 input BidRange {
   id: String!
-  bidIncrement: Float!
-  heldAmount: Float!
+  bidIncrement: Float
+  heldAmount: Float
 }
 
 input UpdateCouponInput {

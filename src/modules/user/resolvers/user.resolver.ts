@@ -20,7 +20,7 @@ import {
   UserActionInput,
   UserProfileInput,
 } from '../dtos/request';
-import { UserFilter } from '../dtos/request/user';
+import { SwitchInterfaceInput, UserFilter } from '../dtos/request/user';
 import { UserResponse } from '../dtos/response/user.response';
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { Public } from '../../auth/decorators/permision.decorator';
@@ -263,6 +263,17 @@ export class UserResolver {
     @Context() ctx: any,
   ): Promise<User> {
     return await this.userService.updateUserData(updateUserInput, ctx.req.user);
+  }
+  @Mutation(() => SuccessResponse, { name: 'switchUserInterface' })
+  @UseGuards(AccessTokenGuard)
+  async switchUserInterface(
+    @Args('switchInterfaceInput') switchInterfaceInput: SwitchInterfaceInput,
+    @Context() ctx: any,
+  ) {
+    return await this.userService.switchUserInterface(
+      switchInterfaceInput,
+      ctx.req.user,
+    );
   }
 
   @Mutation(() => User, { name: 'assignRoleToUser' })
