@@ -326,12 +326,10 @@ export class UserService {
         relations,
       });
 
-      // console.log(user);
-      // await this.createDefaultNotifications(user);
       return user;
     } catch (error) {
-      // this.logger.log(error);
-      // throw new BadRequestException(error.message);
+      this.logger.log(error);
+      throw new BadRequestException(error.message);
     }
   }
 
