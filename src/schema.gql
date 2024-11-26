@@ -2160,7 +2160,7 @@ input CreateReviewDto {
   rating: Float!
   comment: String
   reviewType: String!
-  providerId: String!
+  providerId: String
 }
 
 input CreateCouponInput {
