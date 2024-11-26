@@ -677,6 +677,8 @@ type Notification {
   read: Boolean
   type: String
   expiredAt: DateTime
+  directToWeb: Boolean
+  directToMobile: Boolean
   recipient: User!
   createdAt: DateTime!
   updatedAt: DateTime!
@@ -748,7 +750,7 @@ type WorkFlow {
   action: String
   numberOfApproval: Float!
   approvalOneRole: [String!]!
-  approvalTwoRole: [String!]!
+  approvalTwoRole: [String!]
   createdAt: DateTime!
   deletedAt: DateTime!
   updatedAt: DateTime!
@@ -2239,7 +2241,7 @@ input CreateWorkflowInput {
   isActive: Boolean!
   numberOfApproval: Float!
   approvalOneRole: [String!]!
-  approvalTwoRole: [String!]!
+  approvalTwoRole: [String!]
 }
 
 input UpdateWorkflowInput {

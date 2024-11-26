@@ -35,8 +35,8 @@ export class WorkFlow extends BaseEntity {
   @Field(() => [String])
   approvalOneRole: string[];
 
-  @Column({ type: 'simple-array' })
-  @Field(() => [String])
+  @Column({ type: 'simple-array', nullable: true })
+  @Field(() => [String], { nullable: true })
   approvalTwoRole: string[];
 
   @Field()

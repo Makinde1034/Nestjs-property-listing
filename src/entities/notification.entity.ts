@@ -38,6 +38,14 @@ export class Notification extends BaseEntity {
   @Field({ nullable: true })
   expiredAt: Date;
 
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  directToWeb: boolean;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  directToMobile: boolean;
+
   @Field(() => User)
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   recipient: User;

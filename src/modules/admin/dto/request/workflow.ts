@@ -7,6 +7,7 @@ import {
   IsString,
 } from 'class-validator';
 import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
+import { Optional } from '@nestjs/common';
 @InputType()
 export class CreateWorkflowInput {
   @Field()
@@ -33,8 +34,9 @@ export class CreateWorkflowInput {
   @IsArray()
   approvalOneRole: string[];
 
-  @Field(() => [String])
+  @Field(() => [String], { nullable: true })
   @IsArray()
+  @Optional()
   approvalTwoRole: string[];
 }
 
