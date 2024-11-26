@@ -5,7 +5,11 @@
 
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { NotificationService } from './services';
-import { Notification, NotificationScope } from 'src/entities';
+import {
+  Notification,
+  NotificationScope,
+  UserNotificationPreference,
+} from 'src/entities';
 import { UseGuards } from '@nestjs/common';
 import { AccessTokenGuard, PermissionsGuard } from '../auth/guards';
 import {
@@ -37,6 +41,19 @@ export class NotificationResolver {
   @UseGuards(AccessTokenGuard)
   async listNotifications(@Context() ctx): Promise<Notification[]> {
     return await this.notificationService.find(ctx.req.user);
+  } /**
+   * List user's notification
+   *
+   * @async
+   * @param {any} ctx
+   * @returns {Promise<Notification[]>}
+   */
+  @Query(() => [UserNotificationPreference])
+  @UseGuards(AccessTokenGuard)
+  async listNotificationScopesForUser(@Context() ctx) {
+    return await this.notificationService.listNotificationScopesForUser(
+      ctx.req.user,
+    );
   }
 
   /**

@@ -29,10 +29,7 @@ import {
   UserUpgradeInput,
 } from '../dtos/response/nafath';
 import { PermissionsEnum } from '../../../common/enums/permission.enum';
-import {
-  PushNotificationinput,
-  PushNotificationPayload,
-} from '../../../common/interface';
+import { PushNotificationinput } from '../../../common/interface';
 @Resolver()
 export class UserResolver {
   constructor(private readonly userService: UserService) {}

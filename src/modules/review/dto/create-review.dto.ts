@@ -23,8 +23,9 @@ export class CreateReviewDto {
   @IsEnum(ServicesOffered)
   reviewType: string;
 
-  @Field()
+  @Field({ nullable: true })
   @IsString()
+  @IsOptional()
   providerId: string;
 
   userId?: string;
