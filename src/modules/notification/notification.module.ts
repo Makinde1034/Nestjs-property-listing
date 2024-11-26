@@ -7,17 +7,20 @@ import { Global, Module } from '@nestjs/common';
 import { NotificationResolver } from './notification.resolver';
 import { NotificationService, PushNotificationService } from './services';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Notification } from 'src/entities';
+import { Notification, UserNotificationPreference } from 'src/entities';
 import { NotificationEventListener } from './events';
 import { NotificationRepository } from './repositories';
 
 import { AdminNotificationPreferenceRepository } from './repositories/admin.repository';
 import { NotificationTokenRepository } from './repositories/notification-token.repository';
 import { NotificationMessagesRepository } from './repositories/notification-message.repository';
+import { UserNotificationRepository } from '../user/repositories';
 
 @Global()
 @Module({
-  imports: [TypeOrmModule.forFeature([Notification])],
+  imports: [
+    TypeOrmModule.forFeature([Notification, UserNotificationPreference]),
+  ],
   providers: [
     NotificationResolver,
     NotificationService,
@@ -27,6 +30,8 @@ import { NotificationMessagesRepository } from './repositories/notification-mess
     AdminNotificationPreferenceRepository,
     NotificationTokenRepository,
     NotificationMessagesRepository,
+
+    UserNotificationRepository,
   ],
   exports: [
     PushNotificationService,
@@ -34,6 +39,7 @@ import { NotificationMessagesRepository } from './repositories/notification-mess
     AdminNotificationPreferenceRepository,
     NotificationTokenRepository,
     NotificationMessagesRepository,
+    UserNotificationRepository,
   ],
 })
 export class NotificationModule {}

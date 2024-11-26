@@ -24,6 +24,7 @@ import {
 import {
   UserRepository,
   NotificationScopeRepository,
+  UserNotificationRepository,
 } from '../../user/repositories';
 import { AppStrings } from 'src/common/messages/app.strings';
 import { MailgunEmailService } from '../../mail/services/implementations';
@@ -67,6 +68,8 @@ export class NotificationService {
     private readonly sseService: SseService,
 
     private readonly notificationMesageRepository: NotificationMessagesRepository,
+
+    private readonly userNotificationPreference: UserNotificationRepository,
   ) {
     this.frontEndUrl = this.configService.get('FRONT_END_URL');
   }
@@ -622,6 +625,16 @@ export class NotificationService {
    */
   async listNotificationScopes(): Promise<NotificationScope[]> {
     return await this.notificationScopeRepository.find();
+  }
+
+  async listNotificationScopesForUser(
+    user: User,
+  ): Promise<UserNotificationPreference[]> {
+    return this.userNotificationPreference.findAll({
+      where: {
+        user: { id: user.id },
+      },
+    });
   }
 
   async updateNotificationScope(

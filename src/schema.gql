@@ -1123,6 +1123,7 @@ type Query {
   getUserRoles: [Role!]!
   getRole(id: Float!): Role!
   listNotifications: [Notification!]!
+  listNotificationScopesForUser: [UserNotificationPreference!]!
   listNotificationScopes: [NotificationScope!]!
   findNotificationControl: [NotificationMessages!]!
   findOneNotificationControl(id: String!): NotificationMessages!

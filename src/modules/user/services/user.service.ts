@@ -181,7 +181,7 @@ export class UserService {
         });
 
         if (!user.nationalIdentity) {
-          await this.nationalIdentityRepository.save({
+          await this.nationalIdentityRepository.create({
             nationality: 'Saudi Arabia',
             identityNumber: userUpgradeInput.id,
             type: userUpgradeInput.idType,
@@ -325,11 +325,13 @@ export class UserService {
         where: { id },
         relations,
       });
-      await this.createDefaultNotifications(user);
+
+      // console.log(user);
+      // await this.createDefaultNotifications(user);
       return user;
     } catch (error) {
-      this.logger.log(error);
-      throw new BadRequestException(error);
+      // this.logger.log(error);
+      // throw new BadRequestException(error.message);
     }
   }
 
@@ -552,15 +554,15 @@ export class UserService {
    */
   async createDefaultNotifications(user: User): Promise<void> {
     const scopes = await this.notificationScopeRepository.find();
-    await Promise.all(
-      scopes.map(async (scope) => {
-        const data: Partial<UserNotificationPreference> = {
-          user,
-          scope,
-        };
-        await this.userNotificationRepository.create(data);
-      }),
-    );
+
+    // Prepare all the notification preferences in a single array
+    const data: Partial<UserNotificationPreference>[] = scopes.map((scope) => ({
+      user,
+      scope,
+    }));
+
+    // Use a single database operation to create all records
+    await this.userNotificationRepository.save(data);
   }
 
   /**
