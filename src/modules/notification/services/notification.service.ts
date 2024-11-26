@@ -634,7 +634,6 @@ export class NotificationService {
       where: {
         user: { id: user.id },
       },
-      relations: ['user'],
     });
   }
 

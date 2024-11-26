@@ -313,6 +313,7 @@ export class UserService {
   ): Promise<User> {
     return await this.usersRepository.findOne({ where: userData });
   }
+
   /**
    * Find user
    * @async
