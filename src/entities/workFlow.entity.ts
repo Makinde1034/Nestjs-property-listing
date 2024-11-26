@@ -46,7 +46,6 @@ export class WorkFlow extends BaseEntity {
   @Field()
   @DeleteDateColumn()
   deletedAt: Date;
-
   @Field()
   @UpdateDateColumn()
   updatedAt: Date;
