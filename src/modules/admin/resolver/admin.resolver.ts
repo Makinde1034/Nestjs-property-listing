@@ -41,6 +41,8 @@ import { SystemFeatureSettingInput } from '../dto/request/workflow';
 import { SystemFeatureSetting } from '../../../entities/system-features.entity';
 import { AdminFilterAndSort } from '../../listing/dtos/request';
 import { CouponResponse } from '../dto/response/coupons';
+import { Ticket } from '../../../entities';
+import { TicketResponse } from '../../tickets/dtos/response/ticket-response';
 
 @Resolver()
 @UseGuards(AccessTokenGuard)
@@ -93,6 +95,14 @@ export class AdminResolver {
     @Args('findOptions', { nullable: true }) findOption: AdminDashboardSort,
   ) {
     return await this.adminService.userFunneling(findOption);
+  }
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions(PermissionsEnum.DASHBOARD_SUPPORT_RESPONSE_CARD)
+  @Query(() => TicketResponse, { name: 'getTicketForAdmin' })
+  async ticket(
+    @Args('findOptions', { nullable: true }) findOption: AdminDashboardSort,
+  ) {
+    return await this.adminService.ticket(findOption);
   }
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)

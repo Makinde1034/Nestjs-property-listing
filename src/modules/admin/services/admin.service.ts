@@ -33,7 +33,7 @@ import {
   startOfWeek,
 } from 'date-fns';
 
-import { Between, In } from 'typeorm';
+import { Between, Brackets, In } from 'typeorm';
 import { OfferListEnum } from '../../../common/enums/status.enum';
 import {
   SaiiFees,
@@ -82,6 +82,7 @@ import { ActivityLogService } from '../../activity-log/services/activity-log.ser
 import { ActivityEnum } from '../../../common/enums/activitys';
 import { AdminFilterAndSort } from '../../listing/dtos/request';
 import {
+  TicketStatus,
   UserInterfaceType,
   UserLevelEnum,
   UserProfileTypeEnum,
@@ -210,6 +211,59 @@ export class AdminService {
     return avgTimeDifference;
   }
 
+  async ticket(findOption: AdminDashboardSort) {
+    try {
+      const now = new Date();
+      const whereCondition: any = {};
+      const dateField = 'createdAt';
+
+      // Determine the time range based on the period
+      if (findOption.timePeriod) {
+        switch (findOption.timePeriod) {
+          case 'today':
+            whereCondition[dateField] = Between(startOfDay(now), endOfDay(now));
+            break;
+          case 'week':
+            whereCondition[dateField] = Between(
+              startOfWeek(now),
+              endOfWeek(now),
+            );
+            break;
+          case 'month':
+            whereCondition[dateField] = Between(
+              startOfMonth(now),
+              endOfMonth(now),
+            );
+            break;
+          case 'year':
+            whereCondition[dateField] = Between(
+              startOfYear(now),
+              endOfYear(now),
+            );
+            break;
+        }
+      }
+
+      // Build the query with the date condition and ticket status
+      const [ticket, count] = await this.ticketsRepository
+        .createQueryBuilder('ticket')
+        .where(
+          new Brackets((qb) => {
+            qb.where(whereCondition).orWhere('ticket.status = :status', {
+              status: TicketStatus.CLOSE,
+            });
+          }),
+        )
+        .getManyAndCount();
+
+      return { ticket, count };
+    } catch (error) {
+      this.logger.error(error.message, error.stack);
+      throw new BadRequestException(
+        'An error occurred while fetching tickets.',
+      );
+    }
+  }
   async averageCloseTime() {
     const result = await this.ticketsRepository
       .createQueryBuilder('ticket')

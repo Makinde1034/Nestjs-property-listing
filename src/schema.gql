@@ -1200,6 +1200,7 @@ type Query {
   nationality(findOptions: AdminDashboardSort!): [UserCountryCount!]!
   userAgeCount(findOptions: AdminDashboardSort!): [UserAgeRange!]!
   userFunnel(findOptions: AdminDashboardSort): UserFunneling!
+  getTicketForAdmin(findOptions: AdminDashboardSort): TicketResponse!
   averageResponse: ResponseTime!
   saiiFees(findOptions: AdminDashboardSort): SaiiFees!
   financialVsOrder(findOptions: AdminDashboardSort!): [FinancialVsOrder!]!
