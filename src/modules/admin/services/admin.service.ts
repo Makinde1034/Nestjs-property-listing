@@ -81,6 +81,11 @@ import { SystemFeatureSettingInput } from '../dto/request/workflow';
 import { ActivityLogService } from '../../activity-log/services/activity-log.service';
 import { ActivityEnum } from '../../../common/enums/activitys';
 import { AdminFilterAndSort } from '../../listing/dtos/request';
+import {
+  UserInterfaceType,
+  UserLevelEnum,
+  UserProfileTypeEnum,
+} from '../../../common/enums';
 
 @Injectable()
 export class AdminService {
@@ -451,7 +456,7 @@ export class AdminService {
     const startOfRange = startOfMonth(startDate);
     const endOfRange = endOfMonth(endDate);
 
-    const [guest, levelOne, converged] = await Promise.all([
+    const [guest, levelOne, levelTwo] = await Promise.all([
       this.userTracking.count({
         where: {
           type: 'guest',
@@ -460,13 +465,16 @@ export class AdminService {
       }),
       this.userRepository.count({
         where: {
-          // TODO: Replace with actual condition for levelOne users
+          userLevel: UserLevelEnum.LEVEL_1,
           createdAt: Between(startOfRange, endOfRange),
         },
       }),
       this.userRepository.count({
         where: {
           // TODO: Replace with actual condition for converged users
+
+          userLevel: UserLevelEnum.LEVEL_2,
+
           createdAt: Between(startOfRange, endOfRange),
         },
       }),
@@ -475,8 +483,8 @@ export class AdminService {
     const userFunneling: UserFunneling = {
       guest,
       levelOne,
-      levelTwo: 0, // Placeholder value; update based on actual conditions
-      converged,
+      levelTwo,
+      converged: levelOne + levelTwo,
     };
 
     return userFunneling;
