@@ -66,8 +66,10 @@ export class CreateArticleInput {
 
   @Field({ nullable: true })
   @IsOptional()
-  @IsEnum(knowledgeBaseNeedHelpPlacement)
-  @IsEnum(knowledgeBaseMainPlacement)
+  @IsEnum([
+    ...Object.values(knowledgeBaseNeedHelpPlacement),
+    ...Object.values(knowledgeBaseMainPlacement),
+  ])
   placement: string;
 
   @Field({ nullable: true })

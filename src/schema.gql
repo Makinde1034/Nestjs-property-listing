@@ -308,6 +308,7 @@ type Listing {
   bundleImpression: String
   featureDate: DateTime
   published: Boolean!
+  stage: String
   flaggedDate: DateTime
   offers: Float
   featureExpiration: DateTime
@@ -1004,11 +1005,16 @@ type UserDemography {
   userDemography: [UserCity!]
 }
 
-type ListingStats {
+type Analysis {
   offer: Float
   listing: Float
   acceptedOffer: Float
   ownershipTransfer: Float
+}
+
+type ListingStats {
+  offers: [Offer!]!
+  analysis: Analysis!
 }
 
 type Group {
@@ -1187,13 +1193,14 @@ type Query {
   findManyReviews(findMayOptions: FindManyReviewDto): ReviewResponse!
   searchForReview(searchParam: String!): [Review!]!
   findCities(findCities: PaginateAndSort): CityResponse!
-  listingStats(findOptions: AdminDashboardSort!): ListingStats!
+  listingStats(findOptions: AdminDashboardListingStatus): ListingStats!
   adminDefault: AdminDefault!
   totalUser(findOptions: AdminDashboardSort!): UserDemography!
   userCount(findOptions: AdminDashboardSort!): [UserGenderCount!]!
   nationality(findOptions: AdminDashboardSort!): [UserCountryCount!]!
   userAgeCount(findOptions: AdminDashboardSort!): [UserAgeRange!]!
   userFunnel(findOptions: AdminDashboardSort): UserFunneling!
+  getTicketForAdmin(findOptions: AdminDashboardSort): TicketResponse!
   averageResponse: ResponseTime!
   saiiFees(findOptions: AdminDashboardSort): SaiiFees!
   financialVsOrder(findOptions: AdminDashboardSort!): [FinancialVsOrder!]!
@@ -1398,6 +1405,16 @@ input FindManyReviewDto {
   where: WhereOption
   rating: Float
   timePeriod: String
+}
+
+input AdminDashboardListingStatus {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
+  stage: String
+  status: Float
 }
 
 input WorkflowInputFilter {

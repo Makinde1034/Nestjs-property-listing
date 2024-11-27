@@ -33,7 +33,7 @@ import {
   startOfWeek,
 } from 'date-fns';
 
-import { Between, In } from 'typeorm';
+import { Between, Brackets, In } from 'typeorm';
 import { OfferListEnum } from '../../../common/enums/status.enum';
 import {
   SaiiFees,
@@ -50,6 +50,7 @@ import {
 } from '../dto/response/admin-response';
 import { TicketRepository } from '../../tickets/repositories';
 import {
+  AdminDashboardListingStatus,
   AdminDashboardSort,
   AdminDefaultInput,
   UpdateAdminDefaultInput,
@@ -80,6 +81,12 @@ import { SystemFeatureSettingInput } from '../dto/request/workflow';
 import { ActivityLogService } from '../../activity-log/services/activity-log.service';
 import { ActivityEnum } from '../../../common/enums/activitys';
 import { AdminFilterAndSort } from '../../listing/dtos/request';
+import {
+  TicketStatus,
+  UserInterfaceType,
+  UserLevelEnum,
+  UserProfileTypeEnum,
+} from '../../../common/enums';
 
 @Injectable()
 export class AdminService {
@@ -204,6 +211,59 @@ export class AdminService {
     return avgTimeDifference;
   }
 
+  async ticket(findOption: AdminDashboardSort) {
+    try {
+      const now = new Date();
+      const whereCondition: any = {};
+      const dateField = 'createdAt';
+
+      // Determine the time range based on the period
+      if (findOption.timePeriod) {
+        switch (findOption.timePeriod) {
+          case 'today':
+            whereCondition[dateField] = Between(startOfDay(now), endOfDay(now));
+            break;
+          case 'week':
+            whereCondition[dateField] = Between(
+              startOfWeek(now),
+              endOfWeek(now),
+            );
+            break;
+          case 'month':
+            whereCondition[dateField] = Between(
+              startOfMonth(now),
+              endOfMonth(now),
+            );
+            break;
+          case 'year':
+            whereCondition[dateField] = Between(
+              startOfYear(now),
+              endOfYear(now),
+            );
+            break;
+        }
+      }
+
+      // Build the query with the date condition and ticket status
+      const [ticket, count] = await this.ticketsRepository
+        .createQueryBuilder('ticket')
+        .where(
+          new Brackets((qb) => {
+            qb.where(whereCondition).orWhere('ticket.status = :status', {
+              status: TicketStatus.CLOSE,
+            });
+          }),
+        )
+        .getManyAndCount();
+
+      return { ticket, count };
+    } catch (error) {
+      this.logger.error(error.message, error.stack);
+      throw new BadRequestException(
+        'An error occurred while fetching tickets.',
+      );
+    }
+  }
   async averageCloseTime() {
     const result = await this.ticketsRepository
       .createQueryBuilder('ticket')
@@ -365,53 +425,52 @@ export class AdminService {
       }
     }
 
-    console.log(result);
     return result;
   }
+  async listingStats(
+    findOption: AdminDashboardListingStatus,
+  ): Promise<ListingStats> {
+    const { take = 10, skip = 0, stage, status } = findOption;
 
-  async listingStats(findOption: AdminDashboardSort): Promise<ListingStats> {
-    // Calculate the start and end dates for the given number of months
-    const endDate = new Date();
-    const startDate = subMonths(endDate, findOption.value - 1);
+    // Initialize the query builder
+    const query = this.offerRepository
+      .createQueryBuilder('offer')
+      .leftJoinAndSelect('offer.listing', 'listing');
 
-    // Adjust to the start of the month for startDate and end of the month for endDate
-    const startOfRange = startOfMonth(startDate);
-    const endOfRange = endOfMonth(endDate);
+    // Add conditions dynamically based on input
+    if (stage) {
+      query.andWhere('listing.stage = :stage', { stage });
+    }
 
+    if (status) {
+      query.andWhere('offer.status = :status', { status });
+    }
+
+    // Execute the query
+    const [offers, total] = await query.take(take).skip(skip).getManyAndCount();
+
+    // Add other aggregated stats
     const [offer, listing, acceptedOffer, ownershipTransfer] =
       await Promise.all([
+        this.offerRepository.count({}),
+        this.listingRepository.count({}),
         this.offerRepository.count({
-          where: {
-            createdAt: Between(startOfRange, endOfRange),
-          },
+          where: { status: OfferListEnum.EXPIRED },
         }),
-        this.listingRepository.count({
-          where: {
-            createdAt: Between(startOfRange, endOfRange),
-          },
-        }),
-        this.offerRepository.count({
-          where: {
-            status: OfferListEnum.EXPIRED,
-            createdAt: Between(startOfRange, endOfRange),
-          },
-        }),
-        this.listingRepository.count({
-          where: {
-            isListingSold: true,
-            createdAt: Between(startOfRange, endOfRange),
-          },
-        }),
+        this.listingRepository.count({ where: { isListingSold: true } }),
       ]);
 
-    const analysis: ListingStats = {
-      offer,
-      listing,
-      acceptedOffer,
-      ownershipTransfer,
+    // Return the result
+    return {
+      offers,
+      total,
+      analysis: {
+        offer,
+        listing,
+        acceptedOffer,
+        ownershipTransfer,
+      },
     };
-
-    return analysis;
   }
 
   async userStats(findOption: AdminDashboardSort): Promise<UserStats> {
@@ -451,7 +510,7 @@ export class AdminService {
     const startOfRange = startOfMonth(startDate);
     const endOfRange = endOfMonth(endDate);
 
-    const [guest, levelOne, converged] = await Promise.all([
+    const [guest, levelOne, levelTwo] = await Promise.all([
       this.userTracking.count({
         where: {
           type: 'guest',
@@ -460,13 +519,16 @@ export class AdminService {
       }),
       this.userRepository.count({
         where: {
-          // TODO: Replace with actual condition for levelOne users
+          userLevel: UserLevelEnum.LEVEL_1,
           createdAt: Between(startOfRange, endOfRange),
         },
       }),
       this.userRepository.count({
         where: {
           // TODO: Replace with actual condition for converged users
+
+          userLevel: UserLevelEnum.LEVEL_2,
+
           createdAt: Between(startOfRange, endOfRange),
         },
       }),
@@ -475,8 +537,8 @@ export class AdminService {
     const userFunneling: UserFunneling = {
       guest,
       levelOne,
-      levelTwo: 0, // Placeholder value; update based on actual conditions
-      converged,
+      levelTwo,
+      converged: levelOne + levelTwo,
     };
 
     return userFunneling;

@@ -4,6 +4,8 @@
  */
 
 import { Field, ObjectType } from '@nestjs/graphql';
+import { Listing } from '../../../../entities';
+import { Offer } from '../../../../entities/offer.entity';
 @ObjectType()
 export class UserCity {
   @Field({ nullable: true })
@@ -27,9 +29,8 @@ export class UserDemography {
   @Field(() => [UserCity], { nullable: true })
   userDemography: UserCity[];
 }
-
 @ObjectType()
-export class ListingStats {
+export class Analysis {
   @Field({ nullable: true })
   offer: number;
   @Field({ nullable: true })
@@ -40,6 +41,15 @@ export class ListingStats {
   ownershipTransfer: number;
 }
 
+@ObjectType()
+export class ListingStats {
+  @Field(() => [Offer])
+  offers: Offer[];
+  total: number;
+
+  @Field()
+  analysis: Analysis;
+}
 @ObjectType()
 export class Group {
   @Field({ nullable: true })

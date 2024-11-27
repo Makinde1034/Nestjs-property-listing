@@ -43,6 +43,12 @@ export enum AdminSortListingManagement {
   CREATED = 'createdAt',
   FLAGGED = 'flaggedDate',
 }
+export enum ListingStage {
+  LISTED = 'Listed ',
+  OFFER_CREATED = 'Offer Created',
+  OWNERSHIPS_TRANSFER = 'Ownership Transfer',
+  OFFER_ACCEPTED = 'Offer Accepted',
+}
 
 export enum FurnishingStatusEnum {
   ALL_FURNISHED = 'all-furnished',

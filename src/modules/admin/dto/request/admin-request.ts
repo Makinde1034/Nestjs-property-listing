@@ -14,6 +14,8 @@ import {
 import { TimePeriod } from '../../../../common/enums/sort.enum';
 import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
 import { Optional } from '@nestjs/common';
+import { OfferListEnum } from '../../../../common/enums/status.enum';
+import { ListingStage } from '../../../../common/enums';
 
 @InputType()
 export class AdminDashboardSort extends PaginateAndSort {
@@ -26,7 +28,18 @@ export class AdminDashboardSort extends PaginateAndSort {
   @IsOptional()
   value: number;
 }
+@InputType()
+export class AdminDashboardListingStatus extends PaginateAndSort {
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsEnum(ListingStage)
+  stage: string;
 
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsEnum(OfferListEnum)
+  status: number;
+}
 @InputType()
 export class AdminDefaultInput {
   @Field()
