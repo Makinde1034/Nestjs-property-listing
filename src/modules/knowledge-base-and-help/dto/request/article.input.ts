@@ -25,6 +25,7 @@ import {
   knowledgeBaseNeedHelpPlacement,
 } from '../../../../common/enums/knowledge-base';
 import { LanguageEnum } from '../../../../common/enums/language.enum';
+import { Optional } from '@nestjs/common';
 @InputType()
 export class MetaData {
   @Field({ nullable: true })
@@ -82,7 +83,8 @@ export class CreateArticleInput {
   @IsNotEmpty()
   authorBio: string;
 
-  @Field()
+  @Field({ nullable: true })
+  @Optional()
   @IsEnum(LanguageEnum)
   language: string;
 }

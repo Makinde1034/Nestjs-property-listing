@@ -2310,7 +2310,7 @@ input CreateArticleInput {
   placement: String
   authorImage: String
   authorBio: String!
-  language: String!
+  language: String
 }
 
 input MetaData {
