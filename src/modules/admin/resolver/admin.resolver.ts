@@ -19,6 +19,7 @@ import {
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 
 import {
+  AdminDashboardListingStatus,
   AdminDashboardSort,
   UpdateAdminDefaultInput,
 } from '../dto/request/admin-request';
@@ -49,7 +50,8 @@ export class AdminResolver {
   @Permissions(PermissionsEnum.DASHBOARD_LISTINGS_FUNNEL)
   @Query(() => ListingStats, { name: 'listingStats' })
   async listingStats(
-    @Args('findOptions') findOption: AdminDashboardSort,
+    @Args('findOptions', { nullable: true })
+    findOption: AdminDashboardListingStatus,
   ): Promise<ListingStats> {
     return await this.adminService.listingStats(findOption);
   }

@@ -50,6 +50,7 @@ import {
 } from '../dto/response/admin-response';
 import { TicketRepository } from '../../tickets/repositories';
 import {
+  AdminDashboardListingStatus,
   AdminDashboardSort,
   AdminDefaultInput,
   UpdateAdminDefaultInput,
@@ -365,53 +366,52 @@ export class AdminService {
       }
     }
 
-    console.log(result);
     return result;
   }
+  async listingStats(
+    findOption: AdminDashboardListingStatus,
+  ): Promise<ListingStats> {
+    const { take = 10, skip = 0, stage, status } = findOption;
 
-  async listingStats(findOption: AdminDashboardSort): Promise<ListingStats> {
-    // Calculate the start and end dates for the given number of months
-    const endDate = new Date();
-    const startDate = subMonths(endDate, findOption.value - 1);
+    // Initialize the query builder
+    const query = this.offerRepository
+      .createQueryBuilder('offer')
+      .leftJoinAndSelect('offer.listing', 'listing');
 
-    // Adjust to the start of the month for startDate and end of the month for endDate
-    const startOfRange = startOfMonth(startDate);
-    const endOfRange = endOfMonth(endDate);
+    // Add conditions dynamically based on input
+    if (stage) {
+      query.andWhere('listing.stage = :stage', { stage });
+    }
 
+    if (status) {
+      query.andWhere('offer.status = :status', { status });
+    }
+
+    // Execute the query
+    const [offers, total] = await query.take(take).skip(skip).getManyAndCount();
+
+    // Add other aggregated stats
     const [offer, listing, acceptedOffer, ownershipTransfer] =
       await Promise.all([
+        this.offerRepository.count({}),
+        this.listingRepository.count({}),
         this.offerRepository.count({
-          where: {
-            createdAt: Between(startOfRange, endOfRange),
-          },
+          where: { status: OfferListEnum.EXPIRED },
         }),
-        this.listingRepository.count({
-          where: {
-            createdAt: Between(startOfRange, endOfRange),
-          },
-        }),
-        this.offerRepository.count({
-          where: {
-            status: OfferListEnum.EXPIRED,
-            createdAt: Between(startOfRange, endOfRange),
-          },
-        }),
-        this.listingRepository.count({
-          where: {
-            isListingSold: true,
-            createdAt: Between(startOfRange, endOfRange),
-          },
-        }),
+        this.listingRepository.count({ where: { isListingSold: true } }),
       ]);
 
-    const analysis: ListingStats = {
-      offer,
-      listing,
-      acceptedOffer,
-      ownershipTransfer,
+    // Return the result
+    return {
+      offers,
+      total,
+      analysis: {
+        offer,
+        listing,
+        acceptedOffer,
+        ownershipTransfer,
+      },
     };
-
-    return analysis;
   }
 
   async userStats(findOption: AdminDashboardSort): Promise<UserStats> {

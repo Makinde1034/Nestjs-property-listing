@@ -31,6 +31,7 @@ import { AuctionParticipant } from './auction-participant.entity';
 import { ActivityLog } from './activity-log.entity';
 import { Invoice } from './invoice.entity';
 import { ServiceRequested } from './service-requested.entity';
+import { ListingStage } from '../common/enums';
 
 @Entity()
 @ObjectType()
@@ -235,6 +236,10 @@ export class Listing extends BaseEntity {
   @Column({ default: true })
   @Field()
   published: boolean;
+
+  @Column({ default: ListingStage.LISTED })
+  @Field({ nullable: true })
+  stage: string;
 
   @Column({ nullable: true })
   @Field({ nullable: true })
