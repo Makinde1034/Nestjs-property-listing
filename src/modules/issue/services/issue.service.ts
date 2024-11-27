@@ -30,7 +30,6 @@ export class IssueService {
   ) {}
 
   logger = new Logger(IssueService.name);
-
   /**
    * Create Issue
    * @async
