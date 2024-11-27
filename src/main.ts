@@ -2,7 +2,6 @@
  * Copyright (c) 2024, Waseet LLC. All rights reserved.
  * For license. See license.txt
  */
-
 import { NestFactory, Reflector } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { I18nMiddleware } from 'nestjs-i18n';
@@ -25,10 +24,8 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const PORT = configService.get('PORT');
   const HOST = configService.get('HOST');
-  app.enableCors();
+  app.enableCors({ origin: '*' });
   app.use(I18nMiddleware);
-
-  app.use(new TimeoutMiddleware().use);
 
   app.useGlobalPipes(
     new ValidationPipe({
