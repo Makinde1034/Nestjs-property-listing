@@ -3,7 +3,13 @@
  * For license. See license.txt
  */
 
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  Injectable,
+  Logger,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { NotificationRepository } from '../repositories';
 import {
   CreateNotificationMessage,
@@ -50,6 +56,7 @@ import { MessageEvent } from '../../sse/request/app';
 import { NotificationMessagesRepository } from '../repositories/notification-message.repository';
 import { NotificationMessages } from '../../../entities/notification-message.entity';
 import { In } from 'typeorm';
+import { StorageService } from '../../file-handler/services/storage.service';
 
 @Injectable()
 export class NotificationService {
@@ -70,6 +77,7 @@ export class NotificationService {
     private readonly notificationMesageRepository: NotificationMessagesRepository,
 
     private readonly userNotificationPreference: UserNotificationRepository,
+    private readonly storageService: StorageService,
   ) {
     this.frontEndUrl = this.configService.get('FRONT_END_URL');
   }
@@ -775,6 +783,37 @@ export class NotificationService {
       this.logger.error(error);
 
       throw new BadRequestException(error);
+    }
+  }
+  async uploadImage(id: string, file: Express.Multer.File[]) {
+    try {
+      const notificationControl =
+        await this.notificationMesageRepository.findOneByOrFail({
+          id,
+        });
+
+      if (!notificationControl) {
+        throw new BadRequestException(AppStrings.NOT_FOUND);
+      }
+      const url = await this.storageService.upload(file[0]);
+
+      const { affected } = await this.notificationMesageRepository.update(
+        notificationControl.id,
+        {
+          icon: url,
+        },
+      );
+
+      if (affected > 0) {
+        return await this.notificationMesageRepository.findOneByOrFail({ id });
+      }
+    } catch (error) {
+      this.logger.log(error);
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new UnprocessableEntityException(error);
+      }
     }
   }
 

@@ -15,12 +15,14 @@ import { AdminNotificationPreferenceRepository } from './repositories/admin.repo
 import { NotificationTokenRepository } from './repositories/notification-token.repository';
 import { NotificationMessagesRepository } from './repositories/notification-message.repository';
 import { UserNotificationRepository } from '../user/repositories';
+import { NotificationController } from './controller/notification.controller';
 
 @Global()
 @Module({
   imports: [
     TypeOrmModule.forFeature([Notification, UserNotificationPreference]),
   ],
+  controllers: [NotificationController],
   providers: [
     NotificationResolver,
     NotificationService,

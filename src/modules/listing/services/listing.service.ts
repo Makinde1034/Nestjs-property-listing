@@ -314,6 +314,35 @@ export class ListingService {
       } else throw new BadRequestException(error.messages || error.data);
     }
   }
+  async findListingForDashboa(id: string, user?: User) {
+    try {
+      const result = await this.listingRepository.findOneOrFail({
+        where: { id: id },
+        relations: ['listingAttributes', 'listingType', 'promotion'],
+      });
+
+      if (result.userId != user.id) {
+        throw new BadRequestException('Listing does not belong to this user');
+      }
+      const newImpression = result.impressions + 1;
+
+      this.listingRepository
+        .createQueryBuilder()
+        .update()
+        .set({ impressions: newImpression })
+        .where('id = :id', { id: result.id })
+        .execute();
+
+      const listing = this.transformListing(result);
+
+      return listing;
+    } catch (error) {
+      this.logger.log(error);
+      if (error instanceof HttpException) {
+        throw error;
+      } else throw new BadRequestException(error.messages || error.data);
+    }
+  }
 
   /***************************
    * Buyers
@@ -722,7 +751,6 @@ export class ListingService {
             query.orderBy(`listing.${sortField}`, direction, 'NULLS LAST');
           }
         }
-
         return query;
       };
 
@@ -957,7 +985,6 @@ export class ListingService {
           promotionExpiration: true,
           featureDate: true,
           featureExpiration: true,
-
           isListingPromoted: true,
           isListingFlagged: true,
           isListingSold: true,

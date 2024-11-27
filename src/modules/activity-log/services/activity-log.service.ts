@@ -20,6 +20,7 @@ export class ActivityLogService {
       this.logger.log(error);
     }
   }
+
   async getLogs(activityLogInput: ActivityLogInput) {
     try {
       const { id, take, skip, fieldToFilter } = activityLogInput;
