@@ -18,7 +18,7 @@ export class CreateActivityLog {
   providerId?: string;
   workflowId?: string;
   serviceId?: string;
-
+  placement?: string;
   couponId?: string;
 }
 

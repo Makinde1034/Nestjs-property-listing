@@ -5,7 +5,7 @@
 
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 
-import { ChildIssue, ParentIssue } from 'src/entities';
+import { ChildIssue, ParentIssue, User } from 'src/entities';
 import {
   CreateIssueInput,
   UpdateIssueInput,
@@ -17,12 +17,16 @@ import { ChildIssueRepository } from '../repositories/child-issue.repository';
 import { EntityManager, MoreThanOrEqual } from 'typeorm';
 import { IssueRepository } from '../repositories';
 import { SuccessResponse } from '../../../common/utils/success.response';
+import { ActivityLogService } from '../../activity-log/services/activity-log.service';
+import { ActivityEnum } from '../../../common/enums/activitys';
 
 @Injectable()
 export class IssueService {
   constructor(
     private readonly issueRepository: IssueRepository,
     private readonly childIssueRepository: ChildIssueRepository,
+
+    private readonly activityLogService: ActivityLogService,
   ) {}
 
   logger = new Logger(IssueService.name);
@@ -33,7 +37,10 @@ export class IssueService {
    * @param {CreateIssueInput} payload
    * @returns {Promise<Issue>}
    */
-  async createIssue(payload: CreateIssueInput): Promise<ParentIssue> {
+  async createIssue(
+    payload: CreateIssueInput,
+    admin: User,
+  ): Promise<ParentIssue> {
     try {
       const { sequentialId, ...input } = payload;
       const count = await this.issueRepository.count({
@@ -55,7 +62,7 @@ export class IssueService {
 
       // Validate that the issue exists
 
-      return await this.issueRepository.manager.transaction(
+      const result = await this.issueRepository.manager.transaction(
         async (transactionalEntityManager: EntityManager) => {
           // Update the issue with the provided data
           await transactionalEntityManager.update(
@@ -113,6 +120,17 @@ export class IssueService {
           });
         },
       );
+
+      await this.activityLogService.logActivity([
+        {
+          adminId: admin.id,
+          action: ActivityEnum.CREATED,
+          details: JSON.stringify(data),
+          placement: data.placement,
+        },
+      ]);
+
+      return result;
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -138,7 +156,10 @@ export class IssueService {
     }
   }
 
-  async updateIssue(input: UpdateIssueInput): Promise<ParentIssue> {
+  async updateIssue(
+    input: UpdateIssueInput,
+    admin: User,
+  ): Promise<ParentIssue> {
     const { id, sequentialId, ...data } = input;
 
     if (sequentialId !== undefined && sequentialId <= 0) {
@@ -148,7 +169,7 @@ export class IssueService {
     // Validate that the issue exists
     const issue = await this.issueRepository.findOneByOrFail({ id });
 
-    return await this.issueRepository.manager.transaction(
+    const result = await this.issueRepository.manager.transaction(
       async (transactionalEntityManager: EntityManager) => {
         // Update the issue with the provided data
         await transactionalEntityManager.update(ParentIssue, id, data);
@@ -194,6 +215,17 @@ export class IssueService {
         });
       },
     );
+
+    await this.activityLogService.logActivity([
+      {
+        adminId: admin.id,
+        action: ActivityEnum.UPDATED,
+        details: JSON.stringify(data),
+        placement: issue.placement,
+      },
+    ]);
+
+    return result;
   }
 
   /**
@@ -203,7 +235,7 @@ export class IssueService {
    * @param {String} id
    * @returns {Promise<string>}
    */
-  async deleteIssue(id: string) {
+  async deleteIssue(id: string, admin: User) {
     const issue = await this.issueRepository.findOneBy({ id });
 
     if (!issue) {
@@ -214,6 +246,14 @@ export class IssueService {
 
     const { sequentialId, placement } = issue;
 
+    await this.activityLogService.logActivity([
+      {
+        adminId: admin.id,
+        action: ActivityEnum.DELETED,
+        details: JSON.stringify(issue),
+        placement: placement,
+      },
+    ]);
     await this.issueRepository.manager.transaction(
       async (transactionalEntityManager: EntityManager) => {
         if (sequentialId !== undefined) {
@@ -246,7 +286,10 @@ export class IssueService {
    * Child Issue
    *********************************/
 
-  async createChildIssue(payload: CreateChildIssueInput): Promise<ChildIssue> {
+  async createChildIssue(
+    payload: CreateChildIssueInput,
+    admin: User,
+  ): Promise<ChildIssue> {
     const { parentId, ...data } = payload;
     const parentIssue = await this.issueRepository.findOneByOrFail({
       id: parentId,
@@ -254,10 +297,24 @@ export class IssueService {
     if (!parentIssue) {
       throw new BadRequestException('Parent Issue not found');
     }
-    return await this.childIssueRepository.save({ ...data, parentIssue });
+    const childIssue = await this.childIssueRepository.save({
+      ...data,
+      parentIssue,
+    });
+
+    await this.activityLogService.logActivity([
+      {
+        adminId: admin.id,
+        action: ActivityEnum.CREATED,
+        details: JSON.stringify(childIssue),
+        placement: childIssue.parentIssue.placement,
+      },
+    ]);
+
+    return childIssue;
   }
 
-  async updateChildIssue(updateChildissue: UpdateChildIssueInput) {
+  async updateChildIssue(updateChildissue: UpdateChildIssueInput, admin: User) {
     try {
       const { id, ...rest } = updateChildissue;
       const childIssue = await this.childIssueRepository.findOneBy({
@@ -273,6 +330,14 @@ export class IssueService {
       const { affected } = await this.childIssueRepository.update(id, rest);
 
       if (affected > 0) {
+        await this.activityLogService.logActivity([
+          {
+            adminId: admin.id,
+            action: ActivityEnum.UPDATED,
+            details: JSON.stringify(childIssue),
+            placement: childIssue.parentIssue.placement,
+          },
+        ]);
         return await this.childIssueRepository.findOneByOrFail({ id });
       }
     } catch (error) {
@@ -294,7 +359,7 @@ export class IssueService {
     }
   }
 
-  async deleteChildIssue(id: string) {
+  async deleteChildIssue(id: string, admin: User) {
     try {
       const issue = await this.childIssueRepository.findOne({
         where: { id },
@@ -341,6 +406,15 @@ export class IssueService {
           this.logger.debug('Child issue deleted successfully');
         },
       );
+
+      await this.activityLogService.logActivity([
+        {
+          adminId: admin.id,
+          action: ActivityEnum.DELETED,
+          details: JSON.stringify(issue),
+          placement: issue.parentIssue.placement,
+        },
+      ]);
       return new SuccessResponse(AppStrings.ISSUE_DELETED_SUCCESSFULLY);
     } catch (error) {
       this.logger.error('Failed to delete child issue:', error);

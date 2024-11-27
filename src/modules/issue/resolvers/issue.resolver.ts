@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
 import {
@@ -38,8 +38,9 @@ export class IssueResolver {
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async createIssue(
     @Args('input') RequestInput: CreateIssueInput,
+    @Context() ctx: any,
   ): Promise<ParentIssue> {
-    return await this.issueService.createIssue(RequestInput);
+    return await this.issueService.createIssue(RequestInput, ctx.req.user);
   }
 
   /**
@@ -53,8 +54,10 @@ export class IssueResolver {
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async updateIssue(
     @Args('RequestInput') RequestInput: UpdateIssueInput,
+
+    @Context() ctx: any,
   ): Promise<ParentIssue> {
-    return await this.issueService.updateIssue(RequestInput);
+    return await this.issueService.updateIssue(RequestInput, ctx.user.req);
   }
 
   /**
@@ -83,8 +86,8 @@ export class IssueResolver {
   @Mutation(() => SuccessResponse)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.ISSUES_CATEGORIES_DELETE)
-  async deleteIssue(@Args('id') id: string) {
-    return await this.issueService.deleteIssue(id);
+  async deleteIssue(@Args('id') id: string, @Context() ctx: any) {
+    return await this.issueService.deleteIssue(id, ctx.req.user);
   }
 
   @Mutation(() => ParentIssue)
@@ -92,8 +95,9 @@ export class IssueResolver {
   @Permissions(PermissionsEnum.ISSUES_CATEGORIES_CREATE)
   async createChildIssue(
     @Args('input') input: CreateChildIssueInput,
+    @Context() ctx: any,
   ): Promise<ChildIssue> {
-    return await this.issueService.createChildIssue(input);
+    return await this.issueService.createChildIssue(input, ctx.req.user);
   }
 
   @Mutation(() => ParentIssue)
@@ -101,8 +105,9 @@ export class IssueResolver {
   @Permissions(PermissionsEnum.ISSUES_CATEGORIES_CREATE)
   async updateChildIssue(
     @Args('RequestInput') RequestInput: UpdateIssueInput,
+    @Context() ctx: any,
   ): Promise<ChildIssue> {
-    return await this.issueService.updateChildIssue(RequestInput);
+    return await this.issueService.updateChildIssue(RequestInput, ctx.req.user);
   }
 
   @Query(() => [ChildIssue])
@@ -116,7 +121,7 @@ export class IssueResolver {
   @Mutation(() => SuccessResponse)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.ISSUES_CATEGORIES_DELETE)
-  async deleteChildIssue(@Args('id') id: string) {
-    return await this.issueService.deleteChildIssue(id);
+  async deleteChildIssue(@Args('id') id: string, @Context() ctx: any) {
+    return await this.issueService.deleteChildIssue(id, ctx.req.user);
   }
 }

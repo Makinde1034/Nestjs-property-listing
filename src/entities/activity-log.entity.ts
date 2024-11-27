@@ -152,6 +152,10 @@ export class ActivityLog extends BaseEntity {
   @Column({ nullable: true })
   couponId: string;
 
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  placement: string;
+
   @Column()
   @Field({ nullable: true })
   action: string;
