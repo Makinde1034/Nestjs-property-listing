@@ -25,7 +25,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const PORT = configService.get('PORT');
   const HOST = configService.get('HOST');
-  app.enableCors();
+  app.enableCors({ origin: '*' });
   app.use(I18nMiddleware);
 
   app.use(new TimeoutMiddleware().use);
