@@ -44,6 +44,7 @@ async function bootstrap() {
       },
     }),
   );
+
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.use(new TimeoutMiddleware().use);
   const UsertrackingService = app.get(UserTrackingService);

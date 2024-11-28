@@ -29,7 +29,7 @@ export class AdminDashboardSort extends PaginateAndSort {
   value: number;
 }
 @InputType()
-export class AdminDashboardListingStatus extends PaginateAndSort {
+export class AdminDashboardListingStatus extends AdminDashboardSort {
   @Field({ nullable: true })
   @IsOptional()
   @IsEnum(ListingStage)

@@ -1415,6 +1415,8 @@ input AdminDashboardListingStatus {
   sortField: String
   directionToSort: SortOrder
   where: WhereOption
+  timePeriod: String! = "false"
+  value: Float = 0
   stage: String
   status: Float
 }
