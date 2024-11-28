@@ -41,6 +41,11 @@ export class NotificationResolver {
   @UseGuards(AccessTokenGuard)
   async listNotifications(@Context() ctx): Promise<Notification[]> {
     return await this.notificationService.find(ctx.req.user);
+  }
+  @Query(() => SuccessResponse)
+  @UseGuards(AccessTokenGuard)
+  async deleteNotification(@Context() ctx): Promise<SuccessResponse> {
+    return await this.notificationService.deleteNotification(ctx.req.user);
   } /**
    * List user's notification
    *

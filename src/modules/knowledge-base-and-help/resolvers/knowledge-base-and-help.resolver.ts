@@ -96,6 +96,7 @@ export class KnowledgeBaseAndHelpResolver {
   ) {
     return await this.articleService.create(createArticleInput, ctx.req.user);
   }
+
   @UseGuards(AccessTokenGuard)
   @Query(() => ArticleResponse, { name: 'findManyArticles' })
   async findManyArticles(@Args('findOption') findOption: ArticleFilterInput) {

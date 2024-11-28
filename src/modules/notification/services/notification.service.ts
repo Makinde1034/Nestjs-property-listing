@@ -625,6 +625,21 @@ export class NotificationService {
       where: { recipient: { id: user.id } },
     });
   }
+  async deleteNotification(user: User) {
+    try {
+      // Perform a soft delete of notifications for the given user
+      const result = await this.notificationRepository.softDelete({
+        recipient: { id: user.id },
+      });
+
+      // Return the result of the delete operation
+      return new SuccessResponse(AppStrings.SUCCESSFULL);
+    } catch (error) {
+      this.logger.error('Error deleting notifications', error.stack);
+      throw new BadRequestException('Failed to delete notifications');
+    }
+  }
+
   /**
    * List system NotificationScopes
    *
@@ -821,55 +836,49 @@ export class NotificationService {
     updateNotificationMessage: UpdateNotificationMessageScope,
   ) {
     try {
-      // Step 1: Create a lookup for the system feature settings by id
+      // Extract the notification scopes from the input
+      const { notificationMessageScope } = updateNotificationMessage;
+
+      // Create a map for quick lookups by feature ID
       const settingsMap = new Map(
-        updateNotificationMessage.notificationMessageScope.map((feature) => [
-          feature.id,
-          feature,
-        ]),
+        notificationMessageScope.map((feature) => [feature.id, feature]),
       );
 
-      // Step 2: Retrieve the features from the database
-      const notificationMessage = await this.notificationMesageRepository.find({
-        where: {
-          id: In(
-            updateNotificationMessage.notificationMessageScope.map(
-              (feature) => feature.id,
-            ),
-          ),
-        },
+      // Fetch relevant features from the database
+      const featureIds = Array.from(settingsMap.keys());
+      const existingFeatures = await this.notificationMesageRepository.findBy({
+        id: In(featureIds),
       });
 
-      // Step 3: Prepare the features to be updated
-      const settingToUpdate = notificationMessage.map((feature) => {
-        const featureData = settingsMap.get(feature.id);
-        if (featureData) {
-          // If setting data exists for this feature, update it
-          return {
-            ...feature,
-            email: featureData.email ?? feature.email,
-            pushNotification:
-              featureData.pushNotification ?? feature.pushNotification,
-            systemNotification:
-              featureData.systemNotification ?? feature.systemNotification,
-          };
-        }
-        return feature; // No update if no setting data found
+      // Prepare updated features
+      const featuresToUpdate = existingFeatures.map((feature) => {
+        const updateData = settingsMap.get(feature.id);
+
+        // Update only the fields that are provided in the input
+        return {
+          ...feature,
+          email: updateData?.email ?? feature.email,
+          pushNotification:
+            updateData?.pushNotification ?? feature.pushNotification,
+          systemNotification:
+            updateData?.systemNotification ?? feature.systemNotification,
+        };
       });
 
-      // Step 4: Save the updated features to the repository
-      const updated =
-        await this.notificationMesageRepository.save(settingToUpdate);
+      // Save updated features
+      const updatedFeatures =
+        await this.notificationMesageRepository.save(featuresToUpdate);
 
-      return new SuccessResponse(AppStrings.SUCCESSFULL, updated);
-
-      // const notificationMessage = await this.notificationMesageRepository.find({
-      //   // where: { id: In },
-      // });
+      // Return success response
+      return new SuccessResponse(AppStrings.SUCCESSFULL, updatedFeatures);
     } catch (error) {
-      this.logger.error(error);
+      this.logger.error(
+        'Error updating notification message scope',
+        error.stack,
+      );
 
-      throw new BadRequestException(error);
+      // Handle unexpected errors gracefully
+      throw new BadRequestException('Failed to update notification messages');
     }
   }
 }
