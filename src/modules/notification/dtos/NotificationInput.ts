@@ -194,7 +194,9 @@ export class NotificationMessageScope {
   systemNotification: boolean;
 }
 @InputType()
-export class UpdateNotificationMessageScope {
+export class UpdateNotificationMessageScope extends PartialType(
+  CreateNotificationScopeInput,
+) {
   @Field(() => [NotificationMessageScope])
   @IsArray()
   notificationMessageScope: NotificationMessageScope[];

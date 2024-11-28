@@ -1133,6 +1133,7 @@ type Query {
   getUserRoles: [Role!]!
   getRole(id: Float!): Role!
   listNotifications: [Notification!]!
+  deleteNotification: SuccessResponse!
   listNotificationScopesForUser: [UserNotificationPreference!]!
   listNotificationScopes: [NotificationScope!]!
   findNotificationControl: [NotificationMessages!]!
@@ -1876,6 +1877,9 @@ input CreateNotificationMessage {
 }
 
 input UpdateNotificationMessageScope {
+  name: String
+  description: String
+  scopeGroup: String
   notificationMessageScope: [NotificationMessageScope!]!
 }
 
