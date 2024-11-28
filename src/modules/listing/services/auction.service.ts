@@ -503,28 +503,31 @@ export class AuctionService {
 
   async addListingToAuction(data: CreateAuctionParticipantInput) {
     try {
-      const { auctionId, ...rest } = data;
+      const { auctionId, ...listingData } = data;
 
       const [adminDefault, auction, participant, listing] = await Promise.all([
         this.adminService.adminDefault(),
-        this.auctionRepository.findOneBy({
-          id: auctionId,
-        }),
+        this.auctionRepository.findOneBy({ id: auctionId }),
         this.auctionParticipantRepository.find({
-          where: { listingId: data.listingId },
+          where: {
+            listingId: data.listingId,
+            auction: { id: auctionId },
+          },
         }),
-
         this.listingRepository.findOneBy({ id: data.listingId }),
       ]);
 
-      if (!auction) {
-        throw new BadRequestException('Auction Not Found');
+      // Validate required entities
+      if (!adminDefault) {
+        throw new BadRequestException('Admin settings not found');
       }
 
-      if (!auction?.imageLink) {
-        throw new BadRequestException(
-          AppStrings.AUCTION_IS_NOT_COMPLETELY_SET_UP,
-        );
+      if (!auction) {
+        throw new BadRequestException('Auction not found');
+      }
+
+      if (!listing) {
+        throw new BadRequestException('Listing not found');
       }
 
       if (participant.length > 0) {
@@ -533,10 +536,13 @@ export class AuctionService {
         );
       }
 
-      if (!listing) {
-        throw new BadRequestException('Listing Not Found');
+      if (!auction.imageLink) {
+        throw new BadRequestException(
+          AppStrings.AUCTION_IS_NOT_COMPLETELY_SET_UP,
+        );
       }
 
+      // Validate registration period
       const now = new Date();
       const registrationStart = removeDaysFromDate(
         now,
@@ -546,7 +552,6 @@ export class AuctionService {
         now,
         adminDefault.daysToAuctionRegistrationEnd,
       );
-
       if (auction.startDate <= new Date(registrationStart)) {
         throw new BadRequestException(
           AppStrings.AUCTION_REGISTRATION_HAS_NOT_STARTED,
@@ -557,24 +562,22 @@ export class AuctionService {
         throw new BadRequestException(AppStrings.AUCTION_REGISTATION_HAS_ENDED);
       }
 
-      if (participant.length > 0) {
-        throw new BadRequestException(
-          'Listing has already been added to this auction',
-        );
-      }
-
+      // Save the participant
       return await this.auctionParticipantRepository.save({
-        ...rest,
+        ...listingData,
         auction,
         listing,
       });
     } catch (error) {
+      this.logger.error('Failed to add listing to auction', error.stack);
+
+      // Re-throw known exceptions
       if (error instanceof HttpException) {
         throw error;
-      } else {
-        this.logger.error('Failed to add listing to auction', error.stack);
-        throw new BadRequestException('An unexpected error occurred');
       }
+
+      // Handle unexpected errors
+      throw new BadRequestException('An unexpected error occurred');
     }
   }
 
@@ -613,7 +616,6 @@ export class AuctionService {
 
       return { listing, total };
     } catch (error) {
-      console.log(error);
       this.logger.log(error);
       throw new BadRequestException(error.message || 'Error fetching auctions');
     }
