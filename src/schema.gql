@@ -1015,6 +1015,7 @@ type Analysis {
 
 type ListingStats {
   offers: [Offer!]!
+  total: Float!
   analysis: Analysis!
 }
 

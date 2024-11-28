@@ -45,6 +45,8 @@ export class Analysis {
 export class ListingStats {
   @Field(() => [Offer])
   offers: Offer[];
+
+  @Field()
   total: number;
 
   @Field()
