@@ -19,13 +19,14 @@ import { ListingStage } from '../../../../common/enums';
 
 @InputType()
 export class AdminDashboardSort extends PaginateAndSort {
-  @Field({ defaultValue: false })
+  @Field({ nullable: true })
   @IsOptional()
   @IsEnum(TimePeriod)
   timePeriod: string;
 
-  @Field({ defaultValue: false, nullable: true })
+  @Field({ nullable: true })
   @IsOptional()
+  @IsNumber()
   value: number;
 }
 @InputType()
@@ -40,6 +41,7 @@ export class AdminDashboardListingStatus extends AdminDashboardSort {
   @IsEnum(OfferListEnum)
   status: number;
 }
+
 @InputType()
 export class AdminDefaultInput {
   @Field()

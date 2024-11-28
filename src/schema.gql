@@ -1396,8 +1396,8 @@ input AdminDashboardSort {
   sortField: String
   directionToSort: SortOrder
   where: WhereOption
-  timePeriod: String! = "false"
-  value: Float = 0
+  timePeriod: String
+  value: Float
 }
 
 input FindManyReviewDto {
@@ -1416,8 +1416,8 @@ input AdminDashboardListingStatus {
   sortField: String
   directionToSort: SortOrder
   where: WhereOption
-  timePeriod: String! = "false"
-  value: Float = 0
+  timePeriod: String
+  value: Float
   stage: String
   status: Float
 }
