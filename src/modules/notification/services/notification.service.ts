@@ -498,82 +498,6 @@ export class NotificationService {
    * @param {NotificationEventInput} notification
    * @returns {Promise<string>}
    */
-  // async handleNotificationEvent(
-  //   notification: NotificationEventInput,
-  // ): Promise<void> {
-  //   try {
-  //     const {
-  //       recipients,
-  //       isEmail,
-  //       isPushNotification,
-  //       title,
-  //       message,
-  //       deepLink,
-  //     } = notification;
-  //     const users = await this.userRepository.find({
-  //       where: { id: In([...recipients]) },
-  //     });
-
-  //     await Promise.all(
-  //       users.map(async (user) => {
-  //         const emailData: EmailNotificationPayload = {
-  //           title,
-  //           message,
-  //         };
-  //         if (isEmail) {
-  //           // Send EMail notification
-  //           await this.sendEmailNotification(user, emailData);
-  //         }
-
-  //         const pushNotificationData: PushNotificationPayload = {
-  //           ...emailData,
-  //           notificationToken: user.notificationToken,
-  //           redirectLink: deepLink,
-  //           userId: user.id,
-  //         };
-
-  //         if (isPushNotification) {
-  //           // Send EMail notification
-  //           await this.sendPushNotification(pushNotificationData);
-  //         }
-
-  //         const notificationLog: Partial<Notification> = {
-  //           ...emailData,
-  //           recipient: user,
-  //           type: this.getNotificationType(isEmail, isPushNotification),
-  //         };
-  //         await this.saveNotificationLog(notificationLog);
-  //       }),
-  //     );
-  //   } catch (error) {
-  //     this.logger.error(error);
-  //   }
-  // }
-
-  // /**
-  //  * Get Notification type
-  //  *
-  //  * @param {boolean} isEmail
-  //  * @param {boolean} isPushNotifcation
-  //  * @returns {NotificationType}
-  //  */
-  // getNotificationType(
-  //   isEmail: boolean,
-  //   isPushNotifcation: boolean,
-  // ): NotificationType {
-  //   let notificationType: NotificationType;
-
-  //   if (isEmail && isPushNotifcation) {
-  //     notificationType = NotificationType.ALL;
-  //   } else if (isEmail) {
-  //     notificationType = NotificationType.EMAIL_NOTIFICATION;
-  //   } else if (isPushNotifcation) {
-  //     notificationType = NotificationType.PUSH_NOTIFICATION;
-  //   } else {
-  //     notificationType = NotificationType.SYSTEM_NOTIFICATION;
-  //   }
-  //   return notificationType;
-  // }
 
   /**
    * Save Notification Log
@@ -730,18 +654,6 @@ export class NotificationService {
       const notificationControl =
         await this.notificationMesageRepository.findOneBy({ id });
       return notificationControl;
-    } catch (error) {
-      this.logger.error(error);
-      throw new BadRequestException(error);
-    }
-  }
-
-  async fetchNotificationScopes() {
-    try {
-      const admin = await this.userRepository.findOne({
-        where: { userType: 'admin' },
-      });
-      const data = await this.adminNotificationPreferenceRepository.find();
     } catch (error) {
       this.logger.error(error);
       throw new BadRequestException(error);
