@@ -616,7 +616,6 @@ export class AuctionService {
 
       return { listing, total };
     } catch (error) {
-      console.log(error);
       this.logger.log(error);
       throw new BadRequestException(error.message || 'Error fetching auctions');
     }

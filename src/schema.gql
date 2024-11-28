@@ -309,6 +309,7 @@ type Listing {
   featureDate: DateTime
   published: Boolean!
   stage: String
+  status: String
   flaggedDate: DateTime
   offers: Float
   featureExpiration: DateTime
@@ -1452,7 +1453,7 @@ input ArticleFilterInput {
   placement: String
   published: Boolean
   categoryId: Float
-  language: String!
+  language: String
 }
 
 input ActivityLogInput {

@@ -112,7 +112,8 @@ export class ArticleFilterInput extends PaginateAndSort {
   @Field({ nullable: true })
   categoryId: number;
 
-  @Field()
+  @Field({ nullable: true })
+  @IsOptional()
   @IsEnum(LanguageEnum)
   language: string;
 }
