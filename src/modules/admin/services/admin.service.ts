@@ -433,6 +433,13 @@ export class AdminService {
   ): Promise<ListingStats> {
     const { take = 10, skip = 0, stage, status } = findOption;
 
+    const endDate = new Date();
+    const startDate = subMonths(endDate, findOption.value - 1);
+
+    // Adjust to the start of the month for startDate and end of the month for endDate
+    const startOfRange = startOfMonth(startDate);
+    const endOfRange = endOfMonth(endDate);
+
     // Initialize the query builder
     const query = this.offerRepository
       .createQueryBuilder('offer')
@@ -453,10 +460,18 @@ export class AdminService {
     // Add other aggregated stats
     const [offer, listing, acceptedOffer, ownershipTransfer] =
       await Promise.all([
-        this.offerRepository.count({}),
-        this.listingRepository.count({}),
         this.offerRepository.count({
-          where: { status: OfferListEnum.EXPIRED },
+          where: {
+            createdAt: Between(startOfRange, endOfRange),
+          },
+        }),
+        this.listingRepository.count({
+          where: {
+            createdAt: Between(startOfRange, endOfRange),
+          },
+        }),
+        this.offerRepository.count({
+          where: { status: OfferListEnum.ACCEPTED },
         }),
         this.listingRepository.count({ where: { isListingSold: true } }),
       ]);
