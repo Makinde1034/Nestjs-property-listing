@@ -1266,6 +1266,7 @@ input UserFilter {
   level: [String!]
   status: [String!]
   isBlocked: Boolean
+  saudiUser: Boolean
   type: [String!]
   roles: [Float!]
 }

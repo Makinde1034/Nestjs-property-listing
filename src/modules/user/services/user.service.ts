@@ -690,60 +690,53 @@ export class UserService {
     }
   }
 
-  async findAllUser(userFilterInput: UserFilter) {
+  async findAllUser(
+    userFilterInput: UserFilter,
+  ): Promise<{ users: User[]; total: number }> {
     try {
       const {
-        level,
-        status,
-        type,
-        roles,
         sortField,
         directionToSort,
-        take,
-        isBlocked,
-        skip,
+        take = 20,
+        skip = 0,
+        saudiUser,
       } = userFilterInput;
 
-      // Validate sort direction
+      // Validate and set sort direction
       const validSortDirections = ['ASC', 'DESC'];
-      const direction = directionToSort?.toUpperCase();
-      if (direction && !validSortDirections.includes(direction)) {
-        throw new Error(`Invalid sort direction: ${direction}`);
+      const direction = validSortDirections.includes(
+        directionToSort?.toUpperCase(),
+      )
+        ? directionToSort.toUpperCase()
+        : 'ASC';
+
+      // Build dynamic where options
+      const whereOptions: any = {};
+      if (saudiUser) {
+        whereOptions.nationality = 'Saudi Arabia';
+      } else {
+        whereOptions.nationality = Not('Saudi Arabia');
       }
 
-      // Build where options
-      const whereOptions: any = {
-        ...(level && { userLevel: level }),
-        ...(status && { status: In(status) }),
-        ...(roles && { roles: { id: In(roles) } }),
-        ...(type && { type: In(type) }),
-        isBlocked: isBlocked ?? undefined,
-      };
-
       // Build order options
-      const orderOptions = sortField ? { [sortField]: direction || 'ASC' } : {};
+      const orderOptions = sortField ? { [sortField]: direction } : {};
 
-      // Set default pagination values if not provided
-      const paginationTake = take ?? 20;
-      const paginationSkip = skip ?? 0;
-
-      // Fetch employees with count
+      // Fetch users with count
       const [users, count] = await this.usersRepository.findAndCount({
-        order: orderOptions,
         where: whereOptions,
-        take: paginationTake,
-        skip: paginationSkip,
+        order: orderOptions,
+        take,
+        skip,
       });
 
       return { users, total: count };
     } catch (error) {
-      this.logger.error('Failed to get customer', error);
-      this.logger.log(error);
+      this.logger.error('Failed to fetch users', error.stack);
 
       if (error instanceof HttpException) {
         throw error;
       } else {
-        throw new BadRequestException(error);
+        throw new BadRequestException('An error occurred while fetching users');
       }
     }
   }

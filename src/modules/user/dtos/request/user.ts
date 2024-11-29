@@ -31,6 +31,11 @@ export class UserFilter extends PaginateAndSort {
   @IsBoolean()
   isBlocked: boolean;
 
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  saudiUser: boolean;
+
   @Field(() => [String], { nullable: true })
   @IsOptional()
   @IsArray()
