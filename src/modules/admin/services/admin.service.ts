@@ -469,8 +469,6 @@ export class AdminService {
         return;
     }
 
-    console.log('here', endDate, startDate);
-
     // Perform queries in parallel
     // const [offer, listing, acceptedOffer, ownershipTransfer] =
     //   await Promise.all([

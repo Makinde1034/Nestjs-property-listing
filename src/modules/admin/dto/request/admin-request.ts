@@ -29,6 +29,7 @@ export class AdminDashboardSort extends PaginateAndSort {
   @IsNumber()
   value: number;
 }
+
 @InputType()
 export class AdminDashboardListingStatus extends AdminDashboardSort {
   @Field({ nullable: true })
@@ -48,25 +49,9 @@ export class AdminDefaultInput {
   @IsNumber()
   minimumOfferPercentage: number;
 
-  // @Field()
-  // @IsNumber()
-  // minBidRange: number;
-
-  // @Field()
-  // @IsNumber()
-  // bidIncrement: number;
-
-  // @Field()
-  // @IsNumber()
-  // maxBidRange: number;
-
   @Field()
   @IsString()
   paymentType: string;
-
-  // @Field()
-  // @IsString()
-  // bidIncrementId: string;
 
   @Field()
   @IsNumber()
@@ -87,10 +72,6 @@ export class AdminDefaultInput {
   @Field()
   @IsNumber()
   ticketAging: number;
-
-  // @Field()
-  // @IsNumber()
-  // auctionHeldAmount: number;
 
   @Field()
   @IsNumber()
