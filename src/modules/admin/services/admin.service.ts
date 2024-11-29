@@ -87,6 +87,7 @@ import {
   UserLevelEnum,
   UserProfileTypeEnum,
 } from '../../../common/enums';
+import * as moment from 'moment';
 
 @Injectable()
 export class AdminService {
@@ -427,10 +428,79 @@ export class AdminService {
 
     return result;
   }
+
   async listingStats(
     findOption: AdminDashboardListingStatus,
   ): Promise<ListingStats> {
     const { take = 10, skip = 0, stage, status } = findOption;
+
+    const currentDate = moment();
+    const date = new Date(); // Use moment to handle the current date
+    let startDate: Date, endDate: Date;
+
+    // Determine date range based on time period
+    switch (findOption.timePeriod) {
+      case TimePeriod.Today:
+        startDate = currentDate.startOf('day').toDate();
+        endDate = date;
+        break;
+      case TimePeriod.Week:
+        startDate = currentDate
+          .subtract(findOption.value ?? 1, 'weeks')
+          .startOf('week')
+          .toDate();
+        endDate = date;
+        break;
+      case TimePeriod.Month:
+        startDate = currentDate
+          .subtract(findOption.value ?? 1, 'months')
+          .startOf('month')
+          .toDate();
+        endDate = date;
+        break;
+      case TimePeriod.Year:
+        startDate = currentDate
+          .subtract(findOption.value ?? 1, 'years')
+          .startOf('year')
+          .toDate();
+        endDate = date;
+        break;
+      default:
+        return;
+    }
+
+    // Perform queries in parallel
+    // const [offer, listing, acceptedOffer, ownershipTransfer] =
+    //   await Promise.all([
+    //     this.offerRepository.count({
+    //       where: { createdAt: Between(startDate, endDate) },
+    //     }),
+    //     this.listingRepository.count({
+    //       where: { createdAt: Between(startDate, endDate) },
+    //     }),
+    //     this.offerRepository.count({
+    //       where: {
+    //         status: OfferListEnum.EXPIRED,
+    //         createdAt: Between(startDate, endDate),
+    //       },
+    //     }),
+    //     this.listingRepository.count({
+    //       where: {
+    //         isListingSold: true,
+    //         createdAt: Between(startDate, endDate),
+    //       },
+    //     }),
+    //   ]);
+
+    // // Compile the results
+    // const analysis: ListingStats = {
+    //   offer,
+    //   listing,
+    //   acceptedOffer,
+    //   ownershipTransfer,
+    // };
+
+    // return analysis;
 
     // Initialize the query builder
     const query = this.offerRepository
@@ -452,12 +522,25 @@ export class AdminService {
     // Add other aggregated stats
     const [offer, listing, acceptedOffer, ownershipTransfer] =
       await Promise.all([
-        this.offerRepository.count({}),
-        this.listingRepository.count({}),
         this.offerRepository.count({
-          where: { status: OfferListEnum.EXPIRED },
+          where: {
+            createdAt: Between(startDate, endDate),
+          },
         }),
-        this.listingRepository.count({ where: { isListingSold: true } }),
+        this.listingRepository.count({
+          where: {
+            createdAt: Between(startDate, endDate),
+          },
+        }),
+        this.offerRepository.count({
+          where: { status: OfferListEnum.ACCEPTED },
+        }),
+        this.listingRepository.count({
+          where: {
+            isListingSold: true,
+            createdAt: Between(startDate, endDate),
+          },
+        }),
       ]);
 
     // Return the result

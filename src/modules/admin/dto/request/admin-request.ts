@@ -19,17 +19,19 @@ import { ListingStage } from '../../../../common/enums';
 
 @InputType()
 export class AdminDashboardSort extends PaginateAndSort {
-  @Field({ defaultValue: false })
+  @Field({ nullable: true })
   @IsOptional()
   @IsEnum(TimePeriod)
   timePeriod: string;
 
-  @Field({ defaultValue: false, nullable: true })
+  @Field({ nullable: true })
   @IsOptional()
+  @IsNumber()
   value: number;
 }
+
 @InputType()
-export class AdminDashboardListingStatus extends PaginateAndSort {
+export class AdminDashboardListingStatus extends AdminDashboardSort {
   @Field({ nullable: true })
   @IsOptional()
   @IsEnum(ListingStage)
@@ -40,31 +42,16 @@ export class AdminDashboardListingStatus extends PaginateAndSort {
   @IsEnum(OfferListEnum)
   status: number;
 }
+
 @InputType()
 export class AdminDefaultInput {
   @Field()
   @IsNumber()
   minimumOfferPercentage: number;
 
-  // @Field()
-  // @IsNumber()
-  // minBidRange: number;
-
-  // @Field()
-  // @IsNumber()
-  // bidIncrement: number;
-
-  // @Field()
-  // @IsNumber()
-  // maxBidRange: number;
-
   @Field()
   @IsString()
   paymentType: string;
-
-  // @Field()
-  // @IsString()
-  // bidIncrementId: string;
 
   @Field()
   @IsNumber()
@@ -85,10 +72,6 @@ export class AdminDefaultInput {
   @Field()
   @IsNumber()
   ticketAging: number;
-
-  // @Field()
-  // @IsNumber()
-  // auctionHeldAmount: number;
 
   @Field()
   @IsNumber()

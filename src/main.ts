@@ -24,11 +24,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const PORT = configService.get('PORT');
   const HOST = configService.get('HOST');
-  app.enableCors({
-    origin: configService.get<string>('ALLOWED_ORIGINS') || '*', // Restrict origins in production
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true,
-  });
+  app.enableCors();
   app.use(I18nMiddleware);
 
   app.useGlobalPipes(
@@ -44,6 +40,7 @@ async function bootstrap() {
       },
     }),
   );
+
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.use(new TimeoutMiddleware().use);
   const UsertrackingService = app.get(UserTrackingService);
