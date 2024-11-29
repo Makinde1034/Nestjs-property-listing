@@ -159,6 +159,8 @@ export class PaymentService {
 
     return {
       status: response.result.code,
+
+      referenceId: response.result?.referencedId,
       message: response.result.description,
     };
   }
