@@ -21,7 +21,7 @@ import {
 import { PdfInput } from '../../file-handler/dto/pdf.dto';
 import { PdfService } from '../../file-handler/services/pdf.service';
 import { MailgunEmailService } from '../../mail/services/implementations';
-import { generateRandomString } from '../../../common/utils/helper';
+import { generateRandomString, sleep } from '../../../common/utils/helper';
 import { StorageService } from '../../file-handler/services/storage.service';
 import { Readable } from 'stream';
 import { QrCodeService } from '../../file-handler/services/qrcode.service';
@@ -32,6 +32,11 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { AdminService } from '../../admin/services/admin.service';
 import { CouponResponse } from '../../admin/dto/response/admin-response';
+import { ServerSentEvents } from '../../../common/enums';
+import { SseService } from '../../sse/client.service';
+
+import { MessageEvent } from '../../sse/request/app';
+import { messaging } from 'firebase-admin';
 
 @Injectable()
 export class PaymentService {
@@ -45,6 +50,8 @@ export class PaymentService {
     private readonly qrcodeService: QrCodeService,
     private readonly configService: ConfigService,
     private readonly adminService: AdminService,
+
+    private readonly sseService: SseService,
   ) {
     this.appDefaultConfig = this.configService.get<AppDefaultConfig>(
       getAappDefaultConfigName(),
@@ -68,11 +75,32 @@ export class PaymentService {
       user,
     );
 
-    return {
+    const data = {
       checkoutId: checkout.id,
       referenceId: generateRandomString(),
       timeStamp: checkout.timestamp,
     };
+
+    this.performActionWithDelay(user, data);
+
+    return data;
+  }
+
+  async performActionWithDelay(user: any, data: any) {
+    this.logger.log('Action started');
+
+    const payload: MessageEvent = {
+      type: ServerSentEvents.SUCCESS,
+      data: {
+        status: 'successful',
+        reference: data.referencedId,
+        message: 'Transaction succeeded',
+      },
+    };
+    // Sleep for 2 seconds (2000 milliseconds)
+    await sleep(30000);
+    this.sseService.sendEvent(user.id, payload);
+    this.logger.log('Action resumed after 30 seconds');
   }
 
   async preAuthorized(

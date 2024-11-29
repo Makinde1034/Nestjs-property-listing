@@ -955,6 +955,7 @@ type InitiatePaymentResponse {
 
 type verifyPaymentResponse {
   status: String
+  referenceId: String!
   message: String!
 }
 
