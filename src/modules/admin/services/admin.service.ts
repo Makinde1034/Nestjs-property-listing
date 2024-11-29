@@ -31,6 +31,11 @@ import {
   endOfDay,
   endOfWeek,
   startOfWeek,
+  interval,
+  differenceInDays,
+  subWeeks,
+  addDays,
+  format,
 } from 'date-fns';
 
 import { Between, Brackets, In } from 'typeorm';
@@ -47,6 +52,8 @@ import {
   UserGenderCount,
   UserAgeRange,
   CouponResponse,
+  FinancialVsOrderResponse,
+  GroupTransactions,
 } from '../dto/response/admin-response';
 import { TicketRepository } from '../../tickets/repositories';
 import {
@@ -64,7 +71,11 @@ import {
   UpdateCouponInput,
 } from '../dto/request/coupons';
 import { Coupon } from '../../../entities/coupon.entity';
-import { generateRandomArray } from '../../../common/utils/helper';
+import {
+  generateRandomArray,
+  getDateFromWeek,
+  getDayName,
+} from '../../../common/utils/helper';
 import slugify from 'slugify';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { AppStrings } from '../../../common/messages/app.strings';
@@ -88,6 +99,7 @@ import {
   UserProfileTypeEnum,
 } from '../../../common/enums';
 import * as moment from 'moment';
+import { start } from 'repl';
 
 @Injectable()
 export class AdminService {
@@ -323,110 +335,488 @@ export class AdminService {
     }
   }
 
+  // async financialVsOrder(findOptions: AdminDashboardSort) {
+  //   try {
+  //     const currentDate = new Date();
+
+  //     let startDate, endDate, groupByInterval;
+
+  //     // Validate the findOptions for timePeriod and value
+  //     if (!findOptions || !findOptions.timePeriod) {
+  //       throw new Error('Time period is required');
+  //     }
+
+  //     // Determine date range and grouping based on timePeriod
+  //     switch (findOptions.timePeriod) {
+  //       case TimePeriod.Today:
+  //         startDate = startOfDay(currentDate);
+  //         endDate = endOfDay(currentDate);
+  //         groupByInterval = 'hour';
+  //         break;
+  //       case TimePeriod.Week:
+  //         startDate = startOfWeek(currentDate);
+  //         endDate = endOfWeek(currentDate);
+  //         groupByInterval = 'day';
+  //         break;
+  //       case TimePeriod.Month:
+  //         let date = subMonths(currentDate, findOptions.value);
+  //         startDate = startOfMonth(date);
+  //         endDate = endOfMonth(date);
+  //         groupByInterval = 'week';
+  //         break;
+  //       case TimePeriod.Year:
+  //         if (!findOptions.value) findOptions.value = 0;
+  //         if (findOptions.value == 0) {
+  //           endDate = endOfYear(currentDate);
+  //           startDate = startOfYear(currentDate);
+  //           groupByInterval = 'month';
+  //         } else {
+  //           let date = subYears(currentDate, findOptions.value + 1);
+  //           startDate = subYears(currentDate, findOptions.value + 1);
+  //           endDate = endOfYear(currentDate);
+  //           groupByInterval = 'month';
+  //         }
+  //         break;
+  //       default:
+  //         throw new Error('Invalid time period');
+  //     }
+
+  //     console.log(startDate, endDate);
+
+  //     // Query transactions and group by interval and fee
+  //     const transactions = await this.invoiceRepository
+  //       .createQueryBuilder('invoice')
+  //       .select(
+  //         `EXTRACT(${groupByInterval.toUpperCase()} FROM invoice.createdAt)::int`,
+  //         groupByInterval,
+  //       )
+  //       .addSelect('invoice.type', 'fee')
+  //       .addSelect('COALESCE(SUM(invoice.price), 0)::float', 'totalAmount')
+  //       .addSelect('COALESCE(COUNT(invoice.id), 0)::int', 'totalOrder')
+  //       .where('invoice.createdAt BETWEEN :startDate AND :endDate', {
+  //         startDate,
+  //         endDate,
+  //       })
+  //       .groupBy(
+  //         `EXTRACT(${groupByInterval.toUpperCase()} FROM invoice.createdAt), invoice.type`,
+  //       )
+  //       .orderBy(`${groupByInterval}`)
+  //       .getRawMany();
+
+  //     if (!transactions || transactions.length === 0) {
+  //       return []; // No data case
+  //     }
+
+  //     // Generate all possible intervals (e.g., all days of the week, all months of the year)
+  //     const allIntervals: string[] = [];
+  //     switch (groupByInterval) {
+  //       case 'day':
+  //         // All days of the week (7 days)
+  //         allIntervals.push(
+  //           ...[
+  //             'Sunday',
+  //             'Monday',
+  //             'Tuesday',
+  //             'Wednesday',
+  //             'Thursday',
+  //             'Friday',
+  //             'Saturday',
+  //           ],
+  //         );
+  //         break;
+  //       case 'week':
+  //         // Assume 4-5 weeks in a month
+  //         allIntervals.push(...['0', '1', '2', '3', '4']);
+  //         break;
+  //       case 'month':
+  //         // All 12 months of the year
+  //         allIntervals.push(
+  //           ...[
+  //             'January',
+  //             'February',
+  //             'March',
+  //             'April',
+  //             'May',
+  //             'June',
+  //             'July',
+  //             'August',
+  //             'September',
+  //             'October',
+  //             'November',
+  //             'December',
+  //           ],
+  //         );
+  //         break;
+  //       case 'hour':
+  //         // 24 hours of the day
+  //         for (let i = 0; i < 24; i++) {
+  //           allIntervals.push(`${i}:00`);
+  //         }
+  //         break;
+  //     }
+
+  //     // Group transactions by interval
+  //     const groupedTransactions = transactions.reduce(
+  //       (acc, transaction) => {
+  //         const interval = parseInt(transaction[groupByInterval]);
+
+  //         if (!acc[interval]) {
+  //           acc[interval] = [];
+  //         }
+  //         console.log(acc);
+
+  //         acc[interval].push({
+  //           fee: transaction.fee,
+  //           totalAmount: parseFloat(transaction.totalAmount),
+  //           totalOrder: parseInt(transaction.totalOrder),
+  //         });
+
+  //         return acc;
+  //       },
+  //       {} as { [key: number]: FinancialVsOrderResponse[] },
+  //     );
+
+  //     // Prepare the final result, ensuring every interval is included
+  //     const payload = allIntervals.map((interval, idx) => {
+  //       // Convert numeric intervals (like '41', '42') to human-readable keys
+  //       const humanReadableKey = this.mapIntervalToReadable(
+  //         interval,
+  //         groupByInterval,
+  //       );
+
+  //       console.log(groupedTransactions);
+
+  //       const dataForInterval = groupedTransactions[interval] || []; // Fallback to empty array if no data
+  //       // console.log(groupedTransactions);
+
+  //       return {
+  //         key: humanReadableKey, // human-readable interval (e.g., "Monday", "Week 1", "January")
+  //         data: dataForInterval,
+  //       };
+  //     });
+
+  //     return payload;
+  //   } catch (error) {
+  //     console.log(error);
+  //     this.logger.log(error);
+  //     throw new BadRequestException(error);
+  //   }
+  // }
+
+  // Helper function to map interval to human-readable values
+  // async financialVsOrder(findOptions: AdminDashboardSort) {
+  //   try {
+  //     const currentDate = new Date();
+  //     let startDate, endDate, groupByInterval;
+
+  //     if (!findOptions || !findOptions.timePeriod) {
+  //       throw new Error('Time period is required');
+  //     }
+
+  //     // Determine date range and grouping based on timePeriod
+  //     switch (findOptions.timePeriod) {
+  //       case TimePeriod.Today:
+  //         startDate = startOfDay(currentDate);
+  //         endDate = endOfDay(currentDate);
+  //         groupByInterval = 'hour';
+  //         break;
+  //       case TimePeriod.Week:
+  //         const newDate = subWeeks(currentDate, findOptions.value || 0);
+
+  //         startDate = startOfWeek(newDate);
+  //         endDate = endOfWeek(newDate);
+  //         groupByInterval = 'day';
+  //         break;
+  //       case TimePeriod.Month:
+  //         const date = subMonths(currentDate, findOptions.value || 0);
+  //         startDate = startOfMonth(date);
+  //         endDate = endOfMonth(date);
+  //         groupByInterval = 'week'; // Week within the month
+  //         break;
+  //       case TimePeriod.Year:
+  //         if (!findOptions.value) findOptions.value = 0;
+  //         if (findOptions.value === 0) {
+  //           startDate = startOfYear(currentDate);
+  //           endDate = endOfYear(currentDate);
+  //           groupByInterval = 'month';
+  //         } else {
+  //           startDate = subYears(currentDate, findOptions.value);
+  //           endDate = endOfYear(subYears(currentDate, findOptions.value));
+  //           groupByInterval = 'month';
+  //         }
+  //         break;
+  //       default:
+  //         throw new Error('Invalid time period');
+  //     }
+  //     console.log(startDate, endDate);
+
+  //     // Query transactions dynamically based on groupByInterval
+  //     const groupIntervalSQL =
+  //       groupByInterval === 'week'
+  //         ? `FLOOR((EXTRACT(DAY FROM invoice.createdAt) - 1) / 7) + 1`
+  //         : `EXTRACT(${groupByInterval.toUpperCase()} FROM invoice.createdAt)`;
+
+  //     const transactions = await this.invoiceRepository
+  //       .createQueryBuilder('invoice')
+  //       .select(`${groupIntervalSQL}::int`, groupByInterval)
+  //       .addSelect('invoice.type', 'fee')
+  //       .addSelect('COALESCE(SUM(invoice.price), 0)::float', 'totalAmount')
+  //       .addSelect('COALESCE(COUNT(invoice.id), 0)::int', 'totalOrder')
+  //       .where('invoice.createdAt BETWEEN :startDate AND :endDate', {
+  //         startDate,
+  //         endDate,
+  //       })
+  //       .groupBy(`${groupIntervalSQL}, invoice.type`)
+  //       .orderBy(groupByInterval, 'ASC')
+  //       .getRawMany();
+
+  //     // Generate all intervals based on groupByInterval
+  //     const totalIntervals = (() => {
+  //       switch (groupByInterval) {
+  //         case 'day':
+  //           return 7; // Days of the week
+  //         case 'week':
+  //           return Math.ceil(differenceInDays(endDate, startDate) / 7); // Weeks in the month
+  //         case 'month':
+  //           return 12; // Months in a year
+  //         case 'hour':
+  //           return 24; // Hours in a day
+  //         default:
+  //           return 0;
+  //       }
+  //     })();
+
+  //     const allIntervals = Array.from(
+  //       { length: totalIntervals },
+  //       (_, i) => `${this.mapIntervalToReadable(i, groupByInterval)}`,
+  //     );
+
+  //     // Group transactions by interval
+  //     const groupedTransactions = transactions.reduce(
+  //       (acc, transaction) => {
+  //         const interval = parseInt(transaction[groupByInterval]);
+  //         if (!acc[interval]) {
+  //           acc[interval] = [];
+  //         }
+  //         // console.log(interval);
+  //         acc[interval].push({
+  //           fee: transaction.fee,
+  //           totalAmount: parseFloat(transaction.totalAmount),
+  //           totalOrder: parseInt(transaction.totalOrder),
+  //         });
+  //         return acc;
+  //       },
+  //       {} as { [key: number]: FinancialVsOrderResponse[] },
+  //     );
+
+  //     // Build final payload ensuring all intervals are included
+  //     const payload = allIntervals.map((interval, idx) => {
+  //       const dataForInterval = groupedTransactions[idx + 1] || [];
+  //       console.log(interval);
+
+  //       return {
+  //         key: interval, // e.g., "Week 1", "Monday", "January"
+  //         data: dataForInterval,
+  //       };
+  //     });
+  //     console.log(groupedTransactions);
+  //     return payload;
+  //   } catch (error) {
+  //     console.error(error);
+  //     this.logger.log(error);
+  //     throw new BadRequestException(error.message || 'An error occurred');
+  //   }
+  // }
+
+  // mapIntervalToReadable(index: number, groupBy: string): string {
+  //   console.log(groupBy);
+
+  //   switch (groupBy) {
+  //     case 'day':
+  //       return [
+  //         'Sunday',
+  //         'Monday',
+  //         'Tuesday',
+  //         'Wednesday',
+  //         'Thursday',
+  //         'Friday',
+  //         'Saturday',
+  //       ][index];
+  //     case 'week':
+  //       return `Week ${index + 1}`;
+  //     case 'month':
+  //       return [
+  //         'January',
+  //         'February',
+  //         'March',
+  //         'April',
+  //         'May',
+  //         'June',
+  //         'July',
+  //         'August',
+  //         'September',
+  //         'October',
+  //         'November',
+  //         'December',
+  //       ][index];
+  //     case 'hour':
+  //       return `${index}:00`;
+  //     default:
+  //       return `Interval ${index + 1}`;
+  //   }
+  // }
+
   async financialVsOrder(findOptions: AdminDashboardSort) {
-    const currentDate = new Date();
-    let startDate, endDate, groupByInterval;
+    try {
+      const currentDate = new Date();
+      let startDate, endDate, groupByInterval;
 
-    // Determine date range and grouping based on timePeriod
-    switch (findOptions.timePeriod) {
-      case TimePeriod.Today:
-        startDate = startOfDay(currentDate);
-        endDate = endOfDay(currentDate);
-        groupByInterval = 'hour';
-        break;
-      case TimePeriod.Week:
-        startDate = startOfWeek(currentDate);
-        endDate = endOfWeek(currentDate);
-        groupByInterval = 'day';
-        break;
-      case TimePeriod.Month:
-        startDate = startOfMonth(currentDate);
-        endDate = endOfMonth(currentDate);
-        groupByInterval = 'day';
-        break;
-      case TimePeriod.Year:
-        const oneYearAgo = subYears(currentDate, findOptions.value);
-        startDate = startOfYear(oneYearAgo);
-        endDate = endOfYear(oneYearAgo);
-        groupByInterval = 'month';
-        break;
-      default:
-        throw new Error('Invalid time period');
-    }
-
-    // Query transactions and group by the specified interval
-    const transactions = await this.invoiceRepository
-      .createQueryBuilder('invoice')
-      .select(
-        `EXTRACT(${groupByInterval.toUpperCase()} FROM invoice.createdAt)::int`,
-        groupByInterval,
-      )
-      .addSelect('invoice.type', 'fee')
-      .addSelect('COALESCE(SUM(invoice.price), 0)::float', 'totalAmount')
-      .addSelect('COALESCE(COUNT(invoice.id), 0)::int', 'totalOrder')
-      .where('invoice.createdAt BETWEEN :startDate AND :endDate', {
-        startDate,
-        endDate,
-      })
-      .groupBy(
-        `EXTRACT(${groupByInterval.toUpperCase()} FROM invoice.createdAt), invoice.type`,
-      )
-      .orderBy(`${groupByInterval}`)
-      .getRawMany();
-
-    // Initialize result structure
-    const result: FinancialVsOrder[] = [];
-
-    // Handle different cases
-    if (findOptions.timePeriod === TimePeriod.Today) {
-      const dailyData = transactions.map((t) => ({
-        fee: t.fee, // Use fee from transactions
-        totalAmount: parseFloat(t.totalAmount),
-        totalOrder: parseInt(t.totalOrder),
-      }));
-      result.push(...dailyData);
-    } else if (findOptions.timePeriod === TimePeriod.Year) {
-      const yearlyData = transactions.map((t) => ({
-        fee: t.fee, // Use fee from transactions
-        totalAmount: parseFloat(t.totalAmount) ?? 0,
-        totalOrder: parseInt(t.totalOrder) ?? 0,
-      }));
-      result.push(...yearlyData);
-    } else {
-      const intervalCount =
-        groupByInterval === 'day'
-          ? findOptions.timePeriod === TimePeriod.Week
-            ? 7
-            : 30
-          : 12;
-
-      for (let i = 0; i < intervalCount; i++) {
-        const intervalData = transactions
-          .filter((t) => parseInt(t[groupByInterval]) === i + 1)
-          .map((t) => ({
-            fee: t.fee, // Use fee from transactions
-            totalAmount: parseFloat(t.totalAmount) || 0,
-            totalOrder: parseInt(t.totalOrder) || 0,
-          }));
-
-        const totalAmount = intervalData.reduce(
-          (sum, data) => sum + data.totalAmount,
-          0,
-        );
-        const totalOrder = intervalData.reduce(
-          (sum, data) => sum + data.totalOrder,
-          0,
-        );
-
-        result.push({
-          fee: intervalData.length ? intervalData[0].fee : null, // Keep the first fee of the interval
-          totalAmount,
-          totalOrder,
-        });
+      if (!findOptions || !findOptions.timePeriod) {
+        throw new Error('Time period is required');
       }
-    }
 
-    return result;
+      // Determine date range and grouping
+      switch (findOptions.timePeriod) {
+        case TimePeriod.Today:
+          startDate = startOfDay(currentDate);
+          endDate = endOfDay(currentDate);
+          groupByInterval = 'hour';
+          break;
+        case TimePeriod.Week:
+          const baseDate = subWeeks(currentDate, findOptions.value || 0);
+          startDate = startOfWeek(baseDate);
+          endDate = endOfWeek(baseDate);
+          groupByInterval = 'day';
+          break;
+        case TimePeriod.Month:
+          const monthDate = subMonths(currentDate, findOptions.value || 0);
+          startDate = startOfMonth(monthDate);
+          endDate = endOfMonth(monthDate);
+          groupByInterval = 'week'; // Weeks within the month
+          break;
+        case TimePeriod.Year:
+          const yearDate = subYears(currentDate, findOptions.value || 0);
+          startDate = startOfYear(yearDate);
+          endDate = endOfYear(yearDate);
+          groupByInterval = 'month'; // Months within the year
+          break;
+        default:
+          throw new Error('Invalid time period');
+      }
+
+      console.log(`Range: ${startDate} - ${endDate}`);
+
+      // Query based on groupByInterval
+      const groupIntervalSQL =
+        groupByInterval === 'week'
+          ? `FLOOR((EXTRACT(DAY FROM invoice.createdAt) - 1) / 7) + 1` // Weeks of the month
+          : `EXTRACT(${groupByInterval.toUpperCase()} FROM invoice.createdAt)`;
+
+      const transactions = await this.invoiceRepository
+        .createQueryBuilder('invoice')
+        .select(`${groupIntervalSQL}::int`, groupByInterval)
+        .addSelect('invoice.type', 'fee')
+        .addSelect('COALESCE(SUM(invoice.price), 0)::float', 'totalAmount')
+        .addSelect('COALESCE(COUNT(invoice.id), 0)::int', 'totalOrder')
+        .where('invoice.createdAt BETWEEN :startDate AND :endDate', {
+          startDate,
+          endDate,
+        })
+        .groupBy(`${groupIntervalSQL}, invoice.type`)
+        .orderBy(groupByInterval, 'ASC')
+        .getRawMany();
+
+      // Generate all intervals based on groupByInterval
+      const totalIntervals = (() => {
+        switch (groupByInterval) {
+          case 'day':
+            return 7; // Days of the week
+          case 'week':
+            return Math.ceil(differenceInDays(endDate, startDate) / 7); // Weeks in the time period
+          case 'month':
+            return 12; // Months in a year
+          case 'hour':
+            return 24; // Hours in a day
+          default:
+            return 0;
+        }
+      })();
+
+      const allIntervals = Array.from(
+        { length: totalIntervals },
+        (_, i) => `${this.mapIntervalToReadable(i, groupByInterval)}`,
+      );
+
+      // Group transactions by interval
+      const groupedTransactions = transactions.reduce(
+        (acc, transaction) => {
+          const interval = parseInt(transaction[groupByInterval]);
+          if (!acc[interval]) {
+            acc[interval] = [];
+          }
+
+          acc[interval].push({
+            fee: transaction.fee,
+            totalAmount: parseFloat(transaction.totalAmount),
+            totalOrder: parseInt(transaction.totalOrder),
+          });
+          return acc;
+        },
+        {} as { [key: number]: FinancialVsOrderResponse[] },
+      );
+      // console.log(groupedTransactions);
+
+      // Build the final payload ensuring all intervals are included
+      const payload = allIntervals.map((interval, idx) => {
+        const dataForInterval = groupedTransactions[idx + 1] || [];
+        return {
+          key: interval, // e.g., "January", "February", etc.
+          data: dataForInterval,
+        };
+      });
+
+      return payload;
+    } catch (error) {
+      console.error(error);
+      this.logger.log(error);
+      throw new BadRequestException(error.message || 'An error occurred');
+    }
+  }
+
+  mapIntervalToReadable(index: number, groupBy: string): string {
+    switch (groupBy) {
+      case 'day':
+        return [
+          'Sunday',
+          'Monday',
+          'Tuesday',
+          'Wednesday',
+          'Thursday',
+          'Friday',
+          'Saturday',
+        ][index];
+      case 'week':
+        return `Week ${index + 1}`; // Adjust for 1-indexed weeks
+      case 'month':
+        return [
+          'January',
+          'February',
+          'March',
+          'April',
+          'May',
+          'June',
+          'July',
+          'August',
+          'September',
+          'October',
+          'November',
+          'December',
+        ][index];
+      case 'hour':
+        return `${index}:00`;
+      default:
+        return `Interval ${index + 1}`;
+    }
   }
 
   async listingStats(
@@ -468,39 +858,6 @@ export class AdminService {
       default:
         return;
     }
-
-    // Perform queries in parallel
-    // const [offer, listing, acceptedOffer, ownershipTransfer] =
-    //   await Promise.all([
-    //     this.offerRepository.count({
-    //       where: { createdAt: Between(startDate, endDate) },
-    //     }),
-    //     this.listingRepository.count({
-    //       where: { createdAt: Between(startDate, endDate) },
-    //     }),
-    //     this.offerRepository.count({
-    //       where: {
-    //         status: OfferListEnum.EXPIRED,
-    //         createdAt: Between(startDate, endDate),
-    //       },
-    //     }),
-    //     this.listingRepository.count({
-    //       where: {
-    //         isListingSold: true,
-    //         createdAt: Between(startDate, endDate),
-    //       },
-    //     }),
-    //   ]);
-
-    // // Compile the results
-    // const analysis: ListingStats = {
-    //   offer,
-    //   listing,
-    //   acceptedOffer,
-    //   ownershipTransfer,
-    // };
-
-    // return analysis;
 
     // Initialize the query builder
     const query = this.offerRepository

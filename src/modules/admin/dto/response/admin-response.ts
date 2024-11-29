@@ -6,6 +6,7 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Listing } from '../../../../entities';
 import { Offer } from '../../../../entities/offer.entity';
+import { IsArray } from 'class-validator';
 @ObjectType()
 export class UserCity {
   @Field({ nullable: true })
@@ -136,14 +137,37 @@ export class AdminDashboard {
 }
 
 @ObjectType()
-export class FinancialVsOrder {
+export class FinancialVsOrderResponse {
   @Field({ nullable: true })
-  fee: string;
+  fee?: string; // The fee type (e.g., "Saii Fees").
 
   @Field({ nullable: true })
-  totalAmount: number;
+  totalAmount: number; // Total amount for this fee type.
+
   @Field({ nullable: true })
-  totalOrder: number;
+  totalOrder: number; // Total orders for this fee type.
+}
+
+@ObjectType()
+export class Data {
+  @Field(() => [FinancialVsOrderResponse], { nullable: true }) // Array of FinancialVsOrderResponse
+  @IsArray()
+  data: FinancialVsOrderResponse[];
+}
+
+@ObjectType()
+export class FinancialVsOrder {
+  @Field(() => [Data], { nullable: true }) // Array of Data objects
+  @IsArray()
+  data: Data[];
+}
+@ObjectType()
+export class GroupTransactions {
+  @Field({ nullable: true })
+  key: string;
+
+  @Field(() => [FinancialVsOrderResponse], { nullable: true }) // Array of Data objects
+  data: [FinancialVsOrderResponse];
 }
 
 export class CouponResponse {

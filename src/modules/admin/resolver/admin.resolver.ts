@@ -6,6 +6,7 @@
 import { AdminService } from '../services/admin.service';
 import {
   FinancialVsOrder,
+  GroupTransactions,
   ListingStats,
   ResponseTime,
   SaiiFees,
@@ -121,9 +122,11 @@ export class AdminResolver {
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.DASHBOARD_REVENUE_CARD)
-  @Query(() => [FinancialVsOrder], { name: 'financialVsOrder' })
+  @Query(() => [GroupTransactions], { name: 'financialVsOrder' })
   async financialVsOrder(@Args('findOptions') findOption: AdminDashboardSort) {
-    return await this.adminService.financialVsOrder(findOption);
+    // Fetch the data from the service
+    const data = await this.adminService.financialVsOrder(findOption);
+    return data;
   }
 
   /************************************
