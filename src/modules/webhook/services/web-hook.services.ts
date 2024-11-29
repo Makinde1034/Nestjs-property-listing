@@ -89,7 +89,7 @@ export class WebhookService {
       } else {
         switch (hyperPayWebHookResponse.type) {
           case PaymentEnum.SUCCESSFUL_PAYMENT: {
-            //This.transaction.handleWebhook(hyperPayWebhookResponse.payload)
+            // this.transaction.handleWebhook(hyperPayWebHookResponse.payload)
             break;
           }
           case PaymentEnum.REGISTRATION: {

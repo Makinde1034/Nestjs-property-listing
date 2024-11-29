@@ -20,6 +20,7 @@ import {
 
 import { WebhookService } from './services/web-hook.services';
 import { Public } from '../auth/decorators/permision.decorator';
+import { SseService } from '../sse/client.service';
 @Controller()
 export class WebHookController {
   private webhookConfig: WebhookConfig;
@@ -39,7 +40,7 @@ export class WebHookController {
     @Body() hyperPayWebHookResponse: any,
     @Headers('x-signature') signature: string,
   ) {
-    this.logger.log('data', hyperPayWebHookResponse, signature);
+    console.log('data', hyperPayWebHookResponse, signature);
 
     this.logger.log('data', signature);
 

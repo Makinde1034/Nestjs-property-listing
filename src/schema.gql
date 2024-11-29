@@ -955,6 +955,7 @@ type InitiatePaymentResponse {
 
 type verifyPaymentResponse {
   status: String
+  referenceId: String!
   message: String!
 }
 
@@ -1265,6 +1266,7 @@ input UserFilter {
   level: [String!]
   status: [String!]
   isBlocked: Boolean
+  saudiUser: Boolean
   type: [String!]
   roles: [Float!]
 }

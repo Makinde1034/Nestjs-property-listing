@@ -81,5 +81,8 @@ export class verifyPaymentResponse {
   status: string;
 
   @Field()
+  referenceId: string;
+
+  @Field()
   message: string;
 }
