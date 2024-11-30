@@ -7,6 +7,7 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import { AppStrings } from '../../common/messages/app.strings';
 import { v4 as uuidv4 } from 'uuid';
 import * as exifr from 'exifr';
+import { addDays, format, startOfWeek } from 'date-fns';
 
 /**
  * Getting difference between two dates.
@@ -81,6 +82,33 @@ export function addDaysToDate(dateString: string | Date, days: number): string {
   } catch (error) {
     throw new Error('Failed to add days to date');
   }
+}
+
+/**
+ * Get the date for a specific day in a week.
+ * @param baseDate - The date within the desired week.
+ * @param dayIndex - The index of the day (0 = Sunday, 1 = Monday, ..., 6 = Saturday).
+ * @returns The date string for the specific day.
+ */
+export function getDateFromWeek(baseDate: Date, dayIndex: number): string {
+  if (dayIndex < 0 || dayIndex > 6) {
+    throw new Error(
+      'Invalid day index. Must be between 0 (Sunday) and 6 (Saturday).',
+    );
+  }
+
+  const startDate = startOfWeek(baseDate); // Get the start of the week
+  const specificDay = addDays(startDate, dayIndex); // Add the offset for the specific day
+  return format(specificDay, 'yyyy-MM-dd'); // Format the date
+}
+
+/**
+ * Get the day name from a date.
+ * @param date - The date for which the day name is required.
+ * @returns The name of the day (e.g., "Monday").
+ */
+export function getDayName(date: Date): string {
+  return format(date, 'EEEE'); // 'EEEE' outputs the full day name
 }
 
 export function calculateDaysDifference(date1: Date, date2: Date): number {

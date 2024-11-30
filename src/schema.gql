@@ -1052,10 +1052,19 @@ type UserGenderCount {
   count: Float
 }
 
-type FinancialVsOrder {
+type FinancialVsOrderResponse {
   fee: String
   totalAmount: Float
   totalOrder: Float
+}
+
+type Data {
+  data: [FinancialVsOrderResponse!]
+}
+
+type GroupTransactions {
+  key: String
+  data: [FinancialVsOrderResponse!]
 }
 
 type CouponResponse {
@@ -1207,7 +1216,7 @@ type Query {
   getTicketForAdmin(findOptions: AdminDashboardSort): TicketResponse!
   averageResponse: ResponseTime!
   saiiFees(findOptions: AdminDashboardSort): SaiiFees!
-  financialVsOrder(findOptions: AdminDashboardSort!): [FinancialVsOrder!]!
+  financialVsOrder(findOptions: AdminDashboardSort!): [GroupTransactions!]!
   fetchCoupons(id: String!): Coupon!
   findAllFeatures: [SystemFeatureSetting!]!
   searchForCoupon(searchParam: String!): [Coupon!]!
