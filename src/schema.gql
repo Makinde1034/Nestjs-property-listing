@@ -1431,7 +1431,7 @@ input AdminDashboardListingStatus {
   timePeriod: String
   value: Float
   stage: String
-  status: Float
+  status: String
 }
 
 input WorkflowInputFilter {

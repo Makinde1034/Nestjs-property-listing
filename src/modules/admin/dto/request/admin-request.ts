@@ -40,7 +40,7 @@ export class AdminDashboardListingStatus extends AdminDashboardSort {
   @Field({ nullable: true })
   @IsOptional()
   @IsEnum(OfferListEnum)
-  status: number;
+  status: string;
 }
 
 @InputType()
