@@ -1080,6 +1080,57 @@ export class AdminService {
       throw new BadRequestException('Failed to fetch user country count');
     }
   }
+  async saudiVsNonSaudi(
+    findOption: AdminDashboardSort,
+  ): Promise<UserCountryCount[]> {
+    const endDate = new Date();
+    const startDate = subMonths(endDate, findOption.value);
+
+    // Adjust to the start of the month for startDate and end of the month for endDate
+    const startOfRange = startOfMonth(startDate);
+    const endOfRange = endOfMonth(endDate);
+
+    try {
+      // Log the date range for debugging
+
+      const result = await this.userRepository
+        .createQueryBuilder('user')
+        .select(
+          `CASE 
+      WHEN user.nationality ILIKE '%saudi%' THEN 'Saudi Users' 
+      ELSE 'Non-Saudi Users' 
+    END`,
+          'category',
+        )
+        .addSelect('COUNT(*)', 'count')
+        .where('user.createdAt BETWEEN :startOfRange AND :endOfRange', {
+          startOfRange,
+          endOfRange,
+        })
+        .groupBy('category')
+        .getRawMany();
+
+      console.log('Query Result:', result);
+
+      console.log(result);
+
+      // Map the result to a clean format
+      const countryCounts: UserCountryCount[] = result.map((item) => {
+        console.log(item);
+
+        return {
+          nationality: item.category,
+          count: parseInt(item.count, 10),
+        };
+      });
+
+      return countryCounts;
+    } catch (error) {
+      // Log the error for debugging
+      console.error('Error in saudiVsNonSaudi:', error);
+      throw new BadRequestException('Failed to fetch user country count');
+    }
+  }
 
   async userGenderCount(
     findOption: AdminDashboardSort,

@@ -83,6 +83,12 @@ export class AdminResolver {
     return await this.adminService.usersCountry(findOption);
   }
   @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions(PermissionsEnum.DASHBOARD_USERS_DEMOGRAPHICS)
+  @Query(() => [UserCountryCount], { name: 'saudiVsNonSaudi' })
+  async saudiVsNonSaudi(@Args('findOptions') findOption: AdminDashboardSort) {
+    return await this.adminService.saudiVsNonSaudi(findOption);
+  }
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.DASHBOARD_USERS_FUNNEL)
   @Query(() => [UserAgeRange], { name: 'userAgeCount' })
   async userAgeCount(@Args('findOptions') findOption: AdminDashboardSort) {

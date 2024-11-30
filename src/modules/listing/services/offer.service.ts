@@ -367,16 +367,21 @@ export class OfferService {
       const { maxPrice } = offer;
       const highestOfferPrice = maxPrice || 0;
 
+      console.log(offer);
+
       const [minimumPrice, saii, vat] =
         await this.getMinimumOfferForAListingAndUser(
           rest.price,
           offer.listing_price,
-          offer.listing.purpose,
+          offer.listing_purpose,
         );
 
       // Validate if offer exists
       if (!offer) {
         throw new BadRequestException(AppStrings.NOT_FOUND);
+      }
+      if (offer.status == OfferListEnum.EXPIRED) {
+        throw new BadRequestException('offer already expired');
       }
 
       const adminDefault = await this.adminDefaultService.adminDefault();
@@ -477,11 +482,12 @@ export class OfferService {
       }
       throw new BadRequestException('Offer update failed');
     } catch (error) {
+      console.log(error);
       this.logger.error(error);
       if (error instanceof HttpException) {
         throw error;
       } else {
-        throw new BadRequestException('Offer update failed');
+        throw new BadRequestException('Offer update failed', error);
       }
     }
   }
