@@ -482,7 +482,6 @@ export class OfferService {
       }
       throw new BadRequestException('Offer update failed');
     } catch (error) {
-      console.log(error);
       this.logger.error(error);
       if (error instanceof HttpException) {
         throw error;
