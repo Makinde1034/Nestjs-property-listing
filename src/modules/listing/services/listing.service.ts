@@ -78,6 +78,7 @@ import { CompareRepository } from '../repositories/compare.repository';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { NotificationScopeRepository } from '../../user/repositories';
 import { NotificationScopesEnum } from '../../../common/enums/notification-scope.enum';
+import { ListingStatus } from '../../../common/enums/status.enum';
 
 @Injectable()
 export class ListingService {
@@ -1765,6 +1766,67 @@ export class ListingService {
         return {
           adminId: admin.id,
           action: ActivityEnum.ENABLED,
+          details: JSON.stringify(listing.find((a) => a.id === element.id)),
+
+          listingId: element.id,
+        };
+      });
+
+      await this.activityLogsService.logActivity(activityToSave);
+
+      return new SuccessResponse(AppStrings.LISTING_ENABLED_SUCCESSFULLY);
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error?.messages | error.data);
+    }
+  }
+
+  async approveListing(listingActionInput: ListingActionInput, admin: User) {
+    try {
+      const listing = await this.listingRepository.find({
+        where: { id: In(listingActionInput.listingId) },
+      });
+      await this.listingRepository.update(
+        { id: In(listingActionInput.listingId) },
+        {
+          status: ListingStatus.ACCEPTED,
+        },
+      );
+
+      const activityToSave = listing.map((element) => {
+        return {
+          adminId: admin.id,
+          action: ActivityEnum.ENABLED,
+          details: JSON.stringify(listing.find((a) => a.id === element.id)),
+          listingId: element.id,
+        };
+      });
+
+      await this.activityLogsService.logActivity(activityToSave);
+
+      return new SuccessResponse(AppStrings.LISTING_ENABLED_SUCCESSFULLY);
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error?.messages | error.data);
+    }
+  }
+
+  async rejectListing(listingActionInput: ListingActionInput, admin: User) {
+    try {
+      const listing = await this.listingRepository.find({
+        where: { id: In(listingActionInput.listingId) },
+      });
+      await this.listingRepository.update(
+        { id: In(listingActionInput.listingId) },
+        {
+          status: ListingStatus.REJECTED,
+        },
+      );
+
+      const activityToSave = listing.map((element) => {
+        return {
+          adminId: admin.id,
+          action: ActivityEnum.REJECTED,
           details: JSON.stringify(listing.find((a) => a.id === element.id)),
 
           listingId: element.id,
