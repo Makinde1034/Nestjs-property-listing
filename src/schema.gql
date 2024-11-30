@@ -1211,6 +1211,7 @@ type Query {
   totalUser(findOptions: AdminDashboardSort!): UserDemography!
   userCount(findOptions: AdminDashboardSort!): [UserGenderCount!]!
   nationality(findOptions: AdminDashboardSort!): [UserCountryCount!]!
+  saudiVsNonSaudi(findOptions: AdminDashboardSort!): [UserCountryCount!]!
   userAgeCount(findOptions: AdminDashboardSort!): [UserAgeRange!]!
   userFunnel(findOptions: AdminDashboardSort): UserFunneling!
   getTicketForAdmin(findOptions: AdminDashboardSort): TicketResponse!

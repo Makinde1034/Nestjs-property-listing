@@ -32,6 +32,7 @@ import { ActivityLog } from './activity-log.entity';
 import { Invoice } from './invoice.entity';
 import { ServiceRequested } from './service-requested.entity';
 import { ListingStage } from '../common/enums';
+import { ListingStatus } from '../common/enums/status.enum';
 
 @Entity()
 @ObjectType()
@@ -241,7 +242,7 @@ export class Listing extends BaseEntity {
   @Field({ nullable: true })
   stage: string;
 
-  @Column({ default: ListingStage.LISTED })
+  @Column({ default: ListingStatus.PENDING })
   @Field({ nullable: true })
   status: string;
 

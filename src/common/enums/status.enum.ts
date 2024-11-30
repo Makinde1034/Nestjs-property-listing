@@ -29,6 +29,11 @@ export enum ServiceProviderStatus {
   ACCEPTED = 'accepted',
   REJECTED = 'rejected',
 }
+export enum ListingStatus {
+  PENDING = 'pending',
+  ACCEPTED = 'accepted',
+  REJECTED = 'rejected',
+}
 
 export enum WorkflowActionStatus {
   PENDING = 'pending',
