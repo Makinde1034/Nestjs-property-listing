@@ -1546,6 +1546,8 @@ type Mutation {
   updateListing(updateListingDto: UpdateListingDto!): Listing!
   flagListing(flagListingInput: FlagListingInput!): SuccessResponse!
   deleteListing(listingId: String!): SuccessResponse!
+  approveListing(listingActionInput: ListingActionInput!): SuccessResponse!
+  rejectListing(listingActionInput: ListingActionInput!): SuccessResponse!
   createOffer(createOfferDto: CreateOfferDto!): Offer
   finalizeOffer(id: String!): Offer
   updateOffer(updateOfferInput: UpdateOfferInput!): Offer
@@ -2013,6 +2015,10 @@ input FlagListingInput {
   childIssueId: String!
 }
 
+input ListingActionInput {
+  listingId: [String!]!
+}
+
 input CreateOfferDto {
   price: Float!
   expireAt: DateTime!
@@ -2038,10 +2044,6 @@ input CreatePromotionInput {
 
 input CreateWishlistInput {
   listingId: String!
-}
-
-input ListingActionInput {
-  listingId: [String!]!
 }
 
 input CreateFeatureInput {

@@ -222,7 +222,7 @@ export class ArticleService {
       let stringifiedMetadata;
       const article = await this.articleRepository.findOne({
         where: { id },
-        relations: ['category'], // load category relation if not loaded by default
+        relations: ['category'],
       });
 
       if (!article) {

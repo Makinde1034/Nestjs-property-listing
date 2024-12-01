@@ -625,6 +625,7 @@ export class UserService {
     if (!image) {
       throw new BadRequestException(AppStrings.NO_IMAGE_SELECTED);
     }
+
     // Upload profile image
     const imageurl = await this.storageService.upload(image);
     await this.usersRepository.update(user.id, {
