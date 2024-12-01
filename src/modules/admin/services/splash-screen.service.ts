@@ -112,39 +112,57 @@ export class SplashScreenService {
     }
   }
 
-  async findAll(findOption: SplashScreenFilterInput) {
+  async findAll(
+    findOption: SplashScreenFilterInput,
+  ): Promise<{ splashScreen: SplashScreen[]; total: number }> {
     try {
       const now = new Date();
-      const whereCondition: any = {};
-      const dateField = 'createdAt';
+      let startDate: Date, endDate: Date;
+
+      // Precompute date ranges based on the time period
       switch (findOption.timePeriod) {
         case 'today':
-          whereCondition[dateField] = Between(startOfDay(now), endOfDay(now));
+          startDate = startOfDay(now);
+          endDate = endOfDay(now);
           break;
         case 'week':
-          whereCondition[dateField] = Between(startOfWeek(now), endOfWeek(now));
+          startDate = startOfWeek(now);
+          endDate = endOfWeek(now);
           break;
         case 'month':
-          whereCondition[dateField] = Between(
-            startOfMonth(now),
-            endOfMonth(now),
-          );
+          startDate = startOfMonth(now);
+          endDate = endOfMonth(now);
           break;
         case 'year':
-          whereCondition[dateField] = Between(startOfYear(now), endOfYear(now));
+          startDate = startOfYear(now);
+          endDate = endOfYear(now);
           break;
+        default:
+          throw new BadRequestException('Invalid time period');
       }
-      const take = findOption.take ?? 20;
-      const [splashScreen, total] =
-        await this.splashScreenRepository.findAndCount({
-          where: whereCondition,
-          take: Math.min(take, 20),
-          skip: findOption.skip ?? 0,
-        });
+
+      const queryBuilder =
+        this.splashScreenRepository.createQueryBuilder('splash_screen');
+
+      queryBuilder
+        // Fetch only necessary fields
+        .where('splash_screen.createdAt BETWEEN :startDate AND :endDate', {
+          startDate,
+          endDate,
+        })
+        .orderBy('splash_screen.createdAt', 'DESC') // Add index-friendly ordering
+        .take(Math.min(findOption.take ?? 20, 20)) // Enforce max limit
+        .skip(findOption.skip ?? 0); // Pagination
+
+      const [splashScreen, total] = await Promise.all([
+        queryBuilder.getMany(), // Get the actual data
+        queryBuilder.getCount(), // Fetch the count efficiently
+      ]);
+
       return { splashScreen, total };
     } catch (error) {
-      this.logger.log(error);
-      throw new BadRequestException(error);
+      this.logger.error('Error fetching splash screens', error.stack);
+      throw new BadRequestException('An error occurred while fetching data');
     }
   }
 
