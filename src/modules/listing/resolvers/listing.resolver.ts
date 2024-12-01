@@ -306,6 +306,31 @@ export class ListingResolver {
     return await this.listingService.deleteListing(ctx.req.user, listingId);
   }
 
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions(PermissionsEnum.LISTINGS_CREATE)
+  @Mutation(() => SuccessResponse, { name: 'approveListing' })
+  async approveListing(
+    @Context() ctx: any,
+    @Args('listingActionInput') listingActionInput: ListingActionInput,
+  ) {
+    return await this.listingService.approveListing(
+      listingActionInput,
+      ctx.req.user,
+    );
+  }
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions(PermissionsEnum.LISTINGS_CREATE)
+  @Mutation(() => SuccessResponse, { name: 'rejectListing' })
+  async rejectListing(
+    @Context() ctx: any,
+    @Args('listingActionInput') listingActionInput: ListingActionInput,
+  ) {
+    return await this.listingService.rejectListing(
+      listingActionInput,
+      ctx.req.user,
+    );
+  }
+
   @UseGuards(AccessTokenGuard)
   @Query(() => SearchHistoryResponse, {
     nullable: true,
