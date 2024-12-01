@@ -136,22 +136,23 @@ export class IssueService {
     }
   }
 
-  async findAllIssuesByPlacement(placement: string): Promise<ParentIssue[]> {
+  async findAllIssuesByPlacement(placement?: string): Promise<ParentIssue[]> {
     try {
+      // Build query dynamically to avoid redundant database operations
+      const query = this.issueRepository
+        .createQueryBuilder('issue')
+        .leftJoinAndSelect('issue.childIssue', 'childIssue') // Fetch related child issues
+        .orderBy('issue.sequentialId', 'ASC'); // Order by sequentialId
+
+      // Add placement filter if provided
       if (placement) {
-        return await this.issueRepository.find({
-          where: { placement: placement },
-          order: { sequentialId: 'ASC' },
-          relations: ['childIssue'],
-        });
+        query.where('issue.placement = :placement', { placement });
       }
-      return await this.issueRepository.find({
-        order: { sequentialId: 'ASC' },
-        relations: ['childIssue'],
-      });
+
+      return await query.getMany(); // Execute query
     } catch (error) {
-      this.logger.log(error);
-      throw new BadRequestException(error);
+      this.logger.error('Error fetching issues by placement', error.stack);
+      throw new BadRequestException('Failed to fetch issues');
     }
   }
 
