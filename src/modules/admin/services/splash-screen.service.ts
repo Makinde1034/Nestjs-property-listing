@@ -53,46 +53,62 @@ export class SplashScreenService {
   logger = new Logger(SplashScreenService.name);
   async create(createSplashScreen: CreateSplashScreenInput, admin: User) {
     try {
-      const actionConfig =
-        await this.workflowService.findOneWorkflowByDocumentname(
-          this.splashScreenRepository.metadata.name,
-        );
+      const documentName = this.splashScreenRepository.metadata.name;
 
+      // Check for workflow configuration
+      const actionConfigPromise =
+        this.workflowService.findOneWorkflowByDocumentname(documentName);
+
+      // Prepare splash screen instance
       const splashScreen =
         this.splashScreenRepository.create(createSplashScreen);
 
+      // Await workflow configuration result
+      const actionConfig = await actionConfigPromise;
+
       if (actionConfig) {
-        await this.actionService.createActionRequest(
-          {
-            document: this.splashScreenRepository.metadata.name,
-            actionType: 'create',
-            targetEntityId: null,
-            user: admin,
-            payload: JSON.stringify(splashScreen),
-          },
-          admin,
-        );
+        // Offload action request creation to avoid blocking save operation
+        this.actionService
+          .createActionRequest(
+            {
+              document: documentName,
+              actionType: 'create',
+              targetEntityId: null,
+              user: admin,
+              payload: JSON.stringify(splashScreen),
+            },
+            admin,
+          )
+          .catch((err) =>
+            this.logger.error('Action Request Creation Failed', err),
+          );
 
         return new SuccessResponse('Awaiting action Approval');
       }
 
-      const data = await this.splashScreenRepository.save(createSplashScreen);
+      // Save the splash screen directly if no workflow exists
+      const savedSplashScreen =
+        await this.splashScreenRepository.save(createSplashScreen);
 
-      await this.activityLogService.logActivity([
-        {
-          adminId: admin.id,
-          action: ActivityEnum.CREATED,
+      // Log activity asynchronously
+      this.activityLogService
+        .logActivity([
+          {
+            adminId: admin.id,
+            action: ActivityEnum.CREATED,
+            details: JSON.stringify(savedSplashScreen),
+            splashScreenId: savedSplashScreen.id,
+          },
+        ])
+        .catch((err) => this.logger.error('Activity Logging Failed', err));
 
-          details: JSON.stringify(data),
-
-          splashScreenId: data.id,
-        },
-      ]);
-
-      return new SuccessResponse(AppStrings.SUCCESSFULL, data);
+      return new SuccessResponse(AppStrings.SUCCESSFULL, savedSplashScreen);
     } catch (error) {
-      this.logger.error(error);
-      throw new BadGatewayException(error);
+      this.logger.error(
+        'Error during splash screen creation',
+        error.message || error,
+      );
+      throw new BadGatewayException('Failed to create splash screen');
     }
   }
 
