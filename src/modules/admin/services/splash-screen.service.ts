@@ -185,24 +185,27 @@ export class SplashScreenService {
     }
   }
 
-  async update(updateSplashScreenInput: UpdateSplashScreenInput, admin: User) {
+  async update(
+    updateSplashScreenInput: UpdateSplashScreenInput,
+    admin: User,
+  ): Promise<SuccessResponse> {
     try {
       const { id, ...rest } = updateSplashScreenInput;
 
+      // Fetch data in parallel to minimize waiting time
       const [splashScreen, actionConfig] = await Promise.all([
-        this.splashScreenRepository.findOneBy({
-          id,
-        }),
-
+        this.splashScreenRepository.findOneBy({ id }),
         this.workflowService.findOneWorkflowByDocumentname(
           this.splashScreenRepository.metadata.name,
         ),
       ]);
 
+      // Handle splash screen not found
       if (!splashScreen) {
         throw new BadRequestException(AppStrings.NOT_FOUND);
       }
 
+      // Handle workflow-based action if applicable
       if (actionConfig) {
         await this.actionService.createActionRequest(
           {
@@ -217,29 +220,38 @@ export class SplashScreenService {
         return new SuccessResponse('Action is awaiting approval');
       }
 
+      // Update the splash screen
       const { affected } = await this.splashScreenRepository.update(id, rest);
 
       if (affected > 0) {
-        const splashScreen = await this.splashScreenRepository.findOneByOrFail({
-          id,
-        });
-        await this.activityLogService.logActivity([
-          {
-            adminId: admin.id,
-            action: ActivityEnum.UPDATED,
-            details: JSON.stringify(splashScreen),
-            splashScreenId: splashScreen.id,
-          },
-        ]);
+        // Fetch updated splash screen details
+        const updatedSplashScreen =
+          await this.splashScreenRepository.findOneByOrFail({ id });
 
-        return new SuccessResponse(AppStrings.SUCCESSFULL, splashScreen);
+        // Log the activity asynchronously
+        this.activityLogService
+          .logActivity([
+            {
+              adminId: admin.id,
+              action: ActivityEnum.UPDATED,
+              details: JSON.stringify(updatedSplashScreen),
+              splashScreenId: updatedSplashScreen.id,
+            },
+          ])
+          .catch((err) => this.logger.warn('Activity logging failed', err)); // Log any failure in logging
+
+        return new SuccessResponse(AppStrings.SUCCESSFULL, updatedSplashScreen);
       }
+
+      throw new BadRequestException('Update failed. No records were affected.');
     } catch (error) {
-      this.logger.log(error);
+      this.logger.error('Error updating splash screen', error.stack);
+
+      // Re-throw HTTP exceptions directly, otherwise handle as an unprocessable error
       if (error instanceof HttpException) {
         throw error;
       } else {
-        throw new UnprocessableEntityException(error);
+        throw new UnprocessableEntityException('An unexpected error occurred');
       }
     }
   }
