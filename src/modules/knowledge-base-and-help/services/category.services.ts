@@ -19,7 +19,7 @@ import {
 } from '../dto/request/knowledg-base.category.input';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { AppStrings } from '../../../common/messages/app.strings';
-import { In, IsNull } from 'typeorm';
+import { In } from 'typeorm';
 import {
   knowledgeBaseMainPlacement,
   knowledgeBaseNeedHelpPlacement,
@@ -78,36 +78,40 @@ export class KnowledgeBaseCategoryService {
       }
     }
   }
-
   async findAll(findOption: CategoryFilterInput) {
     try {
-      const sortField = findOption.sortField;
-      let orderOptions;
-      const sortDirection: 'ASC' | 'DESC' = findOption.directionToSort as
-        | 'ASC'
-        | 'DESC';
+      // Set defaults for pagination if not provided
+      const take = Math.min(findOption.take ?? 20, 100); // Limit `take` to 100 for performance
+      const skip = findOption.skip ?? 0;
 
-      if (findOption.take == undefined && findOption.skip == undefined) {
-        findOption.skip = 0;
-        findOption.take = 20;
-      }
-      if (!sortField) {
-        orderOptions = {
-          [sortField]: sortDirection,
-        };
-      }
+      // Validate sort direction and set default
+      const validSortDirections = ['ASC', 'DESC'];
+      const sortDirection = validSortDirections.includes(
+        findOption.directionToSort?.toUpperCase(),
+      )
+        ? (findOption.directionToSort.toUpperCase() as 'ASC' | 'DESC')
+        : 'ASC';
 
-      const [category, count] =
-        await this.knowledgeBaseCategoryRepository.findAndCount({
-          take: findOption.take,
-          skip: findOption.skip,
-          order: orderOptions,
-        });
+      // Build order options dynamically if sortField is provided
+      const orderOptions = findOption.sortField
+        ? { [findOption.sortField]: sortDirection }
+        : {};
+
+      // Fetch categories and count
+      const [category, count] = await this.knowledgeBaseCategoryRepository
+        .createQueryBuilder('Category')
+        .take(take)
+        .skip(skip)
+        .orderBy(orderOptions)
+        .getManyAndCount();
 
       return { category, count };
     } catch (error) {
-      this.logger.log(error);
-      throw new BadRequestException(error);
+      this.logger.error('Failed to fetch categories', error.stack);
+
+      throw new BadRequestException(
+        'Unable to fetch categories. Please try again.',
+      );
     }
   }
 
