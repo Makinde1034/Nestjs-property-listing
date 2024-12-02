@@ -243,7 +243,6 @@ export class HyperPayService {
       );
       return response.data;
     } catch (error) {
-      console.log(error.response.data.result);
       this.logger.error('Error creating checkout', error);
       if (error instanceof HttpException) {
         throw error;
@@ -266,11 +265,9 @@ export class HyperPayService {
       );
 
       const data = await (await lastValueFrom(response)).data;
-      console.log(data);
 
       return data;
     } catch (error) {
-      console.log('here', error);
       this.logger.error('Error creating checkout', error);
       if (error instanceof HttpException) {
         throw error;
@@ -299,7 +296,6 @@ export class HyperPayService {
         merchantTransactionId: adminDefault?.merchantTransactionId,
         paymentBrand: initiatePaymentInput.paymentBrand,
       };
-      console.log(payload);
 
       const requestPayload = querystring.stringify(payload as any);
 
@@ -312,8 +308,6 @@ export class HyperPayService {
       );
       return response.data;
     } catch (error) {
-      console.log('here', error.response.data);
-
       this.logger.error('Error creating checkout', error);
       if (error instanceof HttpException) {
         throw error;

@@ -154,8 +154,6 @@ export class NotificationService {
       const messages = await this.notificationMesageRepository.find({
         where: { scope: scope.scopeGroup, event: event },
       });
-      console.log(scope.scopeGroup, event);
-      console.log('fkldlfjaldjaf', messages);
       if (notificationScopes.includes(scopeName)) {
         this.SendNotificationBasedOnPreference(
           userPrefBuyer,

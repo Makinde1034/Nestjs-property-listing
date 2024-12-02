@@ -367,8 +367,6 @@ export class OfferService {
       const { maxPrice } = offer;
       const highestOfferPrice = maxPrice || 0;
 
-      console.log(offer);
-
       const [minimumPrice, saii, vat] =
         await this.getMinimumOfferForAListingAndUser(
           rest.price,

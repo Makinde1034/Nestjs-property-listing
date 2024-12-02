@@ -41,7 +41,6 @@ export class ListingTypeController {
     @Query('attributeId') attributeId: string,
     @UploadedFile() icon: Express.Multer.File,
   ): Promise<Attribute> {
-    console.log(attributeId);
     return await this.attributeService.uploadAttributeIcon(attributeId, icon);
   }
 

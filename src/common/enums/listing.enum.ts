@@ -44,7 +44,7 @@ export enum AdminSortListingManagement {
   FLAGGED = 'flaggedDate',
 }
 export enum ListingStage {
-  LISTED = 'Listed ',
+  LISTED = 'Listed',
   OFFER_CREATED = 'Offer Created',
   OWNERSHIPS_TRANSFER = 'Ownership Transfer',
   OFFER_ACCEPTED = 'Offer Accepted',
