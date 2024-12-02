@@ -45,10 +45,6 @@ export class NafathService {
         return { transId: 'faketransacrtionId', random: '45', test: true };
       }
 
-      console.log(id == this.nafathConfig.NafathId);
-      console.log(id);
-      console.log(this.nafathConfig.NafathId);
-
       const payload = this.createPayload(id);
       const response = await lastValueFrom(
         this.httpService.post<NafathAuthenticationResponse>(

@@ -32,14 +32,14 @@ export class AdminDashboardSort extends PaginateAndSort {
 
 @InputType()
 export class AdminDashboardListingStatus extends AdminDashboardSort {
-  @Field({ nullable: true })
-  @IsOptional()
+  @Field()
   @IsEnum(ListingStage)
+  @IsOptional()
   stage: string;
 
   @Field({ nullable: true })
-  @IsOptional()
   @IsEnum(OfferListEnum)
+  @IsOptional()
   status: string;
 }
 

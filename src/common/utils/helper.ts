@@ -216,7 +216,6 @@ export function isJsonString(str: string) {
 
 export function filterDeletedImages(data: Array<any>) {
   const result = data.filter((image) => image.isDeleted !== true);
-  console.log(result);
   return result;
 }
 

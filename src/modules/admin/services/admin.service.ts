@@ -328,9 +328,7 @@ export class AdminService {
         group: group,
       };
       return saiiFees;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 
   async financialVsOrder(findOptions: AdminDashboardSort) {
@@ -370,8 +368,6 @@ export class AdminService {
         default:
           throw new Error('Invalid time period');
       }
-
-      console.log(`Range: ${startDate} - ${endDate}`);
 
       // Query based on groupByInterval
       const groupIntervalSQL =
@@ -431,7 +427,6 @@ export class AdminService {
         },
         {} as { [key: number]: FinancialVsOrderResponse[] },
       );
-      // console.log(groupedTransactions);
 
       // Build the final payload ensuring all intervals are included
       const payload = allIntervals.map((interval, idx) => {

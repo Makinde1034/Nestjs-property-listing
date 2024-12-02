@@ -1336,7 +1336,6 @@ export class ListingService {
         this.storageService.upload(file),
       );
       const uploadedUrls = await Promise.all(uploadPromises);
-      console.log(query.imageId);
 
       if (query.imageId) {
         if (files.length > 1) {
@@ -1384,7 +1383,6 @@ export class ListingService {
 
       return new SuccessResponse(AppStrings.UPLOAD_SUCCESSFUL, existingImages);
     } catch (error) {
-      console.log(error);
       this.logger.error(error.message || error);
       if (error instanceof HttpException) {
         throw error;
@@ -2043,7 +2041,7 @@ export class ListingService {
         .filter((attr) => attr !== null);
     }
     //If attribute is found then the search is a valid search
-    if (attributes.length == attributeList.length) {
+    if (attributes?.length == attributeList?.length) {
       isValid = true;
     }
     const type = await this.listingTypeService.findOne(
@@ -2172,7 +2170,7 @@ export class ListingService {
         try {
           parsedImages = JSON.parse(images);
         } catch (parseError) {
-          console.log('Failed to parse images JSON:', parseError);
+          this.logger.log('Failed to parse images JSON:', parseError);
         }
       }
 
@@ -2185,7 +2183,7 @@ export class ListingService {
         images: JSON.stringify(filteredImages),
       };
     } catch (error) {
-      console.error('Error transforming listing:', error);
+      this.logger.error('Error transforming listing:', error);
       listing.images = listing.images ?? null; // Set images to null if it’s undefined or null
       return listing; // Return original listing if transformation fails
     }
