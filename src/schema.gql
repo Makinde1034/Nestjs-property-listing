@@ -1431,7 +1431,7 @@ input AdminDashboardListingStatus {
   where: WhereOption
   timePeriod: String
   value: Float
-  stage: String!
+  stage: String
   status: String
 }
 
