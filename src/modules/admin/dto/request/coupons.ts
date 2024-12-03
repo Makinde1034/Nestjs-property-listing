@@ -22,6 +22,10 @@ export class CreateCouponInput {
   name: string;
 
   @Field()
+  @IsString()
+  code: string;
+
+  @Field()
   @IsNumber()
   maxUse: number;
 

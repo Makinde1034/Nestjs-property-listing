@@ -139,6 +139,7 @@ export class SplashScreenFilterInput extends PaginateAndSort {
   @Field()
   placement: string;
 }
+
 @InputType()
 export class BidRange {
   @IsString()

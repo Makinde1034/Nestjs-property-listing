@@ -2214,6 +2214,7 @@ input CreateReviewDto {
 
 input CreateCouponInput {
   name: String!
+  code: String!
   maxUse: Float!
   isActive: Boolean!
   appliedTo: String!
@@ -2253,6 +2254,7 @@ input BidRange {
 
 input UpdateCouponInput {
   name: String
+  code: String
   maxUse: Float
   isActive: Boolean
   appliedTo: String
