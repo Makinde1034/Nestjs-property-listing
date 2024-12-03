@@ -87,7 +87,7 @@ export class PreAuthorisedPaymentInput {
   @IsString()
   cardHolder: string;
 
-  @Field()
+  @Field({ nullable: true })
   @IsString()
   @IsOptional()
   coupon: string;
@@ -141,8 +141,11 @@ export interface Result {
   code: string;
   description: string;
 }
-export interface CapturePaymentData {
+@InputType()
+export class CapturePaymentData {
+  @Field()
   amount: string;
+  @Field()
   paymentId: string;
 }
 

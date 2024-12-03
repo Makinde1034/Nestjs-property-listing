@@ -118,6 +118,13 @@ export class PaymentService {
     const checkout =
       await this.hyperPayService.preAuthorize(createPaymentInput);
 
+    const data = await this.capturePayment({
+      paymentId: checkout.id,
+      amount: '300',
+    });
+
+    console.log('here', data);
+
     return {
       checkoutId: checkout.id,
       referenceId: generateRandomString(),
@@ -133,14 +140,19 @@ export class PaymentService {
     //   );
     //   CreatePaymentInput.amount = coupon.amount;
     // }
-    const checkout =
-      await this.hyperPayService.capturePayment(createPaymentInput);
+    try {
+      const checkout =
+        await this.hyperPayService.capturePayment(createPaymentInput);
+      console.log(checkout);
 
-    return {
-      checkoutId: checkout.id,
-      referenceId: generateRandomString(),
-      timeStamp: checkout.timestamp,
-    };
+      return {
+        checkoutId: checkout.id,
+        referenceId: generateRandomString(),
+        timeStamp: checkout.timestamp,
+      };
+    } catch (error) {
+      this.logger.log(error);
+    }
   }
 
   async refundPayment(createPaymentInput: RefundPaymentData) {
