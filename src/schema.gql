@@ -1015,7 +1015,7 @@ type Analysis {
 }
 
 type ListingStats {
-  offers: [Offer!]!
+  offers: [Offer!]
   total: Float!
   analysis: Analysis!
 }
@@ -1218,7 +1218,8 @@ type Query {
   averageResponse: ResponseTime!
   saiiFees(findOptions: AdminDashboardSort): SaiiFees!
   financialVsOrder(findOptions: AdminDashboardSort!): [GroupTransactions!]!
-  fetchCoupons(id: String!): Coupon!
+  fetchCoupons(couponFilterInput: AdminFilterAndSort!): CouponResponse!
+  findOne(id: String!): Coupon!
   findAllFeatures: [SystemFeatureSetting!]!
   searchForCoupon(searchParam: String!): [Coupon!]!
   findAllWorkFlow(findOption: WorkflowInputFilter!): WorkFlowResponse!
@@ -1578,6 +1579,7 @@ type Mutation {
   removeAdPackage(id: Int!): AdPackage!
   initializePayment(paymentInput: InitiatePaymentInput!): InitiatePaymentResponse!
   preAuthorisedPayment(paymentInput: PreAuthorisedPaymentInput!): InitiatePaymentResponse!
+  capturePayment(paymentInput: CapturePaymentData!): InitiatePaymentResponse
   verifyPayment(verifyPaymentInput: VerifyPaymentInput!): verifyPaymentResponse!
   createIssue(input: CreateIssueInput!): ParentIssue!
   updateIssue(RequestInput: UpdateIssueInput!): ParentIssue!
@@ -2137,10 +2139,15 @@ input PreAuthorisedPaymentInput {
   paymentBrand: String!
   cardNumber: String!
   cardHolder: String!
-  coupon: String!
+  coupon: String
   cardExpiryMonth: String!
   cardExpiryYear: String!
   cardCvv: String!
+}
+
+input CapturePaymentData {
+  amount: String!
+  paymentId: String!
 }
 
 input VerifyPaymentInput {

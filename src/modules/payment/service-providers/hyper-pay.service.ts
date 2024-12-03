@@ -220,10 +220,11 @@ export class HyperPayService {
       const adminDefault = await this.adminService.adminDefault();
 
       const payload: PaymentRequest = {
-        entityId: this.hyperPayConfig.entityId,
+        // entityId: this.hyperPayConfig.entityId,
+        entityId: '8ac7a4c893855386019386a88e7d0169',
         amount: initiatePaymentInput.amount,
         currency: 'SAR',
-        paymentType: 'DB',
+        paymentType: 'PA',
         integrity: true,
         'customer.email': user.email,
         'customer.givenName': user.firstName,
@@ -236,14 +237,17 @@ export class HyperPayService {
 
       const response = await lastValueFrom(
         this.httpService.post<PreAuthorisedPaymentResponse>(
-          this.hyperPayConfig.baseUrl + '/checkouts',
+          this.hyperPayConfig.baseUrl + '/transaction/v1/checkouts',
           requestPayload,
           this.options,
         ),
       );
       return response.data;
     } catch (error) {
+      console.log(error.response.data);
+
       this.logger.error('Error creating checkout', error);
+
       if (error instanceof HttpException) {
         throw error;
       } else if (error.isAxiosError) {
@@ -284,7 +288,8 @@ export class HyperPayService {
     try {
       const adminDefault = await this.adminService.adminDefault();
       const payload = {
-        entityId: this.hyperPayConfig.entityId,
+        entityId: '8ac7a4c893855386019386a88e7d0169',
+
         amount: initiatePaymentInput.amount,
         currency: 'SAR',
         paymentType: 'PA',
@@ -295,6 +300,8 @@ export class HyperPayService {
         'card.cvv': initiatePaymentInput.cardCvv,
         merchantTransactionId: adminDefault?.merchantTransactionId,
         paymentBrand: initiatePaymentInput.paymentBrand,
+        shopperResultUrl: 'google.com',
+        testMode: 'EXTERNAL',
       };
 
       const requestPayload = querystring.stringify(payload as any);
@@ -308,6 +315,8 @@ export class HyperPayService {
       );
       return response.data;
     } catch (error) {
+      console.log(error.response.data.result);
+
       this.logger.error('Error creating checkout', error);
       if (error instanceof HttpException) {
         throw error;
@@ -324,7 +333,7 @@ export class HyperPayService {
   async capturePayment(capturePayment: CapturePaymentData) {
     try {
       const payload = querystring.stringify({
-        entityId: this.hyperPayConfig.entityId,
+        entityId: '8ac7a4c893855386019386a88e7d0169',
         amount: capturePayment.amount,
         paymentType: 'CP',
         currency: 'SAR',
@@ -332,13 +341,14 @@ export class HyperPayService {
 
       const response = await lastValueFrom(
         this.httpService.post<CapturePaymentResponse>(
-          this.hyperPayConfig.baseUrl + `/payments${capturePayment.paymentId}`,
+          this.hyperPayConfig.baseUrl + `/payments/${capturePayment.paymentId}`,
           payload,
           this.options,
         ),
       );
       return response.data;
     } catch (error) {
+      console.log(error.response);
       this.logger.error('Error in payment pre-authorization', error);
       if (error instanceof HttpException) {
         throw error;

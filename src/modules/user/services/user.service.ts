@@ -87,10 +87,7 @@ import { ActionService } from '../../admin/services/action.service';
 import { AdminWorkflowService } from '../../admin/services/admin-workflow.service';
 import { WorkflowActionStatus } from '../../../common/enums/status.enum';
 import { PushNotificationService } from '../../notification/services';
-import {
-  PushNotificationinput,
-  PushNotificationPayload,
-} from '../../../common/interface';
+import { PushNotificationinput } from '../../../common/interface';
 
 @Injectable()
 export class UserService {
@@ -179,6 +176,7 @@ export class UserService {
 
           nationality: 'Saudi Arabia',
         });
+        console.log(user);
 
         if (!user.nationalIdentity) {
           await this.nationalIdentityRepository.create({
@@ -697,38 +695,47 @@ export class UserService {
     try {
       const {
         sortField,
-        directionToSort,
+        directionToSort = 'ASC',
         take = 20,
         skip = 0,
         saudiUser,
       } = userFilterInput;
 
-      // Validate and set sort direction
-      const validSortDirections = ['ASC', 'DESC'];
-      const direction = validSortDirections.includes(
-        directionToSort?.toUpperCase(),
+      // Validate and normalize sort direction
+      const validSortDirections = ['ASC', 'DESC'] as const; // Ensure strict typing
+      const sortDirection = validSortDirections.includes(
+        directionToSort.toUpperCase() as any,
       )
-        ? directionToSort.toUpperCase()
+        ? (directionToSort.toUpperCase() as 'ASC' | 'DESC')
         : 'ASC';
 
-      // Build dynamic where options
-      const whereOptions: any = {};
+      // Start building the query
+      const query = this.usersRepository.createQueryBuilder('user');
+
+      // Apply nationality filter
       if (saudiUser) {
-        whereOptions.nationality = 'Saudi Arabia';
+        query.where('user.nationality = :nationality', {
+          nationality: 'Saudi Arabia',
+        });
       } else {
-        whereOptions.nationality = Not('Saudi Arabia');
+        query.where('user.nationality != :nationality', {
+          nationality: 'Saudi Arabia',
+        });
       }
 
-      // Build order options
-      const orderOptions = sortField ? { [sortField]: direction } : {};
+      // Apply sorting
+      if (sortField) {
+        query.orderBy(`user.${sortField}`, sortDirection);
+      }
 
-      // Fetch users with count
-      const [users, count] = await this.usersRepository.findAndCount({
-        where: whereOptions,
-        order: orderOptions,
-        take,
-        skip,
-      });
+      // Apply pagination
+      query.skip(skip).take(take);
+
+      // Execute queries for data and count
+      const [users, count] = await Promise.all([
+        query.getMany(),
+        query.getCount(),
+      ]);
 
       return { users, total: count };
     } catch (error) {
@@ -754,42 +761,39 @@ export class UserService {
         skip,
       } = userFilterInput;
 
-      // Validate sort direction
-      const validSortDirections = ['ASC', 'DESC'];
-      const direction = directionToSort?.toUpperCase();
-      if (direction && !validSortDirections.includes(direction)) {
-        throw new Error(`Invalid sort direction: ${direction}`);
-      }
+      // Validate and standardize sort direction
+      const direction =
+        directionToSort?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
 
-      // Build where options
-      const whereOptions: any = {
-        ...(level ? { userLevel: In(level) } : {}),
-        ...(status ? { status: In(status) } : {}),
-        isBlocked: isBlocked ?? undefined,
+      // Build dynamic where clause
+      const whereConditions: Record<string, any> = {
         userType: Not(
           In([UserProfileTypeEnum.STAFF, UserProfileTypeEnum.ADMIN]),
-        ), // Corrected line
+        ),
       };
 
-      // Build order options
-      const orderOptions = sortField ? { [sortField]: direction || 'ASC' } : {};
+      if (level) whereConditions.userLevel = In(level);
+      if (status) whereConditions.status = In(status);
+      if (isBlocked !== undefined) whereConditions.isBlocked = isBlocked;
 
-      // Set default pagination values if not provided
-      const paginationTake = take ?? 20;
-      const paginationSkip = skip ?? 0;
+      // Build query with raw SQL for better performance
+      const query = this.usersRepository
+        .createQueryBuilder('user')
+        .where(whereConditions)
+        .orderBy(sortField || 'user.createdAt', direction) // Default sort by createdAt
+        .skip(skip || 0)
+        .take(take || 20);
 
-      // Fetch employees with count
-      const [users, count] = await this.usersRepository.findAndCount({
-        order: orderOptions,
-        where: whereOptions,
-        take: paginationTake,
-        skip: paginationSkip,
-      });
+      // Use raw count for total number of matching records
+      const [users, count] = await Promise.all([
+        query.getMany(),
+        query.getCount(), // Separate count for better accuracy
+      ]);
 
       return { users, total: count };
     } catch (error) {
-      this.logger.error('Failed to get customer', error);
-      throw new BadRequestException('Failed to retrieve customer');
+      this.logger.error('Failed to get customers', error);
+      throw new BadRequestException('Failed to retrieve customers');
     }
   }
 
@@ -1127,47 +1131,58 @@ export class UserService {
         sortField,
         isBlocked,
         directionToSort,
-        take,
-        skip,
+        take = 20,
+        skip = 0,
       } = userFilterInput;
 
-      // Validate sort direction
+      // Validate and normalize sort direction
       const validSortDirections = ['ASC', 'DESC'];
-      const direction = directionToSort?.toUpperCase();
-      if (direction && !validSortDirections.includes(direction)) {
-        throw new Error(`Invalid sort direction: ${direction}`);
-      }
+      const direction = validSortDirections.includes(
+        directionToSort?.toUpperCase(),
+      )
+        ? directionToSort.toUpperCase()
+        : 'ASC';
 
-      // Build where options
-      const whereOptions: any = {
-        ...(level ? { userLevel: In(level) } : {}),
-        ...(status ? { status: In(status) } : {}),
-        ...(type ? { type: In(type) } : {}),
-        ...(roles ? { roles: { id: In(roles) } } : {}),
-        ...(isBlocked !== undefined ? { isBlocked } : {}),
-        userType: In([UserProfileTypeEnum.STAFF, UserProfileTypeEnum.ADMIN]),
-      };
+      // Build the query
+      const query = this.usersRepository.createQueryBuilder('user');
 
-      // Build order options
-      const orderOptions = sortField ? { [sortField]: direction || 'ASC' } : {};
+      // Apply filters dynamically
+      if (level) query.andWhere('user.userLevel IN (:...level)', { level });
+      if (status) query.andWhere('user.status IN (:...status)', { status });
+      if (type) query.andWhere('user.type IN (:...type)', { type });
+      if (roles) query.andWhere('user.roles.id IN (:...roles)', { roles });
+      if (isBlocked !== undefined)
+        query.andWhere('user.isBlocked = :isBlocked', { isBlocked });
 
-      // Set default pagination values if not provided
-      const paginationTake = take ?? 20;
-      const paginationSkip = skip ?? 0;
-
-      // Fetch employees with count
-      const [users, count] = await this.usersRepository.findAndCount({
-        order: orderOptions,
-        where: { ...whereOptions },
-        take: paginationTake,
-        skip: paginationSkip,
+      query.andWhere('user.userType IN (:...userTypes)', {
+        userTypes: [UserProfileTypeEnum.STAFF, UserProfileTypeEnum.ADMIN],
       });
 
-      return { users: users, total: count };
+      // Apply sorting
+      if (sortField) {
+        query.orderBy(`user.${sortField}`, direction as 'ASC' | 'DESC');
+      }
+
+      // Apply pagination
+      query.skip(skip).take(take);
+
+      // Execute queries for data and count
+      const [users, count] = await Promise.all([
+        query.getMany(),
+        query.getCount(),
+      ]);
+
+      return { users, total: count };
     } catch (error) {
-      this.logger.log(error);
-      this.logger.error('Failed to get employees', error);
-      throw new BadRequestException(error);
+      this.logger.error('Failed to get employees', error.stack);
+
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new BadRequestException(
+          'An error occurred while fetching employees',
+        );
+      }
     }
   }
 

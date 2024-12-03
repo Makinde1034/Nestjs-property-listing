@@ -44,7 +44,7 @@ export class Analysis {
 
 @ObjectType()
 export class ListingStats {
-  @Field(() => [Offer])
+  @Field(() => [Offer], { nullable: true })
   offers: Offer[];
 
   @Field()
