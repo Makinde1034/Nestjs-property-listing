@@ -7,3 +7,10 @@ export class CouponResponse {
   @Field()
   total: number;
 }
+@ObjectType()
+export class ValidCouponCouponResponse {
+  @Field(() => [Coupon])
+  valid: boolean;
+  @Field()
+  amount: number;
+}

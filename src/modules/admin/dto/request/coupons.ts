@@ -67,6 +67,18 @@ export class UpdateCouponInput extends PartialType(CreateCouponInput) {
 }
 
 @InputType()
+export class ValidataCouponInput {
+  @Field()
+  @IsString()
+  code: string;
+
+  @Field()
+  @IsNumber()
+  @IsPositive()
+  price: number;
+}
+
+@InputType()
 export class DeactivateCouponInput {
   @Field(() => [String])
   @IsArray()

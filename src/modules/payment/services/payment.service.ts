@@ -64,10 +64,10 @@ export class PaymentService {
     user: User,
   ) {
     if (createPaymentInput.coupon) {
-      const coupon: CouponResponse = await this.adminService.isCouponValid(
-        createPaymentInput.coupon,
-        createPaymentInput.amount,
-      );
+      const coupon: CouponResponse = await this.adminService.isCouponValid({
+        code: createPaymentInput.coupon,
+        price: createPaymentInput.amount,
+      });
       createPaymentInput.amount = coupon.amount;
     }
     const checkout = await this.hyperPayService.createCheckout(
@@ -108,10 +108,10 @@ export class PaymentService {
     // User: User,
   ) {
     if (createPaymentInput.coupon) {
-      const coupon: CouponResponse = await this.adminService.isCouponValid(
-        createPaymentInput.coupon,
-        createPaymentInput.amount,
-      );
+      const coupon: CouponResponse = await this.adminService.isCouponValid({
+        code: createPaymentInput.coupon,
+        price: createPaymentInput.amount,
+      });
       createPaymentInput.amount = coupon.amount;
     }
 

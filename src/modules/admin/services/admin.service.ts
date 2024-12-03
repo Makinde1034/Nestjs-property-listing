@@ -69,6 +69,7 @@ import {
   DeactivateCouponInput,
   DeleteCouponInput,
   UpdateCouponInput,
+  ValidataCouponInput,
 } from '../dto/request/coupons';
 import { Coupon } from '../../../entities/coupon.entity';
 import {
@@ -92,14 +93,11 @@ import { SystemFeatureSettingInput } from '../dto/request/workflow';
 import { ActivityLogService } from '../../activity-log/services/activity-log.service';
 import { ActivityEnum } from '../../../common/enums/activitys';
 import { AdminFilterAndSort } from '../../listing/dtos/request';
-import {
-  TicketStatus,
-  UserInterfaceType,
-  UserLevelEnum,
-  UserProfileTypeEnum,
-} from '../../../common/enums';
+import { TicketStatus, UserLevelEnum } from '../../../common/enums';
+
 import * as moment from 'moment';
 import { start } from 'repl';
+import { ValidCouponCouponResponse } from '../dto/response/coupons';
 
 @Injectable()
 export class AdminService {
@@ -972,17 +970,19 @@ export class AdminService {
     }
   }
 
-  async isCouponValid(code: string, price: number) {
+  async isCouponValid(
+    validataCouponInput: ValidataCouponInput,
+  ): Promise<ValidCouponCouponResponse> {
     try {
       let result: CouponResponse;
       const coupon = await this.couponRepository.findOne({
-        where: { code },
+        where: { code: validataCouponInput.code },
       });
 
       if (!coupon) {
         result = {
           valid: false,
-          amount: price,
+          amount: 0,
         };
 
         return result;
@@ -994,15 +994,15 @@ export class AdminService {
         !coupon.deactived &&
         coupon.maxUse > coupon.currentUse
       ) {
-        let amount = price;
+        let amount = validataCouponInput.price;
 
         switch (coupon.discountType) {
           case CouponEnum.NUMBER:
-            amount = price - coupon.discountValue;
+            amount = coupon.discountValue;
             break;
 
           case CouponEnum.PERCENT:
-            amount = price - (coupon.discountValue / 100) * price;
+            amount = (coupon.discountValue / 100) * validataCouponInput.price;
             break;
 
           default:
@@ -1017,7 +1017,7 @@ export class AdminService {
       }
       result = {
         valid: false,
-        amount: price,
+        amount: validataCouponInput.price,
       };
       return result;
     } catch (error) {
