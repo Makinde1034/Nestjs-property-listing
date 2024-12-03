@@ -176,6 +176,7 @@ export class UserService {
 
           nationality: 'Saudi Arabia',
         });
+        console.log(user);
 
         if (!user.nationalIdentity) {
           await this.nationalIdentityRepository.create({
