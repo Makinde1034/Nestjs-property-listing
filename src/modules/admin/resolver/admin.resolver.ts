@@ -33,6 +33,7 @@ import {
   DeactivateCouponInput,
   DeleteCouponInput,
   UpdateCouponInput,
+  ValidataCouponInput,
 } from '../dto/request/coupons';
 import { Coupon } from '../../../entities/coupon.entity';
 import { SuccessResponse } from '../../../common/utils/success.response';
@@ -181,6 +182,14 @@ export class AdminResolver {
     @Args('couponFilterInput') couponFilterInput: AdminFilterAndSort,
   ) {
     return await this.adminService.fetchCoupons(couponFilterInput);
+  }
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions(PermissionsEnum.COUPONS_VIEW)
+  @Query(() => CouponResponse, { name: 'fetchCoupons' })
+  async isCouponValid(
+    @Args('couponFilterInput') validataCouponInput: ValidataCouponInput,
+  ) {
+    return await this.adminService.isCouponValid(validataCouponInput);
   }
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.COUPONS_VIEW)
