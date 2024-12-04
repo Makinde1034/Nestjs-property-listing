@@ -142,7 +142,7 @@ export class AdminResolver {
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.COUPONS_CREATE)
-  @Mutation(() => Coupon, { name: 'createCoupon' })
+  @Mutation(() => SuccessResponse, { name: 'createCoupon' })
   async createCoupon(
     @Args('createCouponsInput') createCouponsInput: CreateCouponInput,
     @Context() ctx: any,

@@ -54,6 +54,7 @@ import {
   endOfMonth,
   startOfYear,
   endOfYear,
+  differenceInCalendarDays,
 } from 'date-fns';
 
 import { MessageEvent } from '../../sse/request/app';
@@ -63,6 +64,7 @@ import { AuctionParticipantResponse } from '../dtos/response/listing.response';
 import { SseService } from '../../sse/client.service';
 import { ServerSentEvents } from '../../../common/enums';
 import { BidRegistrationRepository } from '../repositories/bid-registration.repository';
+import { elementAt } from 'rxjs';
 
 @Injectable()
 export class AuctionService {
@@ -561,11 +563,24 @@ export class AuctionService {
 
   async delete(auctionActionInput: AuctionActionInput, user: User) {
     try {
+      let unableToUpdate = [];
+      const auction = await this.auctionRepository.find({
+        where: {
+          id: In(auctionActionInput.id),
+        },
+      });
+
+      auction.forEach((element) => {
+        if (element.startDate > new Date()) {
+          unableToUpdate.push(element);
+        }
+      });
+
       const deleteAuction = await this.auctionRepository.softDelete(
         auctionActionInput.id,
       );
 
-      if (deleteAuction.affected > 0) {
+      if (deleteAuction.affected >= 0) {
         const activityToSave = auctionActionInput.id.map((element) => {
           return {
             adminId: user.id,
@@ -575,7 +590,9 @@ export class AuctionService {
         });
 
         await this.activityLogsService.logActivity(activityToSave);
-        return new SuccessResponse(AppStrings.SUCCESSFULL);
+        return new SuccessResponse(AppStrings.SUCCESSFULL, {
+          unableToUpdate: { ...unableToUpdate },
+        });
       }
     } catch (error) {
       this.logger.log(error);
@@ -845,10 +862,12 @@ export class AuctionService {
 
   async registerToBid(data: BidRegistrationInput, user: User) {
     try {
-      const [auction, listing] = await Promise.all([
+      const [auction, listing, adminDefault] = await Promise.all([
         this.auctionRepository.findOneBy({ id: data.auctionId }),
         this.listingRepository.findOneBy({ id: data.listingId }),
+        this.adminService.adminDefault(),
       ]);
+      const now = new Date();
 
       if (!auction) {
         throw new BadRequestException('Auction not Found');
@@ -856,6 +875,12 @@ export class AuctionService {
 
       if (!listing) {
         throw new BadRequestException('Listing not Found');
+      }
+
+      const differenceInDays = differenceInCalendarDays(auction.startDate, now);
+
+      if (differenceInDays < adminDefault.daysToAuctionRegistrationStart) {
+        throw new BadRequestException('Bid registration has ended');
       }
 
       return await this.bidRegistrationRepository.save({
