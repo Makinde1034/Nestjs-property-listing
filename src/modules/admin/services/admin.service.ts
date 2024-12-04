@@ -36,6 +36,8 @@ import {
   subWeeks,
   addDays,
   format,
+  addMonths,
+  getMonth,
 } from 'date-fns';
 
 import { Between, Brackets, In } from 'typeorm';
@@ -328,11 +330,10 @@ export class AdminService {
       return saiiFees;
     } catch (error) {}
   }
-
   async financialVsOrder(findOptions: AdminDashboardSort) {
     try {
       const currentDate = new Date();
-      let startDate, endDate, groupByInterval;
+      let startDate, endDate, groupByInterval, duration;
 
       if (!findOptions || !findOptions.timePeriod) {
         throw new Error('Time period is required');
@@ -345,24 +346,36 @@ export class AdminService {
           endDate = endOfDay(currentDate);
           groupByInterval = 'hour';
           break;
+
         case TimePeriod.Week:
           const baseDate = subWeeks(currentDate, findOptions.value || 0);
           startDate = startOfWeek(baseDate);
           endDate = endOfWeek(baseDate);
           groupByInterval = 'day';
           break;
+
         case TimePeriod.Month:
-          const monthDate = subMonths(currentDate, findOptions.value || 0);
-          startDate = startOfMonth(monthDate);
-          endDate = endOfMonth(monthDate);
-          groupByInterval = 'week'; // Weeks within the month
+          if (findOptions.value === 6) {
+            const sixMonthsAgo = subMonths(currentDate, 5);
+            startDate = startOfMonth(sixMonthsAgo);
+            endDate = endOfMonth(currentDate);
+            groupByInterval = 'month';
+            duration = 6; // Last 6 months
+          } else {
+            const monthDate = subMonths(currentDate, findOptions.value || 0);
+            startDate = startOfMonth(monthDate);
+            endDate = endOfMonth(monthDate);
+            groupByInterval = 'week'; // Weeks within the month
+          }
           break;
+
         case TimePeriod.Year:
           const yearDate = subYears(currentDate, findOptions.value || 0);
           startDate = startOfYear(yearDate);
           endDate = endOfYear(yearDate);
-          groupByInterval = 'month'; // Months within the year
+          groupByInterval = 'month';
           break;
+
         default:
           throw new Error('Invalid time period');
       }
@@ -370,7 +383,7 @@ export class AdminService {
       // Query based on groupByInterval
       const groupIntervalSQL =
         groupByInterval === 'week'
-          ? `FLOOR((EXTRACT(DAY FROM invoice.createdAt) - 1) / 7) + 1` // Weeks of the month
+          ? `FLOOR((EXTRACT(DAY FROM invoice.createdAt) - 1) / 7) + 1`
           : `EXTRACT(${groupByInterval.toUpperCase()} FROM invoice.createdAt)`;
 
       const transactions = await this.invoiceRepository
@@ -387,35 +400,41 @@ export class AdminService {
         .orderBy(groupByInterval, 'ASC')
         .getRawMany();
 
+      // Log to debug interval keys
+
       // Generate all intervals based on groupByInterval
-      const totalIntervals = (() => {
+      const allIntervals = (() => {
         switch (groupByInterval) {
           case 'day':
-            return 7; // Days of the week
+            return Array.from({ length: 7 }, (_, i) =>
+              format(addDays(startOfWeek(startDate), i), 'EEEE'),
+            );
           case 'week':
-            return Math.ceil(differenceInDays(endDate, startDate) / 7); // Weeks in the time period
+            return Array.from(
+              { length: Math.ceil(differenceInDays(endDate, startDate) / 7) },
+              (_, i) => `Week ${i + 1}`,
+            );
           case 'month':
-            return 12; // Months in a year
+            if (duration === 6) {
+              return Array.from({ length: 6 }, (_, i) =>
+                format(addMonths(startDate, i), 'MMMM'),
+              );
+            }
+            return Array.from({ length: 12 }, (_, i) =>
+              format(addMonths(startOfYear(currentDate), i), 'MMMM'),
+            );
           case 'hour':
-            return 24; // Hours in a day
+            return Array.from({ length: 24 }, (_, i) => `${i}:00`);
           default:
-            return 0;
+            return [];
         }
       })();
-
-      const allIntervals = Array.from(
-        { length: totalIntervals },
-        (_, i) => `${this.mapIntervalToReadable(i, groupByInterval)}`,
-      );
 
       // Group transactions by interval
       const groupedTransactions = transactions.reduce(
         (acc, transaction) => {
           const interval = parseInt(transaction[groupByInterval]);
-          if (!acc[interval]) {
-            acc[interval] = [];
-          }
-
+          acc[interval] = acc[interval] || [];
           acc[interval].push({
             fee: transaction.fee,
             totalAmount: parseFloat(transaction.totalAmount),
@@ -426,56 +445,30 @@ export class AdminService {
         {} as { [key: number]: FinancialVsOrderResponse[] },
       );
 
-      // Build the final payload ensuring all intervals are included
       const payload = allIntervals.map((interval, idx) => {
-        const dataForInterval = groupedTransactions[idx + 1] || [];
+        let difference, month;
+
+        if (duration == 6) {
+          month = getMonth(startDate) + 1;
+          console.log(month);
+          difference = true;
+        }
+        // Match transactions to the exact interval key
+        const intervalKey = (idx + 1 + month).toString(); // Adjust for 1-based month indices
+        console.log(intervalKey, interval);
+        const dataForInterval = groupedTransactions[intervalKey] || [];
         return {
-          key: interval, // e.g., "January", "February", etc.
-          data: dataForInterval,
+          key: interval, // Human-readable interval (e.g., "October")
+          data: dataForInterval, // Corresponding transaction data
         };
       });
+      console.log(payload);
 
       return payload;
     } catch (error) {
       console.error(error);
       this.logger.log(error);
       throw new BadRequestException(error.message || 'An error occurred');
-    }
-  }
-
-  mapIntervalToReadable(index: number, groupBy: string): string {
-    switch (groupBy) {
-      case 'day':
-        return [
-          'Sunday',
-          'Monday',
-          'Tuesday',
-          'Wednesday',
-          'Thursday',
-          'Friday',
-          'Saturday',
-        ][index];
-      case 'week':
-        return `Week ${index + 1}`; // Adjust for 1-indexed weeks
-      case 'month':
-        return [
-          'January',
-          'February',
-          'March',
-          'April',
-          'May',
-          'June',
-          'July',
-          'August',
-          'September',
-          'October',
-          'November',
-          'December',
-        ][index];
-      case 'hour':
-        return `${index}:00`;
-      default:
-        return `Interval ${index + 1}`;
     }
   }
 
