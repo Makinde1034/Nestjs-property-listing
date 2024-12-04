@@ -45,7 +45,7 @@ export class Coupon {
   usage: string;
 
   @Field()
-  @Column()
+  @Column({ default: 0 })
   currentUse: number;
 
   @Field()

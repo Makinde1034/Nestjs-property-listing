@@ -183,14 +183,16 @@ export class AdminResolver {
   ) {
     return await this.adminService.fetchCoupons(couponFilterInput);
   }
+
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.COUPONS_VIEW)
-  @Query(() => CouponResponse, { name: 'fetchCoupons' })
+  @Query(() => CouponResponse, { name: 'validataCoupon' })
   async isCouponValid(
     @Args('couponFilterInput') validataCouponInput: ValidataCouponInput,
   ) {
     return await this.adminService.isCouponValid(validataCouponInput);
   }
+
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.COUPONS_VIEW)
   @Query(() => Coupon, { name: 'findOne' })
