@@ -406,7 +406,6 @@ export class IssueService {
           this.logger.debug('Child issue deleted successfully');
         },
       );
-
       await this.activityLogService.logActivity([
         {
           adminId: admin.id,

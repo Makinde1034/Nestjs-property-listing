@@ -838,7 +838,6 @@ type Coupon {
   name: String
   appliedTo: String
   maxUse: Float!
-  type: String!
   usage: String!
   currentUse: Float!
   discountType: String!
@@ -1599,7 +1598,7 @@ type Mutation {
   deleteResponseTemplate(deleteResponseTemplate: DeleteResponsetemplate!): SuccessResponse!
   updateResponseTemplate(updateResponseTemplateInput: UpdateResponseTemplateInput!): ResponseTemplate!
   createReview(createReviewDto: CreateReviewDto!): Review!
-  createCoupon(createCouponsInput: CreateCouponInput!): Coupon!
+  createCoupon(createCouponsInput: CreateCouponInput!): SuccessResponse!
   updateAdminDefault(updateAdminDefaultInput: UpdateAdminDefaultInput!): AdminDefault!
   updateAuctionBidRangeSetting(updateAuctionBidRangeSettingInput: UpdateAdminDefaultInput!): SuccessResponse!
   updateCoupon(updateCouponsInput: UpdateCouponInput!): Coupon!

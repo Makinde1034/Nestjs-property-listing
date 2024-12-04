@@ -709,6 +709,7 @@ export class ListingResolver {
       ctx.req.user,
     );
   }
+
   @UseGuards(AccessTokenGuard, UserTwoGuard)
   @Query(() => [AuctionBidRange], { name: 'bidRange' })
   async bidRange() {

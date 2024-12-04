@@ -38,10 +38,6 @@ export class Coupon {
 
   @Field()
   @Column()
-  type: string;
-
-  @Field()
-  @Column()
   usage: string;
 
   @Field()
