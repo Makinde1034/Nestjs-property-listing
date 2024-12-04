@@ -64,7 +64,6 @@ import { AuctionParticipantResponse } from '../dtos/response/listing.response';
 import { SseService } from '../../sse/client.service';
 import { ServerSentEvents } from '../../../common/enums';
 import { BidRegistrationRepository } from '../repositories/bid-registration.repository';
-import { elementAt } from 'rxjs';
 import { Auction } from '../../../entities/auction-table.entity';
 
 @Injectable()
@@ -374,14 +373,6 @@ export class AuctionService {
         where: { id: In(auctionActionInput.id) },
       });
 
-      const auctionsToUpdate = auction.map((element) => {
-        const { status, ...rest } = element;
-        return {
-          status: AuctionEnum.CANCELED,
-          ...rest,
-        };
-      });
-
       auction.forEach((element) => {
         if (element.startDate > new Date()) {
           unableToUpdate.push(element);
@@ -390,7 +381,15 @@ export class AuctionService {
         }
       });
 
-      const updated = await this.auctionRepository.save(update);
+      const auctionsToUpdate = update.map((element) => {
+        const { status, ...rest } = element;
+        return {
+          status: AuctionEnum.CANCELED,
+          ...rest,
+        };
+      });
+
+      const updated = await this.auctionRepository.save(auctionsToUpdate);
 
       const activityToSave = updated.map((element) => {
         return {
