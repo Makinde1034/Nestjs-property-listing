@@ -1218,7 +1218,8 @@ type Query {
   averageResponse: ResponseTime!
   saiiFees(findOptions: AdminDashboardSort): SaiiFees!
   financialVsOrder(findOptions: AdminDashboardSort!): [GroupTransactions!]!
-  fetchCoupons(couponFilterInput: ValidataCouponInput!): CouponResponse!
+  fetchCoupons(couponFilterInput: AdminFilterAndSort!): CouponResponse!
+  validataCoupon(couponFilterInput: ValidataCouponInput!): CouponResponse!
   findOne(id: String!): Coupon!
   findAllFeatures: [SystemFeatureSetting!]!
   searchForCoupon(searchParam: String!): [Coupon!]!
