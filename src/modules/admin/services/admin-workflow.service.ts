@@ -28,7 +28,7 @@ export class AdminWorkflowService {
         createWorkFlowInput.document,
       );
 
-      if (workflow) {
+      if (workflow && workflow?.action == createWorkFlowInput.action) {
         throw new BadRequestException(
           'A workFlow with this name already exist',
         );
