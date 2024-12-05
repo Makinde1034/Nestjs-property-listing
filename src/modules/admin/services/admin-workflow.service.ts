@@ -72,11 +72,34 @@ export class AdminWorkflowService {
   async findAllDocument(): Promise<SuccessResponse> {
     try {
       // Get all entity metadata and map to table names
-      const data = this.dataSource.entityMetadatas.map(
-        (metadata) => metadata.tableName,
-      );
 
-      return new SuccessResponse(AppStrings.SUCCESSFULL, data);
+      const payload = [
+        'ad_package',
+        'promotion',
+        'parent_issue',
+        'child_issue',
+        'feature',
+        'auction',
+        'attribute',
+        'attribute_set',
+        'listing_type',
+        'response_template',
+        'category',
+        'article',
+        'splash_screen',
+        'service_provider',
+        'role',
+        'notification_scope',
+        'user',
+        'work_flow',
+        'admin_notification_preference',
+        'admin_default',
+        'coupon',
+        'auction_bid_range',
+        'system_feature_setting',
+      ];
+
+      return new SuccessResponse(AppStrings.SUCCESSFULL, payload);
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
