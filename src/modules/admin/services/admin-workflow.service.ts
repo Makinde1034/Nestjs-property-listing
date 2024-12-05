@@ -24,6 +24,15 @@ export class AdminWorkflowService {
   logger = new Logger(AdminWorkflowService.name);
   async createWorkFlow(createWorkFlowInput: CreateWorkflowInput, admin: User) {
     try {
+      const workflow = await this.findOneWorkflowByDocumentname(
+        createWorkFlowInput.document,
+      );
+
+      if (workflow) {
+        throw new BadRequestException(
+          'A workFlow with this name already exist',
+        );
+      }
       const data = await this.workflowRepository.save(createWorkFlowInput);
       await this.activityLogService.logActivity([
         {
