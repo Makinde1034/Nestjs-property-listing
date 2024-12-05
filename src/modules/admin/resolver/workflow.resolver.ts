@@ -99,6 +99,6 @@ export class WorkFlowResolver {
   @Query(() => [WorkFlow], { name: 'searchForworkflow' })
   @UseGuards(AccessTokenGuard)
   async searchForworkflow(@Args('searchParam') searchParam: string) {
-    return await this.workFlowService.searchForworkflow(searchParam);
+    return await this.workFlowService.searchForWorkflow(searchParam);
   }
 }

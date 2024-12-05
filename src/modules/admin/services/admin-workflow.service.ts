@@ -24,6 +24,15 @@ export class AdminWorkflowService {
   logger = new Logger(AdminWorkflowService.name);
   async createWorkFlow(createWorkFlowInput: CreateWorkflowInput, admin: User) {
     try {
+      const workflow = await this.findOneWorkflowByDocumentname(
+        createWorkFlowInput.document,
+      );
+
+      if (workflow && workflow?.action == createWorkFlowInput.action) {
+        throw new BadRequestException(
+          'A workFlow with this name already exist',
+        );
+      }
       const data = await this.workflowRepository.save(createWorkFlowInput);
       await this.activityLogService.logActivity([
         {
@@ -72,11 +81,34 @@ export class AdminWorkflowService {
   async findAllDocument(): Promise<SuccessResponse> {
     try {
       // Get all entity metadata and map to table names
-      const data = this.dataSource.entityMetadatas.map(
-        (metadata) => metadata.tableName,
-      );
 
-      return new SuccessResponse(AppStrings.SUCCESSFULL, data);
+      const payload = [
+        'ad_package',
+        'promotion',
+        'parent_issue',
+        'child_issue',
+        'feature',
+        'auction',
+        'attribute',
+        'attribute_set',
+        'listing_type',
+        'response_template',
+        'category',
+        'article',
+        'splash_screen',
+        'service_provider',
+        'role',
+        'notification_scope',
+        'user',
+        'work_flow',
+        'admin_notification_preference',
+        'admin_default',
+        'coupon',
+        'auction_bid_range',
+        'system_feature_setting',
+      ];
+
+      return new SuccessResponse(AppStrings.SUCCESSFULL, payload);
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -191,7 +223,7 @@ export class AdminWorkflowService {
     }
   }
 
-  async searchForworkflow(searchParam: string) {
+  async searchForWorkflow(searchParam: string) {
     try {
       return await this.workflowRepository
         .createQueryBuilder('workflow')
