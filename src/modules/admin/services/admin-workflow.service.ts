@@ -223,7 +223,7 @@ export class AdminWorkflowService {
     }
   }
 
-  async searchForworkflow(searchParam: string) {
+  async searchForWorkflow(searchParam: string) {
     try {
       return await this.workflowRepository
         .createQueryBuilder('workflow')
