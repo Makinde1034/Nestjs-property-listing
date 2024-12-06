@@ -57,7 +57,7 @@ export class IssueResolver {
 
     @Context() ctx: any,
   ): Promise<SuccessResponse> {
-    return await this.issueService.updateIssue(RequestInput, ctx.user.req);
+    return await this.issueService.updateIssue(RequestInput, ctx.req.user);
   }
 
   /**
@@ -90,23 +90,23 @@ export class IssueResolver {
     return await this.issueService.deleteIssue(id, ctx.req.user);
   }
 
-  @Mutation(() => ParentIssue)
+  @Mutation(() => SuccessResponse)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.ISSUES_CATEGORIES_CREATE)
   async createChildIssue(
     @Args('input') input: CreateChildIssueInput,
     @Context() ctx: any,
-  ): Promise<ChildIssue> {
+  ): Promise<SuccessResponse> {
     return await this.issueService.createChildIssue(input, ctx.req.user);
   }
 
-  @Mutation(() => ParentIssue)
+  @Mutation(() => SuccessResponse)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.ISSUES_CATEGORIES_CREATE)
   async updateChildIssue(
     @Args('RequestInput') RequestInput: UpdateIssueInput,
     @Context() ctx: any,
-  ): Promise<ChildIssue> {
+  ): Promise<SuccessResponse> {
     return await this.issueService.updateChildIssue(RequestInput, ctx.req.user);
   }
 

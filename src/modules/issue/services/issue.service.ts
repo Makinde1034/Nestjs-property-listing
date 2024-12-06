@@ -3,7 +3,13 @@
  * For license. See license.txt
  */
 
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  Injectable,
+  Logger,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 
 import { ChildIssue, ParentIssue, User } from 'src/entities';
 import {
@@ -311,66 +317,208 @@ export class IssueService {
    * Child Issue
    *********************************/
 
+  // async createChildIssue(
+  //   payload: CreateChildIssueInput,
+  //   admin: User,
+  // ): Promise<ChildIssue> {
+  //   const { parentId, ...data } = payload;
+  //   const parentIssue = await this.issueRepository.findOneByOrFail({
+  //     id: parentId,
+  //   });
+  //   if (!parentIssue) {
+  //     throw new BadRequestException('Parent Issue not found');
+  //   }
+  //   const childIssue = await this.childIssueRepository.save({
+  //     ...data,
+  //     parentIssue,
+  //   });
+
+  //   await this.activityLogService.logActivity([
+  //     {
+  //       adminId: admin.id,
+  //       action: ActivityEnum.CREATED,
+  //       details: JSON.stringify(childIssue),
+  //       placement: childIssue.parentIssue.placement,
+  //     },
+  //   ]);
+
+  //   return childIssue;
+  // }
+
   async createChildIssue(
     payload: CreateChildIssueInput,
     admin: User,
-  ): Promise<ChildIssue> {
-    const { parentId, ...data } = payload;
-    const parentIssue = await this.issueRepository.findOneByOrFail({
-      id: parentId,
-    });
-    if (!parentIssue) {
-      throw new BadRequestException('Parent Issue not found');
+  ): Promise<SuccessResponse> {
+    try {
+      const { parentId, ...data } = payload;
+
+      // Validate the parent issue
+      const parentIssue = await this.issueRepository.findOneByOrFail({
+        id: parentId,
+      });
+      if (!parentIssue) {
+        throw new BadRequestException('Parent Issue not found');
+      }
+
+      // Check if a workflow is configured for the ChildIssue entity
+      const actionConfig =
+        await this.workflowService.findOneWorkflowByDocumentname(
+          this.childIssueRepository.metadata.name,
+        );
+
+      if (actionConfig) {
+        // Submit the action for workflow approval
+        await this.actionService.createActionRequest(
+          {
+            document: this.childIssueRepository.metadata.tableName,
+            actionType: 'create',
+            targetEntityId: null, // New entities don't have IDs yet
+            user: admin,
+            payload: JSON.stringify({ ...data, parentId }),
+          },
+          admin,
+        );
+
+        return new SuccessResponse('Action is awaiting approval');
+      }
+
+      // If no workflow is configured, create the child issue directly
+      const childIssue = await this.childIssueRepository.save({
+        ...data,
+        parentIssue,
+      });
+
+      // Log the activity for this action
+      await this.activityLogService.logActivity([
+        {
+          adminId: admin.id,
+          action: ActivityEnum.CREATED,
+          details: JSON.stringify(childIssue),
+          placement: childIssue.parentIssue.placement,
+        },
+      ]);
+
+      return new SuccessResponse(AppStrings.SUCCESSFULL, childIssue);
+    } catch (error) {
+      this.logger.error('Failed to create child issue', error.stack);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new UnprocessableEntityException(
+        'An error occurred while creating the child issue',
+      );
     }
-    const childIssue = await this.childIssueRepository.save({
-      ...data,
-      parentIssue,
-    });
-
-    await this.activityLogService.logActivity([
-      {
-        adminId: admin.id,
-        action: ActivityEnum.CREATED,
-        details: JSON.stringify(childIssue),
-        placement: childIssue.parentIssue.placement,
-      },
-    ]);
-
-    return childIssue;
   }
 
-  async updateChildIssue(updateChildissue: UpdateChildIssueInput, admin: User) {
+  // async updateChildIssue(updateChildissue: UpdateChildIssueInput, admin: User) {
+  //   try {
+  //     const { id, ...rest } = updateChildissue;
+  //     const childIssue = await this.childIssueRepository.findOneBy({
+  //       id,
+  //     });
+
+  //     if (!childIssue) {
+  //       throw new BadRequestException(AppStrings.NOT_FOUND);
+  //     }
+  //     const childIssueCount = await this.childIssueRepository.count();
+  //     rest.sequentialId = childIssueCount + 1;
+
+  //     const { affected } = await this.childIssueRepository.update(id, rest);
+
+  //     if (affected > 0) {
+  //       await this.activityLogService.logActivity([
+  //         {
+  //           adminId: admin.id,
+  //           action: ActivityEnum.UPDATED,
+  //           details: JSON.stringify(childIssue),
+  //           placement: childIssue.parentIssue.placement,
+  //         },
+  //       ]);
+  //       return await this.childIssueRepository.findOneByOrFail({ id });
+  //     }
+  //   } catch (error) {
+  //     this.logger.log(error);
+
+  //     throw new BadRequestException(error);
+  //   }
+  // }
+
+  async updateChildIssue(
+    updateChildIssueInput: UpdateChildIssueInput,
+    admin: User,
+  ): Promise<SuccessResponse> {
     try {
-      const { id, ...rest } = updateChildissue;
-      const childIssue = await this.childIssueRepository.findOneBy({
-        id,
+      const { id, ...rest } = updateChildIssueInput;
+
+      // Check if the child issue exists
+      const childIssue = await this.childIssueRepository.findOne({
+        where: { id },
+        relations: ['parentIssue'],
       });
 
       if (!childIssue) {
         throw new BadRequestException(AppStrings.NOT_FOUND);
       }
+
+      // Check if a workflow is configured for the ChildIssue entity
+      const actionConfig =
+        await this.workflowService.findOneWorkflowByDocumentname(
+          this.childIssueRepository.metadata.name,
+        );
+
+      if (actionConfig) {
+        // Submit the update action for workflow approval
+        await this.actionService.createActionRequest(
+          {
+            document: this.childIssueRepository.metadata.name,
+            actionType: 'update',
+            targetEntityId: id.toString(),
+            user: admin,
+            payload: JSON.stringify(rest),
+          },
+          admin,
+        );
+
+        return new SuccessResponse('Action is awaiting approval');
+      }
+
+      // If no workflow is configured, proceed with the update directly
       const childIssueCount = await this.childIssueRepository.count();
       rest.sequentialId = childIssueCount + 1;
 
       const { affected } = await this.childIssueRepository.update(id, rest);
 
       if (affected > 0) {
+        // Log the update activity
         await this.activityLogService.logActivity([
           {
             adminId: admin.id,
             action: ActivityEnum.UPDATED,
-            details: JSON.stringify(childIssue),
+            details: JSON.stringify({ ...childIssue, ...rest }),
             placement: childIssue.parentIssue.placement,
           },
         ]);
-        return await this.childIssueRepository.findOneByOrFail({ id });
-      }
-    } catch (error) {
-      this.logger.log(error);
 
-      throw new BadRequestException(error);
+        // Fetch and return the updated child issue
+        const data = await this.childIssueRepository.findOneByOrFail({ id });
+
+        return new SuccessResponse(AppStrings.SUCCESSFULL, data);
+      }
+
+      throw new BadRequestException('Update failed');
+    } catch (error) {
+      this.logger.error('Failed to update child issue', error.stack);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new UnprocessableEntityException(
+        'An error occurred while updating the child issue',
+      );
     }
   }
+
   async findAllChildIssues(id: string): Promise<ChildIssue[]> {
     try {
       return await this.childIssueRepository.find({
