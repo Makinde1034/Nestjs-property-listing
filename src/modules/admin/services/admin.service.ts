@@ -23,7 +23,6 @@ import {
   startOfYear,
   endOfYear,
   subYears,
-  eachQuarterOfInterval,
   endOfMonth,
   startOfMonth,
   subMonths,
@@ -31,7 +30,6 @@ import {
   endOfDay,
   endOfWeek,
   startOfWeek,
-  interval,
   differenceInDays,
   subWeeks,
   addDays,
@@ -44,7 +42,6 @@ import { Between, Brackets, In } from 'typeorm';
 import { OfferListEnum } from '../../../common/enums/status.enum';
 import {
   SaiiFees,
-  FinancialVsOrder,
   ListingStats,
   UserStats,
   UserFunneling,
@@ -55,13 +52,11 @@ import {
   UserAgeRange,
   CouponResponse,
   FinancialVsOrderResponse,
-  GroupTransactions,
 } from '../dto/response/admin-response';
 import { TicketRepository } from '../../tickets/repositories';
 import {
   AdminDashboardListingStatus,
   AdminDashboardSort,
-  AdminDefaultInput,
   UpdateAdminDefaultInput,
 } from '../dto/request/admin-request';
 import { AdminRepository } from '../repositories/admin.repository';
@@ -74,12 +69,7 @@ import {
   ValidataCouponInput,
 } from '../dto/request/coupons';
 import { Coupon } from '../../../entities/coupon.entity';
-import {
-  generateRandomArray,
-  getDateFromWeek,
-  getDayName,
-} from '../../../common/utils/helper';
-import slugify from 'slugify';
+
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { AppStrings } from '../../../common/messages/app.strings';
 import { CouponEnum } from '../../../common/enums/coupons.enum';
@@ -98,7 +88,6 @@ import { AdminFilterAndSort } from '../../listing/dtos/request';
 import { TicketStatus, UserLevelEnum } from '../../../common/enums';
 
 import * as moment from 'moment';
-import { start } from 'repl';
 import { ValidCouponCouponResponse } from '../dto/response/coupons';
 
 @Injectable()
@@ -883,7 +872,7 @@ export class AdminService {
     try {
       const actionConfig =
         await this.workflowService.findOneWorkflowByDocumentname(
-          this.userRepository.metadata.name,
+          this.userRepository.metadata.tableName,
         );
 
       const data = this.couponRepository.create({
@@ -893,7 +882,7 @@ export class AdminService {
       if (actionConfig) {
         await this.actionService.createActionRequest(
           {
-            document: this.couponRepository.metadata.name,
+            document: this.couponRepository.metadata.tableName,
             actionType: 'create',
             targetEntityId: null,
             user: admin,
@@ -1025,7 +1014,7 @@ export class AdminService {
     try {
       const [actionConfig, coupons] = await Promise.all([
         this.workflowService.findOneWorkflowByDocumentname(
-          this.userRepository.metadata.name,
+          this.userRepository.metadata.tableName,
         ),
         this.couponRepository.findOne({
           where: { id: updateCouponInput.id },
@@ -1043,7 +1032,7 @@ export class AdminService {
       if (actionConfig) {
         await this.actionService.createActionRequest(
           {
-            document: this.couponRepository.metadata.name,
+            document: this.couponRepository.metadata.tableName,
             actionType: 'update',
             targetEntityId: null,
             user: admin,
@@ -1083,7 +1072,7 @@ export class AdminService {
     try {
       const [actionConfig, coupons] = await Promise.all([
         this.workflowService.findOneWorkflowByDocumentname(
-          this.userRepository.metadata.name,
+          this.userRepository.metadata.tableName,
         ),
         this.couponRepository.find({
           where: { id: In(deleteCouponInput.id) },
@@ -1099,7 +1088,7 @@ export class AdminService {
       if (actionConfig) {
         await this.actionService.createActionRequest(
           {
-            document: this.couponRepository.metadata.name,
+            document: this.couponRepository.metadata.tableName,
             actionType: 'update',
             targetEntityId: null,
             user: admin,
@@ -1126,7 +1115,7 @@ export class AdminService {
     try {
       const [actionConfig, coupons] = await Promise.all([
         this.workflowService.findOneWorkflowByDocumentname(
-          this.userRepository.metadata.name,
+          this.userRepository.metadata.tableName,
         ),
         this.couponRepository.find({
           where: { id: In(deactivateCouponInput.id) },
@@ -1142,7 +1131,7 @@ export class AdminService {
       if (actionConfig) {
         await this.actionService.createActionRequest(
           {
-            document: this.couponRepository.metadata.name,
+            document: this.couponRepository.metadata.tableName,
             actionType: 'create',
             targetEntityId: null,
             user: admin,
@@ -1169,7 +1158,7 @@ export class AdminService {
     try {
       const [actionConfig, coupons] = await Promise.all([
         this.workflowService.findOneWorkflowByDocumentname(
-          this.userRepository.metadata.name,
+          this.userRepository.metadata.tableName,
         ),
         this.couponRepository.find({
           where: { id: In(deactivateCouponInput.id) },
@@ -1185,7 +1174,7 @@ export class AdminService {
       if (actionConfig) {
         await this.actionService.createActionRequest(
           {
-            document: this.couponRepository.metadata.name,
+            document: this.couponRepository.metadata.tableName,
             actionType: 'create',
             targetEntityId: null,
             user: admin,

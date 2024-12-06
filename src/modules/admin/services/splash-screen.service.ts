@@ -53,7 +53,7 @@ export class SplashScreenService {
   logger = new Logger(SplashScreenService.name);
   async create(createSplashScreen: CreateSplashScreenInput, admin: User) {
     try {
-      const documentName = this.splashScreenRepository.metadata.name;
+      const documentName = this.splashScreenRepository.metadata.tableName;
 
       // Check for workflow configuration
       const actionConfigPromise =
@@ -196,7 +196,7 @@ export class SplashScreenService {
       const [splashScreen, actionConfig] = await Promise.all([
         this.splashScreenRepository.findOneBy({ id }),
         this.workflowService.findOneWorkflowByDocumentname(
-          this.splashScreenRepository.metadata.name,
+          this.splashScreenRepository.metadata.tableName,
         ),
       ]);
 
@@ -209,7 +209,7 @@ export class SplashScreenService {
       if (actionConfig) {
         await this.actionService.createActionRequest(
           {
-            document: this.splashScreenRepository.metadata.name,
+            document: this.splashScreenRepository.metadata.tableName,
             actionType: 'update',
             targetEntityId: id.toString(),
             user: admin,
@@ -263,7 +263,7 @@ export class SplashScreenService {
           where: { id: In(deleteSplashScreenInput.id) },
         }),
         this.workflowService.findOneWorkflowByDocumentname(
-          this.splashScreenRepository.metadata.name,
+          this.splashScreenRepository.metadata.tableName,
         ),
       ]);
 
@@ -276,7 +276,7 @@ export class SplashScreenService {
           element.deletedAt = new Date();
           await this.actionService.createActionRequest(
             {
-              document: this.splashScreenRepository.metadata.name,
+              document: this.splashScreenRepository.metadata.tableName,
               actionType: 'update',
               targetEntityId: element.id.toString(),
               user: admin,

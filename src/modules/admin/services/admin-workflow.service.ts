@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { WorkflowRepository } from '../repositories/workflow.repository';
 import {
   ActionsInput,
@@ -42,8 +47,13 @@ export class AdminWorkflowService {
           workflowId: data.id,
         },
       ]);
+      return data;
     } catch (error) {
       this.logger.log(error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
       throw new BadRequestException(error);
     }
   }
@@ -83,8 +93,6 @@ export class AdminWorkflowService {
       // Get all entity metadata and map to table names
 
       const payload = [
-        'ad_package',
-        'promotion',
         'parent_issue',
         'child_issue',
         'feature',
@@ -104,6 +112,7 @@ export class AdminWorkflowService {
         'admin_notification_preference',
         'admin_default',
         'coupon',
+        'notification_messages',
         'auction_bid_range',
         'system_feature_setting',
       ];
