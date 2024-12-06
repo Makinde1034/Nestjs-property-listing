@@ -1589,8 +1589,8 @@ type Mutation {
   createIssue(input: CreateIssueInput!): SuccessResponse!
   updateIssue(RequestInput: UpdateIssueInput!): SuccessResponse!
   deleteIssue(id: String!): SuccessResponse!
-  createChildIssue(input: CreateChildIssueInput!): ParentIssue!
-  updateChildIssue(RequestInput: UpdateIssueInput!): ParentIssue!
+  createChildIssue(input: CreateChildIssueInput!): SuccessResponse!
+  updateChildIssue(RequestInput: UpdateIssueInput!): SuccessResponse!
   deleteChildIssue(id: String!): SuccessResponse!
   createTicket(RequestInput: CreateTicketInput!): Ticket!
   manageTicket(RequestInput: UpdateTicketInput!): [Ticket!]!

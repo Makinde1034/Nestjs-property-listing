@@ -3,7 +3,13 @@
  * For license. See license.txt
  */
 
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  Injectable,
+  Logger,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 
 import { ChildIssue, ParentIssue, User } from 'src/entities';
 import {
@@ -14,7 +20,7 @@ import {
 } from '../dtos';
 import { AppStrings } from 'src/common/messages/app.strings';
 import { ChildIssueRepository } from '../repositories/child-issue.repository';
-import { EntityManager, MoreThanOrEqual } from 'typeorm';
+import { Between, EntityManager, MoreThanOrEqual } from 'typeorm';
 import { IssueRepository } from '../repositories';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { ActivityLogService } from '../../activity-log/services/activity-log.service';
@@ -45,85 +51,79 @@ export class IssueService {
     admin: User,
   ): Promise<SuccessResponse> {
     try {
-      const { sequentialId, ...input } = payload;
+      const { sequentialId, ...data } = payload;
 
-      if (sequentialId !== undefined && sequentialId <= 0) {
-        throw new BadRequestException('SequentialId must be greater than 0');
-      }
-
-      // Fetch action configuration for issues
-      const actionConfig =
-        await this.workflowService.findOneWorkflowByDocumentname(
-          this.issueRepository.metadata.tableName,
+      // Check if a workflow is configured for the ParentIssue entity
+      const actionConfigPromise =
+        this.workflowService.findOneWorkflowByDocumentname(
+          this.issueRepository.metadata.name,
         );
 
-      const count = await this.issueRepository.count({
-        where: { placement: input.placement },
-      });
+      // Directly calculate the sequential ID if needed
+      const totalIssuesPromise = sequentialId
+        ? null
+        : this.issueRepository.count();
 
-      const issueData: Partial<ParentIssue> = {
-        englishName: input.englishName,
-        arabicName: input.arabicName,
-        sequentialId: count,
-        placement: input.placement,
-      };
+      const [actionConfig, totalIssues] = await Promise.all([
+        actionConfigPromise,
+        totalIssuesPromise,
+      ]);
 
-      // If workflow exists, create an action request
+      // If a workflow is configured, submit the action for approval
       if (actionConfig) {
         await this.actionService.createActionRequest(
           {
-            document: this.issueRepository.metadata.tableName,
+            document: this.issueRepository.metadata.name,
             actionType: 'create',
-            targetEntityId: null,
+            targetEntityId: null, // No specific entity yet for a new parent issue
             user: admin,
-            payload: JSON.stringify(issueData),
+            payload: JSON.stringify(payload),
           },
           admin,
         );
 
-        return new SuccessResponse('Awaiting action approval');
+        return new SuccessResponse('Action is awaiting approval');
       }
 
-      // Proceed with creating the issue directly
-      const data = await this.issueRepository.manager.transaction(
-        async (manager) => {
-          const createdIssue = await manager.save(
-            this.issueRepository.create(issueData),
-          );
+      // Calculate the final sequential ID
+      const finalSequentialId = sequentialId ?? totalIssues + 1;
 
-          if (sequentialId !== undefined) {
-            await manager.update(
-              ParentIssue,
-              {
-                placement: createdIssue.placement,
-                sequentialId: MoreThanOrEqual(sequentialId),
-              },
-              { sequentialId: () => 'sequentialId + 1' },
-            );
+      if (sequentialId) {
+        // Rearrange existing sequential IDs
+        await this.issueRepository
+          .createQueryBuilder()
+          .update()
+          .set({ sequentialId: () => 'sequentialId + 1' })
+          .where('sequentialId >= :sequentialId', { sequentialId })
+          .execute();
+      }
 
-            await manager.update(ParentIssue, createdIssue.id, {
-              sequentialId,
-            });
-          }
+      // Save the new issue
+      const parentIssue = await this.issueRepository.save({
+        ...data,
+        sequentialId: finalSequentialId,
+      });
 
-          await this.activityLogService.logActivity([
-            {
-              adminId: admin.id,
-              action: ActivityEnum.CREATED,
-              details: JSON.stringify(issueData),
-              placement: issueData.placement,
-            },
-          ]);
-
-          return createdIssue;
+      // Log activity
+      await this.activityLogService.logActivity([
+        {
+          adminId: admin.id,
+          action: ActivityEnum.CREATED,
+          details: JSON.stringify(parentIssue),
+          placement: parentIssue.placement,
         },
-      );
+      ]);
 
-      return new SuccessResponse(AppStrings.SUCCESSFULL, data);
+      return new SuccessResponse(AppStrings.SUCCESSFULL, parentIssue);
     } catch (error) {
-      this.logger.error(error);
-      throw new BadRequestException(
-        error.message || 'An error occurred while creating the issue',
+      this.logger.error('Failed to create parent issue', error.stack);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new UnprocessableEntityException(
+        'An error occurred while creating the parent issue',
       );
     }
   }
@@ -149,108 +149,103 @@ export class IssueService {
   }
 
   async updateIssue(
-    input: UpdateIssueInput,
+    updateParentIssueInput: UpdateIssueInput,
     admin: User,
   ): Promise<SuccessResponse> {
-    const { id, sequentialId, ...data } = input;
+    try {
+      const { id, sequentialId, ...rest } = updateParentIssueInput;
 
-    if (sequentialId !== undefined && sequentialId <= 0) {
-      throw new BadRequestException('SequentialId must be greater than 0');
-    }
-
-    // Fetch action configuration and validate issue existence
-    const [actionConfig, issue] = await Promise.all([
-      this.workflowService.findOneWorkflowByDocumentname(
-        this.issueRepository.metadata.tableName,
-      ),
-      this.issueRepository.findOneByOrFail({ id }),
-    ]);
-
-    if (!issue) {
-      throw new BadRequestException('Issue not found');
-    }
-
-    const updatedIssueData: Partial<ParentIssue> = {
-      ...issue,
-      ...data,
-    };
-
-    // If workflow exists, create an action request
-    if (actionConfig) {
-      await this.actionService.createActionRequest(
-        {
-          document: this.issueRepository.metadata.tableName,
-          actionType: 'update',
-          targetEntityId: id,
-          user: admin,
-          payload: JSON.stringify(updatedIssueData),
-        },
-        admin,
-      );
-
-      return new SuccessResponse('Awaiting action approval');
-    }
-
-    // Proceed with updating the issue directly
-    const result = await this.issueRepository.manager.transaction(
-      async (transactionalEntityManager: EntityManager) => {
-        // Update the issue with the provided data
-        await transactionalEntityManager.update(ParentIssue, id, data);
-
-        if (sequentialId !== undefined) {
-          // Fetch records with a sequentialId greater than or equal to the input's sequentialId
-          const records = await transactionalEntityManager.find(ParentIssue, {
-            where: {
-              sequentialId: MoreThanOrEqual(sequentialId),
-              placement: issue.placement,
-            },
-            order: { sequentialId: 'ASC' },
-          });
-
-          // Update the sequentialId for the current issue
-          await transactionalEntityManager.update(ParentIssue, id, {
-            sequentialId: sequentialId,
-          });
-
-          let newSequentialId = sequentialId + 1;
-
-          // Prepare records for update
-          const updatedRecords = records
-            .filter(
-              (record) =>
-                record.id !== id && record.sequentialId >= sequentialId,
-            )
-            .map((record) => {
-              record.sequentialId = newSequentialId;
-              newSequentialId += 1;
-              return record;
-            });
-
-          // Save updated records if any
-          if (updatedRecords.length > 0) {
-            await transactionalEntityManager.save(ParentIssue, updatedRecords);
-          }
-        }
-
-        // Return the updated issue
-        return await transactionalEntityManager.findOneOrFail(ParentIssue, {
+      // Fetch the parent issue and workflow configuration in parallel
+      const [parentIssue, actionConfig] = await Promise.all([
+        this.issueRepository.findOne({
           where: { id },
-          order: { sequentialId: 'ASC' },
+          select: ['id', 'sequentialId', 'placement'], // Fetch only necessary fields
+        }),
+        this.workflowService.findOneWorkflowByDocumentname(
+          this.issueRepository.metadata.name,
+        ),
+      ]);
+
+      if (!parentIssue) {
+        throw new BadRequestException('Parent Issue not found');
+      }
+
+      // Handle workflow-based approval
+      if (actionConfig) {
+        await this.actionService.createActionRequest(
+          {
+            document: this.issueRepository.metadata.name,
+            actionType: 'update',
+            targetEntityId: id.toString(),
+            user: admin,
+            payload: JSON.stringify(updateParentIssueInput),
+          },
+          admin,
+        );
+
+        return new SuccessResponse('Action is awaiting approval');
+      }
+
+      // Rearrange sequential IDs if necessary
+      if (sequentialId && sequentialId !== parentIssue.sequentialId) {
+        const queryBuilder = this.issueRepository.createQueryBuilder();
+        if (sequentialId > parentIssue.sequentialId) {
+          await queryBuilder
+            .update()
+            .set({ sequentialId: () => 'sequentialId - 1' })
+            .where('sequentialId BETWEEN :current AND :target', {
+              current: parentIssue.sequentialId + 1,
+              target: sequentialId,
+            })
+            .execute();
+        } else {
+          await queryBuilder
+            .update()
+            .set({ sequentialId: () => 'sequentialId + 1' })
+            .where('sequentialId BETWEEN :target AND :current', {
+              target: sequentialId,
+              current: parentIssue.sequentialId - 1,
+            })
+            .execute();
+        }
+      }
+
+      // Update the parent issue
+      const updateResult = await this.issueRepository.update(id, {
+        ...rest,
+        sequentialId: sequentialId ?? parentIssue.sequentialId,
+      });
+
+      if (updateResult.affected > 0) {
+        // Log activity for the update
+        await this.activityLogService.logActivity([
+          {
+            adminId: admin.id,
+            action: ActivityEnum.UPDATED,
+            details: JSON.stringify({ id, ...rest }),
+            placement: parentIssue.placement,
+          },
+        ]);
+
+        return new SuccessResponse(AppStrings.SUCCESSFULL, {
+          id,
+          ...rest,
+          sequentialId: sequentialId ?? parentIssue.sequentialId,
         });
-      },
-    );
+      }
 
-    // Log activity after update
-    await this.activityLogService.logActivity([
-      {
-        adminId: admin.id,
-        action: ActivityEnum.UPDATED,
-        details: JSON.stringify(data),
-        placement: issue.placement,
-      },
-    ]);
+      throw new UnprocessableEntityException('Update operation failed');
+    } catch (error) {
+      this.logger.error('Failed to update parent issue', error.stack);
 
-    return new SuccessResponse(AppStrings.SUCCESSFULL, result);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new UnprocessableEntityException(
+        'An error occurred while updating the parent issue',
+      );
+    }
   }
 
   /**
@@ -314,63 +309,195 @@ export class IssueService {
   async createChildIssue(
     payload: CreateChildIssueInput,
     admin: User,
-  ): Promise<ChildIssue> {
-    const { parentId, ...data } = payload;
-    const parentIssue = await this.issueRepository.findOneByOrFail({
-      id: parentId,
-    });
-    if (!parentIssue) {
-      throw new BadRequestException('Parent Issue not found');
+  ): Promise<SuccessResponse> {
+    try {
+      const { parentId, sequentialId, ...data } = payload;
+
+      // Check if the parent issue exists
+      const parentIssue = await this.issueRepository.findOneByOrFail({
+        id: parentId,
+      });
+
+      if (!parentIssue) {
+        throw new BadRequestException('Parent Issue not found');
+      }
+
+      // Check if a workflow is configured for the ChildIssue entity
+      const actionConfig =
+        await this.workflowService.findOneWorkflowByDocumentname(
+          this.childIssueRepository.metadata.name,
+        );
+
+      // If a workflow is configured, submit the action for approval
+      if (actionConfig) {
+        await this.actionService.createActionRequest(
+          {
+            document: this.childIssueRepository.metadata.name,
+            actionType: 'create',
+            targetEntityId: parentId.toString(),
+            user: admin,
+            payload: JSON.stringify(payload),
+          },
+          admin,
+        );
+
+        return new SuccessResponse('Action is awaiting approval');
+      }
+
+      // Direct creation logic if no workflow exists
+      if (sequentialId) {
+        // If sequentialId is provided, rearrange existing sequential IDs
+        await this.childIssueRepository.increment(
+          { sequentialId: MoreThanOrEqual(sequentialId) },
+          'sequentialId',
+          1,
+        );
+      }
+
+      const finalSequentialId =
+        sequentialId ??
+        (await this.childIssueRepository.count({ where: { parentIssue } })) + 1;
+
+      const childIssue = await this.childIssueRepository.save({
+        ...data,
+        parentIssue,
+        sequentialId: finalSequentialId,
+      });
+
+      // Log activity
+      await this.activityLogService.logActivity([
+        {
+          adminId: admin.id,
+          action: ActivityEnum.CREATED,
+          details: JSON.stringify(childIssue),
+          placement: childIssue.parentIssue.placement,
+        },
+      ]);
+
+      return new SuccessResponse(AppStrings.SUCCESSFULL, childIssue);
+    } catch (error) {
+      this.logger.error('Failed to create child issue', error.stack);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new UnprocessableEntityException(
+        'An error occurred while creating the child issue',
+      );
     }
-    const childIssue = await this.childIssueRepository.save({
-      ...data,
-      parentIssue,
-    });
-
-    await this.activityLogService.logActivity([
-      {
-        adminId: admin.id,
-        action: ActivityEnum.CREATED,
-        details: JSON.stringify(childIssue),
-        placement: childIssue.parentIssue.placement,
-      },
-    ]);
-
-    return childIssue;
   }
 
-  async updateChildIssue(updateChildissue: UpdateChildIssueInput, admin: User) {
+  async updateChildIssue(
+    updateChildIssueInput: UpdateChildIssueInput,
+    admin: User,
+  ): Promise<SuccessResponse> {
     try {
-      const { id, ...rest } = updateChildissue;
-      const childIssue = await this.childIssueRepository.findOneBy({
-        id,
+      const { id, sequentialId, ...rest } = updateChildIssueInput;
+
+      // Find the existing child issue with only required fields
+      const childIssue = await this.childIssueRepository.findOne({
+        where: { id },
+        select: ['id', 'sequentialId', 'parentIssueId'], // Fetch only necessary fields
       });
 
       if (!childIssue) {
-        throw new BadRequestException(AppStrings.NOT_FOUND);
+        throw new BadRequestException('Child Issue not found');
       }
-      const childIssueCount = await this.childIssueRepository.count();
-      rest.sequentialId = childIssueCount + 1;
 
-      const { affected } = await this.childIssueRepository.update(id, rest);
+      // Check if a workflow is configured for the ChildIssue entity
+      const actionConfig =
+        await this.workflowService.findOneWorkflowByDocumentname(
+          this.childIssueRepository.metadata.name,
+        );
+
+      if (actionConfig) {
+        // Submit action for approval
+        await this.actionService.createActionRequest(
+          {
+            document: this.childIssueRepository.metadata.name,
+            actionType: 'update',
+            targetEntityId: id.toString(),
+            user: admin,
+            payload: JSON.stringify(updateChildIssueInput),
+          },
+          admin,
+        );
+
+        return new SuccessResponse('Action is awaiting approval');
+      }
+
+      // Rearrange sequential IDs if necessary
+      if (sequentialId && sequentialId !== childIssue.sequentialId) {
+        const parentIssueId = childIssue.parentIssueId; // Use direct parent ID for filtering
+
+        if (sequentialId > childIssue.sequentialId) {
+          // Decrement sequential IDs for issues between the current and new position
+          await this.childIssueRepository
+            .createQueryBuilder()
+            .update()
+            .set({ sequentialId: () => 'sequentialId - 1' })
+            .where('sequentialId > :current AND sequentialId <= :new', {
+              current: childIssue.sequentialId,
+              new: sequentialId,
+            })
+            .andWhere('parentIssueId = :parentId', { parentId: parentIssueId })
+            .execute();
+        } else {
+          // Increment sequential IDs for issues between the new and current position
+          await this.childIssueRepository
+            .createQueryBuilder()
+            .update()
+            .set({ sequentialId: () => 'sequentialId + 1' })
+            .where('sequentialId >= :new AND sequentialId < :current', {
+              current: childIssue.sequentialId,
+              new: sequentialId,
+            })
+            .andWhere('parentIssueId = :parentId', { parentId: parentIssueId })
+            .execute();
+        }
+      }
+
+      // Update the child issue with minimal data fetch
+      const { affected } = await this.childIssueRepository.update(id, {
+        ...rest,
+        sequentialId: sequentialId ?? childIssue.sequentialId,
+      });
 
       if (affected > 0) {
+        // Retrieve the updated issue for logging
+        const updatedIssue = await this.childIssueRepository.findOneOrFail({
+          where: { id },
+          relations: ['parentIssue'], // Only fetch relations after update
+        });
+
+        // Log activity
         await this.activityLogService.logActivity([
           {
             adminId: admin.id,
             action: ActivityEnum.UPDATED,
-            details: JSON.stringify(childIssue),
-            placement: childIssue.parentIssue.placement,
+            details: JSON.stringify(updatedIssue),
+            placement: updatedIssue.parentIssue?.placement,
           },
         ]);
-        return await this.childIssueRepository.findOneByOrFail({ id });
-      }
-    } catch (error) {
-      this.logger.log(error);
 
-      throw new BadRequestException(error);
+        return new SuccessResponse(AppStrings.SUCCESSFULL, updatedIssue);
+      }
+
+      throw new UnprocessableEntityException('Update operation failed');
+    } catch (error) {
+      this.logger.error('Failed to update child issue', error.stack);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new UnprocessableEntityException(
+        'An error occurred while updating the child issue',
+      );
     }
   }
+
   async findAllChildIssues(id: string): Promise<ChildIssue[]> {
     try {
       return await this.childIssueRepository.find({
