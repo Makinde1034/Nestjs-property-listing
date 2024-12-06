@@ -988,7 +988,7 @@ export class UserService {
           where: [{ email: input.email }, { phone: input.phone }],
         }),
         this.workflowService.findOneWorkflowByDocumentname(
-          this.usersRepository.metadata.name,
+          this.usersRepository.metadata.tableName,
         ),
       ]);
 
@@ -1022,7 +1022,7 @@ export class UserService {
       if (actionConfig) {
         await this.actionService.createActionRequest(
           {
-            document: this.usersRepository.metadata.name,
+            document: this.usersRepository.metadata.tableName,
             actionType: 'create',
             targetEntityId: null,
             user: admin,
@@ -1068,7 +1068,7 @@ export class UserService {
 
       await this.actionService.createActionRequest(
         {
-          document: this.usersRepository.metadata.name,
+          document: this.usersRepository.metadata.tableName,
           actionType: 'create',
           targetEntityId: null,
           user: admin,
@@ -1257,7 +1257,7 @@ export class UserService {
         where: { id: In(userId) },
       }),
       this.workflowService.findOneWorkflowByDocumentname(
-        this.usersRepository.metadata.name,
+        this.usersRepository.metadata.tableName,
       ),
     ]);
 
@@ -1275,7 +1275,7 @@ export class UserService {
     if (actionConfig) {
       await this.actionService.createActionRequest(
         {
-          document: this.usersRepository.metadata.name,
+          document: this.usersRepository.metadata.tableName,
           actionType: 'update',
           targetEntityId: null,
           user: admin,
@@ -1320,7 +1320,7 @@ export class UserService {
 
     await this.actionService.createActionRequest(
       {
-        document: this.usersRepository.metadata.name,
+        document: this.usersRepository.metadata.tableName,
         actionType: 'update',
         targetEntityId: null,
         user: admin,
@@ -1350,7 +1350,7 @@ export class UserService {
       }),
 
       this.workflowService.findOneWorkflowByDocumentname(
-        this.usersRepository.metadata.name,
+        this.usersRepository.metadata.tableName,
       ),
     ]);
 
@@ -1369,7 +1369,7 @@ export class UserService {
     if (actionConfig) {
       await this.actionService.createActionRequest(
         {
-          document: this.usersRepository.metadata.name,
+          document: this.usersRepository.metadata.tableName,
           actionType: 'update',
           targetEntityId: null,
           user: admin,

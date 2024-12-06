@@ -1586,8 +1586,8 @@ type Mutation {
   preAuthorisedPayment(paymentInput: PreAuthorisedPaymentInput!): InitiatePaymentResponse!
   capturePayment(paymentInput: CapturePaymentData!): InitiatePaymentResponse
   verifyPayment(verifyPaymentInput: VerifyPaymentInput!): verifyPaymentResponse!
-  createIssue(input: CreateIssueInput!): ParentIssue!
-  updateIssue(RequestInput: UpdateIssueInput!): ParentIssue!
+  createIssue(input: CreateIssueInput!): SuccessResponse!
+  updateIssue(RequestInput: UpdateIssueInput!): SuccessResponse!
   deleteIssue(id: String!): SuccessResponse!
   createChildIssue(input: CreateChildIssueInput!): ParentIssue!
   updateChildIssue(RequestInput: UpdateIssueInput!): ParentIssue!

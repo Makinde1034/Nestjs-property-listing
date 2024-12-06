@@ -33,13 +33,13 @@ export class IssueResolver {
    * @param {CreateIssueInput} RequestInput
    * @returns {Promise<Issue>}
    */
-  @Mutation(() => ParentIssue)
+  @Mutation(() => SuccessResponse)
   @Permissions(PermissionsEnum.ISSUES_CATEGORIES_CREATE)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async createIssue(
     @Args('input') RequestInput: CreateIssueInput,
     @Context() ctx: any,
-  ): Promise<ParentIssue> {
+  ): Promise<SuccessResponse> {
     return await this.issueService.createIssue(RequestInput, ctx.req.user);
   }
 
@@ -49,14 +49,14 @@ export class IssueResolver {
    * @param {UpdateIssueInput} RequestInput
    * @returns {Promise<Issue>}
    */
-  @Mutation(() => ParentIssue)
+  @Mutation(() => SuccessResponse)
   @Permissions(PermissionsEnum.ISSUES_CATEGORIES_READ)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async updateIssue(
     @Args('RequestInput') RequestInput: UpdateIssueInput,
 
     @Context() ctx: any,
-  ): Promise<ParentIssue> {
+  ): Promise<SuccessResponse> {
     return await this.issueService.updateIssue(RequestInput, ctx.user.req);
   }
 
