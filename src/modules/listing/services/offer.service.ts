@@ -30,10 +30,7 @@ import {
   NotificationScopeRepository,
   UserRepository,
 } from '../../user/repositories';
-import {
-  NotificationScopesEnum,
-  NotificationTitlesEnum,
-} from '../../../common/enums/notification-scope.enum';
+import { NotificationScopesEnum } from '../../../common/enums/notification-scope.enum';
 
 import { AuctionEnum, OfferListEnum } from '../../../common/enums/status.enum';
 import { AdminService } from '../../admin/services/admin.service';
@@ -121,11 +118,11 @@ export class OfferService {
         );
       }
 
-      // if (user.id == listing.user.id) {
-      //   throw new BadRequestException(
-      //     'The creator of a listing cannot create an offer on  that listing',
-      //   );
-      // }
+      if (user.id == listing.user.id) {
+        throw new BadRequestException(
+          'The creator of a listing cannot create an offer on  that listing',
+        );
+      }
       if (offer.length > 0) {
         throw new BadRequestException(
           `Minimum Offer must be greater than ${offer[0].price}`,

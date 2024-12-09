@@ -52,6 +52,10 @@ async function bootstrap() {
 
   app.enableShutdownHooks();
   await app.listen(PORT, HOST);
+
+  const server = app.getHttpServer();
+  server.setTimeout(0);
+
   console.log(`Application is running on: ${await app.getUrl()}`);
 }
 bootstrap();
