@@ -29,6 +29,8 @@ export enum NotificationScopesEnum {
   CONTRACT_CONFIRMATION = 'Confirm Contract',
   LISTING_APPROVED = 'Approved',
   LISTING_DENIED = 'Denied',
+
+  WORKFLOW_EVENT = 'Workflow Event',
 }
 
 export enum NotificationTitlesEnum {
