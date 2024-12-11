@@ -85,6 +85,32 @@ export class PaymentService {
 
     return data;
   }
+  async initializePaymentForPA(
+    createPaymentInput: InitiatePaymentInput,
+    user: User,
+  ) {
+    if (createPaymentInput.coupon) {
+      const coupon: CouponResponse = await this.adminService.isCouponValid({
+        code: createPaymentInput.coupon,
+        price: createPaymentInput.amount,
+      });
+      createPaymentInput.amount = coupon.amount;
+    }
+    const checkout = await this.hyperPayService.createCheckoutForPA(
+      createPaymentInput,
+      user,
+    );
+
+    const data = {
+      checkoutId: checkout.id,
+      referenceId: generateRandomString(),
+      timeStamp: checkout.timestamp,
+    };
+
+    this.performActionWithDelay(user, data);
+
+    return data;
+  }
 
   async performActionWithDelay(user: any, data: any) {
     this.logger.log('Action started');

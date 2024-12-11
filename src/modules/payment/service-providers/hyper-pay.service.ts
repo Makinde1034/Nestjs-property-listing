@@ -3,159 +3,6 @@
  * For license. See license.txt
  */
 
-// Import { User } from '../../../entities';
-// Import {
-//   CheckoutResponse,
-//   InitiatePaymentInput,
-// } from '../dto/request/payment.input';
-// Import {
-//   HyperpayConfig,
-//   GetHyperpayConfigName,
-// } from '../../../config/payment/hyper-payment.config';
-
-// @Injectable()
-// Export class HyperPayService {
-//   Private readonly logger = new Logger(HyperPayService.name);
-//   Private hyperPayConfig: HyperpayConfig;
-//   Private readonly options: AxiosRequestConfig;
-
-//   Constructor(
-//     Private httpService: HttpService,
-//     Private configService: ConfigService,
-//   ) {
-//     This.hyperPayConfig = this.configService.get<HyperpayConfig>(
-//       GetHyperpayConfigName(),
-//     );
-
-//     This.options = {
-//       Headers: {
-//         Authorization: `Bearer ${this.hyperPayConfig.token}`,
-//         'Content-Type': 'application/x-www-form-urlencoded',
-//       },
-//     };
-//   }
-
-//   Async createCheckout(
-//     InitiatePaymentInput: InitiatePaymentInput,
-//     User: User,
-//   ): Promise<CheckoutResponse> {
-//     Try {
-//       This.logger.log('createCheckout', initiatePaymentInput, user);
-//       Const payload = {
-//         EntityId: process.env.HYPERPAY_ENTITY_ID,
-//         Amount: initiatePaymentInput.amount,
-//         Currency: 'SAR', // Changed to SAR as per the documentation
-//         PaymentType: 'DB',
-//         'customer.email': user.email,
-//         'customer.givenName': user.firstName,
-//         'customer.surname': user.lastName,
-//         'billing.city': user.city,
-//         'billing.country': user.nationality,
-
-//         MerchantTransactionId: '12345',
-//       };
-
-//       Const data = querystring.stringify(payload as any);
-//       Const options = {
-//         Port: 443,
-//         Host: 'eu-test.oppwa.com', // Updated host
-//         Path: '/v1/checkouts',
-//         Method: 'POST',
-//         Headers: {
-//           'Content-Type': 'application/x-www-form-urlencoded',
-//           'Content-Length': data.length,
-//           Authorization: `Bearer ${process.env.HYPERPAY_TOKEN}`,
-//         },
-//       };
-
-//       Const checkoutResponse: CheckoutResponse = await this.makeHttpsRequest(
-//         Options,
-//         Data,
-//       );
-//       Return checkoutResponse;
-//     } catch (error) {
-//       This.logger.error('Error creating checkout', error);
-//       If (error instanceof HttpException) {
-//         Throw error;
-//       } else {
-//         Throw new BadRequestException(error.message);
-//       }
-//     }
-//   }
-
-//   Async verifyPayment(checkoutId: string): Promise<any> {
-//     Try {
-//       Const path = `/v1/checkouts/${checkoutId}/payment?entityId=${process.env.HYPERPAY_ENTITY_ID}`;
-
-//       Const options = {
-//         Port: 443,
-//         Host: 'eu-test.oppwa.com',
-//         Path: path,
-//         Method: 'GET',
-//         Headers: {
-//           Authorization: `Bearer ${process.env.HYPERPAY_TOKEN}`,
-//         },
-//       };
-
-//       Const payload = {
-//         EntityId: process.env.HYPERPAY_ENTITY_ID, // Updated entityId
-//       };
-
-//       Const data = querystring.stringify(payload);
-
-//       Const response = await this.makeHttpsRequest(options, data);
-
-//       Return response;
-//     } catch (error) {
-//       This.logger.error('Error verifying payment', error);
-//       Throw error;
-//     }
-//   }
-
-//   Private makeHttpsRequest(
-//     Options: https.RequestOptions,
-//     Data: string,
-//   ): Promise<CheckoutResponse> {
-//     Return new Promise((resolve, reject) => {
-//       Const req = https.request(options, (res) => {
-//         Const chunks: Buffer[] = [];
-//         Res.on('data', (chunk: Buffer) => chunks.push(chunk));
-//         Res.on('end', () => {
-//           Const body = Buffer.concat(chunks).toString('utf8');
-//           Try {
-//             Const jsonResponse = JSON.parse(body);
-//             Resolve(jsonResponse);
-//           } catch (error) {
-//             Reject(new Error('Failed to parse response'));
-//           }
-//         });
-//       });
-
-//       Req.on('error', reject);
-//       Req.write(data);
-//       Req.end();
-//     });
-//   }
-
-//   Async checkPaymentStatus(checkoutId: string) {
-//     Const requestPayload1 = new URLSearchParams(checkoutId).toString();
-
-//     Const requestpayload2 = new URLSearchParams({
-//       EntityId: this.hyperPayConfig.entityId,
-//     }).toString();
-
-//     Const response = this.httpService.get(
-//       This.hyperPayConfig.baseUrl +
-//         `checkouts/${requestPayload1}/payment?${requestpayload2}`,
-//       This.options,
-//     );
-
-//     Const data = await (await lastValueFrom(response)).data;
-
-//     Return data;
-//   }
-// }
-
 import * as querystring from 'querystring';
 
 /*
@@ -220,15 +67,13 @@ export class HyperPayService {
       const adminDefault = await this.adminService.adminDefault();
 
       const payload: PaymentRequest = {
-        // entityId: this.hyperPayConfig.entityId,
-        entityId: '8ac7a4c893855386019386a88e7d0169',
+        entityId: this.hyperPayConfig.entityIdForDb,
         amount: initiatePaymentInput.amount,
         currency: 'SAR',
-        paymentType: 'PA',
+        paymentType: 'DB',
         integrity: true,
-        'customer.email': user.email,
-        'customer.givenName': user.firstName,
-        'customer.surname': user.lastName,
+        // 'customer.givenName': user.firstName,
+        // 'customer.surname': user.lastName,
 
         merchantTransactionId: adminDefault?.merchantTransactionId,
       };
@@ -237,7 +82,53 @@ export class HyperPayService {
 
       const response = await lastValueFrom(
         this.httpService.post<PreAuthorisedPaymentResponse>(
-          this.hyperPayConfig.baseUrl + '/transaction/v1/checkouts',
+          this.hyperPayConfig.baseUrl + '/v1/checkouts',
+          requestPayload,
+          this.options,
+        ),
+      );
+      return response.data;
+    } catch (error) {
+      console.log(error.response.data);
+
+      this.logger.error('Error creating checkout', error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      } else if (error.isAxiosError) {
+        throw new BadRequestException(
+          error.response?.data?.message || 'Payment service error',
+        );
+      } else {
+        throw new BadRequestException(error.message);
+      }
+    }
+  }
+  async createCheckoutForPA(
+    initiatePaymentInput: InitiatePaymentInput,
+    user: User,
+  ) {
+    try {
+      const adminDefault = await this.adminService.adminDefault();
+
+      const payload: PaymentRequest = {
+        entityId: this.hyperPayConfig.entityIdForPA,
+        amount: initiatePaymentInput.amount,
+        currency: 'SAR',
+        paymentType: 'PA',
+        testMode: 'EXTERNAL',
+        integrity: true,
+        'customParameters[3DS2_enrolled]': true,
+        'customParameters[3DS2_flow]': 'challenge',
+
+        merchantTransactionId: adminDefault?.merchantTransactionId,
+      };
+
+      const requestPayload = querystring.stringify(payload as any);
+
+      const response = await lastValueFrom(
+        this.httpService.post<PreAuthorisedPaymentResponse>(
+          this.hyperPayConfig.baseUrl + '/v1/checkouts',
           requestPayload,
           this.options,
         ),
@@ -264,7 +155,7 @@ export class HyperPayService {
     try {
       const response = this.httpService.get(
         this.hyperPayConfig.baseUrl +
-          `/checkouts/${checkoutId}/payment?entityId=${this.hyperPayConfig.entityId}`,
+          `/checkouts/${checkoutId}/payment?entityId=${this.hyperPayConfig.entityIdForDb}`,
         this.options,
       );
 
@@ -361,7 +252,33 @@ export class HyperPayService {
   async refundPayment(capturePayment: RefundPaymentData) {
     try {
       const payload = querystring.stringify({
-        entityId: this.hyperPayConfig.entityId,
+        entityId: this.hyperPayConfig.entityIdForDb,
+        amount: capturePayment.amount,
+        paymentType: 'RF',
+        currency: 'SAR',
+      });
+
+      const response = await lastValueFrom(
+        this.httpService.post<CapturePaymentResponse>(
+          this.hyperPayConfig.baseUrl + `/payments${capturePayment.paymentId}`,
+          payload,
+          this.options,
+        ),
+      );
+      return response.data;
+    } catch (error) {
+      this.logger.error('Error in payment pre-authorization', error);
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new BadRequestException(error.message);
+      }
+    }
+  }
+  async refundPaymentPA(capturePayment: RefundPaymentData) {
+    try {
+      const payload = querystring.stringify({
+        entityId: this.hyperPayConfig.entityIdForPA,
         amount: capturePayment.amount,
         paymentType: 'RF',
         currency: 'SAR',
