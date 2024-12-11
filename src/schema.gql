@@ -1127,6 +1127,7 @@ type Query {
   findAllSplashScreen(findOption: SplashScreenFilterInput): SplashScreenResponse!
   findOneSplashScreen(id: Float!): SplashScreen!
   findDefaultSplashScreen: SplashScreen
+  findDefaultBanner: SplashScreen
   searchForSplashScreen(searchParam: String!): [SplashScreen!]!
   activateTwoFa: TwoFaResult!
   user: User!
