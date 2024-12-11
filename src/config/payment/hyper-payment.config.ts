@@ -7,14 +7,16 @@ import { registerAs } from '@nestjs/config';
 
 const token = process.env.HYPERPAY_TOKEN;
 const baseUrl = process.env.HYPERPAY_BASE_URL;
-const entityId = process.env.HYPERPAY_ENTITY_ID;
+const entityIdForDb = process.env.HYPERPAY_ENTITY_ID_FOR_DB;
+const entityIdForPA = process.env.HYPERPAY_ENTITY_ID_FOR_PA;
 const frontendUrl = process.env.FRONT_END_URL;
 const merchantToken = process.env.HYPERPAY_MERCHANT_TOKEN;
 
 export type HyperpayConfig = {
   token: string;
   baseUrl: string;
-  entityId: string;
+  entityIdForDb: string;
+  entityIdForPA: string;
   frontendUrl: string;
   merchantToken: string;
 };
@@ -28,7 +30,8 @@ export type HyperpayConfig = {
 const getHyperpayConfig = (): HyperpayConfig => ({
   token: token,
   baseUrl: baseUrl,
-  entityId: entityId,
+  entityIdForDb: entityIdForDb,
+  entityIdForPA: entityIdForPA,
   frontendUrl: frontendUrl,
   merchantToken: merchantToken,
 });

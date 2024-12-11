@@ -26,6 +26,7 @@ export class ActionRequest {
 
   @Column({ nullable: true })
   targetEntityId?: string; // e.g., User ID, Order ID (null for "create" actions)
+
   @Column()
   @Field(() => String)
   payload: string;

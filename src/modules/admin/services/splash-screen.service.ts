@@ -41,6 +41,7 @@ import {
 } from 'date-fns';
 import { AdminWorkflowService } from './admin-workflow.service';
 import { ActionService } from './action.service';
+import { SplashScreenPlacement } from '../../../common/enums/splashScreen';
 @Injectable()
 export class SplashScreenService {
   constructor(
@@ -363,6 +364,31 @@ export class SplashScreenService {
         splashScreen = await this.splashScreenRepository.findOne({
           where: {
             default: true,
+          },
+        });
+      }
+      return splashScreen;
+    } catch (error) {
+      this.logger.log(error);
+      throw new NotFoundException(AppStrings.NOT_FOUND);
+    }
+  }
+  async fetchDefaultForBanner() {
+    let splashScreen: SplashScreen;
+    try {
+      splashScreen = await this.splashScreenRepository.findOne({
+        where: {
+          placement: SplashScreenPlacement.MAIN_BANNER,
+          startDate: MoreThan(new Date()),
+          endDate: LessThanOrEqual(new Date()),
+        },
+      });
+
+      if (!splashScreen) {
+        splashScreen = await this.splashScreenRepository.findOne({
+          where: {
+            default: true,
+            placement: SplashScreenPlacement.SPLASH_SCREEN,
           },
         });
       }

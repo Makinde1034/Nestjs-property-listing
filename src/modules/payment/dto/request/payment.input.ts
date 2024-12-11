@@ -47,12 +47,11 @@ export class PaymentRequest {
   currency: string;
   paymentType: string;
   integrity: boolean;
-  'customer.email': string;
-  'customer.givenName': string;
-  'customer.surname': string;
-  // 'customer.city': string;
-  // 'customer.country': string;
+  testMode?: string;
+
   merchantTransactionId: string;
+  'customParameters[3DS2_enrolled]'?: boolean;
+  'customParameters[3DS2_flow]'?: string;
 }
 
 export class RefundPaymentRequest {

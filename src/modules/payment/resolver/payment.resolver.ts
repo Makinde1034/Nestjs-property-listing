@@ -23,7 +23,6 @@ import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { InvoiceResponse } from '../dto/response/invoice.response';
 import { InvoiceService } from '../services/invoice.service';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
-import { Public } from '../../auth/decorators/permision.decorator';
 
 @Resolver('payment')
 export class PaymentResolver {
@@ -31,7 +30,9 @@ export class PaymentResolver {
     private readonly paymentService: PaymentService,
     private readonly invoiceService: InvoiceService,
   ) {}
-
+  /************************************
+   *DB
+   *************************************/
   @Mutation(() => InitiatePaymentResponse)
   @UseGuards(AccessTokenGuard)
   async initializePayment(
@@ -40,24 +41,16 @@ export class PaymentResolver {
   ) {
     return await this.paymentService.initializePayment(paymentDto, user);
   }
-
+  /****************************************
+   * PA
+   ****************************************/
   @Mutation(() => InitiatePaymentResponse)
-  // @UseGuards(AccessTokenGuard)
-  @Public()
-  async preAuthorisedPayment(
-    @Args('paymentInput') paymentDto: PreAuthorisedPaymentInput,
-    @CurrentUser() user: User,
-  ) {
-    return await this.paymentService.preAuthorized(paymentDto);
-  }
-  @Mutation(() => InitiatePaymentResponse, { nullable: true })
   @UseGuards(AccessTokenGuard)
-  @Public()
-  async capturePayment(
-    @Args('paymentInput') paymentDto: CapturePaymentData,
+  async initializePaymentForPA(
+    @Args('paymentInput') paymentDto: InitiatePaymentInput,
     @CurrentUser() user: User,
   ) {
-    return await this.paymentService.capturePayment(paymentDto);
+    return await this.paymentService.initializePaymentForPA(paymentDto, user);
   }
 
   @Mutation(() => verifyPaymentResponse)

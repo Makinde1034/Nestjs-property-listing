@@ -14,6 +14,15 @@ import { CreateActionInput } from '../dto/request/action';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Actions } from '../dto/request/workflow';
 import { SuccessResponse } from '../../../common/utils/success.response';
+import { NotificationEvent } from '../../../common/enums';
+import {
+  NotificationScopeRepository,
+  UserRepository,
+} from '../../user/repositories';
+import { NotificationScopesEnum } from '../../../common/enums/notification-scope.enum';
+import { elementAt } from 'rxjs';
+import { AdminWorkflowService } from './admin-workflow.service';
+import { WorkflowRepository } from '../repositories/workflow.repository';
 
 @Injectable()
 export class ActionService {
@@ -23,14 +32,22 @@ export class ActionService {
     private readonly dataSource: DataSource, // Injected Connection to access dynamic repositories
 
     private readonly eventEmitter: EventEmitter2,
+
+    private readonly notificationScopeRepository: NotificationScopeRepository,
+    private readonly workflowRepository: WorkflowRepository,
+
+    private readonly userRepository: UserRepository,
   ) {}
   logger = new Logger(ActionService.name);
 
   async applyApprovedRequest(action: Actions) {
     // Preload the requests in one call to avoid querying the database multiple times
+
     const actionRequests = await this.actionRequestRepository.find({
       where: { id: In(action.id) },
     });
+
+    this.userRepository.find({ where: { roles: { id: In(actionRequests) } } });
 
     // Process each action request
     for (const actionRequest of actionRequests) {
@@ -102,7 +119,22 @@ export class ActionService {
         event: event,
       });
 
-      return await this.actionRequestRepository.save(actionRequest);
+      const [scope, data] = await Promise.all([
+        this.notificationScopeRepository.findOne({
+          where: { name: NotificationScopesEnum.WORKFLOW_EVENT },
+        }),
+
+        this.actionRequestRepository.save(actionRequest),
+      ]);
+
+      this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+        creatorId: actionRequest.id,
+        receiverId: null,
+        scope: scope,
+        recipientFormat: ['Admin Approver', null],
+      });
+
+      return data;
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;

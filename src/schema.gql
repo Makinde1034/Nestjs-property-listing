@@ -1127,6 +1127,7 @@ type Query {
   findAllSplashScreen(findOption: SplashScreenFilterInput): SplashScreenResponse!
   findOneSplashScreen(id: Float!): SplashScreen!
   findDefaultSplashScreen: SplashScreen
+  findDefaultBanner: SplashScreen
   searchForSplashScreen(searchParam: String!): [SplashScreen!]!
   activateTwoFa: TwoFaResult!
   user: User!
@@ -1583,8 +1584,7 @@ type Mutation {
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!
   initializePayment(paymentInput: InitiatePaymentInput!): InitiatePaymentResponse!
-  preAuthorisedPayment(paymentInput: PreAuthorisedPaymentInput!): InitiatePaymentResponse!
-  capturePayment(paymentInput: CapturePaymentData!): InitiatePaymentResponse
+  initializePaymentForPA(paymentInput: InitiatePaymentInput!): InitiatePaymentResponse!
   verifyPayment(verifyPaymentInput: VerifyPaymentInput!): verifyPaymentResponse!
   createIssue(input: CreateIssueInput!): SuccessResponse!
   updateIssue(RequestInput: UpdateIssueInput!): SuccessResponse!
@@ -2137,22 +2137,6 @@ input UpdateAdPackageInput {
 input InitiatePaymentInput {
   amount: Float
   coupon: String
-}
-
-input PreAuthorisedPaymentInput {
-  amount: Float!
-  paymentBrand: String!
-  cardNumber: String!
-  cardHolder: String!
-  coupon: String
-  cardExpiryMonth: String!
-  cardExpiryYear: String!
-  cardCvv: String!
-}
-
-input CapturePaymentData {
-  amount: String!
-  paymentId: String!
 }
 
 input VerifyPaymentInput {
