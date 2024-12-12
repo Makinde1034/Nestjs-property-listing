@@ -55,6 +55,7 @@ import {
   startOfYear,
   endOfYear,
   differenceInCalendarDays,
+  addHours,
 } from 'date-fns';
 
 import { MessageEvent } from '../../sse/request/app';
@@ -98,7 +99,10 @@ export class AuctionService {
         );
       }
 
-      return await this.auctionRepository.save(auctionInput);
+      return await this.auctionRepository.save({
+        ...auctionInput,
+        expireAt: addHours(auctionInput.startDate, auctionInput.liveFor),
+      });
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
@@ -173,6 +177,8 @@ export class AuctionService {
       const { sortField, directionToSort } = paginateAndSort;
       const sortDirection: 'ASC' | 'DESC' = directionToSort as 'ASC' | 'DESC';
 
+      const now = new Date();
+
       // Default pagination if not provided
       if (!paginateAndSort.take || !paginateAndSort.skip) {
         paginateAndSort.skip = 0;
@@ -183,8 +189,9 @@ export class AuctionService {
         .createQueryBuilder('auction')
 
         .where(
-          `CURRENT_DATE >= auction.startDate AND auction.deletedAt IS NULL AND auction.status = :statusOne`,
-          { statusOne: AuctionEnum.ACTIVE },
+          `CURRENT_DATE >= auction.startDate AND auction.deletedAt IS NULL AND auction.status = :statusOne AND auction.expireAt < :now
+`,
+          { statusOne: AuctionEnum.ACTIVE, now },
         )
 
         .loadRelationCountAndMap(
@@ -292,10 +299,15 @@ export class AuctionService {
         )
 
         .where(
-          `CURRENT_DATE < auction.startDate AND auction.startDate > :startDateThreshold AND auction.status = :status`,
-          { status: AuctionEnum.ACTIVE, startDateThreshold },
+          `CURRENT_DATE < auction.startDate 
+           AND auction.startDate > :startDateThreshold 
+           AND auction.status = :status 
+           AND auction.expireAt < :startDateThreshold`,
+          {
+            status: AuctionEnum.ACTIVE,
+            startDateThreshold,
+          },
         )
-
         .take(paginateAndSort.take)
         .skip(paginateAndSort.skip)
         .orderBy(
