@@ -1634,7 +1634,7 @@ type Mutation {
   confirmService(id: String!): SuccessResponse!
   acceptService(id: String!): SuccessResponse!
   rejectService(id: String!): SuccessResponse!
-  removeServiceProvider(deleteServiceProvider: DeleteServiceProvider!): ServiceProvider!
+  removeServiceProvider(deleteServiceProvider: DeleteServiceProvider!): SuccessResponse!
   requestForService(requestForService: RequestForService!): ServiceRequested!
 }
 

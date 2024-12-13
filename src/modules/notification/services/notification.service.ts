@@ -112,49 +112,50 @@ export class NotificationService {
 
   async prepareNotification(notificationInput: SendNotificationInput) {
     try {
-      let {
+      const {
         creatorId,
         receiverId,
         scope,
         recipientFormat,
-        event,
+        event = scope.name,
         count,
         attachment,
       } = notificationInput;
 
-      // Get user information for buyer and seller along with their notification preferences
+      // Fetch buyer and seller along with their notification preferences
       const [buyer, seller] = await Promise.all([
         this.userRepository.findOneOrFail({
           where: { id: creatorId },
+          select: ['id', 'notificationPreference'],
           relations: ['notificationPreference'],
         }),
 
         this.userRepository.findOneOrFail({
           where: { id: receiverId },
+          select: ['id', 'notificationPreference'],
           relations: ['notificationPreference'],
         }),
       ]);
 
-      // Get the preferences for both buyer and seller
-
+      // Extract user preferences for the given scope
       const userPrefBuyer = buyer.notificationPreference.find(
         (pref) => pref.scope.id === scope.id,
       );
+
       const userPrefSeller = seller.notificationPreference.find(
         (pref) => pref.scope.id === scope.id,
       );
 
-      const scopeName = scope.name as NotificationScopesEnum;
-      event = event || scope.name;
-
-      // Define scopes that trigger notifications
+      // Define scopes triggering notifications
       const notificationScopes = Object.values(NotificationScopesEnum);
 
-      // If scope matches one of the predefined notification scopes, send the notification
-      const messages = await this.notificationMesageRepository.find({
-        where: { scope: scope.scopeGroup, event: event },
-      });
+      // Send notification if scope matches predefined scopes
+      const scopeName = scope.name as NotificationScopesEnum;
       if (notificationScopes.includes(scopeName)) {
+        const messages = await this.notificationMesageRepository.find({
+          where: { scope: scope.scopeGroup, event },
+        });
+
         this.SendNotificationBasedOnPreference(
           userPrefBuyer,
           userPrefSeller,
@@ -170,12 +171,12 @@ export class NotificationService {
       }
     } catch (error) {
       this.logger.error('Error sending notification:', error);
-      throw error; // Optional: throw to let calling service handle it
+      throw error; // Re-throw for caller to handle
     }
   }
 
   //TODO: use Event emmiter
-  SendNotificationBasedOnPreference(
+  async SendNotificationBasedOnPreference(
     userPrefRecipients?: UserNotificationPreference,
     userPrefOwner?: UserNotificationPreference,
     owner?: User,
@@ -258,7 +259,6 @@ export class NotificationService {
           event,
           scope,
           recipientFormat[0],
-
           messages,
         );
       }

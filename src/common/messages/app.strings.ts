@@ -113,4 +113,6 @@ export const AppStrings = {
     'Cannot accept an offer while listing is being auctioned',
 
   THIS_IS_ONLY_FOR_LEVEL_TWO_USER: 'Only for level two user',
+
+  YOU_ARE_NOT_A_SERVICE_PROVIDER: 'You are not a service provider',
 };

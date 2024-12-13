@@ -24,6 +24,9 @@ import {
 import { ServiceRequested } from '../../../entities/service-requested.entity';
 import { UseGuards } from '@nestjs/common';
 import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
+import { ServiceProviderGuard } from '../../auth/guards/service-provider.guard';
+import { Permissions } from '../../../common/decorator/permission';
+import { PermissionsEnum } from '../../../common/enums/permission.enum';
 
 @Resolver(() => ServiceProvider)
 export class ServiceAndProviderResolver {
@@ -42,6 +45,8 @@ export class ServiceAndProviderResolver {
     );
   }
 
+  @UseGuards(AccessTokenGuard)
+  @UseGuards(ServiceProviderGuard)
   @Mutation(() => Service, { name: 'createService' })
   async createService(
     @Args('createServiceInput')
@@ -54,6 +59,7 @@ export class ServiceAndProviderResolver {
     );
   }
 
+  @UseGuards(AccessTokenGuard)
   @Query(() => ServiceProviderResponse, { name: 'findAllServiceProviders' })
   async findAll(@Args('paginateAndSort') paginateAndSort: PaginateAndSort) {
     return await this.serviceProviderService.findAllServiceProvider(
@@ -61,11 +67,14 @@ export class ServiceAndProviderResolver {
     );
   }
 
+  @UseGuards(AccessTokenGuard)
   @Query(() => OneServiceProviderResponse, { name: 'findOneServiceProvider' })
   async findOne(@Args('id') id: string): Promise<OneServiceProviderResponse> {
     return await this.serviceProviderService.findOneServiceProvider(id);
   }
 
+  @UseGuards(AccessTokenGuard)
+  @UseGuards(ServiceProviderGuard)
   @Query(() => ServiceResponse, { name: 'findAllService' })
   async findAllServices(
     @Args('paginateAndSort') paginateAndSort: PaginateAndSort,
@@ -112,6 +121,8 @@ export class ServiceAndProviderResolver {
     );
   }
 
+  @UseGuards(AccessTokenGuard)
+  @UseGuards(ServiceProviderGuard)
   @Mutation(() => SuccessResponse)
   async updateServiceStatus(
     @Args('updateServiceStatus')
@@ -122,7 +133,8 @@ export class ServiceAndProviderResolver {
       serviceProviderInput,
     );
   }
-
+  @UseGuards(AccessTokenGuard)
+  @UseGuards(ServiceProviderGuard)
   @Mutation(() => SuccessResponse)
   async updateProviderServiceCoverageArea(
     @Args('updateProviderServiceCoverageArea')
@@ -134,6 +146,7 @@ export class ServiceAndProviderResolver {
     );
   }
 
+  @UseGuards(AccessTokenGuard, ServiceProviderGuard)
   @Mutation(() => SuccessResponse)
   async acceptRequestAndStopRequest(
     @Args('updateServiceStatus')
@@ -144,6 +157,7 @@ export class ServiceAndProviderResolver {
     );
   }
 
+  @UseGuards(AccessTokenGuard, ServiceProviderGuard)
   @Mutation(() => ServiceProvided)
   async provideService(
     @Args('provideService')
@@ -158,24 +172,34 @@ export class ServiceAndProviderResolver {
   async cancleService(@Args('id') id: string, @Context() ctx: any) {
     return await this.serviceProviderService.cancleService(id, ctx.req.user);
   }
+  @UseGuards(AccessTokenGuard)
   @Mutation(() => SuccessResponse)
   async appealService(@Args('id') id: string, @Context() ctx: any) {
     return await this.serviceProviderService.appealService(id, ctx.req.user);
   }
+
+  @UseGuards(AccessTokenGuard)
   @Mutation(() => SuccessResponse)
   async confirmService(@Args('id') id: string, @Context() ctx: any) {
     return await this.serviceProviderService.confirmService(id, ctx.req.user);
   }
+
+  @UseGuards(AccessTokenGuard)
+  @Permissions(PermissionsEnum.SERVICES_STATUS_DEACTIVATE_REACTIVATE)
   @Mutation(() => SuccessResponse)
   async acceptService(@Args('id') id: string, @Context() ctx: any) {
     return await this.serviceProviderService.acceptService(id, ctx.req.user);
   }
+
+  @UseGuards(AccessTokenGuard)
+  @Permissions(PermissionsEnum.SERVICES_STATUS_DEACTIVATE_REACTIVATE)
   @Mutation(() => SuccessResponse)
   async rejectService(@Args('id') id: string, @Context() ctx: any) {
     return await this.serviceProviderService.rejectService(id, ctx.req.user);
   }
-
-  @Mutation(() => ServiceProvider)
+  @UseGuards(AccessTokenGuard)
+  @Permissions(PermissionsEnum.SERVICES_STATUS_DEACTIVATE_REACTIVATE)
+  @Mutation(() => SuccessResponse)
   async removeServiceProvider(
     @Args('deleteServiceProvider') deleteServiceProvider: DeleteServiceProvider,
   ) {
@@ -204,7 +228,8 @@ export class ServiceAndProviderResolver {
       ctx.req.user,
     );
   }
-
+  @UseGuards(AccessTokenGuard)
+  @UseGuards(ServiceProviderGuard)
   @Query(() => RequestedServiceResponse, { name: 'ViewServiceRequested' })
   async ViewServiceRequested(
     @Args('paginateAndSort') paginateAndSort: PaginateAndSort,

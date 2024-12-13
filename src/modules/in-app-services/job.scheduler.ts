@@ -30,6 +30,7 @@ import { NotificationScope } from '../../entities';
 import { AuctionParticipantRepository } from '../listing/repositories/auction-participant.repository';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { NotificationEvent } from '../../common/enums';
+import { Auction } from '../../entities/auction-table.entity';
 
 @Injectable()
 export class JobService {
@@ -57,11 +58,10 @@ export class JobService {
     await this.notifyUsersAboutUpcomingAuctions();
   }
 
-  @Cron(CronExpression.EVERY_5_SECONDS)
+  @Cron(CronExpression.EVERY_10_SECONDS)
   async test() {
-    // await this.sendAlertOnIncompleteOffers();
+    // await this.notifyUsersAboutUpcomingAuctions();
   }
-
   @Cron(CronExpression.EVERY_12_HOURS, { timeZone: 'Africa/Cairo' })
   async handleDailyCron() {
     await this.updateOfferStatus();
@@ -207,12 +207,12 @@ export class JobService {
 
   async notifyUsersAboutUpcomingAuctions() {
     try {
-      const oneMonthNotification = [];
-      let weeklyUpcomingAuction;
+      let oneMonthNotification = [];
+      let weeklyUpcomingAuction: Auction;
       const currentDate = new Date();
 
       const [users, auctions] = await Promise.all([
-        this.userRepository.find(),
+        this.userRepository.find({ select: ['id'] }),
         this.auctionRepository.find({
           order: { startDate: 'DESC' },
           take: 1,
@@ -231,18 +231,20 @@ export class JobService {
 
       //Filter out the correct scope
       const scope: NotificationScope = notificationPreference.find(
-        (element) => element.name == NotificationScopesEnum.UPCOMING_AUCTION,
+        (element) =>
+          element.scopeGroup == NotificationScopesEnum.UPCOMING_AUCTION,
       );
 
       // Filter auctions for notifications based on time frames
       auctions.forEach((auction) => {
         const auctionStartDate = new Date(auction.startDate);
+
         const daysUntilStart = calculateDaysDifference(
           currentDate,
           auctionStartDate,
         );
 
-        if (daysUntilStart % 7 == 0) {
+        if (daysUntilStart % 7 == 0 || 0 == 0) {
           weeklyUpcomingAuction = auction;
         }
         if (daysUntilStart == 30) {
@@ -262,7 +264,7 @@ export class JobService {
           });
         }
 
-        if (weeklyUpcomingAuction.length > 0) {
+        if (weeklyUpcomingAuction) {
           this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
             creatorId: user.id,
             scope: scope,
@@ -271,7 +273,7 @@ export class JobService {
             type: null,
             count: calculateDaysDifference(
               currentDate,
-              weeklyUpcomingAuction.auctionStartDate,
+              weeklyUpcomingAuction.startDate,
             ),
           });
         }
