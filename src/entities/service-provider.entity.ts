@@ -4,6 +4,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   JoinColumn,
   OneToMany,
   OneToOne,
@@ -18,7 +19,8 @@ import { User } from './user.entity';
 @ObjectType()
 @Entity()
 export class ServiceProvider extends BaseEntity {
-  @OneToOne(() => User, (user) => user.serviceProvider)
+  @Index()
+  @OneToOne(() => User, (user) => user.serviceProvider, { eager: true })
   @JoinColumn({ name: 'userId' })
   @Field(() => User)
   user: User;
