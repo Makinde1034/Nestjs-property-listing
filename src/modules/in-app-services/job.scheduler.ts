@@ -60,7 +60,7 @@ export class JobService {
 
   @Cron(CronExpression.EVERY_5_MINUTES)
   async test() {
-    await this.notifyUsersAboutUpcomingAuctions();
+    // await this.notifyUsersAboutUpcomingAuctions();
   }
 
   @Cron(CronExpression.EVERY_12_HOURS, { timeZone: 'Africa/Cairo' })
