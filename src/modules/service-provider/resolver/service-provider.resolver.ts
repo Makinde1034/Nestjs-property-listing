@@ -44,6 +44,7 @@ export class ServiceAndProviderResolver {
       ctx.req.user,
     );
   }
+
   @UseGuards(AccessTokenGuard)
   @UseGuards(ServiceProviderGuard)
   @Mutation(() => Service, { name: 'createService' })
