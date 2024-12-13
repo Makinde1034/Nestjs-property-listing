@@ -20,8 +20,7 @@ import {
   UserRepository,
 } from '../../user/repositories';
 import { NotificationScopesEnum } from '../../../common/enums/notification-scope.enum';
-import { elementAt } from 'rxjs';
-import { AdminWorkflowService } from './admin-workflow.service';
+
 import { WorkflowRepository } from '../repositories/workflow.repository';
 
 @Injectable()

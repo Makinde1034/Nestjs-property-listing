@@ -33,3 +33,6 @@ ENV NODE_ENV=production
 
 # Run the application
 CMD ["npm", "run", "start:prod"]
+
+
+
