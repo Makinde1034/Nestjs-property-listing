@@ -203,6 +203,7 @@ type Auction {
   status: String!
   deletedAt: DateTime!
   createdAt: DateTime!
+  expireAt: DateTime
   updatedAt: DateTime!
 }
 

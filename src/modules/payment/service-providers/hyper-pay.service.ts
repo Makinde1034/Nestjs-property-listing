@@ -72,8 +72,6 @@ export class HyperPayService {
         currency: 'SAR',
         paymentType: 'DB',
         integrity: true,
-        // 'customer.givenName': user.firstName,
-        // 'customer.surname': user.lastName,
 
         merchantTransactionId: adminDefault?.merchantTransactionId,
       };
@@ -135,7 +133,7 @@ export class HyperPayService {
       );
       return response.data;
     } catch (error) {
-      console.log(error.response.data);
+      console.log(error.response.data.result);
 
       this.logger.error('Error creating checkout', error);
 
@@ -180,7 +178,6 @@ export class HyperPayService {
       const adminDefault = await this.adminService.adminDefault();
       const payload = {
         entityId: '8ac7a4c893855386019386a88e7d0169',
-
         amount: initiatePaymentInput.amount,
         currency: 'SAR',
         paymentType: 'PA',

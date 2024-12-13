@@ -26,7 +26,6 @@ export type HyperpayConfig = {
 //     'Missing configuration. Please ensure you provided HYPERPAY_TOKEN | HYPERPAY_BASE_URL | HYPERPAY_ENTITY_ID',
 //   );
 // }
-
 const getHyperpayConfig = (): HyperpayConfig => ({
   token: token,
   baseUrl: baseUrl,

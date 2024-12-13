@@ -79,6 +79,10 @@ export class Auction extends BaseEntity {
   @Field()
   createdAt: Date;
 
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  expireAt: Date;
+
   @UpdateDateColumn()
   @Field()
   updatedAt: Date;
