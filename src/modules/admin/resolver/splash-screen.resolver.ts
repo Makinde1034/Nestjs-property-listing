@@ -95,6 +95,7 @@ export class SplashScreenResolver {
   async findDefaultBanner() {
     return await this.splashScreenService.fetchDefaultForBanner();
   }
+
   @Permissions(PermissionsEnum.KNOWLEDGE_BASE_READ)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Query(() => [SplashScreen], { name: 'searchForSplashScreen' })

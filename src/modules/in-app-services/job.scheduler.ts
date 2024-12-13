@@ -58,10 +58,11 @@ export class JobService {
     await this.notifyUsersAboutUpcomingAuctions();
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async test() {
-    // await this.notifyUsersAboutUpcomingAuctions();
+    await this.notifyUsersAboutUpcomingAuctions();
   }
+
   @Cron(CronExpression.EVERY_12_HOURS, { timeZone: 'Africa/Cairo' })
   async handleDailyCron() {
     await this.updateOfferStatus();
@@ -193,6 +194,7 @@ export class JobService {
 
   async updateListingFeatureStatus() {
     try {
+      console.log('here');
       await this.listingRepository.update(
         {
           featureExpiration: LessThan(new Date()),
@@ -207,78 +209,98 @@ export class JobService {
 
   async notifyUsersAboutUpcomingAuctions() {
     try {
-      let oneMonthNotification = [];
-      let weeklyUpcomingAuction: Auction;
       const currentDate = new Date();
 
-      const [users, auctions] = await Promise.all([
-        this.userRepository.find({ select: ['id'] }),
-        this.auctionRepository.find({
+      const notificationPreference =
+        await this.notificationScopeRepository.find();
+
+      const scope: NotificationScope = notificationPreference.find(
+        (element) =>
+          element.scopeGroup === NotificationScopesEnum.UPCOMING_AUCTION,
+      );
+
+      const batchSize = 100;
+      let offset = 0;
+      let usersBatch;
+
+      do {
+        // Fetch users in batches
+        usersBatch = await this.userRepository.find({
+          select: ['id'],
+          skip: offset,
+          take: batchSize,
+        });
+
+        // Fetch auctions
+        const auctions = await this.auctionRepository.find({
           order: { startDate: 'DESC' },
-          take: 1,
-          skip: 0,
           where: {
             startDate: Between(
               currentDate,
               new Date(addDaysToDate(currentDate, 31)),
             ),
           },
-        }),
-      ]);
+        });
 
-      const notificationPreference =
-        await this.notificationScopeRepository.find();
-
-      //Filter out the correct scope
-      const scope: NotificationScope = notificationPreference.find(
-        (element) =>
-          element.scopeGroup == NotificationScopesEnum.UPCOMING_AUCTION,
-      );
-
-      // Filter auctions for notifications based on time frames
-      auctions.forEach((auction) => {
-        const auctionStartDate = new Date(auction.startDate);
-
-        const daysUntilStart = calculateDaysDifference(
-          currentDate,
-          auctionStartDate,
+        // Filter auctions
+        const oneMonthNotification = auctions.filter(
+          (auction) =>
+            calculateDaysDifference(
+              currentDate,
+              new Date(auction.startDate),
+            ) === 30,
         );
 
-        if (daysUntilStart % 7 == 0 || 0 == 0) {
-          weeklyUpcomingAuction = auction;
-        }
-        if (daysUntilStart == 30) {
-          oneMonthNotification.push(auction);
-        }
-      });
+        const weeklyUpcomingAuction = auctions.find(
+          (auction) =>
+            calculateDaysDifference(currentDate, new Date(auction.startDate)) %
+              7 ===
+            0,
+        );
 
-      // Send notifications to all users for applicable auctions
-      users.forEach((user) => {
-        if (oneMonthNotification.length > 0) {
-          this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
-            creatorId: user.id,
-            scope: scope,
-            event: 'A month before',
-            recipientFormat: ['All platform', null],
-            type: null,
-          });
-        }
+        // Process notifications for this batch of users
+        const notifications = usersBatch.map((user) => {
+          const userNotifications = [];
 
-        if (weeklyUpcomingAuction) {
-          this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
-            creatorId: user.id,
-            scope: scope,
-            event: 'Weekly',
-            recipientFormat: ['All platform', null],
-            type: null,
-            count: calculateDaysDifference(
-              currentDate,
-              weeklyUpcomingAuction.startDate,
-            ),
-          });
-        }
-      });
+          if (oneMonthNotification.length > 0) {
+            userNotifications.push({
+              creatorId: user.id,
+              scope,
+              event: 'A month before',
+              recipientFormat: ['All platform', null],
+              type: null,
+            });
+          }
+
+          if (weeklyUpcomingAuction) {
+            userNotifications.push({
+              creatorId: user.id,
+              scope,
+              event: 'Weekly',
+              recipientFormat: ['All platform', null],
+              type: null,
+              count: calculateDaysDifference(
+                currentDate,
+                weeklyUpcomingAuction.startDate,
+              ),
+            });
+          }
+
+          return userNotifications;
+        });
+
+        // Emit batched notifications
+        notifications.flat().forEach((notification) => {
+          this.eventEmiter.emit(
+            NotificationEvent.SEND_NOTIFICATION,
+            notification,
+          );
+        });
+
+        offset += batchSize;
+      } while (usersBatch.length > 0);
     } catch (error) {
+      console.log(error);
       this.logger.error(
         'Failed to notify users about upcoming auctions',
         error,
