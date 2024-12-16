@@ -1730,7 +1730,13 @@ export class ListingService {
         id: listingId,
       });
       if (listing.userId != user.id) {
-        throw new BadRequestException('Only the owner can unpublish listing');
+        throw new BadRequestException('Only the owner can publish listing');
+      }
+      if (
+        listing.status == ListingStatus.PENDING ||
+        listing.status == ListingStatus.REJECTED
+      ) {
+        throw new BadRequestException(' Listing is not aproved by Admin');
       }
 
       if (!listing) {
