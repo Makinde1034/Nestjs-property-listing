@@ -76,6 +76,9 @@ export class UpdateServiceInput extends PartialType(CreateServiceInput) {
   @Field()
   @IsString()
   id: string;
+  @Field()
+  @IsString()
+  reason: string;
 
   @Field({ nullable: true })
   @IsOptional()
