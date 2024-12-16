@@ -212,6 +212,7 @@ export class ListingService {
       }
     }
   }
+
   async findAllListingsForOwner(data: AttributeDto, user?: User) {
     try {
       let { sortField, directionToSort } = data;
@@ -1797,6 +1798,24 @@ export class ListingService {
         },
       );
 
+      const notificationPreference =
+        await this.notificationScopeRepository.find();
+      const scope: NotificationScope = notificationPreference.find(
+        (element) => {
+          if (element.name == NotificationScopesEnum.LISTING_CREATED) {
+            return element;
+          }
+        },
+      );
+
+      listing.forEach((element) => {
+        this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+          creatorId: element.userId,
+          scope: scope,
+          recipientFormat: ['Owner', null],
+        });
+      });
+
       const activityToSave = listing.map((element) => {
         return {
           adminId: admin.id,
@@ -1826,6 +1845,24 @@ export class ListingService {
           status: ListingStatus.REJECTED,
         },
       );
+
+      const notificationPreference =
+        await this.notificationScopeRepository.find();
+      const scope: NotificationScope = notificationPreference.find(
+        (element) => {
+          if (element.name == NotificationScopesEnum.LISTING_CREATED) {
+            return element;
+          }
+        },
+      );
+
+      listing.forEach((element) => {
+        this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+          creatorId: element.userId,
+          scope: scope,
+          recipientFormat: ['Owner', null],
+        });
+      });
 
       const activityToSave = listing.map((element) => {
         return {
