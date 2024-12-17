@@ -316,7 +316,7 @@ export class ListingService {
       } else throw new BadRequestException(error.messages || error.data);
     }
   }
-  async findListingForDashboa(id: string, user?: User) {
+  async findListingForDashboard(id: string, user?: User) {
     try {
       const result = await this.listingRepository.findOneOrFail({
         where: { id: id },
@@ -883,6 +883,12 @@ export class ListingService {
       paginateAndSort.isListingRented !== null
     ) {
       whereCondition.isListingRented = paginateAndSort.isListingRented;
+    }
+    if (
+      paginateAndSort.status !== undefined &&
+      paginateAndSort.status !== null
+    ) {
+      whereCondition.status = paginateAndSort.status;
     }
 
     const quotedColumnName = (column: string) => `"listing"."${column}"`;
@@ -1802,7 +1808,7 @@ export class ListingService {
         await this.notificationScopeRepository.find();
       const scope: NotificationScope = notificationPreference.find(
         (element) => {
-          if (element.name == NotificationScopesEnum.LISTING_CREATED) {
+          if (element.name == NotificationScopesEnum.LISTING_APPROVED) {
             return element;
           }
         },
@@ -1850,7 +1856,7 @@ export class ListingService {
         await this.notificationScopeRepository.find();
       const scope: NotificationScope = notificationPreference.find(
         (element) => {
-          if (element.name == NotificationScopesEnum.LISTING_CREATED) {
+          if (element.name == NotificationScopesEnum.LISTING_DENIED) {
             return element;
           }
         },
