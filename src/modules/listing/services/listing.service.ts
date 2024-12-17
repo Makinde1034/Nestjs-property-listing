@@ -212,6 +212,7 @@ export class ListingService {
       }
     }
   }
+
   async findAllListingsForOwner(data: AttributeDto, user?: User) {
     try {
       let { sortField, directionToSort } = data;
@@ -315,7 +316,7 @@ export class ListingService {
       } else throw new BadRequestException(error.messages || error.data);
     }
   }
-  async findListingForDashboa(id: string, user?: User) {
+  async findListingForDashboard(id: string, user?: User) {
     try {
       const result = await this.listingRepository.findOneOrFail({
         where: { id: id },
@@ -882,6 +883,12 @@ export class ListingService {
       paginateAndSort.isListingRented !== null
     ) {
       whereCondition.isListingRented = paginateAndSort.isListingRented;
+    }
+    if (
+      paginateAndSort.status !== undefined &&
+      paginateAndSort.status !== null
+    ) {
+      whereCondition.status = paginateAndSort.status;
     }
 
     const quotedColumnName = (column: string) => `"listing"."${column}"`;
@@ -1730,7 +1737,13 @@ export class ListingService {
         id: listingId,
       });
       if (listing.userId != user.id) {
-        throw new BadRequestException('Only the owner can unpublish listing');
+        throw new BadRequestException('Only the owner can publish listing');
+      }
+      if (
+        listing.status == ListingStatus.PENDING ||
+        listing.status == ListingStatus.REJECTED
+      ) {
+        throw new BadRequestException(' Listing is not aproved by Admin');
       }
 
       if (!listing) {
@@ -1791,6 +1804,24 @@ export class ListingService {
         },
       );
 
+      const notificationPreference =
+        await this.notificationScopeRepository.find();
+      const scope: NotificationScope = notificationPreference.find(
+        (element) => {
+          if (element.name == NotificationScopesEnum.LISTING_APPROVED) {
+            return element;
+          }
+        },
+      );
+
+      listing.forEach((element) => {
+        this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+          creatorId: element.userId,
+          scope: scope,
+          recipientFormat: ['Owner', null],
+        });
+      });
+
       const activityToSave = listing.map((element) => {
         return {
           adminId: admin.id,
@@ -1820,6 +1851,24 @@ export class ListingService {
           status: ListingStatus.REJECTED,
         },
       );
+
+      const notificationPreference =
+        await this.notificationScopeRepository.find();
+      const scope: NotificationScope = notificationPreference.find(
+        (element) => {
+          if (element.name == NotificationScopesEnum.LISTING_DENIED) {
+            return element;
+          }
+        },
+      );
+
+      listing.forEach((element) => {
+        this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+          creatorId: element.userId,
+          scope: scope,
+          recipientFormat: ['Owner', null],
+        });
+      });
 
       const activityToSave = listing.map((element) => {
         return {

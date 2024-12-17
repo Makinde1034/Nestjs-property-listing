@@ -25,6 +25,7 @@ import { Ownership, Purpose, RentingOption } from '../../../../common/enums';
 import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
 import { TimePeriod } from '../../../../common/enums/sort.enum';
 import { LocationDto } from '../../../location/dto/request/location.dto';
+import { ListingStatus } from '../../../../common/enums/status.enum';
 
 @InputType()
 export class Attributes {
@@ -136,6 +137,11 @@ export class UserFilterAndSort extends PaginateAndSort {
   @IsOptional()
   @IsEnum(TimePeriod)
   timePeriod: string;
+
+  @Field({ defaultValue: false })
+  @IsOptional()
+  @IsEnum(ListingStatus)
+  status: string;
 
   @Field()
   @IsOptional()

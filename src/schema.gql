@@ -1357,6 +1357,7 @@ input AdminFilterAndSort {
   directionToSort: SortOrder
   where: WhereOption
   timePeriod: String = "false"
+  status: String = "false"
   isListingPromoted: Boolean
   isListingFeatured: Boolean
   isListingSold: Boolean
@@ -2399,6 +2400,7 @@ input UpdateServiceInput {
   pricing: [Pricing!]
   providerServiceStatus: String
   id: String!
+  reason: String!
   isActive: Boolean
 }
 

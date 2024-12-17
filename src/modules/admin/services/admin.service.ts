@@ -451,7 +451,6 @@ export class AdminService {
           data: dataForInterval, // Corresponding transaction data
         };
       });
-      console.log(payload);
 
       return payload;
     } catch (error) {

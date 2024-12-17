@@ -2,6 +2,13 @@ services:
   backend:
     build:
       context: .
+    deploy:
+      resources:
+        limits:
+          memory: 4g
+          cpus: '2.0'
+        reservations:
+          memory: 2g
     volumes:
       - .:/usr/src/app
       - ./node_modules:/usr/src/app/node_modules
