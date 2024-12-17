@@ -2395,7 +2395,7 @@ input ServiceProviderInput {
 
 input ApprovalInput {
   id: String!
-  reason: String!
+  reason: String
 }
 
 input UpdateServiceInput {

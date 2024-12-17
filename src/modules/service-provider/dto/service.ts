@@ -99,7 +99,7 @@ export class ApprovalInput {
   @IsString()
   id: string;
 
-  @Field()
+  @Field({ nullable: true })
   @IsString()
   reason: string;
 }
