@@ -5,10 +5,12 @@ import {
   Logger,
 } from '@nestjs/common';
 import {
+  ApprovalInput,
   CreateServiceInput,
   CreateServiceProviderInput,
   DeleteServiceProvider,
   ProvideNewService,
+  ProvideServiceStatusInput,
   RequestForService,
   ServiceProviderInput,
   UpdateServiceInput,
@@ -29,6 +31,7 @@ import { AppStrings } from '../../../common/messages/app.strings';
 import { ServiceProvided } from '../../../entities/service-provided.entity';
 import { ServiceRequestedRepository } from '../repository/requested-service.repository';
 import { ServiceProvidedStatus } from '../../../common/enums/service-provider';
+import { elementAt } from 'rxjs';
 
 @Injectable()
 export class ServiceAndProviderService {
@@ -129,20 +132,32 @@ export class ServiceAndProviderService {
 
   async accept(serviceProviderInput: ServiceProviderInput, user: User) {
     try {
+      let serviceProviderId = [];
+      serviceProviderInput.approvalInput.forEach((element) => {
+        serviceProviderId.push(element.id);
+      });
       const serviceProvider = await this.serviceProviderRepository.find({
-        where: { id: In(serviceProviderInput.id) },
+        where: { id: In(serviceProviderId) },
       });
 
       if (serviceProvider.length == 0) {
         throw new BadRequestException(AppStrings.NOT_FOUND);
       }
 
-      const { affected } = await this.serviceProviderRepository.update(
-        serviceProviderInput.id,
-        {
+      const resultToUpdate = serviceProvider.map((element) => {
+        const serviceProviderToUpdate = serviceProviderInput.approvalInput.find(
+          (value) => element.id == value.id,
+        );
+        return {
+          ...element,
+          reason: serviceProviderToUpdate.reason,
+
           providerStatus: ServiceProviderStatus.ACCEPTED,
-        },
-      );
+        };
+      });
+
+      const updatedServiceProvider =
+        await this.serviceProviderRepository.save(resultToUpdate);
       const activityToSave = serviceProvider.map((element) => {
         return {
           adminId: user.id,
@@ -156,7 +171,7 @@ export class ServiceAndProviderService {
 
       await this.activityLogService.logActivity(activityToSave);
 
-      if (affected > 0) {
+      if (updatedServiceProvider) {
         return new SuccessResponse(AppStrings.SUCCESSFULL);
       }
     } catch (error) {
@@ -167,20 +182,32 @@ export class ServiceAndProviderService {
 
   async reject(serviceProviderInput: ServiceProviderInput, user: User) {
     try {
+      let serviceProviderId = [];
+      serviceProviderInput.approvalInput.forEach((element) => {
+        serviceProviderId.push(element.id);
+      });
       const serviceProvider = await this.serviceProviderRepository.find({
-        where: { id: In(serviceProviderInput.id) },
+        where: { id: In(serviceProviderId) },
       });
 
       if (serviceProvider.length == 0) {
         throw new BadRequestException(AppStrings.NOT_FOUND);
       }
 
-      const { affected } = await this.serviceProviderRepository.update(
-        serviceProviderInput.id,
-        {
+      const resultToUpdate = serviceProvider.map((element) => {
+        const serviceProviderToUpdate = serviceProviderInput.approvalInput.find(
+          (value) => element.id == value.id,
+        );
+        return {
+          ...element,
+          reason: serviceProviderToUpdate.reason,
+
           providerStatus: ServiceProviderStatus.REJECTED,
-        },
-      );
+        };
+      });
+
+      const updatedServiceProvider =
+        await this.serviceProviderRepository.save(resultToUpdate);
 
       const activityToSave = serviceProvider.map((element) => {
         return {
@@ -195,7 +222,7 @@ export class ServiceAndProviderService {
 
       await this.activityLogService.logActivity(activityToSave);
 
-      if (affected > 0) {
+      if (updatedServiceProvider) {
         return new SuccessResponse(AppStrings.SUCCESSFULL);
       }
     } catch (error) {
@@ -235,7 +262,7 @@ export class ServiceAndProviderService {
     }
   }
 
-  async stopProvidingService(proideServiceInput: ServiceProviderInput) {
+  async stopProvidingService(proideServiceInput: ProvideServiceStatusInput) {
     try {
       const { affected } = await this.serviceProvidedRepository.softDelete(
         proideServiceInput.id,

@@ -1120,7 +1120,6 @@ export class ListingService {
         select: {
           id: true,
           title: true,
-
           purpose: true,
           rentingOption: true,
           featureDate: true,

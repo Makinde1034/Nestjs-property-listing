@@ -478,6 +478,7 @@ type ServiceProvider {
   activityLog: [ActivityLog!]!
   servicesOffered: [ServiceProvided!]!
   coverageArea: String!
+  reason: String
   updatedAt: DateTime!
 }
 
@@ -2389,7 +2390,12 @@ input UpdateServiceProviderInput {
 }
 
 input ServiceProviderInput {
-  id: [String!]!
+  approvalInput: [ApprovalInput!]!
+}
+
+input ApprovalInput {
+  id: String!
+  reason: String!
 }
 
 input UpdateServiceInput {
