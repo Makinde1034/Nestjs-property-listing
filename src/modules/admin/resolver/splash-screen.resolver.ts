@@ -21,6 +21,7 @@ import {
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { Permissions } from '../../../common/decorator/permission';
 import { PermissionsEnum } from '../../../common/enums/permission.enum';
+import { Public } from '../../auth/decorators/permision.decorator';
 
 @Resolver()
 export class SplashScreenResolver {
@@ -84,6 +85,7 @@ export class SplashScreenResolver {
     name: 'findDefaultSplashScreen',
     nullable: true,
   })
+  @Public()
   async findDefault() {
     return await this.splashScreenService.fetchDefault();
   }
@@ -92,6 +94,7 @@ export class SplashScreenResolver {
     name: 'findDefaultBanner',
     nullable: true,
   })
+  @Public()
   async findDefaultBanner() {
     return await this.splashScreenService.fetchDefaultForBanner();
   }
