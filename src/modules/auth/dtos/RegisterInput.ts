@@ -65,6 +65,7 @@ export class RegisterInput {
     minLowercase: 1,
     minNumbers: 1,
     minUppercase: 1,
+    minSymbols: 0,
   })
   password: string;
   @Field(() => CompanyInput, { nullable: true })
