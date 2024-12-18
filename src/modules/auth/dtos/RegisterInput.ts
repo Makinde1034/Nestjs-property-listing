@@ -61,20 +61,18 @@ export class RegisterInput {
   @IsNotEmpty()
   @IsString()
   @IsStrongPassword({
-    minLength: 8,
+    minLength: 6,
     minLowercase: 1,
     minNumbers: 1,
     minUppercase: 1,
   })
   password: string;
-
   @Field(() => CompanyInput, { nullable: true })
   @ValidateNested()
   @Type(() => CompanyInput)
   @ValidateIf((o) => o.userType === UserProfileTypeEnum.COMPANY)
   company: CompanyInput;
 }
-
 @InputType()
 export class ConfirmationInput {
   @Field()
