@@ -388,7 +388,7 @@ export class SplashScreenService {
         splashScreen = await this.splashScreenRepository.findOne({
           where: {
             default: true,
-            placement: SplashScreenPlacement.SPLASH_SCREEN,
+            placement: SplashScreenPlacement.MAIN_BANNER,
           },
         });
       }
