@@ -72,6 +72,10 @@ export class ServiceProvider extends BaseEntity {
   @Column()
   coverageArea: string;
 
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  reason: string;
+
   @Field()
   @UpdateDateColumn()
   updatedAt: Date;

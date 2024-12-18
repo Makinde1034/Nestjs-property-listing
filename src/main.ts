@@ -55,7 +55,6 @@ async function bootstrap() {
 
   const server = app.getHttpServer();
   server.setTimeout(0);
-
   console.log(`Application is running on: ${await app.getUrl()}`);
 }
 bootstrap();

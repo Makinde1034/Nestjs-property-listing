@@ -75,6 +75,7 @@ export class UserResolver {
   async findAllUser(@Args('userFilterInput') userFilterInput: UserFilter) {
     return await this.userService.findAllUser(userFilterInput);
   }
+
   @Query(() => UserResponse, { name: 'getEmployees' })
   @UseGuards(AccessTokenGuard)
   @Permissions(PermissionsEnum.USER_MANAGEMENT_VIEW)
@@ -96,7 +97,6 @@ export class UserResolver {
 
   /**
    * Update User Profile
-   *
    * @async
    * @param {any} ctx
    * @param {UserProfileInput} inputDto
@@ -261,6 +261,7 @@ export class UserResolver {
   ): Promise<User> {
     return await this.userService.updateUserData(updateUserInput, ctx.req.user);
   }
+
   @Mutation(() => SuccessResponse, { name: 'switchUserInterface' })
   @UseGuards(AccessTokenGuard)
   async switchUserInterface(

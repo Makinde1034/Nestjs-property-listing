@@ -76,6 +76,7 @@ export class UpdateServiceInput extends PartialType(CreateServiceInput) {
   @Field()
   @IsString()
   id: string;
+
   @Field()
   @IsString()
   reason: string;
@@ -93,10 +94,21 @@ export class DeleteServiceProvider {
 }
 
 @InputType()
+export class ApprovalInput {
+  @Field()
+  @IsString()
+  id: string;
+
+  @Field({ nullable: true })
+  @IsString()
+  reason: string;
+}
+
+@InputType()
 export class ServiceProviderInput {
-  @Field(() => [String])
+  @Field(() => [ApprovalInput])
   @IsArray()
-  id: string[];
+  approvalInput: ApprovalInput[];
 }
 
 @InputType()
@@ -108,6 +120,12 @@ export class ProvideNewService {
   @Field()
   @IsString()
   serviceId: string;
+}
+@InputType()
+export class ProvideServiceStatusInput {
+  @Field(() => [String])
+  @IsArray()
+  id: string[];
 }
 
 @InputType()
