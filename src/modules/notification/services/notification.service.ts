@@ -122,45 +122,46 @@ export class NotificationService {
         attachment,
       } = notificationInput;
 
-      // Fetch buyer and seller along with their notification preferences
-      const [buyer, seller] = await Promise.all([
-        this.userRepository.findOneOrFail({
-          where: { id: creatorId },
-          select: ['id', 'notificationPreference'],
-          relations: ['notificationPreference'],
+      // Fetch buyer and seller notification preferences for the given scope
+      const [buyerPref, sellerPref] = await Promise.all([
+        this.userNotificationPreference.findOne({
+          where: { user: { id: creatorId }, scope: { id: scope.id } },
+          relations: ['user', 'scope'],
         }),
 
-        this.userRepository.findOneOrFail({
-          where: { id: receiverId },
-          select: ['id', 'notificationPreference'],
-          relations: ['notificationPreference'],
+        this.userNotificationPreference.findOne({
+          where: { user: { id: receiverId }, scope: { id: scope.id } },
+          relations: ['user', 'scope'],
         }),
       ]);
 
-      // Extract user preferences for the given scope
-      const userPrefBuyer = buyer.notificationPreference.find(
-        (pref) => pref.scope.id === scope.id,
-      );
-
-      const userPrefSeller = seller.notificationPreference.find(
-        (pref) => pref.scope.id === scope.id,
-      );
+      // If neither buyer nor seller has preferences for this scope, skip
+      if (!buyerPref && !sellerPref) {
+        this.logger.warn(
+          `No notification preferences found for scope: ${scope.id}`,
+        );
+        return;
+      }
 
       // Define scopes triggering notifications
-      const notificationScopes = Object.values(NotificationScopesEnum);
+      const notificationScopes = new Set(Object.values(NotificationScopesEnum));
 
-      // Send notification if scope matches predefined scopes
-      const scopeName = scope.name as NotificationScopesEnum;
-      if (notificationScopes.includes(scopeName)) {
+      // Check if scope matches predefined notification scopes
+      const scopeName = scope.scopeGroup as NotificationScopesEnum;
+
+      if (notificationScopes.has(scopeName)) {
+        // Fetch messages relevant to the scope and event
         const messages = await this.notificationMesageRepository.find({
           where: { scope: scope.scopeGroup, event },
+          // select: ['id', 'scope', 'event'], // Fetch only necessary fields
         });
 
-        this.SendNotificationBasedOnPreference(
-          userPrefBuyer,
-          userPrefSeller,
-          seller,
-          buyer,
+        // Process notifications based on preferences
+        await this.SendNotificationBasedOnPreference(
+          buyerPref,
+          sellerPref,
+          buyerPref?.user,
+          sellerPref?.user,
           event,
           scope.scopeGroup,
           recipientFormat,
@@ -209,7 +210,15 @@ export class NotificationService {
 
       if (userPrefOwner?.email) {
         this.logger.log('Sending notifications');
-        this.sendEmailToUser(owner, event, scope, recipientFormat[0], null);
+        this.sendEmailToUser(
+          owner,
+          event,
+          scope,
+          recipientFormat[0],
+          count,
+          null,
+          messages,
+        );
       }
 
       /************************
@@ -222,6 +231,8 @@ export class NotificationService {
           event,
           scope,
           recipientFormat[1],
+          count,
+
           messages,
         );
       }
@@ -233,6 +244,7 @@ export class NotificationService {
           event,
           scope,
           recipientFormat[0],
+          count,
           messages,
         );
       }
@@ -247,7 +259,7 @@ export class NotificationService {
           event,
           scope,
           recipientFormat[1],
-
+          count,
           messages,
         );
       }
@@ -259,6 +271,7 @@ export class NotificationService {
           event,
           scope,
           recipientFormat[0],
+          count,
           messages,
         );
       }
@@ -303,6 +316,7 @@ export class NotificationService {
     event: string,
     scope: string,
     format: string,
+    count: number,
     messages?: NotificationMessages[],
   ) {
     try {
@@ -313,15 +327,15 @@ export class NotificationService {
           event,
           scope,
           format,
+          count,
+          messages,
         );
         const subject: string =
           user.language === 'en'
-            ? messageData[0]?.title
-            : messageData[0]?.arabicTitle;
+            ? messageData?.title
+            : messageData?.arabicTitle;
         const text =
-          user.language === 'en'
-            ? messageData[0]?.body
-            : messageData[0]?.arabicBody;
+          user.language === 'en' ? messageData?.body : messageData?.arabicBody;
 
         const payload: MessageEvent = {
           type: ServerSentEvents.SUCCESS,
@@ -364,16 +378,15 @@ export class NotificationService {
           scope,
           format,
           count,
+          message,
         );
 
         const subject: string =
           user.language === 'en'
-            ? messageData[0]?.title
-            : messageData[0]?.arabicTitle;
+            ? messageData?.title
+            : messageData?.arabicTitle;
         const text =
-          user.language === 'en'
-            ? messageData[0]?.body
-            : messageData[0]?.arabicBody;
+          user.language === 'en' ? messageData?.body : messageData?.arabicBody;
 
         //send mail
         this.sendEmailNotification(
@@ -401,6 +414,7 @@ export class NotificationService {
     event: string,
     scope: string,
     format: string,
+    count: number,
     messages?: NotificationMessages[],
   ) {
     try {
@@ -410,16 +424,14 @@ export class NotificationService {
         event,
         scope,
         format,
+        count,
+        messages,
       );
 
       const title =
-        user.language === 'en'
-          ? messageData[0].title
-          : messageData[0].arabicTitle;
+        user.language === 'en' ? messageData.title : messageData.arabicTitle;
       const message =
-        user.language === 'en'
-          ? messageData[0].body
-          : messageData[0].arabicBody;
+        user.language === 'en' ? messageData.body : messageData.arabicBody;
 
       this.sendPushNotification({
         title,
