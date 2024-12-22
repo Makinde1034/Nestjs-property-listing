@@ -149,8 +149,6 @@ export class PaymentService {
       amount: '300',
     });
 
-    console.log('here', data);
-
     return {
       checkoutId: checkout.id,
       referenceId: generateRandomString(),
@@ -169,7 +167,6 @@ export class PaymentService {
     try {
       const checkout =
         await this.hyperPayService.capturePayment(createPaymentInput);
-      console.log(checkout);
 
       return {
         checkoutId: checkout.id,

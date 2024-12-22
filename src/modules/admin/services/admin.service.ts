@@ -439,12 +439,10 @@ export class AdminService {
 
         if (duration == 6) {
           month = getMonth(startDate) + 1;
-          console.log(month);
           difference = true;
         }
         // Match transactions to the exact interval key
         const intervalKey = (idx + 1 + month).toString(); // Adjust for 1-based month indices
-        console.log(intervalKey, interval);
         const dataForInterval = groupedTransactions[intervalKey] || [];
         return {
           key: interval, // Human-readable interval (e.g., "October")
