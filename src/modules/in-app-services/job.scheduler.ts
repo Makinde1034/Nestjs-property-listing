@@ -59,16 +59,18 @@ export class JobService {
     await this.updateListingPromotionStatus();
     await this.notifyUsersAboutUpcomingAuctions();
   }
-
-  @Cron(CronExpression.EVERY_30_SECONDS)
-  async test() {
-    console.log('now', new Date());
-    // await this.sendAlertOnIncompleteOffers();
-    await this.sendNotificationForNewListingBasedOnSearchHistory();
-    // await this.updateListingFeatureStatus();
-    // await this.updateListingPromotionStatus();
-    // await this.notifyUsersAboutUpcomingAuctions();
-  }
+  /***************************
+   * uncomment to test       *
+   ***************************/
+  // @Cron(CronExpression.EVERY_30_SECONDS)
+  // async test() {
+  //   console.log('now', new Date());
+  //   // await this.sendAlertOnIncompleteOffers();
+  //   // await this.sendNotificationForNewListingBasedOnSearchHistory();
+  //   // await this.updateListingFeatureStatus();
+  //   // await this.updateListingPromotionStatus();
+  //   // await this.notifyUsersAboutUpcomingAuctions();
+  // }
 
   @Cron(CronExpression.EVERY_12_HOURS, { timeZone: 'Africa/Cairo' })
   async handleDailyCron() {
@@ -85,7 +87,6 @@ export class JobService {
         where: { isValid: false },
         relations: ['user'],
       });
-      console.log(searchHistory);
 
       const userNotifications: Array<{ id: string; value: SearchHistory[] }> =
         [];
@@ -93,9 +94,9 @@ export class JobService {
       for (const element of searchHistory) {
         const listing = await this.listingRepository.findOne({
           where: {
-            price: element.minPrice,
-            rentingOption: element.rentingOption,
-            purpose: element.type, // TODO: Add more conditions
+            price: Between(element.minPrice, element.maxPrice),
+            // rentingOption: element.rentingOption,
+            // purpose: element.type, // TODO: Add more conditions
           },
           relations: ['user'],
         });
@@ -103,9 +104,9 @@ export class JobService {
         if (listing) {
           listingArrayMails.push(element.user.email);
 
-          await this.searchHistoryRepository.update(element.id, {
-            isValid: true,
-          });
+          // await this.searchHistoryRepository.update(element.id, {
+          //   isValid: true,
+          // });
 
           listingArrayUserId.push(element.user.id);
 
@@ -134,31 +135,17 @@ export class JobService {
           }
         },
       );
-      console.log(userNotifications);
 
       // Send notifications for each user
       for (const notification of userNotifications) {
         this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
-          creatorId: notification.id,
+          receiverId: notification.id,
           scope: scope,
           event: 'Created',
-          recipientFormat: ['User that has searched', null],
+          recipientFormat: [null, 'User that has searched'],
           type: null,
         });
       }
-
-      // Optionally send bulk notifications (e.g., via email)
-      // await this.mailService.sendSearchHistoryIsNowAvailable(listingArrayMails);
-
-      // Optionally send push notifications
-      // this.notificationService.sendUsersNotification({
-      //   title: 'New listing',
-      //   message: 'A listing that matches your search is now available',
-      //   isEmail: false,
-      //   isPushNotification: true,
-      //   recipients: listingArrayUserId,
-      //   deepLink: '',
-      // });
     } catch (error) {
       this.logger.error(
         'Send Notification For New Listing Based On Search History',
@@ -326,10 +313,10 @@ export class JobService {
 
           if (oneMonthAuctions.length > 0) {
             userNotifications.push({
-              creatorId: user.id,
+              receiverId: user.id,
               scope,
               event: 'A month before',
-              recipientFormat: ['All platform', null],
+              recipientFormat: [null, 'All platform'],
               type: null,
             });
           }
@@ -337,10 +324,10 @@ export class JobService {
           if (weeklyAuctions.length > 0) {
             weeklyAuctions.forEach((auction) => {
               userNotifications.push({
-                creatorId: user.id,
+                receiverId: user.id,
                 scope,
                 event: 'Weekly',
-                recipientFormat: ['All platform', null],
+                recipientFormat: [null, 'All platform'],
                 type: null,
                 count: calculateDaysDifference(currentDate, auction.startDate),
               });
@@ -412,10 +399,11 @@ export class JobService {
     auctions.forEach((element) => {
       if (oneDayNotification.length) {
         this.notificationService.prepareNotification({
-          creatorId: element.listing.userId,
+          creatorId: null,
+          receiverId: element.listing.userId,
           scope: scope,
           event: scope.name,
-          recipientFormat: ['Users enlisted to bid and sellers', null],
+          recipientFormat: [null, 'Users enlisted to bid and sellers'],
         });
       }
     });
@@ -467,10 +455,10 @@ export class JobService {
     auctions.forEach((element) => {
       if (oneDayNotification.length) {
         this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
-          creatorId: element.listing.userId,
+          receiverId: element.listing.userId,
           scope: scope,
           event: '12- Hour before',
-          recipientFormat: ['Users enlisted to bid and sellers', null],
+          recipientFormat: [null, 'Users enlisted to bid and sellers'],
           type: null,
         });
       }

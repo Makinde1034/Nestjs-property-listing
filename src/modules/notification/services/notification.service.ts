@@ -120,8 +120,6 @@ export class NotificationService {
         event = scope.name,
         count,
         attachment,
-        message,
-        title,
       } = notificationInput;
 
       // Fetch buyer and seller notification preferences for the given scope
@@ -137,8 +135,10 @@ export class NotificationService {
         }),
       ]);
 
-      // If neither buyer nor seller has preferences for this scope, skip
-      if (!buyerPref && !sellerPref) {
+      console.log(buyerPref);
+
+      //If neither buyer nor seller has preferences for this scope, skip
+      if (!buyerPref || !sellerPref) {
         this.logger.warn(
           `No notification preferences found for scope: ${scope.id}`,
         );
@@ -162,8 +162,8 @@ export class NotificationService {
         await this.SendNotificationBasedOnPreference(
           buyerPref,
           sellerPref,
-          buyerPref?.user,
           sellerPref?.user,
+          buyerPref?.user,
           event,
           scope.scopeGroup,
           recipientFormat,
@@ -196,9 +196,8 @@ export class NotificationService {
        * Email Notification
        ************************/
 
-      if (userPrefRecipients?.email) {
+      if (userPrefRecipients?.email || 1 == 1) {
         this.logger.log('Sending notifications');
-        this.logger.log('here');
         this.sendEmailToUser(
           recipient,
           event,
@@ -322,6 +321,8 @@ export class NotificationService {
     messages?: NotificationMessages[],
   ) {
     try {
+      console.log('user', user);
+
       if (user) {
         const messageData = this.getMessage(
           user.firstName,
