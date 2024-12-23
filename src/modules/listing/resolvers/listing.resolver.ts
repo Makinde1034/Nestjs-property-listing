@@ -173,6 +173,7 @@ export class ListingResolver {
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.LISTINGS_VIEW_DETAILS)
+  @Public()
   @Query(() => AdminListingResponse, { name: 'findListingsForAdmin' })
   async getListingsForAdmin(
     @Args('paginateAndSort', { nullable: true })

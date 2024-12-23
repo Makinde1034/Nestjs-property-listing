@@ -138,10 +138,10 @@ export class UserFilterAndSort extends PaginateAndSort {
   @IsEnum(TimePeriod)
   timePeriod: string;
 
-  @Field({ defaultValue: false })
-  @IsOptional()
+  @Field({ nullable: true })
+  @ValidateIf((o) => o.status) // Validate only if `shouldValidateStatus` is true
   @IsEnum(ListingStatus)
-  status: string;
+  status?: ListingStatus;
 
   @Field()
   @IsOptional()
