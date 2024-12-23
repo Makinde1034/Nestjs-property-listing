@@ -25,11 +25,15 @@ import {
   calculateDaysDifference,
   removeDaysFromDate,
 } from '../../common/utils/helper';
-import { NotificationScopesEnum } from '../../common/enums/notification-scope.enum';
+import {
+  NotificationScopeEnum,
+  NotificationScopesEnum,
+} from '../../common/enums/notification-scope.enum';
 import { NotificationScope } from '../../entities';
 import { AuctionParticipantRepository } from '../listing/repositories/auction-participant.repository';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { NotificationEvent } from '../../common/enums';
+import { SearchHistory } from '../../entities/search-history.entity';
 
 @Injectable()
 export class JobService {
@@ -56,8 +60,15 @@ export class JobService {
     await this.notifyUsersAboutUpcomingAuctions();
   }
 
-  @Cron(CronExpression.EVERY_5_SECONDS)
-  async test() {}
+  @Cron(CronExpression.EVERY_30_SECONDS)
+  async test() {
+    console.log('now', new Date());
+    // await this.sendAlertOnIncompleteOffers();
+    await this.sendNotificationForNewListingBasedOnSearchHistory();
+    // await this.updateListingFeatureStatus();
+    // await this.updateListingPromotionStatus();
+    // await this.notifyUsersAboutUpcomingAuctions();
+  }
 
   @Cron(CronExpression.EVERY_12_HOURS, { timeZone: 'Africa/Cairo' })
   async handleDailyCron() {
@@ -74,36 +85,80 @@ export class JobService {
         where: { isValid: false },
         relations: ['user'],
       });
+      console.log(searchHistory);
 
-      searchHistory.forEach(async (element) => {
+      const userNotifications: Array<{ id: string; value: SearchHistory[] }> =
+        [];
+
+      for (const element of searchHistory) {
         const listing = await this.listingRepository.findOne({
           where: {
             price: element.minPrice,
-
             rentingOption: element.rentingOption,
-
-            purpose: element.type, //TODO: add more conditions
+            purpose: element.type, // TODO: Add more conditions
           },
           relations: ['user'],
         });
+
         if (listing) {
           listingArrayMails.push(element.user.email);
-          this.searchHistoryRepository.update(element.id, {
+
+          await this.searchHistoryRepository.update(element.id, {
             isValid: true,
           });
-          listingArrayUserId.push(element.user.id);
-        }
-      });
 
-      await this.mailService.sendSearchHistoryIsNowAvailable(listingArrayMails);
-      this.notificationService.sendUsersNotification({
-        title: 'New listing',
-        message: 'A listing that matches  your search is now available',
-        isEmail: false,
-        isPushNotification: true,
-        recipients: listingArrayUserId,
-        deepLink: '',
-      });
+          listingArrayUserId.push(element.user.id);
+
+          // Add to userNotifications
+          const existingUserNotification = userNotifications.find(
+            (value) => value.id === element.user.id,
+          );
+
+          if (existingUserNotification) {
+            existingUserNotification.value.push(element);
+          } else {
+            userNotifications.push({ id: element.user.id, value: [element] });
+          }
+        }
+      }
+      const notificationPreference =
+        await this.notificationScopeRepository.find();
+      //Filter out the correct scope
+      const scope: NotificationScope = notificationPreference.find(
+        (element) => {
+          if (
+            element.scopeGroup ==
+            NotificationScopeEnum.LISTINGS_IN_SAVED_SEARCHES
+          ) {
+            return element;
+          }
+        },
+      );
+      console.log(userNotifications);
+
+      // Send notifications for each user
+      for (const notification of userNotifications) {
+        this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
+          creatorId: notification.id,
+          scope: scope,
+          event: 'Created',
+          recipientFormat: ['User that has searched', null],
+          type: null,
+        });
+      }
+
+      // Optionally send bulk notifications (e.g., via email)
+      // await this.mailService.sendSearchHistoryIsNowAvailable(listingArrayMails);
+
+      // Optionally send push notifications
+      // this.notificationService.sendUsersNotification({
+      //   title: 'New listing',
+      //   message: 'A listing that matches your search is now available',
+      //   isEmail: false,
+      //   isPushNotification: true,
+      //   recipients: listingArrayUserId,
+      //   deepLink: '',
+      // });
     } catch (error) {
       this.logger.error(
         'Send Notification For New Listing Based On Search History',
@@ -153,6 +208,7 @@ export class JobService {
 
       return records;
     } catch (error) {
+      console.log(error);
       this.logger.error('send Alert On Incomplete Offers', error);
     }
   }

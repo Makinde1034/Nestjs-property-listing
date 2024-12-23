@@ -120,6 +120,8 @@ export class NotificationService {
         event = scope.name,
         count,
         attachment,
+        message,
+        title,
       } = notificationInput;
 
       // Fetch buyer and seller notification preferences for the given scope
