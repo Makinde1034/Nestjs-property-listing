@@ -4,10 +4,15 @@
  */
 
 import { InputType, Field } from '@nestjs/graphql';
-import { IsNumber, IsOptional } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 @InputType()
 export class LocationDto {
+  @IsString()
+  @Field()
+  @IsOptional()
+  placeId: string;
+
   @Field()
   @IsNumber()
   @IsOptional()

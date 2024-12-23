@@ -18,6 +18,9 @@ export class GpsCoordinate extends BaseEntity {
   @Column('double precision')
   @Field()
   lng: number;
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  placeId: string;
 
   @Field(() => GpsCoordinate)
   @JoinColumn({ name: 'listingId' })
