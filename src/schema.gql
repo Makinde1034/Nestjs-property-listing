@@ -184,6 +184,7 @@ type GpsCoordinate {
   id: ID!
   lat: Float!
   lng: Float!
+  placeId: String
   listing: GpsCoordinate!
 }
 
@@ -1329,6 +1330,7 @@ input CreateSearchHistoryInput {
 }
 
 input LocationDto {
+  placeId: String!
   lng: Float!
   lat: Float!
 }
