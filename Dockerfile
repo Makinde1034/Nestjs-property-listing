@@ -80,6 +80,49 @@
 # # Run the application
 # CMD ["npm", "run", "start:prod"]
 
+# # Stage 1: Build stage
+# FROM node:20 as builder
+
+# WORKDIR /usr/src/app
+# COPY package*.json ./
+# RUN npm ci
+# COPY . .
+# RUN npm run build
+
+# # Stage 2: Production stage
+# FROM node:20-slim
+
+# WORKDIR /usr/src/app
+# COPY --from=builder /usr/src/app/dist ./dist
+# COPY package*.json ./
+# RUN npm ci --only=production
+
+# ENV NODE_OPTIONS="--max-old-space-size=4096"
+
+# # Install Firefox and required fonts
+# RUN apt-get update && \
+#     apt-get install -y --no-install-recommends \
+#     wget \
+#     gnupg \
+#     firefox-esr \
+#     fonts-ipafont-gothic \
+#     fonts-wqy-zenhei \
+#     fonts-thai-tlwg \
+#     fonts-kacst \
+#     fonts-freefont-ttf && \
+#     rm -rf /var/lib/apt/lists/*
+
+# ENV NODE_ENV=production \
+#     PUPPETEER_PRODUCT=firefox \
+#     PUPPETEER_EXECUTABLE_PATH=/usr/bin/firefox
+
+# EXPOSE 3000
+
+# CMD ["node", "--max-old-space-size=4096", "dist/main"]
+
+
+
+
 # Stage 1: Build stage
 FROM node:20 as builder
 
@@ -102,16 +145,17 @@ ENV NODE_OPTIONS="--max-old-space-size=4096"
 # Install Firefox and required fonts
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    wget \
-    gnupg \
-    firefox-esr \
-    fonts-ipafont-gothic \
-    fonts-wqy-zenhei \
-    fonts-thai-tlwg \
-    fonts-kacst \
-    fonts-freefont-ttf && \
+        wget \
+        gnupg \
+        firefox-esr \
+        fonts-ipafont-gothic \
+        fonts-wqy-zenhei \
+        fonts-thai-tlwg \
+        fonts-kacst \
+        fonts-freefont-ttf && \
     rm -rf /var/lib/apt/lists/*
 
+# Set environment variables for Puppeteer
 ENV NODE_ENV=production \
     PUPPETEER_PRODUCT=firefox \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/firefox
