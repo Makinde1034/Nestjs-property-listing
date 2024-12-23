@@ -145,6 +145,7 @@ ENV NODE_OPTIONS="--max-old-space-size=4096"
 # Install Firefox and required fonts
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
+        software-properties-common \
         wget \
         gnupg \
         firefox-esr \
@@ -154,6 +155,7 @@ RUN apt-get update && \
         fonts-kacst \
         fonts-freefont-ttf && \
     rm -rf /var/lib/apt/lists/*
+
 
 # Set environment variables for Puppeteer
 ENV NODE_ENV=production \
