@@ -324,6 +324,8 @@ export class UserService {
         relations,
       });
 
+      // this.createDefaultNotifications(user);
+
       return user;
     } catch (error) {
       this.logger.log(error);

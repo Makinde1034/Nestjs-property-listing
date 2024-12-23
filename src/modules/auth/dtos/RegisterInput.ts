@@ -68,6 +68,7 @@ export class RegisterInput {
     minSymbols: 0,
   })
   password: string;
+
   @Field(() => CompanyInput, { nullable: true })
   @ValidateNested()
   @Type(() => CompanyInput)

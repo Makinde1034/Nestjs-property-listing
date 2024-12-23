@@ -161,4 +161,10 @@ export const NotificationScopeFactory: NotificationScope[] = [
     name: 'Denied',
     description: 'Receive notification when a listing is denied',
   },
+  {
+    id: 26,
+    scopeGroup: 'Listings in Saved searches',
+    name: 'Created',
+    description: 'Receive notification when search is available',
+  },
 ];

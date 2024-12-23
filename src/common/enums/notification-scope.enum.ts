@@ -31,6 +31,8 @@ export enum NotificationScopesEnum {
   LISTING_DENIED = 'Denied',
 
   WORKFLOW_EVENT = 'Workflow Event',
+
+  LISTING_IN_SAVED_SEARCHES = 'Listings in Saved searches',
 }
 
 export enum NotificationTitlesEnum {
@@ -74,4 +76,21 @@ export enum NotificationTitlesEnum {
   NEW_LISTING = 'New Listing',
   LISTING_PUBLISHED = 'Listing Published',
   LISTING_DENIED = 'Listing Denied',
+}
+
+export enum NotificationScopeEnum {
+  OFFERS = 'Offers',
+  LIVE_AUCTION = 'Live Auction',
+  LISTINGS_IN_SAVED_SEARCHES = 'Listings in Saved searches',
+  LISTINGS_IN_WISHLIST = 'Listings in Wishlist',
+  UPCOMING_AUCTIONS = 'Upcoming Auctions',
+  INVOICES = 'Invoices',
+  REGISTRATION = 'Registration',
+  AUCTION = 'Auction',
+  SERVICE_PROVIDER_APPLICATION = 'Service Provider Application',
+  SERVICE = 'Service',
+  WORKFLOW_EVENTS = 'Workflow events',
+  REQUEST_CREATED = 'Request Created',
+  REQUESTS_MANAGEMENT = 'Requests Management',
+  LISTING = 'Listing',
 }

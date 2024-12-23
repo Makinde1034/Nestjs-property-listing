@@ -43,4 +43,6 @@ export interface SendNotificationInput {
   recipientFormat?: [string, string];
   count?: number;
   attachment?: Buffer;
+  message?: string;
+  title?: string;
 }

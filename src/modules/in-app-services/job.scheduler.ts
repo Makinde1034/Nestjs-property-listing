@@ -25,11 +25,15 @@ import {
   calculateDaysDifference,
   removeDaysFromDate,
 } from '../../common/utils/helper';
-import { NotificationScopesEnum } from '../../common/enums/notification-scope.enum';
+import {
+  NotificationScopeEnum,
+  NotificationScopesEnum,
+} from '../../common/enums/notification-scope.enum';
 import { NotificationScope } from '../../entities';
 import { AuctionParticipantRepository } from '../listing/repositories/auction-participant.repository';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { NotificationEvent } from '../../common/enums';
+import { SearchHistory } from '../../entities/search-history.entity';
 
 @Injectable()
 export class JobService {
@@ -55,9 +59,18 @@ export class JobService {
     await this.updateListingPromotionStatus();
     await this.notifyUsersAboutUpcomingAuctions();
   }
-
-  @Cron(CronExpression.EVERY_5_SECONDS)
-  async test() {}
+  /***************************
+   * uncomment to test       *
+   ***************************/
+  // @Cron(CronExpression.EVERY_30_SECONDS)
+  // async test() {
+  //   console.log('now', new Date());
+  //   // await this.sendAlertOnIncompleteOffers();
+  //   // await this.sendNotificationForNewListingBasedOnSearchHistory();
+  //   // await this.updateListingFeatureStatus();
+  //   // await this.updateListingPromotionStatus();
+  //   // await this.notifyUsersAboutUpcomingAuctions();
+  // }
 
   @Cron(CronExpression.EVERY_12_HOURS, { timeZone: 'Africa/Cairo' })
   async handleDailyCron() {
@@ -75,35 +88,64 @@ export class JobService {
         relations: ['user'],
       });
 
-      searchHistory.forEach(async (element) => {
+      const userNotifications: Array<{ id: string; value: SearchHistory[] }> =
+        [];
+
+      for (const element of searchHistory) {
         const listing = await this.listingRepository.findOne({
           where: {
-            price: element.minPrice,
-
-            rentingOption: element.rentingOption,
-
-            purpose: element.type, //TODO: add more conditions
+            price: Between(element.minPrice, element.maxPrice),
+            // rentingOption: element.rentingOption,
+            // purpose: element.type, // TODO: Add more conditions
           },
           relations: ['user'],
         });
+
         if (listing) {
           listingArrayMails.push(element.user.email);
-          this.searchHistoryRepository.update(element.id, {
-            isValid: true,
-          });
-          listingArrayUserId.push(element.user.id);
-        }
-      });
 
-      await this.mailService.sendSearchHistoryIsNowAvailable(listingArrayMails);
-      this.notificationService.sendUsersNotification({
-        title: 'New listing',
-        message: 'A listing that matches  your search is now available',
-        isEmail: false,
-        isPushNotification: true,
-        recipients: listingArrayUserId,
-        deepLink: '',
-      });
+          // await this.searchHistoryRepository.update(element.id, {
+          //   isValid: true,
+          // });
+
+          listingArrayUserId.push(element.user.id);
+
+          // Add to userNotifications
+          const existingUserNotification = userNotifications.find(
+            (value) => value.id === element.user.id,
+          );
+
+          if (existingUserNotification) {
+            existingUserNotification.value.push(element);
+          } else {
+            userNotifications.push({ id: element.user.id, value: [element] });
+          }
+        }
+      }
+      const notificationPreference =
+        await this.notificationScopeRepository.find();
+      //Filter out the correct scope
+      const scope: NotificationScope = notificationPreference.find(
+        (element) => {
+          if (
+            element.scopeGroup ==
+            NotificationScopeEnum.LISTINGS_IN_SAVED_SEARCHES
+          ) {
+            return element;
+          }
+        },
+      );
+
+      // Send notifications for each user
+      for (const notification of userNotifications) {
+        this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
+          receiverId: notification.id,
+          scope: scope,
+          event: 'Created',
+          recipientFormat: [null, 'User that has searched'],
+          type: null,
+        });
+      }
     } catch (error) {
       this.logger.error(
         'Send Notification For New Listing Based On Search History',
@@ -153,6 +195,7 @@ export class JobService {
 
       return records;
     } catch (error) {
+      console.log(error);
       this.logger.error('send Alert On Incomplete Offers', error);
     }
   }
@@ -270,10 +313,10 @@ export class JobService {
 
           if (oneMonthAuctions.length > 0) {
             userNotifications.push({
-              creatorId: user.id,
+              receiverId: user.id,
               scope,
               event: 'A month before',
-              recipientFormat: ['All platform', null],
+              recipientFormat: [null, 'All platform'],
               type: null,
             });
           }
@@ -281,10 +324,10 @@ export class JobService {
           if (weeklyAuctions.length > 0) {
             weeklyAuctions.forEach((auction) => {
               userNotifications.push({
-                creatorId: user.id,
+                receiverId: user.id,
                 scope,
                 event: 'Weekly',
-                recipientFormat: ['All platform', null],
+                recipientFormat: [null, 'All platform'],
                 type: null,
                 count: calculateDaysDifference(currentDate, auction.startDate),
               });
@@ -356,10 +399,11 @@ export class JobService {
     auctions.forEach((element) => {
       if (oneDayNotification.length) {
         this.notificationService.prepareNotification({
-          creatorId: element.listing.userId,
+          creatorId: null,
+          receiverId: element.listing.userId,
           scope: scope,
           event: scope.name,
-          recipientFormat: ['Users enlisted to bid and sellers', null],
+          recipientFormat: [null, 'Users enlisted to bid and sellers'],
         });
       }
     });
@@ -411,10 +455,10 @@ export class JobService {
     auctions.forEach((element) => {
       if (oneDayNotification.length) {
         this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
-          creatorId: element.listing.userId,
+          receiverId: element.listing.userId,
           scope: scope,
           event: '12- Hour before',
-          recipientFormat: ['Users enlisted to bid and sellers', null],
+          recipientFormat: [null, 'Users enlisted to bid and sellers'],
           type: null,
         });
       }
