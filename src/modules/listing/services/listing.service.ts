@@ -1817,6 +1817,8 @@ export class ListingService {
         };
       });
 
+      await this.listingRepository.save(resultToUpdate);
+
       const notificationPreference =
         await this.notificationScopeRepository.find();
       const scope: NotificationScope = notificationPreference.find(
