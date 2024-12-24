@@ -33,6 +33,7 @@ import { Invoice } from './invoice.entity';
 import { ServiceRequested } from './service-requested.entity';
 import { ListingStage } from '../common/enums';
 import { ListingStatus } from '../common/enums/status.enum';
+import { Place } from './place.entity';
 
 @Entity()
 @ObjectType()
@@ -269,6 +270,9 @@ export class Listing extends BaseEntity {
   @Field(() => [ActivityLog], { nullable: true })
   @OneToMany(() => ActivityLog, (activityLogs) => activityLogs.listing)
   listingActivityLogs: ActivityLog;
+  @Field(() => [Place])
+  @OneToMany(() => Place, (place) => place.listing)
+  place: Place[];
 
   @Field({ nullable: true })
   @Index()

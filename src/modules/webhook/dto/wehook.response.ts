@@ -7,6 +7,9 @@ export interface WebHookPaymentResponse {
   type: string;
   payload: Payload;
 }
+export interface WebHookResponse {
+  encryptedBody: string;
+}
 
 export interface Payload {
   id: string;

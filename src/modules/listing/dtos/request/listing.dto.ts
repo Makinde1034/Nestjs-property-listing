@@ -37,6 +37,16 @@ export class Attributes {
   @IsString()
   attributeId: string;
 }
+@InputType()
+export class Places {
+  @Field()
+  @IsString()
+  placeId: string;
+
+  @Field()
+  @IsString()
+  type: string;
+}
 
 @InputType()
 export class CreateListingDto {
@@ -88,6 +98,11 @@ export class CreateListingDto {
   @Field({ nullable: true })
   @IsObject()
   gpsCoordinate: LocationDto;
+
+  @Field(() => [Places], { nullable: true })
+  @IsArray()
+  @IsOptional()
+  places: Places[];
 
   @Field(() => [String], { nullable: true })
   panoramaView: string;
