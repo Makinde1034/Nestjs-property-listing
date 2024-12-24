@@ -267,6 +267,13 @@ type ServiceRequested {
   updatedAt: DateTime!
 }
 
+type Place {
+  id: ID!
+  PlaceId: String!
+  type: String!
+  listing: Listing!
+}
+
 type Listing {
   id: ID!
   ownership: String
@@ -318,6 +325,7 @@ type Listing {
   featureExpiration: DateTime
   promotionExpiration: DateTime
   listingActivityLogs: [ActivityLog!]
+  place: [Place!]!
   createdAt: DateTime
   deletedAt: DateTime!
   updatedAt: DateTime!
@@ -1324,6 +1332,7 @@ input CreateSearchHistoryInput {
   minArea: Float
   maxArea: Float
   gpsCoordinate: LocationDto
+  place: PlacesSearchInput
   attributes: [Attributes!]
   searchHistory: Boolean
   rentingOption: String
@@ -1334,6 +1343,11 @@ input LocationDto {
   placeId: String!
   lng: Float!
   lat: Float!
+}
+
+input PlacesSearchInput {
+  id: String!
+  type: String!
 }
 
 input Attributes {
@@ -2002,8 +2016,14 @@ input CreateListingDto {
   listingTypeId: String!
   attributes: [Attributes!]!
   gpsCoordinate: LocationDto
+  places: [Places!]
   panoramaView: [String!]
   negotiable: Boolean = false
+}
+
+input Places {
+  placeId: String!
+  type: String!
 }
 
 input UpdateListingDto {
@@ -2017,6 +2037,7 @@ input UpdateListingDto {
   listingTypeId: String
   attributes: [Attributes!]
   gpsCoordinate: LocationDto
+  places: [Places!]
   panoramaView: [String!]
   negotiable: Boolean = false
   id: String!

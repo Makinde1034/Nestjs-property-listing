@@ -80,6 +80,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { NotificationScopeRepository } from '../../user/repositories';
 import { NotificationScopesEnum } from '../../../common/enums/notification-scope.enum';
 import { ListingStatus } from '../../../common/enums/status.enum';
+import { PlaceRepository } from '../repositories/place.repositories';
 
 @Injectable()
 export class ListingService {
@@ -101,7 +102,7 @@ export class ListingService {
     private childIssueRepository: ChildIssueRepository,
     private issueRepository: IssueRepository,
     private readonly compareRepository: CompareRepository,
-
+    private readonly placeRepository: PlaceRepository,
     private readonly activityLogsService: ActivityLogService,
     private readonly eventEmitter: EventEmitter2,
     private readonly notificationScopeRepository: NotificationScopeRepository,
@@ -111,7 +112,7 @@ export class ListingService {
   async createListing(user: User, createListingDto: CreateListingDto) {
     try {
       createListingDto.userId = user.id;
-      const { attributes, gpsCoordinate, ...rest } = createListingDto;
+      const { attributes, gpsCoordinate, places, ...rest } = createListingDto;
       const listingType = await this.listingTypeService.findOne(
         createListingDto.listingTypeId,
       );
@@ -141,10 +142,13 @@ export class ListingService {
 
       const gps = await this.gpsCoordinateRepository.save(gpsCoordinate);
 
+      const place = await this.placeRepository.save(places);
+
       const listing = await this.listingRepository.save({
         ...rest,
         gpsCoordinate: gps,
         userId: user.id,
+        place: place,
       });
 
       const attributeEntities = await Promise.all(
@@ -374,7 +378,7 @@ export class ListingService {
         attributes,
         purpose,
         listingTypeId,
-
+        place,
         skip,
         minPrice,
         maxPrice,
@@ -438,6 +442,16 @@ export class ListingService {
           query.andWhere('listing.rentingOption = :rentingOption', {
             rentingOption,
           });
+        }
+
+        if (place) {
+          query.andWhere(
+            'listing.place.id = :placeId AND listing.place.type = :type',
+            {
+              placeId: place.id,
+              type: place.type,
+            },
+          );
         }
 
         if (gpsCoordinate) {
@@ -592,6 +606,7 @@ export class ListingService {
         maxPrice,
         minArea,
         maxArea,
+        place,
         searchHistory,
         take: initialTake,
         purpose,
@@ -668,6 +683,16 @@ export class ListingService {
           query.andWhere('listing.rentingOption = :rentingOption', {
             rentingOption,
           });
+        }
+
+        if (place) {
+          query.andWhere(
+            'listing.place.id = :placeId AND listing.place.type = :type',
+            {
+              placeId: place.id,
+              type: place.type,
+            },
+          );
         }
 
         if (gpsCoordinate) {
@@ -1175,7 +1200,7 @@ export class ListingService {
   async updateListing(editListingDto: UpdateListingDto, user: User) {
     try {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { id, gpsCoordinate, attributes, ...partialUpdatePayload } =
+      const { id, gpsCoordinate, places, attributes, ...partialUpdatePayload } =
         editListingDto;
 
       // Fetch the listing with its relations

@@ -19,6 +19,17 @@ import { Attributes } from './listing.dto';
 import { LocationDto } from '../../../location/dto/request/location.dto';
 
 @InputType()
+export class PlacesSearchInput {
+  @Field()
+  @IsString()
+  id: string;
+
+  @Field()
+  @IsString()
+  type: string;
+}
+
+@InputType()
 export class CreateSearchHistoryInput extends PaginateAndSort {
   @IsOptional()
   @IsNumber()
@@ -49,6 +60,11 @@ export class CreateSearchHistoryInput extends PaginateAndSort {
   @IsObject()
   @Field({ nullable: true })
   gpsCoordinate: LocationDto;
+
+  @IsOptional()
+  @Field({ nullable: true })
+  @IsObject()
+  place: PlacesSearchInput;
 
   @IsOptional()
   @Field(() => [Attributes], { nullable: true })
