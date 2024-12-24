@@ -8,7 +8,10 @@ import {
   WebhookConfig,
   getWebhookConfigName,
 } from '../../../config/web-hook.config.ts/web-hook.config';
-import { WebHookPaymentResponse } from '../dto/wehook.response';
+import {
+  WebHookPaymentResponse,
+  WebHookResponse,
+} from '../dto/wehook.response';
 
 import { ConfigService } from '@nestjs/config';
 import { SuccessResponse } from '../../../common/utils/success.response';
@@ -41,69 +44,63 @@ export class WebhookService {
   logger = new Logger(WebhookService.name);
 
   handleWebHookForHyperpay(
-    hyperPayWebHookResponse: WebHookPaymentResponse,
-    signature: string,
+    payload: WebHookResponse,
+    ivfromHttpHeader: string,
+    authTagFromHttpHeader: string,
   ) {
     try {
-      let isValid = false;
-      const data: any = JSON.stringify(hyperPayWebHookResponse);
-      const valueToHash = data + this.webhookConfig;
-      const hash = crypto
-        .createHash('sha512')
-        .update(valueToHash)
-        .digest('hex');
-      const { ivfromHttpHeader, authTagFromHttpHeader, httpBody } = data;
-      // Convert from hex to Buffer
-      const key = Buffer.from(
-        this.webhookConfig.hyperPayDecriptionToken,
-        'hex',
-      );
-      const iv = Buffer.from(ivfromHttpHeader, 'hex');
-      const authTag = Buffer.from(authTagFromHttpHeader, 'hex');
-      const cipherText = Buffer.from(httpBody, 'hex');
-      // Prepare decryption
-      const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
-      decipher.setAuthTag(authTag);
-      // Decrypt
-      const decrypted = Buffer.concat([
-        decipher.update(cipherText),
-        decipher.final(),
-      ]);
-      this.logger.log(decrypted.toString()); // Or decrypted.toString('utf8') if you expect UTF-8
+      // const algorithm = 'aes-256-gcm';
+      // // Shared secret key (from configuration)
+      // const secretFromConfiguration =
+      //   this.webhookConfig.hyperPayDecriptionToken;
 
-      this.logger.log(
-        'webhook_value:**************************************************************************************',
-        hyperPayWebHookResponse,
-        '**********************************************************************',
-        signature,
-      );
-      if (
-        hash === signature &&
-        hyperPayWebHookResponse.payload.result.description ==
-          'Transaction succeeded'
-      ) {
-        isValid = true;
-      }
-      if (!isValid) {
-        // TODO: mark transaction as needing admin action
-      } else {
-        switch (hyperPayWebHookResponse.type) {
-          case PaymentEnum.SUCCESSFUL_PAYMENT: {
-            // this.transaction.handleWebhook(hyperPayWebHookResponse.payload)
-            break;
-          }
-          case PaymentEnum.REGISTRATION: {
-            break;
-          }
-          default:
-            break;
-        }
-      }
+      // const httpBody = payload.encryptedBody; // Should be a hex string
+
+      // // Convert hex strings to binary buffers
+      // const key = Buffer.from(secretFromConfiguration, 'hex'); // 256-bit key
+      // const iv = Buffer.from(ivfromHttpHeader, 'hex'); // Initialization vector
+      // const authTag = Buffer.from(authTagFromHttpHeader, 'hex'); // Authentication tag
+      // const cipherText = Buffer.from(httpBody, 'hex'); // Ciphertext
+
+      // // Prepare the decipher
+      // const decipher = crypto.createDecipheriv(algorithm, key, iv);
+
+      // // Set the authentication tag
+      // decipher.setAuthTag(authTag);
+
+      // // Decrypt the data
+      // const decrypted = Buffer.concat([
+      //   decipher.update(cipherText),
+      //   decipher.final(),
+      // ]).toString('utf8'); // Combine and convert to UTF-8 string
+
+      // // Log or process the decrypted data
+      // console.log('Decrypted Payload:', decrypted);
+
       return new SuccessResponse();
     } catch (error) {
       this.logger.error('Decryption failed:', error.message);
+      throw new Error('DecryptionFailed');
     }
   }
+
+  // handleWebHookForHyperpay(payload: WebHookResponse) {
+  //   try {
+  //     let isValid = false;
+
+  //     const algorithm = 'aes-256-cbc';
+  //     const key = crypto.randomBytes(32); // 256-bit key
+  //     const iv = crypto.randomBytes(16);
+
+  //     const decipher = crypto.createDecipheriv(algorithm, key, iv);
+  //     let decrypted = decipher.update(payload.encryptedBody, 'base64', 'utf8'); // Assuming input is Base64
+  //     decrypted += decipher.final('utf8'); // Add any remaining decrypted content
+
+  //     return new SuccessResponse();
+  //   } catch (error) {
+  //     this.logger.error('Decryption failed:', error.message);
+  //   }
+  // }
 
   async handleWebhookForNafath(data: NafathWebHookResponse) {
     try {

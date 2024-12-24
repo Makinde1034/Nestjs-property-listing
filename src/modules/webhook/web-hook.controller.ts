@@ -37,16 +37,17 @@ export class WebHookController {
   @Public()
   @HttpCode(200)
   payment(
+    @Headers() headers: Record<string, string | string[]>, // Capture all headers
+    @Headers('x-iv') iv: string, // Extract the IV from the headers
+    @Headers('x-auth-tag') authTag: string, // Extract the Auth Tag from the headers
     @Body() hyperPayWebHookResponse: any,
-    @Headers('x-signature') signature: string,
   ) {
-    console.log('data', hyperPayWebHookResponse, signature);
-
-    this.logger.log('data', signature);
-
+    console.log('Headers:', headers);
+    console.log(hyperPayWebHookResponse, authTag, iv);
     this.webhookService.handleWebHookForHyperpay(
       hyperPayWebHookResponse,
-      signature,
+      iv,
+      authTag,
     );
     return HttpStatus.OK;
   }
