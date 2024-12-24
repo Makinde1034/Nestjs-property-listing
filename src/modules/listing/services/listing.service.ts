@@ -18,6 +18,7 @@ import {
   CompareListingInput,
   CreateListingDto,
   FlagListingInput,
+  ListingActionApprovalInput,
   ListingActionInput,
   ListingImageFormDataInput,
   ListingImageInput,
@@ -1791,17 +1792,32 @@ export class ListingService {
     }
   }
 
-  async approveListing(listingActionInput: ListingActionInput, admin: User) {
+  async approveListing(
+    listingActionInput: ListingActionApprovalInput,
+    admin: User,
+  ) {
     try {
-      const listing = await this.listingRepository.find({
-        where: { id: In(listingActionInput.listingId) },
+      let listingId = [];
+      listingActionInput.listingApproval.forEach((element) => {
+        listingId.push(element.id);
       });
-      await this.listingRepository.update(
-        { id: In(listingActionInput.listingId) },
-        {
+      const listing = await this.listingRepository.find({
+        where: { id: In(listingId) },
+      });
+
+      const resultToUpdate = listing.map((element) => {
+        const listingToUpdate = listingActionInput.listingApproval.find(
+          (value) => element.id == value.id,
+        );
+        return {
+          ...element,
+          reason: listingToUpdate.reason,
+
           status: ListingStatus.ACCEPTED,
-        },
-      );
+        };
+      });
+
+      await this.listingRepository.save(resultToUpdate);
 
       const notificationPreference =
         await this.notificationScopeRepository.find();
@@ -1839,17 +1855,32 @@ export class ListingService {
     }
   }
 
-  async rejectListing(listingActionInput: ListingActionInput, admin: User) {
+  async rejectListing(
+    listingActionInput: ListingActionApprovalInput,
+    admin: User,
+  ) {
     try {
-      const listing = await this.listingRepository.find({
-        where: { id: In(listingActionInput.listingId) },
+      let listingId = [];
+      listingActionInput.listingApproval.forEach((element) => {
+        listingId.push(element.id);
       });
-      await this.listingRepository.update(
-        { id: In(listingActionInput.listingId) },
-        {
+      const listing = await this.listingRepository.find({
+        where: { id: In(listingId) },
+      });
+
+      const resultToUpdate = listing.map((element) => {
+        const listingToUpdate = listingActionInput.listingApproval.find(
+          (value) => element.id == value.id,
+        );
+        return {
+          ...element,
+          reason: listingToUpdate.reason,
+
           status: ListingStatus.REJECTED,
-        },
-      );
+        };
+      });
+
+      await this.listingRepository.save(resultToUpdate);
 
       const notificationPreference =
         await this.notificationScopeRepository.find();

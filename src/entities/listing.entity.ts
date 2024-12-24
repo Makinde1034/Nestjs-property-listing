@@ -242,6 +242,10 @@ export class Listing extends BaseEntity {
   @Field({ nullable: true })
   stage: string;
 
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  reason: string;
+
   @Column({ default: ListingStatus.PENDING })
   @Field({ nullable: true })
   status: string;

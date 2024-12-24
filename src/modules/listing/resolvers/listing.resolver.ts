@@ -11,6 +11,7 @@ import {
   CompareListingInput,
   CreateListingDto,
   FlagListingInput,
+  ListingActionApprovalInput,
   ListingActionInput,
   UpdateListingDto,
 } from '../dtos/request/';
@@ -307,12 +308,13 @@ export class ListingResolver {
     return await this.listingService.deleteListing(ctx.req.user, listingId);
   }
 
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
-  @Permissions(PermissionsEnum.LISTINGS_CREATE)
+  // @UseGuards(AccessTokenGuard, PermissionsGuard)
+  // @Permissions(PermissionsEnum.LISTINGS_CREATE)
+  @Public()
   @Mutation(() => SuccessResponse, { name: 'approveListing' })
   async approveListing(
     @Context() ctx: any,
-    @Args('listingActionInput') listingActionInput: ListingActionInput,
+    @Args('listingActionInput') listingActionInput: ListingActionApprovalInput,
   ) {
     return await this.listingService.approveListing(
       listingActionInput,
@@ -324,7 +326,7 @@ export class ListingResolver {
   @Mutation(() => SuccessResponse, { name: 'rejectListing' })
   async rejectListing(
     @Context() ctx: any,
-    @Args('listingActionInput') listingActionInput: ListingActionInput,
+    @Args('listingActionInput') listingActionInput: ListingActionApprovalInput,
   ) {
     return await this.listingService.rejectListing(
       listingActionInput,

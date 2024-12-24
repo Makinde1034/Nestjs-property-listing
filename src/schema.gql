@@ -311,6 +311,7 @@ type Listing {
   featureDate: DateTime
   published: Boolean!
   stage: String
+  reason: String
   status: String
   flaggedDate: DateTime
   offers: Float
@@ -1558,8 +1559,8 @@ type Mutation {
   updateListing(updateListingDto: UpdateListingDto!): Listing!
   flagListing(flagListingInput: FlagListingInput!): SuccessResponse!
   deleteListing(listingId: String!): SuccessResponse!
-  approveListing(listingActionInput: ListingActionInput!): SuccessResponse!
-  rejectListing(listingActionInput: ListingActionInput!): SuccessResponse!
+  approveListing(listingActionInput: ListingActionApprovalInput!): SuccessResponse!
+  rejectListing(listingActionInput: ListingActionApprovalInput!): SuccessResponse!
   createOffer(createOfferDto: CreateOfferDto!): Offer
   finalizeOffer(id: String!): Offer
   updateOffer(updateOfferInput: UpdateOfferInput!): Offer
@@ -2027,8 +2028,13 @@ input FlagListingInput {
   childIssueId: String!
 }
 
-input ListingActionInput {
-  listingId: [String!]!
+input ListingActionApprovalInput {
+  listingApproval: [ListingStatusApproval!]!
+}
+
+input ListingStatusApproval {
+  id: String!
+  reason: String!
 }
 
 input CreateOfferDto {
@@ -2056,6 +2062,10 @@ input CreatePromotionInput {
 
 input CreateWishlistInput {
   listingId: String!
+}
+
+input ListingActionInput {
+  listingId: [String!]!
 }
 
 input CreateFeatureInput {
