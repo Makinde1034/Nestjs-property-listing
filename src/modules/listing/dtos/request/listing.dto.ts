@@ -187,6 +187,23 @@ export class ListingActionInput {
   listingId: string[];
 }
 
+@InputType()
+export class ListingStatusApproval {
+  @Field()
+  @IsString()
+  id: string;
+  @Field()
+  @IsString()
+  reason: string;
+}
+
+@InputType()
+export class ListingActionApprovalInput {
+  @Field(() => [ListingStatusApproval])
+  @IsArray()
+  listingApproval: ListingStatusApproval[];
+}
+
 export class ListingImageInput {
   @IsUUID()
   listingId: string;

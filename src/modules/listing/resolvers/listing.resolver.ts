@@ -11,6 +11,7 @@ import {
   CompareListingInput,
   CreateListingDto,
   FlagListingInput,
+  ListingActionApprovalInput,
   ListingActionInput,
   UpdateListingDto,
 } from '../dtos/request/';
@@ -312,7 +313,7 @@ export class ListingResolver {
   @Mutation(() => SuccessResponse, { name: 'approveListing' })
   async approveListing(
     @Context() ctx: any,
-    @Args('listingActionInput') listingActionInput: ListingActionInput,
+    @Args('listingActionInput') listingActionInput: ListingActionApprovalInput,
   ) {
     return await this.listingService.approveListing(
       listingActionInput,
@@ -324,7 +325,7 @@ export class ListingResolver {
   @Mutation(() => SuccessResponse, { name: 'rejectListing' })
   async rejectListing(
     @Context() ctx: any,
-    @Args('listingActionInput') listingActionInput: ListingActionInput,
+    @Args('listingActionInput') listingActionInput: ListingActionApprovalInput,
   ) {
     return await this.listingService.rejectListing(
       listingActionInput,
