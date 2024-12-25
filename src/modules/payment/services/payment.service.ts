@@ -36,7 +36,7 @@ import { ServerSentEvents } from '../../../common/enums';
 import { SseService } from '../../sse/client.service';
 
 import { MessageEvent } from '../../sse/request/app';
-import { messaging } from 'firebase-admin';
+import { TransactionRepository } from '../repository/transaction.repository';
 
 @Injectable()
 export class PaymentService {
@@ -50,6 +50,7 @@ export class PaymentService {
     private readonly qrcodeService: QrCodeService,
     private readonly configService: ConfigService,
     private readonly adminService: AdminService,
+    private readonly transactionRepository: TransactionRepository,
 
     private readonly sseService: SseService,
   ) {
@@ -59,6 +60,7 @@ export class PaymentService {
   }
 
   logger = new Logger(PaymentService.name);
+
   async initializePayment(
     createPaymentInput: InitiatePaymentInput,
     user: User,
@@ -85,6 +87,7 @@ export class PaymentService {
 
     return data;
   }
+
   async initializePaymentForPA(
     createPaymentInput: InitiatePaymentInput,
     user: User,
@@ -244,5 +247,9 @@ export class PaymentService {
     } catch (error) {
       this.logger.log(error);
     }
+  }
+
+  async finalizeTransacrion() {
+    // await this.transactionRepository.save();
   }
 }

@@ -16,7 +16,7 @@ import { ConfigService } from '@nestjs/config';
 import {
   getWebhookConfigName,
   WebhookConfig,
-} from '../../config/web-hook.config.ts/web-hook.config';
+} from '../../config/payment/web-hook.config';
 
 import { WebhookService } from './services/web-hook.services';
 import { Public } from '../auth/decorators/permision.decorator';
@@ -37,17 +37,14 @@ export class WebHookController {
   @Public()
   @HttpCode(200)
   payment(
-    @Headers() headers: Record<string, string | string[]>, // Capture all headers
-    @Headers('x-iv') iv: string, // Extract the IV from the headers
-    @Headers('x-auth-tag') authTag: string, // Extract the Auth Tag from the headers
+    @Headers('x-initialization-vector') initializationVector: string, // Extract the IV from the headers
+    @Headers('x-authentication-tag') authenticationTag: string,
     @Body() hyperPayWebHookResponse: any,
   ) {
-    console.log('Headers:', headers);
-    console.log(hyperPayWebHookResponse, authTag, iv);
     this.webhookService.handleWebHookForHyperpay(
       hyperPayWebHookResponse,
-      iv,
-      authTag,
+      initializationVector,
+      authenticationTag,
     );
     return HttpStatus.OK;
   }

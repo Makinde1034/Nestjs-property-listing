@@ -4,6 +4,9 @@
  */
 
 import { registerAs } from '@nestjs/config';
+import { config } from 'dotenv';
+
+config();
 
 const hyperPayDecriptionToken = process.env.HYPERPAY_DECRIPTION_TOKEN;
 
@@ -20,5 +23,5 @@ export type WebhookConfig = {
 const getWebhookConfig = (): WebhookConfig => ({
   hyperPayDecriptionToken: hyperPayDecriptionToken,
 });
-export const getWebhookConfigName = () => 'WebhookConfig';
+export const getWebhookConfigName = () => 'webhookConfig';
 export default registerAs(getWebhookConfigName(), getWebhookConfig);

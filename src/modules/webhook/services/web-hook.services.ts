@@ -7,7 +7,7 @@ import { PaymentEnum } from '../../../common/enums/payment.enum';
 import {
   WebhookConfig,
   getWebhookConfigName,
-} from '../../../config/web-hook.config.ts/web-hook.config';
+} from '../../../config/payment/web-hook.config';
 import {
   WebHookPaymentResponse,
   WebHookResponse,
@@ -29,16 +29,20 @@ import {
 } from '../../user/dtos/response/nafath';
 import { UserService } from '../../user/services';
 import { JwtService } from '@nestjs/jwt';
+import {
+  getHyperpayConfigName,
+  HyperpayConfig,
+} from '../../../config/payment/hyper-payment.config';
 @Injectable()
 export class WebhookService {
-  private webhookConfig: WebhookConfig;
+  private readonly hyperPayConfig: HyperpayConfig;
   constructor(
     private readonly configService: ConfigService,
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
   ) {
-    this.webhookConfig = this.configService.get<WebhookConfig>(
-      getWebhookConfigName(),
+    this.hyperPayConfig = this.configService.get<HyperpayConfig>(
+      getHyperpayConfigName(),
     );
   }
   logger = new Logger(WebhookService.name);
@@ -49,58 +53,93 @@ export class WebhookService {
     authTagFromHttpHeader: string,
   ) {
     try {
-      // const algorithm = 'aes-256-gcm';
-      // // Shared secret key (from configuration)
+      // Data from configuration
+      var secretFromConfiguration =
+        '000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f';
+
+      // Data from server
+      var ivfromHttpHeader = '000000000000000000000000';
+      var authTagFromHttpHeader = 'CE573FB7A41AB78E743180DC83FF09BD';
+      var httpBody = payload.encryptedBody;
+
+      const algorithm = 'aes-256-gcm';
+      // Shared secret key (from configuration)
       // const secretFromConfiguration =
-      //   this.webhookConfig.hyperPayDecriptionToken;
+      //   this.hyperPayConfig.hyperPayDecriptionToken;
 
       // const httpBody = payload.encryptedBody; // Should be a hex string
+      // Convert hex strings to binary buffers
+      const key = Buffer.from(secretFromConfiguration, 'hex');
+      const iv = Buffer.from(ivfromHttpHeader, 'hex');
+      const authTag = Buffer.from(authTagFromHttpHeader, 'hex');
+      const cipherText = Buffer.from(httpBody, 'hex');
+      const decipher = crypto.createDecipheriv(algorithm, key, iv);
 
-      // // Convert hex strings to binary buffers
-      // const key = Buffer.from(secretFromConfiguration, 'hex'); // 256-bit key
-      // const iv = Buffer.from(ivfromHttpHeader, 'hex'); // Initialization vector
-      // const authTag = Buffer.from(authTagFromHttpHeader, 'hex'); // Authentication tag
-      // const cipherText = Buffer.from(httpBody, 'hex'); // Ciphertext
+      decipher.setAuthTag(authTag);
 
-      // // Prepare the decipher
-      // const decipher = crypto.createDecipheriv(algorithm, key, iv);
+      // Decrypt the data
+      const decrypted = Buffer.concat([
+        decipher.update(cipherText),
+        decipher.final(),
+      ]).toString('utf8');
+      console.log('Decrypted Payload:', decrypted);
 
-      // // Set the authentication tag
-      // decipher.setAuthTag(authTag);
-
-      // // Decrypt the data
-      // const decrypted = Buffer.concat([
-      //   decipher.update(cipherText),
-      //   decipher.final(),
-      // ]).toString('utf8'); // Combine and convert to UTF-8 string
-
-      // // Log or process the decrypted data
-      // console.log('Decrypted Payload:', decrypted);
+      const data = {
+        type: 'PAYMENT',
+        payload: {
+          id: '8a829449515d198b01517d5601df5584',
+          paymentType: 'PA',
+          paymentBrand: 'VISA',
+          amount: '92.00',
+          currency: 'EUR',
+          presentationAmount: '92.00',
+          presentationCurrency: 'EUR',
+          descriptor: '3017.7139.1650 OPP_Channel ',
+          result: {
+            code: '000.000.000',
+            description: 'Transaction succeeded',
+          },
+          authentication: {
+            entityId: '8a8294185282b95b01528382b4940245',
+          },
+          card: {
+            bin: '420000',
+            last4Digits: '0000',
+            holder: 'Jane Jones',
+            expiryMonth: '05',
+            expiryYear: '2018',
+          },
+          customer: {
+            givenName: 'Jones',
+            surname: 'Jane',
+            merchantCustomerId: 'jjones',
+            sex: 'F',
+            email: 'jane@jones.com',
+          },
+          customParameters: {
+            SHOPPER_promoCode: 'AT052',
+          },
+          risk: {
+            score: '0',
+          },
+          buildNumber:
+            'ec3c704170e54f6d7cf86c6f1969b20f6d855ce5@2015-12-01 12:20:39 +0000',
+          timestamp: '2015-12-07 16:46:07+0000',
+          ndc: '8a8294174b7ecb28014b9699220015ca_66b12f658442479c8ca66166c4999e78',
+          channelName: 'OPP_Channel',
+          source: 'SYSTEM',
+          paymentMethod: 'CC',
+          shortId: '5420.6916.5424',
+        },
+      };
 
       return new SuccessResponse();
     } catch (error) {
+      console.log(error);
       this.logger.error('Decryption failed:', error.message);
       throw new Error('DecryptionFailed');
     }
   }
-
-  // handleWebHookForHyperpay(payload: WebHookResponse) {
-  //   try {
-  //     let isValid = false;
-
-  //     const algorithm = 'aes-256-cbc';
-  //     const key = crypto.randomBytes(32); // 256-bit key
-  //     const iv = crypto.randomBytes(16);
-
-  //     const decipher = crypto.createDecipheriv(algorithm, key, iv);
-  //     let decrypted = decipher.update(payload.encryptedBody, 'base64', 'utf8'); // Assuming input is Base64
-  //     decrypted += decipher.final('utf8'); // Add any remaining decrypted content
-
-  //     return new SuccessResponse();
-  //   } catch (error) {
-  //     this.logger.error('Decryption failed:', error.message);
-  //   }
-  // }
 
   async handleWebhookForNafath(data: NafathWebHookResponse) {
     try {
