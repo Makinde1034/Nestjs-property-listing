@@ -62,11 +62,7 @@ export class HyperPayService {
     };
   }
 
-  async createCheckout(
-    initiatePaymentInput: InitiatePaymentInput,
-    user: User,
-    reference: string,
-  ) {
+  async createCheckout(initiatePaymentInput: InitiatePaymentInput, user: User) {
     try {
       const adminDefault = await this.adminService.adminDefault();
 
@@ -76,7 +72,6 @@ export class HyperPayService {
         currency: 'SAR',
         paymentType: 'DB',
         integrity: true,
-        merchantInvoiceId: reference,
 
         merchantTransactionId: adminDefault?.merchantTransactionId,
       };
@@ -110,7 +105,6 @@ export class HyperPayService {
   async createCheckoutForPA(
     initiatePaymentInput: InitiatePaymentInput,
     user: User,
-    reference: string,
   ) {
     try {
       const adminDefault = await this.adminService.adminDefault();
@@ -122,7 +116,6 @@ export class HyperPayService {
         paymentType: 'PA',
         testMode: 'EXTERNAL',
         integrity: true,
-        merchantInvoiceId: reference,
 
         'customParameters[3DS2_enrolled]': true,
         'customParameters[3DS2_flow]': 'challenge',
@@ -159,9 +152,10 @@ export class HyperPayService {
 
   async verifyPayment(checkoutId: string) {
     try {
+      console.log(this.hyperPayConfig.entityIdForDb);
       const response = this.httpService.get(
         this.hyperPayConfig.baseUrl +
-          `/checkouts/${checkoutId}/payment?entityId=${this.hyperPayConfig.entityIdForDb}`,
+          `/v1/checkouts/${checkoutId}/payment?entityId=${this.hyperPayConfig.entityIdForPA}`,
         this.options,
       );
 
@@ -169,12 +163,38 @@ export class HyperPayService {
 
       return data;
     } catch (error) {
-      this.logger.error('Error creating checkout', error);
+      this.logger.error('Error verifying payment', error);
       if (error instanceof HttpException) {
         throw error;
       } else if (error.isAxiosError) {
         throw new BadRequestException(
-          error.response?.data?.message || 'Payment service error',
+          error.response?.data?.message || 'Error verifying payment',
+        );
+      } else {
+        throw new BadRequestException(error.message);
+      }
+    }
+  }
+  async verifyPaymentForDb(checkoutId: string) {
+    try {
+      console.log(this.hyperPayConfig.entityIdForDb);
+      const response = this.httpService.get(
+        this.hyperPayConfig.baseUrl +
+          `/v1/checkouts/${checkoutId}/payment?entityId=${this.hyperPayConfig.entityIdForDb}`,
+        this.options,
+      );
+
+      const data = await (await lastValueFrom(response)).data;
+
+      return data;
+    } catch (error) {
+      console.log('here', error.response.data.result.parameterErrors);
+      this.logger.error('Error verifying payment', error);
+      if (error instanceof HttpException) {
+        throw error;
+      } else if (error.isAxiosError) {
+        throw new BadRequestException(
+          error.response?.data?.message || 'Error verifying payment',
         );
       } else {
         throw new BadRequestException(error.message);

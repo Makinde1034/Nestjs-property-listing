@@ -66,7 +66,6 @@ export class WebhookService {
       const authTag = Buffer.from(authTagFromHttpHeader, 'hex');
       const cipherText = Buffer.from(httpBody, 'hex');
       const decipher = crypto.createDecipheriv(algorithm, key, iv);
-
       decipher.setAuthTag(authTag);
 
       // Decrypt the data
@@ -75,7 +74,8 @@ export class WebhookService {
         decipher.final(),
       ]).toString('utf8');
       const data: WebHookPaymentResponse = JSON.parse(decrypted);
-      await this.paymentService.finalizeTransaction(data);
+      console.log(data);
+      // await this.paymentService.finalizeTransaction(data);
 
       return new SuccessResponse();
     } catch (error) {
