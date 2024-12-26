@@ -29,25 +29,29 @@ export class Invoice {
   @Field()
   price: number;
 
+  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  @Field({ nullable: true })
+  capturedPrice: number;
+
   @Column()
   @Field()
   userId: string;
 
   @Column({ nullable: true })
   @Field({ nullable: true })
-  reference: string;
+  reference?: string;
 
   @OneToOne(() => Listing, { nullable: true })
   @JoinColumn({ name: 'listingId' })
   @Field(() => Listing, { nullable: true })
-  listing: Listing;
+  listing?: Listing;
 
   @OneToOne(() => ListingType, (listingType) => listingType.invoice, {
     nullable: true,
   })
   @JoinColumn({ name: 'listingTypeId' })
   @Field(() => ListingType, { nullable: true })
-  listingType: ListingType;
+  listingType?: ListingType;
 
   @Column({ default: 'Saii Fees' })
   @Field()

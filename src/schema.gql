@@ -241,6 +241,7 @@ type AuctionParticipant {
 type Invoice {
   id: Float!
   price: Float!
+  capturedPrice: Float
   userId: String!
   reference: String
   listing: Listing
