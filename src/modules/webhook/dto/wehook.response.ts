@@ -35,6 +35,7 @@ export interface Payload {
   source: string;
   paymentMethod: string;
   shortId: string;
+  merchantInvoiceId: string;
 }
 
 export interface Risk {

@@ -39,6 +39,7 @@ import { MessageEvent } from '../../sse/request/app';
 import { TransactionRepository } from '../repository/transaction.repository';
 import { WebHookPaymentResponse } from '../../webhook/dto/wehook.response';
 import { TransactionType } from '../../../common/enums/payment.enum';
+import { PaymentStatus } from '../../../common/enums/status.enum';
 
 @Injectable()
 export class PaymentService {
@@ -74,17 +75,26 @@ export class PaymentService {
       });
       createPaymentInput.amount = coupon.amount;
     }
+    const reference = generateRandomString();
 
     const checkout = await this.hyperPayService.createCheckout(
       createPaymentInput,
       user,
+      reference,
     );
 
     const data = {
       checkoutId: checkout.id,
-      referenceId: generateRandomString(),
+      referenceId: reference,
       timeStamp: checkout.timestamp,
     };
+
+    await this.invoiceRepository.save({
+      price: createPaymentInput.amount,
+      userId: user.id,
+      status: PaymentStatus.PENDING,
+      reference: reference,
+    });
 
     this.performActionWithDelay(user, data);
 
@@ -102,18 +112,24 @@ export class PaymentService {
       });
       createPaymentInput.amount = coupon.amount;
     }
+    const reference = generateRandomString();
 
     const checkout = await this.hyperPayService.createCheckoutForPA(
       createPaymentInput,
       user,
+      reference,
     );
 
-    const verifyPayment = await this.hyperPayService.verifyPayment(checkout.id);
-    console.log(verifyPayment);
+    await this.invoiceRepository.save({
+      price: createPaymentInput.amount,
+      userId: user.id,
+      status: PaymentStatus.PENDING,
+      reference: reference,
+    });
 
     const data = {
       checkoutId: checkout.id,
-      referenceId: generateRandomString(),
+      referenceId: reference,
       timeStamp: checkout.timestamp,
     };
 
@@ -180,7 +196,7 @@ export class PaymentService {
 
       return {
         checkoutId: checkout.id,
-        referenceId: generateRandomString(),
+        referenceId: checkout.referencedId,
         timeStamp: checkout.timestamp,
       };
     } catch (error) {
@@ -259,7 +275,7 @@ export class PaymentService {
   async finalizeTransaction(webHookPaymentResponse: WebHookPaymentResponse) {
     const invoice = await this.invoiceRepository.findOne({
       where: {
-        reference: webHookPaymentResponse.payload.referencedId,
+        reference: webHookPaymentResponse.payload.merchantInvoiceId,
       },
     });
     const payload = {
@@ -269,6 +285,11 @@ export class PaymentService {
       referenceId: webHookPaymentResponse.payload.referencedId,
       needAdminReview: false,
     };
+
     await this.transactionRepository.save(payload);
+
+    await this.invoiceRepository.update(invoice.id, {
+      status: PaymentStatus.PAID,
+    });
   }
 }

@@ -50,7 +50,7 @@ export class WebhookService {
   logger = new Logger(WebhookService.name);
 
   async handleWebHookForHyperpay(
-    payload: WebHookResponse,
+    payload: any,
     ivfromHttpHeader: string,
     authTagFromHttpHeader: string,
   ) {
@@ -75,7 +75,7 @@ export class WebhookService {
       ]).toString('utf8');
       const data: WebHookPaymentResponse = JSON.parse(decrypted);
       console.log(data);
-      // await this.paymentService.finalizeTransaction(data);
+      await this.paymentService.finalizeTransaction(data);
 
       return new SuccessResponse();
     } catch (error) {

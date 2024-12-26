@@ -20,6 +20,7 @@ export enum AuctionEnum {
 
 export enum PaymentStatus {
   PENDING = 'pending',
+  PAID = 'paid',
   COMPLETED = 'completed',
   FAILED = 'failed',
 }

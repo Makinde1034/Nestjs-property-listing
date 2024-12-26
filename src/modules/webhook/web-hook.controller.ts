@@ -21,6 +21,7 @@ import {
 import { WebhookService } from './services/web-hook.services';
 import { Public } from '../auth/decorators/permision.decorator';
 import { SseService } from '../sse/client.service';
+import { WebHookResponse } from './dto/wehook.response';
 @Controller()
 export class WebHookController {
   private webhookConfig: WebhookConfig;
@@ -46,8 +47,9 @@ export class WebHookController {
       initializationVector,
       authenticationTag,
     );
+    const data = JSON.stringify(hyperPayWebHookResponse);
     this.webhookService.handleWebHookForHyperpay(
-      hyperPayWebHookResponse,
+      data,
       initializationVector,
       authenticationTag,
     );
