@@ -78,10 +78,7 @@ import { Feature } from '../../../entities/feature.entity';
 import { CompareRepository } from '../repositories/compare.repository';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { NotificationScopeRepository } from '../../user/repositories';
-import {
-  NotificationScopeEnum,
-  NotificationScopesEnum,
-} from '../../../common/enums/notification-scope.enum';
+import { NotificationScopeEnum } from '../../../common/enums/notification-scope.enum';
 import { ListingStatus } from '../../../common/enums/status.enum';
 import { PlaceRepository } from '../repositories/place.repositories';
 
@@ -268,21 +265,21 @@ export class ListingService {
         return this.transformListing(element);
       });
 
-      const notificationPreference =
-        await this.notificationScopeRepository.find();
-      const scope: NotificationScope = notificationPreference.find(
-        (element) => {
-          if (element.name == NotificationScopesEnum.LISTING_CREATED) {
-            return element;
-          }
-        },
-      );
+      // const notificationPreference =
+      //   await this.notificationScopeRepository.find();
+      // const scope: NotificationScope = notificationPreference.find(
+      //   (element) => {
+      //     if (element.name == NotificationScopeEnum.LISTING) {
+      //       return element;
+      //     }
+      //   },
+      // );
 
-      this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
-        creatorId: user.id,
-        scope: scope,
-        recipientFormat: ['Owner', null],
-      });
+      // this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+      //   creatorId: user.id,
+      //   scope: scope,
+      //   recipientFormat: ['Owner', null],
+      // });
 
       return { listing: result, total: count };
     } catch (error) {
@@ -1030,6 +1027,8 @@ export class ListingService {
           isListingDisabled: true,
           isListingVerified: true,
           images: true,
+          status: true,
+          stage: true,
 
           listingType: {
             id: true,

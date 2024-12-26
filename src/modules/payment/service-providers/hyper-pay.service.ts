@@ -62,7 +62,11 @@ export class HyperPayService {
     };
   }
 
-  async createCheckout(initiatePaymentInput: InitiatePaymentInput, user: User) {
+  async createCheckout(
+    initiatePaymentInput: InitiatePaymentInput,
+    user: User,
+    reference: string,
+  ) {
     try {
       const adminDefault = await this.adminService.adminDefault();
 
@@ -72,6 +76,7 @@ export class HyperPayService {
         currency: 'SAR',
         paymentType: 'DB',
         integrity: true,
+        merchantInvoiceId: reference,
 
         merchantTransactionId: adminDefault?.merchantTransactionId,
       };
@@ -105,6 +110,7 @@ export class HyperPayService {
   async createCheckoutForPA(
     initiatePaymentInput: InitiatePaymentInput,
     user: User,
+    reference: string,
   ) {
     try {
       const adminDefault = await this.adminService.adminDefault();
@@ -116,6 +122,8 @@ export class HyperPayService {
         paymentType: 'PA',
         testMode: 'EXTERNAL',
         integrity: true,
+        merchantInvoiceId: reference,
+
         'customParameters[3DS2_enrolled]': true,
         'customParameters[3DS2_flow]': 'challenge',
 

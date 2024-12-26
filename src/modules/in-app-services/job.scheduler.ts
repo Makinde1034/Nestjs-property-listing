@@ -25,10 +25,7 @@ import {
   calculateDaysDifference,
   removeDaysFromDate,
 } from '../../common/utils/helper';
-import {
-  NotificationScopeEnum,
-  NotificationScopesEnum,
-} from '../../common/enums/notification-scope.enum';
+import { NotificationScopeEnum } from '../../common/enums/notification-scope.enum';
 import { NotificationScope } from '../../entities';
 import { AuctionParticipantRepository } from '../listing/repositories/auction-participant.repository';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -254,7 +251,7 @@ export class JobService {
 
       const scope = notificationPreference.find(
         (element) =>
-          element.scopeGroup === NotificationScopesEnum.UPCOMING_AUCTION,
+          element.scopeGroup === NotificationScopeEnum.UPCOMING_AUCTIONS,
       );
 
       const batchSize = 100;
@@ -383,7 +380,7 @@ export class JobService {
       await this.notificationScopeRepository.find();
     //Filter out the correct scope
     const scope: NotificationScope = notificationPreference.find((element) => {
-      if (element.name == NotificationScopesEnum.UPCOMING_AUCTION) {
+      if (element.name == NotificationScopeEnum.UPCOMING_AUCTIONS) {
         return element;
       }
     });
@@ -439,7 +436,7 @@ export class JobService {
       await this.notificationScopeRepository.find();
     //Filter out the correct scope
     const scope: NotificationScope = notificationPreference.find((element) => {
-      if (element.name == NotificationScopesEnum.UPCOMING_AUCTION) {
+      if (element.name == NotificationScopeEnum.UPCOMING_AUCTIONS) {
         return element;
       }
     });

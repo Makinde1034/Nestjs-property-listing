@@ -15,12 +15,11 @@ import { AdminRepository } from '../admin/repositories/admin.repository';
 import { InvoiceService } from './services/invoice.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TransactionRepository } from './repository/transaction.repository';
-import { TransactionLog } from '../../entities/transaction-log.entity';
 import { GeneralLedger } from '../../entities/general-ledger.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([TransactionLog, GeneralLedger]),
+    TypeOrmModule.forFeature([GeneralLedger]),
     FilehandlerModule,
     HttpModule,
   ],

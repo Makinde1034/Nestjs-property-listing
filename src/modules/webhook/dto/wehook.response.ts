@@ -15,6 +15,8 @@ export interface Payload {
   id: string;
   paymentType: string;
   paymentBrand: string;
+  referencedId: string;
+
   amount: string;
   currency: string;
   presentationAmount: string;
