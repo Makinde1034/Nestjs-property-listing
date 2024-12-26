@@ -78,7 +78,10 @@ import { Feature } from '../../../entities/feature.entity';
 import { CompareRepository } from '../repositories/compare.repository';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { NotificationScopeRepository } from '../../user/repositories';
-import { NotificationScopesEnum } from '../../../common/enums/notification-scope.enum';
+import {
+  NotificationScopeEnum,
+  NotificationScopesEnum,
+} from '../../../common/enums/notification-scope.enum';
 import { ListingStatus } from '../../../common/enums/status.enum';
 import { PlaceRepository } from '../repositories/place.repositories';
 
@@ -1848,16 +1851,19 @@ export class ListingService {
         await this.notificationScopeRepository.find();
       const scope: NotificationScope = notificationPreference.find(
         (element) => {
-          if (element.name == NotificationScopesEnum.LISTING_APPROVED) {
+          if (element.scopeGroup == NotificationScopeEnum.LISTING) {
             return element;
           }
         },
       );
+      console.log(scope);
 
       listing.forEach((element) => {
         this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
           creatorId: element.userId,
           scope: scope,
+          event: 'Approved',
+
           recipientFormat: ['Owner', null],
         });
       });
@@ -1911,15 +1917,18 @@ export class ListingService {
         await this.notificationScopeRepository.find();
       const scope: NotificationScope = notificationPreference.find(
         (element) => {
-          if (element.name == NotificationScopesEnum.LISTING_DENIED) {
+          if (element.scopeGroup == NotificationScopeEnum.LISTING) {
             return element;
           }
         },
       );
+      console.log(scope);
 
       listing.forEach((element) => {
         this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
           creatorId: element.userId,
+          event: 'Denied',
+
           scope: scope,
           recipientFormat: ['Owner', null],
         });

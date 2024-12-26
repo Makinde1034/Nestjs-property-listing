@@ -46,7 +46,6 @@ import {
   ServerSentEvents,
 } from 'src/common/enums';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { getMessageData } from '../../../common/messages/alert-messages';
 import { NotificationScopesEnum } from '../../../common/enums/notification-scope.enum';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { AdminNotificationPreferenceRepository } from '../repositories/admin.repository';
@@ -122,6 +121,8 @@ export class NotificationService {
         attachment,
       } = notificationInput;
 
+      const specificEvent = notificationInput.event ?? event;
+
       // Fetch buyer and seller notification preferences for the given scope
       const [buyerPref, sellerPref] = await Promise.all([
         this.userNotificationPreference.findOne({
@@ -134,8 +135,6 @@ export class NotificationService {
           relations: ['user', 'scope'],
         }),
       ]);
-
-      console.log(buyerPref);
 
       //If neither buyer nor seller has preferences for this scope, skip
       if (!buyerPref || !sellerPref) {
@@ -154,8 +153,10 @@ export class NotificationService {
       if (notificationScopes.has(scopeName)) {
         // Fetch messages relevant to the scope and event
         const messages = await this.notificationMesageRepository.find({
-          where: { scope: scope.scopeGroup, event },
-          // select: ['id', 'scope', 'event'], // Fetch only necessary fields
+          where: {
+            scope: scope.scopeGroup,
+            event: specificEvent,
+          },
         });
 
         // Process notifications based on preferences
@@ -164,7 +165,7 @@ export class NotificationService {
           sellerPref,
           sellerPref?.user,
           buyerPref?.user,
-          event,
+          specificEvent,
           scope.scopeGroup,
           recipientFormat,
           count,
