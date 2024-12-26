@@ -75,17 +75,14 @@ export class PaymentService {
       createPaymentInput.amount = coupon.amount;
     }
 
-    const invoive = await this.invoice();
-
     const checkout = await this.hyperPayService.createCheckout(
       createPaymentInput,
       user,
-      invoive.reference,
     );
 
     const data = {
       checkoutId: checkout.id,
-      referenceId: checkout.result,
+      referenceId: generateRandomString(),
       timeStamp: checkout.timestamp,
     };
 
@@ -106,13 +103,13 @@ export class PaymentService {
       createPaymentInput.amount = coupon.amount;
     }
 
-    const invoive = await this.invoice();
-
     const checkout = await this.hyperPayService.createCheckoutForPA(
       createPaymentInput,
       user,
-      invoive.reference,
     );
+
+    const verifyPayment = await this.hyperPayService.verifyPayment(checkout.id);
+    console.log(verifyPayment);
 
     const data = {
       checkoutId: checkout.id,
@@ -142,32 +139,32 @@ export class PaymentService {
     this.logger.log('Action resumed after 30 seconds');
   }
 
-  async preAuthorized(
-    createPaymentInput: PreAuthorisedPaymentInput,
-    // User: User,
-  ) {
-    if (createPaymentInput.coupon) {
-      const coupon: CouponResponse = await this.adminService.isCouponValid({
-        code: createPaymentInput.coupon,
-        price: createPaymentInput.amount,
-      });
-      createPaymentInput.amount = coupon.amount;
-    }
+  // async preAuthorized(
+  //   createPaymentInput: PreAuthorisedPaymentInput,
+  //   // User: User,
+  // ) {
+  //   if (createPaymentInput.coupon) {
+  //     const coupon: CouponResponse = await this.adminService.isCouponValid({
+  //       code: createPaymentInput.coupon,
+  //       price: createPaymentInput.amount,
+  //     });
+  //     createPaymentInput.amount = coupon.amount;
+  //   }
 
-    const checkout =
-      await this.hyperPayService.preAuthorize(createPaymentInput);
+  //   const checkout =
+  //     await this.hyperPayService.preAuthorize(createPaymentInput);
 
-    const data = await this.capturePayment({
-      paymentId: checkout.id,
-      amount: '300',
-    });
+  //   const data = await this.capturePayment({
+  //     paymentId: checkout.id,
+  //     amount: '300',
+  //   });
 
-    return {
-      checkoutId: checkout.id,
-      referenceId: generateRandomString(),
-      timeStamp: checkout.timestamp,
-    };
-  }
+  //   return {
+  //     checkoutId: checkout.id,
+  //     referenceId: generateRandomString(),
+  //     timeStamp: checkout.timestamp,
+  //   };
+  // }
 
   async capturePayment(createPaymentInput: CapturePaymentData) {
     // If (createPaymentInput.coupon) {
@@ -207,7 +204,6 @@ export class PaymentService {
 
     return {
       status: response.result.code,
-
       referenceId: response.result?.referencedId,
       message: response.result.description,
     };
@@ -260,12 +256,17 @@ export class PaymentService {
     }
   }
 
-  async finalizeTransaction(WebHookPaymentResponse: WebHookPaymentResponse) {
+  async finalizeTransaction(webHookPaymentResponse: WebHookPaymentResponse) {
+    const invoice = await this.invoiceRepository.findOne({
+      where: {
+        reference: webHookPaymentResponse.payload.referencedId,
+      },
+    });
     const payload = {
-      description: WebHookPaymentResponse.payload.result.description,
-      amount: parseFloat(WebHookPaymentResponse.payload.amount),
+      description: webHookPaymentResponse.payload.result.description,
+      amount: parseFloat(webHookPaymentResponse.payload.amount),
       transactionType: TransactionType.DEBIT,
-      referenceId: WebHookPaymentResponse.payload.referencedId,
+      referenceId: webHookPaymentResponse.payload.referencedId,
       needAdminReview: false,
     };
     await this.transactionRepository.save(payload);

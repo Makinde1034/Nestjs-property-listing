@@ -48,7 +48,7 @@ export class PaymentRequest {
   paymentType: string;
   integrity: boolean;
   testMode?: string;
-  merchantInvoiceId: string;
+  merchantInvoiceId?: string;
 
   merchantTransactionId: string;
   'customParameters[3DS2_enrolled]'?: boolean;
