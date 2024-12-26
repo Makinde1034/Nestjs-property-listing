@@ -1,48 +1,48 @@
-/*
- * Copyright (c) 2024, Waseet LLC. All rights reserved.
- * For license. See license.txt
- */
+// /*
+//  * Copyright (c) 2024, Waseet LLC. All rights reserved.
+//  * For license. See license.txt
+//  */
 
-import { Entity, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+// import { Entity, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
-import BaseEntity from './base.entity';
-import { PaymentStatus } from '../common/enums/status.enum';
-import { Field, ObjectType } from '@nestjs/graphql';
+// import BaseEntity from './base.entity';
+// import { PaymentStatus } from '../common/enums/status.enum';
+// import { Field, ObjectType } from '@nestjs/graphql';
 
-@Entity()
-@ObjectType()
-export class TransactionLog extends BaseEntity {
-  @Column('decimal', { precision: 10, scale: 2 })
-  @Field()
-  amount: number;
-  @Column('decimal', { precision: 10, scale: 2 })
-  @Field()
-  fee: number;
+// @Entity()
+// @ObjectType()
+// export class TransactionLog extends BaseEntity {
+//   @Column('decimal', { precision: 10, scale: 2 })
+//   @Field()
+//   amount: number;
+//   @Column('decimal', { precision: 10, scale: 2 })
+//   @Field()
+//   fee: number;
 
-  @Column('decimal', { precision: 10, scale: 2 })
-  @Field()
-  vat: number;
+//   @Column('decimal', { precision: 10, scale: 2 })
+//   @Field()
+//   vat: number;
 
-  @Column({
-    type: 'enum',
-    enum: PaymentStatus,
-    default: PaymentStatus.PENDING,
-  })
-  @Field()
-  status: PaymentStatus;
+//   @Column({
+//     type: 'enum',
+//     enum: PaymentStatus,
+//     default: PaymentStatus.PENDING,
+//   })
+//   @Field()
+//   status: PaymentStatus;
 
-  @Column()
-  @Field()
-  reference: string;
+//   @Column()
+//   @Field()
+//   reference: string;
 
-  @Column()
-  @Field()
-  category: string;
+//   @Column()
+//   @Field()
+//   category: string;
 
-  @UpdateDateColumn()
-  @Field()
-  updatedAt: Date;
-  @CreateDateColumn()
-  @Field()
-  createdAt: Date;
-}
+//   @UpdateDateColumn()
+//   @Field()
+//   updatedAt: Date;
+//   @CreateDateColumn()
+//   @Field()
+//   createdAt: Date;
+// }

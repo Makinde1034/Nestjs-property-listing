@@ -5,6 +5,10 @@
 
 export enum PaymentEnum {
   SUCCESSFUL_PAYMENT = 'PAYMENT',
-
   REGISTRATION = 'REGISTRATION',
+}
+
+export enum TransactionType {
+  DEBIT = 'debit',
+  CREDIT = 'credit',
 }

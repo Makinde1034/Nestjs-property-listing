@@ -37,6 +37,8 @@ import { SseService } from '../../sse/client.service';
 
 import { MessageEvent } from '../../sse/request/app';
 import { TransactionRepository } from '../repository/transaction.repository';
+import { WebHookPaymentResponse } from '../../webhook/dto/wehook.response';
+import { TransactionType } from '../../../common/enums/payment.enum';
 
 @Injectable()
 export class PaymentService {
@@ -72,14 +74,18 @@ export class PaymentService {
       });
       createPaymentInput.amount = coupon.amount;
     }
+
+    const invoive = await this.invoice();
+
     const checkout = await this.hyperPayService.createCheckout(
       createPaymentInput,
       user,
+      invoive.reference,
     );
 
     const data = {
       checkoutId: checkout.id,
-      referenceId: generateRandomString(),
+      referenceId: checkout.result,
       timeStamp: checkout.timestamp,
     };
 
@@ -99,9 +105,13 @@ export class PaymentService {
       });
       createPaymentInput.amount = coupon.amount;
     }
+
+    const invoive = await this.invoice();
+
     const checkout = await this.hyperPayService.createCheckoutForPA(
       createPaymentInput,
       user,
+      invoive.reference,
     );
 
     const data = {
@@ -215,6 +225,7 @@ export class PaymentService {
 
       const invoice = await this.invoiceRepository.save({
         ...payload,
+        reference: generateRandomString(),
         listingType: listing.listingType,
         listing,
       });
@@ -249,7 +260,14 @@ export class PaymentService {
     }
   }
 
-  async finalizeTransacrion() {
-    // await this.transactionRepository.save();
+  async finalizeTransaction(WebHookPaymentResponse: WebHookPaymentResponse) {
+    const payload = {
+      description: WebHookPaymentResponse.payload.result.description,
+      amount: parseFloat(WebHookPaymentResponse.payload.amount),
+      transactionType: TransactionType.DEBIT,
+      referenceId: WebHookPaymentResponse.payload.referencedId,
+      needAdminReview: false,
+    };
+    await this.transactionRepository.save(payload);
   }
 }

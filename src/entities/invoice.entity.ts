@@ -33,6 +33,10 @@ export class Invoice {
   @Field()
   userId: string;
 
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  reference: string;
+
   @OneToOne(() => Listing, { nullable: true })
   @JoinColumn({ name: 'listingId' })
   @Field(() => Listing, { nullable: true })

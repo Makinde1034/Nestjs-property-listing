@@ -242,6 +242,7 @@ type Invoice {
   id: Float!
   price: Float!
   userId: String!
+  reference: String
   listing: Listing
   listingType: ListingType
   type: String!

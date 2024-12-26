@@ -46,7 +46,7 @@ import {
   ServerSentEvents,
 } from 'src/common/enums';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { NotificationScopesEnum } from '../../../common/enums/notification-scope.enum';
+import { NotificationScopeEnum } from '../../../common/enums/notification-scope.enum';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { AdminNotificationPreferenceRepository } from '../repositories/admin.repository';
 import { SseService } from '../../sse/client.service';
@@ -145,10 +145,10 @@ export class NotificationService {
       }
 
       // Define scopes triggering notifications
-      const notificationScopes = new Set(Object.values(NotificationScopesEnum));
+      const notificationScopes = new Set(Object.values(NotificationScopeEnum));
 
       // Check if scope matches predefined notification scopes
-      const scopeName = scope.scopeGroup as NotificationScopesEnum;
+      const scopeName = scope.scopeGroup as NotificationScopeEnum;
 
       if (notificationScopes.has(scopeName)) {
         // Fetch messages relevant to the scope and event

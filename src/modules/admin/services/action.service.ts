@@ -19,7 +19,7 @@ import {
   NotificationScopeRepository,
   UserRepository,
 } from '../../user/repositories';
-import { NotificationScopesEnum } from '../../../common/enums/notification-scope.enum';
+import { NotificationScopeEnum } from '../../../common/enums/notification-scope.enum';
 
 import { WorkflowRepository } from '../repositories/workflow.repository';
 
@@ -120,7 +120,7 @@ export class ActionService {
 
       const [scope, data] = await Promise.all([
         this.notificationScopeRepository.findOne({
-          where: { name: NotificationScopesEnum.WORKFLOW_EVENT },
+          where: { name: NotificationScopeEnum.WORKFLOW_EVENTS },
         }),
 
         this.actionRequestRepository.save(actionRequest),

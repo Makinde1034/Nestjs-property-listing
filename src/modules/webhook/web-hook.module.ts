@@ -8,8 +8,10 @@ import { Module } from '@nestjs/common';
 import { WebhookService } from './services/web-hook.services';
 import { WebHookController } from './web-hook.controller';
 import { JwtService } from '@nestjs/jwt';
+import { PaymentModule } from '../payment/payment.module';
 
 @Module({
+  imports: [PaymentModule],
   providers: [WebhookService, JwtService],
   controllers: [WebHookController],
 })

@@ -5,11 +5,11 @@
 
 import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
-import { TransactionLog } from '../../../entities/transaction-log.entity';
+import { GeneralLedger } from '../../../entities/general-ledger.entity';
 
 @Injectable()
-export class TransactionRepository extends Repository<TransactionLog> {
+export class TransactionRepository extends Repository<GeneralLedger> {
   constructor(private readonly dataSource: DataSource) {
-    super(TransactionLog, dataSource.createEntityManager());
+    super(GeneralLedger, dataSource.createEntityManager());
   }
 }

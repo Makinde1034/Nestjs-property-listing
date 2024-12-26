@@ -30,7 +30,7 @@ import {
   NotificationScopeRepository,
   UserRepository,
 } from '../../user/repositories';
-import { NotificationScopesEnum } from '../../../common/enums/notification-scope.enum';
+import { NotificationScopeEnum } from '../../../common/enums/notification-scope.enum';
 
 import { AuctionEnum, OfferListEnum } from '../../../common/enums/status.enum';
 import { AdminService } from '../../admin/services/admin.service';
@@ -172,7 +172,7 @@ export class OfferService {
       //Filter out the correct scope
       const scope: NotificationScope = notificationPreference.find(
         (element) => {
-          if (element.name == NotificationScopesEnum.CREATE_OFFER) {
+          if (element.name == NotificationScopeEnum.OFFERS) {
             return element;
           }
         },
@@ -183,6 +183,7 @@ export class OfferService {
         creatorId: user.id,
         receiverId: seller.id,
         scope: scope,
+        event: 'Create',
         recipientFormat: ['Seller', 'Offer Creator'],
       });
       return offerPayload;
@@ -356,7 +357,7 @@ export class OfferService {
 
         // Fetch notification preference
         this.notificationScopeRepository.findOne({
-          where: { name: NotificationScopesEnum.UPDATE_OFFER },
+          where: { name: NotificationScopeEnum.OFFERS },
         }),
         await this.offerRepository.findOneBy({ id }),
       ]);
@@ -464,6 +465,7 @@ export class OfferService {
           creatorId: user.id,
           receiverId: seller.id,
           scope: scope,
+          event: 'Update',
           recipientFormat: ['Seller', 'Offer Creator'],
         });
 
@@ -547,7 +549,7 @@ export class OfferService {
           const notificationPreference = await entityManager.findOne(
             NotificationScope,
             {
-              where: { name: NotificationScopesEnum.OFFER_RESPONSE },
+              where: { name: NotificationScopeEnum.OFFERS },
             },
           );
 
@@ -565,6 +567,7 @@ export class OfferService {
             creatorId: user.id,
             receiverId: offer.listing.user.id,
             scope: notificationPreference,
+            event: 'Update',
             recipientFormat: ['Seller', 'Offer Creator'],
           });
 
@@ -627,7 +630,7 @@ export class OfferService {
           const notificationPreference = await entityManager.findOne(
             NotificationScope,
             {
-              where: { name: NotificationScopesEnum.OFFER_RESPONSE },
+              where: { name: NotificationScopeEnum.OFFERS },
             },
           );
 
@@ -645,6 +648,7 @@ export class OfferService {
             creatorId: user.id,
             receiverId: offer.listing.user.id,
             scope: notificationPreference,
+            event: 'Update',
             recipientFormat: ['Seller', 'Offer Creator'],
           });
 
