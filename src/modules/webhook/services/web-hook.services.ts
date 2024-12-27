@@ -60,13 +60,6 @@ export class WebhookService {
         this.hyperPayConfig.hyperPayDecriptionToken;
 
       // Validate inputs
-      if (!payload?.encryptedBody)
-        throw new Error('Missing encryptedBody in payload');
-      if (!ivfromHttpHeader) throw new Error('Missing ivfromHttpHeader');
-      if (!authTagFromHttpHeader)
-        throw new Error('Missing authTagFromHttpHeader');
-      if (!secretFromConfiguration)
-        throw new Error('Missing hyperPayDecriptionToken');
 
       // const httpBody = JSON.stringify(payload?.encryptedBody); // Should be a hex string
 
