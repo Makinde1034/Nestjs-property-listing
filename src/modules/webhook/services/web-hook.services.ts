@@ -50,7 +50,7 @@ export class WebhookService {
   logger = new Logger(WebhookService.name);
 
   async handleWebHookForHyperpay(
-    payload: WebHookResponse,
+    payload: any,
     ivfromHttpHeader: string,
     authTagFromHttpHeader: string,
   ) {
@@ -69,7 +69,7 @@ export class WebhookService {
       if (!secretFromConfiguration)
         throw new Error('Missing hyperPayDecriptionToken');
 
-      const httpBody = JSON.stringify(payload?.encryptedBody); // Should be a hex string
+      const httpBody = JSON.stringify(payload?.encryptedBody.encryptedBody); // Should be a hex string
       console.log(httpBody);
 
       // // Convert hex strings to binary buffers
