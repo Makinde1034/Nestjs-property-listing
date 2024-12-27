@@ -1265,93 +1265,195 @@ export class ListingService {
           'This user does not have permission to update the record',
         );
       }
-      let update;
-      // Update listing details
-      update = await this.listingRepository.update(id, partialUpdatePayload);
+      if (listing.status == ListingStatus.PENDING) {
+        let update;
+        // Update listing details
 
-      if (gpsCoordinate) {
-        update = await this.gpsCoordinateRepository.update(
-          listing.gpsCoordinate.id,
-          gpsCoordinate,
-        );
-      }
+        update = await this.listingRepository.update(id, partialUpdatePayload);
 
-      // Create a map for quick lookups of existing attributes
-      const existingAttributesMap = new Map(
-        listing.listingAttributes.map((attr) => [attr.attributeId, attr]),
-      );
-
-      // Collect promises for attribute updates and new attributes
-      const updatePromises = [];
-      const newAttributesPromises = [];
-
-      if (attributes?.length > 0) {
-        for (const element of attributes) {
-          const existingAttribute = existingAttributesMap.get(
-            element.attributeId,
+        if (gpsCoordinate) {
+          update = await this.gpsCoordinateRepository.update(
+            listing.gpsCoordinate.id,
+            gpsCoordinate,
           );
+        }
 
-          if (existingAttribute) {
-            if (element.value !== existingAttribute.value) {
-              updatePromises.push(
-                this.listingAttributesRepository.update(existingAttribute.id, {
-                  value: element.value,
-                }),
+        // Create a map for quick lookups of existing attributes
+        const existingAttributesMap = new Map(
+          listing.listingAttributes.map((attr) => [attr.attributeId, attr]),
+        );
+
+        // Collect promises for attribute updates and new attributes
+        const updatePromises = [];
+        const newAttributesPromises = [];
+
+        if (attributes?.length > 0) {
+          for (const element of attributes) {
+            const existingAttribute = existingAttributesMap.get(
+              element.attributeId,
+            );
+
+            if (existingAttribute) {
+              if (element.value !== existingAttribute.value) {
+                updatePromises.push(
+                  this.listingAttributesRepository.update(
+                    existingAttribute.id,
+                    {
+                      value: element.value,
+                    },
+                  ),
+                );
+              }
+            } else {
+              // Fetch attribute details only if needed
+              newAttributesPromises.push(
+                this.attributeService
+                  .findOneAttribute(element.attributeId)
+                  .then((attribute) => ({
+                    ...element,
+                    name: attribute.englishName,
+                    listing,
+                  })),
               );
             }
-          } else {
-            // Fetch attribute details only if needed
-            newAttributesPromises.push(
-              this.attributeService
-                .findOneAttribute(element.attributeId)
-                .then((attribute) => ({
-                  ...element,
-                  name: attribute.englishName,
-                  listing,
-                })),
+          }
+
+          // Wait for all attribute updates to complete
+          await Promise.all(updatePromises);
+
+          // Save new attributes
+          const newAttributes = await Promise.all(newAttributesPromises);
+          await this.listingAttributesRepository.save(newAttributes);
+        }
+        // Prepare notifications
+        const wishlistUserIds = listing.wishlist.map(
+          (wishlist) => wishlist.userId,
+        );
+        const notificationPromises = [];
+
+        if (partialUpdatePayload.price != undefined) {
+          for (const userId of wishlistUserIds) {
+            notificationPromises.push(
+              this.pushNotification.sendUsersNotification({
+                title: 'New listing',
+                message: `Hi ${user.name}, Heads up! The price of an item in your wishlist has been updated. Check out the new price now.`,
+                isEmail: true,
+                isPushNotification: true,
+                recipients: [userId],
+                deepLink: '',
+              }),
             );
           }
         }
 
-        // Wait for all attribute updates to complete
-        await Promise.all(updatePromises);
+        // Wait for all notifications to be sent
+        await Promise.all(notificationPromises);
 
-        // Save new attributes
-        const newAttributes = await Promise.all(newAttributesPromises);
-        await this.listingAttributesRepository.save(newAttributes);
-      }
-      // Prepare notifications
-      const wishlistUserIds = listing.wishlist.map(
-        (wishlist) => wishlist.userId,
-      );
-      const notificationPromises = [];
+        // Return the updated listing
+        if (update.affected > 0) {
+          const result = await this.listingRepository.findOneOrFail({
+            where: { id },
+            relations: ['user', 'gpsCoordinate'],
+          });
 
-      if (partialUpdatePayload.price != undefined) {
-        for (const userId of wishlistUserIds) {
-          notificationPromises.push(
-            this.pushNotification.sendUsersNotification({
-              title: 'New listing',
-              message: `Hi ${user.name}, Heads up! The price of an item in your wishlist has been updated. Check out the new price now.`,
-              isEmail: true,
-              isPushNotification: true,
-              recipients: [userId],
-              deepLink: '',
-            }),
-          );
+          return this.transformListing(result);
         }
-      }
+      } else if (listing.status == ListingStatus.ACCEPTED) {
+        let update;
+        // Update listing details
 
-      // Wait for all notifications to be sent
-      await Promise.all(notificationPromises);
-
-      // Return the updated listing
-      if (update.affected > 0) {
-        const result = await this.listingRepository.findOneOrFail({
-          where: { id },
-          relations: ['user', 'gpsCoordinate'],
+        update = await this.listingRepository.update(id, {
+          ...partialUpdatePayload,
+          status: ListingStatus.PENDING,
         });
 
-        return this.transformListing(result);
+        if (gpsCoordinate) {
+          update = await this.gpsCoordinateRepository.update(
+            listing.gpsCoordinate.id,
+            gpsCoordinate,
+          );
+        }
+
+        // Create a map for quick lookups of existing attributes
+        const existingAttributesMap = new Map(
+          listing.listingAttributes.map((attr) => [attr.attributeId, attr]),
+        );
+
+        // Collect promises for attribute updates and new attributes
+        const updatePromises = [];
+        const newAttributesPromises = [];
+
+        if (attributes?.length > 0) {
+          for (const element of attributes) {
+            const existingAttribute = existingAttributesMap.get(
+              element.attributeId,
+            );
+
+            if (existingAttribute) {
+              if (element.value !== existingAttribute.value) {
+                updatePromises.push(
+                  this.listingAttributesRepository.update(
+                    existingAttribute.id,
+                    {
+                      value: element.value,
+                    },
+                  ),
+                );
+              }
+            } else {
+              // Fetch attribute details only if needed
+              newAttributesPromises.push(
+                this.attributeService
+                  .findOneAttribute(element.attributeId)
+                  .then((attribute) => ({
+                    ...element,
+                    name: attribute.englishName,
+                    listing,
+                  })),
+              );
+            }
+          }
+
+          // Wait for all attribute updates to complete
+          await Promise.all(updatePromises);
+
+          // Save new attributes
+          const newAttributes = await Promise.all(newAttributesPromises);
+          await this.listingAttributesRepository.save(newAttributes);
+        }
+        // Prepare notifications
+        const wishlistUserIds = listing.wishlist.map(
+          (wishlist) => wishlist.userId,
+        );
+        const notificationPromises = [];
+
+        if (partialUpdatePayload.price != undefined) {
+          for (const userId of wishlistUserIds) {
+            notificationPromises.push(
+              this.pushNotification.sendUsersNotification({
+                title: 'New listing',
+                message: `Hi ${user.name}, Heads up! The price of an item in your wishlist has been updated. Check out the new price now.`,
+                isEmail: true,
+                isPushNotification: true,
+                recipients: [userId],
+                deepLink: '',
+              }),
+            );
+          }
+        }
+
+        // Wait for all notifications to be sent
+        await Promise.all(notificationPromises);
+
+        // Return the updated listing
+        if (update.affected > 0) {
+          const result = await this.listingRepository.findOneOrFail({
+            where: { id },
+            relations: ['user', 'gpsCoordinate'],
+          });
+
+          return this.transformListing(result);
+        }
       }
     } catch (error) {
       this.logger.log(error);
