@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 
 import { addDays } from 'date-fns';
 
@@ -40,6 +40,7 @@ import { TransactionRepository } from '../repository/transaction.repository';
 import { WebHookPaymentResponse } from '../../webhook/dto/wehook.response';
 import { TransactionType } from '../../../common/enums/payment.enum';
 import { PaymentStatus } from '../../../common/enums/status.enum';
+import { SuccessResponse } from '../../../common/utils/success.response';
 
 @Injectable()
 export class PaymentService {
@@ -273,23 +274,34 @@ export class PaymentService {
   }
 
   async finalizeTransaction(webHookPaymentResponse: WebHookPaymentResponse) {
-    const invoice = await this.invoiceRepository.findOne({
-      where: {
-        reference: webHookPaymentResponse.payload.merchantInvoiceId,
-      },
-    });
-    const payload = {
-      description: webHookPaymentResponse.payload.result.description,
-      amount: parseFloat(webHookPaymentResponse.payload.amount),
-      transactionType: TransactionType.DEBIT,
-      referenceId: webHookPaymentResponse.payload.referencedId,
-      needAdminReview: false,
-    };
+    try {
+      const invoice = await this.invoiceRepository.findOne({
+        where: {
+          reference: webHookPaymentResponse.payload.merchantInvoiceId,
+        },
+      });
 
-    await this.transactionRepository.save(payload);
+      if (!invoice) {
+        throw new BadRequestException('No invoice found');
+      }
+      const payload = {
+        description: webHookPaymentResponse.payload.result.description,
+        amount: parseFloat(webHookPaymentResponse.payload.amount),
+        transactionType: TransactionType.DEBIT,
+        referenceId: webHookPaymentResponse.payload.id,
+        needAdminReview: false,
+      };
 
-    await this.invoiceRepository.update(invoice.id, {
-      status: PaymentStatus.PAID,
-    });
+      await this.transactionRepository.save(payload);
+
+      await this.invoiceRepository.update(invoice.id, {
+        status: PaymentStatus.PAID,
+        capturedPrice: parseFloat(webHookPaymentResponse.payload.amount),
+      });
+      return new SuccessResponse();
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error);
+    }
   }
 }

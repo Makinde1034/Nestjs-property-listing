@@ -933,6 +933,8 @@ export class ListingService {
             'listing.isListingRented',
             'listing.isListingPromoted',
             'listing.price',
+            'listing.status',
+            'listing.stage',
             'listing.isListingVerified',
           ])
           .leftJoin('listing.listingType', 'listingType')
