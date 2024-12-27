@@ -271,7 +271,7 @@ type ServiceRequested {
 
 type Place {
   id: ID!
-  PlaceId: String!
+  placeId: String!
   type: String!
   listing: Listing!
 }
@@ -1342,7 +1342,6 @@ input CreateSearchHistoryInput {
 }
 
 input LocationDto {
-  placeId: String!
   lng: Float!
   lat: Float!
 }

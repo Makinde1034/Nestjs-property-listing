@@ -7,7 +7,7 @@ import { Listing } from './listing.entity';
 export class Place extends BaseEntity {
   @Field()
   @Column()
-  PlaceId: string;
+  placeId: string;
 
   @Field()
   @Column()
