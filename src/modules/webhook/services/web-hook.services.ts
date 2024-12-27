@@ -59,28 +59,46 @@ export class WebhookService {
       const secretFromConfiguration =
         this.hyperPayConfig.hyperPayDecriptionToken;
 
+      // Validate inputs
+      if (!payload?.encryptedBody)
+        throw new Error('Missing encryptedBody in payload');
+      if (!ivfromHttpHeader) throw new Error('Missing ivfromHttpHeader');
+      if (!authTagFromHttpHeader)
+        throw new Error('Missing authTagFromHttpHeader');
+      if (!secretFromConfiguration)
+        throw new Error('Missing hyperPayDecriptionToken');
+
       const httpBody = payload.encryptedBody; // Should be a hex string
+      console.log(httpBody);
+
       // Convert hex strings to binary buffers
       const key = Buffer.from(secretFromConfiguration, 'hex');
       const iv = Buffer.from(ivfromHttpHeader, 'hex');
       const authTag = Buffer.from(authTagFromHttpHeader, 'hex');
       const cipherText = Buffer.from(httpBody, 'hex');
+
+      // Log converted values for debugging
+      console.log('Key:', key);
+      console.log('IV:', iv);
+      console.log('AuthTag:', authTag);
+      console.log('CipherText:', cipherText);
+
+      // Decrypt the data
       const decipher = crypto.createDecipheriv(algorithm, key, iv);
       decipher.setAuthTag(authTag);
 
-      // Decrypt the data
       const decrypted = Buffer.concat([
         decipher.update(cipherText),
         decipher.final(),
       ]).toString('utf8');
+
       const data: WebHookPaymentResponse = JSON.parse(decrypted);
-      console.log(data);
+      console.log('Decrypted data:', data);
       await this.paymentService.finalizeTransaction(data);
 
       return new SuccessResponse();
     } catch (error) {
-      console.log(error);
-      this.logger.error('Decryption failed:', error.message);
+      console.error('Decryption failed:', error.message);
       throw new Error('DecryptionFailed');
     }
   }
