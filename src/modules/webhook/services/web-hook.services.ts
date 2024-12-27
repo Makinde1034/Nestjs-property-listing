@@ -61,21 +61,11 @@ export class WebhookService {
 
       // Validate inputs
 
-      // const httpBody = JSON.stringify(payload?.encryptedBody); // Should be a hex string
-
       // // Convert hex strings to binary buffers
       const key = Buffer.from(secretFromConfiguration, 'hex');
       const iv = Buffer.from(ivfromHttpHeader, 'hex');
       const authTag = Buffer.from(authTagFromHttpHeader, 'hex');
       const cipherText = Buffer.from(payload?.encryptedBody, 'hex');
-
-      // console.log(cipherText);
-
-      // // // Log converted values for debugging
-      // // console.log('Key:', key);
-      // // console.log('IV:', iv);
-      // // console.log('AuthTag:', authTag);
-      // // console.log('CipherText:', cipherText);
 
       // // Decrypt the data
       const decipher = crypto.createDecipheriv(algorithm, key, iv);
@@ -87,13 +77,12 @@ export class WebhookService {
       ]).toString('utf8');
 
       const data: WebHookPaymentResponse = JSON.parse(decrypted);
-      console.log('Decrypted data:', data);
+
       await this.paymentService.finalizeTransaction(data);
 
       return new SuccessResponse();
     } catch (error) {
       console.error('Decryption failed:', error.message);
-      throw new Error('DecryptionFailed');
     }
   }
 
