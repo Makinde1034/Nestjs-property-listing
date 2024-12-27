@@ -42,11 +42,6 @@ export class WebHookController {
     @Headers('x-authentication-tag') authenticationTag: string,
     @Body() hyperPayWebHookResponse: WebHookResponse,
   ) {
-    console.log(
-      hyperPayWebHookResponse.encryptedBody,
-      initializationVector,
-      authenticationTag,
-    );
     this.webhookService.handleWebHookForHyperpay(
       hyperPayWebHookResponse,
 

@@ -68,7 +68,7 @@ export class WebhookService {
       if (!secretFromConfiguration)
         throw new Error('Missing hyperPayDecriptionToken');
 
-      const httpBody = payload.encryptedBody; // Should be a hex string
+      const httpBody = JSON.stringify(payload.encryptedBody); // Should be a hex string
       console.log(httpBody);
 
       // Convert hex strings to binary buffers
