@@ -55,6 +55,7 @@ export class WebhookService {
     authTagFromHttpHeader: string,
   ) {
     try {
+      console.log(payload);
       const algorithm = 'aes-256-gcm';
       const secretFromConfiguration =
         this.hyperPayConfig.hyperPayDecriptionToken;
@@ -68,33 +69,33 @@ export class WebhookService {
       if (!secretFromConfiguration)
         throw new Error('Missing hyperPayDecriptionToken');
 
-      const httpBody = JSON.stringify(payload.encryptedBody); // Should be a hex string
+      const httpBody = JSON.stringify(payload?.encryptedBody); // Should be a hex string
       console.log(httpBody);
 
-      // Convert hex strings to binary buffers
+      // // Convert hex strings to binary buffers
       const key = Buffer.from(secretFromConfiguration, 'hex');
       const iv = Buffer.from(ivfromHttpHeader, 'hex');
       const authTag = Buffer.from(authTagFromHttpHeader, 'hex');
       const cipherText = Buffer.from(httpBody, 'hex');
 
-      // Log converted values for debugging
+      // // Log converted values for debugging
       console.log('Key:', key);
       console.log('IV:', iv);
       console.log('AuthTag:', authTag);
       console.log('CipherText:', cipherText);
 
-      // Decrypt the data
-      const decipher = crypto.createDecipheriv(algorithm, key, iv);
-      decipher.setAuthTag(authTag);
+      // // Decrypt the data
+      // const decipher = crypto.createDecipheriv(algorithm, key, iv);
+      // decipher.setAuthTag(authTag);
 
-      const decrypted = Buffer.concat([
-        decipher.update(cipherText),
-        decipher.final(),
-      ]).toString('utf8');
+      // const decrypted = Buffer.concat([
+      //   decipher.update(cipherText),
+      //   decipher.final(),
+      // ]).toString('utf8');
 
-      const data: WebHookPaymentResponse = JSON.parse(decrypted);
-      console.log('Decrypted data:', data);
-      await this.paymentService.finalizeTransaction(data);
+      // const data: WebHookPaymentResponse = JSON.parse(decrypted);
+      // console.log('Decrypted data:', data);
+      // await this.paymentService.finalizeTransaction(data);
 
       return new SuccessResponse();
     } catch (error) {
