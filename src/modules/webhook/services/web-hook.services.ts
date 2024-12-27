@@ -50,7 +50,7 @@ export class WebhookService {
   logger = new Logger(WebhookService.name);
 
   async handleWebHookForHyperpay(
-    payload: any,
+    payload: WebHookResponse,
     ivfromHttpHeader: string,
     authTagFromHttpHeader: string,
   ) {

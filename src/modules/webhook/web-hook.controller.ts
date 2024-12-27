@@ -40,16 +40,16 @@ export class WebHookController {
   payment(
     @Headers('x-initialization-vector') initializationVector: string, // Extract the IV from the headers
     @Headers('x-authentication-tag') authenticationTag: string,
-    @Body() hyperPayWebHookResponse: any,
+    @Body() hyperPayWebHookResponse: WebHookResponse,
   ) {
     console.log(
       hyperPayWebHookResponse,
       initializationVector,
       authenticationTag,
     );
-    const data = JSON.stringify(hyperPayWebHookResponse);
     this.webhookService.handleWebHookForHyperpay(
-      data,
+      hyperPayWebHookResponse,
+
       initializationVector,
       authenticationTag,
     );
