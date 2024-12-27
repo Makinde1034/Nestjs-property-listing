@@ -160,7 +160,8 @@ export class UserResolver {
    * @returns {Promise<User>}
    */
   @Mutation(() => String)
-  @UseGuards(AccessTokenGuard)
+  // @UseGuards(AccessTokenGuard)
+  @Public()
   async staffConfirmation(
     @Args('RequestInput') inputDto: StaffConfirmDto,
   ): Promise<string> {
