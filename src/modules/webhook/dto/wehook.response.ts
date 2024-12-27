@@ -3,12 +3,15 @@
  * For license. See license.txt
  */
 
+import { IsString } from 'class-validator';
+
 export interface WebHookPaymentResponse {
   type: string;
   payload: Payload;
 }
 
 export class WebHookResponse {
+  @IsString()
   encryptedBody: string;
 }
 
