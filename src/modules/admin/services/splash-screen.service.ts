@@ -64,6 +64,23 @@ export class SplashScreenService {
       const splashScreen =
         this.splashScreenRepository.create(createSplashScreen);
 
+      const overlappingSplashScreens = await this.splashScreenRepository
+        .createQueryBuilder('splashScreen')
+        .where(
+          '(splashScreen.startDate BETWEEN :start AND :end OR splashScreen.endDate BETWEEN :start AND :end OR :start BETWEEN splashScreen.startDate AND splashScreen.endDate)',
+          {
+            start: createSplashScreen.startDate,
+            end: createSplashScreen.endDate,
+          },
+        )
+        .getCount();
+
+      if (overlappingSplashScreens > 0) {
+        throw new BadRequestException(
+          'A schedule matching this date already exists',
+        );
+      }
+
       // Await workflow configuration result
       const actionConfig = await actionConfigPromise;
 
