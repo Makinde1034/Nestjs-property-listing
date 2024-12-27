@@ -77,7 +77,7 @@ export class SplashScreenService {
 
       if (overlappingSplashScreens > 0) {
         throw new BadRequestException(
-          'A schedule matching this date already exists',
+          'A schedule matching this date range already exists',
         );
       }
 
