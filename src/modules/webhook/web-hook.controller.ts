@@ -43,7 +43,7 @@ export class WebHookController {
     @Body() hyperPayWebHookResponse: WebHookResponse,
   ) {
     console.log(
-      hyperPayWebHookResponse,
+      hyperPayWebHookResponse.encryptedBody,
       initializationVector,
       authenticationTag,
     );
