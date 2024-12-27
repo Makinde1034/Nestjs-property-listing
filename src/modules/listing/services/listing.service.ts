@@ -77,10 +77,18 @@ import { ActivityEnum } from '../../../common/enums/activitys';
 import { Feature } from '../../../entities/feature.entity';
 import { CompareRepository } from '../repositories/compare.repository';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { NotificationScopeRepository } from '../../user/repositories';
+import {
+  NotificationScopeRepository,
+  RolePermissionRepository,
+  RoleRepository,
+  UserRepository,
+} from '../../user/repositories';
 import { NotificationScopeEnum } from '../../../common/enums/notification-scope.enum';
 import { ListingStatus } from '../../../common/enums/status.enum';
 import { PlaceRepository } from '../repositories/place.repositories';
+import { RoleService } from '../../user/services';
+import { permission } from 'process';
+import { PermissionsEnum } from '../../../common/enums/permission.enum';
 
 @Injectable()
 export class ListingService {
@@ -106,6 +114,8 @@ export class ListingService {
     private readonly activityLogsService: ActivityLogService,
     private readonly eventEmitter: EventEmitter2,
     private readonly notificationScopeRepository: NotificationScopeRepository,
+
+    private readonly roleRepository: RoleRepository,
   ) {}
   logger = new Logger(ListingService.name);
 
@@ -150,7 +160,6 @@ export class ListingService {
         userId: user.id,
         place: place,
       });
-
       const attributeEntities = await Promise.all(
         attributes.map(async (element) => {
           const attribute = await this.attributeService.findOneAttribute(
@@ -206,8 +215,45 @@ export class ListingService {
           break;
       }
 
+      const notificationPreference =
+        await this.notificationScopeRepository.find();
+      const scope: NotificationScope = notificationPreference.find(
+        (element) => {
+          if (element.scopeGroup == NotificationScopeEnum.LISTING) {
+            return element;
+          }
+        },
+      );
+
+      const role = await this.roleRepository.find({
+        where: {
+          permissions: {
+            slug: PermissionsEnum.LISTINGS_MULTI_ACTIONS,
+          },
+        },
+        relations: ['permissions', 'user'], // Ensures the relationship is loaded if not already eager
+      });
+
+      let users = [];
+
+      role.forEach((element) => {
+        users.push(element.user);
+      });
+
+      users.forEach((user) => {
+        console.log(user);
+        this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+          creatorId: user.id,
+          scope: scope,
+          event: 'Create',
+
+          recipientFormat: [null, 'Admin listing approver'],
+        });
+      });
+
       return listing;
     } catch (error) {
+      console.log(error);
       this.logger.log(error);
 
       if (error instanceof HttpException) {
@@ -1772,7 +1818,7 @@ export class ListingService {
         listing.status == ListingStatus.PENDING ||
         listing.status == ListingStatus.REJECTED
       ) {
-        throw new BadRequestException(' Listing is not aproved by Admin');
+        throw new BadRequestException(' Listing is not approved by Admin');
       }
 
       if (!listing) {
@@ -1857,7 +1903,6 @@ export class ListingService {
           }
         },
       );
-      console.log(scope);
 
       listing.forEach((element) => {
         this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
@@ -1923,7 +1968,6 @@ export class ListingService {
           }
         },
       );
-      console.log(scope);
 
       listing.forEach((element) => {
         this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
@@ -1959,6 +2003,7 @@ export class ListingService {
       const listing = await this.listingRepository.findOneOrFail({
         where: { id: id },
       });
+
       if (listing.userId != user.id || user.userType != 'admin') {
         throw new BadRequestException('Only the creator can delete Listing');
       }

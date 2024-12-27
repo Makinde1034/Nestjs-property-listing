@@ -7,7 +7,15 @@ import { Module } from '@nestjs/common';
 import { ListingTypeResolver, AttributeResolver } from './resolvers';
 import { ListingTypeService, AttributeService } from './services';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Attribute, AttributeSet, Listing, ListingType } from 'src/entities';
+import {
+  Attribute,
+  AttributeSet,
+  Listing,
+  ListingType,
+  Permission,
+  Role,
+  RolePermissions,
+} from 'src/entities';
 import {
   AttributeRepository,
   AttributeSetRepository,
@@ -56,6 +64,11 @@ import { AuctionBidRangeRepository } from './repositories/auction-bid-range.repo
 import { CompareRepository } from './repositories/compare.repository';
 import { BidRegistrationRepository } from './repositories/bid-registration.repository';
 import { PlaceRepository } from './repositories/place.repositories';
+import {
+  RolePermissionRepository,
+  RoleRepository,
+  UserRepository,
+} from '../user/repositories';
 
 @Module({
   imports: [
@@ -70,6 +83,7 @@ import { PlaceRepository } from './repositories/place.repositories';
       GpsCoordinate,
       Bids,
       AutoBid,
+      Role,
     ]),
     AdPackageModule,
     PaymentModule,
@@ -116,6 +130,8 @@ import { PlaceRepository } from './repositories/place.repositories';
     CompareRepository,
     BidRegistrationRepository,
     PlaceRepository,
+    RoleRepository,
+    UserRepository,
   ],
   exports: [ListingTypeService],
 })
