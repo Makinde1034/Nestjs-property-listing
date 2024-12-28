@@ -1974,63 +1974,83 @@ export class ListingService {
     admin: User,
   ) {
     try {
-      let listingId = [];
-      listingActionInput.listingApproval.forEach((element) => {
-        listingId.push(element.id);
-      });
-      const listing = await this.listingRepository.find({
-        where: { id: In(listingId) },
+      // Extract listing IDs from input
+      const listingIds = listingActionInput.listingApproval.map(
+        (item) => item.id,
+      );
+
+      // Fetch listings from the database
+      const listings = await this.listingRepository.find({
+        where: { id: In(listingIds) },
       });
 
-      const resultToUpdate = listing.map((element) => {
-        const listingToUpdate = listingActionInput.listingApproval.find(
-          (value) => element.id == value.id,
+      if (!listings || listings.length === 0) {
+        throw new BadRequestException('No matching listings found.');
+      }
+
+      // Prepare updates for listings
+      const updatedListings = listings.map((listing) => {
+        if (!listing || !listing.id) {
+          throw new BadRequestException('Invalid listing data.');
+        }
+
+        const approvalData = listingActionInput.listingApproval.find(
+          (item) => item.id === listing.id,
         );
-        return {
-          ...element,
-          reason: listingToUpdate.reason,
 
+        if (!approvalData) {
+          throw new BadRequestException(
+            `Approval data missing for listing ID: ${listing.id}`,
+          );
+        }
+
+        return {
+          ...listing,
+          reason: approvalData.reason,
           status: ListingStatus.ACCEPTED,
         };
       });
 
-      await this.listingRepository.save(resultToUpdate);
+      // Save updated listings
+      await this.listingRepository.save(updatedListings);
 
-      const notificationPreference =
-        await this.notificationScopeRepository.find();
-      const scope: NotificationScope = notificationPreference.find(
-        (element) => {
-          if (element.scopeGroup == NotificationScopeEnum.LISTING) {
-            return element;
-          }
-        },
-      );
+      // Fetch notification scope
+      const scope = await this.notificationScopeRepository.findOne({
+        where: { scopeGroup: NotificationScopeEnum.LISTING },
+      });
 
-      listing.forEach((element) => {
+      if (!scope) {
+        throw new BadRequestException(
+          'Notification scope for listings not configured.',
+        );
+      }
+
+      // Send notifications
+      updatedListings.forEach((listing) => {
         this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
-          creatorId: element.userId,
-          scope: scope,
+          creatorId: listing.userId,
+          scope,
           event: 'Approved',
-
           recipientFormat: ['Owner', null],
         });
       });
 
-      const activityToSave = listing.map((element) => {
-        return {
-          adminId: admin.id,
-          action: ActivityEnum.ENABLED,
-          details: JSON.stringify(listing.find((a) => a.id === element.id)),
-          listingId: element.id,
-        };
-      });
+      // Log activities
+      const activities = updatedListings.map((listing) => ({
+        adminId: admin.id,
+        action: ActivityEnum.APPROVED,
+        details: JSON.stringify(listing),
+        listingId: listing.id,
+      }));
 
-      await this.activityLogsService.logActivity(activityToSave);
+      await this.activityLogsService.logActivity(activities);
 
-      return new SuccessResponse(AppStrings.LISTING_ENABLED_SUCCESSFULLY);
+      return new SuccessResponse(AppStrings.LISTING_APPROVED_SUCCESSFULLY);
     } catch (error) {
-      this.logger.log(error);
-      throw new BadRequestException(error?.messages | error.data);
+      this.logger.error('Error approving listings:', error.stack);
+      throw new BadRequestException(
+        error?.message || 'An error occurred during approval.',
+      );
     }
   }
 
@@ -2093,7 +2113,7 @@ export class ListingService {
 
       await this.activityLogsService.logActivity(activityToSave);
 
-      return new SuccessResponse(AppStrings.LISTING_ENABLED_SUCCESSFULLY);
+      return new SuccessResponse(AppStrings.LISTING_REJECTED_SUCCESSFULLY);
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error?.messages | error.data);
