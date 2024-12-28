@@ -308,8 +308,8 @@ export class ListingResolver {
     return await this.listingService.deleteListing(ctx.req.user, listingId);
   }
 
-  // @UseGuards(AccessTokenGuard, PermissionsGuard)
-  // @Permissions(PermissionsEnum.LISTINGS_CREATE)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Permissions(PermissionsEnum.LISTINGS_CREATE)
   @Public()
   @Mutation(() => SuccessResponse, { name: 'approveListing' })
   async approveListing(
@@ -322,7 +322,7 @@ export class ListingResolver {
     );
   }
   @UseGuards(AccessTokenGuard, PermissionsGuard)
-  @Permissions(PermissionsEnum.LISTINGS_CREATE)
+  // @Permissions(PermissionsEnum.LISTINGS_CREATE)
   @Mutation(() => SuccessResponse, { name: 'rejectListing' })
   async rejectListing(
     @Context() ctx: any,

@@ -322,8 +322,6 @@ export class NotificationService {
     messages?: NotificationMessages[],
   ) {
     try {
-      console.log('user', user);
-
       if (user) {
         const messageData = this.getMessage(
           user.firstName,
@@ -488,7 +486,6 @@ export class NotificationService {
 
     return message;
   }
-
   replacePlaceholders(
     text: string,
     placeholders: { username: string; count?: number },
