@@ -79,15 +79,12 @@ import { CompareRepository } from '../repositories/compare.repository';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   NotificationScopeRepository,
-  RolePermissionRepository,
   RoleRepository,
-  UserRepository,
 } from '../../user/repositories';
 import { NotificationScopeEnum } from '../../../common/enums/notification-scope.enum';
 import { ListingStatus } from '../../../common/enums/status.enum';
 import { PlaceRepository } from '../repositories/place.repositories';
-import { RoleService } from '../../user/services';
-import { permission } from 'process';
+
 import { PermissionsEnum } from '../../../common/enums/permission.enum';
 
 @Injectable()
@@ -151,9 +148,10 @@ export class ListingService {
       });
 
       const gps = await this.gpsCoordinateRepository.save(gpsCoordinate);
-
-      const place = await this.placeRepository.save(places);
-
+      let place;
+      if (places) {
+        place = await this.placeRepository.save(places);
+      }
       const listing = await this.listingRepository.save({
         ...rest,
         gpsCoordinate: gps,
@@ -1329,25 +1327,30 @@ export class ListingService {
         const wishlistUserIds = listing.wishlist.map(
           (wishlist) => wishlist.userId,
         );
-        const notificationPromises = [];
 
+        // Fetch notification preference only if offer update is successful
+        const notificationPreference =
+          await this.notificationScopeRepository.find();
+        const scope: NotificationScope = notificationPreference.find(
+          (element) => {
+            if (element.scopeGroup == NotificationScopeEnum.LISTING) {
+              return element;
+            }
+          },
+        );
         if (partialUpdatePayload.price != undefined) {
           for (const userId of wishlistUserIds) {
-            notificationPromises.push(
-              this.pushNotification.sendUsersNotification({
-                title: 'New listing',
-                message: `Hi ${user.name}, Heads up! The price of an item in your wishlist has been updated. Check out the new price now.`,
-                isEmail: true,
-                isPushNotification: true,
-                recipients: [userId],
-                deepLink: '',
-              }),
-            );
+            this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+              creatorId: userId,
+              receiverId: listing.user.id,
+              scope: scope,
+              event: 'Price change',
+              recipientFormat: [null, 'User that has listing in wishlist'],
+            });
           }
         }
 
         // Wait for all notifications to be sent
-        await Promise.all(notificationPromises);
 
         // Return the updated listing
         if (update.affected > 0) {
@@ -2018,12 +2021,6 @@ export class ListingService {
       const scope = await this.notificationScopeRepository.findOne({
         where: { scopeGroup: NotificationScopeEnum.LISTING },
       });
-
-      if (!scope) {
-        throw new BadRequestException(
-          'Notification scope for listings not configured.',
-        );
-      }
 
       // Send notifications
       updatedListings.forEach((listing) => {

@@ -553,22 +553,19 @@ export class OfferService {
             },
           );
 
-          // Send notification (event emitter can be used here)
-          // this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
-          //   creatorId: user.id,
-          //   receiverId: offer.listing.user.id,
-          //   scope: notificationPreference,
-          //   event: NotificationScopesEnum.OFFER_RESPONSE,
-          //   recipientFormat: ['Seller', 'Offer Creator'],
-          //   type: null,
-          // });
-
           this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
             creatorId: user.id,
             receiverId: offer.listing.user.id,
             scope: notificationPreference,
-            event: 'Update',
-            recipientFormat: ['Seller', 'Offer Creator'],
+            event: 'If Accepted Offer',
+            recipientFormat: ['Seller', null],
+          });
+          this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
+            creatorId: user.id,
+            receiverId: offer.listing.user.id,
+            scope: notificationPreference,
+            event: 'Accepted',
+            recipientFormat: [null, 'Buyer'],
           });
 
           // Return the updated offer
@@ -633,16 +630,6 @@ export class OfferService {
               where: { name: NotificationScopeEnum.OFFERS },
             },
           );
-
-          // Send notification (event emitter can be used here)
-          // this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
-          //   creatorId: user.id,
-          //   receiverId: offer.listing.user.id,
-          //   scope: notificationPreference,
-          //   event: NotificationScopesEnum.OFFER_RESPONSE,
-          //   recipientFormat: ['Seller', 'Offer Creator'],
-          //   type: null,
-          // });
 
           this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
             creatorId: user.id,
