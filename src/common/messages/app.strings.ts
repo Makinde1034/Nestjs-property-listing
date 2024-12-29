@@ -71,8 +71,8 @@ export const AppStrings = {
   LISTING_DISABLE_SUCCESSFULLY: 'Listing has been disabled',
 
   LISTING_ENABLED_SUCCESSFULLY: 'Listing has been enabled',
-  LISTING_APPROVED_SUCCESSFULLY: 'Listing has been enabled',
-  LISTING_REJECTED_SUCCESSFULLY: 'Listing has been enabled',
+  LISTING_APPROVED_SUCCESSFULLY: 'Listing has been approved',
+  LISTING_REJECTED_SUCCESSFULLY: 'Listing has been rejected',
 
   LISTING_DELETED_SUCCESSFULLY: 'Listing has been deleted',
   LISTING_UNPUBLISHED_SUCCESSFULLY: 'Listing has been unpublished',
