@@ -74,11 +74,11 @@ export class AuthService {
 
   /**
    * Register
-   *
    * @async
    * @param {RegisterInput} inputDto
    * @returns {Promise<User>}
    */
+
   async register(inputDto: RegisterInput): Promise<User> {
     try {
       // Await this.recaptchaValidator.validateRecaptcha(inputDto.recaptcha);

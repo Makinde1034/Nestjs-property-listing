@@ -108,6 +108,7 @@ export class OfferService {
       if (!listing.negotiable) {
         throw new BadRequestException(AppStrings.LISTING_IS_NOT_NEGOTIABLE);
       }
+
       if (offerExpiry <= new Date()) {
         throw new BadRequestException('Expiry Date is in the past');
       }
@@ -123,6 +124,7 @@ export class OfferService {
           'The creator of a listing cannot create an offer on  that listing',
         );
       }
+
       if (offer.length > 0) {
         throw new BadRequestException(
           `Minimum Offer must be greater than ${offer[0].price}`,
@@ -290,6 +292,7 @@ export class OfferService {
       }
     }
   }
+
   async findManyForOwner(findOfferInput: FindOfferInput, user?: User) {
     try {
       const skip = findOfferInput.skip ?? 0;

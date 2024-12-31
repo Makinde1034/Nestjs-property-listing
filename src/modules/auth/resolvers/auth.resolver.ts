@@ -79,7 +79,6 @@ export class AuthResolver {
 
   /**
    * Register biometric key
-   *
    * @async
    * @param {LoginInput} inputDto
    * @returns {Promise<LoginResponse>}
@@ -95,7 +94,6 @@ export class AuthResolver {
 
   /**
    * Login using biometric method
-   *
    * @async
    * @param {LoginInput} loginInput
    * @returns {Promise<LoginResponse>}
@@ -142,8 +140,7 @@ export class AuthResolver {
   }
 
   /**
-   * Activate 2Fa
-   *
+   * Activate 2FA
    * @async
    * @returns {Promise<TwoFaResult>}
    */
@@ -155,7 +152,6 @@ export class AuthResolver {
 
   /**
    * Login using two Fa
-   *
    * @async
    * @param {TwoFaLoginInput} loginInput
    * @returns {Promise<LoginResponse>}
