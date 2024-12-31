@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import {
   BadRequestException,
   HttpException,
@@ -169,10 +174,9 @@ export class AdminWorkflowService {
           affected,
           message: `${affected} workflow(s) successfully deleted.`,
         });
-      } else {
-        // Handle case where no rows were deleted
-        throw new BadRequestException(AppStrings.NOT_FOUND); // Replace `AppStrings.NOT_FOUND` with an appropriate error message
       }
+      // Handle case where no rows were deleted
+      throw new BadRequestException(AppStrings.NOT_FOUND); // Replace `AppStrings.NOT_FOUND` with an appropriate error message
     } catch (error) {
       // Log and throw the error
       this.logger.error('Error deleting workflows:', error);

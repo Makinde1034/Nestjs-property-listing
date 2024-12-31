@@ -30,7 +30,7 @@ export class PushNotificationService {
 
   /**
    * Update User Profile
-   
+
    * @async
    * @param {PushNotificationPayload} notification
    * @returns {Promise<void>}
@@ -105,17 +105,13 @@ export class PushNotificationService {
         device_type: notification.deviceType,
       });
       return new SuccessResponse();
-    } else {
-      if (userNotificationToken?.deviceType != notification.deviceType) {
-        await this.notificationTokenRepository.update(
-          userNotificationToken.id,
-          {
-            token: notification.notificationToken,
-            deviceType: notification.deviceType,
-          },
-        );
-      }
-      return new SuccessResponse();
     }
+    if (userNotificationToken?.deviceType != notification.deviceType) {
+      await this.notificationTokenRepository.update(userNotificationToken.id, {
+        token: notification.notificationToken,
+        deviceType: notification.deviceType,
+      });
+    }
+    return new SuccessResponse();
   }
 }

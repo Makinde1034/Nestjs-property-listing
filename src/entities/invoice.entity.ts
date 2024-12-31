@@ -17,6 +17,7 @@ import { int } from 'aws-sdk/clients/datapipeline';
 import { PaymentStatus } from '../common/enums/status.enum';
 import { Listing } from './listing.entity';
 import { ListingType } from './listing-type.entity';
+import { Offer } from './offer.entity';
 
 @Entity()
 @ObjectType()
@@ -37,6 +38,14 @@ export class Invoice {
   @Field()
   userId: string;
 
+  @Column()
+  @Field()
+  checkoutId: string;
+
+  @Column()
+  @Field()
+  offerId: string;
+
   @Column({ nullable: true })
   @Field({ nullable: true })
   reference?: string;
@@ -52,6 +61,13 @@ export class Invoice {
   @JoinColumn({ name: 'listingTypeId' })
   @Field(() => ListingType, { nullable: true })
   listingType?: ListingType;
+
+  @OneToOne(() => Offer, (offer) => offer.invoice, {
+    nullable: true,
+  })
+  @JoinColumn({ name: 'offerId' })
+  @Field(() => Offer, { nullable: true })
+  offer?: Offer;
 
   @Column({ default: 'Saii Fees' })
   @Field()

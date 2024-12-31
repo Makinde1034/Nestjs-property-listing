@@ -41,6 +41,8 @@ import { Offer } from '../../../entities/offer.entity';
 import { AuctionParticipantRepository } from '../repositories/auction-participant.repository';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { NotificationEvent, Purpose } from '../../../common/enums';
+import { InvoiceRepository } from '../../payment/repositories/invoice.repository';
+import { SaiiFees } from '../../admin/dto/response/admin-response';
 
 @Injectable()
 export class OfferService {
@@ -54,6 +56,7 @@ export class OfferService {
     private readonly listingRepository: ListingRepository,
     private readonly auctionParticipantRepository: AuctionParticipantRepository,
     private readonly eventEmiter: EventEmitter2,
+    private readonly invoiceRepository: InvoiceRepository,
   ) {}
   logger = new Logger(OfferService.name);
 
@@ -72,17 +75,27 @@ export class OfferService {
 
   async createAnOffer(createOfferDto: CreateOfferDto, user: User) {
     try {
-      const offer = await this.offerRepository.find({
-        where: {
-          price: MoreThanOrEqual(createOfferDto.price),
-          listingId: createOfferDto.listingId,
-        },
-        order: { price: 'DESC' },
-      });
-      const adminDefault = await this.adminDefaultService.adminDefault();
-      const listing = await this.listingService.findOneListingForBuyer(
-        createOfferDto.listingId,
-      );
+      const [offer, invoice, adminDefault, listing] = await Promise.all([
+        this.offerRepository.find({
+          where: {
+            price: MoreThanOrEqual(createOfferDto.price),
+            listingId: createOfferDto.listingId,
+          },
+          order: { price: 'DESC' },
+        }),
+        this.invoiceRepository.findOne({
+          where: { reference: createOfferDto.reference },
+        }),
+
+        this.adminDefaultService.adminDefault(),
+        await this.listingService.findOneListingForBuyer(
+          createOfferDto.listingId,
+        ),
+      ]);
+
+      if (!invoice) {
+        throw new BadRequestException(AppStrings.INVALID_PAYMENT_REFERENCE);
+      }
 
       if (!listing) {
         throw new NotFoundException(AppStrings.LISTING_NOT_FOUND);
@@ -135,7 +148,10 @@ export class OfferService {
       createOfferDto.saiiFee = saii;
       createOfferDto.vat = vat;
 
-      const offerPayload = await this.offerRepository.save(createOfferDto);
+      const offerPayload = await this.offerRepository.save({
+        ...createOfferDto,
+        previousSaiiFee: [saii],
+      });
 
       const seller = await this.userRepository.findOneOrFail({
         where: { id: listing.userId },
@@ -166,7 +182,7 @@ export class OfferService {
       };
 
       //TODO: switch to event emitter
-      this.paymentService.invoice(data, user, listing);
+      this.paymentService.finalizeInvoice(invoice, data, user, listing);
 
       // Find the Scope available for application
       const notificationPreference =
@@ -194,6 +210,10 @@ export class OfferService {
       throw new BadRequestException(error?.data || error?.message || error);
     }
   }
+
+  /************************
+   * To be removed
+   ************************/
   async finalizeOffer(id: string) {
     try {
       const offer = await this.offerRepository.findOneBy({ id });
@@ -261,7 +281,6 @@ export class OfferService {
       throw new BadRequestException();
     }
   }
-
   async findMany(findOfferInput: FindOfferInput) {
     try {
       const listing = await this.listingRepository.findOne({
@@ -331,39 +350,45 @@ export class OfferService {
     try {
       const { id, listingId, ...rest } = updateOfferInput;
 
-      const [offer, scope, currentOffer] = await Promise.all([
-        // Fetch offer and highest offer in a single query
-        this.offerRepository
-          .createQueryBuilder('offer')
-          .leftJoinAndSelect('offer.listing', 'listing')
-          .leftJoinAndSelect('listing.user', 'listingUser')
+      const [offer, scope, currentOffer, invoice, adminDefault] =
+        await Promise.all([
+          // Fetch offer and highest offer in a single query
+          this.offerRepository
+            .createQueryBuilder('offer')
+            .leftJoinAndSelect('offer.listing', 'listing')
+            .leftJoinAndSelect('listing.user', 'listingUser')
 
-          .select([
-            'offer.id',
-            'offer.price',
-            'listing.id',
-            'listing.purpose',
-            'listingUser.id',
-            'listingUser.email',
-            'listingUser.firstName',
-            'listing.price',
-            'offer.createdAt',
-          ])
-          .addSelect((subQuery) => {
-            return subQuery
-              .select('MAX(offerSub.price)', 'maxPrice')
-              .from(Offer, 'offerSub')
-              .where('offerSub.listingId = :listingId', { listingId });
-          }, 'maxPrice')
-          .where('offer.id = :id', { id })
-          .getRawOne(),
+            .select([
+              'offer.id',
+              'offer.price',
+              'listing.id',
+              'listing.purpose',
+              'listingUser.id',
+              'listingUser.email',
+              'listingUser.firstName',
+              'listing.price',
+              'offer.createdAt',
+            ])
+            .addSelect((subQuery) => {
+              return subQuery
+                .select('MAX(offerSub.price)', 'maxPrice')
+                .from(Offer, 'offerSub')
+                .where('offerSub.listingId = :listingId', { listingId });
+            }, 'maxPrice')
+            .where('offer.id = :id', { id })
+            .getRawOne(),
 
-        // Fetch notification preference
-        this.notificationScopeRepository.findOne({
-          where: { name: NotificationScopeEnum.OFFERS },
-        }),
-        await this.offerRepository.findOneBy({ id }),
-      ]);
+          // Fetch notification preference
+          this.notificationScopeRepository.findOne({
+            where: { name: NotificationScopeEnum.OFFERS },
+          }),
+          await this.offerRepository.findOneBy({ id }),
+          this.invoiceRepository.findOne({
+            where: { reference: updateOfferInput.reference },
+          }),
+
+          this.adminDefaultService.adminDefault(),
+        ]);
 
       const { maxPrice } = offer;
       const highestOfferPrice = maxPrice || 0;
@@ -382,8 +407,6 @@ export class OfferService {
       if (offer.status == OfferListEnum.EXPIRED) {
         throw new BadRequestException('offer already expired');
       }
-
-      const adminDefault = await this.adminDefaultService.adminDefault();
 
       const offerExpiry = new Date(updateOfferInput.expireAt);
 
@@ -473,7 +496,7 @@ export class OfferService {
         });
 
         //TODO: switch to event emitter
-        this.paymentService.invoice(data, user, offer.listing);
+        this.paymentService.finalizeInvoice(invoice, data, user, offer.listing);
       }
 
       // Return the updated offer only if it was affected
@@ -534,6 +557,15 @@ export class OfferService {
               'Only the creator can accept an offer',
             );
           }
+
+          const invoice = await this.invoiceRepository.findOneBy({
+            offerId: updateOfferInput.id,
+          });
+
+          await this.paymentService.capturePayment({
+            amount: JSON.stringify(invoice.price),
+            paymentId: invoice.checkoutId,
+          });
 
           // Update offer status and return updated offer immediately using RETURNING (if supported by your DB)
           const updateResult = await entityManager
@@ -625,6 +657,15 @@ export class OfferService {
           if (!updateResult.affected) {
             throw new BadRequestException('Failed to update offer status');
           }
+
+          const invoice = await this.invoiceRepository.findOneBy({
+            offerId: updateOfferInput.id,
+          });
+
+          await this.paymentService.refundPayment({
+            amount: JSON.stringify(invoice.price),
+            paymentId: invoice.checkoutId,
+          });
 
           // Fetch notification preference only if offer update is successful
           const notificationPreference = await entityManager.findOne(

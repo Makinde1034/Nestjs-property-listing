@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { ServiceProviderService } from './service-provider.service';
 

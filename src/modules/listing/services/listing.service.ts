@@ -236,7 +236,7 @@ export class ListingService {
         relations: ['permissions', 'user'], // Ensures the relationship is loaded if not already eager
       });
 
-      let users = [];
+      const users = [];
 
       role.forEach((element) => {
         users.push(element.user);
@@ -311,20 +311,20 @@ export class ListingService {
         return this.transformListing(element);
       });
 
-      // const notificationPreference =
-      //   await this.notificationScopeRepository.find();
-      // const scope: NotificationScope = notificationPreference.find(
+      // Const notificationPreference =
+      //   Await this.notificationScopeRepository.find();
+      // Const scope: NotificationScope = notificationPreference.find(
       //   (element) => {
-      //     if (element.name == NotificationScopeEnum.LISTING) {
-      //       return element;
+      //     If (element.name == NotificationScopeEnum.LISTING) {
+      //       Return element;
       //     }
       //   },
       // );
 
-      // this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
-      //   creatorId: user.id,
-      //   scope: scope,
-      //   recipientFormat: ['Owner', null],
+      // This.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+      //   CreatorId: user.id,
+      //   Scope: scope,
+      //   RecipientFormat: ['Owner', null],
       // });
 
       return { listing: result, total: count };
@@ -1593,7 +1593,7 @@ export class ListingService {
   ) {
     try {
       let numberOfimagesWithinDistance: number;
-      let verified = false;
+      const verified = false;
 
       const listing = await this.listingRepository.findOne({ where: { id } });
 
@@ -2060,7 +2060,7 @@ export class ListingService {
     admin: User,
   ) {
     try {
-      let listingId = [];
+      const listingId = [];
       listingActionInput.listingApproval.forEach((element) => {
         listingId.push(element.id);
       });

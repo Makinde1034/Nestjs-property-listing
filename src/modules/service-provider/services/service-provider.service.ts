@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import {
   BadRequestException,
   HttpException,
@@ -5,7 +10,6 @@ import {
   Logger,
 } from '@nestjs/common';
 import {
-  ApprovalInput,
   CreateServiceInput,
   CreateServiceProviderInput,
   DeleteServiceProvider,
@@ -31,7 +35,6 @@ import { AppStrings } from '../../../common/messages/app.strings';
 import { ServiceProvided } from '../../../entities/service-provided.entity';
 import { ServiceRequestedRepository } from '../repository/requested-service.repository';
 import { ServiceProvidedStatus } from '../../../common/enums/service-provider';
-import { elementAt } from 'rxjs';
 
 @Injectable()
 export class ServiceAndProviderService {
@@ -79,7 +82,7 @@ export class ServiceAndProviderService {
       }
 
       const service = await this.serviceRepository.findOne({
-        where: { id: createServiceProviderInput.serviceOffered },
+        where: { id: serviceOffered },
       });
       const serviceProvider = await this.serviceProviderRepository.save({
         ...rest,
@@ -132,7 +135,7 @@ export class ServiceAndProviderService {
 
   async accept(serviceProviderInput: ServiceProviderInput, user: User) {
     try {
-      let serviceProviderId = [];
+      const serviceProviderId = [];
       serviceProviderInput.approvalInput.forEach((element) => {
         serviceProviderId.push(element.id);
       });
@@ -182,7 +185,7 @@ export class ServiceAndProviderService {
 
   async reject(serviceProviderInput: ServiceProviderInput, user: User) {
     try {
-      let serviceProviderId = [];
+      const serviceProviderId = [];
       serviceProviderInput.approvalInput.forEach((element) => {
         serviceProviderId.push(element.id);
       });
@@ -317,7 +320,7 @@ export class ServiceAndProviderService {
 
       const data = await this.serviceRepository.save({
         ...rest,
-        pricing: JSON.stringify(createServiceInput.pricing),
+        pricing: JSON.stringify(pricing),
       });
 
       await this.activityLogService.logActivity([
@@ -393,7 +396,7 @@ export class ServiceAndProviderService {
     }
   }
 
-  async cancleService(id: string, user: User) {
+  async cancleService(id: string, user?: User) {
     try {
       const data = await this.serviceRequestedRepository.update(id, {
         status: ServiceProvidedStatus.CANCELED,
@@ -446,7 +449,7 @@ export class ServiceAndProviderService {
 
   async rejectService(id: string, user: User) {
     try {
-      const data = await this.serviceRequestedRepository.update(id, {
+      await this.serviceRequestedRepository.update(id, {
         status: ServiceProvidedStatus.REJECTED,
       });
 

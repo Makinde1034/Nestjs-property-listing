@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AdminWorkflowService } from '../services/admin-workflow.service';
 import {

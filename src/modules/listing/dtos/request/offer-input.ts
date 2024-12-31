@@ -49,6 +49,11 @@ export class CreateOfferDto {
   @IsNotEmpty()
   listingId: string;
 
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  reference: string;
+
   saiiFee: number;
 
   vat: number;

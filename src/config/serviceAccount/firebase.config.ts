@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { registerAs } from '@nestjs/config';
 
 const key = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');

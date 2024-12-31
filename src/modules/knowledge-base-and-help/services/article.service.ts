@@ -40,7 +40,7 @@ export class ArticleService {
   logger = new Logger(ArticleService.name);
   async create(createArticleInput: CreateArticleInput, user: User) {
     try {
-      let { metadata } = createArticleInput;
+      const { metadata } = createArticleInput;
       const category = await this.knowledgeBaseCategoryRepository.findOneBy({
         id: createArticleInput.categoryId,
       });

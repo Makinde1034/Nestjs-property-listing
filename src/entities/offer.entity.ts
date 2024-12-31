@@ -11,6 +11,7 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
@@ -19,6 +20,8 @@ import { User } from './user.entity';
 import { Listing } from './listing.entity';
 import { OfferListEnum } from '../common/enums/status.enum';
 import { IsEnum } from 'class-validator';
+import { Invoice } from './invoice.entity';
+
 @ObjectType()
 @Entity()
 export class Offer extends BaseEntity {
@@ -29,6 +32,10 @@ export class Offer extends BaseEntity {
   @Column('decimal', { precision: 12, scale: 2 })
   @Field()
   saiiFee: number;
+
+  @Column('simple-array')
+  @Field(() => Array)
+  previousSaiiFee: number[];
 
   @Column('decimal', { precision: 12, scale: 2 })
   @Field()
@@ -82,6 +89,12 @@ export class Offer extends BaseEntity {
   @Field()
   @CreateDateColumn()
   createdAt: Date;
+
+  @OneToOne(() => Invoice, (listingType) => listingType.offer, {
+    nullable: true,
+  })
+  @Field(() => Invoice, { nullable: true })
+  invoice: Invoice;
 
   @Field()
   @DeleteDateColumn()

@@ -1,11 +1,16 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { User } from '../../../../entities';
 
 export class CreateActionInput {
   actionType: string; // "create" or "update"
 
-  document: string; // e.g., "User", "Listing", "Auction"
+  document: string; // E.g., "User", "Listing", "Auction"
 
-  targetEntityId?: string; // e.g., User ID, Auction Id ID (null for "create" actions)
+  targetEntityId?: string; // E.g., User ID, Auction Id ID (null for "create" actions)
   payload: string;
 
   status?: string;

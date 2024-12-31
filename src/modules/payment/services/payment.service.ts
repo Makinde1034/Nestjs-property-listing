@@ -41,6 +41,7 @@ import { WebHookPaymentResponse } from '../../webhook/dto/wehook.response';
 import { TransactionType } from '../../../common/enums/payment.enum';
 import { PaymentStatus } from '../../../common/enums/status.enum';
 import { SuccessResponse } from '../../../common/utils/success.response';
+import { Invoice } from '../../../entities/invoice.entity';
 
 @Injectable()
 export class PaymentService {
@@ -55,7 +56,6 @@ export class PaymentService {
     private readonly configService: ConfigService,
     private readonly adminService: AdminService,
     private readonly transactionRepository: TransactionRepository,
-
     private readonly sseService: SseService,
   ) {
     this.appDefaultConfig = this.configService.get<AppDefaultConfig>(
@@ -91,14 +91,12 @@ export class PaymentService {
     };
 
     await this.invoiceRepository.save({
+      checkkoutId: checkout.id,
       price: createPaymentInput.amount,
       userId: user.id,
       status: PaymentStatus.PENDING,
       reference: reference,
     });
-
-    this.performActionWithDelay(user, data);
-
     return data;
   }
 
@@ -122,6 +120,7 @@ export class PaymentService {
     );
 
     await this.invoiceRepository.save({
+      checkoutId: checkout.id,
       price: createPaymentInput.amount,
       userId: user.id,
       status: PaymentStatus.PENDING,
@@ -134,63 +133,34 @@ export class PaymentService {
       timeStamp: checkout.timestamp,
     };
 
-    this.performActionWithDelay(user, data);
-
     return data;
   }
 
-  async performActionWithDelay(user: any, data: any) {
+  async successNotification(userId: string, referencedId: string) {
     this.logger.log('Action started');
 
     const payload: MessageEvent = {
       type: ServerSentEvents.SUCCESS,
       data: {
         status: 'successful',
-        reference: data.referencedId,
+        reference: referencedId,
         message: 'Transaction succeeded',
       },
     };
-    // Sleep for 2 seconds (2000 milliseconds)
-    await sleep(30000);
-    this.sseService.sendEvent(user.id, payload);
-    this.logger.log('Action resumed after 30 seconds');
+
+    this.sseService.sendEvent(userId, payload);
+    this.logger.log('notification sent');
   }
 
-  // async preAuthorized(
-  //   createPaymentInput: PreAuthorisedPaymentInput,
-  //   // User: User,
-  // ) {
-  //   if (createPaymentInput.coupon) {
-  //     const coupon: CouponResponse = await this.adminService.isCouponValid({
-  //       code: createPaymentInput.coupon,
-  //       price: createPaymentInput.amount,
-  //     });
-  //     createPaymentInput.amount = coupon.amount;
-  //   }
-
-  //   const checkout =
-  //     await this.hyperPayService.preAuthorize(createPaymentInput);
-
-  //   const data = await this.capturePayment({
-  //     paymentId: checkout.id,
-  //     amount: '300',
-  //   });
-
-  //   return {
-  //     checkoutId: checkout.id,
-  //     referenceId: generateRandomString(),
-  //     timeStamp: checkout.timestamp,
-  //   };
-  // }
-
   async capturePayment(createPaymentInput: CapturePaymentData) {
-    // If (createPaymentInput.coupon) {
-    //   Const coupon: CouponResponse = await this.adminService.isCouponValid(
-    //     CreatePaymentInput.coupon,
-    //     CreatePaymentInput.amount,
+    // if (createPaymentInput.coupon) {
+    //   const coupon: CouponResponse = await this.adminService.isCouponValid(
+    //     createPaymentInput.coupon,
+    //     createPaymentInput.amount,
     //   );
-    //   CreatePaymentInput.amount = coupon.amount;
+    //   createPaymentInput.amount = coupon.amount;
     // }
+
     try {
       const checkout =
         await this.hyperPayService.capturePayment(createPaymentInput);
@@ -226,19 +196,24 @@ export class PaymentService {
     };
   }
 
-  async invoice(data?: PdfInput, user?: User, listing?: Listing) {
+  async finalizeInvoice(
+    invoice: Invoice,
+    data?: PdfInput,
+    user?: User,
+    listing?: Listing,
+  ) {
     try {
       const payload: CreateInvoiceInput = {
-        price: data.sumTotalWithVat,
+        capturedPrice: data.sumTotalWithVat,
         vat: data.sumTotalVat,
         expiredAt: addDays(new Date(), 4),
         userId: user.id,
         listingid: listing.id,
       };
 
-      const invoice = await this.invoiceRepository.save({
+      const updatedInvoice = await this.invoiceRepository.save({
+        ...invoice, // Merge the existing entity to ensure it updates.
         ...payload,
-        reference: generateRandomString(),
         listingType: listing.listingType,
         listing,
       });
@@ -246,8 +221,9 @@ export class PaymentService {
       const qrcode = await this.qrcodeService.generateQrCode(
         `${this.appDefaultConfig.customerFrontEndUrl}?${invoice.id}`,
       );
+
       data.qrcode = qrcode;
-      data.invoiceNumber = invoice.id;
+      data.invoiceNumber = updatedInvoice.id;
 
       const invoicePdf =
         await this.pdfGeneratorService.generatePdfForInvoice(data);
@@ -279,11 +255,13 @@ export class PaymentService {
         where: {
           reference: webHookPaymentResponse.payload.merchantInvoiceId,
         },
+        relations: ['user'],
       });
 
       if (!invoice) {
         throw new BadRequestException('No invoice found');
       }
+
       const payload = {
         description: webHookPaymentResponse.payload.result.description,
         amount: parseFloat(webHookPaymentResponse.payload.amount),
@@ -293,14 +271,15 @@ export class PaymentService {
       };
 
       await this.transactionRepository.save(payload);
-
       await this.invoiceRepository.update(invoice.id, {
         status: PaymentStatus.PAID,
         capturedPrice: parseFloat(webHookPaymentResponse.payload.amount),
       });
+
+      this.successNotification(invoice.userId, invoice.reference);
+
       return new SuccessResponse();
     } catch (error) {
-      console.log(error);
       throw new BadRequestException(error);
     }
   }

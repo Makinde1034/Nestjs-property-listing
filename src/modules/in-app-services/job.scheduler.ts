@@ -57,11 +57,11 @@ export class JobService {
     await this.notifyUsersAboutUpcomingAuctions();
   }
   /***************************
-   * uncomment to test       *
+   * Uncomment to test       *
    ***************************/
   // @Cron(CronExpression.EVERY_30_SECONDS)
-  // async test() {
-  //   console.log('now', new Date());
+  // Async test() {
+  //   Console.log('now', new Date());
   //   // await this.sendAlertOnIncompleteOffers();
   //   // await this.sendNotificationForNewListingBasedOnSearchHistory();
   //   // await this.updateListingFeatureStatus();
@@ -85,15 +85,14 @@ export class JobService {
         relations: ['user'],
       });
 
-      const userNotifications: Array<{ id: string; value: SearchHistory[] }> =
-        [];
+      const userNotifications: { id: string; value: SearchHistory[] }[] = [];
 
       for (const element of searchHistory) {
         const listing = await this.listingRepository.findOne({
           where: {
             price: Between(element.minPrice, element.maxPrice),
-            // rentingOption: element.rentingOption,
-            // purpose: element.type, // TODO: Add more conditions
+            // RentingOption: element.rentingOption,
+            // Purpose: element.type, // TODO: Add more conditions
           },
           relations: ['user'],
         });
@@ -101,8 +100,8 @@ export class JobService {
         if (listing) {
           listingArrayMails.push(element.user.email);
 
-          // await this.searchHistoryRepository.update(element.id, {
-          //   isValid: true,
+          // Await this.searchHistoryRepository.update(element.id, {
+          //   IsValid: true,
           // });
 
           listingArrayUserId.push(element.user.id);
@@ -192,7 +191,6 @@ export class JobService {
 
       return records;
     } catch (error) {
-      console.log(error);
       this.logger.error('send Alert On Incomplete Offers', error);
     }
   }

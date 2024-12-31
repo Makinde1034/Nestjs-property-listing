@@ -2,6 +2,7 @@
  * Copyright (c) 2024, Waseet LLC. All rights reserved.
  * For license. See license.txt
  */
+
 import { UseGuards } from '@nestjs/common';
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';

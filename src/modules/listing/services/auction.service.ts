@@ -379,8 +379,8 @@ export class AuctionService {
 
   async cancleAuction(auctionActionInput: AuctionActionInput, user: User) {
     try {
-      let unableToUpdate = [];
-      let update = [];
+      const unableToUpdate = [];
+      const update = [];
       const auction = await this.auctionRepository.find({
         where: { id: In(auctionActionInput.id) },
       });
@@ -435,8 +435,8 @@ export class AuctionService {
         where: { id: In(auctionActionInput.id) },
       });
 
-      let unableToUpdate = [];
-      let update: Array<Auction> = [];
+      const unableToUpdate = [];
+      const update: Auction[] = [];
 
       auction.forEach((element) => {
         if (element.startDate > new Date()) {
@@ -611,8 +611,8 @@ export class AuctionService {
 
   async delete(auctionActionInput: AuctionActionInput, user: User) {
     try {
-      let unableToUpdate = [];
-      let update = [];
+      const unableToUpdate = [];
+      const update = [];
       const auction = await this.auctionRepository.find({
         where: {
           id: In(auctionActionInput.id),

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 export enum knowledgeBaseNeedHelpPlacement {
   USER_VERIFICATION = 'User Verification',
   CREATE_LISTING = 'Create Listing',

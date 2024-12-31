@@ -316,14 +316,13 @@ export class SplashScreenService {
         await this.activityLogService.logActivity(activityToSave);
 
         return new SuccessResponse('Awaiting approval');
-      } else {
-        // Batch delete operation if no actionConfig is needed
-        const { affected } = await this.splashScreenRepository.softDelete(
-          deleteSplashScreenInput.id,
-        );
-        if (affected > 0) {
-          return new SuccessResponse(AppStrings.DELETED_SUCCESSFULLY);
-        }
+      }
+      // Batch delete operation if no actionConfig is needed
+      const { affected } = await this.splashScreenRepository.softDelete(
+        deleteSplashScreenInput.id,
+      );
+      if (affected > 0) {
+        return new SuccessResponse(AppStrings.DELETED_SUCCESSFULLY);
       }
     } catch (error) {
       this.logger.error(error.stack || error);

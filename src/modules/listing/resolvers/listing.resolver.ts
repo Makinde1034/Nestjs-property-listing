@@ -201,8 +201,8 @@ export class ListingResolver {
   // @Permissions(PermissionsEnum.AUCTIONS_READ)
   // @UseGuards(AccessTokenGuard, PermissionsGuard)
   // @Query(() => [String], { name: 'getAllUsersForParticipant' })
-  // async getAllUsersForParticipant(@Args('id') id: string) {
-  //   return await this.auctionService.getAllUsersForParticipant(id);
+  // Async getAllUsersForParticipant(@Args('id') id: string) {
+  //   Return await this.auctionService.getAllUsersForParticipant(id);
   // }
 
   @UseGuards(AccessTokenGuard)

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import {
   CallHandler,
   ExecutionContext,
@@ -68,10 +73,9 @@ export class TimerInterceptor implements NestInterceptor {
           this.logger.debug(`[WebSocket] - Execution time: ${executionTime}ms`);
         }),
       );
-    } else {
-      // Unknown context type
-      this.logger.warn(`[Unknown] context - No specific logging implemented`);
-      return next.handle();
     }
+    // Unknown context type
+    this.logger.warn(`[Unknown] context - No specific logging implemented`);
+    return next.handle();
   }
 }

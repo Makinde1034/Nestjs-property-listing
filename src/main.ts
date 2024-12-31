@@ -2,6 +2,7 @@
  * Copyright (c) 2024, Waseet LLC. All rights reserved.
  * For license. See license.txt
  */
+
 import { NestFactory, Reflector } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { I18nMiddleware } from 'nestjs-i18n';
