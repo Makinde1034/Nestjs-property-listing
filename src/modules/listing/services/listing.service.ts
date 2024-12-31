@@ -280,7 +280,7 @@ export class ListingService {
       }
 
       if (where) {
-        whereOption = ` listing.${where.fieldToChose} IS ${where.whereParam} AND listing.userId = :id`;
+        whereOption = ` listing.${where.fieldToChose} IS ${where.whereParam} AND listing.userId = :id AND  status = :status`;
       } else {
         whereOption = 'listing.userId = :id';
       }
@@ -292,7 +292,7 @@ export class ListingService {
         .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
         .leftJoinAndSelect('listing.listingType', 'listingType')
         .loadRelationCountAndMap('listing.offers', 'listing.offer')
-        .where(whereOption, { id: user.id })
+        .where(whereOption, { id: user.id, status: ListingStatus.ACCEPTED })
         .take(take)
         .skip(skip);
 
@@ -474,11 +474,12 @@ export class ListingService {
           .leftJoin('listingType.attributeSets', 'attributeSets')
 
           .where(
-            'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented AND listing.published IS true AND listingType.deletedAt IS NULL',
+            'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented AND listing.published IS true AND listingType.deletedAt IS NULL AND  status = :status',
             {
               isListingDisabled: false,
               isListingSold: false,
               isListingRented: false,
+              status: ListingStatus.ACCEPTED,
             },
           );
 
@@ -715,11 +716,12 @@ export class ListingService {
           .leftJoin('listingType.attributeSets', 'attributeSets')
 
           .where(
-            'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented   AND listing.published IS true AND listingType.deletedAt IS NULL',
+            'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented   AND listing.published IS true AND listingType.deletedAt IS NULL AND  status = :status',
             {
               isListingDisabled: false,
               isListingSold: false,
               isListingRented: false,
+              status: ListingStatus.ACCEPTED,
             },
           );
 
@@ -858,9 +860,9 @@ export class ListingService {
         total = count;
       }
 
-      const listingToPerse = [...result];
+      const listingToParse = [...result];
 
-      const listing = listingToPerse.map((element) => {
+      const listing = listingToParse.map((element) => {
         return this.transformListing(element);
       });
 
@@ -876,6 +878,7 @@ export class ListingService {
             maxArea,
             rentingOption,
             purpose,
+            listingTypeId,
           },
           user,
         );

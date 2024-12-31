@@ -981,6 +981,7 @@ export class UserService {
   ): Promise<SuccessResponse> {
     try {
       // Fetch roles, check for existing user, and get workflow config concurrently
+
       const [roles, existingUser, actionConfig] = await Promise.all([
         this.roleRepository.find({
           where: { id: In([...input.roles]) },
@@ -1122,6 +1123,7 @@ export class UserService {
       throw new BadRequestException(error);
     }
   }
+
   async getEmployees(userFilterInput: UserFilter) {
     try {
       const {
@@ -1225,10 +1227,12 @@ export class UserService {
       }
 
       if (this.validateUserConfirmation(userConfirmation, token)) {
+        const salt = await bcrypt.genSalt();
+
         await this.usersRepository.update(user.id, {
           verifiedAt: new Date(),
           status: UserStatus.VERIFIED,
-          password,
+          password: await bcrypt.hash(password, salt),
         });
         await this.removeUserConfirmation(userConfirmation.id);
         return AppStrings.ACCOUNT_CONFIRMED_SUCCESSFULLY;
