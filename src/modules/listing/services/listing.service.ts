@@ -136,13 +136,13 @@ export class ListingService {
       const allAttributes = listingType.attributeSets.flatMap(
         (element) => element.attributes,
       );
-
       // Check required attributes
       allAttributes.forEach((attribute) => {
         if (attribute.isRequired) {
           const match = attributes.some(
             (attr) => attr.attributeId === attribute.id,
           );
+
           if (!match) {
             throw new BadRequestException(
               `${attribute.englishName ? attribute.englishName : attribute.arabicName} is required`,

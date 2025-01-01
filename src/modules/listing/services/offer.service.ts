@@ -337,7 +337,7 @@ export class OfferService {
           .take(take)
           .getManyAndCount(),
 
-        this.listingRepository.count({ where: { userId: user.id } }),
+        this.offerRepository.count({ where: { listing: { userId: user.id } } }),
       ]);
 
       return { offer, total, totalOfferOnlisting };

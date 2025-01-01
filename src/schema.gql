@@ -67,7 +67,7 @@ type Offer {
   id: ID!
   price: Float!
   saiiFee: Float!
-  initialSaiiFee: Float!
+  previousSaiiFee: [Float!]!
   vat: Float!
   expireAt: DateTime!
   acceptedAt: DateTime

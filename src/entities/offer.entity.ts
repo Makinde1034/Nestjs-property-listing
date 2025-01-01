@@ -34,7 +34,7 @@ export class Offer extends BaseEntity {
   saiiFee: number;
 
   @Column('simple-array')
-  @Field(() => Array)
+  @Field(() => [Number])
   previousSaiiFee: number[];
 
   @Column('decimal', { precision: 12, scale: 2 })
