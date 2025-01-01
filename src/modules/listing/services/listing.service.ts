@@ -243,7 +243,6 @@ export class ListingService {
       });
 
       users.forEach((user) => {
-        console.log(user);
         this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
           creatorId: user.id,
           scope: scope,
@@ -255,7 +254,6 @@ export class ListingService {
 
       return listing;
     } catch (error) {
-      console.log(error);
       this.logger.log(error);
 
       if (error instanceof HttpException) {

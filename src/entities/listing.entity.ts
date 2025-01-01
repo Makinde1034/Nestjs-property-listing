@@ -235,7 +235,7 @@ export class Listing extends BaseEntity {
   @Field({ nullable: true })
   featureDate: Date;
 
-  @Column({ default: false })
+  @Column({ default: true })
   @Field()
   published: boolean;
 
