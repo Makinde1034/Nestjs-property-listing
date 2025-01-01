@@ -42,6 +42,7 @@ import {
   getLocationFromImage,
   haversine,
   isJsonString,
+  removeDaysFromDate,
 } from '../../../common/utils/helper';
 import { FlagListingRepository } from '../repositories/flag-listing.repository';
 import { AppStrings } from '../../../common/messages/app.strings';
@@ -59,6 +60,9 @@ import {
   startOfMonth,
   startOfWeek,
   startOfYear,
+  subMonths,
+  subWeeks,
+  subYears,
 } from 'date-fns';
 import { FeatureRepository } from '../repositories/feature.repository';
 import { CreateFeatureInput } from '../dtos/request/feature-input';
@@ -911,19 +915,18 @@ export class ListingService {
       }
     }
 
-    switch (paginateAndSort.timePeriod) {
-      case 'today':
-        whereCondition[dateField] = Between(startOfDay(now), endOfDay(now));
-        break;
-      case 'week':
-        whereCondition[dateField] = Between(startOfWeek(now), endOfWeek(now));
-        break;
-      case 'month':
-        whereCondition[dateField] = Between(startOfMonth(now), endOfMonth(now));
-        break;
-      case 'year':
-        whereCondition[dateField] = Between(startOfYear(now), endOfYear(now));
-        break;
+    const timePeriods: Record<string, [Date, Date]> = {
+      today: [startOfDay(now), endOfDay(now)],
+      week: [subWeeks(now, 1), now],
+      month: [subMonths(now, 1), now],
+      year: [subYears(now, 1), now],
+    };
+
+    const period = timePeriods[paginateAndSort.timePeriod];
+    if (period) {
+      whereCondition[dateField] = Between(...period);
+    } else {
+      throw new Error(`Unsupported time period: ${paginateAndSort.timePeriod}`);
     }
 
     if (

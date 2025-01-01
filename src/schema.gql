@@ -1375,7 +1375,7 @@ input AdminFilterAndSort {
   sortField: String
   directionToSort: SortOrder
   where: WhereOption
-  timePeriod: String = "false"
+  timePeriod: String
   status: String
   isListingPromoted: Boolean
   isListingFeatured: Boolean

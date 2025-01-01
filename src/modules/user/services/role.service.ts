@@ -182,6 +182,7 @@ export class RoleService {
    * @param {RoleInput} input
    * @returns {Promise<Role>}
    */
+
   async createRole(input: RoleInputDto, user: User): Promise<Role> {
     const permissionIds = input.permissions.map((item) => item.permissionId);
     const permissions = await this.permissionRepository.find({
