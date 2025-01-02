@@ -136,6 +136,7 @@ export class ListingService {
       const allAttributes = listingType.attributeSets.flatMap(
         (element) => element.attributes,
       );
+
       // Check required attributes
       allAttributes.forEach((attribute) => {
         if (attribute.isRequired) {

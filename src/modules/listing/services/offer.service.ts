@@ -42,7 +42,6 @@ import { AuctionParticipantRepository } from '../repositories/auction-participan
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { NotificationEvent, Purpose } from '../../../common/enums';
 import { InvoiceRepository } from '../../payment/repositories/invoice.repository';
-import { SaiiFees } from '../../admin/dto/response/admin-response';
 
 @Injectable()
 export class OfferService {
@@ -237,6 +236,7 @@ export class OfferService {
       }
     }
   }
+
   async getMinimumOfferForAListingAndUser(
     offerPrice: number,
     listingPrice: number,
@@ -339,13 +339,13 @@ export class OfferService {
 
         this.offerRepository.count({ where: { listing: { userId: user.id } } }),
       ]);
-
       return { offer, total, totalOfferOnlisting };
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
     }
   }
+
   async updateOffer(user: User, updateOfferInput: UpdateOfferInput) {
     try {
       const { id, listingId, ...rest } = updateOfferInput;
@@ -369,6 +369,7 @@ export class OfferService {
               'listing.price',
               'offer.createdAt',
             ])
+
             .addSelect((subQuery) => {
               return subQuery
                 .select('MAX(offerSub.price)', 'maxPrice')
@@ -382,14 +383,12 @@ export class OfferService {
           this.notificationScopeRepository.findOne({
             where: { name: NotificationScopeEnum.OFFERS },
           }),
-          await this.offerRepository.findOneBy({ id }),
+          this.offerRepository.findOneBy({ id }),
           this.invoiceRepository.findOne({
             where: { reference: updateOfferInput.reference },
           }),
-
           this.adminDefaultService.adminDefault(),
         ]);
-
       const { maxPrice } = offer;
       const highestOfferPrice = maxPrice || 0;
 
@@ -448,11 +447,23 @@ export class OfferService {
 
       // Send notification using an event emitter
 
+      const updatedPreviousSaii = [
+        ...offer.previousSaiiFee,
+        updateOfferInput.price,
+      ];
+
       // Update offer with new data and saiiFee
       const { affected } = await this.offerRepository.update(id, {
         saiiFee: saii,
+        previousSaiiFee: updatedPreviousSaii,
         ...rest,
       });
+
+      let updatedOffer: Offer;
+      if (affected) {
+        updatedOffer = await this.offerRepository.findOneBy({ id });
+      }
+
       if (updateOfferInput.price) {
         updateOfferInput.userId = user.id;
         updateOfferInput.saiiFee = saii;
@@ -479,12 +490,12 @@ export class OfferService {
               : `${user.arabicFirstName} ${user.arabicLastName}`,
           customerAddress: user.address,
           customerZatcaNumber: user.zatcaNuber,
-          totalWithVat: [offer.price],
+          totalWithVat: [updatedOffer.price],
           itemVat: [{ vat: adminDefault.vat, vatValue: vat }],
-          product: offer,
-          sumTotalWithoutVat: offer.price - vat,
+          product: updatedOffer,
+          sumTotalWithoutVat: updatedOffer.price - vat,
           sumTotalVat: vat,
-          sumTotalWithVat: offer.price,
+          sumTotalWithVat: updatedOffer.price,
         };
 
         this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
@@ -500,10 +511,7 @@ export class OfferService {
       }
 
       // Return the updated offer only if it was affected
-      if (affected) {
-        return await this.offerRepository.findOneBy({ id });
-      }
-      throw new BadRequestException('Offer update failed');
+      return updatedOffer;
     } catch (error) {
       this.logger.error(error);
       if (error instanceof HttpException) {
