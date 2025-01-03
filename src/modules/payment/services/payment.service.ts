@@ -204,7 +204,6 @@ export class PaymentService {
       this.logger.log(error);
     }
   }
-
   async refundPayment(createPaymentInput: RefundPaymentData) {
     const checkout =
       await this.hyperPayService.refundPayment(createPaymentInput);
