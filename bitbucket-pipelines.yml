@@ -123,7 +123,7 @@ definitions:
         image: caprover/cli-caprover:v2.1.1
         script:
           - caprover deploy --caproverUrl $CAPROVER_URL --caproverPassword $CAPROVER_PASSWORD --caproverApp $CAPROVER_APP --imageName "$DOCKERHUB_USERNAME/$DOCKERHUB_REPO:$BITBUCKET_COMMIT"
-    - step:
+    - step: &deploy-with-scp
         name: Deploy to Google Compute Engine
         script:
           # Install dependencies
