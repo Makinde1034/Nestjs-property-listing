@@ -225,7 +225,6 @@ export class User extends BaseEntity {
   @Field(() => NationalIdentity, { nullable: true })
   @OneToOne(() => NationalIdentity, (identity) => identity.user, {
     cascade: true,
-    eager: true,
   })
   nationalIdentity?: NationalIdentity;
 
@@ -253,7 +252,6 @@ export class User extends BaseEntity {
   @Field()
   @OneToMany(() => SearchHistory, (searchHistory) => searchHistory.user, {
     cascade: true,
-    eager: true,
   })
   searchHistory: SearchHistory;
   @Exclude()
@@ -266,7 +264,7 @@ export class User extends BaseEntity {
   isTwoFactorAuthenticationEnabled: boolean;
 
   @Field(() => [Role], { nullable: true })
-  @ManyToMany(() => Role, (role) => role.user, { cascade: true, eager: true })
+  @ManyToMany(() => Role, (role) => role.user, { cascade: true })
   @JoinTable({ name: 'user_role_roles' })
   roles: Role[];
 
