@@ -1,5 +1,9 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+
+>>>>>>> 94d6e4f (clean up docker file)
 
 
 
@@ -56,4 +60,7 @@ CMD ["npm", "run", "start"]
 =======
 CMD ["npm", "run", "start:prod"]
 
+<<<<<<< HEAD
 >>>>>>> 397cfa3 ( rebase)
+=======
+>>>>>>> 94d6e4f (clean up docker file)
