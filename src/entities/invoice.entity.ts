@@ -38,12 +38,12 @@ export class Invoice {
   @Field()
   userId: string;
 
-  @Column()
+  @Column({ default: '' })
   @Field()
   checkoutId: string;
 
-  @Column()
-  @Field()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   offerId: string;
 
   @Column({ nullable: true })
