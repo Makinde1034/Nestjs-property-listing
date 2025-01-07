@@ -89,6 +89,7 @@ import { TicketStatus, UserLevelEnum } from '../../../common/enums';
 
 import * as moment from 'moment';
 import { ValidCouponCouponResponse } from '../dto/response/coupons';
+import { WhereOption } from '../../core/dto/where-option.dto';
 
 @Injectable()
 export class AdminService {
@@ -916,6 +917,8 @@ export class AdminService {
       const now = new Date();
       const whereCondition: any = {};
       const dateField = 'createdAt';
+
+      // Filter by time period
       switch (couponFilterInput.timePeriod) {
         case 'today':
           whereCondition[dateField] = Between(startOfDay(now), endOfDay(now));
@@ -933,19 +936,36 @@ export class AdminService {
           whereCondition[dateField] = Between(startOfYear(now), endOfYear(now));
           break;
       }
-      const [coupon, total] = await this.couponRepository
+
+      // Add status filter
+      let whereOption = '';
+      if (couponFilterInput.status) {
+        whereOption = 'coupons.status = :status';
+      }
+
+      const baseQuery = this.couponRepository
         .createQueryBuilder('coupons')
-        .where(whereCondition, {
-          whereParam: couponFilterInput.where?.whereParam,
-        })
-        .take(couponFilterInput.take)
-        .skip(couponFilterInput.skip)
+        .where(whereCondition);
+
+      // Add dynamic whereOption condition if provided
+      if (whereOption) {
+        baseQuery.andWhere(whereOption, { status: couponFilterInput.status });
+      }
+
+      // Handle pagination defaults
+      const take = couponFilterInput.take || 10;
+      const skip = couponFilterInput.skip || 0;
+
+      // Execute query
+      const [coupons, total] = await baseQuery
+        .take(take)
+        .skip(skip)
         .getManyAndCount();
 
-      return { coupon, total };
+      return { coupons, total };
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 
