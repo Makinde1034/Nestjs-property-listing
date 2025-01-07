@@ -123,7 +123,6 @@ definitions:
         image: caprover/cli-caprover:v2.1.1
         script:
           - caprover deploy --caproverUrl $CAPROVER_URL --caproverPassword $CAPROVER_PASSWORD --caproverApp $CAPROVER_APP --imageName "$DOCKERHUB_USERNAME/$DOCKERHUB_REPO:$BITBUCKET_COMMIT"
-<<<<<<< HEAD
     - step:
         name: Deploy to Google Compute Engine
         script:
@@ -142,8 +141,6 @@ definitions:
           # Deploy application (adjust the commands based on your app)
           - scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -r ./dist/* meelisfidelis@34.166.135.16:/var/www/my-app
           - ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no meelisfidelis@34.166.135.16 "cd /var/www/my-app && npm ci && pm2 restart my-app || pm2 start dist/main.js --name my-app"
-=======
->>>>>>> 6c07012 (update bit bucket pipeline)
 
 clone:
   depth: full
