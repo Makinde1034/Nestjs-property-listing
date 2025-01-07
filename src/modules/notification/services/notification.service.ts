@@ -119,6 +119,7 @@ export class NotificationService {
         event = scope.name,
         count,
         attachment,
+        metadata,
       } = notificationInput;
 
       const specificEvent = notificationInput.event ?? event;
@@ -171,6 +172,7 @@ export class NotificationService {
           count,
           attachment,
           messages,
+          metadata,
         );
       }
     } catch (error) {
@@ -191,13 +193,14 @@ export class NotificationService {
     count?: number,
     attachment?: Buffer,
     messages?: NotificationMessages[],
+    metadata?: string,
   ) {
     try {
       /************************
        * Email Notification
        ************************/
 
-      if (userPrefRecipients?.email || 1 == 1) {
+      if (userPrefRecipients?.email) {
         this.logger.log('Sending notifications');
         this.sendEmailToUser(
           recipient,
@@ -207,6 +210,7 @@ export class NotificationService {
           count,
           attachment,
           messages,
+          metadata,
         );
       }
 
@@ -220,6 +224,7 @@ export class NotificationService {
           count,
           null,
           messages,
+          metadata,
         );
       }
 
@@ -236,6 +241,7 @@ export class NotificationService {
           count,
 
           messages,
+          metadata,
         );
       }
 
@@ -248,6 +254,7 @@ export class NotificationService {
           recipientFormat[0],
           count,
           messages,
+          metadata,
         );
       }
 
@@ -263,6 +270,7 @@ export class NotificationService {
           recipientFormat[1],
           count,
           messages,
+          metadata,
         );
       }
 
@@ -275,6 +283,7 @@ export class NotificationService {
           recipientFormat[0],
           count,
           messages,
+          metadata,
         );
       }
       // Add web notification logic when needed
@@ -292,18 +301,6 @@ export class NotificationService {
    * @param {EmailNotificationPayload} data
    * @returns {Promise<void>}
    */
-  async sendEmailNotification(
-    user?: User,
-    data?: EmailNotificationPayload,
-    attachment?: Buffer,
-    messages?: NotificationMessages[],
-  ): Promise<void> {
-    try {
-      await this.mailService.sendEmailNotification(user, data, attachment);
-    } catch (error) {
-      this.logger.log(error);
-    }
-  }
 
   async sendPushNotification(data: PushNotificationPayload): Promise<void> {
     try {
@@ -320,6 +317,7 @@ export class NotificationService {
     format: string,
     count: number,
     messages?: NotificationMessages[],
+    metadata?: string,
   ) {
     try {
       if (user) {
@@ -350,6 +348,9 @@ export class NotificationService {
         this.sseService.sendEvent(user.id, payload);
         this.saveNotificationLog({
           title: subject,
+          category: messageData.scope,
+          subCategory: messageData.event,
+          metadata: metadata,
           message: text,
           type: NotificationType.SYSTEM_NOTIFICATION,
         });
@@ -370,6 +371,7 @@ export class NotificationService {
     count?: number,
     attachment?: Buffer,
     message?: NotificationMessages[],
+    metadata?: string,
   ) {
     try {
       if (user) {
@@ -403,6 +405,9 @@ export class NotificationService {
         this.saveNotificationLog({
           title: subject,
           message: text,
+          category: messageData.scope,
+          subCategory: messageData.event,
+          metadata: metadata,
           type: NotificationType.EMAIL_NOTIFICATION,
         });
       }
@@ -418,6 +423,7 @@ export class NotificationService {
     format: string,
     count: number,
     messages?: NotificationMessages[],
+    metadata?: string,
   ) {
     try {
       const messageData = this.getMessage(
@@ -448,8 +454,24 @@ export class NotificationService {
       this.saveNotificationLog({
         title: title,
         message: message,
+        category: messageData.scope,
+        subCategory: messageData.event,
+        metadata: metadata,
         type: NotificationType.PUSH_NOTIFICATION,
       });
+    } catch (error) {
+      this.logger.log(error);
+    }
+  }
+
+  async sendEmailNotification(
+    user?: User,
+    data?: EmailNotificationPayload,
+    attachment?: Buffer,
+    messages?: NotificationMessages[],
+  ): Promise<void> {
+    try {
+      await this.mailService.sendEmailNotification(user, data, attachment);
     } catch (error) {
       this.logger.log(error);
     }
@@ -545,6 +567,24 @@ export class NotificationService {
 
     if (affected) {
       return await this.notificationRepository.findOneBy({ id });
+    }
+  }
+
+  async markAllAsRead(user: User): Promise<SuccessResponse> {
+    try {
+      const { affected } = await this.notificationRepository
+        .createQueryBuilder()
+
+        .update(Notification)
+        .set({ read: true })
+        .where('user.id= :id', { id: user.id })
+        .execute();
+
+      if (affected) {
+        return new SuccessResponse();
+      }
+    } catch (error) {
+      throw new BadRequestException(error);
     }
   }
 

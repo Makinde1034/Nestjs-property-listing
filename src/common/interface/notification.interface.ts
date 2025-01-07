@@ -40,6 +40,8 @@ export interface SendNotificationInput {
   receiverId?: string;
   scope: NotificationScope;
   event: string;
+  metadata: string;
+
   recipientFormat?: [string, string];
   count?: number;
   attachment?: Buffer;

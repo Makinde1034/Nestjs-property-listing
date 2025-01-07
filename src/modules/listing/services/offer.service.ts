@@ -201,6 +201,7 @@ export class OfferService {
         receiverId: seller.id,
         scope: scope,
         event: 'Create',
+        metadata: JSON.stringify(offer),
         recipientFormat: ['Seller', 'Offer Creator'],
       });
       return offerPayload;
@@ -503,6 +504,8 @@ export class OfferService {
           receiverId: seller.id,
           scope: scope,
           event: 'Update',
+          metadata: JSON.stringify(offer),
+
           recipientFormat: ['Seller', 'Offer Creator'],
         });
 
@@ -601,6 +604,8 @@ export class OfferService {
             receiverId: offer.listing.user.id,
             scope: notificationPreference,
             event: 'If Accepted Offer',
+            metadata: JSON.stringify(offer),
+
             recipientFormat: ['Seller', null],
           });
           this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
@@ -688,6 +693,8 @@ export class OfferService {
             receiverId: offer.listing.user.id,
             scope: notificationPreference,
             event: 'Update',
+            metadata: JSON.stringify(offer),
+
             recipientFormat: ['Seller', 'Offer Creator'],
           });
 

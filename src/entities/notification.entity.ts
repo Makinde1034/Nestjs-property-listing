@@ -26,6 +26,22 @@ export class Notification extends BaseEntity {
   @Field()
   message: string;
 
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  metadata: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  category: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  id: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  subCategory: string;
+
   @Column({ nullable: true, default: false })
   @Field({ nullable: true, defaultValue: false })
   read: boolean;

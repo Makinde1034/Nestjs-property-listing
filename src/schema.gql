@@ -693,9 +693,12 @@ type User {
 }
 
 type Notification {
-  id: ID!
+  id: String
   title: String!
   message: String!
+  metadata: String
+  category: String
+  subCategory: String
   read: Boolean
   type: String
   expiredAt: DateTime
@@ -1558,6 +1561,7 @@ type Mutation {
   updateRole(RequestInput: RoleUpdateInputDto!): Role!
   deleteRole(deleteRoleInput: DeleteRolesInput!): SuccessResponse!
   markNotificationAsRead(id: String!): Notification!
+  markAllAsRead: SuccessResponse!
   sendNotification(requestInput: NotificationInput!): String!
   updateNotificationScope(requestInput: UpdateAdminNotificationScope!): SuccessResponse!
   createAdminNotificationScope(requestInput: CreateNotificationScopeInput!): NotificationScope!

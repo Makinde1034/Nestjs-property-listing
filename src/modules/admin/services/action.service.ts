@@ -135,6 +135,8 @@ export class ActionService {
         creatorId: actionRequest.id,
         receiverId: null,
         scope: scope,
+        metadata: JSON.stringify(actionRequest),
+
         recipientFormat: ['Admin Approver', null],
       });
 
