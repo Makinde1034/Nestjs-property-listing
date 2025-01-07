@@ -123,27 +123,6 @@ definitions:
         image: caprover/cli-caprover:v2.1.1
         script:
           - caprover deploy --caproverUrl $CAPROVER_URL --caproverPassword $CAPROVER_PASSWORD --caproverApp $CAPROVER_APP --imageName "$DOCKERHUB_USERNAME/$DOCKERHUB_REPO:$BITBUCKET_COMMIT"
-    - step:
-        name: Deploy to Google Compute Engine
-        script:
-          # Install dependencies
-          - apt-get update && apt-get install -y openssh-client
-
-          # Set up SSH key for deployment
-          - mkdir -p ~/.ssh
-          - echo "-----BEGIN OPENSSH PRIVATE KEY-----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-----END OPENSSH PRIVATE KEY-----" > ~/.ssh/id_rsa
-          - chmod 600 ~/.ssh/id_rsa
-          - ssh-keyscan -H 34.166.135.16 >> ~/.ssh/known_hosts
-          
-
-          # Copy the .env file to the VM
-          - scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ./.env meelisfidelis@34.166.135.16:/var/www/my-app/.env
-
-          
-
-          # Deploy application (adjust the commands based on your app)
-          - scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -r ./dist/* meelisfidelis@34.166.135.16:/var/www/my-app
-          - ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no meelisfidelis@34.166.135.16 "cd /var/www/my-app && npm ci && pm2 restart my-app || pm2 start dist/main.js --name my-app"
 
 clone:
   depth: full
@@ -163,10 +142,6 @@ pipelines:
     develop:
       - step: *push-to-dockerhub
       - step: *deploy-to-test
-      - step: *deploy-with-scp
-
-    main:
-      - step: *deploy-with-scp
 
 options:
   size: 2x
