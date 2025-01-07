@@ -143,6 +143,5 @@ pipelines:
     develop:
       - step: *push-to-dockerhub
       - step: *deploy-to-test
-
 options:
   size: 2x
