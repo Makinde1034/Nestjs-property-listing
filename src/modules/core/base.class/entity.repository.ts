@@ -183,6 +183,11 @@ export abstract class EntityRepository<T extends BaseEntity> {
       throw error;
     }
   }
+  async rawUpdate(id: string, data: DeepPartial<T>): Promise<T> {
+    const item = await this.findByIdOrFail(id);
+    // Using save to fire entity hooks
+    return await this.baseRepository.save(Object.assign(item, data));
+  }
 
   /**
    * Delete by Id

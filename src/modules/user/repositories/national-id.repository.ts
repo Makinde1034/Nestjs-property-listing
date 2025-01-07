@@ -5,16 +5,12 @@
 
 import { Injectable } from '@nestjs/common';
 import { NationalIdentity } from '../../../entities';
-import { EntityRepository } from '../../core/base.class/entity.repository';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+
+import { DataSource, Repository } from 'typeorm';
 
 @Injectable()
-export class NationalIdentityRepository extends EntityRepository<NationalIdentity> {
-  constructor(
-    @InjectRepository(NationalIdentity)
-    private readonly repository: Repository<NationalIdentity>,
-  ) {
-    super(repository);
+export class NationalIdentityRepository extends Repository<NationalIdentity> {
+  constructor(private readonly dataSource: DataSource) {
+    super(NationalIdentity, dataSource.createEntityManager());
   }
 }
