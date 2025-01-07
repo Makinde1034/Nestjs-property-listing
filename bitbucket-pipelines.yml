@@ -142,10 +142,5 @@ pipelines:
     develop:
       - step: *push-to-dockerhub
       - step: *deploy-to-test
-      - step: *deploy-with-scp
-
-    main:
-      - step: *deploy-with-scp
-
 options:
   size: 2x
