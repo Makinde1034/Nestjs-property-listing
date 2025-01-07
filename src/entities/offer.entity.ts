@@ -33,7 +33,7 @@ export class Offer extends BaseEntity {
   @Field()
   saiiFee: number;
 
-  @Column('simple-array')
+  @Column('simple-array', { default: [] })
   @Field(() => [Number])
   previousSaiiFee: number[];
 

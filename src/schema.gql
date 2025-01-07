@@ -47,7 +47,7 @@ type Invoice {
   capturedPrice: Float
   userId: String!
   checkoutId: String!
-  offerId: String!
+  offerId: String
   reference: String
   listing: Listing
   listingType: ListingType
