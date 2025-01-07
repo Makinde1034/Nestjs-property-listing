@@ -1,3 +1,9 @@
+<<<<<<< HEAD
+=======
+
+
+
+>>>>>>> 397cfa3 ( rebase)
 # Stage 1: Build stage
 FROM node:20
 
@@ -45,4 +51,9 @@ ENV NODE_ENV=development \ PUPPETEER_PRODUCT=firefox \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/firefox
 
 # Run the application
+<<<<<<< HEAD
 CMD ["npm", "run", "start"]
+=======
+CMD ["npm", "run", "start:prod"]
+
+>>>>>>> 397cfa3 ( rebase)
