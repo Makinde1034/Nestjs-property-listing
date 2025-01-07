@@ -197,7 +197,7 @@ export class NotificationService {
        * Email Notification
        ************************/
 
-      if (userPrefRecipients?.email || 1 == 1) {
+      if (userPrefRecipients?.email) {
         this.logger.log('Sending notifications');
         this.sendEmailToUser(
           recipient,
@@ -320,6 +320,7 @@ export class NotificationService {
     format: string,
     count: number,
     messages?: NotificationMessages[],
+    metadata?: string,
   ) {
     try {
       if (user) {
@@ -350,6 +351,9 @@ export class NotificationService {
         this.sseService.sendEvent(user.id, payload);
         this.saveNotificationLog({
           title: subject,
+          category: messageData.scope,
+          subCategory: messageData.event,
+          metadata: metadata,
           message: text,
           type: NotificationType.SYSTEM_NOTIFICATION,
         });
@@ -370,6 +374,7 @@ export class NotificationService {
     count?: number,
     attachment?: Buffer,
     message?: NotificationMessages[],
+    metadata?: string,
   ) {
     try {
       if (user) {
@@ -403,6 +408,9 @@ export class NotificationService {
         this.saveNotificationLog({
           title: subject,
           message: text,
+          category: messageData.scope,
+          subCategory: messageData.event,
+          metadata: metadata,
           type: NotificationType.EMAIL_NOTIFICATION,
         });
       }
@@ -418,6 +426,7 @@ export class NotificationService {
     format: string,
     count: number,
     messages?: NotificationMessages[],
+    metadata?: string,
   ) {
     try {
       const messageData = this.getMessage(
@@ -448,6 +457,9 @@ export class NotificationService {
       this.saveNotificationLog({
         title: title,
         message: message,
+        category: messageData.scope,
+        subCategory: messageData.event,
+        metadata: metadata,
         type: NotificationType.PUSH_NOTIFICATION,
       });
     } catch (error) {
@@ -545,6 +557,24 @@ export class NotificationService {
 
     if (affected) {
       return await this.notificationRepository.findOneBy({ id });
+    }
+  }
+
+  async markAllAsRead(user: User): Promise<SuccessResponse> {
+    try {
+      const { affected } = await this.notificationRepository
+        .createQueryBuilder()
+
+        .update(Notification)
+        .set({ read: true })
+        .where('user.id= :id', { id: user.id })
+        .execute();
+
+      if (affected) {
+        return new SuccessResponse();
+      }
+    } catch (error) {
+      throw new BadRequestException(error);
     }
   }
 

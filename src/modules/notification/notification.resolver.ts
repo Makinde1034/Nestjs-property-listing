@@ -78,6 +78,12 @@ export class NotificationResolver {
     return await this.notificationService.updateNotification(id);
   }
 
+  @Mutation(() => SuccessResponse)
+  @UseGuards(AccessTokenGuard)
+  async markAllAsRead(@Context() ctx: any): Promise<SuccessResponse> {
+    return await this.notificationService.markAllAsRead(ctx.req.user);
+  }
+
   /**
    * Send User's Notifications
    *
