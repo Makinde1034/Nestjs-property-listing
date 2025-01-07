@@ -123,7 +123,7 @@ definitions:
         image: caprover/cli-caprover:v2.1.1
         script:
           - caprover deploy --caproverUrl $CAPROVER_URL --caproverPassword $CAPROVER_PASSWORD --caproverApp $CAPROVER_APP --imageName "$DOCKERHUB_USERNAME/$DOCKERHUB_REPO:$BITBUCKET_COMMIT"
-    
+
 clone:
   depth: full
 
@@ -142,9 +142,6 @@ pipelines:
     develop:
       - step: *push-to-dockerhub
       - step: *deploy-to-test
-
-    main:
-      - step: *deploy-with-scp
 
 options:
   size: 2x
