@@ -398,6 +398,8 @@ export class JobService {
           receiverId: element.listing.userId,
           scope: scope,
           event: scope.name,
+          metadata: JSON.stringify(element),
+
           recipientFormat: [null, 'Users enlisted to bid and sellers'],
         });
       }

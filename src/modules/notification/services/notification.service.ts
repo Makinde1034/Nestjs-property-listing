@@ -119,6 +119,7 @@ export class NotificationService {
         event = scope.name,
         count,
         attachment,
+        metadata,
       } = notificationInput;
 
       const specificEvent = notificationInput.event ?? event;
@@ -171,6 +172,7 @@ export class NotificationService {
           count,
           attachment,
           messages,
+          metadata,
         );
       }
     } catch (error) {
@@ -191,6 +193,7 @@ export class NotificationService {
     count?: number,
     attachment?: Buffer,
     messages?: NotificationMessages[],
+    metadata?: string,
   ) {
     try {
       /************************
@@ -207,6 +210,7 @@ export class NotificationService {
           count,
           attachment,
           messages,
+          metadata,
         );
       }
 
@@ -220,6 +224,7 @@ export class NotificationService {
           count,
           null,
           messages,
+          metadata,
         );
       }
 
@@ -236,6 +241,7 @@ export class NotificationService {
           count,
 
           messages,
+          metadata,
         );
       }
 
@@ -248,6 +254,7 @@ export class NotificationService {
           recipientFormat[0],
           count,
           messages,
+          metadata,
         );
       }
 
@@ -263,6 +270,7 @@ export class NotificationService {
           recipientFormat[1],
           count,
           messages,
+          metadata,
         );
       }
 
@@ -275,6 +283,7 @@ export class NotificationService {
           recipientFormat[0],
           count,
           messages,
+          metadata,
         );
       }
       // Add web notification logic when needed
@@ -292,18 +301,6 @@ export class NotificationService {
    * @param {EmailNotificationPayload} data
    * @returns {Promise<void>}
    */
-  async sendEmailNotification(
-    user?: User,
-    data?: EmailNotificationPayload,
-    attachment?: Buffer,
-    messages?: NotificationMessages[],
-  ): Promise<void> {
-    try {
-      await this.mailService.sendEmailNotification(user, data, attachment);
-    } catch (error) {
-      this.logger.log(error);
-    }
-  }
 
   async sendPushNotification(data: PushNotificationPayload): Promise<void> {
     try {
@@ -462,6 +459,19 @@ export class NotificationService {
         metadata: metadata,
         type: NotificationType.PUSH_NOTIFICATION,
       });
+    } catch (error) {
+      this.logger.log(error);
+    }
+  }
+
+  async sendEmailNotification(
+    user?: User,
+    data?: EmailNotificationPayload,
+    attachment?: Buffer,
+    messages?: NotificationMessages[],
+  ): Promise<void> {
+    try {
+      await this.mailService.sendEmailNotification(user, data, attachment);
     } catch (error) {
       this.logger.log(error);
     }
