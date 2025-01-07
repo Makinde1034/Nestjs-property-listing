@@ -1,11 +1,12 @@
-
-
-
 # Stage 1: Build stage
 FROM node:20
 
 # Set a working directory
 WORKDIR /usr/src/app
+
+# Create a non-root user
+RUN groupadd -g 1001 appgroup && \
+    useradd -m -u 1001 -g appgroup appuser
 
 # Copy package.json and package-lock.json
 COPY package*.json ./
@@ -16,8 +17,9 @@ RUN npm ci
 # Copy the rest of the application source code
 COPY . .
 
-# Build the application
-RUN npm run build
+# Build the application and grant universal access to 'dist'
+RUN npm run build && \
+    chmod -R 777 /usr/src/app/dist
 
 # Install Firefox and required fonts
 RUN apt-get update && \
@@ -39,10 +41,8 @@ RUN npm install puppeteer
 EXPOSE 3000
 
 # Set environment variables
-ENV NODE_ENV=production \
-    PUPPETEER_PRODUCT=firefox \
+ENV NODE_ENV=development \ PUPPETEER_PRODUCT=firefox \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/firefox
 
 # Run the application
-CMD ["npm", "run", "start:prod"]
-
+CMD ["npm", "run", "start"]

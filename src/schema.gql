@@ -1239,7 +1239,7 @@ type Query {
   financialVsOrder(findOptions: AdminDashboardSort!): [GroupTransactions!]!
   fetchCoupons(couponFilterInput: AdminFilterAndSort!): CouponResponse!
   validataCoupon(couponFilterInput: ValidataCouponInput!): CouponResponse!
-  findOne(id: String!): Coupon!
+  findOneCoupon(id: String!): Coupon!
   findAllFeatures: [SystemFeatureSetting!]!
   searchForCoupon(searchParam: String!): [Coupon!]!
   findAllWorkFlow(findOption: WorkflowInputFilter!): WorkFlowResponse!
@@ -1627,7 +1627,7 @@ type Mutation {
   createCoupon(createCouponsInput: CreateCouponInput!): SuccessResponse!
   updateAdminDefault(updateAdminDefaultInput: UpdateAdminDefaultInput!): AdminDefault!
   updateAuctionBidRangeSetting(updateAuctionBidRangeSettingInput: UpdateAdminDefaultInput!): SuccessResponse!
-  updateCoupon(updateCouponsInput: UpdateCouponInput!): Coupon!
+  updateCoupon(updateCouponsInput: UpdateCouponInput!): SuccessResponse!
   deleteCoupons(deleteCouponsInput: DeleteCouponInput!): SuccessResponse!
   deactivateCoupons(deactivateCoupons: DeactivateCouponInput!): SuccessResponse!
   reactivateCoupon(deactivateCoupons: DeactivateCouponInput!): SuccessResponse!
@@ -1786,7 +1786,7 @@ input StaffConfirmDto {
 input UserUpgradeInput {
   idType: String!
   id: String!
-  phoneNumber: String!
+  phoneNumber: String
 }
 
 input PushNotificationinput {
