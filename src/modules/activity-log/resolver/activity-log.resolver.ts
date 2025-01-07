@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { Args, Query, Resolver } from '@nestjs/graphql';
 import { ActivityLog } from '../../../entities/activity-log.entity';
 import { AccessTokenGuard } from '../../auth/guards';
@@ -5,7 +10,10 @@ import { UseGuards } from '@nestjs/common';
 import { ActivityLogService } from '../services/activity-log.service';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { ActivityLogsResponse } from '../dto/activity-log';
-import { ActivityLogInput, AuditLogTrailsInput } from '../dto/request/activity-log';
+import {
+  ActivityLogInput,
+  AuditLogTrailsInput,
+} from '../dto/request/activity-log';
 
 @Resolver()
 export class ActivityResolver {

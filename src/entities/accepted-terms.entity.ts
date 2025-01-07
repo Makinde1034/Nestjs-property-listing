@@ -26,10 +26,10 @@ export class AcceptedTerms extends BaseEntity {
   // @Field(() => User)
   // @JoinColumn({ name: 'userId' })
   // @ManyToOne(() => User, (user) => user.term, {
-  //   cascade: true,
-  //   eager: true,
+  //   Cascade: true,
+  //   Eager: true,
   // })
-  // user: User;
+  // User: User;
 
   @Field()
   @Column()

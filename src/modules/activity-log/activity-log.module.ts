@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { Global, Module } from '@nestjs/common';
 import { ActivityLogService } from './services/activity-log.service';
 import { ActivityLogRepository } from './repositories/activity-log.repository';

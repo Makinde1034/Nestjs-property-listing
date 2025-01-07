@@ -143,6 +143,7 @@ export class ListingService {
           const match = attributes.some(
             (attr) => attr.attributeId === attribute.id,
           );
+
           if (!match) {
             throw new BadRequestException(
               `${attribute.englishName ? attribute.englishName : attribute.arabicName} is required`,
@@ -236,7 +237,7 @@ export class ListingService {
         relations: ['permissions', 'user'], // Ensures the relationship is loaded if not already eager
       });
 
-      let users = [];
+      const users = [];
 
       role.forEach((element) => {
         users.push(element.user);
@@ -311,20 +312,20 @@ export class ListingService {
         return this.transformListing(element);
       });
 
-      // const notificationPreference =
-      //   await this.notificationScopeRepository.find();
-      // const scope: NotificationScope = notificationPreference.find(
+      // Const notificationPreference =
+      //   Await this.notificationScopeRepository.find();
+      // Const scope: NotificationScope = notificationPreference.find(
       //   (element) => {
-      //     if (element.name == NotificationScopeEnum.LISTING) {
-      //       return element;
+      //     If (element.name == NotificationScopeEnum.LISTING) {
+      //       Return element;
       //     }
       //   },
       // );
 
-      // this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
-      //   creatorId: user.id,
-      //   scope: scope,
-      //   recipientFormat: ['Owner', null],
+      // This.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+      //   CreatorId: user.id,
+      //   Scope: scope,
+      //   RecipientFormat: ['Owner', null],
       // });
 
       return { listing: result, total: count };
@@ -609,22 +610,97 @@ export class ListingService {
         result = listings;
         total = count;
       } else {
-        const [listings, count] = await baseQuery()
-          .take(take)
-          .skip(skip)
-          .orderBy('listing.featureDate', 'DESC', 'NULLS LAST')
-          .addOrderBy('listing.promotedDate', 'DESC', 'NULLS LAST')
+        const mergedListings: Listing[] = [];
+        const promotedRatio = 5; // 1 promoted for every 5 regular
+        const featuredRatio = 6; // 1 featured for every 6 regular
 
-          .getManyAndCount();
+        let promotedIndex = 0;
+        let featuredIndex = 0;
+        const splitTake = Math.ceil(take / 4); // Divide `take` equally for featured and promoted
+        const splitSkip = Math.ceil(skip / 4); // Divide `skip` equally for featured and promoted
 
-        result = listings;
-        total = count;
+        if (take > featuredRatio) {
+          const [featured, promoted, regular] = await Promise.all([
+            baseQuery()
+              .take(splitTake)
+              .skip(splitSkip)
+              .andWhere('listing.featureDate IS NOT NULL') // Only fetch featured listings
+              .orderBy('listing.featureDate', 'DESC', 'NULLS LAST')
+              .getManyAndCount(),
+
+            baseQuery()
+              .take(splitTake)
+              .skip(splitSkip)
+              .andWhere('listing.promotedDate IS NOT NULL') // Only fetch promoted listings
+              .orderBy('listing.promotedDate', 'DESC', 'NULLS LAST')
+              .getManyAndCount(),
+
+            baseQuery()
+              .take(take - splitTake)
+              .skip(skip - splitSkip)
+              .andWhere(
+                'listing.promotedDate IS NULL AND listing.featureDate IS NULL',
+              ) // Exclude promoted and featured listings
+              .orderBy('listing.featureDate', 'DESC', 'NULLS LAST')
+              .addOrderBy('listing.promotedDate', 'DESC', 'NULLS LAST')
+              .getManyAndCount(),
+          ]);
+
+          // Destructure results
+          const [featuredListings, totalFeatured] = featured;
+          const [promotedListings, totalPromoted] = promoted;
+          const [regularListings, totalRegular] = regular;
+          total = totalRegular + totalFeatured + totalPromoted;
+
+          // Iterate through regular listings
+          for (let i = 0; i < Math.min(take, regularListings.length); i++) {
+            // Add regular listing if available
+            if (regularListings[i]) {
+              mergedListings.push(regularListings[i]);
+            }
+
+            // Check if a promoted listing needs to be added
+            if (
+              (i + 1) % promotedRatio === 0 &&
+              promotedIndex < promotedListings.length
+            ) {
+              mergedListings.push(promotedListings[promotedIndex]);
+              promotedIndex++;
+            }
+
+            // Check if a featured listing needs to be added
+            if (
+              (i + 1) % featuredRatio === 0 &&
+              featuredIndex < featuredListings.length
+            ) {
+              mergedListings.push(featuredListings[featuredIndex]);
+              featuredIndex++;
+            }
+          }
+
+          // Add remaining promoted listings if any
+
+          result = mergedListings;
+        } else {
+          const [listing, count] = await baseQuery()
+            .take(take)
+            .skip(skip)
+            .orderBy('listing.featureDate', 'DESC', 'NULLS LAST')
+            .addOrderBy('listing.promotedDate', 'DESC', 'NULLS LAST')
+            .getManyAndCount();
+
+          total = count;
+          result = listing;
+        }
       }
 
-      const listingToParse = [...result];
+      const listingToParse: Listing[] = [...result];
 
       const listing = listingToParse.map((element) => {
-        return this.transformListing(element);
+        if (!element) {
+        } else {
+          return this.transformListing(element);
+        }
       });
 
       return { listing, total };
@@ -850,16 +926,175 @@ export class ListingService {
         result = listings;
         total = count;
       } else {
-        const [listings, count] = await baseQuery()
-          .take(take)
-          .skip(skip)
-          .orderBy('listing.featureDate', 'DESC', 'NULLS LAST')
-          .addOrderBy('listing.promotedDate', 'DESC', 'NULLS LAST')
+        //   const [featured, promoted, regular] = await Promise.all([
+        //     baseQuery()
+        //       .take(take % 3)
+        //       .skip(skip % 3)
+        //       .where('listing.featureDate IS NOT NULL') // Only fetch featured listings
+        //       .orderBy('listing.featureDate', 'DESC', 'NULLS LAST')
+        //       .getManyAndCount(),
 
-          .getManyAndCount();
+        //     baseQuery()
+        //       .take(take % 3)
+        //       .skip(skip % 3)
+        //       .where('listing.promotedDate IS NOT NULL') // Only fetch promoted listings
+        //       .orderBy('listing.promotedDate', 'DESC', 'NULLS LAST')
+        //       .getManyAndCount(),
 
-        result = listings;
-        total = count;
+        //     baseQuery()
+        //       .take(take)
+        //       .skip(skip)
+        //       .where(
+        //         'listing.promotedDate IS NULL AND listing.featureDate IS NULL',
+        //       ) // Exclude promoted and featured listings
+        //       .orderBy('listing.featureDate', 'DESC', 'NULLS LAST')
+        //       .addOrderBy('listing.promotedDate', 'DESC', 'NULLS LAST')
+        //       .getManyAndCount(),
+        //   ]);
+
+        //   // Destructure results
+        //   const [featuredListings, totalFeatured] = featured;
+        //   const [promotedListings, totalPromoted] = promoted;
+        //   const [regularListings, totalRegular] = regular;
+
+        //   // Merge listings with the specified ratios
+        //   const mergedListings = [];
+        //   const promotedRatio = 5; // 1 promoted for every 5 regular
+        //   const featuredRatio = 10; // 1 featured for every 10 regular
+
+        //   let promotedIndex = 0;
+        //   let featuredIndex = 0;
+
+        //   regularListings.forEach((regularListing, index) => {
+        //     mergedListings.push(regularListing);
+
+        //     // Insert a promoted listing every `promotedRatio` regular listings
+        //     if (
+        //       (index + 1) % promotedRatio === 0 &&
+        //       promotedIndex < promotedListings.length
+        //     ) {
+        //       mergedListings.push(promotedListings[promotedIndex]);
+        //       promotedIndex++;
+        //     }
+
+        //     // Insert a featured listing every `featuredRatio` regular listings
+        //     if (
+        //       (index + 1) % featuredRatio === 0 &&
+        //       featuredIndex < featuredListings.length
+        //     ) {
+        //       mergedListings.push(featuredListings[featuredIndex]);
+        //       featuredIndex++;
+        //     }
+        //   });
+
+        //   // Add remaining promoted listings if any
+        //   while (promotedIndex < promotedListings.length) {
+        //     mergedListings.push(promotedListings[promotedIndex]);
+        //     promotedIndex++;
+        //   }
+
+        //   // Add remaining featured listings if any
+        //   while (featuredIndex < featuredListings.length) {
+        //     mergedListings.push(featuredListings[featuredIndex]);
+        //     featuredIndex++;
+        //   }
+
+        //   // `mergedListings` now contains the desired order
+        //   console.log(mergedListings);
+
+        //   // const [listings, count] = await baseQuery()
+        //   //   .take(take)
+        //   //   .skip(skip)
+        //   //   .orderBy('listing.featureDate', 'DESC', 'NULLS LAST')
+        //   //   .addOrderBy('listing.promotedDate', 'DESC', 'NULLS LAST')
+
+        //   //   .getManyAndCount();
+
+        //   // result = listings;
+        //   // total = count;
+        // Combine listings if needed
+        const mergedListings: Listing[] = [];
+        const promotedRatio = 5; // 1 promoted for every 5 regular
+        const featuredRatio = 6; // 1 featured for every 6 regular
+
+        let promotedIndex = 0;
+        let featuredIndex = 0;
+        const splitTake = Math.ceil(take / 4); // Divide `take` equally for featured and promoted
+        const splitSkip = Math.ceil(skip / 4); // Divide `skip` equally for featured and promoted
+
+        if (take > featuredRatio) {
+          const [featured, promoted, regular] = await Promise.all([
+            baseQuery()
+              .take(splitTake)
+              .skip(splitSkip)
+              .andWhere('listing.featureDate IS NOT NULL') // Only fetch featured listings
+              .orderBy('listing.featureDate', 'DESC', 'NULLS LAST')
+              .getManyAndCount(),
+
+            baseQuery()
+              .take(splitTake)
+              .skip(splitSkip)
+              .andWhere('listing.promotedDate IS NOT NULL') // Only fetch promoted listings
+              .orderBy('listing.promotedDate', 'DESC', 'NULLS LAST')
+              .getManyAndCount(),
+
+            baseQuery()
+              .take(take - splitTake)
+              .skip(skip - splitSkip)
+              .andWhere(
+                'listing.promotedDate IS NULL AND listing.featureDate IS NULL',
+              ) // Exclude promoted and featured listings
+              .orderBy('listing.featureDate', 'DESC', 'NULLS LAST')
+              .addOrderBy('listing.promotedDate', 'DESC', 'NULLS LAST')
+              .getManyAndCount(),
+          ]);
+
+          // Destructure results
+          const [featuredListings, totalFeatured] = featured;
+          const [promotedListings, totalPromoted] = promoted;
+          const [regularListings, totalRegular] = regular;
+          total = totalRegular + totalFeatured + totalPromoted;
+
+          // Iterate through regular listings
+          for (let i = 0; i < Math.min(take, regularListings.length); i++) {
+            // Add regular listing if available
+            if (regularListings[i]) {
+              mergedListings.push(regularListings[i]);
+            }
+
+            // Check if a promoted listing needs to be added
+            if (
+              (i + 1) % promotedRatio === 0 &&
+              promotedIndex < promotedListings.length
+            ) {
+              mergedListings.push(promotedListings[promotedIndex]);
+              promotedIndex++;
+            }
+
+            // Check if a featured listing needs to be added
+            if (
+              (i + 1) % featuredRatio === 0 &&
+              featuredIndex < featuredListings.length
+            ) {
+              mergedListings.push(featuredListings[featuredIndex]);
+              featuredIndex++;
+            }
+          }
+
+          // Add remaining promoted listings if any
+
+          result = mergedListings;
+        } else {
+          const [listing, count] = await baseQuery()
+            .take(take)
+            .skip(skip)
+            .orderBy('listing.featureDate', 'DESC', 'NULLS LAST')
+            .addOrderBy('listing.promotedDate', 'DESC', 'NULLS LAST')
+            .getManyAndCount();
+
+          total = count;
+          result = listing;
+        }
       }
 
       const listingToParse = [...result];
@@ -1593,7 +1828,7 @@ export class ListingService {
   ) {
     try {
       let numberOfimagesWithinDistance: number;
-      let verified = false;
+      const verified = false;
 
       const listing = await this.listingRepository.findOne({ where: { id } });
 
@@ -2060,7 +2295,7 @@ export class ListingService {
     admin: User,
   ) {
     try {
-      let listingId = [];
+      const listingId = [];
       listingActionInput.listingApproval.forEach((element) => {
         listingId.push(element.id);
       });
@@ -2443,12 +2678,13 @@ export class ListingService {
 
   transformListing(listing: Listing): Listing {
     try {
-      const { images, ...rest } = listing;
+      let { images, ...rest } = listing;
 
-      let parsedImages: any[] | string = images;
+      // If `images` is undefined or null, default to an empty array
+      let parsedImages: any[] | string = images ?? [];
 
-      // Attempt to parse images only if it looks like JSON
-      if (isJsonString(images)) {
+      // Attempt to parse `images` only if it's a valid JSON string
+      if (typeof images === 'string' && isJsonString(images)) {
         try {
           parsedImages = JSON.parse(images);
         } catch (parseError) {
@@ -2456,18 +2692,24 @@ export class ListingService {
         }
       }
 
+      // Filter images if parsedImages is an array
       const filteredImages = Array.isArray(parsedImages)
         ? filterDeletedImages(parsedImages)
         : parsedImages;
 
+      // Return transformed listing
       return {
         ...rest,
         images: JSON.stringify(filteredImages),
       };
     } catch (error) {
       this.logger.error('Error transforming listing:', error);
-      listing.images = listing.images ?? null; // Set images to null if it’s undefined or null
-      return listing; // Return original listing if transformation fails
+
+      // Return the original listing with `images` defaulting to an empty string
+      return {
+        ...listing,
+        images: listing?.images ?? '',
+      };
     }
   }
 

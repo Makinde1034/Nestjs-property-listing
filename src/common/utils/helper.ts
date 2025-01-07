@@ -215,7 +215,7 @@ export function isJsonString(str: string) {
   }
 }
 
-export function filterDeletedImages(data: Array<any>) {
+export function filterDeletedImages(data: any[]) {
   const result = data.filter((image) => image.isDeleted !== true);
   return result;
 }
@@ -262,9 +262,8 @@ export async function getLocationFromImage(fileBuffer: Buffer) {
         latitude: metadata.latitude,
         longitude: metadata.longitude,
       };
-    } else {
-      return null;
     }
+    return null;
   } catch (error) {
     this.logger.error('Error extracting location from image:', error);
     throw error;

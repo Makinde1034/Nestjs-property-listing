@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
 import { ServiceAndProviderService } from '../services/service-provider.service';
 import { ServiceProvider } from '../../../entities/service-provider.entity';

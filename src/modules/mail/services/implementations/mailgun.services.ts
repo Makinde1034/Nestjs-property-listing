@@ -177,20 +177,20 @@ export class MailgunEmailService implements MailSendService {
     }
   }
 
-  // async sendOfferMail(data: MailInput): Promise<void> {
-  //   try {
-  //     const mailgunData: MailgunMessageData = {
-  //       from: this.MAIL_FROM,
-  //       text: data.text,
-  //       subject: data.subject,
-  //       to: data.email,
+  // Async sendOfferMail(data: MailInput): Promise<void> {
+  //   Try {
+  //     Const mailgunData: MailgunMessageData = {
+  //       From: this.MAIL_FROM,
+  //       Text: data.text,
+  //       Subject: data.subject,
+  //       To: data.email,
   //     };
-  //     await this.sendMail(mailgunData);
+  //     Await this.sendMail(mailgunData);
 
-  //     this.logger.debug('Email Sent');
+  //     This.logger.debug('Email Sent');
   //   } catch (error) {
-  //     this.logger.log('Failed to send mail because of:', error);
-  //     this.logger.debug(error);
+  //     This.logger.log('Failed to send mail because of:', error);
+  //     This.logger.debug(error);
   //   }
   // }
   async sendEmailInvoice(user: User, invoice: Buffer): Promise<void> {

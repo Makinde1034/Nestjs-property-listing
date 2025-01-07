@@ -13,9 +13,9 @@ import webHookConfig from './payment/web-hook.config';
 import firebaseConfig from './serviceAccount/firebase.config';
 
 export default [
-  //   postgresConfig,
-  //   authConfig,
-  //   recaptchaConfig,
+  //   PostgresConfig,
+  //   AuthConfig,
+  //   RecaptchaConfig,
   postgresConfig,
   authConfig,
   recaptchaConfig,

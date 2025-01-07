@@ -4,7 +4,7 @@
  */
 
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class NafathWebHookResponse {
   response: string;
@@ -22,8 +22,9 @@ export class UserUpgradeInput {
   @IsString()
   id: string;
 
-  @Field()
+  @Field({ nullable: true })
   @IsString()
+  @IsOptional()
   phoneNumber: string;
 }
 @ObjectType()

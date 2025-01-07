@@ -56,9 +56,7 @@ import { TimerInterceptor } from './common/interceptors/request-timer';
     SseModule,
     ConfigModule.forRoot({
       envFilePath:
-        process.env.NODE_ENV === 'development'
-          ? '.env.development.local'
-          : '.env',
+        process.env.NODE_ENV === 'production' ? '.env' : '.env.local',
       load: configuration,
       isGlobal: true,
     }),

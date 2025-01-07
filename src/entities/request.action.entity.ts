@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -22,10 +27,10 @@ export class ActionRequest {
   actionType: string; // "create" or "update"
 
   @Column()
-  targetEntity: string; // e.g., "User", "Order", "Product"
+  targetEntity: string; // E.g., "User", "Order", "Product"
 
   @Column({ nullable: true })
-  targetEntityId?: string; // e.g., User ID, Order ID (null for "create" actions)
+  targetEntityId?: string; // E.g., User ID, Order ID (null for "create" actions)
 
   @Column()
   @Field(() => String)

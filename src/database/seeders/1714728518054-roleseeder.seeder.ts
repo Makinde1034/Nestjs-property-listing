@@ -18,12 +18,10 @@ export class RoleSeeder implements Seeder {
   ): Promise<any> {
     this.logger.debug(`Seeding For : ${RoleSeeder.name}....`, factoryManager);
     const userRepository = dataSource.getRepository(User);
-    const roleRepository = dataSource.getRepository(Role);
 
     const permissionRepository = dataSource.getRepository(Permission); // Ensure Permissions is imported correctly
-    const [permissions, role, user] = await Promise.all([
+    const [permissions, user] = await Promise.all([
       permissionRepository.find(),
-      roleRepository.find(),
 
       userRepository.find({ where: { userType: 'admin' } }),
     ]);
@@ -33,8 +31,8 @@ export class RoleSeeder implements Seeder {
     } else {
       this.logger.debug(`Permissions fetched: ${permissions.length}`);
     }
-    // if (role.length > 0) {
-    //   this.logger.debug(`Seeding for: ${RoleSeeder.name} Already completed`);
+    // If (role.length > 0) {
+    //   This.logger.debug(`Seeding for: ${RoleSeeder.name} Already completed`);
     // } else {
     // Transform permissions to only include id
     const permissionIds = permissions.map((permission) => ({

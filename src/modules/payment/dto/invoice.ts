@@ -7,15 +7,13 @@ import { Field } from '@nestjs/graphql';
 
 export class CreateInvoiceInput {
   @Field()
-  price?: number;
+  capturedPrice?: number;
+
   @Field()
   qrcode?: string;
 
   @Field()
   userId: string;
-
-  @Field()
-  status?: string;
 
   @Field()
   vat?: number;

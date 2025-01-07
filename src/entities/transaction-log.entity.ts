@@ -1,48 +1,48 @@
-// /*
-//  * Copyright (c) 2024, Waseet LLC. All rights reserved.
-//  * For license. See license.txt
-//  */
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
 
-// import { Entity, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+// Import { Entity, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
-// import BaseEntity from './base.entity';
-// import { PaymentStatus } from '../common/enums/status.enum';
-// import { Field, ObjectType } from '@nestjs/graphql';
+// Import BaseEntity from './base.entity';
+// Import { PaymentStatus } from '../common/enums/status.enum';
+// Import { Field, ObjectType } from '@nestjs/graphql';
 
 // @Entity()
 // @ObjectType()
-// export class TransactionLog extends BaseEntity {
+// Export class TransactionLog extends BaseEntity {
 //   @Column('decimal', { precision: 10, scale: 2 })
 //   @Field()
-//   amount: number;
+//   Amount: number;
 //   @Column('decimal', { precision: 10, scale: 2 })
 //   @Field()
-//   fee: number;
+//   Fee: number;
 
 //   @Column('decimal', { precision: 10, scale: 2 })
 //   @Field()
-//   vat: number;
+//   Vat: number;
 
 //   @Column({
-//     type: 'enum',
-//     enum: PaymentStatus,
-//     default: PaymentStatus.PENDING,
+//     Type: 'enum',
+//     Enum: PaymentStatus,
+//     Default: PaymentStatus.PENDING,
 //   })
 //   @Field()
-//   status: PaymentStatus;
+//   Status: PaymentStatus;
 
 //   @Column()
 //   @Field()
-//   reference: string;
+//   Reference: string;
 
 //   @Column()
 //   @Field()
-//   category: string;
+//   Category: string;
 
 //   @UpdateDateColumn()
 //   @Field()
-//   updatedAt: Date;
+//   UpdatedAt: Date;
 //   @CreateDateColumn()
 //   @Field()
-//   createdAt: Date;
+//   CreatedAt: Date;
 // }

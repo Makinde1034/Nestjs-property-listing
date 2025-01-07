@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Waseet LLC. All rights reserved.
+ * For license. See license.txt
+ */
+
 import { Subject } from 'rxjs';
 import { MessageEvent } from '../request/app';
 

@@ -390,7 +390,7 @@ export class NotificationService {
         const text =
           user.language === 'en' ? messageData?.body : messageData?.arabicBody;
 
-        //send mail
+        //Send mail
         this.sendEmailNotification(
           user,
           {
@@ -462,7 +462,7 @@ export class NotificationService {
     scope: string,
     recipient: string,
     count?: number,
-    messages?: Array<NotificationMessages>,
+    messages?: NotificationMessages[],
   ) {
     const filteredMessages = messages.filter(
       (message) =>

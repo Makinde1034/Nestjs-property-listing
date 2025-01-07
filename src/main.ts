@@ -2,6 +2,7 @@
  * Copyright (c) 2024, Waseet LLC. All rights reserved.
  * For license. See license.txt
  */
+
 import { NestFactory, Reflector } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { I18nMiddleware } from 'nestjs-i18n';
@@ -55,6 +56,8 @@ async function bootstrap() {
 
   const server = app.getHttpServer();
   server.setTimeout(0);
+
+  console.log(process.env.NODE_ENV);
   console.log(`Application is running on: ${await app.getUrl()}`);
 }
 bootstrap();

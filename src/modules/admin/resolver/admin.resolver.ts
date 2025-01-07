@@ -195,7 +195,7 @@ export class AdminResolver {
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.COUPONS_VIEW)
-  @Query(() => Coupon, { name: 'findOne' })
+  @Query(() => Coupon, { name: 'findOneCoupon' })
   async findOne(@Args('id') id: string) {
     return await this.adminService.findOne(id);
   }
@@ -209,7 +209,7 @@ export class AdminResolver {
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.COUPONS_EDIT)
-  @Mutation(() => Coupon, { name: 'updateCoupon' })
+  @Mutation(() => SuccessResponse, { name: 'updateCoupon' })
   async updateCoupons(
     @Args('updateCouponsInput') updateCouponsInput: UpdateCouponInput,
     @Context() ctx: any,

@@ -168,7 +168,6 @@ export class UserService {
         const { affected } = await this.usersRepository.update(user.id, {
           userLevel: UserLevelEnum.LEVEL_2,
           isDataVerified: true,
-          phone: userUpgradeInput.phoneNumber,
           dateOfBirth: '1924-12-01 00:00:00.000',
           arabicFirstName: user.firstName,
           arabicLastName: user.lastName,
@@ -324,7 +323,7 @@ export class UserService {
         relations,
       });
 
-      // this.createDefaultNotifications(user);
+      // This.createDefaultNotifications(user);
 
       return user;
     } catch (error) {

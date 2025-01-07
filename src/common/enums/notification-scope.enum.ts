@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-// export enum NotificationScopesEnum {
+// Export enum NotificationScopesEnum {
 //   CREATE_OFFER = 'Create',
 //   UPDATE_OFFER = 'Update',
 //   OFFER_RESPONSE = 'Response',
@@ -35,7 +35,7 @@
 //   LISTING_IN_SAVED_SEARCHES = 'Listings in Saved searches',
 // }
 
-// export enum NotificationTitlesEnum {
+// Export enum NotificationTitlesEnum {
 //   OFFER_CREATED = 'Offer Created',
 //   OFFER_EDITED = 'Offer Edited',
 //   OFFER_RESPONSE = 'Offer Response',
