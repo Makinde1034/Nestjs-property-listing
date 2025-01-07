@@ -172,19 +172,20 @@ export class UserService {
           arabicFirstName: user.firstName,
           arabicLastName: user.lastName,
           middleName: user.lastName,
-
           nationality: 'Saudi Arabia',
         });
 
+        console.log(user.nationalIdentity);
+
         if (!user.nationalIdentity) {
-          await this.nationalIdentityRepository.create({
+          await this.nationalIdentityRepository.save({
             nationality: 'Saudi Arabia',
             identityNumber: userUpgradeInput.id,
             type: userUpgradeInput.idType,
             user,
           });
         } else {
-          await this.nationalIdentityRepository.update(
+          const data = await this.nationalIdentityRepository.update(
             user.nationalIdentity.id,
             {
               nationality: 'Saudi Arabia',
@@ -205,6 +206,8 @@ export class UserService {
       }
       /*************************************************/
     } catch (error) {
+      console.log(error);
+      this.logger.log(error);
       if (error instanceof HttpException) {
         throw error;
       } else {
@@ -498,7 +501,7 @@ export class UserService {
           { ...nationalIdentity },
         );
       } else {
-        await this.nationalIdentityRepository.create({
+        await this.nationalIdentityRepository.save({
           ...nationalIdentity,
           user,
         });
