@@ -117,7 +117,10 @@ export class OfferService {
           listing.purpose,
         );
 
-      if (!listing.negotiable) {
+      if (
+        (listing.negotiable && listing.price < createOfferDto.price) ||
+        createOfferDto.price < listing.price
+      ) {
         throw new BadRequestException(AppStrings.LISTING_IS_NOT_NEGOTIABLE);
       }
 
@@ -131,13 +134,13 @@ export class OfferService {
         );
       }
 
-      if (user.id == listing.user.id) {
-        throw new BadRequestException(
-          'The creator of a listing cannot create an offer on  that listing',
-        );
-      }
+      // if (user.id == listing.user.id) {
+      //   throw new BadRequestException(
+      //     'The creator of a listing cannot create an offer on  that listing',
+      //   );
+      // }
 
-      if (offer.length > 0) {
+      if (listing.negotiable && offer.length > 0) {
         throw new BadRequestException(
           `Minimum Offer must be greater than ${offer[0].price}`,
         );
@@ -186,16 +189,17 @@ export class OfferService {
       // Find the Scope available for application
       const notificationPreference =
         await this.notificationScopeRepository.find();
+      console.log(notificationPreference);
       //Filter out the correct scope
       const scope: NotificationScope = notificationPreference.find(
         (element) => {
-          if (element.name == NotificationScopeEnum.OFFERS) {
+          if (element.scopeGroup == NotificationScopeEnum.OFFERS) {
             return element;
           }
         },
       );
 
-      //TODO:switch to an emited event
+      // TODO:switch to an emited event
       this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
         creatorId: user.id,
         receiverId: seller.id,
@@ -214,29 +218,29 @@ export class OfferService {
   /************************
    * To be removed
    ************************/
-  async finalizeOffer(id: string) {
-    try {
-      const offer = await this.offerRepository.findOneBy({ id });
-      if (!offer) {
-        throw new NotFoundException(AppStrings.NOT_FOUND);
-      }
+  // async finalizeOffer(id: string) {
+  //   try {
+  //     const offer = await this.offerRepository.findOneBy({ id });
+  //     if (!offer) {
+  //       throw new NotFoundException(AppStrings.NOT_FOUND);
+  //     }
 
-      const { affected } = await this.offerRepository.update(id, {
-        status: OfferListEnum.ACTIVE,
-      });
-      if (affected > 0) {
-        return await this.offerRepository.findOneByOrFail({ id: offer.id });
-      }
-    } catch (error) {
-      this.logger.log(error);
+  //     const { affected } = await this.offerRepository.update(id, {
+  //       status: OfferListEnum.ACTIVE,
+  //     });
+  //     if (affected > 0) {
+  //       return await this.offerRepository.findOneByOrFail({ id: offer.id });
+  //     }
+  //   } catch (error) {
+  //     this.logger.log(error);
 
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        throw new BadRequestException(error);
-      }
-    }
-  }
+  //     if (error instanceof HttpException) {
+  //       throw error;
+  //     } else {
+  //       throw new BadRequestException(error);
+  //     }
+  //   }
+  // }
 
   async getMinimumOfferForAListingAndUser(
     offerPrice: number,
@@ -351,45 +355,50 @@ export class OfferService {
     try {
       const { id, listingId, ...rest } = updateOfferInput;
 
-      const [offer, scope, currentOffer, invoice, adminDefault] =
-        await Promise.all([
-          // Fetch offer and highest offer in a single query
-          this.offerRepository
-            .createQueryBuilder('offer')
-            .leftJoinAndSelect('offer.listing', 'listing')
-            .leftJoinAndSelect('listing.user', 'listingUser')
+      const [
+        offer,
+        notificationPreference,
+        currentOffer,
+        invoice,
+        adminDefault,
+      ] = await Promise.all([
+        // Fetch offer and highest offer in a single query
+        this.offerRepository
+          .createQueryBuilder('offer')
+          .leftJoinAndSelect('offer.listing', 'listing')
+          .leftJoinAndSelect('listing.user', 'listingUser')
 
-            .select([
-              'offer.id',
-              'offer.price',
-              'listing.id',
-              'listing.purpose',
-              'listingUser.id',
-              'listingUser.email',
-              'listingUser.firstName',
-              'listing.price',
-              'offer.createdAt',
-            ])
+          .select([
+            'offer.id',
+            'offer.price',
+            'listing.id',
+            'listing.purpose',
+            'listingUser.id',
+            'listingUser.email',
+            'listingUser.firstName',
+            'listing.price',
+            'offer.createdAt',
+          ])
 
-            .addSelect((subQuery) => {
-              return subQuery
-                .select('MAX(offerSub.price)', 'maxPrice')
-                .from(Offer, 'offerSub')
-                .where('offerSub.listingId = :listingId', { listingId });
-            }, 'maxPrice')
-            .where('offer.id = :id', { id })
-            .getRawOne(),
+          .addSelect((subQuery) => {
+            return subQuery
+              .select('MAX(offerSub.price)', 'maxPrice')
+              .from(Offer, 'offerSub')
+              .where('offerSub.listingId = :listingId', { listingId });
+          }, 'maxPrice')
+          .where('offer.id = :id', { id })
+          .getRawOne(),
 
-          // Fetch notification preference
-          this.notificationScopeRepository.findOne({
-            where: { name: NotificationScopeEnum.OFFERS },
-          }),
-          this.offerRepository.findOneBy({ id }),
-          this.invoiceRepository.findOne({
-            where: { reference: updateOfferInput.reference },
-          }),
-          this.adminDefaultService.adminDefault(),
-        ]);
+        // Fetch notification preference
+        this.notificationScopeRepository.find({
+          where: { name: NotificationScopeEnum.OFFERS },
+        }),
+        this.offerRepository.findOneBy({ id }),
+        this.invoiceRepository.findOne({
+          where: { reference: updateOfferInput.reference },
+        }),
+        this.adminDefaultService.adminDefault(),
+      ]);
       const { maxPrice } = offer;
       const highestOfferPrice = maxPrice || 0;
 
@@ -498,6 +507,14 @@ export class OfferService {
           sumTotalVat: vat,
           sumTotalWithVat: updatedOffer.price,
         };
+
+        const scope: NotificationScope = notificationPreference.find(
+          (element) => {
+            if (element.scopeGroup == NotificationScopeEnum.OFFERS) {
+              return element;
+            }
+          },
+        );
 
         this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
           creatorId: user.id,

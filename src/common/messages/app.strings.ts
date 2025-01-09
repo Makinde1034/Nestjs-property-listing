@@ -84,7 +84,8 @@ export const AppStrings = {
   LISTING_TYPE_NOT_FOUND: 'Listing Type  was not found.',
 
   UPLOAD_SUCCESSFUL: 'Upload successful',
-  LISTING_IS_NOT_NEGOTIABLE: 'listing is not negotiable',
+  LISTING_IS_NOT_NEGOTIABLE:
+    'Invalid offer price because listing is not negotiable',
 
   INTERNAL_SERVER_EXCEPTION:
     'Something went wrong on our server. We are working to fix it',

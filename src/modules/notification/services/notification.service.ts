@@ -125,6 +125,9 @@ export class NotificationService {
       const specificEvent = notificationInput.event ?? event;
 
       // Fetch buyer and seller notification preferences for the given scope
+
+      console.log(scope);
+
       const [buyerPref, sellerPref] = await Promise.all([
         this.userNotificationPreference.findOne({
           where: { user: { id: creatorId }, scope: { id: scope.id } },
@@ -176,6 +179,7 @@ export class NotificationService {
         );
       }
     } catch (error) {
+      console.log(error);
       this.logger.error('Error sending notification:', error);
       throw error; // Re-throw for caller to handle
     }

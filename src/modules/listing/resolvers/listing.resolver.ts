@@ -362,11 +362,6 @@ export class ListingResolver {
   ) {
     return await this.offerService.createAnOffer(createOfferDto, ctx.req.user);
   }
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
-  @Mutation(() => Offer, { name: 'finalizeOffer', nullable: true })
-  async finalizeOffer(@Args('id') id: string) {
-    return await this.offerService.finalizeOffer(id);
-  }
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Query(() => Offer, { name: 'getLastOfferPrice', nullable: true })

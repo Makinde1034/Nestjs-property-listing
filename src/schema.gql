@@ -1586,7 +1586,6 @@ type Mutation {
   approveListing(listingActionInput: ListingActionApprovalInput!): SuccessResponse!
   rejectListing(listingActionInput: ListingActionApprovalInput!): SuccessResponse!
   createOffer(createOfferDto: CreateOfferDto!): Offer
-  finalizeOffer(id: String!): Offer
   updateOffer(updateOfferInput: UpdateOfferInput!): Offer
   acceptOffer(updateOfferInput: UpdateOfferInput!): Offer
   rejectOffer(updateOfferInput: UpdateOfferInput!): Offer
@@ -2070,7 +2069,7 @@ input ListingStatusApproval {
 
 input CreateOfferDto {
   price: Float!
-  expireAt: DateTime!
+  expireAt: DateTime
   coupon: Boolean
   couponCode: String
   listingId: String!

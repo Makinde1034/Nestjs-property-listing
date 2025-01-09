@@ -149,6 +149,8 @@ export class AuthService {
    * @param {User} user
    */
   async sendRegisterConfirmEmail(user: User) {
+    console.log(this.frontEndUrl);
+
     const { email } = user;
     const { token } = await this.userService.generateUserConfirmation(user);
 

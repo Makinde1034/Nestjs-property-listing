@@ -24,7 +24,6 @@ services:
     depends_on:
       - postgres
 
-  #
   # PostGIS-enabled Postgres DB
   #
   postgres:
