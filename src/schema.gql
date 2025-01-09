@@ -1586,7 +1586,6 @@ type Mutation {
   approveListing(listingActionInput: ListingActionApprovalInput!): SuccessResponse!
   rejectListing(listingActionInput: ListingActionApprovalInput!): SuccessResponse!
   createOffer(createOfferDto: CreateOfferDto!): Offer
-  finalizeOffer(id: String!): Offer
   updateOffer(updateOfferInput: UpdateOfferInput!): Offer
   acceptOffer(updateOfferInput: UpdateOfferInput!): Offer
   rejectOffer(updateOfferInput: UpdateOfferInput!): Offer
