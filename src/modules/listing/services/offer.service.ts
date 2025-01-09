@@ -184,7 +184,13 @@ export class OfferService {
       };
 
       //TODO: switch to event emitter
-      this.paymentService.finalizeInvoice(invoice, data, user, listing);
+      this.paymentService.finalizeInvoice(
+        invoice,
+        data,
+        user,
+        listing,
+        offerPayload,
+      );
 
       // Find the Scope available for application
       const notificationPreference =

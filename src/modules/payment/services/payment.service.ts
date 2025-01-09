@@ -42,6 +42,7 @@ import { TransactionType } from '../../../common/enums/payment.enum';
 import { PaymentStatus } from '../../../common/enums/status.enum';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { Invoice } from '../../../entities/invoice.entity';
+import { Offer } from '../../../entities/offer.entity';
 
 @Injectable()
 export class PaymentService {
@@ -200,6 +201,7 @@ export class PaymentService {
     data?: PdfInput,
     user?: User,
     listing?: Listing,
+    offer?: Offer,
   ) {
     try {
       const payload: CreateInvoiceInput = {
