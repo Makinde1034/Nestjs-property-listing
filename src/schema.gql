@@ -2070,7 +2070,7 @@ input ListingStatusApproval {
 
 input CreateOfferDto {
   price: Float!
-  expireAt: DateTime!
+  expireAt: DateTime
   coupon: Boolean
   couponCode: String
   listingId: String!

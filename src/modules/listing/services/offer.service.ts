@@ -117,9 +117,9 @@ export class OfferService {
           listing.purpose,
         );
 
-      if (!listing.negotiable) {
-        throw new BadRequestException(AppStrings.LISTING_IS_NOT_NEGOTIABLE);
-      }
+      // if (!listing.negotiable  ) {
+      //   throw new BadRequestException(AppStrings.LISTING_IS_NOT_NEGOTIABLE);
+      // }
 
       if (offerExpiry <= new Date()) {
         throw new BadRequestException('Expiry Date is in the past');
