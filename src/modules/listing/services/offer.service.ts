@@ -134,11 +134,11 @@ export class OfferService {
         );
       }
 
-      // if (user.id == listing.user.id) {
-      //   throw new BadRequestException(
-      //     'The creator of a listing cannot create an offer on  that listing',
-      //   );
-      // }
+      if (user.id == listing.user.id) {
+        throw new BadRequestException(
+          'The creator of a listing cannot create an offer on  that listing',
+        );
+      }
 
       if (listing.negotiable && offer.length > 0) {
         throw new BadRequestException(
@@ -391,7 +391,7 @@ export class OfferService {
 
         // Fetch notification preference
         this.notificationScopeRepository.find({
-          where: { name: NotificationScopeEnum.OFFERS },
+          where: { scopeGroup: NotificationScopeEnum.OFFERS },
         }),
         this.offerRepository.findOneBy({ id }),
         this.invoiceRepository.findOne({
@@ -604,22 +604,25 @@ export class OfferService {
             .returning(['id', 'status']) // Fetch updated fields right after the update
             .execute();
 
-          if (!updateResult.affected) {
-            throw new BadRequestException('Failed to update offer status');
-          }
-
           // Fetch notification preference only if offer update is successful
-          const notificationPreference = await entityManager.findOne(
+          const notificationPreference = await entityManager.find(
             NotificationScope,
             {
-              where: { name: NotificationScopeEnum.OFFERS },
+              where: { scopeGroup: NotificationScopeEnum.OFFERS },
+            },
+          );
+          const scope: NotificationScope = notificationPreference.find(
+            (element) => {
+              if (element.scopeGroup == NotificationScopeEnum.OFFERS) {
+                return element;
+              }
             },
           );
 
           this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
             creatorId: user.id,
             receiverId: offer.listing.user.id,
-            scope: notificationPreference,
+            scope: scope,
             event: 'If Accepted Offer',
             metadata: JSON.stringify(offer),
 
@@ -684,10 +687,6 @@ export class OfferService {
             .returning(['id', 'status']) // Fetch updated fields right after the update
             .execute();
 
-          if (!updateResult.affected) {
-            throw new BadRequestException('Failed to update offer status');
-          }
-
           const invoice = await this.invoiceRepository.findOneBy({
             offerId: updateOfferInput.id,
           });
@@ -698,17 +697,25 @@ export class OfferService {
           });
 
           // Fetch notification preference only if offer update is successful
-          const notificationPreference = await entityManager.findOne(
+          const notificationPreference = await entityManager.find(
             NotificationScope,
             {
-              where: { name: NotificationScopeEnum.OFFERS },
+              where: { scopeGroup: NotificationScopeEnum.OFFERS },
+            },
+          );
+
+          const scope: NotificationScope = notificationPreference.find(
+            (element) => {
+              if (element.scopeGroup == NotificationScopeEnum.OFFERS) {
+                return element;
+              }
             },
           );
 
           this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
             creatorId: user.id,
             receiverId: offer.listing.user.id,
-            scope: notificationPreference,
+            scope: scope,
             event: 'Update',
             metadata: JSON.stringify(offer),
 
