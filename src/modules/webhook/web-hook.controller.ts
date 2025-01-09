@@ -22,7 +22,7 @@ import { WebhookService } from './services/web-hook.services';
 import { Public } from '../auth/decorators/permision.decorator';
 import { SseService } from '../sse/client.service';
 import { WebHookResponse } from './dto/wehook.response';
-@Controller()
+@Controller('webhook')
 export class WebHookController {
   private webhookConfig: WebhookConfig;
   constructor(
@@ -34,7 +34,7 @@ export class WebHookController {
     );
   }
   logger = new Logger(WebHookController.name);
-  @Post('webhook/payment')
+  @Post('payment')
   @Public()
   @HttpCode(200)
   payment(
@@ -52,7 +52,7 @@ export class WebHookController {
     return HttpStatus.OK;
   }
 
-  @Post('api/v1/user/iam')
+  @Post('iam')
   @Public()
   @HttpCode(200)
   User(@Body() data: any) {
