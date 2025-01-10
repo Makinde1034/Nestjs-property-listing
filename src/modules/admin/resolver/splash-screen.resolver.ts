@@ -11,7 +11,6 @@ import {
 } from '../dto/request/create-splash-screen';
 import { SplashScreenService } from '../services/splash-screen.service';
 import { SplashScreenResponse } from '../dto/response/splash-screen-response';
-import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { UseGuards } from '@nestjs/common';
 import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
 import {
@@ -67,6 +66,7 @@ export class SplashScreenResolver {
       ctx.req.user,
     );
   }
+
   @Permissions(PermissionsEnum.KNOWLEDGE_BASE_DELETE)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Mutation(() => SuccessResponse, { name: 'deleteSplashScreen' })

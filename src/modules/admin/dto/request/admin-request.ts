@@ -131,12 +131,14 @@ export class DeleteSplashScreenInput {
 
 @InputType()
 export class SplashScreenFilterInput extends PaginateAndSort {
+  @IsOptional()
   @IsEnum(TimePeriod)
-  @Field()
+  @Field({ nullable: true })
   timePeriod: string;
 
+  @IsOptional()
   @IsString()
-  @Field()
+  @Field({ nullable: true })
   placement: string;
 }
 
