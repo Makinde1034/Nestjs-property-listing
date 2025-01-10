@@ -38,6 +38,9 @@ import {
   endOfMonth,
   startOfYear,
   endOfYear,
+  subMonths,
+  subWeeks,
+  subYears,
 } from 'date-fns';
 import { AdminWorkflowService } from './admin-workflow.service';
 import { ActionService } from './action.service';
@@ -135,40 +138,31 @@ export class SplashScreenService {
   ): Promise<{ splashScreen: SplashScreen[]; total: number }> {
     try {
       const now = new Date();
-      let startDate: Date, endDate: Date;
+      let whereCondition = {};
 
-      // Precompute date ranges based on the time period
-      switch (findOption.timePeriod) {
-        case 'today':
-          startDate = startOfDay(now);
-          endDate = endOfDay(now);
-          break;
-        case 'week':
-          startDate = startOfWeek(now);
-          endDate = endOfWeek(now);
-          break;
-        case 'month':
-          startDate = startOfMonth(now);
-          endDate = endOfMonth(now);
-          break;
-        case 'year':
-          startDate = startOfYear(now);
-          endDate = endOfYear(now);
-          break;
-        default:
-          throw new BadRequestException('Invalid time period');
+      const dateField = 'createdAt';
+
+      const timePeriods: Record<string, [Date, Date]> = {
+        today: [startOfDay(now), endOfDay(now)],
+        week: [subWeeks(now, 1), now],
+        month: [subMonths(now, 1), now],
+        year: [subYears(now, 1), now],
+      };
+
+      const period = timePeriods[findOption.timePeriod];
+      if (period) {
+        whereCondition[dateField] = Between(...period);
+      } else {
+        throw new Error(`Unsupported time period: ${findOption.timePeriod}`);
       }
 
       const queryBuilder =
         this.splashScreenRepository.createQueryBuilder('splash_screen');
-
       queryBuilder
         // Fetch only necessary fields
-        .where('splash_screen.createdAt BETWEEN :startDate AND :endDate', {
-          startDate,
-          endDate,
-        })
-        .orderBy('splash_screen.createdAt', 'DESC') // Add index-friendly ordering
+        .where(whereCondition)
+        .orderBy('splash_screen.createdAt', 'DESC')
+        // Add index-friendly ordering
         .take(Math.min(findOption.take ?? 20, 20)) // Enforce max limit
         .skip(findOption.skip ?? 0); // Pagination
 

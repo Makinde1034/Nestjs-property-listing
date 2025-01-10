@@ -1277,8 +1277,8 @@ input SplashScreenFilterInput {
   sortField: String
   directionToSort: SortOrder
   where: WhereOption
-  timePeriod: String!
-  placement: String!
+  timePeriod: String
+  placement: String
 }
 
 enum SortOrder {
