@@ -1398,4 +1398,16 @@ export const permissionFactory = [
     staffAccess: true,
     remarks: null,
   },
+  {
+    category: 'Platform',
+    functionDescription: 'Finalize request',
+    englishLabel: 'Request finalizer',
+    arabicLabel: 'المُصَفِّي الطَّلَب',
+    useFlag: true,
+    approveFlag: null,
+    individualAccess: null,
+    companyAccess: null,
+    staffAccess: true,
+    remarks: null,
+  },
 ];

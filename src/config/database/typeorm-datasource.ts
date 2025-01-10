@@ -12,7 +12,7 @@ import { Logger } from '@nestjs/common';
  * This data source is used for Typeorm migration that runs outside of Nestjs
  */
 
-config({ path: process.env.NODE_ENV === 'test' ? '.env.test' : '.env' });
+config({ path: process.env.NODE_ENV === 'production' ? '.env' : '.env.local' });
 
 const connectionSource = {
   ...typeOrmPostgresOptions,
