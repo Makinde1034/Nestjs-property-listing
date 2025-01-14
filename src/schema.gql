@@ -1548,6 +1548,7 @@ type Mutation {
   updateSplashScreen(updateSplashScreenInput: UpdateSplashScreenInput!): SuccessResponse!
   deleteSplashScreen(deleteSplashScreenInput: DeleteSplashScreenInput!): SuccessResponse!
   register(RegisterInput: RegisterInput!): User!
+  resetPasswordAdmin(ResetInput: UserActionInput!): SuccessResponse!
   registerConfirm(RegisterConfirmInput: AuthRegisterConfirmDto!): String!
   login(loginInput: LoginInput!): LoginResponse!
   biometricRegister(RequestInput: BiometricRegister!): LoginResponse!
@@ -1559,7 +1560,6 @@ type Mutation {
   profileUpdate(RequestInput: UserProfileInput!): User!
   updateTerm: SuccessResponse!
   forceUpdate(version: String!): SuccessResponse!
-  resetPasswordAdmin(ResetInput: UserActionInput!): SuccessResponse!
   createStaff(RequestInput: CreateStaffInput!): SuccessResponse!
   staffConfirmation(RequestInput: StaffConfirmDto!): String!
   upgradeUser(userUpgradeInput: UserUpgradeInput!): NafathAuthenticationResponseToUser!
@@ -1719,6 +1719,11 @@ input CompanyInput {
   crNumber: String!
 }
 
+input UserActionInput {
+  userId: [String!]!
+  action: Boolean!
+}
+
 input AuthRegisterConfirmDto {
   email: String!
   token: String!
@@ -1775,11 +1780,6 @@ input IdentityInput {
   type: String!
   identityNumber: String!
   dateOfExpiry: DateTime!
-}
-
-input UserActionInput {
-  userId: [String!]!
-  action: Boolean!
 }
 
 input CreateStaffInput {

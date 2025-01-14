@@ -128,16 +128,6 @@ export class UserResolver {
     return await this.userService.forceUpdate(version);
   }
 
-  @Permissions(PermissionsEnum.USER_MANAGEMENT_RESET_PASSWORD)
-  @UseGuards(AccessTokenGuard, PermissionsGuard)
-  @Mutation(() => SuccessResponse)
-  async resetPasswordAdmin(
-    @Args('ResetInput') ResetInput: UserActionInput,
-    @Context() ctx: any,
-  ): Promise<SuccessResponse> {
-    return await this.userService.resetPassword(ResetInput, ctx.req.user);
-  }
-
   /**
    * Create Staff User Profile
    * @async
