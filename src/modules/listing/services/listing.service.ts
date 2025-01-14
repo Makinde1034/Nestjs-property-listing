@@ -1133,6 +1133,7 @@ export class ListingService {
   async getListingForAdmin(paginateAndSort: AdminFilterAndSort) {
     const now = new Date();
     const whereCondition: any = {};
+
     const dateField = 'createdAt';
 
     let sortField;
@@ -1146,6 +1147,9 @@ export class ListingService {
       if (!['ASC', 'DESC'].includes(directionToSort)) {
         throw new Error(`Invalid sort direction: ${directionToSort}`);
       }
+    } else {
+      sortField = dateField;
+      directionToSort = paginateAndSort['DESC'].toUpperCase() as 'ASC' | 'DESC';
     }
 
     const timePeriods: Record<string, [Date, Date]> = {

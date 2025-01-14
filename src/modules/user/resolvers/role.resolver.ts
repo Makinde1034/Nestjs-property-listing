@@ -8,7 +8,7 @@ import { RoleService } from '../services';
 import { Role, Permission } from 'src/entities';
 import { UseGuards } from '@nestjs/common';
 import { AccessTokenGuard, PermissionsGuard } from 'src/modules/auth/guards';
-import { Permissions } from 'src/common/decorator/permission';
+import { PERMISSION_KEY, Permissions } from 'src/common/decorator/permission';
 import {
   DeleteRolesInput,
   RoleData,
@@ -17,6 +17,7 @@ import {
 } from '../dtos/request';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
+import { PermissionsEnum } from '../../../common/enums/permission.enum';
 
 @Resolver()
 export class RoleResolver {
@@ -41,20 +42,21 @@ export class RoleResolver {
    * @returns {Promise<RoleData[]>}
    */
   @Query(() => [RoleData], { name: 'roles' })
-  @Permissions('read-role')
+  @Permissions(PermissionsEnum.ROLES_VIEW)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async fetchRoles(): Promise<RoleData[]> {
     return await this.roleService.findAllRoles();
   }
 
   @Query(() => [Role], { name: 'searchForRoles' })
-  @UseGuards(AccessTokenGuard)
+  @Permissions(PermissionsEnum.ROLES_CREATE)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
   async searchForRole(@Args('searchParam') searchParam: string) {
     return await this.roleService.searchForRole(searchParam);
   }
 
   @Query(() => [Role], { name: 'rolesAndUser' })
-  @Permissions('read-role')
+  @Permissions(PermissionsEnum.ROLES_VIEW)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async fetchRolesAndUsers(
     @Args('paginateAndSort') paginateAndSort: PaginateAndSort,
@@ -69,7 +71,7 @@ export class RoleResolver {
    * @returns {Promise<Role>}
    */
   @Mutation(() => Role)
-  @Permissions('create-role')
+  @Permissions(PermissionsEnum.ROLES_CREATE)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async createRole(
     @Context() ctx: any,
@@ -86,7 +88,7 @@ export class RoleResolver {
    * @returns {Promise<Role>}
    */
   @Mutation(() => Role)
-  @Permissions('update-role')
+  @Permissions(PermissionsEnum.ROLES_EDIT)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async updateRole(
     @Context() ctx: any,
@@ -103,7 +105,7 @@ export class RoleResolver {
    * @returns {Promise<string>}
    */
   @Mutation(() => SuccessResponse)
-  @Permissions('delete-role')
+  @Permissions(PermissionsEnum.ROLES_DELETE)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async deleteRole(
     @Context() ctx: any,
@@ -118,12 +120,14 @@ export class RoleResolver {
    */
   @Query(() => [Role])
   @UseGuards(AccessTokenGuard)
+  @Permissions(PermissionsEnum.ROLES_VIEW)
   async getUserRoles(@Context() ctx: any): Promise<Role[]> {
     return await this.roleService.fetchUserRoles(ctx.req.user);
   }
 
   @Query(() => Role)
   @UseGuards(AccessTokenGuard)
+  @Permissions(PermissionsEnum.ROLES_VIEW)
   async getRole(@Args('id') id: number): Promise<Role> {
     return await this.roleService.findRole(id);
   }

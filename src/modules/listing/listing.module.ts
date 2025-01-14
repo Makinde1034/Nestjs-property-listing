@@ -69,6 +69,7 @@ import {
   RoleRepository,
   UserRepository,
 } from '../user/repositories';
+import { FinalizationRepository } from './repositories/finalization.repository';
 
 @Module({
   imports: [
@@ -132,6 +133,7 @@ import {
     PlaceRepository,
     RoleRepository,
     UserRepository,
+    FinalizationRepository,
   ],
   exports: [ListingTypeService],
 })

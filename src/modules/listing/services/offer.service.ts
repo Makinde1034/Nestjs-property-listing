@@ -42,6 +42,8 @@ import { AuctionParticipantRepository } from '../repositories/auction-participan
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { NotificationEvent, Purpose } from '../../../common/enums';
 import { InvoiceRepository } from '../../payment/repositories/invoice.repository';
+import { FinalizationRepository } from '../repositories/finalization.repository';
+import { FinalizationInput } from '../dtos/request/finalizationOffer';
 
 @Injectable()
 export class OfferService {
@@ -56,6 +58,8 @@ export class OfferService {
     private readonly auctionParticipantRepository: AuctionParticipantRepository,
     private readonly eventEmiter: EventEmitter2,
     private readonly invoiceRepository: InvoiceRepository,
+
+    private readonly finalizationRepository: FinalizationRepository,
   ) {}
   logger = new Logger(OfferService.name);
 
@@ -221,32 +225,36 @@ export class OfferService {
     }
   }
 
-  /************************
-   * To be removed
-   ************************/
-  // async finalizeOffer(id: string) {
-  //   try {
-  //     const offer = await this.offerRepository.findOneBy({ id });
-  //     if (!offer) {
-  //       throw new NotFoundException(AppStrings.NOT_FOUND);
-  //     }
+  async finalizeOffer(finalizationInput: FinalizationInput) {
+    try {
+      const { id, ...rest } = finalizationInput;
+      const offer = await this.offerRepository.findOneBy({ id });
+      if (!offer) {
+        throw new NotFoundException(AppStrings.NOT_FOUND);
+      }
 
-  //     const { affected } = await this.offerRepository.update(id, {
-  //       status: OfferListEnum.ACTIVE,
-  //     });
-  //     if (affected > 0) {
-  //       return await this.offerRepository.findOneByOrFail({ id: offer.id });
-  //     }
-  //   } catch (error) {
-  //     this.logger.log(error);
+      const finilization = await this.finalizationRepository.findOne({
+        where: { offerId: offer.id },
+      });
 
-  //     if (error instanceof HttpException) {
-  //       throw error;
-  //     } else {
-  //       throw new BadRequestException(error);
-  //     }
-  //   }
-  // }
+      const data = await this.finalizationRepository.save({
+        offer,
+        ...finilization,
+        ...rest,
+      });
+      if (data) {
+        return new SuccessResponse();
+      }
+    } catch (error) {
+      this.logger.log(error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new BadRequestException(error);
+      }
+    }
+  }
 
   async getMinimumOfferForAListingAndUser(
     offerPrice: number,

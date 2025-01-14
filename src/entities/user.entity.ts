@@ -65,10 +65,6 @@ export class User extends BaseEntity {
   @OneToMany(() => ActionRequest, (request) => request.user)
   requests: ActionRequest[];
 
-  // @Field(() => [AcceptedTerms], { nullable: true })
-  // @OneToMany(() => AcceptedTerms, (term) => term.user, { nullable: true })
-  // Term: AcceptedTerms[];
-
   @Column({ nullable: true })
   @Field({ nullable: true })
   firstName: string;

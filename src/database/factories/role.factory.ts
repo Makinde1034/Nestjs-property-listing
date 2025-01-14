@@ -18,12 +18,4 @@ export const roleFactory: DeepPartial<Role[]> = [
     permissions: [],
     user: null,
   },
-  {
-    id: 2,
-    englishName: 'Request finalizer',
-    arabicName: 'المُصَفِّي الطَّلَب',
-    slug: 'request-finalizer',
-    permissions: [],
-    user: null,
-  },
 ];
