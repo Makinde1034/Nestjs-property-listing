@@ -79,6 +79,7 @@ import { Permissions } from '../../../common/decorator/permission';
 import { PermissionsEnum } from '../../../common/enums/permission.enum';
 import { BidRegistration } from '../../../entities/bid-registration.entity';
 import { AuctionBidRange } from '../../../entities/auction-bid-range.entity';
+import { FinalizationInput } from '../dtos/request/finalizationOffer';
 
 @Resolver()
 export class ListingResolver {
@@ -421,6 +422,14 @@ export class ListingResolver {
   @Mutation(() => SuccessResponse)
   async cancelOffer(@Args('id') id: string) {
     return await this.offerService.deleteOffer(id);
+  }
+
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Mutation(() => SuccessResponse)
+  async finalizeOffer(
+    @Args('finalizationInput') finalizationInput: FinalizationInput,
+  ) {
+    return await this.offerService.finalizeOffer(finalizationInput);
   }
 
   /**************************

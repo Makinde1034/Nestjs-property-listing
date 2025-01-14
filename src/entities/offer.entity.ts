@@ -21,6 +21,7 @@ import { Listing } from './listing.entity';
 import { OfferListEnum } from '../common/enums/status.enum';
 import { IsEnum } from 'class-validator';
 import { Invoice } from './invoice.entity';
+import { Finalization } from './finalization.entity';
 
 @ObjectType()
 @Entity()
@@ -103,4 +104,8 @@ export class Offer extends BaseEntity {
   @Field()
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Field(() => Finalization, { nullable: true })
+  @OneToOne(() => Finalization, (finalization) => finalization.offer)
+  finalization: Finalization;
 }

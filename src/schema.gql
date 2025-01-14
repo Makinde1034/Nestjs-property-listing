@@ -63,6 +63,19 @@ type Invoice {
   updatedAt: DateTime!
 }
 
+type Finalization {
+  id: ID!
+  sellerZatca: String!
+  sellerIban: String!
+  sellerBirthDate: String!
+  ownershipAmmount: Float!
+  zatca: String!
+  buyerIban: String!
+  buyerBirthDate: String!
+  offer: Offer
+  offerId: String!
+}
+
 type Offer {
   id: ID!
   price: Float!
@@ -83,6 +96,7 @@ type Offer {
   invoice: Invoice
   deletedAt: DateTime!
   updatedAt: DateTime!
+  finalization: Finalization
 }
 
 type AdPackage {
@@ -1590,6 +1604,7 @@ type Mutation {
   acceptOffer(updateOfferInput: UpdateOfferInput!): Offer
   rejectOffer(updateOfferInput: UpdateOfferInput!): Offer
   cancelOffer(id: String!): SuccessResponse!
+  finalizeOffer(finalizationInput: FinalizationInput!): SuccessResponse!
   createPromotion(createPromotionInput: CreatePromotionInput!): Promotion!
   addToWishlist(createWishlistInput: CreateWishlistInput!): Wishlist!
   removeFromWishlist(wishlistId: String!): SuccessResponse!
@@ -2084,6 +2099,17 @@ input UpdateOfferInput {
   listingId: String
   reference: String
   id: String!
+}
+
+input FinalizationInput {
+  id: String!
+  sellerZatca: String
+  sellerIban: String
+  sellerBirthDate: String
+  ownershipAmmount: Float
+  zatca: String
+  buyerIban: String
+  buyerBirthDate: String
 }
 
 input CreatePromotionInput {
