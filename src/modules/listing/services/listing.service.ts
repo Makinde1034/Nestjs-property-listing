@@ -1147,9 +1147,6 @@ export class ListingService {
       if (!['ASC', 'DESC'].includes(directionToSort)) {
         throw new Error(`Invalid sort direction: ${directionToSort}`);
       }
-    } else {
-      sortField = dateField;
-      directionToSort = paginateAndSort['DESC'].toUpperCase() as 'ASC' | 'DESC';
     }
 
     const timePeriods: Record<string, [Date, Date]> = {
@@ -1223,6 +1220,7 @@ export class ListingService {
             'listing.status',
             'listing.stage',
             'listing.isListingVerified',
+            'listing.createdAt',
           ])
           .leftJoin('listing.listingType', 'listingType')
           .leftJoin('listing.user', 'user')
