@@ -17,6 +17,8 @@ export enum knowledgeBaseNeedHelpPlacement {
   REQUEST_SERVICE = 'Request a Service',
   SERVICE_MARKED_DONE = 'Service Marked as Done',
   PROMOTING_LISTING = 'Promoting Listing',
+  COMPARE = 'Compare',
+  PAYMENT_SCRENN = 'Payment Screen',
 
   USER_AUTHENTICATION = 'User Authentication',
 
