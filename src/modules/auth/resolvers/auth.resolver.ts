@@ -22,10 +22,13 @@ import {
   TwoFaLoginInput,
   ConfirmationInput,
 } from '../dtos';
-import { AccessTokenGuard } from '../guards';
+import { AccessTokenGuard, PermissionsGuard } from '../guards';
 import { AuthService } from '../services/auth.service';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { Public } from '../decorators/permision.decorator';
+import { UserActionInput } from '../../user/dtos/request';
+import { PermissionsEnum } from '../../../common/enums/permission.enum';
+import { Permissions } from '../../../common/decorator/permission';
 
 @Resolver()
 export class AuthResolver {
@@ -44,6 +47,16 @@ export class AuthResolver {
     @Args('RegisterInput') inputDto: RegisterInput,
   ): Promise<User> {
     return await this.authService.register(inputDto);
+  }
+
+  @Permissions(PermissionsEnum.USER_MANAGEMENT_RESET_PASSWORD)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Mutation(() => SuccessResponse)
+  async resetPasswordAdmin(
+    @Args('ResetInput') ResetInput: UserActionInput,
+    @Context() ctx: any,
+  ): Promise<SuccessResponse> {
+    return await this.authService.resetPassword(ResetInput, ctx.req.user);
   }
 
   /**

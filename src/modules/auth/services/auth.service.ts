@@ -6,6 +6,7 @@
 import {
   BadRequestException,
   ForbiddenException,
+  Global,
   HttpException,
   HttpStatus,
   Injectable,
@@ -51,6 +52,11 @@ import { UserService } from '../../user/services/user.service';
 import { RecaptchaValidator } from './recaptcha.validator';
 import { TwoFactorAuthenticationService } from './two-fa-auth.service';
 import { SuccessResponse } from '../../../common/utils/success.response';
+import { In } from 'typeorm';
+import { ActivityEnum } from '../../../common/enums/activitys';
+import { generateRandomToken } from '../../../common/utils/functions';
+import { UserActionInput, StaffCreatedData } from '../../user/dtos/request';
+import { ActivityLogService } from '../../activity-log/services/activity-log.service';
 
 @Injectable()
 export class AuthService {
@@ -67,6 +73,9 @@ export class AuthService {
     private readonly recaptchaValidator: RecaptchaValidator,
     private readonly twoFactorAuthenticationService: TwoFactorAuthenticationService,
     private readonly userRepository: UserRepository,
+
+    private readonly activityLogsService: ActivityLogService,
+    private readonly usersRepository: UserRepository,
   ) {
     this.frontEndUrl = this.configService.get('FRONT_END_URL');
     this.adminUrl = this.configService.get('ADMIN_FRONTEND_URL');
@@ -118,6 +127,82 @@ export class AuthService {
       this.logger.log({ error });
       throw new BadRequestException(error);
     }
+  }
+
+  async resetPassword(
+    requestInput: UserActionInput,
+    admin: User,
+  ): Promise<SuccessResponse> {
+    const { userId } = requestInput;
+    const notFoundIds: string[] = [];
+
+    // Ensure userId is an array of strings
+    if (!Array.isArray(userId)) {
+      throw new BadRequestException('Invalid user ID format');
+    }
+
+    // Fetch users with the provided IDs
+    const users = await this.usersRepository.find({
+      where: { id: In(userId) },
+    });
+
+    // Determine which user IDs were not found
+    if (users.length < userId.length) {
+      const foundUserIds = users.map((user) => user.id);
+      notFoundIds.push(...userId.filter((id) => !foundUserIds.includes(id)));
+    }
+
+    // Concurrently update each user
+    const updatePromises = users.map(async (user) => {
+      // Remove the password property before saving
+      delete user.password;
+
+      // Save the user with a new password
+      await this.usersRepository.save({
+        ...user,
+        password: generateRandomToken(),
+      });
+
+      const activityToSave = users.map((element) => {
+        return {
+          adminId: admin.id,
+          action: ActivityEnum.UPDATED,
+          details: JSON.stringify(element),
+          userId: element.id,
+        };
+      });
+
+      await this.activityLogsService.logActivity(activityToSave);
+
+      // Prepare the data for sending the email
+      const updatedUser: StaffCreatedData = {
+        staff: user,
+      };
+
+      // Send the password email
+      this.requestPasswordReset({ email: updatedUser.staff.email });
+    });
+
+    try {
+      // Execute all updates concurrently
+      await Promise.all(updatePromises);
+    } catch (error) {
+      // Log and handle any errors
+      this.logger.error('Error resetting passwords:', error);
+      throw new BadRequestException('Failed to reset passwords for some users');
+    }
+
+    // Handle not found IDs
+    if (notFoundIds.length > 0) {
+      throw new BadRequestException(
+        'There was a problem performing this action on some users',
+      );
+    }
+
+    // Return success response
+    return new SuccessResponse(
+      'You have successfully reset the passwords for the selected users',
+    );
   }
 
   /**
