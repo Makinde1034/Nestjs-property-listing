@@ -126,8 +126,6 @@ export class NotificationService {
 
       // Fetch buyer and seller notification preferences for the given scope
 
-      console.log(scope);
-
       const [buyerPref, sellerPref] = await Promise.all([
         this.userNotificationPreference.findOne({
           where: { user: { id: creatorId }, scope: { id: scope.id } },
@@ -155,7 +153,7 @@ export class NotificationService {
       const scopeName = scope.scopeGroup as NotificationScopeEnum;
 
       if (notificationScopes.has(scopeName)) {
-        // Fetch messages relevant to the scope and event
+        // Fetch messages relevant tBodyo the scope and event
         const messages = await this.notificationMesageRepository.find({
           where: {
             scope: scope.scopeGroup,
@@ -179,8 +177,7 @@ export class NotificationService {
         );
       }
     } catch (error) {
-      console.log(error);
-      this.logger.error('Error sending notification:', error);
+      this.logger.debug('Error sending notification:', error);
       throw error; // Re-throw for caller to handle
     }
   }
@@ -334,30 +331,34 @@ export class NotificationService {
           count,
           messages,
         );
-        const subject: string =
-          user.language === 'en'
-            ? messageData?.title
-            : messageData?.arabicTitle;
-        const text =
-          user.language === 'en' ? messageData?.body : messageData?.arabicBody;
+        if (messageData) {
+          const subject: string =
+            user.language === 'en'
+              ? messageData?.title
+              : messageData?.arabicTitle;
+          const text =
+            user.language === 'en'
+              ? messageData?.body
+              : messageData?.arabicBody;
 
-        const payload: MessageEvent = {
-          type: ServerSentEvents.SUCCESS,
-          data: {
-            subject: subject,
-            text: text,
-          },
-        };
+          const payload: MessageEvent = {
+            type: ServerSentEvents.SUCCESS,
+            data: {
+              subject: subject,
+              text: text,
+            },
+          };
 
-        this.sseService.sendEvent(user.id, payload);
-        this.saveNotificationLog({
-          title: subject,
-          category: messageData.scope,
-          subCategory: messageData.event,
-          metadata: metadata,
-          message: text,
-          type: NotificationType.SYSTEM_NOTIFICATION,
-        });
+          this.sseService.sendEvent(user.id, payload);
+          this.saveNotificationLog({
+            title: subject,
+            category: messageData.scope,
+            subCategory: messageData.event,
+            metadata: metadata,
+            message: text,
+            type: NotificationType.SYSTEM_NOTIFICATION,
+          });
+        }
       }
     } catch (error) {
       this.logger.log(error);
@@ -388,32 +389,35 @@ export class NotificationService {
           count,
           message,
         );
+        if (messageData) {
+          const subject: string =
+            user.language === 'en'
+              ? messageData?.title
+              : messageData?.arabicTitle;
+          const text =
+            user.language === 'en'
+              ? messageData?.body
+              : messageData?.arabicBody;
 
-        const subject: string =
-          user.language === 'en'
-            ? messageData?.title
-            : messageData?.arabicTitle;
-        const text =
-          user.language === 'en' ? messageData?.body : messageData?.arabicBody;
+          //Send mail
+          this.sendEmailNotification(
+            user,
+            {
+              title: subject,
+              message: text,
+            },
+            attachment,
+          );
 
-        //Send mail
-        this.sendEmailNotification(
-          user,
-          {
+          this.saveNotificationLog({
             title: subject,
             message: text,
-          },
-          attachment,
-        );
-
-        this.saveNotificationLog({
-          title: subject,
-          message: text,
-          category: messageData.scope,
-          subCategory: messageData.event,
-          metadata: metadata,
-          type: NotificationType.EMAIL_NOTIFICATION,
-        });
+            category: messageData.scope,
+            subCategory: messageData.event,
+            metadata: metadata,
+            type: NotificationType.EMAIL_NOTIFICATION,
+          });
+        }
       }
     } catch (error) {
       this.logger.log(error);
@@ -440,29 +444,33 @@ export class NotificationService {
         messages,
       );
 
-      const title =
-        user.language === 'en' ? messageData.title : messageData.arabicTitle;
-      const message =
-        user.language === 'en' ? messageData.body : messageData.arabicBody;
+      if (messageData) {
+        const title =
+          user.language === 'en'
+            ? messageData?.title
+            : messageData?.arabicTitle;
+        const message =
+          user.language === 'en' ? messageData?.body : messageData?.arabicBody;
 
-      this.sendPushNotification({
-        title,
-        message,
-        deviceType: '',
+        this.sendPushNotification({
+          title,
+          message,
+          deviceType: '',
 
-        notificationToken: user.notificationToken,
-        userId: user.id,
-        redirectLink: this.frontEndUrl,
-      });
+          notificationToken: user.notificationToken,
+          userId: user.id,
+          redirectLink: this.frontEndUrl,
+        });
 
-      this.saveNotificationLog({
-        title: title,
-        message: message,
-        category: messageData.scope,
-        subCategory: messageData.event,
-        metadata: metadata,
-        type: NotificationType.PUSH_NOTIFICATION,
-      });
+        this.saveNotificationLog({
+          title: title,
+          message: message,
+          category: messageData.scope,
+          subCategory: messageData.event,
+          metadata: metadata,
+          type: NotificationType.PUSH_NOTIFICATION,
+        });
+      }
     } catch (error) {
       this.logger.log(error);
     }
@@ -490,28 +498,40 @@ export class NotificationService {
     count?: number,
     messages?: NotificationMessages[],
   ) {
-    const filteredMessages = messages.filter(
-      (message) =>
-        message.scope === scope &&
-        message.event === event &&
-        message.recipients === recipient,
-    );
-
-    if (filteredMessages.length === 0) {
-      this.logger.log('No matching message found');
+    if (!messages || messages.length === 0) {
+      this.logger.log('Messages array is empty or undefined');
+      return null;
     }
 
-    const message = filteredMessages[0]; // Assuming we take the first match
+    console.log(scope, event, recipient);
+    console.log(messages);
+
+    const filteredMessages = messages.filter(
+      (message) =>
+        message.scope == scope &&
+        message.event == event &&
+        message.recipients == recipient,
+    );
+
+    console.log('here', filteredMessages);
+
+    if (filteredMessages.length < 1) {
+      this.logger.log('No matching message found');
+      return null; // Early return to avoid accessing undefined
+    }
+
+    const message = filteredMessages[0]; // Take the first matching message
 
     // Replace placeholders in the desired message's body
-    message.body = this.replacePlaceholders(message.body, { username, count });
-    message.arabicBody = this.replacePlaceholders(message.arabicBody, {
+    message.body = this.replacePlaceholders(message?.body, { username, count });
+    message.arabicBody = this.replacePlaceholders(message?.arabicBody, {
       username: arabicUsername,
       count,
     });
 
     return message;
   }
+
   replacePlaceholders(
     text: string,
     placeholders: { username: string; count?: number },
