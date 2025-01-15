@@ -295,9 +295,11 @@ export class UserService {
    * @returns {(Promise<User | null>)}
    */
   async findByEmailOrPhone(username: string): Promise<User | null> {
-    return await this.usersRepository.findOne({
-      where: [{ email: username }, { phone: username }],
-    });
+    return await this.usersRepository
+      .createQueryBuilder('user')
+      .where('user.email = :username', { username })
+      .orWhere('user.phone = :username', { username })
+      .getOne();
   }
 
   /**
