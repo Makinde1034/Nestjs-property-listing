@@ -15,13 +15,13 @@ import { TrackingMiddleware } from './common/interceptors/user-visit';
 import { UserTrackingService } from './modules/user/services/user.tracking.service';
 import { TimeoutMiddleware } from './common/interceptors/timeout.middleware';
 import { AppModule } from './app.module';
+import * as compression from 'compression';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: ['log', 'error', 'warn', 'debug', 'verbose'] as LogLevel[],
     forceCloseConnections: true,
   });
-
   const configService = app.get(ConfigService);
   const PORT = configService.get('PORT');
   const HOST = configService.get('HOST');
@@ -50,7 +50,12 @@ async function bootstrap() {
     const trackingMiddleware = new TrackingMiddleware(UsertrackingService);
     trackingMiddleware.use(req, res, next);
   });
-
+  app.use(
+    compression({
+      level: 6, // Compression level (1-9)
+      threshold: 1024, // Minimum response size in bytes
+    }),
+  );
   app.enableShutdownHooks();
   await app.listen(PORT, HOST);
 
