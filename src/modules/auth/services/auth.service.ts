@@ -336,16 +336,26 @@ export class AuthService {
     const { username, password, app } = loginDto;
 
     // Fetch user data and validate credentials in a single query
-    const user = await this.userRepository.findOne({
-      where: [{ email: username }, { phone: username }],
-    });
 
-    if (!user.verifiedAt) {
+    // Validate the user credentials
+    let user = await this.validateUserCredentials(username, password);
+    // Throw unauthorized error if the credential is invalid
+    if (!user) {
+      throw new UnauthorizedException(AppStrings.INCORRECT_CREDENTIALS);
+    } else if (!user.verifiedAt) {
+      // Throw Forbidden error if the user is not verified
       throw new ForbiddenException(AppStrings.UNCONFIRMED_ACCOUNT);
     }
-
-    // Validate app-specific login rules
+    // Allow Indiviudal/Company to login from Customer App
+    // Allow Admin/Staff to login from Admin App
     this.validateApp(user, app);
+
+    if (user.userType === 'admin') {
+      user = await this.userRepository.findOneOrFail({
+        where: { id: user.id },
+        relations: ['roles'],
+      });
+    }
 
     // Issue tokens and return user details
     const token = await this.issueTokens(user);
