@@ -5,16 +5,18 @@
 
 import { Field, ObjectType } from '@nestjs/graphql';
 import BaseEntity from './base.entity';
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, Index, ManyToOne } from 'typeorm';
 import { Listing } from './listing.entity';
 @Entity()
 @ObjectType()
 export class Place extends BaseEntity {
   @Field()
   @Column()
+  @Index()
   placeId: string;
 
   @Field()
+  @Index()
   @Column()
   type: string;
 

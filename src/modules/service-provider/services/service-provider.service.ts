@@ -339,6 +339,7 @@ export class ServiceAndProviderService {
       throw new BadRequestException(error);
     }
   }
+
   async findAllServices(paginateAndSort: PaginateAndSort) {
     try {
       const whereOption =
