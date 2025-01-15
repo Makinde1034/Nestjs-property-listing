@@ -2237,7 +2237,9 @@ export class ListingService {
       updatedListings.forEach((listing) => {
         this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
           creatorId: listing.userId,
-          scope,
+          category: scope.name,
+          metadata: JSON.stringify(listing),
+
           event: 'Approved',
           recipientFormat: ['Owner', null],
         });
@@ -2303,6 +2305,7 @@ export class ListingService {
         this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
           creatorId: element.userId,
           event: 'Denied',
+          metadata: JSON.stringify(listing),
 
           scope: scope,
           recipientFormat: ['Owner', null],

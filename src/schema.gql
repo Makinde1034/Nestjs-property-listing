@@ -1103,7 +1103,7 @@ type GroupTransactions {
 }
 
 type CouponResponse {
-  coupon: [Coupon!]!
+  coupon: [Coupon!]
   total: Float!
 }
 
