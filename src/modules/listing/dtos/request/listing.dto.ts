@@ -150,6 +150,7 @@ export class FlagListingInput {
 export class UserFilterAndSort extends PaginateAndSort {
   @Field({ nullable: true })
   @IsOptional()
+  @ValidateIf((o) => o.timePeriod)
   @IsEnum(TimePeriod)
   timePeriod: string;
 

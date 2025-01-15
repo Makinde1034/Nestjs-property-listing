@@ -361,7 +361,6 @@ export class AuthService {
     const token = await this.issueTokens(user);
     return { user, token };
   }
-
   /**
    * Validate user password
    *
