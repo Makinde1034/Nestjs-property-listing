@@ -171,7 +171,7 @@ export class TicketService {
       const agingCount = await this.ticketRepository
         .createQueryBuilder('ticket')
         .where(
-          `${quotedColumnName('createdAt')} < CURRENT_DATE - INTERVAL '4 days'`,
+          `${quotedColumnName('createdAt')} < CURRENT_DATE - INTERVAL '4 days'  AND ${quotedColumnName('status')} != :${TicketStatus.CLOSE} `,
         )
         .getCount();
 
