@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import * as firebase from 'firebase-admin';
 import {
   PushNotificationinput,
@@ -90,28 +90,38 @@ export class PushNotificationService {
     notification: PushNotificationinput,
     userId: string,
   ) {
-    const userNotificationToken =
-      await this.notificationTokenRepository.findOne({
-        where: {
-          userId: userId,
-        },
-      });
+    try {
+      const userNotificationToken =
+        await this.notificationTokenRepository.findOne({
+          where: {
+            userId: userId,
+          },
+        });
 
-    if (!userNotificationToken) {
-      await this.notificationTokenRepository.save({
-        status: false,
-        token: notification.notificationToken,
-        userId: userId,
-        device_type: notification.deviceType,
-      });
+      if (!userNotificationToken) {
+        await this.notificationTokenRepository.save({
+          status: false,
+          token: notification.notificationToken,
+          userId: userId,
+          deviceType: notification.deviceType,
+        });
+        return new SuccessResponse();
+      }
+      if (userNotificationToken?.deviceType != notification.deviceType) {
+        await this.notificationTokenRepository.update(
+          userNotificationToken.id,
+          {
+            token: notification.notificationToken,
+            deviceType: notification.deviceType,
+          },
+        );
+      }
       return new SuccessResponse();
+    } catch (error) {
+      console.log(error);
+
+      this.logger.log(error);
+      throw new BadRequestException(error);
     }
-    if (userNotificationToken?.deviceType != notification.deviceType) {
-      await this.notificationTokenRepository.update(userNotificationToken.id, {
-        token: notification.notificationToken,
-        deviceType: notification.deviceType,
-      });
-    }
-    return new SuccessResponse();
   }
 }

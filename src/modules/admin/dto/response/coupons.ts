@@ -14,7 +14,7 @@ export class CouponResponse {
 }
 @ObjectType()
 export class ValidCouponCouponResponse {
-  @Field(() => [Coupon])
+  @Field()
   valid: boolean;
   @Field()
   amount: number;
