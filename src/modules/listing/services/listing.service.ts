@@ -42,7 +42,6 @@ import {
   getLocationFromImage,
   haversine,
   isJsonString,
-  removeDaysFromDate,
 } from '../../../common/utils/helper';
 import { FlagListingRepository } from '../repositories/flag-listing.repository';
 import { AppStrings } from '../../../common/messages/app.strings';
@@ -51,19 +50,7 @@ import { I18nService } from 'nestjs-i18n';
 import { SearchHistoryRepository } from '../repositories/search-history.repository';
 import { CreateSearchHistoryInput } from '../dtos/request/create-search-history';
 
-import {
-  endOfDay,
-  endOfMonth,
-  endOfWeek,
-  endOfYear,
-  startOfDay,
-  startOfMonth,
-  startOfWeek,
-  startOfYear,
-  subMonths,
-  subWeeks,
-  subYears,
-} from 'date-fns';
+import { endOfDay, startOfDay, subMonths, subWeeks, subYears } from 'date-fns';
 import { FeatureRepository } from '../repositories/feature.repository';
 import { CreateFeatureInput } from '../dtos/request/feature-input';
 import { NotificationService } from '../../notification/services';
@@ -151,7 +138,6 @@ export class ListingService {
           }
         }
       });
-
       const gps = await this.gpsCoordinateRepository.save(gpsCoordinate);
       let place;
       if (places) {
@@ -311,22 +297,6 @@ export class ListingService {
       const result = listing.map((element) => {
         return this.transformListing(element);
       });
-
-      // Const notificationPreference =
-      //   Await this.notificationScopeRepository.find();
-      // Const scope: NotificationScope = notificationPreference.find(
-      //   (element) => {
-      //     If (element.name == NotificationScopeEnum.LISTING) {
-      //       Return element;
-      //     }
-      //   },
-      // );
-
-      // This.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
-      //   CreatorId: user.id,
-      //   Scope: scope,
-      //   RecipientFormat: ['Owner', null],
-      // });
 
       return { listing: result, total: count };
     } catch (error) {

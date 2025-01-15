@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, OneToOne } from 'typeorm';
 import BaseEntity from './base.entity';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Listing } from './listing.entity';
@@ -13,11 +13,14 @@ import { Listing } from './listing.entity';
 export class GpsCoordinate extends BaseEntity {
   @Column('double precision')
   @Field()
+  @Index()
   lat: number;
 
   @Column('double precision')
   @Field()
+  @Index()
   lng: number;
+
   @Column({ nullable: true })
   @Field({ nullable: true })
   placeId: string;

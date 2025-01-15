@@ -76,6 +76,7 @@ export class Listing extends BaseEntity {
     (serviceRequested) => serviceRequested.listing,
   )
   serviceRequested: ServiceRequested;
+
   @Field(() => AuctionParticipant)
   @OneToOne(() => AuctionParticipant, (listing) => listing.listing)
   auctionParticipant: AuctionParticipant;
@@ -94,6 +95,7 @@ export class Listing extends BaseEntity {
   listingType: ListingType;
 
   @Field({ nullable: true })
+  @Index()
   @Column()
   listingTypeId: string;
 
@@ -120,6 +122,7 @@ export class Listing extends BaseEntity {
   panoramaView: string;
 
   @Field(() => User, { nullable: true })
+  @Index()
   @JoinColumn({ name: 'userId' })
   @ManyToOne(() => User, (user) => user.listing)
   user: User;
@@ -130,6 +133,7 @@ export class Listing extends BaseEntity {
     onDelete: 'CASCADE',
   })
   offer: Offer[];
+
   @Column()
   @Index()
   @Field({ nullable: true })
@@ -270,6 +274,7 @@ export class Listing extends BaseEntity {
   @Field(() => [ActivityLog], { nullable: true })
   @OneToMany(() => ActivityLog, (activityLogs) => activityLogs.listing)
   listingActivityLogs: ActivityLog;
+
   @Field(() => [Place])
   @OneToMany(() => Place, (place) => place.listing)
   place: Place[];
