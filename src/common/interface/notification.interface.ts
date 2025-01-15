@@ -5,6 +5,7 @@
 
 import { Field, InputType } from '@nestjs/graphql';
 import { NotificationScope } from '../../entities';
+import { IsString } from 'class-validator';
 
 export interface EmailNotificationPayload {
   title: string;
@@ -20,8 +21,11 @@ export interface PushNotificationPayload extends EmailNotificationPayload {
 @InputType()
 export class PushNotificationinput {
   @Field()
+  @IsString()
   deviceType: string;
+
   @Field()
+  @IsString()
   notificationToken: string;
 }
 
