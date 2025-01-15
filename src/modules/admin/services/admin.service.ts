@@ -957,12 +957,12 @@ export class AdminService {
       const skip = couponFilterInput.skip || 0;
 
       // Execute query
-      const [coupons, total] = await baseQuery
+      const [coupon, total] = await baseQuery
         .take(take)
         .skip(skip)
         .getManyAndCount();
 
-      return { coupons, total };
+      return { coupon, total };
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error.message);
