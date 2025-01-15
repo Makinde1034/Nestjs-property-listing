@@ -355,6 +355,7 @@ export class NotificationService {
             category: messageData.scope,
             subCategory: messageData.event,
             metadata: metadata,
+            recipient: user,
             message: text,
             type: NotificationType.SYSTEM_NOTIFICATION,
           });
@@ -414,6 +415,8 @@ export class NotificationService {
             message: text,
             category: messageData.scope,
             subCategory: messageData.event,
+            recipient: user,
+
             metadata: metadata,
             type: NotificationType.EMAIL_NOTIFICATION,
           });
@@ -467,6 +470,7 @@ export class NotificationService {
           message: message,
           category: messageData.scope,
           subCategory: messageData.event,
+          recipient: user,
           metadata: metadata,
           type: NotificationType.PUSH_NOTIFICATION,
         });
@@ -512,8 +516,6 @@ export class NotificationService {
         message.event == event &&
         message.recipients == recipient,
     );
-
-    console.log('here', filteredMessages);
 
     if (filteredMessages.length < 1) {
       this.logger.log('No matching message found');
