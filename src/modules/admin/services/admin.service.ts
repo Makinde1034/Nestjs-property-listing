@@ -940,11 +940,11 @@ export class AdminService {
       // Add status filter
       let whereOption = '';
       if (couponFilterInput.status) {
-        whereOption = 'coupons.status = :status';
+        whereOption = 'coupon.status = :status';
       }
 
       const baseQuery = this.couponRepository
-        .createQueryBuilder('coupons')
+        .createQueryBuilder('coupon')
         .where(whereCondition);
 
       // Add dynamic whereOption condition if provided
