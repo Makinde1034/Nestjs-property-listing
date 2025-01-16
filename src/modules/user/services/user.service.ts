@@ -289,11 +289,11 @@ export class UserService {
 
   /**
    * Find by email or phone
-   *
    * @async
    * @param {string} username
    * @returns {(Promise<User | null>)}
    */
+
   async findByEmailOrPhone(username: string): Promise<User | null> {
     return await this.usersRepository
       .createQueryBuilder('user')

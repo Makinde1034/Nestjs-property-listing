@@ -18,15 +18,25 @@ const connectionSource = {
   ...typeOrmPostgresOptions,
   url: process.env.DATABASE_URL,
   seeds: ['dist/**/*.seeder{.ts,.js}'],
+  extra: {
+    max: 20, // Pool size: adjust based on your load
+    connectionTimeoutMillis: 2000, // Timeout for establishing a connection
+    idleTimeoutMillis: 10000, // Timeout for idle connections
+  },
 };
 
 const AppDataSource = new DataSource(connectionSource as DataSourceOptions);
-AppDataSource.initialize()
-  .then(() => {
-    Logger.log('Data Source has been initialized!!');
-  })
-  .catch((err) => {
-    Logger.error('Error during Data Source initialization', err);
-  });
+
+async function initializeDataSource() {
+  try {
+    await AppDataSource.initialize();
+    Logger.log('Data Source has been initialized!', 'DatabaseConnection');
+  } catch (err) {
+    Logger.error('Error during Data Source initialization, retrying...', err);
+    setTimeout(initializeDataSource, 5000); // Retry after 5 seconds
+  }
+}
+
+initializeDataSource();
 
 export default AppDataSource;
