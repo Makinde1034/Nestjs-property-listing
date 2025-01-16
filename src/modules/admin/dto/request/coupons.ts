@@ -60,7 +60,6 @@ export class CreateCouponInput {
   @IsDate()
   endDate: Date;
 }
-
 @InputType()
 export class UpdateCouponInput extends PartialType(CreateCouponInput) {
   @Field()
