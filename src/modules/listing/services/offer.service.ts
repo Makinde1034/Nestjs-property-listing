@@ -122,7 +122,7 @@ export class OfferService {
         );
 
       if (
-        (listing.negotiable && listing.price < createOfferDto.price) ||
+        (!listing.negotiable && listing.price < createOfferDto.price) ||
         createOfferDto.price < listing.price
       ) {
         throw new BadRequestException(AppStrings.LISTING_IS_NOT_NEGOTIABLE);
