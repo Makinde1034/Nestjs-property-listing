@@ -888,10 +888,14 @@ export class ListingService {
       }
 
       if (paginateAndSort.sortField) {
+        const start = Date.now();
         const [listings, count] = await baseQuery()
           .take(take)
           .skip(skip)
           .getManyAndCount();
+
+        const end = Date.now();
+        console.log(`Query execution time: ${end - start}ms`);
 
         result = listings;
         total = count;
@@ -991,6 +995,7 @@ export class ListingService {
         let featuredIndex = 0;
         const splitTake = Math.ceil(take / 4); // Divide `take` equally for featured and promoted
         const splitSkip = Math.ceil(skip / 4); // Divide `skip` equally for featured and promoted
+        const start = Date.now();
 
         if (take > featuredRatio) {
           const [featured, promoted, regular] = await Promise.all([
@@ -1065,6 +1070,9 @@ export class ListingService {
           total = count;
           result = listing;
         }
+
+        const end = Date.now();
+        console.log(`Query execution time: ${end - start}ms`);
       }
 
       const listingToParse = [...result];
@@ -1075,7 +1083,7 @@ export class ListingService {
 
       // Save search history if needed
       if (searchHistory) {
-        this.saveSearchHistory(
+        await this.saveSearchHistory(
           {
             attributes,
             gpsCoordinate,
