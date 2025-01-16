@@ -881,6 +881,7 @@ type Coupon {
   createdAt: DateTime!
   startDate: DateTime!
   endDate: DateTime!
+  status: String!
   deactived: Boolean!
   deletedAt: DateTime!
   updatedAt: DateTime!
@@ -2326,6 +2327,7 @@ input UpdateCouponInput {
   startDate: DateTime
   endDate: DateTime
   id: String!
+  status: String!
 }
 
 input DeleteCouponInput {

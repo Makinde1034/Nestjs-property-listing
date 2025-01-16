@@ -65,6 +65,10 @@ export class Coupon {
   endDate: Date;
 
   @Field()
+  @Column({ default: 'active' })
+  status: string;
+
+  @Field()
   @Column({ default: false })
   deactived: boolean;
 
