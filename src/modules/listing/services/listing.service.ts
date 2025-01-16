@@ -2374,21 +2374,38 @@ export class ListingService {
 
   async getSearchHistory(id: string, paginateAndSort?: PaginateAndSort) {
     try {
-      const orderOptions = {
-        [paginateAndSort.sortField]: paginateAndSort.directionToSort,
-      };
+      // Ensure the sorting direction and field are properly set
+      const sortField = paginateAndSort?.sortField || 'createdAt'; // default to createdAt if not provided
+      const directionToSort = paginateAndSort?.directionToSort || 'ASC'; // default to ascending
+
+      const sortDirections = ['ASC', 'DESC'] as const;
 
       if (paginateAndSort.take && paginateAndSort.skip) {
         paginateAndSort.skip = 0;
         paginateAndSort.take = 20;
       }
-      const [searchHistory, total] =
-        await this.searchHistoryRepository.findAndCount({
-          where: { userId: id },
-          take: paginateAndSort.take,
-          skip: paginateAndSort.skip,
-          order: orderOptions,
-        });
+
+      // Using query builder
+      const queryBuilder =
+        this.searchHistoryRepository.createQueryBuilder('searchHistory');
+
+      // Building the query with conditions
+      const query = queryBuilder
+        .where('searchHistory.userId = :id', { id })
+        .orderBy(
+          `searchHistory.${sortField}`,
+          directionToSort.toUpperCase() as (typeof sortDirections)[number],
+          'NULLS LAST',
+        ) // Correct orderBy usage
+        .skip(paginateAndSort.skip)
+        .take(paginateAndSort.take);
+
+      // Getting the search history results
+      const searchHistory = await query.getMany();
+
+      // Getting the total count of records
+      const total = await query.getCount();
+
       return { searchHistory, total };
     } catch (error) {
       this.logger.log(error);
