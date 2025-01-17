@@ -470,94 +470,93 @@ export class AdminService {
   async listingStats(
     findOption: AdminDashboardListingStatus,
   ): Promise<ListingStats> {
-    const {
-      take = 10,
-      skip = 0,
-      stage,
-      status,
-      timePeriod,
-      value,
-    } = findOption;
+    const { take = 10, skip = 0, stage, status } = findOption;
 
-    // Calculate date range
-    const currentDate = new Date();
-    let startDate: Date;
-    switch (timePeriod) {
+    const currentDate = moment();
+    const date = new Date(); // Use moment to handle the current date
+    let startDate: Date, endDate: Date;
+
+    // Determine date range based on time period
+    switch (findOption.timePeriod) {
       case TimePeriod.Today:
-        startDate = new Date(currentDate.setHours(0, 0, 0, 0));
+        startDate = currentDate.startOf('day').toDate();
+        endDate = date;
         break;
       case TimePeriod.Week:
-        startDate = new Date(
-          currentDate.setDate(currentDate.getDate() - 7 * (value ?? 1)),
-        );
+        startDate = currentDate
+          .subtract(findOption.value ?? 1, 'weeks')
+          .startOf('week')
+          .toDate();
+        endDate = date;
         break;
       case TimePeriod.Month:
-        startDate = new Date(
-          currentDate.setMonth(currentDate.getMonth() - (value ?? 1)),
-        );
-        startDate.setDate(1);
+        startDate = currentDate
+          .subtract(findOption.value ?? 1, 'months')
+          .startOf('month')
+          .toDate();
+        endDate = date;
         break;
       case TimePeriod.Year:
-        startDate = new Date(
-          currentDate.setFullYear(currentDate.getFullYear() - (value ?? 1)),
-        );
-        startDate.setMonth(0, 1);
+        startDate = currentDate
+          .subtract(findOption.value ?? 1, 'years')
+          .startOf('year')
+          .toDate();
+        endDate = date;
         break;
       default:
-        throw new Error('Invalid time period');
+        return;
     }
 
-    // Construct query with QueryBuilder
-    const baseQuery = this.offerRepository
+    // Initialize the query builder
+    const query = this.offerRepository
       .createQueryBuilder('offer')
-      .select([
-        'COUNT(*) FILTER (WHERE offer.createdAt BETWEEN :startDate AND :endDate) AS totalOffers',
-        'COUNT(*) FILTER (WHERE offer.status = :acceptedStatus) AS acceptedOffers',
-        'COUNT(listing.id) FILTER (WHERE listing.isListingSold = TRUE AND listing.createdAt BETWEEN :startDate AND :endDate) AS soldListings',
-      ])
-      .leftJoin('offer.listing', 'listing')
-      .where('offer.createdAt BETWEEN :startDate AND :endDate', {
-        startDate,
-        endDate: new Date(),
-      })
-      .setParameters({
-        acceptedStatus: OfferListEnum.ACCEPTED,
-      });
+      .leftJoinAndSelect('offer.listing', 'listing');
 
-    // Add dynamic filters
+    // Add conditions dynamically based on input
     if (stage) {
-      baseQuery.andWhere('listing.stage = :stage', { stage });
+      query.andWhere('listing.stage = :stage', { stage });
     }
+
     if (status) {
-      baseQuery.andWhere('offer.status = :status', { status });
+      query.andWhere('offer.status = :status', { status });
     }
 
-    // Fetch aggregated data and paginated offers
-    const [aggregatedStats, offersAndTotal] = await Promise.all([
-      baseQuery.getRawOne(), // Aggregated statistics
-      this.offerRepository
-        .createQueryBuilder('offer')
-        .leftJoinAndSelect('offer.listing', 'listing')
-        .where('offer.createdAt BETWEEN :startDate AND :endDate', {
-          startDate,
-          endDate: new Date(),
-        })
-        .take(take)
-        .skip(skip)
-        .getManyAndCount(),
-    ]);
+    // Execute the query
 
-    const [offers, total] = offersAndTotal;
+    // Add other aggregated stats
+    const [offer, listing, acceptedOffer, ownershipTransfer, [offers, total]] =
+      await Promise.all([
+        this.offerRepository.count({
+          where: {
+            createdAt: Between(startDate, endDate),
+          },
+        }),
+        this.listingRepository.count({
+          where: {
+            createdAt: Between(startDate, endDate),
+          },
+        }),
+        this.offerRepository.count({
+          where: { status: OfferListEnum.ACCEPTED },
+        }),
+        this.listingRepository.count({
+          where: {
+            isListingSold: true,
+            createdAt: Between(startDate, endDate),
+          },
+        }),
+        query.take(take).skip(skip).getManyAndCount(),
+      ]);
 
     // Return the result
     return {
       offers,
       total,
       analysis: {
-        offer: Number(aggregatedStats.totalOffers) || 0,
-        listing: Number(aggregatedStats.totalListings) || 0,
-        acceptedOffer: Number(aggregatedStats.acceptedOffers) || 0,
-        ownershipTransfer: Number(aggregatedStats.soldListings) || 0,
+        offer,
+        listing,
+        acceptedOffer,
+        ownershipTransfer,
       },
     };
   }
