@@ -1103,6 +1103,11 @@ type GroupTransactions {
   data: [FinancialVsOrderResponse!]
 }
 
+type IsCouponValidResponse {
+  valid: Boolean!
+  amount: Float!
+}
+
 type CouponResponse {
   coupon: [Coupon!]
   total: Float!
@@ -1256,7 +1261,7 @@ type Query {
   saiiFees(findOptions: AdminDashboardSort): SaiiFees!
   financialVsOrder(findOptions: AdminDashboardSort!): [GroupTransactions!]!
   fetchCoupons(couponFilterInput: AdminFilterAndSort!): CouponResponse!
-  validataCoupon(couponFilterInput: ValidataCouponInput!): CouponResponse!
+  validataCoupon(couponFilterInput: ValidataCouponInput!): IsCouponValidResponse!
   findOneCoupon(id: String!): Coupon!
   findAllFeatures: [SystemFeatureSetting!]!
   searchForCoupon(searchParam: String!): [Coupon!]!

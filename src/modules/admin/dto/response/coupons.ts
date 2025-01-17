@@ -13,7 +13,7 @@ export class CouponResponse {
   total: number;
 }
 @ObjectType()
-export class ValidCouponCouponResponse {
+export class ValidCouponResponse {
   @Field()
   valid: boolean;
   @Field()

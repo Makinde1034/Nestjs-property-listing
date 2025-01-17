@@ -6,7 +6,7 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Listing } from '../../../../entities';
 import { Offer } from '../../../../entities/offer.entity';
-import { IsArray } from 'class-validator';
+import { IsArray, IsBoolean, IsNumber } from 'class-validator';
 @ObjectType()
 export class UserCity {
   @Field({ nullable: true })
@@ -170,7 +170,13 @@ export class GroupTransactions {
   data: [FinancialVsOrderResponse];
 }
 
-export class CouponResponse {
+@ObjectType()
+export class IsCouponValidResponse {
+  @Field()
+  @IsBoolean()
   valid: boolean;
+
+  @Field()
+  @IsNumber()
   amount: number;
 }
