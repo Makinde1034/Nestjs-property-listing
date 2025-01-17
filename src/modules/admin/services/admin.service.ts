@@ -188,7 +188,6 @@ export class AdminService {
       averageSupportTime,
     };
 
-    console.log(analysis);
     return analysis;
   }
 
@@ -600,30 +599,45 @@ export class AdminService {
     const startOfRange = startOfMonth(startDate);
     const endOfRange = endOfMonth(endDate);
 
-    const [guest, levelOne, levelTwo] = await Promise.all([
-      this.userTracking.count({
-        where: {
-          type: 'guest',
-          createdAt: Between(startOfRange, endOfRange),
-        },
-      }),
-      this.userRepository.count({
-        where: {
-          userLevel: UserLevelEnum.LEVEL_1,
-          createdAt: Between(startOfRange, endOfRange),
-        },
-      }),
-      this.userRepository.count({
-        where: {
-          // TODO: Replace with actual condition for converged users
+    // Use raw SQL to count users by type and levels
+    const [guestCount, levelOneCount, levelTwoCount] = await Promise.all([
+      this.userTracking
+        .createQueryBuilder('userTracking')
+        .select('COUNT(*)', 'count')
+        .where('userTracking.type = :type', { type: 'guest' })
+        .andWhere('userTracking.createdAt BETWEEN :start AND :end', {
+          start: startOfRange,
+          end: endOfRange,
+        })
+        .getRawOne(),
 
-          userLevel: UserLevelEnum.LEVEL_2,
+      this.userRepository
+        .createQueryBuilder('user')
+        .select('COUNT(*)', 'count')
+        .where('user.userLevel = :level', { level: UserLevelEnum.LEVEL_1 })
+        .andWhere('user.createdAt BETWEEN :start AND :end', {
+          start: startOfRange,
+          end: endOfRange,
+        })
+        .getRawOne(),
 
-          createdAt: Between(startOfRange, endOfRange),
-        },
-      }),
+      this.userRepository
+        .createQueryBuilder('user')
+        .select('COUNT(*)', 'count')
+        .where('user.userLevel = :level', { level: UserLevelEnum.LEVEL_2 })
+        .andWhere('user.createdAt BETWEEN :start AND :end', {
+          start: startOfRange,
+          end: endOfRange,
+        })
+        .getRawOne(),
     ]);
 
+    // Extract counts from raw query results
+    const guest = parseInt(guestCount.count, 10) || 0;
+    const levelOne = parseInt(levelOneCount.count, 10) || 0;
+    const levelTwo = parseInt(levelTwoCount.count, 10) || 0;
+
+    // Construct the funneling result
     const userFunneling: UserFunneling = {
       guest,
       levelOne,
