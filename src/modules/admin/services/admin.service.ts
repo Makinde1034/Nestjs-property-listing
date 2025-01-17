@@ -187,24 +187,29 @@ export class AdminService {
       averageCloseTime,
       averageSupportTime,
     };
+
+    console.log(analysis);
     return analysis;
   }
 
-  async averageSupportTime() {
-    const result = await this.ticketsRepository
+  async averageSupportTime(): Promise<number> {
+    // Fetch the relevant data from the database
+    const tickets = await this.ticketsRepository
       .createQueryBuilder('ticket')
-      .select(
-        'AVG(EXTRACT(EPOCH FROM (ticket.closedAt - ticket.assignedAt)))',
-        'avgTimeDifference',
-      )
+      .select(['ticket.assignedAt', 'ticket.closedAt'])
       .where('ticket.assignedAt IS NOT NULL AND ticket.closedAt IS NOT NULL')
-      .getRawOne();
+      .getMany();
 
-    const avgTimeDifference = parseFloat(result.avgTimeDifference);
+    // Calculate the total time difference in seconds
+    const totalTimeDifference = tickets.reduce((total, ticket) => {
+      const assignedAt = ticket.assignedAt.getTime(); // Convert to milliseconds
+      const closedAt = ticket.closedAt.getTime(); // Convert to milliseconds
+      return total + (closedAt - assignedAt) / 1000; // Add the time difference in seconds
+    }, 0);
 
-    if (isNaN(avgTimeDifference)) {
-      return 0;
-    }
+    // Calculate the average time difference
+    const avgTimeDifference =
+      tickets.length > 0 ? totalTimeDifference / tickets.length : 0;
 
     return avgTimeDifference;
   }
@@ -262,21 +267,24 @@ export class AdminService {
       );
     }
   }
-  async averageCloseTime() {
-    const result = await this.ticketsRepository
+  async averageCloseTime(): Promise<number> {
+    // Fetch the relevant data from the database
+    const tickets = await this.ticketsRepository
       .createQueryBuilder('ticket')
-      .select(
-        'AVG(EXTRACT(EPOCH FROM (ticket."closedAt" - ticket.createdAt)))',
-        'avgTimeDifference',
-      )
+      .select(['ticket.createdAt', 'ticket.closedAt'])
       .where('ticket.createdAt IS NOT NULL AND ticket.closedAt IS NOT NULL')
-      .getRawOne();
+      .getMany();
 
-    const avgTimeDifference = parseFloat(result.avgTimeDifference);
+    // Calculate the total time difference in seconds
+    const totalTimeDifference = tickets.reduce((total, ticket) => {
+      const createdAt = ticket.createdAt.getTime(); // Convert to milliseconds
+      const closedAt = ticket.closedAt.getTime(); // Convert to milliseconds
+      return total + (closedAt - createdAt) / 1000; // Add the time difference in seconds
+    }, 0);
 
-    if (isNaN(avgTimeDifference)) {
-      return 0;
-    }
+    // Calculate the average time difference
+    const avgTimeDifference =
+      tickets.length > 0 ? totalTimeDifference / tickets.length : 0;
 
     return avgTimeDifference;
   }
@@ -463,93 +471,94 @@ export class AdminService {
   async listingStats(
     findOption: AdminDashboardListingStatus,
   ): Promise<ListingStats> {
-    const { take = 10, skip = 0, stage, status } = findOption;
+    const {
+      take = 10,
+      skip = 0,
+      stage,
+      status,
+      timePeriod,
+      value,
+    } = findOption;
 
-    const currentDate = moment();
-    const date = new Date(); // Use moment to handle the current date
-    let startDate: Date, endDate: Date;
-
-    // Determine date range based on time period
-    switch (findOption.timePeriod) {
+    // Calculate date range
+    const currentDate = new Date();
+    let startDate: Date;
+    switch (timePeriod) {
       case TimePeriod.Today:
-        startDate = currentDate.startOf('day').toDate();
-        endDate = date;
+        startDate = new Date(currentDate.setHours(0, 0, 0, 0));
         break;
       case TimePeriod.Week:
-        startDate = currentDate
-          .subtract(findOption.value ?? 1, 'weeks')
-          .startOf('week')
-          .toDate();
-        endDate = date;
+        startDate = new Date(
+          currentDate.setDate(currentDate.getDate() - 7 * (value ?? 1)),
+        );
         break;
       case TimePeriod.Month:
-        startDate = currentDate
-          .subtract(findOption.value ?? 1, 'months')
-          .startOf('month')
-          .toDate();
-        endDate = date;
+        startDate = new Date(
+          currentDate.setMonth(currentDate.getMonth() - (value ?? 1)),
+        );
+        startDate.setDate(1);
         break;
       case TimePeriod.Year:
-        startDate = currentDate
-          .subtract(findOption.value ?? 1, 'years')
-          .startOf('year')
-          .toDate();
-        endDate = date;
+        startDate = new Date(
+          currentDate.setFullYear(currentDate.getFullYear() - (value ?? 1)),
+        );
+        startDate.setMonth(0, 1);
         break;
       default:
-        return;
+        throw new Error('Invalid time period');
     }
 
-    // Initialize the query builder
-    const query = this.offerRepository
+    // Construct query with QueryBuilder
+    const baseQuery = this.offerRepository
       .createQueryBuilder('offer')
-      .leftJoinAndSelect('offer.listing', 'listing');
+      .select([
+        'COUNT(*) FILTER (WHERE offer.createdAt BETWEEN :startDate AND :endDate) AS totalOffers',
+        'COUNT(*) FILTER (WHERE offer.status = :acceptedStatus) AS acceptedOffers',
+        'COUNT(listing.id) FILTER (WHERE listing.isListingSold = TRUE AND listing.createdAt BETWEEN :startDate AND :endDate) AS soldListings',
+      ])
+      .leftJoin('offer.listing', 'listing')
+      .where('offer.createdAt BETWEEN :startDate AND :endDate', {
+        startDate,
+        endDate: new Date(),
+      })
+      .setParameters({
+        acceptedStatus: OfferListEnum.ACCEPTED,
+      });
 
-    // Add conditions dynamically based on input
+    // Add dynamic filters
     if (stage) {
-      query.andWhere('listing.stage = :stage', { stage });
+      baseQuery.andWhere('listing.stage = :stage', { stage });
     }
-
     if (status) {
-      query.andWhere('offer.status = :status', { status });
+      baseQuery.andWhere('offer.status = :status', { status });
     }
 
-    // Execute the query
+    // Fetch aggregated data and paginated offers
+    const [aggregatedStats, offersAndTotal] = await Promise.all([
+      baseQuery.getRawOne(), // Aggregated statistics
+      this.offerRepository
+        .createQueryBuilder('offer')
+        .leftJoinAndSelect('offer.listing', 'listing')
+        .where('offer.createdAt BETWEEN :startDate AND :endDate', {
+          startDate,
+          endDate: new Date(),
+        })
+        .take(take)
+        .skip(skip)
+        .getManyAndCount(),
+    ]);
 
-    // Add other aggregated stats
-    const [offer, listing, acceptedOffer, ownershipTransfer, [offers, total]] =
-      await Promise.all([
-        this.offerRepository.count({
-          where: {
-            createdAt: Between(startDate, endDate),
-          },
-        }),
-        this.listingRepository.count({
-          where: {
-            createdAt: Between(startDate, endDate),
-          },
-        }),
-        this.offerRepository.count({
-          where: { status: OfferListEnum.ACCEPTED },
-        }),
-        this.listingRepository.count({
-          where: {
-            isListingSold: true,
-            createdAt: Between(startDate, endDate),
-          },
-        }),
-        query.take(take).skip(skip).getManyAndCount(),
-      ]);
+    const [offers, total] = offersAndTotal;
 
     // Return the result
     return {
       offers,
       total,
       analysis: {
-        offer,
-        listing,
-        acceptedOffer,
-        ownershipTransfer,
+        offer: Number(aggregatedStats.totalOffers) || 0,
+        listing: Number(aggregatedStats.totalListings) || 0,
+        acceptedOffer: Number(aggregatedStats.acceptedOffers) || 0,
+        ownershipTransfer: Number(aggregatedStats.soldListings) || 0,
       },
     };
   }
