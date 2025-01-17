@@ -514,10 +514,9 @@ export class AdminService {
     }
 
     // Execute the query
-    const [offers, total] = await query.take(take).skip(skip).getManyAndCount();
 
     // Add other aggregated stats
-    const [offer, listing, acceptedOffer, ownershipTransfer] =
+    const [offer, listing, acceptedOffer, ownershipTransfer, [offers, total]] =
       await Promise.all([
         this.offerRepository.count({
           where: {
@@ -538,6 +537,7 @@ export class AdminService {
             createdAt: Between(startDate, endDate),
           },
         }),
+        query.take(take).skip(skip).getManyAndCount(),
       ]);
 
     // Return the result
@@ -994,7 +994,6 @@ export class AdminService {
         coupon.maxUse > coupon.currentUse
       ) {
         let amount = validataCouponInput.price;
-
         switch (coupon.discountType) {
           case CouponEnum.NUMBER:
             amount = coupon.discountValue;
@@ -1026,7 +1025,6 @@ export class AdminService {
       );
     }
   }
-
   async updateCoupon(updateCouponInput: UpdateCouponInput, admin: User) {
     try {
       const [actionConfig, coupons] = await Promise.all([
