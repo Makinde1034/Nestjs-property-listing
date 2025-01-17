@@ -47,14 +47,75 @@ export class AttributeService {
    */
   async findAllAttributes(findOptions: AttributeFilter) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { where, skip, take, directionToSort, sortField, ...rest } =
-      findOptions;
 
-    const [attribute, total] = await this.attributeRepository.findAndCount({
-      where: { ...rest },
-      take,
-      skip,
-    });
+    const { take, skip, ...filters } = findOptions;
+
+    const query = this.attributeRepository.createQueryBuilder('attribute');
+
+    // Dynamically add filters based on the fields in the filter object
+    if (filters.englishName) {
+      query.andWhere('attribute.englishName LIKE :englishName', {
+        englishName: `%${filters.englishName}%`,
+      });
+    }
+
+    if (filters.type) {
+      query.andWhere('attribute.type = :type', { type: filters.type });
+    }
+
+    if (filters.showInFilters !== undefined) {
+      query.andWhere('attribute.showInFilters = :showInFilters', {
+        showInFilters: filters.showInFilters,
+      });
+    }
+
+    if (filters.showInComparison !== undefined) {
+      query.andWhere('attribute.showInComparison = :showInComparison', {
+        showInComparison: filters.showInComparison,
+      });
+    }
+
+    if (filters.showInSummary !== undefined) {
+      query.andWhere('attribute.showInSummary = :showInSummary', {
+        showInSummary: filters.showInSummary,
+      });
+    }
+
+    if (filters.isRequired !== undefined) {
+      query.andWhere('attribute.isRequired = :isRequired', {
+        isRequired: filters.isRequired,
+      });
+    }
+
+    if (filters.hiddenToBuyers !== undefined) {
+      query.andWhere('attribute.hiddenToBuyers = :hiddenToBuyers', {
+        hiddenToBuyers: filters.hiddenToBuyers,
+      });
+    }
+
+    if (filters.isAmenity !== undefined) {
+      query.andWhere('attribute.isAmenity = :isAmenity', {
+        isAmenity: filters.isAmenity,
+      });
+    }
+
+    if (filters.isAddress !== undefined) {
+      query.andWhere('attribute.isAddress = :isAddress', {
+        isAddress: filters.isAddress,
+      });
+    }
+
+    // Add pagination
+    query.skip(skip).take(take);
+
+    // Execute the query
+    const [attribute, total] = await query.getManyAndCount();
+
+    // const [attribute, total] = await this.attributeRepository.findAndCount({
+    //   where: { ...rest },
+    //   take,
+    //   skip,
+    // });
 
     return { attribute, total };
   }
