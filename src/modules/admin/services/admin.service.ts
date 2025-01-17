@@ -50,8 +50,8 @@ import {
   UserCountryCount,
   UserGenderCount,
   UserAgeRange,
-  CouponResponse,
   FinancialVsOrderResponse,
+  IsCouponValidResponse,
 } from '../dto/response/admin-response';
 import { TicketRepository } from '../../tickets/repositories';
 import {
@@ -88,8 +88,6 @@ import { AdminFilterAndSort } from '../../listing/dtos/request';
 import { TicketStatus, UserLevelEnum } from '../../../common/enums';
 
 import * as moment from 'moment';
-import { ValidCouponCouponResponse } from '../dto/response/coupons';
-import { WhereOption } from '../../core/dto/where-option.dto';
 
 @Injectable()
 export class AdminService {
@@ -105,7 +103,6 @@ export class AdminService {
 
     private readonly workflowService: AdminWorkflowService,
     private readonly actionService: ActionService,
-    private readonly transactionRepository: TransactionRepository,
     private readonly listingTypeRepository: ListingTypeRepository,
     private readonly invoiceRepository: InvoiceRepository,
     private readonly systemFeatureRepository: SettingFeatureRepository,
@@ -317,9 +314,13 @@ export class AdminService {
         total: totalSum,
         group: group,
       };
+
       return saiiFees;
-    } catch (error) {}
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
   }
+
   async financialVsOrder(findOptions: AdminDashboardSort) {
     try {
       const currentDate = new Date();
@@ -971,9 +972,9 @@ export class AdminService {
 
   async isCouponValid(
     validataCouponInput: ValidataCouponInput,
-  ): Promise<ValidCouponCouponResponse> {
+  ): Promise<IsCouponValidResponse> {
     try {
-      let result: CouponResponse;
+      let result: IsCouponValidResponse;
       const coupon = await this.couponRepository.findOne({
         where: { code: validataCouponInput.code },
       });

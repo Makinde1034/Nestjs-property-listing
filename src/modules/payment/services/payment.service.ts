@@ -31,7 +31,7 @@ import {
 } from '../../../config/app-default/app-default';
 import { ConfigService } from '@nestjs/config';
 import { AdminService } from '../../admin/services/admin.service';
-import { CouponResponse } from '../../admin/dto/response/admin-response';
+import { IsCouponValidResponse } from '../../admin/dto/response/admin-response';
 import { ServerSentEvents } from '../../../common/enums';
 import { SseService } from '../../sse/client.service';
 
@@ -71,10 +71,11 @@ export class PaymentService {
     user: User,
   ) {
     if (createPaymentInput.coupon) {
-      const coupon: CouponResponse = await this.adminService.isCouponValid({
-        code: createPaymentInput.coupon,
-        price: createPaymentInput.amount,
-      });
+      const coupon: IsCouponValidResponse =
+        await this.adminService.isCouponValid({
+          code: createPaymentInput.coupon,
+          price: createPaymentInput.amount,
+        });
       createPaymentInput.amount = coupon.amount;
     }
     const reference = generateRandomString();
@@ -106,10 +107,11 @@ export class PaymentService {
     user: User,
   ) {
     if (createPaymentInput.coupon) {
-      const coupon: CouponResponse = await this.adminService.isCouponValid({
-        code: createPaymentInput.coupon,
-        price: createPaymentInput.amount,
-      });
+      const coupon: IsCouponValidResponse =
+        await this.adminService.isCouponValid({
+          code: createPaymentInput.coupon,
+          price: createPaymentInput.amount,
+        });
       createPaymentInput.amount = coupon.amount;
     }
     const reference = generateRandomString();
