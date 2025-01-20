@@ -157,8 +157,7 @@ export class PaymentService {
 
   async capturePayment(createPaymentInput: CapturePaymentData) {
     // if (createPaymentInput.coupon) {
-    //   const coupon: CouponResponse = await this.adminService.isCouponValid(
-    //     createPaymentInput.coupon,
+    //   const coupon: IsCouponValidResponse = await this.adminService.isCouponValid(
     //     createPaymentInput.amount,
     //   );
     //   createPaymentInput.amount = coupon.amount;

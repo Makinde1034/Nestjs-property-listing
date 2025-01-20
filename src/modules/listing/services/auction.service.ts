@@ -300,7 +300,6 @@ export class AuctionService {
 
         .where(
           `CURRENT_DATE < auction.startDate 
-           AND auction.startDate > :startDateThreshold 
            AND auction.status = :status 
            AND auction.expireAt < :startDateThreshold`,
           {
