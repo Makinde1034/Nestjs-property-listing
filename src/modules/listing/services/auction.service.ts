@@ -191,7 +191,7 @@ export class AuctionService {
         .where(
           `CURRENT_DATE >= auction.startDate AND auction.deletedAt IS NULL AND auction.status = :statusOne
 `,
-          { statusOne: AuctionEnum.ACTIVE, now },
+          { statusOne: AuctionEnum.ACTIVE },
         )
 
         .loadRelationCountAndMap(
