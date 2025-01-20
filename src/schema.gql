@@ -266,7 +266,7 @@ type AuctionParticipant {
   listingId: String!
   userId: [String!]
   bidCount: Float
-  listing: Listing!
+  listing: Listing
   startingPrice: Float!
   minimumPrice: Float!
   auction: Auction!

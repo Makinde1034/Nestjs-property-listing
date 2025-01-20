@@ -33,7 +33,7 @@ export class AuctionParticipant extends BaseEntity {
   @Field({ nullable: true })
   bidCount: number;
 
-  @Field(() => Listing)
+  @Field(() => Listing, { nullable: true })
   @JoinColumn({ name: 'listingId' })
   @OneToOne(() => Listing, (listing) => listing.auctionParticipant)
   listing: Listing;
