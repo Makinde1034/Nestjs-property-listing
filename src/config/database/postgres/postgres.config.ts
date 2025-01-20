@@ -5,6 +5,8 @@
 
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { registerAs } from '@nestjs/config';
+import { DefaultNamingStrategy } from 'typeorm';
+import { CamelCaseNamingStrategy } from './naming.strategy';
 
 export const typeOrmPostgresOptions = <TypeOrmModuleOptions>{
   type: 'postgres',
@@ -14,6 +16,7 @@ export const typeOrmPostgresOptions = <TypeOrmModuleOptions>{
   synchronize: false,
   logging: false,
   autoLoadEntities: true,
+  namingStrategy: new CamelCaseNamingStrategy(),
 };
 
 export default registerAs(

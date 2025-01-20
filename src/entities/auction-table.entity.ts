@@ -17,6 +17,7 @@ import { AuctionParticipant } from './auction-participant.entity';
 import { IsEnum } from 'class-validator';
 import { AuctionEnum } from '../common/enums/status.enum';
 import { ActivityLog } from './activity-log.entity';
+
 @ObjectType()
 @Entity()
 export class Auction extends BaseEntity {
@@ -50,7 +51,7 @@ export class Auction extends BaseEntity {
 
   @Field(() => [ActivityLog], { nullable: true })
   @OneToMany(() => ActivityLog, (activityLogs) => activityLogs.splashScreen)
-  actionActivityLog: ActivityLog;
+  actionActivityLog: ActivityLog[];
 
   @Column()
   @Field()

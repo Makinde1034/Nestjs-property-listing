@@ -292,10 +292,28 @@ export class AuctionService {
 
       const [auctions, total] = await this.auctionRepository
         .createQueryBuilder('auction')
+        .leftJoin('auction.auctionParticipant', 'auctionParticipant')
+        .leftJoin('auctionParticipant.listing', 'listing')
+        .select([
+          'auction.id',
+          'auction.titleInEnglish',
+          'auction.titleInArabic',
+          'auction.arabicDescription',
+          'auction.englishDescription',
+          'auction.startDate',
+          'auction.liveFor',
+          'auction.imageLink',
+          'auction.status',
+          'auction.expireAt',
+          'auction.createdAt',
+          'auction.maxListing',
+          'auctionParticipant.id',
+          'listing.id',
+          'listing.images',
+        ])
         .loadRelationCountAndMap(
           'auction.auctionParticipantCount',
           'auction.auctionParticipant', // Relation to count
-          'auctionParticipant',
         )
 
         .where(
