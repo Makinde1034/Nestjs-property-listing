@@ -38,6 +38,8 @@ export class ServiceAndProviderResolver {
   constructor(
     private readonly serviceProviderService: ServiceAndProviderService,
   ) {}
+
+  @UseGuards(AccessTokenGuard)
   @Mutation(() => ServiceProvider)
   async createServiceProvider(
     @Args('createServiceProviderInput')
@@ -79,7 +81,6 @@ export class ServiceAndProviderResolver {
   }
 
   @UseGuards(AccessTokenGuard)
-  @UseGuards(ServiceProviderGuard)
   @Query(() => ServiceResponse, { name: 'findAllService' })
   async findAllServices(
     @Args('paginateAndSort') paginateAndSort: PaginateAndSort,
@@ -87,11 +88,13 @@ export class ServiceAndProviderResolver {
     return await this.serviceProviderService.findAllServices(paginateAndSort);
   }
 
+  @UseGuards(AccessTokenGuard)
   @Query(() => ServiceProvider, { name: 'findOneService' })
   async findOneService(@Args('id') id: string) {
     return await this.serviceProviderService.findOneService(id);
   }
 
+  @UseGuards(AccessTokenGuard)
   @Mutation(() => ServiceProvider)
   async updateServiceProvider(
     @Args('updateServiceProviderInput')
@@ -102,6 +105,7 @@ export class ServiceAndProviderResolver {
     );
   }
 
+  @UseGuards(AccessTokenGuard)
   @Mutation(() => SuccessResponse)
   async acceptServiceProvider(
     @Args('serviceProviderInput')
@@ -113,7 +117,7 @@ export class ServiceAndProviderResolver {
       ctx.req.user,
     );
   }
-
+  @UseGuards(AccessTokenGuard)
   @Mutation(() => SuccessResponse)
   async rejectServiceProvider(
     @Args('serviceProviderInput')
