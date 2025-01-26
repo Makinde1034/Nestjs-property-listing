@@ -1,5 +1,4 @@
 image: node:latest
-
 definitions:
   services:
     postgres:

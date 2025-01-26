@@ -32,6 +32,7 @@ export class NotificationMessageSeeder implements Seeder {
         NotificationMessageFactory as Partial<NotificationMessages>,
       );
     }
+
     this.logger.debug(
       `Seeding for: ${NotificationMessageSeeder.name} finished`,
     );

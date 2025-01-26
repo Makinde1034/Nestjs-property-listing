@@ -17,7 +17,7 @@ import {
 } from '../dtos/request/';
 
 import { Listing } from '../../../entities';
-import { UseGuards } from '@nestjs/common';
+import { UseGuards, UseInterceptors } from '@nestjs/common';
 import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
 
 import {
@@ -80,6 +80,7 @@ import { PermissionsEnum } from '../../../common/enums/permission.enum';
 import { BidRegistration } from '../../../entities/bid-registration.entity';
 import { AuctionBidRange } from '../../../entities/auction-bid-range.entity';
 import { FinalizationInput } from '../dtos/request/finalizationOffer';
+import { GqlCacheInterceptor } from '../../../common/interceptors/cache-middleware';
 
 @Resolver()
 export class ListingResolver {
@@ -115,6 +116,7 @@ export class ListingResolver {
     name: 'findAllListingForBuyerUnauthenticated',
   })
   @Public()
+  @UseInterceptors(GqlCacheInterceptor)
   async findListingForBuyer(
     @Args('findManyOptions', { nullable: true })
     findManyOptions?: CreateSearchHistoryInput,
@@ -128,6 +130,7 @@ export class ListingResolver {
   }
 
   @UseGuards(AccessTokenGuard)
+  @UseInterceptors(GqlCacheInterceptor)
   @Query(() => ListingResponse, { name: 'findListingsForOwner' })
   async findListingsForOwner(
     @Context() ctx: any,
@@ -580,6 +583,7 @@ export class ListingResolver {
   }
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @UseInterceptors(GqlCacheInterceptor)
   @Query(() => AuctionResponse, { name: 'getAllUpcomingAuction' })
   async getAllUpcomingAuction(
     @Args('findManyOption') paginateAndSort: PaginateAndSort,
@@ -588,6 +592,7 @@ export class ListingResolver {
   }
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @UseInterceptors(GqlCacheInterceptor)
   @Permissions(PermissionsEnum.AUCTIONS_READ)
   @Query(() => AuctionResponse, { name: 'getAllAuction' })
   async getAllAuction(

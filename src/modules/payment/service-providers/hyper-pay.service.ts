@@ -201,50 +201,6 @@ export class HyperPayService {
       }
     }
   }
-  // Async preAuthorize(initiatePaymentInput: PreAuthorisedPaymentInput) {
-  //   Try {
-  //     Const adminDefault = await this.adminService.adminDefault();
-  //     Const payload = {
-  //       EntityId: '8ac7a4c893855386019386a88e7d0169',
-  //       Amount: initiatePaymentInput.amount,
-  //       Currency: 'SAR',
-  //       PaymentType: 'PA',
-  //       'card.number': initiatePaymentInput.cardNumber,
-  //       'card.holder': initiatePaymentInput.cardHolder,
-  //       'card.expiryMonth': initiatePaymentInput.cardExpiryMonth,
-  //       'card.expiryYear': initiatePaymentInput.cardExpiryYear,
-  //       'card.cvv': initiatePaymentInput.cardCvv,
-  //       MerchantTransactionId: adminDefault?.merchantTransactionId,
-  //       PaymentBrand: initiatePaymentInput.paymentBrand,
-  //       ShopperResultUrl: 'google.com',
-  //       TestMode: 'EXTERNAL',
-  //     };
-
-  //     Const requestPayload = querystring.stringify(payload as any);
-
-  //     Const response = await lastValueFrom(
-  //       This.httpService.post<CheckoutResponse>(
-  //         This.hyperPayConfig.baseUrl + '/payments',
-  //         RequestPayload,
-  //         This.options,
-  //       ),
-  //     );
-  //     Return response.data;
-  //   } catch (error) {
-  //     Console.log(error.response.data.result);
-
-  //     This.logger.error('Error creating checkout', error);
-  //     If (error instanceof HttpException) {
-  //       Throw error;
-  //     } else if (error.isAxiosError) {
-  //       Throw new BadRequestException(
-  //         Error.response?.data?.message || 'Payment service error',
-  //       );
-  //     } else {
-  //       Throw new BadRequestException(error.message);
-  //     }
-  //   }
-  // }
 
   async capturePayment(capturePayment: CapturePaymentData) {
     try {

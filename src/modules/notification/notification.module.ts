@@ -32,6 +32,7 @@ import { NotificationController } from './controller/notification.controller';
     AdminNotificationPreferenceRepository,
     NotificationTokenRepository,
     NotificationMessagesRepository,
+    NotificationTokenRepository,
 
     UserNotificationRepository,
   ],

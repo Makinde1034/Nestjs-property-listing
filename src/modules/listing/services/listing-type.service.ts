@@ -46,11 +46,13 @@ export class ListingTypeService {
    * @returns {Promise<ListingTypesResponse>}
    */
   async findAllListingTypes(findOptions: PaginateAndSort) {
-    const [listingType, total] = await this.listingTypeRepository.findAndCount({
-      take: findOptions.take,
-      skip: findOptions.skip,
-      relations: ['attributeSets'],
-    });
+    const [listingType, total] = await this.listingTypeRepository
+      .queryBuilder('listingType')
+      .leftJoinAndSelect('listingType.attributeSets', 'attributeSets')
+      .take(findOptions.take)
+      .skip(findOptions.skip)
+      .getManyAndCount();
+
     return { listingType, total };
   }
 

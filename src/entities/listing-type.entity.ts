@@ -43,7 +43,6 @@ export class ListingType extends BaseEntity {
   @Field(() => Listing)
   @OneToMany(() => Listing, (listing) => listing.listingType)
   listing: Listing;
-
   @Field(() => [AttributeSet], { nullable: true })
   @ManyToMany(() => AttributeSet, (attribute) => attribute.listingTypes, {
     cascade: true,
@@ -54,7 +53,6 @@ export class ListingType extends BaseEntity {
   @Field()
   @CreateDateColumn()
   createdAt: Date;
-
   @Field(() => Invoice, { nullable: true })
   @OneToOne(() => Invoice, (invoice) => invoice.listingType)
   invoice: Invoice;

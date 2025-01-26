@@ -11,11 +11,9 @@ import nafathConfig from './auth/nafath.config';
 import hyperPaymentConfig from './payment/hyper-payment.config';
 import webHookConfig from './payment/web-hook.config';
 import firebaseConfig from './serviceAccount/firebase.config';
+import redisConfig from './serviceAccount/redis.config';
 
 export default [
-  //   PostgresConfig,
-  //   AuthConfig,
-  //   RecaptchaConfig,
   postgresConfig,
   authConfig,
   recaptchaConfig,
@@ -24,4 +22,5 @@ export default [
   appDefault,
   nafathConfig,
   firebaseConfig,
+  redisConfig,
 ];

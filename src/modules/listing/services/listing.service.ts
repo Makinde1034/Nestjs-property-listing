@@ -895,97 +895,10 @@ export class ListingService {
           .getManyAndCount();
 
         const end = Date.now();
-        console.log(`Query execution time: ${end - start}ms`);
 
         result = listings;
         total = count;
       } else {
-        //   const [featured, promoted, regular] = await Promise.all([
-        //     baseQuery()
-        //       .take(take % 3)
-        //       .skip(skip % 3)
-        //       .where('listing.featureDate IS NOT NULL') // Only fetch featured listings
-        //       .orderBy('listing.featureDate', 'DESC', 'NULLS LAST')
-        //       .getManyAndCount(),
-
-        //     baseQuery()
-        //       .take(take % 3)
-        //       .skip(skip % 3)
-        //       .where('listing.promotedDate IS NOT NULL') // Only fetch promoted listings
-        //       .orderBy('listing.promotedDate', 'DESC', 'NULLS LAST')
-        //       .getManyAndCount(),
-
-        //     baseQuery()
-        //       .take(take)
-        //       .skip(skip)
-        //       .where(
-        //         'listing.promotedDate IS NULL AND listing.featureDate IS NULL',
-        //       ) // Exclude promoted and featured listings
-        //       .orderBy('listing.featureDate', 'DESC', 'NULLS LAST')
-        //       .addOrderBy('listing.promotedDate', 'DESC', 'NULLS LAST')
-        //       .getManyAndCount(),
-        //   ]);
-
-        //   // Destructure results
-        //   const [featuredListings, totalFeatured] = featured;
-        //   const [promotedListings, totalPromoted] = promoted;
-        //   const [regularListings, totalRegular] = regular;
-
-        //   // Merge listings with the specified ratios
-        //   const mergedListings = [];
-        //   const promotedRatio = 5; // 1 promoted for every 5 regular
-        //   const featuredRatio = 10; // 1 featured for every 10 regular
-
-        //   let promotedIndex = 0;
-        //   let featuredIndex = 0;
-
-        //   regularListings.forEach((regularListing, index) => {
-        //     mergedListings.push(regularListing);
-
-        //     // Insert a promoted listing every `promotedRatio` regular listings
-        //     if (
-        //       (index + 1) % promotedRatio === 0 &&
-        //       promotedIndex < promotedListings.length
-        //     ) {
-        //       mergedListings.push(promotedListings[promotedIndex]);
-        //       promotedIndex++;
-        //     }
-
-        //     // Insert a featured listing every `featuredRatio` regular listings
-        //     if (
-        //       (index + 1) % featuredRatio === 0 &&
-        //       featuredIndex < featuredListings.length
-        //     ) {
-        //       mergedListings.push(featuredListings[featuredIndex]);
-        //       featuredIndex++;
-        //     }
-        //   });
-
-        //   // Add remaining promoted listings if any
-        //   while (promotedIndex < promotedListings.length) {
-        //     mergedListings.push(promotedListings[promotedIndex]);
-        //     promotedIndex++;
-        //   }
-
-        //   // Add remaining featured listings if any
-        //   while (featuredIndex < featuredListings.length) {
-        //     mergedListings.push(featuredListings[featuredIndex]);
-        //     featuredIndex++;
-        //   }
-
-        //   // `mergedListings` now contains the desired order
-        //   console.log(mergedListings);
-
-        //   // const [listings, count] = await baseQuery()
-        //   //   .take(take)
-        //   //   .skip(skip)
-        //   //   .orderBy('listing.featureDate', 'DESC', 'NULLS LAST')
-        //   //   .addOrderBy('listing.promotedDate', 'DESC', 'NULLS LAST')
-
-        //   //   .getManyAndCount();
-
-        //   // result = listings;
-        //   // total = count;
         // Combine listings if needed
         const mergedListings: Listing[] = [];
         const promotedRatio = 5; // 1 promoted for every 5 regular
@@ -995,7 +908,6 @@ export class ListingService {
         let featuredIndex = 0;
         const splitTake = Math.ceil(take / 4); // Divide `take` equally for featured and promoted
         const splitSkip = Math.ceil(skip / 4); // Divide `skip` equally for featured and promoted
-        const start = Date.now();
 
         if (take > featuredRatio) {
           const [featured, promoted, regular] = await Promise.all([
@@ -1070,9 +982,6 @@ export class ListingService {
           total = count;
           result = listing;
         }
-
-        const end = Date.now();
-        console.log(`Query execution time: ${end - start}ms`);
       }
 
       const listingToParse = [...result];
@@ -2232,9 +2141,18 @@ export class ListingService {
           status: ListingStatus.ACCEPTED,
         };
       });
+      let updatedListingId = [];
 
       // Save updated listings
-      await this.listingRepository.save(updatedListings);
+      const listing = await this.listingRepository.save(updatedListings);
+      listing.forEach((element) => {
+        updatedListingId.push(element.id);
+      });
+
+      const data = await this.listingRepository.find({
+        where: { id: In(updatedListingId) },
+        relations: ['user'],
+      });
 
       // Fetch notification scope
       const scope = await this.notificationScopeRepository.findOne({
@@ -2242,12 +2160,12 @@ export class ListingService {
       });
 
       // Send notifications
-      updatedListings.forEach((listing) => {
+      data.forEach((element) => {
         this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
-          creatorId: listing.userId,
+          creatorId: element.id,
+          scope: scope,
           category: scope.name,
           metadata: JSON.stringify(listing),
-
           event: 'Approved',
           recipientFormat: ['Owner', null],
         });

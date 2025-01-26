@@ -10,7 +10,6 @@ import * as path from 'path';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { formatError } from './common/utils/format-error';
-import configuration from './database/seeders/config/configuration';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
@@ -50,17 +49,20 @@ import { ActivityLogModule } from './modules/activity-log/activity-log.module';
 import { ServiceProviderModule } from './modules/service-provider/service-provider.module';
 import { TermsAndConditionGuard } from './modules/auth/guards/terms-and-condition.guard';
 import { TimerInterceptor } from './common/interceptors/request-timer';
+import { CacheModule } from '@nestjs/cache-manager';
+
+import { redisStore } from 'cache-manager-redis-store';
+import { getRedisConfigName } from './config/serviceAccount/redis.config';
+import configuration from './config/configuration';
 
 @Module({
   imports: [
     SseModule,
     ConfigModule.forRoot({
-      envFilePath:
-        process.env.NODE_ENV === 'production' ? '.env' : '.env.local',
+      envFilePath: process.env.NODE_ENV === 'production' ? '.env' : '.env',
       load: configuration,
       isGlobal: true,
     }),
-
     I18nModule.forRoot({
       fallbackLanguage: 'en',
       loaderOptions: {
@@ -93,6 +95,22 @@ import { TimerInterceptor } from './common/interceptors/request-timer';
       useFactory: (config: ConfigService) =>
         config.get<GoogleRecaptchaModuleOptions>('recaptcha'),
       inject: [ConfigService],
+    }),
+
+    CacheModule.register({
+      store: redisStore,
+      inject: [ConfigService],
+
+      isGlobal: true,
+      useFactory: async (configService: ConfigService) => {
+        const redisConfig = configService.get(getRedisConfigName());
+        return {
+          store: await redisStore({
+            host: redisConfig.host,
+            password: redisConfig.password,
+          }),
+        };
+      },
     }),
     ScheduleModule.forRoot(),
     AuthModule,

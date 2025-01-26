@@ -125,7 +125,8 @@ export class AuctionService {
     paginateAndSort: FetchAuctionParticipantInput,
   ): Promise<AuctionParticipantResponse> {
     try {
-      const { id, skip = 0, take = 20 } = paginateAndSort; // Default pagination if not provided
+      const { id, skip = 0, take = 20 } = paginateAndSort;
+      //Default pagination if not provided
 
       const [auction, [participants, total]] = await Promise.all([
         // Fetch the auction details

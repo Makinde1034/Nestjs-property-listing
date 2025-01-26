@@ -199,7 +199,6 @@ export class OfferService {
       // Find the Scope available for application
       const notificationPreference =
         await this.notificationScopeRepository.find();
-      console.log(notificationPreference);
       //Filter out the correct scope
       const scope: NotificationScope = notificationPreference.find(
         (element) => {
@@ -608,7 +607,6 @@ export class OfferService {
             amount: JSON.stringify(invoice.price),
             paymentId: invoice.checkoutId,
           });
-
           // Update offer status and return updated offer immediately using RETURNING (if supported by your DB)
           const updateResult = await entityManager
             .createQueryBuilder()

@@ -56,6 +56,7 @@ import { NotificationMessagesRepository } from '../repositories/notification-mes
 import { NotificationMessages } from '../../../entities/notification-message.entity';
 import { In } from 'typeorm';
 import { StorageService } from '../../file-handler/services/storage.service';
+import { NotificationTokenRepository } from '../repositories/notification-token.repository';
 
 @Injectable()
 export class NotificationService {
@@ -74,6 +75,7 @@ export class NotificationService {
     private readonly sseService: SseService,
 
     private readonly notificationMesageRepository: NotificationMessagesRepository,
+    private readonly notificationTokenRepository: NotificationTokenRepository,
 
     private readonly userNotificationPreference: UserNotificationRepository,
     private readonly storageService: StorageService,
@@ -139,7 +141,7 @@ export class NotificationService {
       ]);
 
       //If neither buyer nor seller has preferences for this scope, skip
-      if (!buyerPref || !sellerPref) {
+      if (!sellerPref && !buyerPref) {
         this.logger.warn(
           `No notification preferences found for scope: ${scope.id}`,
         );
@@ -202,7 +204,7 @@ export class NotificationService {
        ************************/
 
       if (userPrefRecipients?.email) {
-        this.logger.log('Sending notifications');
+        this.logger.log('Sending  email notifications');
         this.sendEmailToUser(
           recipient,
           event,
@@ -216,7 +218,7 @@ export class NotificationService {
       }
 
       if (userPrefOwner?.email) {
-        this.logger.log('Sending notifications');
+        this.logger.log('Sending  email notifications');
         this.sendEmailToUser(
           owner,
           event,
@@ -233,37 +235,53 @@ export class NotificationService {
        * Push Notification
        ************************/
       if (userPrefRecipients?.mobile) {
-        this.logger.log('Sending notifications');
-        this.sendPushNotificationToUser(
-          recipient,
-          event,
-          scope,
-          recipientFormat[1],
-          count,
+        this.logger.log('Sending  push notifications');
+        const recipientNotificationToken =
+          await this.notificationTokenRepository.findOne({
+            where: { userId: recipient?.id },
+          });
 
-          messages,
-          metadata,
-        );
+        if (recipientNotificationToken) {
+          this.sendPushNotificationToUser(
+            recipient,
+            recipientNotificationToken.token,
+            event,
+            scope,
+            recipientFormat[1],
+            count,
+            messages,
+            metadata,
+          );
+        }
       }
 
       if (userPrefOwner?.mobile) {
-        this.logger.log('Sending notifications');
-        this.sendPushNotificationToUser(
-          owner,
-          event,
-          scope,
-          recipientFormat[0],
-          count,
-          messages,
-          metadata,
-        );
+        this.logger.log('Sending push notifications');
+        const ownerNotificationToken =
+          await this.notificationTokenRepository.findOne({
+            where: { userId: owner?.id },
+          });
+
+        if (ownerNotificationToken) {
+          this.sendPushNotificationToUser(
+            owner,
+            ownerNotificationToken?.token,
+            event,
+            scope,
+            recipientFormat[0],
+            count,
+            messages,
+            metadata,
+          );
+        }
       }
 
       /*********************
        * Web Notification
        ********************/
       if (userPrefRecipients?.desktop) {
-        this.logger.log('Sending notifications');
+        this.logger.log('Sending  system notifications');
+
         this.sendDesktopNotificationToUser(
           recipient,
           event,
@@ -276,7 +294,7 @@ export class NotificationService {
       }
 
       if (userPrefOwner?.desktop) {
-        this.logger.log('Sending notifications');
+        this.logger.log('Sending system notifications');
         this.sendDesktopNotificationToUser(
           owner,
           event,
@@ -429,6 +447,7 @@ export class NotificationService {
 
   private sendPushNotificationToUser(
     user: User,
+    notificationToken: string,
     event: string,
     scope: string,
     format: string,
@@ -460,7 +479,7 @@ export class NotificationService {
           message,
           deviceType: '',
 
-          notificationToken: user.notificationToken,
+          notificationToken: notificationToken,
           userId: user.id,
           redirectLink: this.frontEndUrl,
         });
@@ -507,14 +526,11 @@ export class NotificationService {
       return null;
     }
 
-    console.log(scope, event, recipient);
-    console.log(messages);
-
     const filteredMessages = messages.filter(
       (message) =>
         message.scope == scope &&
         message.event == event &&
-        message.recipients == recipient,
+        message?.recipients == recipient,
     );
 
     if (filteredMessages.length < 1) {

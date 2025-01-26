@@ -11,7 +11,6 @@ import { Role } from '../../entities';
  *******************************************************************/
 export const roleFactory: DeepPartial<Role[]> = [
   {
-    id: 1,
     englishName: 'Super Admin',
     arabicName: 'مشرف عام',
     slug: 'super-admin',

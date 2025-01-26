@@ -5,7 +5,7 @@
 
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ListingTypeService } from '../services/listing-type.service';
-import { UseGuards } from '@nestjs/common';
+import { UseGuards, UseInterceptors } from '@nestjs/common';
 import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
 import {
   ListingTypeInput,
@@ -19,6 +19,7 @@ import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { ListingTypesResponse } from '../dtos/response/listingType.response';
 import { Public } from '../../auth/decorators/permision.decorator';
 import { PermissionsEnum } from '../../../common/enums/permission.enum';
+import { GqlCacheInterceptor } from '../../../common/interceptors/cache-middleware';
 
 @Resolver()
 export class ListingTypeResolver {
@@ -26,11 +27,11 @@ export class ListingTypeResolver {
 
   /**
    * Fetch ListingTypes
-   *
    * @async
    * @returns {Promise<ListingType[]>}
-   */ @Public()
-  // @Permissions('listing-type-and-attributes-view-listing-types')
+   */
+  @Public()
+  @UseInterceptors(GqlCacheInterceptor)
   @Query(() => ListingTypesResponse)
   async fetchListingTypes(
     @Args('findOptions', { nullable: true }) findOptions: PaginateAndSort,
@@ -39,6 +40,8 @@ export class ListingTypeResolver {
   }
   @Public()
   @Query(() => ListingType)
+  @UseInterceptors(GqlCacheInterceptor)
+
   // @Permissions('listing-type-and-attributes-view-listing-types')
   async fetchOneListingTypes(@Args('id') id: string): Promise<ListingType> {
     return await this.listingTypeService.findOne(id);

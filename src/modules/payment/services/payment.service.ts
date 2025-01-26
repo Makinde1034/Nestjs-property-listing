@@ -277,9 +277,7 @@ export class PaymentService {
         status: PaymentStatus.PAID,
         capturedPrice: parseFloat(webHookPaymentResponse.payload.amount),
       });
-
       this.successNotification(invoice.userId, invoice.reference);
-
       return new SuccessResponse();
     } catch (error) {
       throw new BadRequestException(error);

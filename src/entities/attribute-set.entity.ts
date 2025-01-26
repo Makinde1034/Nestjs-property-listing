@@ -39,7 +39,6 @@ export class AttributeSet extends BaseEntity {
   @Field(() => [ListingType])
   @ManyToMany(() => ListingType, (listing) => listing.attributeSets)
   listingTypes: ListingType[];
-
   @Field()
   @DeleteDateColumn()
   deletedAt: Date;

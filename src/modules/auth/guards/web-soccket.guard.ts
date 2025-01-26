@@ -20,7 +20,6 @@ export class WsAuthGuard implements CanActivate {
       // Validate the token and extract user information
       return true; // Or false based on validation
     }
-
     return false;
   }
 }

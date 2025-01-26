@@ -14,7 +14,6 @@ export type FireBaseConfig = {
   projectId: string;
   email: string;
 };
-
 const getFireBaseConfig = (): FireBaseConfig => ({
   key: key,
   projectId: projectId,

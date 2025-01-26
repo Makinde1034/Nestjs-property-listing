@@ -206,7 +206,6 @@ export class UserService {
       }
       /*************************************************/
     } catch (error) {
-      console.log(error);
       this.logger.log(error);
       if (error instanceof HttpException) {
         throw error;
@@ -217,7 +216,6 @@ export class UserService {
   }
   /************************************************
    *Bypass Nafath
-   *
    ************************************************/
   //TODO: remove before going live
 
@@ -295,11 +293,12 @@ export class UserService {
    */
 
   async findByEmailOrPhone(username: string): Promise<User | null> {
-    return await this.usersRepository
+    const data = await this.usersRepository
       .createQueryBuilder('user')
       .where('user.email = :username', { username })
       .orWhere('user.phone = :username', { username })
       .getOne();
+    return data;
   }
 
   /**

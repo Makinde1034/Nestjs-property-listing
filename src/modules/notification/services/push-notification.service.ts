@@ -9,25 +9,40 @@ import {
   PushNotificationinput,
   PushNotificationPayload,
 } from 'src/common/interface';
-import StorageConfig from '../../../database/seeders/config/serviceAccount/storage-config';
+
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { NotificationTokenRepository } from '../repositories/notification-token.repository';
-
-firebase.initializeApp({
-  credential: firebase.credential.cert({
-    projectId: StorageConfig.projectId,
-    clientEmail: StorageConfig.clientEmail,
-    privateKey: StorageConfig.privateKey,
-  }),
-});
+import { ConfigService } from '@nestjs/config';
+import {
+  FireBaseConfig,
+  getFireBaseConfigName,
+} from '../../../config/serviceAccount/firebase.config';
 
 @Injectable()
 export class PushNotificationService {
+  private readonly logger = new Logger(PushNotificationService.name);
+  private readonly firebaseConfig: FireBaseConfig;
+
   constructor(
     private readonly notificationTokenRepository: NotificationTokenRepository,
-  ) {}
-  logger = new Logger(PushNotificationService.name);
 
+    private readonly configService: ConfigService, // Inject ConfigService
+  ) {
+    this.firebaseConfig = this.configService.get<FireBaseConfig>(
+      getFireBaseConfigName(),
+    );
+    // Fetch Firebase Config
+    if (!firebase.apps.length) {
+      firebase.initializeApp({
+        credential: firebase.credential.cert({
+          projectId: this.firebaseConfig.projectId,
+          clientEmail: this.firebaseConfig.email,
+          privateKey: this.firebaseConfig.key,
+        }),
+      });
+      this.logger.log('Firebase initialized successfully.');
+    }
+  }
   /**
    * Update User Profile
 
@@ -35,7 +50,6 @@ export class PushNotificationService {
    * @param {PushNotificationPayload} notification
    * @returns {Promise<void>}
    */
-
   async sendPushNotification(
     notification: PushNotificationPayload,
   ): Promise<void> {
@@ -118,8 +132,6 @@ export class PushNotificationService {
       }
       return new SuccessResponse();
     } catch (error) {
-      console.log(error);
-
       this.logger.log(error);
       throw new BadRequestException(error);
     }

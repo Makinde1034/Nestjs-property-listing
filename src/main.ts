@@ -50,6 +50,7 @@ async function bootstrap() {
     const trackingMiddleware = new TrackingMiddleware(UsertrackingService);
     trackingMiddleware.use(req, res, next);
   });
+
   app.use(
     compression({
       level: 6, // Compression level (1-9)

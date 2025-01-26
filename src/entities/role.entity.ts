@@ -59,7 +59,6 @@ export class Role {
   @Field(() => [ActivityLog], { nullable: true })
   @OneToMany(() => ActivityLog, (activityLogs) => activityLogs.role)
   activityLogs: ActivityLog;
-
   @Field()
   @CreateDateColumn()
   createdAt: Date;

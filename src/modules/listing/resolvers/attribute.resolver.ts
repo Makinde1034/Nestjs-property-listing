@@ -4,7 +4,7 @@
  */
 
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { UseGuards } from '@nestjs/common';
+import { UseGuards, UseInterceptors } from '@nestjs/common';
 
 import { Permissions } from 'src/common/decorator/permission';
 
@@ -26,6 +26,8 @@ import {
 } from '../dtos/response/attribute.response';
 import { Public } from '../../auth/decorators/permision.decorator';
 import { PermissionsEnum } from '../../../common/enums/permission.enum';
+import { GqlCacheInterceptor } from '../../../common/interceptors/cache-middleware';
+import { CacheTTL } from '@nestjs/cache-manager';
 
 @Resolver()
 export class AttributeResolver {
@@ -39,6 +41,8 @@ export class AttributeResolver {
    */
 
   @Public()
+  @CacheTTL(3600)
+  @UseInterceptors(GqlCacheInterceptor)
   @Query(() => AttributeResponse)
   async fetchAttributes(
     @Args('findOptions', { nullable: true }) findOptions: AttributeFilter,
@@ -100,6 +104,8 @@ export class AttributeResolver {
    * @returns {Promise<AttributeSet[]>}
    */
   @Public()
+  @CacheTTL(3600)
+  @UseInterceptors(GqlCacheInterceptor)
   @Query(() => AttributeSetResponse)
   async fetchAttributeSets(
     @Args('findOptions', { nullable: true }) findOptions: PaginateAndSort,
@@ -107,11 +113,14 @@ export class AttributeResolver {
     return await this.attributeService.findAllAttributeSets(findOptions);
   }
   @Public()
+  @UseInterceptors(GqlCacheInterceptor)
   @Query(() => AttributeSet)
   async fetchOneAttributeSets(@Args('id') id: string): Promise<AttributeSet> {
     return await this.attributeService.findOneAttributeSet(id);
   }
   @Public()
+  @CacheTTL(3600)
+  @UseInterceptors(GqlCacheInterceptor)
   @Query(() => Attribute)
   async fetchOneAttribute(@Args('id') id: string): Promise<Attribute> {
     return await this.attributeService.findOneAttribute(id);
@@ -172,6 +181,8 @@ export class AttributeResolver {
     return await this.attributeService.searchForAttributes(searchParam);
   }
 
+  @Public()
+  @CacheTTL(3600)
   @Query(() => [AttributeSet], { name: 'searchForAttributeSets' })
   @UseGuards(AccessTokenGuard)
   async searchForAttributeSets(@Args('searchParam') searchParam: string) {
