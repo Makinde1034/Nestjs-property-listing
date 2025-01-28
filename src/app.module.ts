@@ -74,7 +74,6 @@ import configuration from './config/configuration';
         AcceptLanguageResolver,
       ],
     }),
-
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: 'src/schema.gql',

@@ -28,6 +28,7 @@ import { ActivityLog } from './activity-log.entity';
 @Entity()
 export class Ticket extends BaseEntity {
   @Field(() => User)
+  @Index()
   @ManyToOne(() => User, { cascade: true })
   reporter: User;
 
@@ -40,6 +41,7 @@ export class Ticket extends BaseEntity {
   ticketActivityLog: ActivityLog;
 
   @Field(() => ParentIssue, { nullable: true })
+  @Index()
   @ManyToOne(() => ParentIssue, (parentIssue) => parentIssue.ticket, {
     cascade: true,
     eager: true,
@@ -47,6 +49,7 @@ export class Ticket extends BaseEntity {
   parentIssue: ParentIssue;
 
   @Field(() => ChildIssue, { nullable: true })
+  @Index()
   @ManyToOne(() => ChildIssue, (childIssue) => childIssue.ticket, {
     cascade: true,
     eager: true,

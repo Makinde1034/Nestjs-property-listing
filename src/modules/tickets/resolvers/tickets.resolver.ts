@@ -6,7 +6,7 @@
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { TicketService } from '../services';
 import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
-import { UseGuards } from '@nestjs/common';
+import { UseGuards, UseInterceptors } from '@nestjs/common';
 import {
   CreateResponseTemplateInput,
   CreateTicketInput,
@@ -28,6 +28,7 @@ import { Public } from '../../auth/decorators/permision.decorator';
 
 import { AdminDashboardSort } from '../../admin/dto/request/admin-request';
 import { PermissionsEnum } from '../../../common/enums/permission.enum';
+import { GqlCacheInterceptor } from '../../../common/interceptors/cache-middleware';
 
 @Resolver()
 @Public()
@@ -91,14 +92,15 @@ export class TicketsResolver {
    * @returns {Promise<Ticket>}
    */
   @Query(() => TicketResponse)
+  @UseInterceptors(GqlCacheInterceptor)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.SUPPORT_TICKETS_READ)
   async listTicketsForAdminAndStaff(
     @Context() ctx: any,
-    @Args({ name: 'findOptions', nullable: true, type: () => ListTicketInput })
-    input: ListTicketInput,
+    @Args({ name: 'findOptions', nullable: true })
+    findOptions: ListTicketInput,
   ) {
-    return await this.ticketService.listTicketsForAdminAndStaff(input);
+    return await this.ticketService.listTicketsForAdminAndStaff(findOptions);
   }
   @Query(() => TicketResponse)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
@@ -110,7 +112,6 @@ export class TicketsResolver {
   ) {
     return await this.ticketService.listTicketsForAdminDashboard(input);
   }
-
   /**
    * Update Ticket
    * @async

@@ -142,41 +142,45 @@ export class NotificationService {
 
       //If neither buyer nor seller has preferences for this scope, skip
       if (!sellerPref && !buyerPref) {
-        this.logger.warn(
-          `No notification preferences found for scope: ${scope.id}`,
+        if (!sellerPref && !buyerPref) {
+          this.logger.warn(
+            `No notification preferences found for scope: ${scope.id}`,
+          );
+          return;
+        }
+
+        // Define scopes triggering notifications
+        const notificationScopes = new Set(
+          Object.values(NotificationScopeEnum),
         );
-        return;
-      }
 
-      // Define scopes triggering notifications
-      const notificationScopes = new Set(Object.values(NotificationScopeEnum));
+        // Check if scope matches predefined notification scopes
+        const scopeName = scope.scopeGroup as NotificationScopeEnum;
 
-      // Check if scope matches predefined notification scopes
-      const scopeName = scope.scopeGroup as NotificationScopeEnum;
+        if (notificationScopes.has(scopeName)) {
+          // Fetch messages relevant tBodyo the scope and event
+          const messages = await this.notificationMesageRepository.find({
+            where: {
+              scope: scope.scopeGroup,
+              event: specificEvent,
+            },
+          });
 
-      if (notificationScopes.has(scopeName)) {
-        // Fetch messages relevant tBodyo the scope and event
-        const messages = await this.notificationMesageRepository.find({
-          where: {
-            scope: scope.scopeGroup,
-            event: specificEvent,
-          },
-        });
-
-        // Process notifications based on preferences
-        await this.SendNotificationBasedOnPreference(
-          buyerPref,
-          sellerPref,
-          sellerPref?.user,
-          buyerPref?.user,
-          specificEvent,
-          scope.scopeGroup,
-          recipientFormat,
-          count,
-          attachment,
-          messages,
-          metadata,
-        );
+          // Process notifications based on preferences
+          await this.SendNotificationBasedOnPreference(
+            buyerPref,
+            sellerPref,
+            sellerPref?.user,
+            buyerPref?.user,
+            specificEvent,
+            scope.scopeGroup,
+            recipientFormat,
+            count,
+            attachment,
+            messages,
+            metadata,
+          );
+        }
       }
     } catch (error) {
       this.logger.debug('Error sending notification:', error);
@@ -445,7 +449,7 @@ export class NotificationService {
     }
   }
 
-  private sendPushNotificationToUser(
+  private async sendPushNotificationToUser(
     user: User,
     notificationToken: string,
     event: string,
@@ -474,7 +478,7 @@ export class NotificationService {
         const message =
           user.language === 'en' ? messageData?.body : messageData?.arabicBody;
 
-        this.sendPushNotification({
+        await this.sendPushNotification({
           title,
           message,
           deviceType: '',
