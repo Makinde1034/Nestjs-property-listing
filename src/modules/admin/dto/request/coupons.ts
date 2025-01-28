@@ -16,6 +16,7 @@ import {
 } from 'class-validator';
 import { CouponEnum } from '../../../../common/enums/coupons.enum';
 import { CouponStatus } from '../../../../common/enums/status.enum';
+import { AdminFilterAndSort } from '../../../listing/dtos/request';
 
 @InputType()
 export class CreateCouponInput {
@@ -68,6 +69,12 @@ export class UpdateCouponInput extends PartialType(CreateCouponInput) {
 
   @Field()
   @ValidateIf((o) => o.status)
+  @IsEnum(CouponStatus)
+  status: string;
+}
+@InputType()
+export class CouponFilter extends AdminFilterAndSort {
+  @Field()
   @IsEnum(CouponStatus)
   status: string;
 }

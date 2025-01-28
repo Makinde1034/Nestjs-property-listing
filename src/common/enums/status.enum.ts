@@ -48,9 +48,9 @@ export enum ProviderServiceStatus {
   ACTIVE = 'active',
 }
 export enum CouponStatus {
-  EXPIRED = 'Expired',
-  DEACTIVATED = 'Deactivated',
-  ACTIVE = 'Active',
+  EXPIRED = 'expired',
+  DEACTIVATED = 'deactivated',
+  ACTIVE = 'active',
 }
 
 export enum ServiceProvided {

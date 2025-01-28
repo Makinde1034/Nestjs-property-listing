@@ -40,7 +40,7 @@ export class GqlCacheInterceptor extends CacheInterceptor {
       next: async (result) => {
         if (key && result) {
           // Cache the result only if there's a valid key and result
-          await this.cacheManager.set(key, result, { ttl: 300 }); // TTL is optional
+          await this.cacheManager.set(key, result); // TTL is optional
         }
       },
       error: (err) => {

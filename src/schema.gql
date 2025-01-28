@@ -1260,7 +1260,7 @@ type Query {
   averageResponse: ResponseTime!
   saiiFees(findOptions: AdminDashboardSort): SaiiFees!
   financialVsOrder(findOptions: AdminDashboardSort!): [GroupTransactions!]!
-  fetchCoupons(couponFilterInput: AdminFilterAndSort!): CouponResponse!
+  fetchCoupons(couponFilterInput: CouponFilter!): CouponResponse!
   validataCoupon(couponFilterInput: ValidataCouponInput!): IsCouponValidResponse!
   findOneCoupon(id: String!): Coupon!
   findAllFeatures: [SystemFeatureSetting!]!
@@ -1483,6 +1483,21 @@ input AdminDashboardListingStatus {
   value: Float
   stage: String
   status: String
+}
+
+input CouponFilter {
+  take: Float
+  skip: Float
+  sortField: String
+  directionToSort: SortOrder
+  where: WhereOption
+  timePeriod: String
+  status: String!
+  isListingPromoted: Boolean
+  isListingFeatured: Boolean
+  isListingSold: Boolean
+  isListingFlagged: Boolean
+  isListingRented: Boolean
 }
 
 input ValidataCouponInput {

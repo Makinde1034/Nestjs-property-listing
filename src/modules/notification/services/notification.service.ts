@@ -142,45 +142,41 @@ export class NotificationService {
 
       //If neither buyer nor seller has preferences for this scope, skip
       if (!sellerPref && !buyerPref) {
-        if (!sellerPref && !buyerPref) {
-          this.logger.warn(
-            `No notification preferences found for scope: ${scope.id}`,
-          );
-          return;
-        }
-
-        // Define scopes triggering notifications
-        const notificationScopes = new Set(
-          Object.values(NotificationScopeEnum),
+        this.logger.warn(
+          `No notification preferences found for scope: ${scope.id}`,
         );
+        return;
+      }
 
-        // Check if scope matches predefined notification scopes
-        const scopeName = scope.scopeGroup as NotificationScopeEnum;
+      // Define scopes triggering notifications
+      const notificationScopes = new Set(Object.values(NotificationScopeEnum));
 
-        if (notificationScopes.has(scopeName)) {
-          // Fetch messages relevant tBodyo the scope and event
-          const messages = await this.notificationMesageRepository.find({
-            where: {
-              scope: scope.scopeGroup,
-              event: specificEvent,
-            },
-          });
+      // Check if scope matches predefined notification scopes
+      const scopeName = scope.scopeGroup as NotificationScopeEnum;
 
-          // Process notifications based on preferences
-          await this.SendNotificationBasedOnPreference(
-            buyerPref,
-            sellerPref,
-            sellerPref?.user,
-            buyerPref?.user,
-            specificEvent,
-            scope.scopeGroup,
-            recipientFormat,
-            count,
-            attachment,
-            messages,
-            metadata,
-          );
-        }
+      if (notificationScopes.has(scopeName)) {
+        // Fetch messages relevant tBodyo the scope and event
+        const messages = await this.notificationMesageRepository.find({
+          where: {
+            scope: scope.scopeGroup,
+            event: specificEvent,
+          },
+        });
+
+        // Process notifications based on preferences
+        await this.SendNotificationBasedOnPreference(
+          buyerPref,
+          sellerPref,
+          sellerPref?.user,
+          buyerPref?.user,
+          specificEvent,
+          scope.scopeGroup,
+          recipientFormat,
+          count,
+          attachment,
+          messages,
+          metadata,
+        );
       }
     } catch (error) {
       this.logger.debug('Error sending notification:', error);

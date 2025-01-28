@@ -30,6 +30,7 @@ import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import { AdminDefault } from '../../../entities/admin-table.entity';
 import {
+  CouponFilter,
   CreateCouponInput,
   DeactivateCouponInput,
   DeleteCouponInput,
@@ -180,7 +181,7 @@ export class AdminResolver {
   @Permissions(PermissionsEnum.COUPONS_VIEW)
   @Query(() => CouponResponse, { name: 'fetchCoupons' })
   async fetchCoupons(
-    @Args('couponFilterInput') couponFilterInput: AdminFilterAndSort,
+    @Args('couponFilterInput') couponFilterInput: CouponFilter,
   ) {
     return await this.adminService.fetchCoupons(couponFilterInput);
   }

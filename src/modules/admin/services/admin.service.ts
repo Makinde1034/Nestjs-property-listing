@@ -62,6 +62,7 @@ import {
 import { AdminRepository } from '../repositories/admin.repository';
 import { CouponRepository } from '../repositories/coupons.repository';
 import {
+  CouponFilter,
   CreateCouponInput,
   DeactivateCouponInput,
   DeleteCouponInput,
@@ -470,62 +471,68 @@ export class AdminService {
   async listingStats(
     findOption: AdminDashboardListingStatus,
   ): Promise<ListingStats> {
-    const { take = 10, skip = 0, stage, status } = findOption;
+    try {
+      const { take = 10, skip = 0, stage, status } = findOption;
 
-    const currentDate = moment();
-    const date = new Date(); // Use moment to handle the current date
-    let startDate: Date, endDate: Date;
+      const currentDate = moment();
+      const date = new Date(); // Use moment to handle the current date
+      let startDate: Date, endDate: Date;
 
-    // Determine date range based on time period
-    switch (findOption.timePeriod) {
-      case TimePeriod.Today:
-        startDate = currentDate.startOf('day').toDate();
-        endDate = date;
-        break;
-      case TimePeriod.Week:
-        startDate = currentDate
-          .subtract(findOption.value ?? 1, 'weeks')
-          .startOf('week')
-          .toDate();
-        endDate = date;
-        break;
-      case TimePeriod.Month:
-        startDate = currentDate
-          .subtract(findOption.value ?? 1, 'months')
-          .startOf('month')
-          .toDate();
-        endDate = date;
-        break;
-      case TimePeriod.Year:
-        startDate = currentDate
-          .subtract(findOption.value ?? 1, 'years')
-          .startOf('year')
-          .toDate();
-        endDate = date;
-        break;
-      default:
-        return;
-    }
+      // Determine date range based on time period
+      switch (findOption.timePeriod) {
+        case TimePeriod.Today:
+          startDate = currentDate.startOf('day').toDate();
+          endDate = date;
+          break;
+        case TimePeriod.Week:
+          startDate = currentDate
+            .subtract(findOption.value ?? 1, 'weeks')
+            .startOf('week')
+            .toDate();
+          endDate = date;
+          break;
+        case TimePeriod.Month:
+          startDate = currentDate
+            .subtract(findOption.value ?? 1, 'months')
+            .startOf('month')
+            .toDate();
+          endDate = date;
+          break;
+        case TimePeriod.Year:
+          startDate = currentDate
+            .subtract(findOption.value ?? 1, 'years')
+            .startOf('year')
+            .toDate();
+          endDate = date;
+          break;
+        default:
+          break;
+      }
 
-    // Initialize the query builder
-    const query = this.offerRepository
-      .createQueryBuilder('offer')
-      .leftJoinAndSelect('offer.listing', 'listing');
+      // Initialize the query builder
+      const query = this.offerRepository
+        .createQueryBuilder('offer')
+        .leftJoinAndSelect('offer.listing', 'listing');
 
-    // Add conditions dynamically based on input
-    if (stage) {
-      query.andWhere('listing.stage = :stage', { stage });
-    }
+      // Add conditions dynamically based on input
+      if (stage) {
+        query.andWhere('listing.stage = :stage', { stage });
+      }
 
-    if (status) {
-      query.andWhere('offer.status = :status', { status });
-    }
+      if (status) {
+        query.andWhere('offer.status = :status', { status });
+      }
 
-    // Execute the query
+      // Execute the query
 
-    // Add other aggregated stats
-    const [offer, listing, acceptedOffer, ownershipTransfer, [offers, total]] =
-      await Promise.all([
+      // Add other aggregated stats
+      const [
+        offer,
+        listing,
+        acceptedOffer,
+        ownershipTransfer,
+        [offers, total],
+      ] = await Promise.all([
         this.offerRepository.count({
           where: {
             createdAt: Between(startDate, endDate),
@@ -548,17 +555,22 @@ export class AdminService {
         query.take(take).skip(skip).getManyAndCount(),
       ]);
 
-    // Return the result
-    return {
-      offers,
-      total,
-      analysis: {
-        offer,
-        listing,
-        acceptedOffer,
-        ownershipTransfer,
-      },
-    };
+      // Return the result
+
+      return {
+        offers,
+        total,
+        analysis: {
+          offer,
+          listing,
+          acceptedOffer,
+          ownershipTransfer,
+        },
+      };
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
   }
 
   async userStats(findOption: AdminDashboardSort): Promise<UserStats> {
@@ -935,7 +947,7 @@ export class AdminService {
     }
   }
 
-  async fetchCoupons(couponFilterInput: AdminFilterAndSort) {
+  async fetchCoupons(couponFilterInput: CouponFilter) {
     try {
       const now = new Date();
       const whereCondition: any = {};

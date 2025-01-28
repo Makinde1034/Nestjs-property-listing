@@ -157,7 +157,7 @@ export class UserFilterAndSort extends PaginateAndSort {
   @Field({ nullable: true })
   @ValidateIf((o) => o.status) // Validate only if `shouldValidateStatus` is true
   @IsEnum(ListingStatus)
-  status?: ListingStatus;
+  status?: string;
 
   @Field()
   @IsOptional()
