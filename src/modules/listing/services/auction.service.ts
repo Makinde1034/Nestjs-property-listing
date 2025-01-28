@@ -190,7 +190,7 @@ export class AuctionService {
         .createQueryBuilder('auction')
 
         .where(
-          `CURRENT_DATE >= auction.startDate AND auction.deletedAt IS NULL AND auction.status = :statusOne
+          ` auction.startDate <= CURRENT_DATE AND auction.deletedAt IS NULL AND auction.status = :statusOne
 `,
           { statusOne: AuctionEnum.ACTIVE },
         )

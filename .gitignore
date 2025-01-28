@@ -56,6 +56,7 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 .firebase
 
 /v8-compile-cache-0
+docker-compose.yml
 
 
 /src/config/database/

@@ -49,6 +49,8 @@ export class ListingTypeService {
     const [listingType, total] = await this.listingTypeRepository
       .queryBuilder('listingType')
       .leftJoinAndSelect('listingType.attributeSets', 'attributeSets')
+      .leftJoinAndSelect('attributeSets.attributes', 'attributes')
+
       .take(findOptions.take)
       .skip(findOptions.skip)
       .getManyAndCount();
