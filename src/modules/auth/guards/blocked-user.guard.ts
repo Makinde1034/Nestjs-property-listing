@@ -38,9 +38,7 @@ export class GlobalBLockUserGuard implements CanActivate {
     }
 
     if (user.isBlocked) {
-      throw new ForbiddenException(
-        'Your account has been blocked Please contact support',
-      );
+      throw new ForbiddenException('USER_BLOCKED');
     }
 
     return true;

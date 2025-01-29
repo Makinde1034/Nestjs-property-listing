@@ -10,6 +10,7 @@ import {
   DeleteDateColumn,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToMany,
   OneToOne,
   UpdateDateColumn,
@@ -29,13 +30,12 @@ export class ServiceRequested extends BaseEntity {
 
   @Field(() => User)
   @JoinColumn({ name: 'userId' })
-  @OneToOne(() => User, (user) => user)
+  @ManyToOne(() => User, (user) => user)
   user: User;
 
   @Column()
   @Field()
   serviceProvidedId: string;
-
   @Field(() => [Listing])
   @OneToMany(() => Listing, (listing) => listing.serviceRequested)
   listing: Listing[];

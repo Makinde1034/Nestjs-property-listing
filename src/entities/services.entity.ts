@@ -41,8 +41,9 @@ export class Service extends BaseEntity {
   @Column()
   @Field({ nullable: true })
   pricing: string;
-  @Field(() => [ServiceProvided])
-  @OneToMany(() => ServiceProvided, (status) => status.service)
+
+  @Field(() => [ServiceProvided], { nullable: true })
+  @OneToMany(() => ServiceProvided, (status) => status.service, { eager: true })
   status: ServiceProvided[];
 
   @Field()

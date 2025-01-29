@@ -476,7 +476,7 @@ type Service {
   isWorkLicenseRequired: Boolean
   icon: String
   pricing: String
-  status: [ServiceProvided!]!
+  status: [ServiceProvided!]
   createdAt: DateTime!
   deletedAt: DateTime!
   updatedAt: DateTime!

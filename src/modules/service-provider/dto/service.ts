@@ -8,6 +8,7 @@ import {
   IsArray,
   IsBoolean,
   IsEnum,
+  IsNotEmpty,
   IsOptional,
   IsString,
 } from 'class-validator';
@@ -17,10 +18,12 @@ import { ServiceProviderStatus } from '../../../common/enums/status.enum';
 export class Pricing {
   @Field()
   @IsString()
+  @IsNotEmpty()
   type: string;
 
   @Field()
   @IsString()
+  @IsNotEmpty()
   price: number;
 }
 
@@ -136,8 +139,10 @@ export class ProvideServiceStatusInput {
 @InputType()
 export class RequestForService {
   @Field()
+  @IsString()
   serviceProvidedId: string;
 
   @Field()
+  @IsString()
   listingId: string;
 }
