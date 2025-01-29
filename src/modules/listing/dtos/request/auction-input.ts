@@ -4,7 +4,16 @@
  */
 
 import { Field, InputType, PartialType } from '@nestjs/graphql';
-import { IsArray, IsDate, IsNumber, IsString, IsUUID } from 'class-validator';
+import {
+  IsArray,
+  IsDate,
+  IsDateString,
+  IsNumber,
+  IsString,
+  IsUUID,
+  Max,
+  Min,
+} from 'class-validator';
 import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
 
 @InputType()
@@ -31,6 +40,8 @@ export class CreateAuctionInput {
 
   @Field()
   @IsNumber()
+  @Min(4)
+  @Max(24)
   liveFor: number;
 
   @Field()

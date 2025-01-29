@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsPositive, IsString } from 'class-validator';
 @InputType()
 export class FinalizationInput {
   @Field()
@@ -24,7 +24,8 @@ export class FinalizationInput {
 
   @Field({ nullable: true })
   @IsOptional()
-  @IsString()
+  @IsNumber()
+  @IsPositive()
   ownershipAmmount: number;
 
   @Field({ nullable: true })

@@ -506,7 +506,7 @@ export class AdminService {
           endDate = date;
           break;
         default:
-          break;
+          return;
       }
 
       // Initialize the query builder

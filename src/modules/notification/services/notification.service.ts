@@ -127,6 +127,7 @@ export class NotificationService {
       const specificEvent = notificationInput.event ?? event;
 
       // Fetch buyer and seller notification preferences for the given scope
+      console.log(creatorId, scope);
 
       const [buyerPref, sellerPref] = await Promise.all([
         this.userNotificationPreference.findOne({
@@ -281,7 +282,6 @@ export class NotificationService {
        ********************/
       if (userPrefRecipients?.desktop) {
         this.logger.log('Sending  system notifications');
-
         this.sendDesktopNotificationToUser(
           recipient,
           event,
@@ -307,6 +307,7 @@ export class NotificationService {
       }
       // Add web notification logic when needed
     } catch (error) {
+      console.log(error);
       this.logger.error('Error sending notifications', error);
       throw new BadRequestException(error);
     }

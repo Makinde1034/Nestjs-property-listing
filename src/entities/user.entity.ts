@@ -221,6 +221,7 @@ export class User extends BaseEntity {
   @Field(() => NationalIdentity, { nullable: true })
   @OneToOne(() => NationalIdentity, (identity) => identity.user, {
     cascade: true,
+    eager: true,
   })
   nationalIdentity?: NationalIdentity;
 

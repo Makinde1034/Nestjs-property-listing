@@ -56,6 +56,7 @@ import {
   endOfYear,
   differenceInCalendarDays,
   addHours,
+  parseISO,
 } from 'date-fns';
 
 import { MessageEvent } from '../../sse/request/app';
@@ -87,21 +88,31 @@ export class AuctionService {
   logger = new Logger(AuctionService.name);
   async create(auctionInput: CreateAuctionInput) {
     try {
+      // Ensure start date is not in the past
       if (auctionInput.startDate < new Date()) {
         throw new BadRequestException(
           AppStrings.START_DATE_CANNOT_BE_LESS_THAN_DATE_0F_CREATION,
         );
       }
 
+      // Ensure auction live time is between 4 and 24 hours
       if (auctionInput.liveFor > 24 || auctionInput.liveFor < 4) {
         throw new BadRequestException(
           AppStrings.AUCTION_DURATION_IS_BETWEEN_4_TO_24_HOURS,
         );
       }
 
+      // Convert start date to UTC format
+      const parsedStartDate = auctionInput.startDate;
+
+      // Calculate expire date
+      const expireAt = addHours(parsedStartDate, auctionInput.liveFor);
+
+      // Save auction to the database
       return await this.auctionRepository.save({
         ...auctionInput,
-        expireAt: addHours(auctionInput.startDate, auctionInput.liveFor),
+        startDate: parsedStartDate,
+        expireAt: expireAt,
       });
     } catch (error) {
       this.logger.log(error);
@@ -172,29 +183,25 @@ export class AuctionService {
       );
     }
   }
-
   async findAllRunning(paginateAndSort: PaginateAndSort) {
     try {
       const { sortField, directionToSort } = paginateAndSort;
       const sortDirection: 'ASC' | 'DESC' = directionToSort as 'ASC' | 'DESC';
-
-      const now = new Date();
 
       // Default pagination if not provided
       if (!paginateAndSort.take || !paginateAndSort.skip) {
         paginateAndSort.skip = 0;
         paginateAndSort.take = 20;
       }
-
+      const nowUTC = new Date().toISOString();
       const [auctions, total] = await this.auctionRepository
         .createQueryBuilder('auction')
-
-        .where(
-          ` auction.startDate <= CURRENT_DATE AND auction.deletedAt IS NULL AND auction.status = :statusOne
-`,
-          { statusOne: AuctionEnum.ACTIVE },
-        )
-
+        .where('auction.startDate <= :date') // Running auctions
+        .andWhere('auction.expireAt > :date') // Not expired
+        .andWhere('auction.status = :statusOne', {
+          statusOne: AuctionEnum.ACTIVE,
+          date: nowUTC,
+        })
         .loadRelationCountAndMap(
           'auction.auctionParticipantCount',
           'auction.auctionParticipant', // Relation to count
@@ -215,6 +222,7 @@ export class AuctionService {
       throw new BadRequestException(error.message || 'Error fetching auctions');
     }
   }
+
   async findAll(paginateAndSort: AdminAuctionFilter) {
     try {
       const { sortField, directionToSort, where } = paginateAndSort;

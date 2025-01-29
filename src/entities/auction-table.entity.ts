@@ -11,8 +11,9 @@ import {
   OneToMany,
   UpdateDateColumn,
 } from 'typeorm';
+
 import BaseEntity from './base.entity';
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
 import { AuctionParticipant } from './auction-participant.entity';
 import { IsEnum } from 'class-validator';
 import { AuctionEnum } from '../common/enums/status.enum';
@@ -37,8 +38,9 @@ export class Auction extends BaseEntity {
   @Field({ nullable: true })
   englishDescription: string;
 
-  @Column()
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
+  @Column({ type: 'timestamptz', nullable: true })
+  @Field({ nullable: true })
   startDate: Date;
 
   @Column({ nullable: true })
@@ -76,14 +78,16 @@ export class Auction extends BaseEntity {
   @DeleteDateColumn()
   deletedAt: Date;
 
+  @Field(() => GraphQLISODateTime)
   @CreateDateColumn()
   @Field()
   createdAt: Date;
 
-  @Column({ nullable: true })
-  @Field({ nullable: true })
+  @Field(() => GraphQLISODateTime, { nullable: true })
+  @Column({ type: 'timestamptz', nullable: true })
+  @Field()
   expireAt: Date;
-
+  @Field(() => GraphQLISODateTime)
   @UpdateDateColumn()
   @Field()
   updatedAt: Date;

@@ -50,9 +50,9 @@ import { ServiceProviderModule } from './modules/service-provider/service-provid
 import { TermsAndConditionGuard } from './modules/auth/guards/terms-and-condition.guard';
 import { TimerInterceptor } from './common/interceptors/request-timer';
 import { CacheModule } from '@nestjs/cache-manager';
-
+import KeyvRedis, { Keyv } from '@keyv/redis';
+import { CacheableMemory } from 'cacheable';
 import { redisStore } from 'cache-manager-redis-store';
-import { getRedisConfigName } from './config/serviceAccount/redis.config';
 import configuration from './config/configuration';
 
 @Module({
@@ -98,18 +98,9 @@ import configuration from './config/configuration';
 
     CacheModule.register({
       store: redisStore,
-      inject: [ConfigService],
-
+      url: 'redis://127.0.0.1:6379',
       isGlobal: true,
-      useFactory: async (configService: ConfigService) => {
-        const redisConfig = configService.get(getRedisConfigName());
-        return {
-          store: await redisStore({
-            host: redisConfig.host,
-            password: redisConfig.password,
-          }),
-        };
-      },
+      ttl: 300,
     }),
     ScheduleModule.forRoot(),
     AuthModule,

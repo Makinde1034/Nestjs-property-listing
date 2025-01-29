@@ -232,7 +232,7 @@ type Auction {
   titleInArabic: String
   arabicDescription: String
   englishDescription: String
-  startDate: DateTime!
+  startDate: DateTime
   liveFor: Float
   imageLink: String
   actionActivityLog: [ActivityLog!]
