@@ -32,6 +32,7 @@ import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
 import { ServiceProviderGuard } from '../../auth/guards/service-provider.guard';
 import { Permissions } from '../../../common/decorator/permission';
 import { PermissionsEnum } from '../../../common/enums/permission.enum';
+import { AdminFilterAndSort } from '../../listing/dtos/request';
 
 @Resolver(() => ServiceProvider)
 export class ServiceAndProviderResolver {
@@ -65,10 +66,9 @@ export class ServiceAndProviderResolver {
       ctx.req.user,
     );
   }
-
   @UseGuards(AccessTokenGuard)
   @Query(() => ServiceProviderResponse, { name: 'findAllServiceProviders' })
-  async findAll(@Args('paginateAndSort') paginateAndSort: PaginateAndSort) {
+  async findAll(@Args('paginateAndSort') paginateAndSort: AdminFilterAndSort) {
     return await this.serviceProviderService.findAllServiceProvider(
       paginateAndSort,
     );

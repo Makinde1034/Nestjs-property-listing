@@ -35,6 +35,7 @@ import { AppStrings } from '../../../common/messages/app.strings';
 import { ServiceProvided } from '../../../entities/service-provided.entity';
 import { ServiceRequestedRepository } from '../repository/requested-service.repository';
 import { ServiceProvidedStatus } from '../../../common/enums/service-provider';
+import { AdminFilterAndSort } from '../../listing/dtos/request';
 
 @Injectable()
 export class ServiceAndProviderService {
@@ -103,13 +104,24 @@ export class ServiceAndProviderService {
     }
   }
 
-  async findAllServiceProvider(paginateAndSort: PaginateAndSort) {
+  async findAllServiceProvider(paginateAndSort: AdminFilterAndSort) {
     try {
-      const [serviceProvider, count] =
-        await this.serviceProviderRepository.findAndCount({
-          take: paginateAndSort.take ?? 20,
-          skip: paginateAndSort.skip ?? 0,
+      const take = paginateAndSort.take ?? 20;
+      const skip = paginateAndSort.skip ?? 0;
+
+      const baseQuery =
+        this.serviceProviderRepository.createQueryBuilder('serviceProvider');
+
+      if (paginateAndSort.status) {
+        baseQuery.where(`serviceProvider.providerStatus = :status`, {
+          status: paginateAndSort.status,
         });
+      }
+
+      const [serviceProvider, count] = await baseQuery
+        .take(take)
+        .skip(skip)
+        .getManyAndCount();
       return { serviceProvider, count };
     } catch (error) {
       this.logger.error(error);

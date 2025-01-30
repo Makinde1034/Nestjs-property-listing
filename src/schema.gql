@@ -1283,7 +1283,7 @@ type Query {
   searchForArticlesKnowledgeBase(searchParam: String!): [Article!]!
   getActivityLogs(activityLogInput: ActivityLogInput!): ActivityLogsResponse!
   getAllActivityLogs(paginateAndSort: AuditLogTrailsInput): ActivityLogsResponse!
-  findAllServiceProviders(paginateAndSort: PaginateAndSort!): ServiceProviderResponse!
+  findAllServiceProviders(paginateAndSort: AdminFilterAndSort!): ServiceProviderResponse!
   findOneServiceProvider(id: String!): OneServiceProviderResponse!
   findAllService(paginateAndSort: PaginateAndSort!): ServiceResponse!
   findOneService(id: String!): ServiceProvider!
