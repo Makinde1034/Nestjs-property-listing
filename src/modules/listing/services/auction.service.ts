@@ -507,19 +507,22 @@ export class AuctionService {
 
   async addListingToAuction(data: CreateAuctionParticipantInput) {
     try {
-      const { auctionId, ...listingData } = data;
+      const { auctionId, listingId, ...listingData } = data;
 
-      const [adminDefault, auction, participant, listing] = await Promise.all([
-        this.adminService.adminDefault(),
-        this.auctionRepository.findOneBy({ id: auctionId }),
-        this.auctionParticipantRepository.find({
-          where: {
-            listingId: data.listingId,
-            auction: { id: auctionId },
-          },
-        }),
-        this.listingRepository.findOneBy({ id: data.listingId }),
-      ]);
+      const [adminDefault, auction, participantCount, listing] =
+        await Promise.all([
+          this.adminService.adminDefault(),
+          this.auctionRepository.findOneBy({ id: auctionId }),
+          this.auctionParticipantRepository
+            .createQueryBuilder('auctionParticipant')
+            .where(
+              'auctionParticipant.listingId = :listingId AND auctionParticipant.auctionId = :auctionId',
+              { auctionId, listingId: data.listingId },
+            )
+            .getCount(),
+
+          this.listingRepository.findOneBy({ id: listingId }),
+        ]);
 
       // Validate required entities
       if (!adminDefault) {
@@ -534,7 +537,7 @@ export class AuctionService {
         throw new BadRequestException('Listing not found');
       }
 
-      if (participant.length > 0) {
+      if (participantCount > 0) {
         throw new BadRequestException(
           'Listing has already been added to this auction',
         );
@@ -564,7 +567,6 @@ export class AuctionService {
           AppStrings.AUCTION_REGISTRATION_HAS_NOT_STARTED,
         );
       }
-
       if (differenceInDays > adminDefault.daysToAuctionRegistrationStart) {
         throw new BadRequestException(
           AppStrings.AUCTION_REGISTRATION_HAS_NOT_STARTED,
@@ -578,7 +580,7 @@ export class AuctionService {
       // Save the participant
       return await this.auctionParticipantRepository.save({
         ...listingData,
-        auction,
+        auctionId,
         listing,
       });
     } catch (error) {

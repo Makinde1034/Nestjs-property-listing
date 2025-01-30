@@ -264,6 +264,7 @@ type Bids {
 type AuctionParticipant {
   id: ID!
   listingId: String!
+  auctionId: String!
   userId: [String!]
   bidCount: Float
   listing: Listing
@@ -497,7 +498,7 @@ type ServiceProvided {
 
 type ServiceProvider {
   id: ID!
-  user: User!
+  user: User
   userId: String!
   ibanCertificate: String
   workLicense: String
@@ -507,7 +508,7 @@ type ServiceProvider {
   providerStatus: String
   deletedAt: DateTime!
   activityLog: [ActivityLog!]!
-  servicesOffered: [ServiceProvided!]!
+  servicesOffered: [ServiceProvided!]
   coverageArea: String!
   reason: String
   updatedAt: DateTime!

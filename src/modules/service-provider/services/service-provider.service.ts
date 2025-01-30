@@ -109,21 +109,25 @@ export class ServiceAndProviderService {
       const take = paginateAndSort.take ?? 20;
       const skip = paginateAndSort.skip ?? 0;
 
-      const baseQuery =
-        this.serviceProviderRepository.createQueryBuilder('serviceProvider');
-
+      const baseQuery = this.serviceProviderRepository
+        .createQueryBuilder('serviceProvider')
+        .leftJoinAndSelect('serviceProvider.user', 'user')
+        .leftJoinAndSelect(
+          'serviceProvider.servicesOffered',
+          'servicesOffered',
+        );
       if (paginateAndSort.status) {
-        baseQuery.where(`serviceProvider.providerStatus = :status`, {
+        baseQuery.andWhere(`serviceProvider.providerStatus = :status`, {
           status: paginateAndSort.status,
         });
       }
-
       const [serviceProvider, count] = await baseQuery
         .take(take)
         .skip(skip)
         .getManyAndCount();
       return { serviceProvider, count };
     } catch (error) {
+      console.log(error);
       this.logger.error(error);
       throw new BadRequestException(error);
     }

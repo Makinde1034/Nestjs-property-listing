@@ -27,7 +27,7 @@ export class ServiceProvider extends BaseEntity {
   @Index()
   @OneToOne(() => User, (user) => user.serviceProvider, { eager: true })
   @JoinColumn({ name: 'userId' })
-  @Field(() => User)
+  @Field(() => User, { nullable: true })
   user: User;
 
   @Column()
@@ -69,8 +69,8 @@ export class ServiceProvider extends BaseEntity {
   )
   activityLog: ActivityLog[];
 
-  @Field(() => [ServiceProvided])
-  @OneToMany(() => ServiceProvided, (status) => status.service)
+  @Field(() => [ServiceProvided], { nullable: true })
+  @OneToMany(() => ServiceProvided, (status) => status.service, { eager: true })
   servicesOffered: ServiceProvided[];
 
   @Field()
