@@ -74,6 +74,7 @@ export class ServiceAndProviderService {
   ) {
     try {
       const { serviceOffered, ...rest } = createServiceProviderInput;
+
       const alreadyExisting = await this.serviceProviderRepository.findOne({
         where: { userId: user.id },
       });
@@ -85,15 +86,25 @@ export class ServiceAndProviderService {
       const service = await this.serviceRepository.findOne({
         where: { id: serviceOffered },
       });
-      const serviceProvider = await this.serviceProviderRepository.save({
+
+      if (!service) {
+        throw new BadRequestException(AppStrings.NOT_FOUND);
+      }
+
+      const serviceProvider = this.serviceProviderRepository.create({
         ...rest,
         user,
       });
 
-      await this.serviceProvidedRepository.save({
-        serviceId: service.id,
-        serviceProviderId: serviceProvider.id,
+      await this.serviceProviderRepository.save(serviceProvider);
+
+      const serviceProvided = this.serviceProvidedRepository.create({
+        service: service, // Use entity reference
+        serviceProvider: serviceProvider, // Use entity reference
       });
+
+      await this.serviceProvidedRepository.save(serviceProvided);
+
       return serviceProvider;
     } catch (error) {
       if (error instanceof HttpException) {
@@ -112,10 +123,9 @@ export class ServiceAndProviderService {
       const baseQuery = this.serviceProviderRepository
         .createQueryBuilder('serviceProvider')
         .leftJoinAndSelect('serviceProvider.user', 'user')
-        .leftJoinAndSelect(
-          'serviceProvider.servicesOffered',
-          'servicesOffered',
-        );
+        .leftJoinAndSelect('serviceProvider.servicesOffered', 'servicesOffered')
+
+        .leftJoinAndSelect('servicesOffered.service', 'service');
       if (paginateAndSort.status) {
         baseQuery.andWhere(`serviceProvider.providerStatus = :status`, {
           status: paginateAndSort.status,

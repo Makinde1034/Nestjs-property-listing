@@ -70,7 +70,14 @@ export class ServiceProvider extends BaseEntity {
   activityLog: ActivityLog[];
 
   @Field(() => [ServiceProvided], { nullable: true })
-  @OneToMany(() => ServiceProvided, (status) => status.service, { eager: true })
+  @OneToMany(
+    () => ServiceProvided,
+    (serviceProvided) => serviceProvided.serviceProvider,
+    {
+      eager: true,
+      cascade: true,
+    },
+  )
   servicesOffered: ServiceProvided[];
 
   @Field()

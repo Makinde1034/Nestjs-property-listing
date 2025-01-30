@@ -22,7 +22,6 @@ import { ProviderServiceStatus } from '../common/enums/status.enum';
 @Entity()
 export class ServiceProvided extends BaseEntity {
   @Field(() => ServiceProvider)
-  @JoinColumn({ name: 'serviceProviderId' })
   @ManyToOne(
     () => ServiceProvider,
     (servicesProvider) => servicesProvider.servicesOffered,
@@ -35,7 +34,7 @@ export class ServiceProvided extends BaseEntity {
 
   @Field(() => Service)
   @JoinColumn({ name: 'serviceId' })
-  @ManyToOne(() => Service, (services) => services.status)
+  @ManyToOne(() => Service, (services) => services.status, { eager: true })
   service: Service;
 
   @Field()
