@@ -57,6 +57,8 @@ import { NotificationMessages } from '../../../entities/notification-message.ent
 import { In } from 'typeorm';
 import { StorageService } from '../../file-handler/services/storage.service';
 import { NotificationTokenRepository } from '../repositories/notification-token.repository';
+import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
+import { NotificationResponse } from '../dtos/response/notification';
 
 @Injectable()
 export class NotificationService {
@@ -638,10 +640,18 @@ export class NotificationService {
    * @param {User} user
    * @returns {Promise<Notification[]>}
    */
-  async find(user: User): Promise<Notification[]> {
-    return await this.notificationRepository.find({
-      where: { recipient: { id: user.id } },
-    });
+  async find(
+    paginateAndSort: PaginateAndSort,
+    user: User,
+  ): Promise<NotificationResponse> {
+    const [notification, total] =
+      await this.notificationRepository.findAndCount({
+        where: { recipient: { id: user.id } },
+        take: paginateAndSort.take ?? 20,
+        skip: paginateAndSort.skip ?? 0,
+      });
+
+    return { notification, total };
   }
   async deleteNotification(user: User) {
     try {

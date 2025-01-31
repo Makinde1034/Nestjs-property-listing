@@ -688,6 +688,7 @@ export class AuctionService {
           this.auctionParticipantRepository.findOne({
             where: { listingId: bidInput.listingId },
           }),
+
           this.auctionBidRangeRepository.find(),
           this.bidRepository.findOne({
             where: {

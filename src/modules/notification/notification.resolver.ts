@@ -25,6 +25,8 @@ import { SuccessResponse } from '../../common/utils/success.response';
 import { PermissionsEnum } from '../../common/enums/permission.enum';
 import { Permissions } from '../../common/decorator/permission';
 import { NotificationMessages } from '../../entities/notification-message.entity';
+import { PaginateAndSort } from '../core/dto/pagination-and-sort.dto';
+import { NotificationResponse } from './dtos/response/notification';
 
 @Resolver()
 export class NotificationResolver {
@@ -37,10 +39,13 @@ export class NotificationResolver {
    * @param {any} ctx
    * @returns {Promise<Notification[]>}
    */
-  @Query(() => [Notification])
+  @Query(() => NotificationResponse)
   @UseGuards(AccessTokenGuard)
-  async listNotifications(@Context() ctx): Promise<Notification[]> {
-    return await this.notificationService.find(ctx.req.user);
+  async listNotifications(
+    @Args('paginateAndSort') paginateAndSort: PaginateAndSort,
+    @Context() ctx,
+  ): Promise<NotificationResponse> {
+    return await this.notificationService.find(paginateAndSort, ctx.req.user);
   }
   @Query(() => SuccessResponse)
   @UseGuards(AccessTokenGuard)

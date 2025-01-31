@@ -129,6 +129,7 @@ export class ProvideNewService {
   @IsString()
   serviceId: string;
 }
+
 @InputType()
 export class ProvideServiceStatusInput {
   @Field(() => [String])

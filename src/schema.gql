@@ -827,6 +827,11 @@ type NafathAuthenticationResponseToUser {
   random: String!
 }
 
+type NotificationResponse {
+  notification: [Notification!]!
+  total: Float!
+}
+
 type ListingTypesResponse {
   listingType: [ListingType!]!
   total: Int!
@@ -1186,7 +1191,7 @@ type Query {
   rolesAndUser(paginateAndSort: PaginateAndSort!): [Role!]!
   getUserRoles: [Role!]!
   getRole(id: Float!): Role!
-  listNotifications: [Notification!]!
+  listNotifications(paginateAndSort: PaginateAndSort!): NotificationResponse!
   deleteNotification: SuccessResponse!
   listNotificationScopesForUser: [UserNotificationPreference!]!
   listNotificationScopes: [NotificationScope!]!
