@@ -24,7 +24,6 @@ export class GlobalBLockUserGuard implements CanActivate {
       IS_PUBLIC_KEY,
       context.getHandler(),
     );
-
     // Skip permission check if the route is marked as public
     if (isPublic) {
       return true;
@@ -32,7 +31,6 @@ export class GlobalBLockUserGuard implements CanActivate {
 
     const ctx = GqlExecutionContext.create(context);
     const user: User = ctx.getContext().req.user;
-
     if (!user) {
       throw new UnauthorizedException();
     }

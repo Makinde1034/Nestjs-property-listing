@@ -16,6 +16,7 @@ export interface PushNotificationPayload extends EmailNotificationPayload {
   notificationToken: string;
   redirectLink?: string;
   userId: string;
+  img: string;
 }
 
 @InputType()
@@ -45,6 +46,7 @@ export interface SendNotificationInput {
   scope: NotificationScope;
   event: string;
   metadata: string;
+  img?: string;
 
   recipientFormat?: [string, string];
   count?: number;

@@ -5,6 +5,7 @@
 
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import * as firebase from 'firebase-admin';
+
 import {
   PushNotificationinput,
   PushNotificationPayload,
@@ -23,6 +24,8 @@ export class PushNotificationService {
   private readonly logger = new Logger(PushNotificationService.name);
   private readonly firebaseConfig: FireBaseConfig;
 
+  private messaging: firebase.messaging.Messaging;
+
   constructor(
     private readonly notificationTokenRepository: NotificationTokenRepository,
 
@@ -40,12 +43,11 @@ export class PushNotificationService {
           privateKey: this.firebaseConfig.key,
         }),
       });
-      this.logger.log('Firebase initialized successfully.');
     }
+    this.messaging = firebase.messaging();
   }
   /**
    * Update User Profile
-
    * @async
    * @param {PushNotificationPayload} notification
    * @returns {Promise<void>}
@@ -53,51 +55,29 @@ export class PushNotificationService {
   async sendPushNotification(
     notification: PushNotificationPayload,
   ): Promise<void> {
-    const androidConfig: firebase.messaging.AndroidConfig = {
-      priority: 'high',
-    };
+    try {
+      const data = {
+        title: notification.title,
+        message: notification.message,
+        userId: notification.userId,
+        deepLink: notification.redirectLink,
+      };
 
-    const data = {
-      title: notification.title,
-      message: notification.message,
-      userId: notification.userId,
-      deepLink: notification.redirectLink,
-    };
-    const message: firebase.messaging.Message = {
-      token: notification.notificationToken,
-      data,
-      android: androidConfig,
-      apns: {
-        payload: {
-          aps: {
-            alert: {
-              title: notification.title,
-              body: notification.message,
-            },
-            sound: 'default',
-            badge: 1,
-          },
+      const message: firebase.messaging.Message = {
+        token: notification.notificationToken,
+        notification: {
+          imageUrl: notification.img,
+          title: notification.title,
+          body: notification.message,
         },
-      },
-      webpush: {
         data,
-        fcmOptions: {
-          link: notification.redirectLink,
-        },
-      },
-    };
-
-    await firebase
-      .messaging()
-      .send(message)
-      .then((response) => {
-        this.logger.log('Successfully sent message:', response);
-      })
-      .catch((error) => {
-        this.logger.debug('error code:', error.code);
-
-        this.logger.debug('Error sending notification:', error);
-      });
+      };
+      await this.messaging.send(message);
+      this.logger.log('Push notification sent');
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException('Failed to send push notification');
+    }
   }
 
   async configureNotification(

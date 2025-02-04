@@ -1466,6 +1466,8 @@ export class ListingService {
             }
           },
         );
+
+        const images: any = JSON.parse(listing.images);
         if (partialUpdatePayload.price != undefined) {
           for (const userId of wishlistUserIds) {
             this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
@@ -1474,6 +1476,7 @@ export class ListingService {
               scope: scope,
               event: 'Price change',
               recipientFormat: [null, 'User that has listing in wishlist'],
+              img: images[0]?.url,
             });
           }
         }
@@ -2158,16 +2161,18 @@ export class ListingService {
       const scope = await this.notificationScopeRepository.findOne({
         where: { scopeGroup: NotificationScopeEnum.LISTING },
       });
-
       // Send notifications
       data.forEach((element) => {
+        const image = JSON.parse(element.images);
+
         this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
-          creatorId: element.id,
+          creatorId: element.user.id,
           scope: scope,
           category: scope.name,
           metadata: JSON.stringify(listing),
           event: 'Approved',
           recipientFormat: ['Owner', null],
+          img: image[0]?.url,
         });
       });
 
@@ -2228,6 +2233,7 @@ export class ListingService {
       );
 
       listing.forEach((element) => {
+        const images = JSON.parse(element.images);
         this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
           creatorId: element.userId,
           event: 'Denied',
@@ -2235,6 +2241,7 @@ export class ListingService {
 
           scope: scope,
           recipientFormat: ['Owner', null],
+          img: images[0]?.url,
         });
       });
 

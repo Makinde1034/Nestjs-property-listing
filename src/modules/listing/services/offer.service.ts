@@ -207,6 +207,7 @@ export class OfferService {
           }
         },
       );
+      const images = JSON.parse(listing.images);
 
       // TODO:switch to an emited event
       this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
@@ -216,6 +217,7 @@ export class OfferService {
         event: 'Create',
         metadata: JSON.stringify(offer),
         recipientFormat: ['Seller', 'Offer Creator'],
+        img: images[0]?.url,
       });
       return offerPayload;
     } catch (error) {
@@ -386,6 +388,7 @@ export class OfferService {
             'offer.price',
             'listing.id',
             'listing.purpose',
+            'listing.images',
             'listingUser.id',
             'listingUser.email',
             'listingUser.firstName',
@@ -528,6 +531,7 @@ export class OfferService {
             }
           },
         );
+        const images = JSON.parse(offer.listing.images);
 
         this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
           creatorId: user.id,
@@ -535,6 +539,7 @@ export class OfferService {
           scope: scope,
           event: 'Update',
           metadata: JSON.stringify(offer),
+          img: images[0]?.url,
 
           recipientFormat: ['Seller', 'Offer Creator'],
         });
@@ -630,15 +635,15 @@ export class OfferService {
               }
             },
           );
-
+          const images = JSON.parse(offer.listing.images);
           this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
             creatorId: user.id,
             receiverId: offer.listing.user.id,
             scope: scope,
             event: 'If Accepted Offer',
             metadata: JSON.stringify(offer),
-
             recipientFormat: ['Seller', null],
+            img: images[0]?.url,
           });
           this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
             creatorId: user.id,
@@ -646,6 +651,7 @@ export class OfferService {
             scope: notificationPreference,
             event: 'Accepted',
             recipientFormat: [null, 'Buyer'],
+            img: images[0]?.url,
           });
 
           // Return the updated offer
@@ -724,12 +730,15 @@ export class OfferService {
             },
           );
 
+          const images = JSON.parse(offer.listing.images);
+
           this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
             creatorId: user.id,
             receiverId: offer.listing.user.id,
             scope: scope,
             event: 'Update',
             metadata: JSON.stringify(offer),
+            img: images[0]?.url,
 
             recipientFormat: ['Seller', 'Offer Creator'],
           });

@@ -313,6 +313,7 @@ export class JobService {
               event: 'A month before',
               recipientFormat: [null, 'All platform'],
               type: null,
+              img: auctions[0]?.imageLink,
             });
           }
 
@@ -325,6 +326,7 @@ export class JobService {
                 recipientFormat: [null, 'All platform'],
                 type: null,
                 count: calculateDaysDifference(currentDate, auction.startDate),
+                img: auctions[0]?.imageLink,
               });
             });
           }
@@ -361,7 +363,7 @@ export class JobService {
         },
         createdAt: LessThanOrEqual(new Date()),
       },
-      relations: ['listing', 'listing.user'],
+      relations: ['listing', 'listing.user', 'auction'],
       select: {
         id: true,
         listing: {
@@ -399,6 +401,7 @@ export class JobService {
           scope: scope,
           event: scope.name,
           metadata: JSON.stringify(element),
+          img: element.auction?.imageLink,
 
           recipientFormat: [null, 'Users enlisted to bid and sellers'],
         });
@@ -457,6 +460,7 @@ export class JobService {
           event: '12- Hour before',
           recipientFormat: [null, 'Users enlisted to bid and sellers'],
           type: null,
+          img: element?.auction?.imageLink,
         });
       }
     });

@@ -4,11 +4,9 @@
  */
 
 import { Args, Query, Resolver } from '@nestjs/graphql';
-import { ActivityLog } from '../../../entities/activity-log.entity';
 import { AccessTokenGuard } from '../../auth/guards';
 import { UseGuards } from '@nestjs/common';
 import { ActivityLogService } from '../services/activity-log.service';
-import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { ActivityLogsResponse } from '../dto/activity-log';
 import {
   ActivityLogInput,
@@ -25,7 +23,6 @@ export class ActivityResolver {
   ) {
     return await this.activityLogService.getLogs(activityLogInput);
   }
-
   @Query(() => ActivityLogsResponse, { name: 'getAllActivityLogs' })
   @UseGuards(AccessTokenGuard)
   async getAllActivityLogs(

@@ -8,9 +8,10 @@ import {
   Entity,
   Column,
   ManyToOne,
-  JoinTable,
   CreateDateColumn,
   UpdateDateColumn,
+  Index,
+  JoinColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
 import { User } from './user.entity';
@@ -24,37 +25,42 @@ import { SplashScreen } from './splash-screen.entity';
 import { Auction } from './auction-table.entity';
 import { ServiceProvider } from './service-provider.entity';
 import { Service } from './services.entity';
-
 @Entity()
 @ObjectType()
 export class ActivityLog extends BaseEntity {
   @Field(() => User, { nullable: true })
-  @JoinTable({ name: 'userId' })
+  @Index()
+  @JoinColumn({ name: 'userId' })
   @ManyToOne(() => User, (user) => user.activityLogs)
   user: User;
 
   @Field(() => User, { nullable: true })
-  @JoinTable({ name: 'adminId' })
+  @Index()
+  @JoinColumn({ name: 'adminId' })
   @ManyToOne(() => User, (user) => user.adminActivityLogs)
   admin: User;
 
   @Field(() => Role, { nullable: true })
-  @JoinTable({ name: 'roleId' })
+  @Index()
+  @JoinColumn({ name: 'roleId' })
   @ManyToOne(() => Role, (role) => role.activityLogs)
   role: Role;
 
   @Field(() => ListingType, { nullable: true })
-  @JoinTable({ name: 'listingTypeId' })
+  @Index()
+  @JoinColumn({ name: 'listingTypeId' })
   @ManyToOne(() => ListingType, (role) => role.listingTypeActivityLogs)
   listingType: ListingType;
 
   @Field(() => Listing, { nullable: true })
-  @JoinTable({ name: 'listingId' })
+  @Index()
+  @JoinColumn({ name: 'listingId' })
   @ManyToOne(() => Listing, (listing) => listing.listingActivityLogs)
   listing: Listing;
 
   @Field(() => ResponseTemplate, { nullable: true })
-  @JoinTable({ name: 'responseTemplateId' })
+  @Index()
+  @JoinColumn({ name: 'responseTemplateId' })
   @ManyToOne(
     () => ResponseTemplate,
     (responseTemplate) => responseTemplate.responseTemplateActivityLogs,
@@ -62,25 +68,30 @@ export class ActivityLog extends BaseEntity {
   responseTemplate: ResponseTemplate;
 
   @Field(() => Ticket, { nullable: true })
-  @JoinTable({ name: 'ticketId' })
+  @Index()
+  @JoinColumn({ name: 'ticketId' })
   @ManyToOne(() => Ticket, (ticket) => ticket.ticketActivityLog)
   ticket: Ticket;
 
   @Field(() => Article, { nullable: true })
-  @JoinTable({ name: 'articleId' })
+  @Index()
+  @JoinColumn({ name: 'articleId' })
   @ManyToOne(() => Article, (article) => article.articleActivityLog)
   article: Article;
 
   @Field(() => ServiceProvider, { nullable: true })
-  @JoinTable({ name: 'serviceProviderId' })
+  @Index()
+  @JoinColumn({ name: 'serviceProviderId' })
   @ManyToOne(() => ServiceProvider, (serviceProvider) => serviceProvider)
   serviceProvider: ServiceProvider;
 
   @Field({ nullable: true })
   @Column({ nullable: true })
   serviceProviderId: string;
+
   @Field(() => SplashScreen, { nullable: true })
-  @JoinTable({ name: 'splashScreenId' })
+  @Index()
+  @JoinColumn({ name: 'splashScreenId' })
   @ManyToOne(
     () => SplashScreen,
     (splashScreen) => splashScreen.splashScreenActivityLog,
@@ -88,12 +99,13 @@ export class ActivityLog extends BaseEntity {
   splashScreen: SplashScreen;
 
   @Field(() => Auction, { nullable: true })
-  @JoinTable({ name: 'auctionId' })
+  @Index()
+  @JoinColumn({ name: 'auctionId' })
   @ManyToOne(() => Auction, (auction) => auction.actionActivityLog)
   auction: Auction;
 
   @Field(() => Service, { nullable: true })
-  @JoinTable({ name: 'serviceId' })
+  @JoinColumn({ name: 'serviceId' })
   @ManyToOne(() => Service, (service) => service)
   service: Service;
 

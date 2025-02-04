@@ -713,6 +713,7 @@ type Notification {
   message: String!
   metadata: String
   category: String
+  img: String
   subCategory: String
   read: Boolean
   type: String

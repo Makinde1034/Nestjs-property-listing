@@ -775,7 +775,6 @@ export class AuctionService {
       if (!listing) {
         throw new NotFoundException(AppStrings.NOT_FOUND);
       }
-
       if (!auction) {
         throw new NotFoundException(AppStrings.NOT_FOUND);
       }

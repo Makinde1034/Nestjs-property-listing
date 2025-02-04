@@ -297,6 +297,7 @@ export class AdminService {
         this.listingTypeRepository.queryBuilder('listingType').getMany(),
         this.invoiceRepository
           .createQueryBuilder('invoice')
+          .leftJoinAndSelect('invoice.listingType', 'listingType')
           .where('invoice.listingType IS NOT NULL')
           .getMany(),
       ]);
@@ -306,6 +307,7 @@ export class AdminService {
 
       // Group invoices by listingType and calculate fees for each type
       const feesByType = invoice.reduce((acc, element) => {
+        console.log(element);
         const type = element.listingType.englishName;
         acc[type] = (acc[type] || 0) + element.price;
         return acc;
@@ -506,7 +508,7 @@ export class AdminService {
           endDate = date;
           break;
         default:
-          return;
+          break;
       }
 
       // Initialize the query builder

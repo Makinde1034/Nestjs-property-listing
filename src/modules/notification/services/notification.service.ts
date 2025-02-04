@@ -64,6 +64,9 @@ import { NotificationResponse } from '../dtos/response/notification';
 export class NotificationService {
   private readonly logger = new Logger(NotificationService.name);
   private readonly frontEndUrl: string;
+
+  private static isEventTriggered: boolean = false;
+
   constructor(
     private readonly notificationRepository: NotificationRepository,
     private readonly userRepository: UserRepository,
@@ -82,7 +85,14 @@ export class NotificationService {
     private readonly userNotificationPreference: UserNotificationRepository,
     private readonly storageService: StorageService,
   ) {
+    this.eventEmitter.on('customEvent', () => {
+      NotificationService.isEventTriggered = true;
+    });
     this.frontEndUrl = this.configService.get('FRONT_END_URL');
+  }
+
+  static getEventTriggered(): boolean {
+    return this.isEventTriggered;
   }
 
   /**
@@ -124,12 +134,12 @@ export class NotificationService {
         count,
         attachment,
         metadata,
+        img,
       } = notificationInput;
 
       const specificEvent = notificationInput.event ?? event;
 
       // Fetch buyer and seller notification preferences for the given scope
-      console.log(creatorId, scope);
 
       const [buyerPref, sellerPref] = await Promise.all([
         this.userNotificationPreference.findOne({
@@ -179,6 +189,7 @@ export class NotificationService {
           attachment,
           messages,
           metadata,
+          img,
         );
       }
     } catch (error) {
@@ -200,6 +211,7 @@ export class NotificationService {
     attachment?: Buffer,
     messages?: NotificationMessages[],
     metadata?: string,
+    img?: string,
   ) {
     try {
       /************************
@@ -217,6 +229,7 @@ export class NotificationService {
           attachment,
           messages,
           metadata,
+          img,
         );
       }
 
@@ -231,6 +244,7 @@ export class NotificationService {
           null,
           messages,
           metadata,
+          img,
         );
       }
 
@@ -254,6 +268,7 @@ export class NotificationService {
             count,
             messages,
             metadata,
+            img,
           );
         }
       }
@@ -275,6 +290,7 @@ export class NotificationService {
             count,
             messages,
             metadata,
+            img,
           );
         }
       }
@@ -292,6 +308,7 @@ export class NotificationService {
           count,
           messages,
           metadata,
+          img,
         );
       }
 
@@ -305,9 +322,9 @@ export class NotificationService {
           count,
           messages,
           metadata,
+          img,
         );
       }
-      // Add web notification logic when needed
     } catch (error) {
       console.log(error);
       this.logger.error('Error sending notifications', error);
@@ -340,6 +357,7 @@ export class NotificationService {
     count: number,
     messages?: NotificationMessages[],
     metadata?: string,
+    img?: string,
   ) {
     try {
       if (user) {
@@ -371,15 +389,22 @@ export class NotificationService {
           };
 
           this.sseService.sendEvent(user.id, payload);
-          this.saveNotificationLog({
-            title: subject,
-            category: messageData.scope,
-            subCategory: messageData.event,
-            metadata: metadata,
-            recipient: user,
-            message: text,
-            type: NotificationType.SYSTEM_NOTIFICATION,
-          });
+          const isEventTriggered = NotificationService.getEventTriggered();
+
+          if (!isEventTriggered) {
+            this.eventEmitter.emit('customEvent');
+
+            this.saveNotificationLog({
+              title: subject,
+              category: messageData.scope,
+              subCategory: messageData.event,
+              metadata: metadata,
+              recipient: user,
+              message: text,
+              type: NotificationType.SYSTEM_NOTIFICATION,
+              img,
+            });
+          }
         }
       }
     } catch (error) {
@@ -399,6 +424,7 @@ export class NotificationService {
     attachment?: Buffer,
     message?: NotificationMessages[],
     metadata?: string,
+    img?: string,
   ) {
     try {
       if (user) {
@@ -431,16 +457,23 @@ export class NotificationService {
             attachment,
           );
 
-          this.saveNotificationLog({
-            title: subject,
-            message: text,
-            category: messageData.scope,
-            subCategory: messageData.event,
-            recipient: user,
+          const isEventTriggered = NotificationService.getEventTriggered();
 
-            metadata: metadata,
-            type: NotificationType.EMAIL_NOTIFICATION,
-          });
+          if (!isEventTriggered) {
+            this.eventEmitter.emit('customEvent');
+
+            this.saveNotificationLog({
+              title: subject,
+              message: text,
+              category: messageData.scope,
+              subCategory: messageData.event,
+              recipient: user,
+
+              metadata: metadata,
+              type: NotificationType.EMAIL_NOTIFICATION,
+              img,
+            });
+          }
         }
       }
     } catch (error) {
@@ -457,6 +490,7 @@ export class NotificationService {
     count: number,
     messages?: NotificationMessages[],
     metadata?: string,
+    img?: string,
   ) {
     try {
       const messageData = this.getMessage(
@@ -481,21 +515,28 @@ export class NotificationService {
           title,
           message,
           deviceType: '',
+          img,
 
           notificationToken: notificationToken,
           userId: user.id,
           redirectLink: this.frontEndUrl,
         });
 
-        this.saveNotificationLog({
-          title: title,
-          message: message,
-          category: messageData.scope,
-          subCategory: messageData.event,
-          recipient: user,
-          metadata: metadata,
-          type: NotificationType.PUSH_NOTIFICATION,
-        });
+        const isEventTriggered = NotificationService.getEventTriggered();
+
+        if (!isEventTriggered) {
+          this.eventEmitter.emit('customEvent');
+
+          this.saveNotificationLog({
+            title: title,
+            message: message,
+            category: messageData.scope,
+            subCategory: messageData.event,
+            recipient: user,
+            metadata: metadata,
+            type: NotificationType.PUSH_NOTIFICATION,
+          });
+        }
       }
     } catch (error) {
       this.logger.log(error);
@@ -816,6 +857,7 @@ export class NotificationService {
       throw new BadRequestException(error);
     }
   }
+
   async uploadImage(id: string, file: Express.Multer.File[]) {
     try {
       const notificationControl =

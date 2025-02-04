@@ -59,7 +59,8 @@ import configuration from './config/configuration';
   imports: [
     SseModule,
     ConfigModule.forRoot({
-      envFilePath: process.env.NODE_ENV === 'production' ? '.env' : '.env',
+      envFilePath:
+        process.env.NODE_ENV === 'production' ? '.env' : '.env.local',
       load: configuration,
       isGlobal: true,
     }),
@@ -77,6 +78,7 @@ import configuration from './config/configuration';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: 'src/schema.gql',
+      introspection: true,
 
       formatError: (err) => formatError(err),
       fieldResolverEnhancers: ['interceptors'],

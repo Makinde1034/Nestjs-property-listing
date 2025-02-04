@@ -40,6 +40,10 @@ export class Notification extends BaseEntity {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
+  img: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   subCategory: string;
 
   @Column({ nullable: true, default: false })

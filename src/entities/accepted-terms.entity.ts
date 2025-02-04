@@ -8,13 +8,10 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinColumn,
-  ManyToOne,
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
 import { Field, ObjectType } from '@nestjs/graphql';
-import { User } from './user.entity';
 
 @Entity()
 @ObjectType()
