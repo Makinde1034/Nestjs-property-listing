@@ -8,6 +8,7 @@ import { Injectable, Logger } from '@nestjs/common';
 
 import { generatereference } from '../../../common/utils/functions';
 import StorageConfig from '../../../config/serviceAccount/storage-config';
+import slugify from 'slugify';
 
 @Injectable()
 export class StorageService {
@@ -40,7 +41,8 @@ export class StorageService {
   async upload(fileData: Express.Multer.File): Promise<string> {
     return await new Promise((resolve, reject) => {
       const name = this.getFileName(fileData.originalname);
-      const file = this.storage.bucket(this.bucket).file(name);
+
+      const file = this.storage.bucket(this.bucket).file(slugify(name));
       const stream = file.createWriteStream();
       stream.on('finish', () => {
         this.logger.log('stream Finished');
@@ -70,9 +72,11 @@ export class StorageService {
    */
   async uploadFile(file: Express.Multer.File): Promise<UploadResponse> {
     const destination = this.getFileName(file.filename);
+    const name = slugify(file.path);
+
     const result = await this.storage
       .bucket(this.bucket)
-      .upload(file.path, { destination });
+      .upload(name, { destination });
     return result;
   }
 

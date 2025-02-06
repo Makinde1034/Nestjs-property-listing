@@ -38,7 +38,7 @@ import {
   getMonth,
 } from 'date-fns';
 
-import { Between, Brackets, In } from 'typeorm';
+import { Between, Brackets, In, IsNull, Not } from 'typeorm';
 import { OfferListEnum } from '../../../common/enums/status.enum';
 import {
   SaiiFees,
@@ -464,7 +464,6 @@ export class AdminService {
 
       return payload;
     } catch (error) {
-      console.error(error);
       this.logger.log(error);
       throw new BadRequestException(error.message || 'An error occurred');
     }
@@ -525,9 +524,6 @@ export class AdminService {
         query.andWhere('offer.status = :status', { status });
       }
 
-      // Execute the query
-
-      // Add other aggregated stats
       const [
         offer,
         listing,
@@ -548,6 +544,7 @@ export class AdminService {
         this.offerRepository.count({
           where: { status: OfferListEnum.ACCEPTED },
         }),
+
         this.listingRepository.count({
           where: {
             isListingSold: true,
@@ -556,8 +553,6 @@ export class AdminService {
         }),
         query.take(take).skip(skip).getManyAndCount(),
       ]);
-
-      // Return the result
 
       return {
         offers,
@@ -682,41 +677,86 @@ export class AdminService {
   async userDemography(
     findOption: AdminDashboardSort,
   ): Promise<UserDemography> {
-    // Calculate the start and end dates for the given number of months
-    const endDate = new Date();
-    const startDate = subMonths(endDate, findOption.value - 1);
+    const currentDate = moment();
+    const date = new Date(); // Use moment to handle the current date
+    let startDate: Date, endDate: Date;
 
-    // Adjust to the start of the month for startDate and end of the month for endDate
-    const startOfRange = startOfMonth(startDate);
-    const endOfRange = endOfMonth(endDate);
+    // Determine date range based on time period
+    switch (findOption.timePeriod) {
+      case TimePeriod.Today:
+        startDate = currentDate.startOf('day').toDate();
+        endDate = date;
+        break;
+      case TimePeriod.Week:
+        startDate = currentDate
+          .subtract(findOption.value ?? 1, 'weeks')
+          .startOf('week')
+          .toDate();
+        endDate = date;
+        break;
+      case TimePeriod.Month:
+        startDate = currentDate
+          .subtract(findOption.value ?? 1, 'months')
+          .startOf('month')
+          .toDate();
+        endDate = date;
+        break;
+      case TimePeriod.Year:
+        startDate = currentDate
+          .subtract(findOption.value ?? 1, 'years')
+          .startOf('year')
+          .toDate();
+        endDate = date;
+        break;
+      default:
+        break;
+    }
 
     try {
-      const [userDemographyResult, totalListings] = await Promise.all([
-        this.userRepository
-          .createQueryBuilder('user')
-          .select('user.city')
-          .addSelect('COUNT(*)', 'total')
-          .where('user.createdAt BETWEEN :startOfRange AND :endOfRange', {
-            startOfRange,
-            endOfRange,
-          })
-          .groupBy('user.city')
-          .getRawMany(),
-        this.listingRepository.count({
-          where: {
-            createdAt: Between(startOfRange, endOfRange),
-          },
+      const query = this.userRepository
+        .createQueryBuilder('user')
+        // .leftJoin('user.nationalIdentity', 'nationalIdentity')
+        .select('user.city')
+        .addSelect('COUNT(*)', 'total')
+        .where('user.city IS NOT NULL')
+        .andWhere('user.nationality = :name ', {
+          name: 'Saudi Arabia',
+        })
+        .groupBy('user.city');
+
+      // ✅ Apply date filter only if `startDate` is provided
+      if (startDate && endDate) {
+        query.where('user.createdAt BETWEEN :startDate AND :endDate', {
+          startDate,
+          endDate,
+        });
+      }
+
+      const [userDemographyResult, user] = await Promise.all([
+        query.getRawMany(),
+
+        this.userRepository.count({
+          where:
+            startDate && endDate
+              ? {
+                  createdAt: Between(startDate, endDate),
+                  city: Not(IsNull()), // Ensure it excludes NULL values
+                  nationality: 'Saudi Arabia',
+                }
+              : { city: Not(IsNull()), nationality: 'Saudi Arabia' },
         }),
       ]);
+
       const userDemography: UserCity[] = userDemographyResult.map((item) => ({
         user_city: item.user_city,
-        total: parseInt(item.total, 10), // Convert total to number
+        total: parseInt(item.total, 10),
       }));
 
-      const data: UserDemography = { userDemography, total: totalListings };
+      const data: UserDemography = { userDemography, total: user };
 
       return data;
     } catch (error) {
+      console.log(error);
       this.logger.log(error);
       throw new BadRequestException('Failed to fetch user demography');
     }

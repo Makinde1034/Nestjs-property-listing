@@ -2,6 +2,17 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type CityEntitity {
+  id: String!
+  city: String!
+  lat: String!
+  lng: String!
+  country: String!
+  iso2: String!
+  arabic_name: String!
+  admin_name: String!
+}
+
 type NationalIdentity {
   id: ID!
   nationality: String
@@ -723,17 +734,6 @@ type Notification {
   recipient: User!
   createdAt: DateTime!
   updatedAt: DateTime!
-}
-
-type CityEntitity {
-  id: String!
-  city: String!
-  lat: String!
-  lng: String!
-  country: String!
-  iso2: String!
-  arabic_name: String!
-  admin_name: String!
 }
 
 type TokenType {

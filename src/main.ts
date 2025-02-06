@@ -16,6 +16,7 @@ import { UserTrackingService } from './modules/user/services/user.tracking.servi
 import { TimeoutMiddleware } from './common/interceptors/timeout.middleware';
 import { AppModule } from './app.module';
 import * as compression from 'compression';
+import { LocationService } from './modules/location/services';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -44,10 +45,14 @@ async function bootstrap() {
 
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.use(new TimeoutMiddleware().use);
-  const UsertrackingService = app.get(UserTrackingService);
+  const userTrackingService = app.get(UserTrackingService);
+  const locationService = app.get(LocationService);
   // Apply the middleware for user tracking
   app.use((req, res, next) => {
-    const trackingMiddleware = new TrackingMiddleware(UsertrackingService);
+    const trackingMiddleware = new TrackingMiddleware(
+      userTrackingService,
+      locationService,
+    );
     trackingMiddleware.use(req, res, next);
   });
 

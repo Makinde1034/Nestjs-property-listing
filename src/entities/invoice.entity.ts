@@ -8,6 +8,7 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -55,7 +56,7 @@ export class Invoice {
   @Field(() => Listing, { nullable: true })
   listing?: Listing;
 
-  @OneToOne(() => ListingType, (listingType) => listingType.invoice, {
+  @ManyToOne(() => ListingType, (listingType) => listingType.invoice, {
     nullable: true,
   })
   @JoinColumn({ name: 'listingTypeId' })

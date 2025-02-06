@@ -54,7 +54,7 @@ export class ListingType extends BaseEntity {
   @CreateDateColumn()
   createdAt: Date;
   @Field(() => Invoice, { nullable: true })
-  @OneToOne(() => Invoice, (invoice) => invoice.listingType)
+  @OneToMany(() => Invoice, (invoice) => invoice.listingType)
   invoice: Invoice;
 
   @Field()
