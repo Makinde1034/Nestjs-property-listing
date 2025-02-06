@@ -39,17 +39,22 @@ export class StorageService {
    * @returns {Promise<string>}
    */
   async upload(fileData: Express.Multer.File): Promise<string> {
-    return await new Promise((resolve, reject) => {
-      const name = this.getFileName(fileData.originalname);
+    return new Promise((resolve, reject) => {
+      // Ensure filename is sanitized (removes spaces and special characters)
+      const name = slugify(this.getFileName(fileData.originalname), {
+        lower: true, // Convert to lowercase
+        trim: true, // Remove trailing spaces
+      });
 
-      const file = this.storage.bucket(this.bucket).file(slugify(name));
+      const file = this.storage.bucket(this.bucket).file(name);
+
       const stream = file.createWriteStream();
       stream.on('finish', () => {
-        this.logger.log('stream Finished');
+        this.logger.log('Stream finished');
         resolve(`${StorageConfig.baseUrl}/${this.bucket}/${name}`);
       });
       stream.on('error', (error) => {
-        this.logger.error('stream error', error);
+        this.logger.error('Stream error', error);
         reject(error);
       });
       stream.end(fileData.buffer);

@@ -13,6 +13,7 @@ import {
   IsString,
 } from 'class-validator';
 import { ServiceProviderStatus } from '../../../common/enums/status.enum';
+import { ServiceProviderLicense } from '../../../common/enums/service-provider';
 
 @InputType()
 export class Pricing {
@@ -128,6 +129,14 @@ export class ProvideNewService {
   @Field()
   @IsString()
   serviceId: string;
+}
+
+export class UploadWorkDocument {
+  @IsString()
+  serviceProviderId: string;
+
+  @IsEnum(ServiceProviderLicense)
+  documentType: string;
 }
 
 @InputType()

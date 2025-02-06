@@ -12,8 +12,10 @@ import { ServiceRepository } from './repository/services.repository';
 import { ServiceProvidedRepository } from './repository/service-provided.repository';
 import { ServiceAndProviderService } from './services/service-provider.service';
 import { ServiceRequestedRepository } from './repository/requested-service.repository';
+import { ServiceProviderController } from './controller/servic-provider.controller';
 
 @Module({
+  controllers: [ServiceProviderController],
   providers: [
     ServiceAndProviderResolver,
     ServiceAndProviderService,

@@ -11,3 +11,11 @@ export enum ServiceProvidedStatus {
   CANCELED = 'canceled',
   COMPLETED = 'confirmed',
 }
+
+export enum ServiceProviderLicense {
+  IBAN = 'ibanCertificate',
+
+  WORK_LICENSE = 'workLicense',
+
+  ID_OR_CR = 'idOrCr',
+}

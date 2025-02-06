@@ -34,8 +34,12 @@ import { SuccessResponse } from '../../../common/utils/success.response';
 import { AppStrings } from '../../../common/messages/app.strings';
 import { ServiceProvided } from '../../../entities/service-provided.entity';
 import { ServiceRequestedRepository } from '../repository/requested-service.repository';
-import { ServiceProvidedStatus } from '../../../common/enums/service-provider';
+import {
+  ServiceProvidedStatus,
+  ServiceProviderLicense,
+} from '../../../common/enums/service-provider';
 import { AdminFilterAndSort } from '../../listing/dtos/request';
+import { StorageService } from '../../file-handler/services/storage.service';
 
 @Injectable()
 export class ServiceAndProviderService {
@@ -44,7 +48,7 @@ export class ServiceAndProviderService {
     private readonly serviceRepository: ServiceRepository,
     private readonly activityLogService: ActivityLogService,
     private readonly serviceProvidedRepository: ServiceProvidedRepository,
-
+    private readonly storageService: StorageService,
     private readonly serviceRequestedRepository: ServiceRequestedRepository,
   ) {}
 
@@ -597,6 +601,75 @@ export class ServiceAndProviderService {
     } catch (error) {
       this.logger.error('Error searching tickets', error);
       throw new BadRequestException(error.message);
+    }
+  }
+
+  async uploadWorkDocument(
+    id: string,
+    icon: Express.Multer.File,
+    type: string,
+  ) {
+    try {
+      let imageUrl: string;
+      const serviceProvider = await this.serviceProviderRepository.findOneBy({
+        id,
+      });
+
+      if (!serviceProvider) {
+        throw new BadRequestException(AppStrings.NOT_FOUND);
+      }
+
+      if (icon) {
+        // Upload icon image only if provided
+        imageUrl = await this.storageService.upload(icon);
+      }
+      let result;
+
+      // Perform update only if the image URL exists
+      if (imageUrl) {
+        switch (type) {
+          case ServiceProviderLicense.IBAN:
+            result = await this.serviceProviderRepository.update(
+              serviceProvider.id,
+              {
+                ibanCertificate: imageUrl,
+              },
+            );
+            break;
+
+          case ServiceProviderLicense.ID_OR_CR:
+            result = await this.serviceProviderRepository.update(
+              serviceProvider.id,
+              {
+                idOrCr: imageUrl,
+              },
+            );
+            break;
+          case ServiceProviderLicense.WORK_LICENSE:
+            result = await this.serviceProviderRepository.update(
+              serviceProvider.id,
+              {
+                workLicense: imageUrl,
+              },
+            );
+            break;
+
+          default:
+            break;
+        }
+
+        // Fetch updated entity only if update was successful
+        if (result.affected > 0) {
+          return this.serviceProviderRepository.findOneOrFail({
+            where: { id: serviceProvider.id },
+          });
+        }
+      }
+    } catch (error) {
+      this.logger.error('Error uploading attribute icon:', error);
+      throw new BadRequestException(
+        error.message || 'Failed to upload attribute icon',
+      );
     }
   }
 }
