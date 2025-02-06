@@ -670,7 +670,6 @@ export class AdminService {
       nationality,
       city,
     };
-
     return analysis;
   }
 
@@ -765,33 +764,58 @@ export class AdminService {
   async usersCountry(
     findOption: AdminDashboardSort,
   ): Promise<UserCountryCount[]> {
-    // Calculate the start and end dates for the given number of months
-    const endDate = new Date();
-    const startDate = subMonths(endDate, findOption.value - 1);
+    const currentDate = moment();
+    const date = new Date(); // Use moment to handle the current date
+    let startDate: Date, endDate: Date;
 
-    // Adjust to the start of the month for startDate and end of the month for endDate
-    const startOfRange = startOfMonth(startDate);
-    const endOfRange = endOfMonth(endDate);
+    // Determine date range based on time period
+    switch (findOption.timePeriod) {
+      case TimePeriod.Today:
+        startDate = currentDate.startOf('day').toDate();
+        endDate = date;
+        break;
+      case TimePeriod.Week:
+        startDate = currentDate
+          .subtract(findOption.value ?? 1, 'weeks')
+          .startOf('week')
+          .toDate();
+        endDate = date;
+        break;
+      case TimePeriod.Month:
+        startDate = currentDate
+          .subtract(findOption.value ?? 1, 'months')
+          .startOf('month')
+          .toDate();
+        endDate = date;
+        break;
+      case TimePeriod.Year:
+        startDate = currentDate
+          .subtract(findOption.value ?? 1, 'years')
+          .startOf('year')
+          .toDate();
+        endDate = date;
+        break;
+      default:
+        break;
+    }
 
     try {
       const result = await this.userRepository
         .createQueryBuilder('user')
-        .select('user.nationality')
-        .addSelect('COUNT(*)', 'count')
-        .where('user.createdAt BETWEEN :startOfRange AND :endOfRange', {
-          startOfRange,
-          endOfRange,
-        })
-        .groupBy('user.nationality')
-        .getRawMany();
+        .select([
+          `COUNT(*) FILTER (WHERE user.nationality ILIKE '%saudi%') AS "saudi"`,
+          `COUNT(*) FILTER (WHERE user.nationality NOT ILIKE '%saudi%') AS "nonSaudi"`,
+          `COUNT(*) FILTER (WHERE user.nationality IS NULL) AS "others"`,
+        ])
+        .getRawOne();
 
-      // Map result to UserCountryCount format
-      const countryCounts: UserCountryCount[] = result.map((item) => ({
-        nationality: item.nationality,
-        count: parseInt(item.count, 10), // Convert count to number
-      }));
+      const country: UserCountryCount[] = [
+        { nationality: 'Saudi', count: result.saudi },
+        { nationality: 'Non-Saudi', count: result.nonSaudi },
+        { nationality: 'Unprovided', count: result.others },
+      ];
 
-      return countryCounts;
+      return country;
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException('Failed to fetch user country count');
@@ -844,30 +868,61 @@ export class AdminService {
   }
 
   async userGenderCount(
-    findOption: AdminDashboardSort,
+    findOption?: AdminDashboardSort,
   ): Promise<UserGenderCount[]> {
-    // Calculate the start and end dates for the given number of months
-    const endDate = new Date();
-    const startDate = subMonths(endDate, findOption.value - 1);
+    // Use moment for consistent date handling
+    const currentDate = moment();
+    let startDate: Date | undefined;
+    let endDate: Date = new Date(); // End date is always the current date
 
-    // Adjust to the start of the month for startDate and end of the month for endDate
-    const startOfRange = startOfMonth(startDate);
-    const endOfRange = endOfMonth(endDate);
+    // Calculate the start and end dates based on the time period provided in findOption
+    if (findOption?.timePeriod && findOption?.value) {
+      switch (findOption.timePeriod) {
+        case TimePeriod.Today:
+          startDate = currentDate.startOf('day').toDate();
+          break;
+        case TimePeriod.Week:
+          startDate = currentDate
+            .subtract(findOption.value ?? 1, 'weeks')
+            .startOf('week')
+            .toDate();
+          break;
+        case TimePeriod.Month:
+          startDate = currentDate
+            .subtract(findOption.value ?? 1, 'months')
+            .startOf('month')
+            .toDate();
+          break;
+        case TimePeriod.Year:
+          startDate = currentDate
+            .subtract(findOption.value ?? 1, 'years')
+            .startOf('year')
+            .toDate();
+          break;
+        default:
+          break;
+      }
+    }
 
     try {
-      const result = await this.userRepository
+      // Query the user gender count
+      const query = this.userRepository
         .createQueryBuilder('user')
         .select('user.gender')
         .addSelect('COUNT(*)', 'count')
-        .where('user.createdAt BETWEEN :startOfRange AND :endOfRange', {
-          startOfRange,
-          endOfRange,
-        })
-        .groupBy('user.gender')
-        .getRawMany();
+        .groupBy('user.gender');
+
+      // Apply date filter conditionally if startDate is defined
+      if (startDate) {
+        query.andWhere('user.createdAt BETWEEN :startOfRange AND :endOfRange', {
+          startOfRange: startDate.toISOString(),
+          endOfRange: endDate.toISOString(),
+        });
+      }
+
+      const result = await query.getRawMany();
 
       // Map result to UserGenderCount format
-
       const genderCounts: UserGenderCount[] = result.map((item) => ({
         gender: item.user_gender,
         count: parseInt(item.count, 10), // Convert count to number
@@ -875,51 +930,76 @@ export class AdminService {
 
       return genderCounts;
     } catch (error) {
-      this.logger.log(error);
+      this.logger.error('Error fetching user gender count:', error);
       throw new BadRequestException('Failed to fetch user gender count');
     }
   }
 
-  async userAgeCount(findOption: AdminDashboardSort): Promise<UserAgeRange[]> {
-    // Calculate the start and end dates for the given number of months
-    const endDate = new Date();
-    const startDate = subMonths(endDate, findOption.value - 1);
-
-    // Adjust to the start of the month for startDate and end of the month for endDate
-    const startOfRange = startOfMonth(startDate);
-    const endOfRange = endOfMonth(endDate);
-
+  async userAgeCount(findOption?: AdminDashboardSort): Promise<UserAgeRange[]> {
     try {
-      const result = await this.userRepository
-        .createQueryBuilder('user')
-        .select(
-          `
-          CASE
-            WHEN user.age BETWEEN 18 AND 23 THEN '18-23'
-            WHEN user.age BETWEEN 24 AND 30 THEN '24-30'
-            WHEN user.age BETWEEN 31 AND 40 THEN '31-40'
-            ELSE 'others'
-          END as age_range
-        `,
-        )
-        .addSelect('COUNT(*)', 'count')
-        .where('user.createdAt BETWEEN :startOfRange AND :endOfRange', {
-          startOfRange,
-          endOfRange,
-        })
-        .andWhere('user.deletedAt IS NULL')
-        .groupBy('age_range')
-        .getRawMany();
+      let startOfRange: Date | undefined;
+      let endOfRange: Date | undefined;
 
-      // Map result to UserAgeRange format
-      const ageRangeCounts: UserAgeRange[] = result.map((item) => ({
-        age_range: item.age_range,
-        count: parseInt(item.count, 10), // Convert count to number
-      }));
+      // Compute the date range only if findOption is provided
+      if (findOption?.value) {
+        const endDate = new Date();
+        const startDate = subMonths(endDate, findOption.value - 1);
+
+        if (isNaN(startDate.getTime())) {
+          throw new BadRequestException('Invalid start date calculation');
+        }
+
+        startOfRange = startOfMonth(startDate);
+        endOfRange = endOfMonth(endDate);
+      }
+
+      const query = this.userRepository
+        .createQueryBuilder('user')
+        .select([
+          `CASE 
+              WHEN user.dateOfBirth IS NULL THEN 'unknown'
+              WHEN DATE_PART('year', AGE(COALESCE(user.dateOfBirth, NOW()))) BETWEEN 18 AND 23 THEN '18-23'
+              WHEN DATE_PART('year', AGE(COALESCE(user.dateOfBirth, NOW()))) BETWEEN 24 AND 30 THEN '24-30'
+              WHEN DATE_PART('year', AGE(COALESCE(user.dateOfBirth, NOW()))) BETWEEN 31 AND 40 THEN '31-40'
+              ELSE '41+' 
+           END AS "age_range"`,
+          `COUNT(*) AS "count"`,
+        ])
+        .where('user.deletedAt IS NULL') // Ensure deleted users are excluded
+        .groupBy('age_range')
+        .orderBy('age_range', 'ASC');
+
+      // Apply date filter conditionally if startOfRange and endOfRange are available
+      if (startOfRange && endOfRange) {
+        query.andWhere('user.createdAt BETWEEN :startOfRange AND :endOfRange', {
+          startOfRange: startOfRange.toISOString(),
+          endOfRange: endOfRange.toISOString(),
+        });
+      }
+
+      const result = await query.getRawMany();
+
+      // Define all possible age ranges
+      const allAgeRanges: UserAgeRange[] = [
+        { age_range: '18-23', count: 0 },
+        { age_range: '24-30', count: 0 },
+        { age_range: '31-40', count: 0 },
+        { age_range: '41+', count: 0 },
+        { age_range: 'unknown', count: 0 }, // Users with no DOB
+      ];
+
+      // Merge database results with predefined ranges
+      const ageRangeCounts: UserAgeRange[] = allAgeRanges.map((range) => {
+        const found = result.find((item) => item.age_range === range.age_range);
+        return {
+          age_range: range.age_range,
+          count: found ? Number(found.count) : 0, // Use database count if found, otherwise 0
+        };
+      });
 
       return ageRangeCounts;
     } catch (error) {
-      this.logger.log(error);
+      this.logger.error('Error fetching user age count:', error);
       throw new BadRequestException('Failed to fetch user age count');
     }
   }

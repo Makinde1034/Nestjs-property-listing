@@ -74,7 +74,7 @@ export class AdminResolver {
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.DASHBOARD_USERS_FUNNEL)
-  @Query(() => [UserGenderCount], { name: 'userCount' })
+  @Query(() => [UserGenderCount], { name: 'userGenderCount' })
   async userCount(@Args('findOptions') findOption: AdminDashboardSort) {
     return await this.adminService.userGenderCount(findOption);
   }

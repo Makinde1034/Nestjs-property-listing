@@ -1258,7 +1258,7 @@ type Query {
   listingStats(findOptions: AdminDashboardListingStatus): ListingStats!
   adminDefault: AdminDefault!
   totalUser(findOptions: AdminDashboardSort!): UserDemography!
-  userCount(findOptions: AdminDashboardSort!): [UserGenderCount!]!
+  userGenderCount(findOptions: AdminDashboardSort!): [UserGenderCount!]!
   nationality(findOptions: AdminDashboardSort!): [UserCountryCount!]!
   saudiVsNonSaudi(findOptions: AdminDashboardSort!): [UserCountryCount!]!
   userAgeCount(findOptions: AdminDashboardSort!): [UserAgeRange!]!

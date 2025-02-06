@@ -73,7 +73,6 @@ export class ServiceAndProviderResolver {
       paginateAndSort,
     );
   }
-
   @UseGuards(AccessTokenGuard)
   @Query(() => OneServiceProviderResponse, { name: 'findOneServiceProvider' })
   async findOne(@Args('id') id: string): Promise<OneServiceProviderResponse> {
