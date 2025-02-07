@@ -84,6 +84,10 @@ export class Ticket extends BaseEntity {
 
   @Field({ nullable: true })
   @Column({ nullable: true })
+  ticketNumber: string;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
   @Index()
   assignedAt: Date;
 

@@ -42,6 +42,10 @@ import {
   startOfYear,
   endOfYear,
 } from 'date-fns';
+import {
+  generateRandomNumbers,
+  randomNumbers,
+} from '../../../common/utils/helper';
 @Injectable()
 export class TicketService {
   constructor(
@@ -77,6 +81,7 @@ export class TicketService {
       openedAt: new Date(),
       reporter: user,
       parentIssue,
+      ticketNumber: JSON.stringify(generateRandomNumbers(5)),
       childIssue: childIssue,
       isOpen: true,
       status: TicketStatus.OPEN,

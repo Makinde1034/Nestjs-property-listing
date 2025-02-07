@@ -9,6 +9,7 @@ export enum OrderBYEnum {
   TYPE = 'type',
   SERVICE_OWNER = 'serviceOwnerId',
 }
+
 export enum TimePeriod {
   Today = 'today',
   Week = 'week',

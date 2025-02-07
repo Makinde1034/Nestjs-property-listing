@@ -54,6 +54,7 @@ import KeyvRedis, { Keyv } from '@keyv/redis';
 import { CacheableMemory } from 'cacheable';
 import { redisStore } from 'cache-manager-redis-store';
 import configuration from './config/configuration';
+import { getRedisConfigName } from './config/serviceAccount/redis.config';
 
 @Module({
   imports: [
@@ -100,9 +101,18 @@ import configuration from './config/configuration';
 
     CacheModule.register({
       store: redisStore,
-      url: 'redis://127.0.0.1:6379',
+      inject: [ConfigService],
+
       isGlobal: true,
-      ttl: 300,
+      useFactory: async (configService: ConfigService) => {
+        const redisConfig = configService.get(getRedisConfigName());
+        return {
+          store: await redisStore({
+            host: redisConfig.host,
+            password: redisConfig.password,
+          }),
+        };
+      },
     }),
     ScheduleModule.forRoot(),
     AuthModule,

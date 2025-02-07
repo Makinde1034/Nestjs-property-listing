@@ -175,6 +175,7 @@ type Ticket {
   openedAt: DateTime!
   isOpen: Boolean!
   closedAt: DateTime
+  ticketNumber: String
   assignedAt: DateTime
   createdAt: DateTime!
   updatedAt: DateTime!
@@ -1291,7 +1292,7 @@ type Query {
   getActivityLogs(activityLogInput: ActivityLogInput!): ActivityLogsResponse!
   getAllActivityLogs(paginateAndSort: AuditLogTrailsInput): ActivityLogsResponse!
   findAllServiceProviders(paginateAndSort: AdminFilterAndSort!): ServiceProviderResponse!
-  findOneServiceProvider(id: String!): OneServiceProviderResponse!
+  findOneServiceProvider: ServiceProvider!
   findAllService(paginateAndSort: PaginateAndSort!): ServiceResponse!
   findOneService(id: String!): ServiceProvider!
   ViewServiceRequest(paginateAndSort: PaginateAndSort!): RequestedServiceResponse!
@@ -1330,6 +1331,8 @@ input UserFilter {
   saudiUser: Boolean
   type: [String!]
   roles: [Float!]
+  timePeriod: String
+  value: Float
 }
 
 input PaginateAndSort {

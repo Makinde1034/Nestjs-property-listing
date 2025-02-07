@@ -191,6 +191,19 @@ export const generateRandomArray = (length: number, key_length: number) => {
   return keys;
 };
 
+export const generateRandomNumbers = (
+  length: number,
+  value: string = '',
+): string => {
+  if (length === 1) {
+    const number = Math.floor(Math.random() * 10).toString(); // Generate a single digit
+    return value + number;
+  }
+
+  const number = Math.floor(Math.random() * 10).toString(); // Generate a single digit
+  return generateRandomNumbers(length - 1, value + number); // Recursive call
+};
+
 export function checkIfEmailNameOrPhoneNumber(testStrings: string) {
   const regex =
     /^(?<email>[\w.%+-]+@[\w.-]+\.\w{2,})|(?<name>[A-Z][a-z]+\s[A-Z][a-z]+)|(?<phone>\+?\d{1,4}?[-.\s]?\(?\d{1,4}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4})$/;

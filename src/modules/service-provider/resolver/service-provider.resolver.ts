@@ -80,6 +80,16 @@ export class ServiceAndProviderResolver {
   }
 
   @UseGuards(AccessTokenGuard)
+  @Query(() => ServiceProvider, { name: 'findOneServiceProvider' })
+  async checkServiceProviderstatus(
+    @Context() ctx: any,
+  ): Promise<ServiceProvider> {
+    return await this.serviceProviderService.serviceProviderStatus(
+      ctx.req.user,
+    );
+  }
+
+  @UseGuards(AccessTokenGuard)
   @Query(() => ServiceResponse, { name: 'findAllService' })
   async findAllServices(
     @Args('paginateAndSort') paginateAndSort: PaginateAndSort,
@@ -175,7 +185,7 @@ export class ServiceAndProviderResolver {
       serviceProviderInput,
     );
   }
-
+  @UseGuards(AccessTokenGuard)
   @Mutation(() => SuccessResponse)
   async cancleService(@Args('id') id: string, @Context() ctx: any) {
     return await this.serviceProviderService.cancleService(id, ctx.req.user);

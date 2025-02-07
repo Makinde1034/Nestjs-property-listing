@@ -88,6 +88,8 @@ import { AdminWorkflowService } from '../../admin/services/admin-workflow.servic
 import { WorkflowActionStatus } from '../../../common/enums/status.enum';
 import { PushNotificationService } from '../../notification/services';
 import { PushNotificationinput } from '../../../common/interface';
+import { TimePeriod } from '../../../common/enums/sort.enum';
+import * as moment from 'moment';
 
 @Injectable()
 export class UserService {
@@ -696,6 +698,8 @@ export class UserService {
   ): Promise<{ users: User[]; total: number }> {
     try {
       const {
+        timePeriod,
+        value,
         sortField,
         directionToSort = 'ASC',
         take = 20,
@@ -703,10 +707,14 @@ export class UserService {
         saudiUser,
       } = userFilterInput;
 
+      const { startDate, endDate } = this.getDateRange(
+        timePeriod as TimePeriod,
+        value,
+      );
+
       // Validate and normalize sort direction
-      const validSortDirections = ['ASC', 'DESC'] as const; // Ensure strict typing
-      const sortDirection = validSortDirections.includes(
-        directionToSort.toUpperCase() as any,
+      const sortDirection: 'ASC' | 'DESC' = ['ASC', 'DESC'].includes(
+        directionToSort.toUpperCase(),
       )
         ? (directionToSort.toUpperCase() as 'ASC' | 'DESC')
         : 'ASC';
@@ -714,18 +722,22 @@ export class UserService {
       // Start building the query
       const query = this.usersRepository.createQueryBuilder('user');
 
-      // Apply nationality filter
-      if (saudiUser) {
-        query.where('user.nationality = :nationality', {
-          nationality: 'Saudi Arabia',
-        });
-      } else {
-        query.where('user.nationality != :nationality', {
-          nationality: 'Saudi Arabia',
-        });
-      }
+      console.log(startDate, endDate);
+      query
+        .where('user.createdAt BETWEEN :startDate AND :endDate', {
+          startDate: moment(startDate).format('YYYY-MM-DD HH:mm:ss'),
+          endDate: moment(endDate).format('YYYY-MM-DD HH:mm:ss'),
+        })
 
-      // Apply sorting
+        .andWhere(
+          'user.nationality ' +
+            (saudiUser ? '= :nationality' : '!= :nationality'),
+          {
+            nationality: 'Saudi Arabia',
+          },
+        );
+
+      // Apply sorting if sortField is provided
       if (sortField) {
         query.orderBy(`user.${sortField}`, sortDirection);
       }
@@ -742,13 +754,48 @@ export class UserService {
       return { users, total: count };
     } catch (error) {
       this.logger.error('Failed to fetch users', error.stack);
-
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        throw new BadRequestException('An error occurred while fetching users');
-      }
+      throw error instanceof HttpException
+        ? error
+        : new BadRequestException('An error occurred while fetching users');
     }
+  }
+
+  // Helper function to get date ranges
+  private getDateRange(
+    timePeriod: TimePeriod,
+    value?: number,
+  ): { startDate: Date; endDate: Date } {
+    const currentDate = moment();
+    let startDate: Date,
+      endDate: Date = currentDate.toDate();
+
+    switch (timePeriod) {
+      case TimePeriod.Today:
+        startDate = currentDate.startOf('day').toDate();
+        break;
+      case TimePeriod.Week:
+        startDate = currentDate
+          .subtract(value ?? 1, 'weeks')
+          .startOf('week')
+          .toDate();
+        break;
+      case TimePeriod.Month:
+        startDate = currentDate
+          .subtract(value ?? 1, 'months')
+          .startOf('month')
+          .toDate();
+        break;
+      case TimePeriod.Year:
+        startDate = currentDate
+          .subtract(value ?? 1, 'years')
+          .startOf('year')
+          .toDate();
+        break;
+      default:
+        startDate = new Date(0); // Earliest possible date if no filter is applied
+    }
+
+    return { startDate, endDate };
   }
 
   async findAllCustomers(userFilterInput: UserFilter) {

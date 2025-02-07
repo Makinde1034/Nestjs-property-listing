@@ -767,7 +767,6 @@ export class AdminService {
     const currentDate = moment();
     const date = new Date(); // Use moment to handle the current date
     let startDate: Date, endDate: Date;
-
     // Determine date range based on time period
     switch (findOption.timePeriod) {
       case TimePeriod.Today:

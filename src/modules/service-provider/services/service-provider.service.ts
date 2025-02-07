@@ -162,6 +162,18 @@ export class ServiceAndProviderService {
       throw new BadRequestException(error);
     }
   }
+  async serviceProviderStatus(user: User) {
+    try {
+      const provider = await this.serviceProviderRepository.findOneBy({
+        userId: user.id,
+      });
+
+      return provider;
+    } catch (error) {
+      this.logger.error(error);
+      throw new BadRequestException(error);
+    }
+  }
 
   async accept(serviceProviderInput: ServiceProviderInput, user: User) {
     try {

@@ -9,10 +9,12 @@ import {
   IsArray,
   IsBoolean,
   IsEnum,
+  IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
 import { UserInterfaceType } from '../../../../common/enums';
+import { TimePeriod } from '../../../../common/enums/sort.enum';
 
 @InputType()
 export class UserFilter extends PaginateAndSort {
@@ -45,6 +47,16 @@ export class UserFilter extends PaginateAndSort {
   @IsOptional()
   @IsArray()
   roles: number[];
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsEnum(TimePeriod)
+  timePeriod: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsNumber()
+  value: number;
 }
 @InputType()
 export class SwitchInterfaceInput {
