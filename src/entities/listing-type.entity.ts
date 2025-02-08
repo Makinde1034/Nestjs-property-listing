@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
 import {
   Column,
   CreateDateColumn,
@@ -50,18 +50,18 @@ export class ListingType extends BaseEntity {
   @JoinTable({ name: 'listing_types_attribute_sets' })
   attributeSets: AttributeSet[];
 
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @CreateDateColumn()
   createdAt: Date;
   @Field(() => Invoice, { nullable: true })
   @OneToMany(() => Invoice, (invoice) => invoice.listingType)
   invoice: Invoice;
 
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @DeleteDateColumn()
   deletedAt: Date;
 
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @UpdateDateColumn()
   updatedAt: Date;
 }

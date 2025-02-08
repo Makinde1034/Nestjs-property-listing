@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { ObjectType, Field } from '@nestjs/graphql';
+import { ObjectType, Field, GraphQLISODateTime } from '@nestjs/graphql';
 import {
   Column,
   CreateDateColumn,
@@ -45,7 +45,7 @@ export class ServiceProvided extends BaseEntity {
   @Column({ default: true })
   isActive: boolean;
 
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @CreateDateColumn()
   createdAt: Date;
 
@@ -53,11 +53,11 @@ export class ServiceProvided extends BaseEntity {
   @Field({ nullable: true })
   status: string;
 
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @DeleteDateColumn()
   deletedAt: Date;
 
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @UpdateDateColumn()
   updatedAt: Date;
 }

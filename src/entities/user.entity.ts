@@ -18,7 +18,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
 import { UserLevel, UserProfileType } from '../common/types';
 import * as bcrypt from 'bcrypt';
 import { Gender, MaritalStatus, UserStatus } from '../common/enums';
@@ -281,16 +281,16 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   disabledAt: Date;
 
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @CreateDateColumn()
   createdAt: Date;
 
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @UpdateDateColumn()
   updatedAt: Date;
 
   @Exclude()
-  @Field({ nullable: true })
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @DeleteDateColumn()
   deletedAt: Date;
 

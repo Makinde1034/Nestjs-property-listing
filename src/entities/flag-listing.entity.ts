@@ -13,7 +13,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
 import { Listing } from './listing.entity';
 import { User } from './user.entity';
 import { ChildIssue } from './child-issue.entity';
@@ -52,15 +52,15 @@ export class FlagListing extends BaseEntity {
   @ManyToOne(() => Listing, (listing) => listing.flag, { eager: true })
   listing: Listing;
 
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @CreateDateColumn()
   createdAt: Date;
 
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @DeleteDateColumn()
   deletedAt: Date;
 
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @UpdateDateColumn()
   updatedAt: Date;
 }

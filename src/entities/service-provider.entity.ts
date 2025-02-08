@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { ObjectType, Field } from '@nestjs/graphql';
+import { ObjectType, Field, GraphQLISODateTime } from '@nestjs/graphql';
 import {
   Column,
   CreateDateColumn,
@@ -50,7 +50,7 @@ export class ServiceProvider extends BaseEntity {
   @Field({ nullable: true })
   iban: string;
 
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @CreateDateColumn()
   createdAt: Date;
 
@@ -88,7 +88,7 @@ export class ServiceProvider extends BaseEntity {
   @Column({ nullable: true })
   reason: string;
 
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @UpdateDateColumn()
   updatedAt: Date;
 }

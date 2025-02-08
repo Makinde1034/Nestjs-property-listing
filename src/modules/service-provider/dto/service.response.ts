@@ -18,7 +18,7 @@ export class ServiceResponse {
 }
 @ObjectType()
 export class RequestedServiceResponse {
-  @Field(() => [Service])
+  @Field(() => [ServiceRequested])
   request: ServiceRequested[];
 
   @Field()

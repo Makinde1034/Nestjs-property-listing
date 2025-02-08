@@ -224,6 +224,7 @@ export class ServiceAndProviderResolver {
     return await this.serviceProviderService.delete(deleteServiceProvider);
   }
 
+  @UseGuards(AccessTokenGuard)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Mutation(() => ServiceRequested)
   async requestForService(
@@ -235,7 +236,7 @@ export class ServiceAndProviderResolver {
       ctx.req.user,
     );
   }
-
+  @UseGuards(AccessTokenGuard)
   @Query(() => RequestedServiceResponse, { name: 'ViewServiceRequest' })
   async ViewServiceRequest(
     @Args('paginateAndSort') paginateAndSort: PaginateAndSort,

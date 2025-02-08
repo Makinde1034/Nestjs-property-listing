@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 import BaseEntity from './base.entity';
 import { User } from './user.entity';
@@ -25,7 +25,7 @@ export class NationalIdentity extends BaseEntity {
   identityNumber: string;
 
   @Column({ nullable: true })
-  @Field({ nullable: true })
+  @Field(() => GraphQLISODateTime, { nullable: true })
   dateOfExpiry: Date;
 
   @Field(() => User)

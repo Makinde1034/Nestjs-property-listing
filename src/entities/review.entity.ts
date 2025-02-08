@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
 import {
   Column,
   CreateDateColumn,
@@ -44,11 +44,11 @@ export class Review extends BaseEntity {
   @IsEnum(ServicesOffered)
   reviewType: string;
 
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   updatedAt: Date;
 }

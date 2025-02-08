@@ -11,7 +11,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
 
 @Entity()
 @ObjectType()
@@ -36,11 +36,11 @@ export class AuctionBidRange extends BaseEntity {
   @CreateDateColumn()
   createdAt: Date;
 
-  @Field()
+  @Field(GraphQLISODateTime)
   @DeleteDateColumn()
   deletedAt: Date;
 
-  @Field()
+  @Field(GraphQLISODateTime)
   @UpdateDateColumn()
   updatedAt: Date;
 }

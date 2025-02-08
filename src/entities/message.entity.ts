@@ -13,7 +13,7 @@ import {
 import BaseEntity from './base.entity';
 import { Chat } from './chat.entity';
 import { User } from './user.entity';
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
 @Entity()
 @ObjectType()
 export class Messages extends BaseEntity {
@@ -38,6 +38,6 @@ export class Messages extends BaseEntity {
   createdAt: Date;
 
   @UpdateDateColumn()
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   updatedAt: Date;
 }

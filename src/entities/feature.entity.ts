@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { ObjectType, Field } from '@nestjs/graphql';
+import { ObjectType, Field, GraphQLISODateTime } from '@nestjs/graphql';
 import {
   Column,
   CreateDateColumn,
@@ -27,11 +27,11 @@ export class Feature {
   @Column()
   listingId: string;
 
-  @Field({ nullable: true })
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @Column({ nullable: true })
   endDate: Date;
 
-  @Field({ nullable: true })
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @Column({ nullable: true })
   startDate: Date;
 
@@ -44,11 +44,11 @@ export class Feature {
   @ManyToOne(() => Listing, (listing) => listing.feature)
   listing: Listing;
 
-  @Field()
+  @Field(GraphQLISODateTime)
   @CreateDateColumn()
   createdAt: Date;
 
-  @Field()
+  @Field(GraphQLISODateTime)
   @UpdateDateColumn()
   updatedAt: Date;
 }

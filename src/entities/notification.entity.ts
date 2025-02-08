@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
 import {
   Column,
   CreateDateColumn,
@@ -70,11 +70,11 @@ export class Notification extends BaseEntity {
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   recipient: User;
 
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @CreateDateColumn()
   createdAt: Date;
 
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @UpdateDateColumn()
   updatedAt: Date;
 }

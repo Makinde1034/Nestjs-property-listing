@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { ObjectType, Field } from '@nestjs/graphql';
+import { ObjectType, Field, GraphQLISODateTime } from '@nestjs/graphql';
 import {
   Column,
   CreateDateColumn,
@@ -49,11 +49,11 @@ export class AdPackage {
   @OneToMany(() => Promotion, (promotion) => promotion.adPackage)
   promotion: Promotion[];
 
-  @Field()
+  @Field(GraphQLISODateTime)
   @CreateDateColumn()
   createdAt: Date;
 
-  @Field()
+  @Field(GraphQLISODateTime)
   @UpdateDateColumn()
   updatedAt: Date;
 }

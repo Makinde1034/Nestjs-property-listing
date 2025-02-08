@@ -5,7 +5,7 @@
 
 import { Column, CreateDateColumn, Entity, UpdateDateColumn } from 'typeorm';
 import BaseEntity from './base.entity';
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
 
 @Entity()
 @ObjectType()
@@ -91,11 +91,11 @@ export class AdminDefault extends BaseEntity {
   @Column()
   daysToAuctionRegistrationStart: number;
 
-  @Field({ nullable: true })
+  @Field(GraphQLISODateTime)
   @CreateDateColumn()
   createdAt: Date;
 
-  @Field({ nullable: true })
+  @Field(GraphQLISODateTime)
   @UpdateDateColumn()
   updatedAt: Date;
 }

@@ -11,7 +11,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
 
 @Entity()
 @ObjectType()
@@ -32,11 +32,11 @@ export class Amenities {
   @Field({ nullable: true })
   description: string;
 
-  @Field()
+  @Field(GraphQLISODateTime)
   @CreateDateColumn()
   createdAt: Date;
 
-  @Field()
+  @Field(GraphQLISODateTime)
   @UpdateDateColumn()
   updatedAt: Date;
 }

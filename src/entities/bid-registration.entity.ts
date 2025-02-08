@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
 import {
   Column,
   CreateDateColumn,
@@ -36,11 +36,11 @@ export class BidRegistration extends BaseEntity {
   @CreateDateColumn()
   createdAt: Date;
 
-  @Field()
+  @Field(GraphQLISODateTime)
   @DeleteDateColumn()
   deletedAt: Date;
 
-  @Field()
+  @Field(GraphQLISODateTime)
   @UpdateDateColumn()
   updatedAt: Date;
 }

@@ -3,12 +3,13 @@
  * For license. See license.txt
  */
 
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -25,10 +26,12 @@ import { Bids } from './bids.entity';
 export class AuctionParticipant extends BaseEntity {
   @Field()
   @Column()
+  @Index()
   listingId: string;
 
   @Field()
   @Column()
+  @Index()
   auctionId: string;
 
   @Field(() => [String], { nullable: true })
@@ -45,7 +48,6 @@ export class AuctionParticipant extends BaseEntity {
   @Field()
   @Column({ default: 0 })
   startingPrice: number;
-
   @Field()
   @Column({ default: 0 })
   minimumPrice: number;
@@ -60,15 +62,15 @@ export class AuctionParticipant extends BaseEntity {
   @OneToMany(() => Bids, (bid) => bid.auctionParticipant)
   bid: Bids[];
 
-  @Field()
+  @Field(GraphQLISODateTime)
   @CreateDateColumn()
   createdAt: Date;
 
-  @Field()
+  @Field(GraphQLISODateTime)
   @DeleteDateColumn()
   deletedAt: Date;
 
-  @Field()
+  @Field(GraphQLISODateTime)
   @UpdateDateColumn()
   updatedAt: Date;
 }

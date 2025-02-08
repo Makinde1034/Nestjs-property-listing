@@ -12,7 +12,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
 import { ActivityLog } from './activity-log.entity';
 
 @Entity()
@@ -34,7 +34,7 @@ export class ResponseTemplate extends BaseEntity {
   templateArabicText: string;
 
   @CreateDateColumn()
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   createdAt: Date;
 
   @Field(() => [ActivityLog], { nullable: true })
@@ -42,10 +42,10 @@ export class ResponseTemplate extends BaseEntity {
   responseTemplateActivityLogs: ActivityLog;
 
   @DeleteDateColumn()
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   deletedAt: Date;
 
   @UpdateDateColumn()
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   updatedAt: Date;
 }

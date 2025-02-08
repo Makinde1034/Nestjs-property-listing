@@ -69,9 +69,9 @@ type Invoice {
   listingTypeId: String
   listingId: String
   vat: Float!
-  expireAt: DateTime!
-  createdAt: DateTime!
-  updatedAt: DateTime!
+  expireAt: DateTime
+  createdAt: DateTime
+  updatedAt: DateTime
 }
 
 type Finalization {
@@ -103,10 +103,10 @@ type Offer {
   listing: Listing!
   userId: String!
   listingId: String!
-  createdAt: DateTime!
+  createdAt: DateTime
   invoice: Invoice
-  deletedAt: DateTime!
-  updatedAt: DateTime!
+  deletedAt: DateTime
+  updatedAt: DateTime
   finalization: Finalization
 }
 
@@ -119,8 +119,11 @@ type AdPackage {
   price: Float!
   duration: String!
   promotion: [Promotion!]!
-  createdAt: DateTime!
-  updatedAt: DateTime!
+
+  """
+  A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+  """
+  DateTime: DateTime!
 }
 
 type Promotion {
@@ -129,8 +132,8 @@ type Promotion {
   expiredAt: DateTime
   adPackage: AdPackage!
   listing: Listing!
-  createdAt: DateTime!
-  updatedAt: DateTime!
+  createdAt: DateTime
+  updatedAt: DateTime
 }
 
 type ParentIssue {
@@ -142,9 +145,9 @@ type ParentIssue {
   englishName: String
   sequentialId: Float
   arabicName: String
-  createdAt: DateTime!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
+  createdAt: DateTime
+  deletedAt: DateTime
+  updatedAt: DateTime
 }
 
 type Messages {
@@ -154,7 +157,7 @@ type Messages {
   message: String!
   attachment: String
   createdAt: DateTime!
-  updatedAt: DateTime!
+  updatedAt: DateTime
 }
 
 type Chat {
@@ -177,8 +180,8 @@ type Ticket {
   closedAt: DateTime
   ticketNumber: String
   assignedAt: DateTime
-  createdAt: DateTime!
-  updatedAt: DateTime!
+  createdAt: DateTime
+  updatedAt: DateTime
   deletedAt: DateTime
 }
 
@@ -192,8 +195,11 @@ type ChildIssue {
   arabicName: String
   sequentialId: Float
   createdAt: DateTime!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
+
+  """
+  A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+  """
+  DateTime: DateTime!
 }
 
 type FlagListing {
@@ -204,9 +210,9 @@ type FlagListing {
   childIssue: ChildIssue
   listingId: String!
   listing: Listing
-  createdAt: DateTime!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
+  createdAt: DateTime
+  deletedAt: DateTime
+  updatedAt: DateTime
 }
 
 type Feature {
@@ -216,8 +222,11 @@ type Feature {
   startDate: DateTime
   adPackage: AdPackage
   listing: Listing!
-  createdAt: DateTime!
-  updatedAt: DateTime!
+
+  """
+  A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+  """
+  DateTime: DateTime!
 }
 
 type Wishlist {
@@ -226,8 +235,8 @@ type Wishlist {
   user: User!
   userId: String!
   createdAt: DateTime!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
+  deletedAt: DateTime
+  updatedAt: DateTime
 }
 
 type GpsCoordinate {
@@ -268,9 +277,11 @@ type Bids {
   auctionParticipantId: String!
   listingId: String!
   autoBid: Boolean!
-  createdAt: DateTime!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
+
+  """
+  A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+  """
+  DateTime: DateTime!
 }
 
 type AuctionParticipant {
@@ -296,9 +307,9 @@ type ServiceRequested {
   serviceProvidedId: String!
   listing: [Listing!]!
   status: String!
-  createdAt: DateTime!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
+  createdAt: DateTime
+  deletedAt: DateTime
+  updatedAt: DateTime
 }
 
 type Place {
@@ -361,8 +372,8 @@ type Listing {
   listingActivityLogs: [ActivityLog!]
   place: [Place!]!
   createdAt: DateTime
-  deletedAt: DateTime!
-  updatedAt: DateTime!
+  deletedAt: DateTime
+  updatedAt: DateTime
 }
 
 type ListingAttributes {
@@ -394,9 +405,11 @@ type Attribute {
   thiqaIntegration: [String!]
   attributeSets: [AttributeSet!]!
   listingAttribute: Attribute!
-  deletedAt: DateTime!
-  createdAt: DateTime!
-  updatedAt: DateTime!
+
+  """
+  A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+  """
+  DateTime: DateTime!
 }
 
 type AttributeSet {
@@ -405,9 +418,11 @@ type AttributeSet {
   englishName: String
   attributes: [Attribute!]
   listingTypes: [ListingType!]!
-  deletedAt: DateTime!
-  createdAt: DateTime!
-  updatedAt: DateTime!
+
+  """
+  A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+  """
+  DateTime: DateTime!
 }
 
 type ListingType {
@@ -418,10 +433,10 @@ type ListingType {
   icon: String
   listing: Listing!
   attributeSets: [AttributeSet!]
-  createdAt: DateTime!
+  createdAt: DateTime
   invoice: Invoice
-  deletedAt: DateTime!
-  updatedAt: DateTime!
+  deletedAt: DateTime
+  updatedAt: DateTime
 }
 
 type ResponseTemplate {
@@ -430,10 +445,10 @@ type ResponseTemplate {
   templateArabicName: String!
   templateText: String!
   templateArabicText: String!
-  createdAt: DateTime!
+  createdAt: DateTime
   responseTemplateActivityLogs: [ActivityLog!]
-  deletedAt: DateTime!
-  updatedAt: DateTime!
+  deletedAt: DateTime
+  updatedAt: DateTime
 }
 
 type Category {
@@ -442,9 +457,9 @@ type Category {
   englishName: String!
   placement: String
   article: [Article!]
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  deletedAt: DateTime!
+  createdAt: DateTime
+  updatedAt: DateTime
+  deletedAt: DateTime
 }
 
 type Article {
@@ -462,9 +477,11 @@ type Article {
   language: String!
   placement: String
   published: Boolean!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  deletedAt: DateTime!
+
+  """
+  A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+  """
+  DateTime: DateTime!
 }
 
 type SplashScreen {
@@ -473,12 +490,12 @@ type SplashScreen {
   placement: String
   image: String
   default: Boolean!
-  startDate: DateTime!
-  endDate: DateTime!
+  startDate: DateTime
+  endDate: DateTime
   splashScreenActivityLog: [ActivityLog!]
-  createdAt: DateTime!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
+  createdAt: DateTime
+  deletedAt: DateTime
+  updatedAt: DateTime
 }
 
 type Service {
@@ -490,9 +507,9 @@ type Service {
   icon: String
   pricing: String
   status: [ServiceProvided!]
-  createdAt: DateTime!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
+  createdAt: DateTime
+  deletedAt: DateTime
+  updatedAt: DateTime
 }
 
 type ServiceProvided {
@@ -502,10 +519,10 @@ type ServiceProvided {
   service: Service!
   serviceId: String!
   isActive: Boolean!
-  createdAt: DateTime!
+  createdAt: DateTime
   status: String
-  deletedAt: DateTime!
-  updatedAt: DateTime!
+  deletedAt: DateTime
+  updatedAt: DateTime
 }
 
 type ServiceProvider {
@@ -516,14 +533,14 @@ type ServiceProvider {
   workLicense: String
   idOrCr: String
   iban: String
-  createdAt: DateTime!
+  createdAt: DateTime
   providerStatus: String
   deletedAt: DateTime!
   activityLog: [ActivityLog!]!
   servicesOffered: [ServiceProvided!]
   coverageArea: String!
   reason: String
-  updatedAt: DateTime!
+  updatedAt: DateTime
 }
 
 type ActivityLog {
@@ -559,8 +576,11 @@ type ActivityLog {
   placement: String
   action: String
   details: String
-  createdAt: DateTime
-  updatedAt: DateTime!
+
+  """
+  A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+  """
+  DateTime: DateTime!
 }
 
 type Role {
@@ -573,9 +593,9 @@ type Role {
   rolePermissions: [RolePermissions!]!
   user: [User!]
   activityLogs: [ActivityLog!]
-  createdAt: DateTime!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
+  createdAt: DateTime
+  deletedAt: DateTime
+  updatedAt: DateTime
 }
 
 type Company {
@@ -610,8 +630,8 @@ type Review {
   userId: String!
   providerId: String
   reviewType: String!
-  createdAt: DateTime!
-  updatedAt: DateTime!
+  createdAt: DateTime
+  updatedAt: DateTime
 }
 
 type SearchHistory {
@@ -628,9 +648,9 @@ type SearchHistory {
   type: String
   rentingOption: String
   listingId: String
-  createdAt: DateTime!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
+  createdAt: DateTime
+  deletedAt: DateTime
+  updatedAt: DateTime
 }
 
 type Compare {
@@ -638,9 +658,11 @@ type Compare {
   user: User!
   userId: String!
   listings: [String!]!
-  createdAt: DateTime!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
+
+  """
+  A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+  """
+  DateTime: DateTime!
 }
 
 type ActionRequest {
@@ -651,8 +673,8 @@ type ActionRequest {
   admin: User!
   event: String
   createdAt: DateTime!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
+  deletedAt: DateTime
+  updatedAt: DateTime
 }
 
 type User {
@@ -712,8 +734,8 @@ type User {
   flagListing: FlagListing!
   employeeId: String
   disabledAt: DateTime
-  createdAt: DateTime!
-  updatedAt: DateTime!
+  createdAt: DateTime
+  updatedAt: DateTime
   deletedAt: DateTime
   notificationToken: String
   name: String
@@ -733,8 +755,8 @@ type Notification {
   directToWeb: Boolean
   directToMobile: Boolean
   recipient: User!
-  createdAt: DateTime!
-  updatedAt: DateTime!
+  createdAt: DateTime
+  updatedAt: DateTime
 }
 
 type TokenType {
@@ -794,8 +816,8 @@ type WorkFlow {
   approvalOneRole: [String!]!
   approvalTwoRole: [String!]
   createdAt: DateTime!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
+  deletedAt: DateTime
+  updatedAt: DateTime
 }
 
 type NotificationMessages {
@@ -816,8 +838,8 @@ type NotificationMessages {
   body: String
   arabicTitle: String
   arabicBody: String
-  createdAt: DateTime!
-  updatedAt: DateTime!
+  createdAt: DateTime
+  updatedAt: DateTime
 }
 
 type UserResponse {
@@ -872,8 +894,11 @@ type AdminDefault {
   daysToAuctionRegistrationEnd: Float
   maximumDaysForOfferExpiration: Float!
   daysToAuctionRegistrationStart: Float
-  createdAt: DateTime
-  updatedAt: DateTime
+
+  """
+  A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+  """
+  DateTime: DateTime!
 }
 
 type Coupon {
@@ -891,8 +916,11 @@ type Coupon {
   endDate: DateTime!
   status: String!
   deactived: Boolean!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
+
+  """
+  A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+  """
+  DateTime: DateTime!
 }
 
 type AuctionBidRange {
@@ -902,8 +930,11 @@ type AuctionBidRange {
   increment: Float!
   heldAmount: Float
   createdAt: DateTime!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
+
+  """
+  A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+  """
+  DateTime: DateTime!
 }
 
 type SystemFeatureSetting {
@@ -913,9 +944,9 @@ type SystemFeatureSetting {
   slug: String!
   isActive: Boolean!
   description: String!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  deleteAt: DateTime!
+  createdAt: DateTime
+  updatedAt: DateTime
+  deleteAt: DateTime
 }
 
 type AutoBid {
@@ -924,9 +955,11 @@ type AutoBid {
   auctionId: String!
   price: Float!
   userId: String!
-  createdAt: DateTime!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
+
+  """
+  A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+  """
+  DateTime: DateTime!
 }
 
 type BidRegistration {
@@ -936,8 +969,11 @@ type BidRegistration {
   auctionId: String!
   listingId: String!
   createdAt: DateTime!
-  deletedAt: DateTime!
-  updatedAt: DateTime!
+
+  """
+  A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+  """
+  DateTime: DateTime!
 }
 
 type ListingResponse {
@@ -1158,7 +1194,7 @@ type ServiceResponse {
 }
 
 type RequestedServiceResponse {
-  request: [Service!]!
+  request: [ServiceRequested!]!
   total: Float!
 }
 

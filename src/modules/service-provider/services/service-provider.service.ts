@@ -519,7 +519,7 @@ export class ServiceAndProviderService {
           'user.arabicFirstName',
           'user.arabicLastName',
         ])
-        .where('serviceRequest.userId = :userId', { userId: user.id })
+        .where('serviceRequested.userId = :userId', { userId: user.id })
         .take(paginateAndSort.take)
         .skip(paginateAndSort.skip)
         .getManyAndCount();

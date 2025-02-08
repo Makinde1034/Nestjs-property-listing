@@ -15,7 +15,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
 import { User } from './user.entity';
 import { Listing } from './listing.entity';
 import { OfferListEnum } from '../common/enums/status.enum';
@@ -87,7 +87,7 @@ export class Offer extends BaseEntity {
   @Column()
   listingId: string;
 
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @CreateDateColumn()
   createdAt: Date;
 
@@ -97,11 +97,11 @@ export class Offer extends BaseEntity {
   @Field(() => Invoice, { nullable: true })
   invoice: Invoice;
 
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @DeleteDateColumn()
   deletedAt: Date;
 
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @UpdateDateColumn()
   updatedAt: Date;
 

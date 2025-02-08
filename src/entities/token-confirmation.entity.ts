@@ -11,7 +11,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import BaseEntity from './base.entity';
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
 import { User } from './user.entity';
 
 @Entity()
@@ -25,15 +25,15 @@ export class TokenConfirmation extends BaseEntity {
   @Column()
   token: string;
 
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @Column()
   expiredAt: Date;
 
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @CreateDateColumn()
   createdAt: Date;
 
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @UpdateDateColumn()
   updatedAt: Date;
 }

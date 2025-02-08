@@ -8,6 +8,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   OneToMany,
   UpdateDateColumn,
 } from 'typeorm';
@@ -39,6 +40,7 @@ export class Auction extends BaseEntity {
   englishDescription: string;
 
   @Field(() => GraphQLISODateTime, { nullable: true })
+  @Index()
   @Column({ type: 'timestamptz', nullable: true })
   @Field({ nullable: true })
   startDate: Date;
@@ -80,15 +82,15 @@ export class Auction extends BaseEntity {
 
   @Field(() => GraphQLISODateTime)
   @CreateDateColumn()
-  @Field()
+  @Index()
   createdAt: Date;
 
   @Field(() => GraphQLISODateTime, { nullable: true })
   @Column({ type: 'timestamptz', nullable: true })
-  @Field()
+  @Index()
   expireAt: Date;
+
   @Field(() => GraphQLISODateTime)
   @UpdateDateColumn()
-  @Field()
   updatedAt: Date;
 }

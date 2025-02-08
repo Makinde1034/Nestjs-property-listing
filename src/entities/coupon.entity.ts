@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
 import {
   Column,
   CreateDateColumn,
@@ -72,11 +72,11 @@ export class Coupon {
   @Column({ default: false })
   deactived: boolean;
 
-  @Field()
+  @Field(GraphQLISODateTime)
   @DeleteDateColumn()
   deletedAt: Date;
 
-  @Field()
+  @Field(GraphQLISODateTime)
   @UpdateDateColumn()
   updatedAt: Date;
 }

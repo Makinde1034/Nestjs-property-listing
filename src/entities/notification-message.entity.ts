@@ -6,7 +6,7 @@
 import { Column, CreateDateColumn, Entity, UpdateDateColumn } from 'typeorm';
 import BaseEntity from './base.entity';
 
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
 @Entity()
 @ObjectType()
 export class NotificationMessages extends BaseEntity {
@@ -75,10 +75,10 @@ export class NotificationMessages extends BaseEntity {
   arabicBody: string;
 
   @CreateDateColumn()
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   createdAt: Date;
 
   @UpdateDateColumn()
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   updatedAt: Date;
 }

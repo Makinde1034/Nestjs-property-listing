@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
 import {
   Column,
   CreateDateColumn,
@@ -39,26 +39,26 @@ export class SplashScreen {
   default: boolean;
 
   @Column()
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   startDate: Date;
 
   @Column()
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   endDate: Date;
 
   @Field(() => [ActivityLog], { nullable: true })
   @OneToMany(() => ActivityLog, (activityLogs) => activityLogs.splashScreen)
   splashScreenActivityLog: ActivityLog;
 
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @CreateDateColumn()
   createdAt: Date;
 
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @DeleteDateColumn()
   deletedAt: Date;
 
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @UpdateDateColumn()
   updatedAt: Date;
 }
