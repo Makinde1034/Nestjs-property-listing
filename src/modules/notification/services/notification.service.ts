@@ -8,6 +8,7 @@ import {
   HttpException,
   Injectable,
   Logger,
+  OnModuleInit,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { NotificationRepository } from '../repositories';
@@ -61,11 +62,10 @@ import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { NotificationResponse } from '../dtos/response/notification';
 
 @Injectable()
-export class NotificationService {
+export class NotificationService implements OnModuleInit {
+  static isEventTriggered = false;
   private readonly logger = new Logger(NotificationService.name);
   private readonly frontEndUrl: string;
-
-  private static isEventTriggered: boolean = false;
 
   constructor(
     private readonly notificationRepository: NotificationRepository,
@@ -85,10 +85,13 @@ export class NotificationService {
     private readonly userNotificationPreference: UserNotificationRepository,
     private readonly storageService: StorageService,
   ) {
+    this.frontEndUrl = this.configService.get('FRONT_END_URL');
+  }
+
+  onModuleInit() {
     this.eventEmitter.on('customEvent', () => {
       NotificationService.isEventTriggered = true;
     });
-    this.frontEndUrl = this.configService.get('FRONT_END_URL');
   }
 
   static getEventTriggered(): boolean {
@@ -141,7 +144,7 @@ export class NotificationService {
 
       // Fetch buyer and seller notification preferences for the given scope
 
-      const [buyerPref, sellerPref] = await Promise.all([
+      const [sellerPref, buyerPref] = await Promise.all([
         this.userNotificationPreference.findOne({
           where: { user: { id: creatorId }, scope: { id: scope.id } },
           relations: ['user', 'scope'],
@@ -326,7 +329,6 @@ export class NotificationService {
         );
       }
     } catch (error) {
-      console.log(error);
       this.logger.error('Error sending notifications', error);
       throw new BadRequestException(error);
     }
@@ -349,7 +351,7 @@ export class NotificationService {
     }
   }
 
-  private sendDesktopNotificationToUser(
+  private async sendDesktopNotificationToUser(
     user: User,
     event: string,
     scope: string,
@@ -370,6 +372,7 @@ export class NotificationService {
           count,
           messages,
         );
+
         if (messageData) {
           const subject: string =
             user.language === 'en'
@@ -394,11 +397,12 @@ export class NotificationService {
           if (!isEventTriggered) {
             this.eventEmitter.emit('customEvent');
 
-            this.saveNotificationLog({
+            await this.saveNotificationLog({
               title: subject,
               category: messageData.scope,
               subCategory: messageData.event,
               metadata: metadata,
+
               recipient: user,
               message: text,
               type: NotificationType.SYSTEM_NOTIFICATION,
@@ -415,7 +419,7 @@ export class NotificationService {
   /**
    * Helper method to send email notification.
    */
-  private sendEmailToUser(
+  private async sendEmailToUser(
     user: User,
     event: string,
     scope: string,
@@ -462,7 +466,7 @@ export class NotificationService {
           if (!isEventTriggered) {
             this.eventEmitter.emit('customEvent');
 
-            this.saveNotificationLog({
+            await this.saveNotificationLog({
               title: subject,
               message: text,
               category: messageData.scope,
@@ -527,7 +531,7 @@ export class NotificationService {
         if (!isEventTriggered) {
           this.eventEmitter.emit('customEvent');
 
-          this.saveNotificationLog({
+          await this.saveNotificationLog({
             title: title,
             message: message,
             category: messageData.scope,
@@ -576,6 +580,8 @@ export class NotificationService {
         message.event == event &&
         message?.recipients == recipient,
     );
+
+    console.log(filteredMessages);
 
     if (filteredMessages.length < 1) {
       this.logger.log('No matching message found');
@@ -628,7 +634,8 @@ export class NotificationService {
   async saveNotificationLog(
     data: Partial<Notification>,
   ): Promise<Notification> {
-    return await this.notificationRepository.save(data);
+    const result = await this.notificationRepository.save(data);
+    return result;
   }
 
   /**
@@ -685,14 +692,19 @@ export class NotificationService {
     paginateAndSort: PaginateAndSort,
     user: User,
   ): Promise<NotificationResponse> {
-    const [notification, total] =
-      await this.notificationRepository.findAndCount({
+    const [[notification, total], unread] = await Promise.all([
+      this.notificationRepository.findAndCount({
         where: { recipient: { id: user.id } },
         take: paginateAndSort.take ?? 20,
         skip: paginateAndSort.skip ?? 0,
-      });
+      }),
+      this.notificationRepository
+        .createQueryBuilder('notification')
+        .where('notification.read IS false')
+        .getCount(),
+    ]);
 
-    return { notification, total };
+    return { notification, unread, total };
   }
   async deleteNotification(user: User) {
     try {

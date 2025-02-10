@@ -7,5 +7,7 @@ export class NotificationResponse {
   notification: Notification[];
 
   @Field()
+  unread: number;
+  @Field()
   total: number;
 }
