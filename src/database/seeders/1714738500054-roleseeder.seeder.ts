@@ -43,6 +43,7 @@ export class RoleSeeder implements Seeder {
       id: permission.id,
     }));
     this.logger.debug(`Permissions fetched: ${permissions.length}`);
+
     this.logger.debug(`Admin users fetched: ${users.length}`);
 
     const newRole = {

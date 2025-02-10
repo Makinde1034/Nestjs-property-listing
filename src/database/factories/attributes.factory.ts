@@ -10,6 +10,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Area',
     arabicName: 'المساحة',
+    icon: null,
     type: 'Number',
     showInFilters: true,
     showInComparison: true,
@@ -26,6 +27,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Apartment Number',
     arabicName: 'رقم الوحدة السكنية',
+    icon: null,
     type: 'Address',
     showInFilters: false,
     showInComparison: false,
@@ -42,6 +44,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Number of Storeys',
     arabicName: 'عدد الأدوار',
+    icon: null,
     type: 'Dropdown',
     showInFilters: true,
     showInComparison: true,
@@ -58,6 +61,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Number of Bathrooms',
     arabicName: 'عدد الحمامات',
+    icon: null,
     type: 'Dropdown',
     showInFilters: true,
     showInComparison: true,
@@ -74,6 +78,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Tennis court',
     arabicName: 'صالة تنس',
+    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--tennis-ball.png',
     type: null,
     showInFilters: false,
     showInComparison: true,
@@ -90,6 +95,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Basketball court',
     arabicName: 'صالة كرة سلة',
+    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--court-basketball.png',
     type: null,
     showInFilters: false,
     showInComparison: true,
@@ -106,6 +112,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Jacuzzi',
     arabicName: 'جاكوزي',
+    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--bathtub.png',
     type: null,
     showInFilters: false,
     showInComparison: true,
@@ -122,6 +129,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'District',
     arabicName: 'الحي',
+    icon: null,
     type: 'Address',
     showInFilters: true,
     showInComparison: true,
@@ -138,6 +146,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Parking',
     arabicName: 'جراج سيارة',
+    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--car-profile.png',
     type: null,
     showInFilters: true,
     showInComparison: true,
@@ -154,6 +163,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Level',
     arabicName: 'الدور',
+    icon: null,
     type: 'Dropdown',
     showInFilters: true,
     showInComparison: true,
@@ -170,6 +180,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Garage Area',
     arabicName: 'منطقة جراج',
+    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--hamburger.png',
     type: null,
     showInFilters: false,
     showInComparison: true,
@@ -186,6 +197,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Pool',
     arabicName: 'حمام سباحة',
+    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--swimming-pool.png',
     type: null,
     showInFilters: true,
     showInComparison: true,
@@ -202,6 +214,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Outdoor kitchen',
     arabicName: 'مطبخ خارجي',
+    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--cooking-pot.png',
     type: null,
     showInFilters: false,
     showInComparison: true,
@@ -218,6 +231,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Garden',
     arabicName: 'حديقة',
+    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--tree.png',
     type: null,
     showInFilters: true,
     showInComparison: true,
@@ -234,6 +248,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Guest house',
     arabicName: 'منزل ضيوف',
+    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--house.png',
     type: null,
     showInFilters: true,
     showInComparison: true,
@@ -250,6 +265,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Indoor play area',
     arabicName: 'منطقة لعب داخلية',
+    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--bowling-ball.png',
     type: null,
     showInFilters: false,
     showInComparison: true,
@@ -266,6 +282,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Wifi',
     arabicName: 'واي فاي',
+    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--wifi-medium.png',
     type: null,
     showInFilters: true,
     showInComparison: true,
@@ -282,6 +299,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Elevator',
     arabicName: 'مصعد',
+    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--elevator-duotone.png',
     type: null,
     showInFilters: true,
     showInComparison: true,
@@ -298,6 +316,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Maids room',
     arabicName: 'غرفة خادمة',
+    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--broom.png',
     type: null,
     showInFilters: true,
     showInComparison: true,
@@ -314,6 +333,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Pets allowed',
     arabicName: 'مسموح للحيوانات',
+    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--dog.png',
     type: null,
     showInFilters: true,
     showInComparison: true,
@@ -330,6 +350,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Balcony',
     arabicName: 'بالكونة',
+    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--bird.png',
     type: null,
     showInFilters: false,
     showInComparison: true,
@@ -346,6 +367,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Gym',
     arabicName: 'صالة رياضية',
+    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--barbell.png',
     type: null,
     showInFilters: true,
     showInComparison: true,
@@ -362,6 +384,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Playground',
     arabicName: 'منطقة رياضية',
+    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--court-basketball.png',
     type: null,
     showInFilters: false,
     showInComparison: true,
@@ -378,6 +401,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Security',
     arabicName: 'تأمين',
+    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--security-camera.png',
     type: null,
     showInFilters: true,
     showInComparison: true,
@@ -394,6 +418,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Air conditioning',
     arabicName: 'تكييف هواء',
+    icon: 'https://storage.googleapis.com/waseet-dev/37923833-main logo.svg',
     type: null,
     showInFilters: true,
     showInComparison: true,
@@ -410,6 +435,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Storage room',
     arabicName: 'غرفة تخزين',
+    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--warehouse.png',
     type: null,
     showInFilters: false,
     showInComparison: true,
@@ -426,6 +452,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Laundry room',
     arabicName: 'غرفة غسيل',
+    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--washing-machine.png',
     type: null,
     showInFilters: false,
     showInComparison: true,
@@ -442,6 +469,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Conference room',
     arabicName: 'غرفة اجتماعات',
+    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--microphone-stage.png',
     type: null,
     showInFilters: false,
     showInComparison: true,
@@ -458,6 +486,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Gated community',
     arabicName: 'مجمع سكني',
+    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--wall.png',
     type: null,
     showInFilters: true,
     showInComparison: true,
@@ -474,6 +503,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Covered parking',
     arabicName: 'جراج مغطى',
+    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--car-simple.png',
     type: null,
     showInFilters: false,
     showInComparison: true,
@@ -490,6 +520,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'BBQ area',
     arabicName: 'منطقة شواء',
+    icon: 'https://storage.googleapis.com/waseet-dev/amenities/ph--hamburger.png',
     type: 'String',
     showInFilters: true,
     showInComparison: true,
@@ -506,6 +537,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Rented apartments',
     arabicName: 'الوحدات المؤجرة',
+    icon: 'https://storage.googleapis.com/waseet-dev/32733890-image (1).png',
     type: 'Number',
     showInFilters: false,
     showInComparison: true,
@@ -522,6 +554,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Bathrooms per apartment',
     arabicName: 'عدد الحمامات لكل دور',
+    icon: 'https://storage.googleapis.com/waseet-dev/71372067-collabo.png',
     type: 'Number',
     showInFilters: false,
     showInComparison: true,
@@ -538,6 +571,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Rooms per apartment',
     arabicName: 'عدد الغرف لكل وحدة',
+    icon: 'https://storage.googleapis.com/waseet-dev/49306323-api.png',
     type: 'Number',
     showInFilters: false,
     showInComparison: true,
@@ -554,6 +588,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Street',
     arabicName: 'الشارع',
+    icon: 'https://storage.googleapis.com/waseet-dev/53048302-Screenshot from 2024-11-13 14-24-07.png',
     type: 'Media',
     showInFilters: false,
     showInComparison: true,
@@ -570,6 +605,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Country',
     arabicName: 'الدولة',
+    icon: 'https://storage.googleapis.com/waseet-dev/70887549-compute.png',
     type: 'Media',
     showInFilters: false,
     showInComparison: true,
@@ -586,6 +622,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Number of Rooms',
     arabicName: 'عدد الغرف',
+    icon: 'https://storage.googleapis.com/waseet-dev/32991621-collabo.png',
     type: 'Dropdown',
     showInFilters: true,
     showInComparison: true,
@@ -602,6 +639,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Number of Appartments',
     arabicName: 'عدد الوحدات',
+    icon: 'https://storage.googleapis.com/waseet-dev/68857350-image.png',
     type: 'Number',
     showInFilters: false,
     showInComparison: true,
@@ -618,6 +656,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Area per apartment',
     arabicName: 'مساحة كل وحدة',
+    icon: 'https://storage.googleapis.com/waseet-dev/51436985-api.png',
     type: 'Number',
     showInFilters: false,
     showInComparison: true,
@@ -634,6 +673,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Boom',
     arabicName: 'Bllom',
+    icon: null,
     type: 'Number',
     showInFilters: true,
     showInComparison: true,
@@ -650,6 +690,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'City',
     arabicName: 'المدينة',
+    icon: 'https://storage.googleapis.com/waseet-dev/95384642-api.png',
     type: 'Media',
     showInFilters: false,
     showInComparison: true,
@@ -666,6 +707,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Building No',
     arabicName: 'رقم المبنى',
+    icon: 'https://storage.googleapis.com/waseet-dev/75038896-Screenshot from 2024-11-13 14-24-07.png',
     type: 'Address',
     showInFilters: false,
     showInComparison: false,
@@ -682,6 +724,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Not seen',
     arabicName: 'Not seen',
+    icon: null,
     type: 'Number',
     showInFilters: true,
     showInComparison: false,
@@ -698,6 +741,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'testing atribute',
     arabicName: 'اختباري',
+    icon: 'https://storage.googleapis.com/waseet-dev/80371427-black logo copy.svg',
     type: 'Dropdown',
     showInFilters: true,
     showInComparison: true,
@@ -714,6 +758,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Test 1',
     arabicName: 'تجريبي 1',
+    icon: null,
     type: 'Dropdown',
     showInFilters: true,
     showInComparison: false,
@@ -730,6 +775,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'waseet attribute',
     arabicName: 'وسيط',
+    icon: 'https://storage.googleapis.com/waseet-dev/37997264-black logo copy.svg',
     type: 'Dropdown',
     showInFilters: true,
     showInComparison: true,
@@ -746,6 +792,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'test',
     arabicName: 'wew',
+    icon: null,
     type: 'Dropdown',
     showInFilters: false,
     showInComparison: false,
@@ -762,6 +809,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'testing tuesday',
     arabicName: 'الثلاث اختبار',
+    icon: 'https://storage.googleapis.com/waseet-dev/28245171-main logo.svg',
     type: 'Dropdown',
     showInFilters: true,
     showInComparison: true,
@@ -778,6 +826,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'amenity test',
     arabicName: 'اختبار',
+    icon: 'https://storage.googleapis.com/waseet-dev/36480952-main logo.svg',
     type: 'String',
     showInFilters: true,
     showInComparison: true,
@@ -794,6 +843,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'date testing',
     arabicName: 'اختبار تاريخ',
+    icon: null,
     type: 'Date',
     showInFilters: false,
     showInComparison: false,
@@ -810,6 +860,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Test Att',
     arabicName: 'اختباري',
+    icon: null,
     type: 'Dropdown',
     showInFilters: true,
     showInComparison: true,
@@ -826,6 +877,7 @@ export const AttributeFactory: DeepPartial<Attribute>[] = [
   {
     englishName: 'Friday',
     arabicName: 'الجمعة',
+    icon: 'https://storage.googleapis.com/waseet-dev/55795081-main logo.png',
     type: 'String',
     showInFilters: false,
     showInComparison: true,

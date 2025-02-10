@@ -17,7 +17,7 @@ export const SuperAdminData: Partial<User> = {
   phone: '+1100299111',
   currentTermOfservice: 'v1',
   termsOfServiceVersion: 'v1',
+  userLevel: 'level_2',
   isTwoFactorAuthenticationEnabled: true,
-  roles: [{ id: 1 }] as Role[],
   status: UserStatus.VERIFIED,
 };
