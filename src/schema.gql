@@ -1266,6 +1266,7 @@ type Query {
   findOneOffer(id: String!): Offer!
   findOffers(findOptions: FindOfferInput!): OfferResponse!
   findManyForOwner(findOptions: FindOfferInput!): OfferOwnerResponse!
+  findOneRequestToFinalize(offerId: String!): Finalization!
   getWishlist: [Wishlist!]!
   findOneListingsForAdmin(listingId: String!): Listing!
   getAuction(id: String!): Auction!
@@ -1331,7 +1332,8 @@ type Query {
   getActivityLogs(activityLogInput: ActivityLogInput!): ActivityLogsResponse!
   getAllActivityLogs(paginateAndSort: AuditLogTrailsInput): ActivityLogsResponse!
   findAllServiceProviders(paginateAndSort: AdminFilterAndSort!): ServiceProviderResponse!
-  findOneServiceProvider: ServiceProvider!
+  findOneServiceProvider(id: String!): OneServiceProviderResponse!
+  checkServiceProviderstatus: ServiceProvider!
   findAllService(paginateAndSort: PaginateAndSort!): ServiceResponse!
   findOneService(id: String!): ServiceProvider!
   ViewServiceRequest(paginateAndSort: PaginateAndSort!): RequestedServiceResponse!

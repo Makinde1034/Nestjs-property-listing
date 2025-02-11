@@ -390,11 +390,10 @@ export class NotificationService implements OnModuleInit {
               text: text,
             },
           };
-
           this.sseService.sendEvent(user.id, payload);
           const isEventTriggered = NotificationService.getEventTriggered();
 
-          if (!isEventTriggered) {
+          if (isEventTriggered == false) {
             this.eventEmitter.emit('customEvent');
 
             await this.saveNotificationLog({
@@ -463,7 +462,7 @@ export class NotificationService implements OnModuleInit {
 
           const isEventTriggered = NotificationService.getEventTriggered();
 
-          if (!isEventTriggered) {
+          if (isEventTriggered == false) {
             this.eventEmitter.emit('customEvent');
 
             await this.saveNotificationLog({
@@ -528,7 +527,7 @@ export class NotificationService implements OnModuleInit {
 
         const isEventTriggered = NotificationService.getEventTriggered();
 
-        if (!isEventTriggered) {
+        if (isEventTriggered == false) {
           this.eventEmitter.emit('customEvent');
 
           await this.saveNotificationLog({
@@ -580,8 +579,6 @@ export class NotificationService implements OnModuleInit {
         message.event == event &&
         message?.recipients == recipient,
     );
-
-    console.log(filteredMessages);
 
     if (filteredMessages.length < 1) {
       this.logger.log('No matching message found');
@@ -700,7 +697,12 @@ export class NotificationService implements OnModuleInit {
       }),
       this.notificationRepository
         .createQueryBuilder('notification')
-        .where('notification.read IS false')
+        .where(
+          'notification.read IS false AND notification.recipientId = :userId',
+          {
+            userId: user.id,
+          },
+        )
         .getCount(),
     ]);
 

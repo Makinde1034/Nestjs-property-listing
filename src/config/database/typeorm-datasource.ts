@@ -7,12 +7,15 @@ import { DataSource, DataSourceOptions } from 'typeorm';
 import { typeOrmPostgresOptions } from './postgres/postgres.config';
 import { config } from 'dotenv';
 import { Logger } from '@nestjs/common';
+import { database } from 'firebase-admin';
 
 /**
  * This data source is used for Typeorm migration that runs outside of Nestjs
  */
 
-config({ path: process.env.NODE_ENV === 'production' ? '.env' : '.env.local' });
+config({
+  path: process.env.NODE_ENV === 'development' ? '.env.local' : '.env',
+});
 
 const connectionSource = {
   ...typeOrmPostgresOptions,

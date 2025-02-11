@@ -81,6 +81,8 @@ import { BidRegistration } from '../../../entities/bid-registration.entity';
 import { AuctionBidRange } from '../../../entities/auction-bid-range.entity';
 import { FinalizationInput } from '../dtos/request/finalizationOffer';
 import { GqlCacheInterceptor } from '../../../common/interceptors/cache-middleware';
+import { FinalizationResponse } from '../dtos/response/finilization.response';
+import { Finalization } from '../../../entities/finalization.entity';
 
 @Resolver()
 export class ListingResolver {
@@ -433,6 +435,13 @@ export class ListingResolver {
     @Args('finalizationInput') finalizationInput: FinalizationInput,
   ) {
     return await this.offerService.finalizeOffer(finalizationInput);
+  }
+
+  @Permissions(PermissionsEnum.LISTINGS_VIEW_DETAILS)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Query(() => Finalization, { name: 'findOneRequestToFinalize' })
+  async findOneFinalization(@Args('offerId') offerId: string) {
+    return await this.offerService.findOneFinalization(offerId);
   }
 
   /**************************

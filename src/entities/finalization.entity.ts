@@ -35,7 +35,7 @@ export class Finalization extends BaseEntity {
 
   @Field(() => Offer, { nullable: true })
   @JoinColumn({ name: 'offerId' })
-  @OneToOne(() => Offer, (offer) => offer.finalization)
+  @OneToOne(() => Offer, (offer) => offer.finalization, { eager: true })
   offer: Offer;
 
   @Column()

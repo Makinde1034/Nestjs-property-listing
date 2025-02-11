@@ -25,6 +25,8 @@ export class AttributeSeeder implements Seeder {
 
     const listingTypes = ['Farm', 'Building', 'Villa', 'Apartment'];
     const attributeGroup = {
+      BasicAddress: ['District', 'Street', 'Country', 'City'],
+
       Building: ['Wifi', 'Pets allowed', 'Building No', 'Area'],
       Villa: [
         'BBQ area',
@@ -106,8 +108,12 @@ export class AttributeSeeder implements Seeder {
 
       for (const element of listingTypes) {
         if (value.englishName === element) {
+          const search = [
+            ...attributeGroup[element],
+            ...attributeGroup.BasicAddress,
+          ];
           const attributes = await attributeRepository.find({
-            where: { englishName: In(attributeGroup[element]) },
+            where: { englishName: In(search) },
           });
 
           attributeIds.push(...attributes); // Store full objects
@@ -127,7 +133,7 @@ export class AttributeSeeder implements Seeder {
     const listingType: DeepPartial<ListingType>[] = listingTypeFactory.map(
       (value) => {
         const attributeSetToSave = attributeSet.filter(
-          (element) => value.englishName === element.englishName,
+          (element) => value.englishName === element.englishName && element,
         );
 
         return {

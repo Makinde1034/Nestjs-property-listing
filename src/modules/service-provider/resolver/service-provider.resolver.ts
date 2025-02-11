@@ -80,7 +80,7 @@ export class ServiceAndProviderResolver {
   }
 
   @UseGuards(AccessTokenGuard)
-  @Query(() => ServiceProvider, { name: 'findOneServiceProvider' })
+  @Query(() => ServiceProvider, { name: 'checkServiceProviderstatus' })
   async checkServiceProviderstatus(
     @Context() ctx: any,
   ): Promise<ServiceProvider> {
