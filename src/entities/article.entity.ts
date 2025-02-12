@@ -68,7 +68,7 @@ export class Article {
   @Field({ nullable: true })
   placement: string;
 
-  @Column({ default: false })
+  @Column({ default: true })
   @Field()
   published: boolean;
 

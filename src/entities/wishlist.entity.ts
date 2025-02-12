@@ -33,7 +33,7 @@ export class Wishlist extends BaseEntity {
   @Column()
   userId: string;
 
-  @Field()
+  @Field(() => GraphQLISODateTime)
   @CreateDateColumn()
   createdAt: Date;
 

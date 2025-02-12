@@ -44,7 +44,7 @@ export class WorkFlow extends BaseEntity {
   @Field(() => [String], { nullable: true })
   approvalTwoRole: string[];
 
-  @Field()
+  @Field(() => GraphQLISODateTime)
   @CreateDateColumn()
   createdAt: Date;
 

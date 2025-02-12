@@ -27,7 +27,7 @@ export class Promotion {
   @Column()
   listingId: string;
 
-  @Field({ nullable: true })
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @Column({ nullable: true })
   expiredAt: Date;
 

@@ -69,7 +69,7 @@ export class Ticket extends BaseEntity {
   @OneToOne(() => Chat, (chat) => chat.ticket)
   chat: Chat;
 
-  @Field()
+  @Field(() => GraphQLISODateTime)
   @Column()
   openedAt: Date;
 
@@ -77,7 +77,7 @@ export class Ticket extends BaseEntity {
   @Column({ default: true })
   isOpen: boolean;
 
-  @Field({ nullable: true })
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @Column({ nullable: true })
   @Index()
   closedAt: Date;
@@ -86,7 +86,7 @@ export class Ticket extends BaseEntity {
   @Column({ nullable: true })
   ticketNumber: string;
 
-  @Field({ nullable: true })
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @Column({ nullable: true })
   @Index()
   assignedAt: Date;

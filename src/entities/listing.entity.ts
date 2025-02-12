@@ -208,11 +208,11 @@ export class Listing extends BaseEntity {
   wishlist: Wishlist[];
 
   @Column({ nullable: true })
-  @Field({ nullable: true })
+  @Field(() => GraphQLISODateTime, { nullable: true })
   rentDate: Date;
 
   @Column({ nullable: true })
-  @Field({ nullable: true })
+  @Field(() => GraphQLISODateTime, { nullable: true })
   soldDate: Date;
 
   @Column({ nullable: true })
@@ -220,7 +220,7 @@ export class Listing extends BaseEntity {
   furnished: string;
 
   @Column({ nullable: true })
-  @Field({ nullable: true })
+  @Field(() => GraphQLISODateTime, { nullable: true })
   promotedDate: Date;
 
   @Column({ nullable: true })
@@ -236,7 +236,7 @@ export class Listing extends BaseEntity {
   bundleImpression: string;
 
   @Column({ nullable: true })
-  @Field({ nullable: true })
+  @Field(() => GraphQLISODateTime, { nullable: true })
   featureDate: Date;
 
   @Column({ default: true })
@@ -256,7 +256,7 @@ export class Listing extends BaseEntity {
   status: string;
 
   @Column({ nullable: true })
-  @Field({ nullable: true })
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @Index()
   flaggedDate: Date;
 
@@ -264,11 +264,11 @@ export class Listing extends BaseEntity {
   offers: number;
 
   @Column({ nullable: true })
-  @Field({ nullable: true })
+  @Field(() => GraphQLISODateTime, { nullable: true })
   featureExpiration: Date;
 
   @Column({ nullable: true })
-  @Field({ nullable: true })
+  @Field(() => GraphQLISODateTime, { nullable: true })
   promotionExpiration: Date;
 
   @Field(() => [ActivityLog], { nullable: true })

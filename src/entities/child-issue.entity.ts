@@ -51,7 +51,7 @@ export class ChildIssue extends BaseEntity {
   @Field({ nullable: true })
   sequentialId: number;
 
-  @Field()
+  @Field(() => GraphQLISODateTime)
   @CreateDateColumn()
   createdAt: Date;
 

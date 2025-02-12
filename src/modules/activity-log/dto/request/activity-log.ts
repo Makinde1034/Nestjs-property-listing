@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, GraphQLISODateTime, InputType } from '@nestjs/graphql';
 import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
 import { IsDate, IsOptional, IsString } from 'class-validator';
 
@@ -26,12 +26,12 @@ export class AuditLogTrailsInput extends PaginateAndSort {
   @IsOptional()
   userName: string;
 
-  @Field({ nullable: true })
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @IsDate()
   @IsOptional()
   minDate: Date;
 
-  @Field({ nullable: true })
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @IsDate()
   @IsOptional()
   maxDate: Date;

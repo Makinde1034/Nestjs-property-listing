@@ -245,6 +245,24 @@ export class OfferService {
     }
   }
 
+  async findOneFinalization(id: string) {
+    try {
+      const data = await this.finalizationRepository.findOne({
+        where: { offerId: id },
+        relations: [],
+      });
+
+      if (!data) {
+        throw new NotFoundException(AppStrings.NOT_FOUND);
+      }
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new BadRequestException(error);
+    }
+  }
+
   async finalizeOffer(finalizationInput: FinalizationInput) {
     try {
       const { id, ...rest } = finalizationInput;

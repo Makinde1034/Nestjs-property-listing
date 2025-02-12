@@ -52,7 +52,7 @@ export class ActionRequest {
   @Field({ nullable: true })
   event: string;
 
-  @Field()
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @CreateDateColumn()
   createdAt: Date;
 

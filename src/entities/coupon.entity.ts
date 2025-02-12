@@ -52,15 +52,15 @@ export class Coupon {
   @Column()
   discountValue: number;
 
-  @Field()
+  @Field(() => GraphQLISODateTime)
   @CreateDateColumn()
   createdAt: Date;
 
-  @Field()
+  @Field(() => GraphQLISODateTime)
   @Column()
   startDate: Date;
 
-  @Field()
+  @Field(() => GraphQLISODateTime)
   @Column()
   endDate: Date;
 

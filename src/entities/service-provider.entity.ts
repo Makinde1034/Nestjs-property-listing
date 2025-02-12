@@ -58,7 +58,7 @@ export class ServiceProvider extends BaseEntity {
   @Field({ nullable: true })
   providerStatus: string;
 
-  @Field()
+  @Field(() => GraphQLISODateTime)
   @DeleteDateColumn()
   deletedAt: Date;
 

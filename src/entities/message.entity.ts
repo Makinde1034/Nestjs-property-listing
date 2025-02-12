@@ -34,7 +34,7 @@ export class Messages extends BaseEntity {
   attachment: string;
 
   @CreateDateColumn()
-  @Field()
+  @Field(() => GraphQLISODateTime)
   createdAt: Date;
 
   @UpdateDateColumn()

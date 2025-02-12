@@ -55,7 +55,7 @@ export class Notification extends BaseEntity {
   type: NotificationType;
 
   @Column({ nullable: true })
-  @Field({ nullable: true })
+  @Field(() => GraphQLISODateTime, { nullable: true })
   expiredAt: Date;
 
   @Column({ nullable: true })

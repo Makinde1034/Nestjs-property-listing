@@ -46,7 +46,7 @@ export class Offer extends BaseEntity {
   @Column()
   expireAt: Date;
 
-  @Field({ nullable: true })
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @Column({ nullable: true })
   acceptedAt: Date;
 

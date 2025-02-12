@@ -101,7 +101,7 @@ export class User extends BaseEntity {
   @Field({ nullable: true })
   phone: string;
 
-  @Field({ nullable: true })
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @Column({ nullable: true })
   verifiedAt: Date;
 
@@ -134,7 +134,7 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   occupation: string;
 
-  @Field({ nullable: true })
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @Column({ nullable: true })
   dateOfBirth: Date;
 
@@ -277,7 +277,7 @@ export class User extends BaseEntity {
   @Column({ nullable: true, unique: true })
   employeeId: string;
 
-  @Field({ nullable: true })
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @Column({ nullable: true })
   disabledAt: Date;
 
