@@ -72,11 +72,11 @@ export class Coupon {
   @Column({ default: false })
   deactived: boolean;
 
-  @Field(GraphQLISODateTime)
+  @Field(() => GraphQLISODateTime)
   @DeleteDateColumn()
   deletedAt: Date;
 
-  @Field(GraphQLISODateTime)
+  @Field(() => GraphQLISODateTime)
   @UpdateDateColumn()
   updatedAt: Date;
 }

@@ -55,11 +55,11 @@ export class ChildIssue extends BaseEntity {
   @CreateDateColumn()
   createdAt: Date;
 
-  @Field(GraphQLISODateTime)
+  @Field(() => GraphQLISODateTime)
   @DeleteDateColumn()
   deletedAt: Date;
 
-  @Field(GraphQLISODateTime)
+  @Field(() => GraphQLISODateTime)
   @UpdateDateColumn()
   updatedAt: Date;
 }

@@ -181,11 +181,11 @@ export class ActivityLog extends BaseEntity {
   @Field(() => String, { nullable: true })
   details: string;
 
-  @Field(GraphQLISODateTime)
+  @Field(() => GraphQLISODateTime)
   @CreateDateColumn()
   createdAt: Date;
 
-  @Field(GraphQLISODateTime)
+  @Field(() => GraphQLISODateTime)
   @UpdateDateColumn()
   updatedAt: Date;
 }

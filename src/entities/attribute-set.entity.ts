@@ -40,15 +40,15 @@ export class AttributeSet extends BaseEntity {
   @ManyToMany(() => ListingType, (listing) => listing.attributeSets)
   listingTypes: ListingType[];
 
-  @Field(GraphQLISODateTime)
+  @Field(() => GraphQLISODateTime)
   @DeleteDateColumn()
   deletedAt: Date;
 
-  @Field(GraphQLISODateTime)
+  @Field(() => GraphQLISODateTime)
   @CreateDateColumn()
   createdAt: Date;
 
-  @Field(GraphQLISODateTime)
+  @Field(() => GraphQLISODateTime)
   @UpdateDateColumn()
   updatedAt: Date;
 }

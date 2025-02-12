@@ -119,11 +119,8 @@ type AdPackage {
   price: Float!
   duration: String!
   promotion: [Promotion!]!
-
-  """
-  A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-  """
-  DateTime: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type Promotion {
@@ -195,11 +192,8 @@ type ChildIssue {
   arabicName: String
   sequentialId: Float
   createdAt: DateTime!
-
-  """
-  A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-  """
-  DateTime: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type FlagListing {
@@ -222,11 +216,8 @@ type Feature {
   startDate: DateTime
   adPackage: AdPackage
   listing: Listing!
-
-  """
-  A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-  """
-  DateTime: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type Wishlist {
@@ -277,11 +268,9 @@ type Bids {
   auctionParticipantId: String!
   listingId: String!
   autoBid: Boolean!
-
-  """
-  A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-  """
-  DateTime: DateTime!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type AuctionParticipant {
@@ -295,11 +284,9 @@ type AuctionParticipant {
   minimumPrice: Float!
   auction: Auction!
   bid: [Bids!]
-
-  """
-  A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-  """
-  DateTime: DateTime!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type ServiceRequested {
@@ -407,11 +394,9 @@ type Attribute {
   thiqaIntegration: [String!]
   attributeSets: [AttributeSet!]!
   listingAttribute: Attribute!
-
-  """
-  A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-  """
-  DateTime: DateTime!
+  deletedAt: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type AttributeSet {
@@ -420,11 +405,9 @@ type AttributeSet {
   englishName: String
   attributes: [Attribute!]
   listingTypes: [ListingType!]!
-
-  """
-  A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-  """
-  DateTime: DateTime!
+  deletedAt: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type ListingType {
@@ -479,11 +462,9 @@ type Article {
   language: String!
   placement: String
   published: Boolean!
-
-  """
-  A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-  """
-  DateTime: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime!
 }
 
 type SplashScreen {
@@ -578,11 +559,8 @@ type ActivityLog {
   placement: String
   action: String
   details: String
-
-  """
-  A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-  """
-  DateTime: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type Role {
@@ -660,11 +638,9 @@ type Compare {
   user: User!
   userId: String!
   listings: [String!]!
-
-  """
-  A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-  """
-  DateTime: DateTime!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type ActionRequest {
@@ -897,11 +873,8 @@ type AdminDefault {
   daysToAuctionRegistrationEnd: Float
   maximumDaysForOfferExpiration: Float!
   daysToAuctionRegistrationStart: Float
-
-  """
-  A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-  """
-  DateTime: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type Coupon {
@@ -919,11 +892,8 @@ type Coupon {
   endDate: DateTime!
   status: String!
   deactived: Boolean!
-
-  """
-  A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-  """
-  DateTime: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type AuctionBidRange {
@@ -933,11 +903,8 @@ type AuctionBidRange {
   increment: Float!
   heldAmount: Float
   createdAt: DateTime!
-
-  """
-  A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-  """
-  DateTime: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type SystemFeatureSetting {
@@ -958,11 +925,9 @@ type AutoBid {
   auctionId: String!
   price: Float!
   userId: String!
-
-  """
-  A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-  """
-  DateTime: DateTime!
+  createdAt: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type BidRegistration {
@@ -972,11 +937,8 @@ type BidRegistration {
   auctionId: String!
   listingId: String!
   createdAt: DateTime!
-
-  """
-  A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-  """
-  DateTime: DateTime!
+  deletedAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type ListingResponse {

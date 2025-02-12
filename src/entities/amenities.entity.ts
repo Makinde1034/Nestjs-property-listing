@@ -32,11 +32,11 @@ export class Amenities {
   @Field({ nullable: true })
   description: string;
 
-  @Field(GraphQLISODateTime)
+  @Field(() => GraphQLISODateTime)
   @CreateDateColumn()
   createdAt: Date;
 
-  @Field(GraphQLISODateTime)
+  @Field(() => GraphQLISODateTime)
   @UpdateDateColumn()
   updatedAt: Date;
 }

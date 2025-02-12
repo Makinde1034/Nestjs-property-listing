@@ -49,11 +49,11 @@ export class AdPackage {
   @OneToMany(() => Promotion, (promotion) => promotion.adPackage)
   promotion: Promotion[];
 
-  @Field(GraphQLISODateTime)
+  @Field(() => GraphQLISODateTime)
   @CreateDateColumn()
   createdAt: Date;
 
-  @Field(GraphQLISODateTime)
+  @Field(() => GraphQLISODateTime)
   @UpdateDateColumn()
   updatedAt: Date;
 }

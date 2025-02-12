@@ -44,11 +44,11 @@ export class Feature {
   @ManyToOne(() => Listing, (listing) => listing.feature)
   listing: Listing;
 
-  @Field(GraphQLISODateTime)
+  @Field(() => GraphQLISODateTime)
   @CreateDateColumn()
   createdAt: Date;
 
-  @Field(GraphQLISODateTime)
+  @Field(() => GraphQLISODateTime)
   @UpdateDateColumn()
   updatedAt: Date;
 }

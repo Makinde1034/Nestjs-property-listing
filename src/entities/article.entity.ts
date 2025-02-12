@@ -72,17 +72,15 @@ export class Article {
   @Field()
   published: boolean;
 
-  @Column()
-  @Field(GraphQLISODateTime)
+  @Field(() => GraphQLISODateTime)
   @CreateDateColumn()
   createdAt: Date;
 
-  @Field(GraphQLISODateTime)
+  @Field(() => GraphQLISODateTime)
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Column()
-  @Field(GraphQLISODateTime)
+  @Field(() => GraphQLISODateTime)
   @DeleteDateColumn()
   deletedAt: Date;
 }

@@ -91,11 +91,11 @@ export class AdminDefault extends BaseEntity {
   @Column()
   daysToAuctionRegistrationStart: number;
 
-  @Field(GraphQLISODateTime)
+  @Field(() => GraphQLISODateTime)
   @CreateDateColumn()
   createdAt: Date;
 
-  @Field(GraphQLISODateTime)
+  @Field(() => GraphQLISODateTime)
   @UpdateDateColumn()
   updatedAt: Date;
 }

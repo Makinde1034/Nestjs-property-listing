@@ -659,7 +659,6 @@ export class NotificationService implements OnModuleInit {
       return await this.notificationRepository.findOneBy({ id });
     }
   }
-
   async markAllAsRead(user: User): Promise<SuccessResponse> {
     try {
       const { affected } = await this.notificationRepository
@@ -677,7 +676,6 @@ export class NotificationService implements OnModuleInit {
       throw new BadRequestException(error);
     }
   }
-
   /**
    * List user's Notification
    *
