@@ -41,4 +41,8 @@ export class Finalization extends BaseEntity {
   @Column()
   @Field()
   offerId: string;
+
+  @Column()
+  @Field()
+  status: string;
 }

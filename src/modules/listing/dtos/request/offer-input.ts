@@ -5,6 +5,7 @@
 
 import { Field, InputType, PartialType } from '@nestjs/graphql';
 import {
+  IsArray,
   IsBoolean,
   IsDate,
   IsNotEmpty,
@@ -15,6 +16,24 @@ import {
   ValidateIf,
 } from 'class-validator';
 import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
+
+@InputType()
+export class FinalizationStatus {
+  @Field()
+  @IsString()
+  id: string;
+
+  @Field()
+  @IsString()
+  status: string;
+}
+
+@InputType()
+export class OfferFinalizationInput {
+  @Field(() => [FinalizationStatus])
+  @IsArray()
+  finalizationInput: FinalizationStatus[];
+}
 
 @InputType()
 export class CreateOfferDto {

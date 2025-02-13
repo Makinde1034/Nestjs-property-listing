@@ -14,12 +14,13 @@ import {
 import {
   CreateOfferDto,
   FindOfferInput,
+  OfferFinalizationInput,
   UpdateOfferInput,
 } from '../dtos/request/offer-input';
 import { OfferRepository } from '../repositories';
 import { NotificationScope, User } from '../../../entities';
 import { PaymentService } from '../../payment/services/payment.service';
-import { EntityManager, MoreThanOrEqual } from 'typeorm';
+import { EntityManager, In, MoreThanOrEqual } from 'typeorm';
 import { ListingService } from './listing.service';
 import { AppStrings } from '../../../common/messages/app.strings';
 
@@ -40,7 +41,11 @@ import { Offer } from '../../../entities/offer.entity';
 
 import { AuctionParticipantRepository } from '../repositories/auction-participant.repository';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { NotificationEvent, Purpose } from '../../../common/enums';
+import {
+  ListingStage,
+  NotificationEvent,
+  Purpose,
+} from '../../../common/enums';
 import { InvoiceRepository } from '../../payment/repositories/invoice.repository';
 import { FinalizationRepository } from '../repositories/finalization.repository';
 import { FinalizationInput } from '../dtos/request/finalizationOffer';
@@ -158,6 +163,7 @@ export class OfferService {
       const offerPayload = await this.offerRepository.save({
         ...createOfferDto,
         previousSaiiFee: [saii],
+        listing: { ...listing, stage: ListingStage.OFFER_CREATED },
       });
 
       const seller = await this.userRepository.findOneOrFail({
@@ -226,35 +232,85 @@ export class OfferService {
       throw new BadRequestException(error?.data || error?.message || error);
     }
   }
-
-  async findOneFinalization(id: string) {
+  async updateFinalilization(updateRequest: OfferFinalizationInput) {
     try {
-      const data = await this.finalizationRepository.findOne({
-        where: { offerId: id },
-        relations: [],
+      // Extract listing IDs from input
+      const listingIds = updateRequest.finalizationInput.map((item) => item.id);
+
+      // Fetch listings from the database
+      const finalization = await this.finalizationRepository.find({
+        where: { id: In(listingIds) },
       });
 
-      if (!data) {
-        throw new NotFoundException(AppStrings.NOT_FOUND);
+      if (!finalization || finalization.length === 0) {
+        throw new BadRequestException('No matching finalization found.');
+      }
+
+      // Prepare updates for listings
+      const updatedFinalization = finalization.map((finalization) => {
+        if (!finalization || !finalization.id) {
+          throw new BadRequestException('Invalid finalization data.');
+        }
+
+        const approvalData = updateRequest.finalizationInput.find(
+          (item) => item.id === finalization.id,
+        );
+
+        if (!approvalData) {
+          throw new BadRequestException(finalization);
+        }
+
+        return {
+          ...finalization,
+          status: approvalData.status,
+        };
+      });
+
+      const offerId = finalization.map((value) => {
+        return value.offerId;
+      });
+
+      const result =
+        await this.finalizationRepository.save(updatedFinalization);
+
+      if (result) {
+        const offer = await this.offerRepository.find({
+          where: {
+            id: In(offerId),
+          },
+        });
+        const listingId = offer.map((offer) => {
+          return offer.listingId;
+        });
+        this.listingRepository.update(listingId, {
+          soldDate: new Date(),
+          rentDate: new Date(),
+          stage: ListingStage.OWNERSHIPS_TRANSFER,
+        });
+        return new SuccessResponse();
       }
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
-      throw new BadRequestException(error);
+      this.logger.log(error);
+      throw new BadRequestException(error?.data || error?.message || error);
     }
   }
-
   async findOneFinalization(id: string) {
     try {
-      const data = await this.finalizationRepository.findOne({
-        where: { offerId: id },
-        relations: [],
-      });
+      const data = await this.finalizationRepository
+        .createQueryBuilder('finalization')
+        .leftJoinAndSelect('finalization.offer', 'offer')
+        .leftJoinAndSelect('offer.user', 'buyer')
+        .leftJoinAndSelect('offer.listing', 'listing')
+        .leftJoinAndSelect('listing.user', 'creator')
+        .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
+
+        .where('finalization.offer = :offerId', { offerId: id })
+        .getOne();
 
       if (!data) {
         throw new NotFoundException(AppStrings.NOT_FOUND);
       }
+      return data;
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
@@ -653,7 +709,10 @@ export class OfferService {
           const updateResult = await entityManager
             .createQueryBuilder()
             .update(Offer)
-            .set({ status: 'accepted' })
+            .set({
+              status: 'accepted',
+              stage: ListingStage.OFFER_ACCEPTED,
+            })
             .where({ id })
             .returning(['id', 'status']) // Fetch updated fields right after the update
             .execute();

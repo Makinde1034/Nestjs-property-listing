@@ -34,6 +34,7 @@ import { OfferService } from '../services/offer.service';
 import {
   CreateOfferDto,
   FindOfferInput,
+  OfferFinalizationInput,
   UpdateOfferInput,
 } from '../dtos/request/offer-input';
 import { Offer } from '../../../entities/offer.entity';
@@ -383,6 +384,14 @@ export class ListingResolver {
     @Context() ctx: any,
   ) {
     return await this.offerService.updateOffer(ctx.req.user, updateOfferInput);
+  }
+
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  @Mutation(() => Offer, { name: 'updateFinalilization' })
+  async updateFinalization(
+    @Args('finalizationInput') finalizationInput: OfferFinalizationInput,
+  ) {
+    return await this.offerService.updateFinalilization(finalizationInput);
   }
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)

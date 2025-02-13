@@ -8,6 +8,7 @@ import {
   HttpException,
   Injectable,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import {
   CreateServiceInput,
@@ -168,9 +169,17 @@ export class ServiceAndProviderService {
         userId: user.id,
       });
 
+      if (!provider) {
+        throw new NotFoundException(AppStrings.NOT_FOUND);
+      }
+
       return provider;
     } catch (error) {
       this.logger.error(error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
       throw new BadRequestException(error);
     }
   }
@@ -536,30 +545,30 @@ export class ServiceAndProviderService {
       const serviceprovider = await this.serviceProviderRepository.findOne({
         where: { userId: user.id },
       });
-      const [request, total] = await this.serviceRequestedRepository
+
+      const query = this.serviceRequestedRepository
         .createQueryBuilder('serviceRequested')
-        .leftJoin('serviceRequested.user', 'user')
-        .leftJoin('serviceRequested.listing', 'listing')
+        .leftJoinAndSelect('serviceRequested.user', 'user')
+        .leftJoinAndSelect('serviceRequested.listing', 'listing')
         .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
         .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
-        .leftJoinAndSelect('listing.listingType', 'listingType')
-        .select([
-          'user.id',
-          'user.lastName',
-          'user.firstName',
-          'user.arabicFirstName',
-          'user.arabicLastName',
-        ])
-        .where(
-          'listingAttributes.name  = :city AND listingAttributes.value = :coverageArea',
+        .leftJoinAndSelect('listing.listingType', 'listingType');
+
+      if (serviceprovider?.coverageArea) {
+        query.where(
+          'listingAttributes.name = :city AND listingAttributes.value = :coverageArea',
           {
             city: 'City',
             coverageArea: serviceprovider.coverageArea,
           },
-        )
+        );
+      }
+
+      const [request, total] = await query
         .take(paginateAndSort.take)
         .skip(paginateAndSort.skip)
         .getManyAndCount();
+
       return { request, total };
     } catch (error) {
       this.logger.log(error);

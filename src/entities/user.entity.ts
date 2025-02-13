@@ -162,7 +162,7 @@ export class User extends BaseEntity {
   @Field({ nullable: true })
   isBlocked: boolean;
 
-  @Column({ default: false })
+  @Column({ default: 'user' })
   @Field({ nullable: true })
   interface: string;
 

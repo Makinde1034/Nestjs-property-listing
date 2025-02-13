@@ -68,7 +68,7 @@ import {
 } from '../../../common/utils/functions';
 import { AppStrings } from '../../../common/messages/app.strings';
 import { SuccessResponse } from '../../../common/utils/success.response';
-import { UserFilter } from '../dtos/request/user';
+import { SwitchInterfaceInput, UserFilter } from '../dtos/request/user';
 
 import {
   NafathAuthenticationResponseToUser,
@@ -1402,7 +1402,7 @@ export class UserService {
     }
   }
 
-  async switchUserInterface(payload, user: User) {
+  async switchUserInterface(payload: SwitchInterfaceInput, user: User) {
     try {
       const data = await this.usersRepository.update(user.id, {
         interface: payload.interface,
