@@ -312,6 +312,21 @@ export class NotificationService implements OnModuleInit {
           messages,
           metadata,
           img,
+          true,
+        );
+      }
+      if (userPrefRecipients?.desktop == false) {
+        this.logger.log('Sending  system notifications');
+        this.sendDesktopNotificationToUser(
+          recipient,
+          event,
+          scope,
+          recipientFormat[1],
+          count,
+          messages,
+          metadata,
+          img,
+          false,
         );
       }
 
@@ -326,6 +341,21 @@ export class NotificationService implements OnModuleInit {
           messages,
           metadata,
           img,
+          true,
+        );
+      }
+      if (userPrefOwner?.desktop == false) {
+        this.logger.log('Sending system notifications');
+        this.sendDesktopNotificationToUser(
+          owner,
+          event,
+          scope,
+          recipientFormat[0],
+          count,
+          messages,
+          metadata,
+          img,
+          false,
         );
       }
     } catch (error) {
@@ -342,7 +372,6 @@ export class NotificationService implements OnModuleInit {
    * @param {EmailNotificationPayload} data
    * @returns {Promise<void>}
    */
-
   async sendPushNotification(data: PushNotificationPayload): Promise<void> {
     try {
       await this.pushNotificationService.sendPushNotification(data);
@@ -350,7 +379,6 @@ export class NotificationService implements OnModuleInit {
       this.logger.log(error);
     }
   }
-
   private async sendDesktopNotificationToUser(
     user: User,
     event: string,
@@ -360,6 +388,7 @@ export class NotificationService implements OnModuleInit {
     messages?: NotificationMessages[],
     metadata?: string,
     img?: string,
+    sse?: boolean,
   ) {
     try {
       if (user) {
@@ -390,24 +419,21 @@ export class NotificationService implements OnModuleInit {
               text: text,
             },
           };
-          this.sseService.sendEvent(user.id, payload);
-          const isEventTriggered = NotificationService.getEventTriggered();
-
-          if (isEventTriggered == false) {
-            this.eventEmitter.emit('customEvent');
-
-            await this.saveNotificationLog({
-              title: subject,
-              category: messageData.scope,
-              subCategory: messageData.event,
-              metadata: metadata,
-
-              recipient: user,
-              message: text,
-              type: NotificationType.SYSTEM_NOTIFICATION,
-              img,
-            });
+          if (sse) {
+            this.sseService.sendEvent(user.id, payload);
           }
+
+          await this.saveNotificationLog({
+            title: subject,
+            category: messageData.scope,
+            subCategory: messageData.event,
+            metadata: metadata,
+
+            recipient: user,
+            message: text,
+            type: NotificationType.SYSTEM_NOTIFICATION,
+            img,
+          });
         }
       }
     } catch (error) {
@@ -460,23 +486,17 @@ export class NotificationService implements OnModuleInit {
             attachment,
           );
 
-          const isEventTriggered = NotificationService.getEventTriggered();
+          await this.saveNotificationLog({
+            title: subject,
+            message: text,
+            category: messageData.scope,
+            subCategory: messageData.event,
+            recipient: user,
 
-          if (isEventTriggered == false) {
-            this.eventEmitter.emit('customEvent');
-
-            await this.saveNotificationLog({
-              title: subject,
-              message: text,
-              category: messageData.scope,
-              subCategory: messageData.event,
-              recipient: user,
-
-              metadata: metadata,
-              type: NotificationType.EMAIL_NOTIFICATION,
-              img,
-            });
-          }
+            metadata: metadata,
+            type: NotificationType.EMAIL_NOTIFICATION,
+            img,
+          });
         }
       }
     } catch (error) {
@@ -525,21 +545,15 @@ export class NotificationService implements OnModuleInit {
           redirectLink: this.frontEndUrl,
         });
 
-        const isEventTriggered = NotificationService.getEventTriggered();
-
-        if (isEventTriggered == false) {
-          this.eventEmitter.emit('customEvent');
-
-          await this.saveNotificationLog({
-            title: title,
-            message: message,
-            category: messageData.scope,
-            subCategory: messageData.event,
-            recipient: user,
-            metadata: metadata,
-            type: NotificationType.PUSH_NOTIFICATION,
-          });
-        }
+        await this.saveNotificationLog({
+          title: title,
+          message: message,
+          category: messageData.scope,
+          subCategory: messageData.event,
+          recipient: user,
+          metadata: metadata,
+          type: NotificationType.PUSH_NOTIFICATION,
+        });
       }
     } catch (error) {
       this.logger.log(error);

@@ -163,6 +163,7 @@ export class ListingService {
 
           return this.listingAttributesRepository.create({
             listing,
+
             attributeId: attribute.id,
             attribute,
             name: attribute.englishName,
@@ -1695,6 +1696,7 @@ export class ListingService {
       const stringifiedImages = JSON.stringify(existingImages);
 
       await this.listingRepository.update(query.listingId, {
+        publishable: true,
         images: stringifiedImages,
         isListingVerified: verified,
       });
@@ -1710,7 +1712,6 @@ export class ListingService {
       );
     }
   }
-
   async uploadPanoramaImage(
     id: string,
 
@@ -1789,6 +1790,8 @@ export class ListingService {
 
       // Save the updated images to the database
       await this.listingRepository.update(id, {
+        publishable: true,
+
         images: stringifiedImages,
         isListingVerified: verified,
       });

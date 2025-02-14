@@ -18,7 +18,7 @@ import {
   UpdateOfferInput,
 } from '../dtos/request/offer-input';
 import { OfferRepository } from '../repositories';
-import { NotificationScope, User } from '../../../entities';
+import { Listing, NotificationScope, User } from '../../../entities';
 import { PaymentService } from '../../payment/services/payment.service';
 import { EntityManager, In, MoreThanOrEqual } from 'typeorm';
 import { ListingService } from './listing.service';
@@ -302,7 +302,6 @@ export class OfferService {
         .leftJoinAndSelect('offer.user', 'buyer')
         .leftJoinAndSelect('offer.listing', 'listing')
         .leftJoinAndSelect('listing.user', 'creator')
-        .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
 
         .where('finalization.offer = :offerId', { offerId: id })
         .getOne();
@@ -681,7 +680,7 @@ export class OfferService {
             relations: ['listing', 'listing.user'],
             select: {
               id: true,
-              listing: { id: true, user: { id: true } },
+              listing: { id: true, images: true, user: { id: true } },
             },
           });
 
@@ -701,17 +700,16 @@ export class OfferService {
             offerId: updateOfferInput.id,
           });
 
-          await this.paymentService.capturePayment({
-            amount: JSON.stringify(invoice.price),
-            paymentId: invoice.checkoutId,
-          });
+          // await this.paymentService.capturePayment({
+          //   amount: JSON.stringify(invoice.price),
+          //   paymentId: invoice.checkoutId,
+          // });
           // Update offer status and return updated offer immediately using RETURNING (if supported by your DB)
           const updateResult = await entityManager
             .createQueryBuilder()
             .update(Offer)
             .set({
               status: 'accepted',
-              stage: ListingStage.OFFER_ACCEPTED,
             })
             .where({ id })
             .returning(['id', 'status']) // Fetch updated fields right after the update
@@ -731,7 +729,8 @@ export class OfferService {
               }
             },
           );
-          const images = JSON.parse(offer.listing.images);
+          console.log(offer.listing);
+          const images = JSON.parse(offer?.listing?.images);
           this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
             creatorId: user.id,
             receiverId: offer.listing.user.id,
@@ -750,9 +749,20 @@ export class OfferService {
             img: images[0]?.url,
           });
 
+          const listing = await entityManager
+            .createQueryBuilder()
+            .update(Listing)
+            .set({
+              stage: ListingStage.OFFER_ACCEPTED,
+            })
+            .where({ id })
+            .returning(['id', 'status']) // Fetch updated fields right after the update
+            .execute();
+
           // Return the updated offer
           return updateResult.raw[0]; // Returning the updated offer from the query result
         } catch (error) {
+          console.log(error);
           if (error instanceof HttpException) {
             throw error;
           } else {
@@ -776,7 +786,7 @@ export class OfferService {
             relations: ['listing', 'listing.user'],
             select: {
               id: true,
-              listing: { id: true, user: { id: true } },
+              listing: { id: true, images: true, user: { id: true } },
             },
           });
 
@@ -805,10 +815,10 @@ export class OfferService {
             offerId: updateOfferInput.id,
           });
 
-          await this.paymentService.refundPayment({
-            amount: JSON.stringify(invoice.price),
-            paymentId: invoice.checkoutId,
-          });
+          // await this.paymentService.refundPayment({
+          //   amount: JSON.stringify(invoice.price),
+          //   paymentId: invoice.checkoutId,
+          // });
 
           // Fetch notification preference only if offer update is successful
           const notificationPreference = await entityManager.find(

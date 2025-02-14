@@ -104,7 +104,7 @@ export class AttributeResolver {
    * @returns {Promise<AttributeSet[]>}
    */
   @Public()
-  @CacheTTL(3600)
+  @CacheTTL(300)
   @UseInterceptors(GqlCacheInterceptor)
   @Query(() => AttributeSetResponse)
   async fetchAttributeSets(
@@ -125,7 +125,6 @@ export class AttributeResolver {
   async fetchOneAttribute(@Args('id') id: string): Promise<Attribute> {
     return await this.attributeService.findOneAttribute(id);
   }
-
   /**
    * Create Attribute
    *

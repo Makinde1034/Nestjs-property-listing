@@ -352,6 +352,7 @@ type Listing {
   bundleImpression: String
   featureDate: DateTime
   published: Boolean!
+  publishable: Boolean!
   stage: String
   reason: String
   status: String

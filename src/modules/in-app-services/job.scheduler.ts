@@ -26,7 +26,7 @@ import {
   removeDaysFromDate,
 } from '../../common/utils/helper';
 import { NotificationScopeEnum } from '../../common/enums/notification-scope.enum';
-import { NotificationScope } from '../../entities';
+import { Listing, NotificationScope } from '../../entities';
 import { AuctionParticipantRepository } from '../listing/repositories/auction-participant.repository';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { NotificationEvent } from '../../common/enums';
@@ -74,6 +74,7 @@ export class JobService {
     await this.updateOfferStatus();
     await this.updateListingFeatureStatus();
     await this.updateListingPromotionStatus();
+    await this.deleteUnsuccessfulNotification();
   }
 
   async sendNotificationForNewListingBasedOnSearchHistory() {
@@ -464,5 +465,14 @@ export class JobService {
         });
       }
     });
+  }
+
+  async deleteUnsuccessfulNotification() {
+    await this.listingRepository
+      .createQueryBuilder('listing')
+      .update(Listing)
+      .set({ deletedAt: new Date() })
+      .where('listing.publishable = :publishable', { publishable: true })
+      .execute();
   }
 }

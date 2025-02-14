@@ -1,7 +1,7 @@
 import { Injectable, ExecutionContext, CallHandler } from '@nestjs/common';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
 @Injectable()
 export class GqlCacheInterceptor extends CacheInterceptor {
@@ -10,45 +10,56 @@ export class GqlCacheInterceptor extends CacheInterceptor {
     const info = gqlCtx.getInfo();
     const args = gqlCtx.getArgs();
 
-    // Generating cache key from query and arguments
-    const key = `${info.fieldName}:${JSON.stringify(args)}`;
-    return key;
+    return `${info.fieldName}:${JSON.stringify(args)}`;
   }
 
   async intercept(
     context: ExecutionContext,
     next: CallHandler,
   ): Promise<Observable<any>> {
-    const key = this.trackBy(context); // Generate cache key
+    const key = this.trackBy(context);
 
     if (key) {
       const cachedValue = await this.cacheManager.get(key);
       if (cachedValue) {
-        // If cache hit, return cached value wrapped in an observable
-        return new Observable((observer) => {
-          observer.next(cachedValue);
-          observer.complete();
-        });
+        // Parse stringified dates back to Date objects
+        const parsedData = this.parseDates(cachedValue);
+        return of(parsedData);
       }
     }
 
-    // Proceed with the next handler and subscribe to the result
     const result$ = next.handle();
-
-    // Cache the result once it is available
     result$.subscribe({
       next: async (result) => {
         if (key && result) {
-          // Cache the result only if there's a valid key and result
-          await this.cacheManager.set(key, result); // TTL is optional
+          await this.cacheManager.set(key, result);
         }
-      },
-      error: (err) => {
-        console.error('Error during GraphQL execution:', err);
       },
     });
 
-    // Return the observable itself
     return result$;
+  }
+
+  private parseDates(data: any): any {
+    if (Array.isArray(data)) {
+      return data.map((item) => this.parseDates(item));
+    }
+    if (typeof data === 'object' && data !== null) {
+      for (const key in data) {
+        if (this.isDateString(data[key])) {
+          data[key] = new Date(data[key]);
+        } else {
+          data[key] = this.parseDates(data[key]); // Recursively process nested objects
+        }
+      }
+    }
+    return data;
+  }
+
+  private isDateString(value: any): boolean {
+    return (
+      typeof value === 'string' &&
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/.test(value)
+    );
   }
 }

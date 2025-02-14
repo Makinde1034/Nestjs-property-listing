@@ -242,6 +242,9 @@ export class Listing extends BaseEntity {
   @Column({ default: true })
   @Field()
   published: boolean;
+  @Field()
+  @Column({ default: false })
+  publishable: boolean;
 
   @Column({ default: ListingStage.LISTED })
   @Field({ nullable: true })
@@ -270,15 +273,12 @@ export class Listing extends BaseEntity {
   @Column({ nullable: true })
   @Field(() => GraphQLISODateTime, { nullable: true })
   promotionExpiration: Date;
-
   @Field(() => [ActivityLog], { nullable: true })
   @OneToMany(() => ActivityLog, (activityLogs) => activityLogs.listing)
   listingActivityLogs: ActivityLog;
-
   @Field(() => [Place])
   @OneToMany(() => Place, (place) => place.listing)
   place: Place[];
-
   @Field(() => GraphQLISODateTime, { nullable: true })
   @Index()
   @CreateDateColumn()
