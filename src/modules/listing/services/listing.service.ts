@@ -229,14 +229,18 @@ export class ListingService {
       role.forEach((element) => {
         users.push(element.user);
       });
+      const images = JSON.parse(listing.images);
 
       users.forEach((user) => {
         this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
           creatorId: user.id,
           scope: scope,
           event: 'Create',
+          metadata: JSON.stringify(listing),
 
           recipientFormat: [null, 'Admin listing approver'],
+
+          img: images[0]?.url,
         });
       });
 
@@ -1478,6 +1482,7 @@ export class ListingService {
               event: 'Price change',
               recipientFormat: [null, 'User that has listing in wishlist'],
               img: images[0]?.url,
+              metadata: JSON.stringify(listing),
             });
           }
         }

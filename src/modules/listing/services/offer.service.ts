@@ -50,6 +50,7 @@ import { InvoiceRepository } from '../../payment/repositories/invoice.repository
 import { FinalizationRepository } from '../repositories/finalization.repository';
 import { FinalizationInput } from '../dtos/request/finalizationOffer';
 import { AdminFilterAndSort } from '../dtos/request';
+import { FinalizationEnum } from '../../../common/enums/finalization.enum';
 
 @Injectable()
 export class OfferService {
@@ -62,7 +63,7 @@ export class OfferService {
     private readonly adminDefaultService: AdminService,
     private readonly listingRepository: ListingRepository,
     private readonly auctionParticipantRepository: AuctionParticipantRepository,
-    private readonly eventEmiter: EventEmitter2,
+    private readonly eventEmitter: EventEmitter2,
     private readonly invoiceRepository: InvoiceRepository,
 
     private readonly finalizationRepository: FinalizationRepository,
@@ -217,7 +218,7 @@ export class OfferService {
       const images = JSON.parse(listing.images);
 
       // TODO:switch to an emited event
-      this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
+      this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
         creatorId: user.id,
         receiverId: seller.id,
         scope: scope,
@@ -333,6 +334,7 @@ export class OfferService {
       const data = await this.finalizationRepository.save({
         offer,
         ...finilization,
+        status: FinalizationEnum.PENDING,
         ...rest,
       });
       if (data) {
@@ -625,7 +627,7 @@ export class OfferService {
         );
         const images = JSON.parse(offer.listing.images);
 
-        this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
+        this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
           creatorId: user.id,
           receiverId: seller.id,
           scope: scope,
@@ -731,7 +733,7 @@ export class OfferService {
           );
           console.log(offer.listing);
           const images = JSON.parse(offer?.listing?.images);
-          this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
+          this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
             creatorId: user.id,
             receiverId: offer.listing.user.id,
             scope: scope,
@@ -740,7 +742,7 @@ export class OfferService {
             recipientFormat: ['Seller', null],
             img: images[0]?.url,
           });
-          this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
+          this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
             creatorId: user.id,
             receiverId: offer.listing.user.id,
             scope: notificationPreference,
@@ -838,7 +840,7 @@ export class OfferService {
 
           const images = JSON.parse(offer.listing.images);
 
-          this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
+          this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
             creatorId: user.id,
             receiverId: offer.listing.user.id,
             scope: scope,
