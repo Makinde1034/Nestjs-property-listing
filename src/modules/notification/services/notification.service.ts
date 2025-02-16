@@ -485,18 +485,6 @@ export class NotificationService implements OnModuleInit {
             },
             attachment,
           );
-
-          await this.saveNotificationLog({
-            title: subject,
-            message: text,
-            category: messageData.scope,
-            subCategory: messageData.event,
-            recipient: user,
-
-            metadata: metadata,
-            type: NotificationType.EMAIL_NOTIFICATION,
-            img,
-          });
         }
       }
     } catch (error) {
@@ -543,16 +531,6 @@ export class NotificationService implements OnModuleInit {
           notificationToken: notificationToken,
           userId: user.id,
           redirectLink: this.frontEndUrl,
-        });
-
-        await this.saveNotificationLog({
-          title: title,
-          message: message,
-          category: messageData.scope,
-          subCategory: messageData.event,
-          recipient: user,
-          metadata: metadata,
-          type: NotificationType.PUSH_NOTIFICATION,
         });
       }
     } catch (error) {
@@ -726,6 +704,19 @@ export class NotificationService implements OnModuleInit {
       const result = await this.notificationRepository.softDelete({
         recipient: { id: user.id },
       });
+
+      // Return the result of the delete operation
+      return new SuccessResponse(AppStrings.SUCCESSFULL);
+    } catch (error) {
+      this.logger.error('Error deleting notifications', error.stack);
+      throw new BadRequestException('Failed to delete notifications');
+    }
+  }
+
+  async deleteOneNotification(id: string) {
+    try {
+      // Perform a soft delete of notifications for the given user
+      const result = await this.notificationRepository.softDelete({ id });
 
       // Return the result of the delete operation
       return new SuccessResponse(AppStrings.SUCCESSFULL);

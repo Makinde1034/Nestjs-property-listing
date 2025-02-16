@@ -47,10 +47,16 @@ export class NotificationResolver {
   ): Promise<NotificationResponse> {
     return await this.notificationService.find(paginateAndSort, ctx.req.user);
   }
-  @Query(() => SuccessResponse)
+  @Mutation(() => SuccessResponse)
   @UseGuards(AccessTokenGuard)
   async deleteNotification(@Context() ctx): Promise<SuccessResponse> {
     return await this.notificationService.deleteNotification(ctx.req.user);
+  }
+
+  @Mutation(() => SuccessResponse)
+  @UseGuards(AccessTokenGuard)
+  async deleteOneNotification(@Args() id: string): Promise<SuccessResponse> {
+    return await this.notificationService.deleteOneNotification(id);
   } /**
    * List user's notification
    *

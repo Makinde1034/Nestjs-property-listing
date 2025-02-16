@@ -223,7 +223,7 @@ export class OfferService {
         receiverId: seller.id,
         scope: scope,
         event: 'Create',
-        metadata: JSON.stringify(offer),
+        metadata: JSON.stringify(offerPayload),
         recipientFormat: ['Seller', 'Offer Creator'],
         img: images[0]?.url,
       });
