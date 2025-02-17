@@ -1690,8 +1690,7 @@ export class ListingService {
       role.forEach((element) => {
         users.push(element.user);
       });
-      const images = JSON.parse(listing.images);
-
+      const images = JSON.parse(stringifiedImages);
       users.forEach((user) => {
         this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
           creatorId: user.id,
@@ -1704,7 +1703,6 @@ export class ListingService {
           img: images[0]?.url,
         });
       });
-
       return new SuccessResponse(AppStrings.UPLOAD_SUCCESSFUL, existingImages);
     } catch (error) {
       this.logger.error(error.message || error);

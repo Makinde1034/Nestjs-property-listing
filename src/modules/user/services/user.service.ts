@@ -90,6 +90,7 @@ import { PushNotificationService } from '../../notification/services';
 import { PushNotificationinput } from '../../../common/interface';
 import { TimePeriod } from '../../../common/enums/sort.enum';
 import * as moment from 'moment';
+import { getRandomValues } from 'crypto';
 
 @Injectable()
 export class UserService {
@@ -1311,6 +1312,22 @@ export class UserService {
       `You have successfully ${action ? 'blocked' : 'unblocked'} the selected users`,
       updatedUsers,
     );
+  }
+
+  async deleteMyAccount(user: User) {
+    try {
+      await this.usersRepository.update(user.id, {
+        firstName: ` user${generateRandomToken()}`,
+        lastName: `user${generateRandomToken()}`,
+
+        middleName: `user${generateRandomToken()}`,
+        email: `deleted${generateRandomToken()}@deleted.com`,
+      });
+      return new SuccessResponse('You have successfully deleted');
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException('failed to delete');
+    }
   }
 
   async deleteUser(

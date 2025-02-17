@@ -1601,6 +1601,7 @@ type Mutation {
   setUpNotification(pushNotificationPayload: PushNotificationinput!): SuccessResponse!
   blockUser(RequestInput: UserActionInput!): SuccessResponse!
   deleteUser(RequestInput: DeleteUserInput!): SuccessResponse!
+  deleteMyAccount: SuccessResponse!
   updateNotificationPreference(RequestInput: NotificationPrefenceInput!): User!
   changePassword(RequestInput: PasswordInput!): User!
   updateUserData(updateUserInput: UpdateUserData!): User!

@@ -216,6 +216,16 @@ export class UserResolver {
     return await this.userService.deleteUser(inputDto, ctx.req.user);
   }
 
+  @Mutation(() => SuccessResponse)
+  @Permissions(PermissionsEnum.USER_MANAGEMENT_DELETE)
+  @UseGuards(AccessTokenGuard, PermissionsGuard)
+  async deleteMyAccount(
+    @Context()
+    ctx: any,
+  ): Promise<SuccessResponse> {
+    return await this.userService.deleteMyAccount(ctx.req.user);
+  }
+
   @Mutation(() => User)
   @UseGuards(AccessTokenGuard)
   async updateNotificationPreference(
