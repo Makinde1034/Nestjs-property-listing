@@ -16,7 +16,7 @@ export enum Ownership {
 export enum RentingOption {
   MONTHLY = 'monthly',
   QUARTERLY = 'quarterly',
-  BI_QUARTERLY = 'bi-quarterly',
+  BI_QUARTERLY = 'semi-annually',
   YEARLY = 'yearly',
 }
 

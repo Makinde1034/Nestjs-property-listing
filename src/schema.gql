@@ -735,6 +735,7 @@ type Notification {
   directToWeb: Boolean
   directToMobile: Boolean
   recipient: User!
+  deletedAt: DateTime
   createdAt: DateTime
   updatedAt: DateTime
 }

@@ -133,7 +133,6 @@ export class ListingResolver {
   }
 
   @UseGuards(AccessTokenGuard)
-  @UseInterceptors(GqlCacheInterceptor)
   @Query(() => ListingResponse, { name: 'findListingsForOwner' })
   async findListingsForOwner(
     @Context() ctx: any,

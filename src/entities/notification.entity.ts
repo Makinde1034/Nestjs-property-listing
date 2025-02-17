@@ -7,6 +7,7 @@ import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   ManyToOne,
   UpdateDateColumn,
@@ -69,6 +70,10 @@ export class Notification extends BaseEntity {
   @Field(() => User)
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   recipient: User;
+
+  @Field(() => GraphQLISODateTime, { nullable: true })
+  @DeleteDateColumn()
+  deletedAt: Date;
 
   @Field(() => GraphQLISODateTime, { nullable: true })
   @CreateDateColumn()

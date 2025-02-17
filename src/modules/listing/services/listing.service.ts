@@ -130,7 +130,6 @@ export class ListingService {
           const match = attributes.some(
             (attr) => attr.attributeId === attribute.id,
           );
-
           if (!match) {
             throw new BadRequestException(
               `${attribute.englishName ? attribute.englishName : attribute.arabicName} is required`,
@@ -177,6 +176,7 @@ export class ListingService {
         Calculate furnished status from number of amenities added
         compared to number of amenities in listing type
       */
+
       const furnishedValue = listingType.attributeSets.length;
 
       let furnishedStatus = null; // Default to null
@@ -1679,7 +1679,7 @@ export class ListingService {
       const role = await this.roleRepository.find({
         where: {
           permissions: {
-            slug: PermissionsEnum.LISTINGS_MULTI_ACTIONS,
+            slug: PermissionsEnum.LISTINGS_CREATE,
           },
         },
         relations: ['permissions', 'user'], // Ensures the relationship is loaded if not already eager
@@ -1714,9 +1714,9 @@ export class ListingService {
       );
     }
   }
+
   async uploadPanoramaImage(
     id: string,
-
     files: Express.Multer.File[],
     imageId: string,
     feature: ListingImageFormDataInput,

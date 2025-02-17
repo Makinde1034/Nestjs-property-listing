@@ -171,7 +171,7 @@ export class NotificationService implements OnModuleInit {
       const scopeName = scope.scopeGroup as NotificationScopeEnum;
 
       if (notificationScopes.has(scopeName)) {
-        // Fetch messages relevant tBodyo the scope and event
+        // Fetch messages relevant to the scope and event
         const messages = await this.notificationMesageRepository.find({
           where: {
             scope: scope.scopeGroup,
@@ -654,11 +654,11 @@ export class NotificationService implements OnModuleInit {
   async markAllAsRead(user: User): Promise<SuccessResponse> {
     try {
       const { affected } = await this.notificationRepository
-        .createQueryBuilder()
+        .createQueryBuilder('notification')
 
         .update(Notification)
         .set({ read: true })
-        .where('user.id= :id', { id: user.id })
+        .where('notification.recipientId= :id', { id: user.id })
         .execute();
 
       if (affected) {
@@ -679,9 +679,12 @@ export class NotificationService implements OnModuleInit {
     paginateAndSort: PaginateAndSort,
     user: User,
   ): Promise<NotificationResponse> {
+    console.log(user);
+
     const [[notification, total], unread] = await Promise.all([
       this.notificationRepository.findAndCount({
         where: { recipient: { id: user.id } },
+        relations: ['recipient'],
         take: paginateAndSort.take ?? 20,
         skip: paginateAndSort.skip ?? 0,
       }),
@@ -700,12 +703,15 @@ export class NotificationService implements OnModuleInit {
   }
   async deleteNotification(user: User) {
     try {
-      // Perform a soft delete of notifications for the given user
-      const result = await this.notificationRepository.softDelete({
-        recipient: { id: user.id },
-      });
+      // Perform soft delete using update to set deletedAt field
+      const result = await this.notificationRepository
+        .createQueryBuilder()
+        .update(Notification)
+        .set({ deletedAt: new Date() })
+        // Assuming you're using TypeORM's soft delete
+        .where('recipientId = :userId', { userId: user.id })
+        .execute();
 
-      // Return the result of the delete operation
       return new SuccessResponse(AppStrings.SUCCESSFULL);
     } catch (error) {
       this.logger.error('Error deleting notifications', error.stack);
