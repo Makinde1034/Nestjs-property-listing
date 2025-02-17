@@ -55,9 +55,12 @@ export class NotificationResolver {
 
   @Mutation(() => SuccessResponse)
   @UseGuards(AccessTokenGuard)
-  async deleteOneNotification(@Args() id: string): Promise<SuccessResponse> {
+  async deleteOneNotification(
+    @Args('id') id: string,
+  ): Promise<SuccessResponse> {
     return await this.notificationService.deleteOneNotification(id);
-  } /**
+  }
+  /**
    * List user's notification
    *
    * @async

@@ -1197,7 +1197,6 @@ type Query {
   getUserRoles: [Role!]!
   getRole(id: Float!): Role!
   listNotifications(paginateAndSort: PaginateAndSort!): NotificationResponse!
-  deleteNotification: SuccessResponse!
   listNotificationScopesForUser: [UserNotificationPreference!]!
   listNotificationScopes: [NotificationScope!]!
   findNotificationControl: [NotificationMessages!]!
@@ -1610,6 +1609,8 @@ type Mutation {
   createRole(RequestInput: RoleInputDto!): Role!
   updateRole(RequestInput: RoleUpdateInputDto!): Role!
   deleteRole(deleteRoleInput: DeleteRolesInput!): SuccessResponse!
+  deleteNotification: SuccessResponse!
+  deleteOneNotification(id: String!): SuccessResponse!
   markNotificationAsRead(id: String!): Notification!
   markAllAsRead: SuccessResponse!
   sendNotification(requestInput: NotificationInput!): String!
