@@ -1697,12 +1697,11 @@ export class ListingService {
           scope: scope,
           event: 'Create',
           metadata: JSON.stringify(listing),
-
           recipientFormat: [null, 'Admin listing approver'],
-
           img: images[0]?.url,
         });
       });
+
       return new SuccessResponse(AppStrings.UPLOAD_SUCCESSFUL, existingImages);
     } catch (error) {
       this.logger.error(error.message || error);

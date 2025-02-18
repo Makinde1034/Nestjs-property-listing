@@ -74,7 +74,7 @@ export class JobService {
     await this.updateOfferStatus();
     await this.updateListingFeatureStatus();
     await this.updateListingPromotionStatus();
-    await this.deleteUnsuccessfulNotification();
+    await this.deleteUnsuccessfulListing();
   }
 
   async sendNotificationForNewListingBasedOnSearchHistory() {
@@ -467,12 +467,12 @@ export class JobService {
     });
   }
 
-  async deleteUnsuccessfulNotification() {
+  async deleteUnsuccessfulListing() {
     await this.listingRepository
       .createQueryBuilder('listing')
       .update(Listing)
       .set({ deletedAt: new Date() })
-      .where('listing.publishable = :publishable', { publishable: true })
+      .where('listing.publishable = :publishable', { publishable: false })
       .execute();
   }
 }

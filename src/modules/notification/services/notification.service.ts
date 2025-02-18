@@ -668,6 +668,7 @@ export class NotificationService implements OnModuleInit {
       throw new BadRequestException(error);
     }
   }
+
   /**
    * List user's Notification
    *
