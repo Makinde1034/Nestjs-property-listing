@@ -217,7 +217,6 @@ export class UserResolver {
   }
 
   @Mutation(() => SuccessResponse)
-  @Permissions(PermissionsEnum.USER_MANAGEMENT_DELETE)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   async deleteMyAccount(
     @Context()

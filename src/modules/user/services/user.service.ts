@@ -497,16 +497,18 @@ export class UserService {
         relations: ['nationalIdentity'],
       });
 
-      if (userData.nationalIdentity) {
-        await this.nationalIdentityRepository.update(
-          userData.nationalIdentity.id,
-          { ...nationalIdentity },
-        );
-      } else {
-        await this.nationalIdentityRepository.save({
-          ...nationalIdentity,
-          user,
-        });
+      if (user.userLevel == UserLevelEnum.LEVEL_2) {
+        if (userData.nationalIdentity) {
+          await this.nationalIdentityRepository.update(
+            userData.nationalIdentity.id,
+            { ...nationalIdentity },
+          );
+        } else {
+          await this.nationalIdentityRepository.save({
+            ...nationalIdentity,
+            user,
+          });
+        }
       }
 
       // Remove nationalIdentity from data to prevent updating it in the user table
@@ -517,7 +519,10 @@ export class UserService {
     await this.usersRepository.update(user.id, updateData);
 
     // Return the updated user
-    return await this.usersRepository.findOneByOrFail({ id: user.id });
+    return await this.usersRepository.findOne({
+      where: { id: user.id },
+      relations: ['nationalIdentity'],
+    });
   }
 
   /**
