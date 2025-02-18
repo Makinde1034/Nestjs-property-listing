@@ -680,8 +680,6 @@ export class NotificationService implements OnModuleInit {
     paginateAndSort: PaginateAndSort,
     user: User,
   ): Promise<NotificationResponse> {
-    console.log(user);
-
     const [[notification, total], unread] = await Promise.all([
       this.notificationRepository.findAndCount({
         where: { recipient: { id: user.id } },

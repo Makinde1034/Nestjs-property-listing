@@ -548,7 +548,7 @@ export class ServiceAndProviderService {
 
       const query = this.serviceRequestedRepository
         .createQueryBuilder('serviceRequested')
-        .leftJoinAndSelect('serviceRequested.user', 'user')
+        .leftJoin('serviceRequested.user', 'user')
         .leftJoinAndSelect('serviceRequested.listing', 'listing')
         .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
         .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
