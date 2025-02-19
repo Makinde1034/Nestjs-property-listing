@@ -130,7 +130,7 @@ export class NotificationService implements OnModuleInit {
     try {
       const {
         creatorId,
-        receiverId,
+        recipientId,
         scope,
         recipientFormat,
         event = scope.name,
@@ -140,21 +140,34 @@ export class NotificationService implements OnModuleInit {
         img,
       } = notificationInput;
 
+      console.log(recipientId);
+
       const specificEvent = notificationInput.event ?? event;
 
       // Fetch buyer and seller notification preferences for the given scope
 
-      const [sellerPref, buyerPref] = await Promise.all([
-        this.userNotificationPreference.findOne({
-          where: { user: { id: creatorId }, scope: { id: scope.id } },
-          relations: ['user', 'scope'],
-        }),
+      const sellerPrefQuery = this.userNotificationPreference
+        .queryBuilder('pref')
+        .leftJoinAndSelect('pref.user', 'user')
+        .leftJoinAndSelect('pref.scope', 'scope')
+        .where('user.id = :creatorId', { creatorId })
+        .andWhere('scope.id = :scopeId', { scopeId: scope.id })
+        .getOne();
 
-        this.userNotificationPreference.findOne({
-          where: { user: { id: receiverId }, scope: { id: scope.id } },
-          relations: ['user', 'scope'],
-        }),
+      const buyerPrefQuery = this.userNotificationPreference
+        .queryBuilder('pref')
+        .leftJoinAndSelect('pref.user', 'user')
+        .leftJoinAndSelect('pref.scope', 'scope')
+        .where('user.id = :recipientId', { recipientId })
+        .andWhere('scope.id = :scopeId', { scopeId: scope.id })
+        .getOne();
+
+      const [sellerPref, buyerPref] = await Promise.all([
+        sellerPrefQuery,
+        buyerPrefQuery,
       ]);
+
+      console.log(creatorId, recipientId);
 
       //If neither buyer nor seller has preferences for this scope, skip
       if (!sellerPref && !buyerPref) {
@@ -217,6 +230,7 @@ export class NotificationService implements OnModuleInit {
     img?: string,
   ) {
     try {
+      console.log('ownere', owner.id, 'recipient', recipient.id);
       /************************
        * Email Notification
        ************************/

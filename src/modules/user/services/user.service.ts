@@ -328,7 +328,7 @@ export class UserService {
         relations,
       });
 
-      // This.createDefaultNotifications(user);
+      // this.createDefaultNotifications(user);
 
       return user;
     } catch (error) {
@@ -497,7 +497,7 @@ export class UserService {
         relations: ['nationalIdentity'],
       });
 
-      if (user.userLevel == UserLevelEnum.LEVEL_2) {
+      if (user.userLevel == UserLevelEnum.LEVEL_1) {
         if (userData.nationalIdentity) {
           await this.nationalIdentityRepository.update(
             userData.nationalIdentity.id,
@@ -1324,9 +1324,13 @@ export class UserService {
       await this.usersRepository.update(user.id, {
         firstName: ` user${generateRandomToken()}`,
         lastName: `user${generateRandomToken()}`,
-
+        arabicFirstName: `user${generateRandomToken()}`,
+        arabicLastName: `user${generateRandomToken()}`,
+        arabicMiddleName: `user${generateRandomToken()}`,
+        phone: `user${generateRandomToken()}`,
         middleName: `user${generateRandomToken()}`,
         email: `deleted${generateRandomToken()}@deleted.com`,
+        deletedAt: new Date(),
       });
       return new SuccessResponse('You have successfully deleted');
     } catch (error) {

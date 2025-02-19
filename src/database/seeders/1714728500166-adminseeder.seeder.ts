@@ -4,8 +4,13 @@
  */
 
 import { Logger } from '@nestjs/common';
-import { Role, User } from 'src/entities';
-import { DataSource } from 'typeorm';
+import {
+  NotificationScope,
+  Role,
+  User,
+  UserNotificationPreference,
+} from 'src/entities';
+import { DataSource, DeepPartial } from 'typeorm';
 import { Seeder, SeederFactoryManager } from 'typeorm-extension';
 import { SuperAdminData } from '../factories/admin.factory';
 
@@ -19,17 +24,39 @@ export class Adminseeder1714728650166 implements Seeder {
     this.logger.debug(`Seeding For : ${User.name}....`, factoryManager);
     const repository = dataSource.getRepository(User);
     const roleRepository = dataSource.getRepository(Role);
+    const notificationScopeRepository =
+      dataSource.getRepository(NotificationScope);
+    const userNotificationPreference = dataSource.getRepository(
+      UserNotificationPreference,
+    );
 
     const hasAdmin = await repository.findOne({
       where: { email: SuperAdminData.email },
     });
+
+    const scopes = await notificationScopeRepository.find();
+
+    // Prepare all the notification preferences in a single array
 
     try {
       if (!hasAdmin) {
         const role = await roleRepository.find({
           where: { slug: 'super_admin' },
         });
-        await repository.save({ ...SuperAdminData, roles: role });
+
+        const user = await repository.save({ ...SuperAdminData, roles: role });
+
+        const data: DeepPartial<UserNotificationPreference>[] = scopes.map(
+          (scope) => ({
+            user,
+            scope,
+          }),
+        );
+
+        // Use a single database operation to create all records
+
+        await userNotificationPreference.save(data);
+
         this.logger.debug(`Seeding for: ${User.name} finished`);
       } else {
         this.logger.debug(`Seeding ${User.name}: not empty, skipping`);

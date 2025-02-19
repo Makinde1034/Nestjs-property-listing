@@ -1660,48 +1660,53 @@ export class ListingService {
 
       const stringifiedImages = JSON.stringify(existingImages);
 
-      await this.listingRepository.update(query.listingId, {
-        publishable: true,
-        images: stringifiedImages,
-        isListingVerified: verified,
-      });
+      // await this.listingRepository.update(query.listingId, {
+      //   publishable: true,
+      //   images: stringifiedImages,
+      //   isListingVerified: verified,
+      // });
 
-      const notificationPreference =
-        await this.notificationScopeRepository.find();
-      const scope: NotificationScope = notificationPreference.find(
-        (element) => {
-          if (element.scopeGroup == NotificationScopeEnum.LISTING) {
-            return element;
-          }
-        },
-      );
-
-      const role = await this.roleRepository.find({
-        where: {
-          permissions: {
-            slug: PermissionsEnum.LISTINGS_CREATE,
+      if (!listing.images) {
+        const notificationPreference =
+          await this.notificationScopeRepository.find();
+        const scope: NotificationScope = notificationPreference.find(
+          (element) => {
+            if (element.scopeGroup == NotificationScopeEnum.LISTING) {
+              return element;
+            }
           },
-        },
-        relations: ['permissions', 'user'], // Ensures the relationship is loaded if not already eager
-      });
+        );
 
-      const users = [];
-
-      role.forEach((element) => {
-        users.push(element.user);
-      });
-      const images = JSON.parse(stringifiedImages);
-      users.forEach((user) => {
-        this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
-          creatorId: user.id,
-          scope: scope,
-          event: 'Create',
-          metadata: JSON.stringify(listing),
-          recipientFormat: [null, 'Admin listing approver'],
-          img: images[0]?.url,
+        const role = await this.roleRepository.find({
+          where: {
+            permissions: {
+              slug: PermissionsEnum.LISTINGS_CREATE,
+            },
+          },
+          relations: ['permissions', 'user'], // Ensures the relationship is loaded if not already eager
         });
-      });
+        console.log(role);
 
+        const users = role
+          .flatMap((element) => element.user)
+          .filter(
+            (user, index, self) =>
+              self.findIndex((u) => u.id === user.id) === index,
+          );
+
+        const images = JSON.parse(stringifiedImages);
+        users.forEach((user) => {
+          console.log(user.id);
+          this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+            recipientId: user.id,
+            scope: scope,
+            event: 'Create',
+            metadata: JSON.stringify(listing),
+            recipientFormat: [null, 'Admin listing approver'],
+            img: images[0]?.url,
+          });
+        });
+      }
       return new SuccessResponse(AppStrings.UPLOAD_SUCCESSFUL, existingImages);
     } catch (error) {
       this.logger.error(error.message || error);

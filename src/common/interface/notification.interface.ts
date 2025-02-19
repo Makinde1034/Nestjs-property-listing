@@ -42,7 +42,7 @@ export interface NotificationEventInput {
 
 export interface SendNotificationInput {
   creatorId: string;
-  receiverId?: string;
+  recipientId?: string;
   scope: NotificationScope;
   event: string;
   metadata: string;

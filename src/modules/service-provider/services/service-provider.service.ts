@@ -521,13 +521,6 @@ export class ServiceAndProviderService {
         .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
         .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
         .leftJoinAndSelect('listing.listingType', 'listingType')
-        .select([
-          'user.id',
-          'user.lastName',
-          'user.firstName',
-          'user.arabicFirstName',
-          'user.arabicLastName',
-        ])
         .where('serviceRequested.userId = :userId', { userId: user.id })
         .take(paginateAndSort.take)
         .skip(paginateAndSort.skip)
