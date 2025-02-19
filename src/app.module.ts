@@ -114,6 +114,7 @@ import { getRedisConfigName } from './config/serviceAccount/redis.config';
         };
       },
     }),
+
     ScheduleModule.forRoot(),
     AuthModule,
     UserModule,
