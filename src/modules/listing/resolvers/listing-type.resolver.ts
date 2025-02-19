@@ -20,6 +20,7 @@ import { ListingTypesResponse } from '../dtos/response/listingType.response';
 import { Public } from '../../auth/decorators/permision.decorator';
 import { PermissionsEnum } from '../../../common/enums/permission.enum';
 import { GqlCacheInterceptor } from '../../../common/interceptors/cache-middleware';
+import { CacheTTL } from '@nestjs/cache-manager';
 
 @Resolver()
 export class ListingTypeResolver {
@@ -32,6 +33,7 @@ export class ListingTypeResolver {
    */
   @Public()
   @UseInterceptors(GqlCacheInterceptor)
+  @CacheTTL(5)
   @Query(() => ListingTypesResponse)
   async fetchListingTypes(
     @Args('findOptions', { nullable: true }) findOptions: PaginateAndSort,

@@ -41,7 +41,7 @@ export class AttributeResolver {
    */
 
   @Public()
-  @CacheTTL(3600)
+  @CacheTTL(5)
   @UseInterceptors(GqlCacheInterceptor)
   @Query(() => AttributeResponse)
   async fetchAttributes(

@@ -28,7 +28,6 @@ import { Public } from '../../auth/decorators/permision.decorator';
 
 import { AdminDashboardSort } from '../../admin/dto/request/admin-request';
 import { PermissionsEnum } from '../../../common/enums/permission.enum';
-import { GqlCacheInterceptor } from '../../../common/interceptors/cache-middleware';
 
 @Resolver()
 @Public()
@@ -92,7 +91,6 @@ export class TicketsResolver {
    * @returns {Promise<Ticket>}
    */
   @Query(() => TicketResponse)
-  @UseInterceptors(GqlCacheInterceptor)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.SUPPORT_TICKETS_READ)
   async listTicketsForAdminAndStaff(
