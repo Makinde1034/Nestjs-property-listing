@@ -453,7 +453,6 @@ export class ServiceAndProviderService {
 
         userId: user.id,
       });
-
       return data;
     } catch (error) {
       this.logger.log(error);

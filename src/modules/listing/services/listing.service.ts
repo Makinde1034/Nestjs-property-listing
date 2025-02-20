@@ -222,10 +222,7 @@ export class ListingService {
   async findAllListingsForOwner(data: AttributeDto, user?: User) {
     try {
       let { sortField, directionToSort } = data;
-
       const { take: initialTake, skip, where } = data;
-
-      let whereOption;
 
       const sortDirections = ['ASC', 'DESC'] as const;
       if (sortField && directionToSort) {
@@ -236,12 +233,6 @@ export class ListingService {
         sortField = null; // No sorting if not provided
       }
 
-      if (where) {
-        whereOption = ` listing.${where.fieldToChose} IS ${where.whereParam} AND listing.userId = :id AND  status = :status`;
-      } else {
-        whereOption = 'listing.userId = :id';
-      }
-
       const take = initialTake <= 20 ? initialTake : 20;
       const query = this.listingRepository
         .createQueryBuilder('listing')
@@ -249,22 +240,31 @@ export class ListingService {
         .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
         .leftJoinAndSelect('listing.listingType', 'listingType')
         .loadRelationCountAndMap('listing.offers', 'listing.offer')
-        .where(whereOption, { id: user.id, status: ListingStatus.ACCEPTED })
-        .take(take)
-        .skip(skip);
+        .where('listing.userId = :id', { id: user.id })
+        .andWhere('status = :status', { status: ListingStatus.ACCEPTED });
 
+      // ✅ Apply additional `where` conditions correctly
+      if (where?.fieldToChose && where?.whereParam !== undefined) {
+        query.andWhere(`listing.${where.fieldToChose} = :whereParam`, {
+          whereParam: where.whereParam,
+        });
+      }
+
+      // ✅ Ensure sorting is applied correctly
       if (sortField && directionToSort) {
-        // Ensure sortField is valid and exists in the entity before adding orderBy
         query.orderBy(
           `listing.${sortField}`,
           directionToSort as 'ASC' | 'DESC',
           'NULLS LAST',
         );
       }
+
+      // ✅ Limit results properly
+      query.take(take).skip(skip);
+
+      // ✅ Fetch results
       const [listing, count] = await query.getManyAndCount();
-      const result = listing.map((element) => {
-        return this.transformListing(element);
-      });
+      const result = listing.map((element) => this.transformListing(element));
 
       return { listing: result, total: count };
     } catch (error) {

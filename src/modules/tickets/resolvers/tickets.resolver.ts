@@ -100,6 +100,7 @@ export class TicketsResolver {
   ) {
     return await this.ticketService.listTicketsForAdminAndStaff(findOptions);
   }
+
   @Query(() => TicketResponse)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.DASHBOARD_SUPPORT_RESPONSE_CARD)
