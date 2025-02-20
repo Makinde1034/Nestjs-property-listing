@@ -290,12 +290,60 @@ type AuctionParticipant {
   updatedAt: DateTime!
 }
 
+type ServiceProvider {
+  id: ID!
+  user: User
+  userId: String!
+  ibanCertificate: String
+  workLicense: String
+  idOrCr: String
+  iban: String
+  createdAt: DateTime
+  providerStatus: String
+  deletedAt: DateTime!
+  activityLog: [ActivityLog!]!
+  servicesOffered: [ServiceProvided!]
+  coverageArea: String!
+  reason: String
+  updatedAt: DateTime
+}
+
+type ServiceProvided {
+  id: ID!
+  serviceProvider: ServiceProvider!
+  serviceProviderId: String!
+  service: Service!
+  serviceId: String!
+  isActive: Boolean!
+  createdAt: DateTime
+  status: String
+  deletedAt: DateTime
+  updatedAt: DateTime
+}
+
+type Service {
+  id: ID!
+  englishServiceName: String!
+  arabicServiceName: String!
+  active: Boolean
+  isWorkLicenseRequired: Boolean
+  icon: String
+  pricing: String
+  status: [ServiceProvided!]
+  createdAt: DateTime
+  deletedAt: DateTime
+  updatedAt: DateTime
+}
+
 type ServiceRequested {
   id: ID!
   userId: String!
+  listingId: String!
+  serviceId: String!
   user: User!
   serviceProvidedId: String!
-  listing: [Listing!]!
+  listing: Listing!
+  service: Service!
   status: String!
   createdAt: DateTime
   deletedAt: DateTime
@@ -318,7 +366,7 @@ type Listing {
   deedNumber: String
   poaNumber: String
   rentingOption: String
-  serviceRequested: ServiceRequested!
+  serviceRequested: [ServiceRequested!]!
   auctionParticipant: AuctionParticipant!
   invoice: Invoice
   listingType: ListingType
@@ -480,51 +528,6 @@ type SplashScreen {
   splashScreenActivityLog: [ActivityLog!]
   createdAt: DateTime
   deletedAt: DateTime
-  updatedAt: DateTime
-}
-
-type Service {
-  id: ID!
-  englishServiceName: String!
-  arabicServiceName: String!
-  active: Boolean
-  isWorkLicenseRequired: Boolean
-  icon: String
-  pricing: String
-  status: [ServiceProvided!]
-  createdAt: DateTime
-  deletedAt: DateTime
-  updatedAt: DateTime
-}
-
-type ServiceProvided {
-  id: ID!
-  serviceProvider: ServiceProvider!
-  serviceProviderId: String!
-  service: Service!
-  serviceId: String!
-  isActive: Boolean!
-  createdAt: DateTime
-  status: String
-  deletedAt: DateTime
-  updatedAt: DateTime
-}
-
-type ServiceProvider {
-  id: ID!
-  user: User
-  userId: String!
-  ibanCertificate: String
-  workLicense: String
-  idOrCr: String
-  iban: String
-  createdAt: DateTime
-  providerStatus: String
-  deletedAt: DateTime!
-  activityLog: [ActivityLog!]!
-  servicesOffered: [ServiceProvided!]
-  coverageArea: String!
-  reason: String
   updatedAt: DateTime
 }
 
@@ -2542,4 +2545,5 @@ input DeleteServiceProvider {
 input RequestForService {
   serviceProvidedId: String!
   listingId: String!
+  serviceId: String!
 }

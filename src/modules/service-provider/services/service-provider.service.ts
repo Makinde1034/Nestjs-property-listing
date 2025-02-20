@@ -41,6 +41,7 @@ import {
 } from '../../../common/enums/service-provider';
 import { AdminFilterAndSort } from '../../listing/dtos/request';
 import { StorageService } from '../../file-handler/services/storage.service';
+import { ListingRepository } from '../../listing/repositories/listing.repository';
 
 @Injectable()
 export class ServiceAndProviderService {
@@ -51,6 +52,7 @@ export class ServiceAndProviderService {
     private readonly serviceProvidedRepository: ServiceProvidedRepository,
     private readonly storageService: StorageService,
     private readonly serviceRequestedRepository: ServiceRequestedRepository,
+    private readonly listingRepository: ListingRepository,
   ) {}
 
   logger = new Logger(ServiceAndProviderService.name);
@@ -439,8 +441,16 @@ export class ServiceAndProviderService {
     user: User,
   ) {
     try {
+      const listing = await this.listingRepository.findOneBy({
+        id: requestForServiceInput.listingId,
+      });
+      if (!listing) {
+        throw new BadRequestException('Listing not found');
+      }
       const data = await this.serviceRequestedRepository.save({
         ...requestForServiceInput,
+        listing,
+
         userId: user.id,
       });
 
@@ -551,7 +561,6 @@ export class ServiceAndProviderService {
       throw new BadRequestException(error);
     }
   }
-
   async ViewServiceRequested(paginateAndSort: PaginateAndSort, user: User) {
     try {
       const query = this.serviceRequestedRepository

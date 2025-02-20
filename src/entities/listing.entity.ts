@@ -70,12 +70,12 @@ export class Listing extends BaseEntity {
   @Index()
   rentingOption: string;
 
-  @Field(() => ServiceRequested)
-  @ManyToOne(
+  @Field(() => [ServiceRequested])
+  @OneToMany(
     () => ServiceRequested,
     (serviceRequested) => serviceRequested.listing,
   )
-  serviceRequested: ServiceRequested;
+  serviceRequested: ServiceRequested[];
 
   @Field(() => AuctionParticipant)
   @OneToOne(() => AuctionParticipant, (listing) => listing.listing)

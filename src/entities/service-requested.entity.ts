@@ -20,6 +20,7 @@ import { IsEnum } from 'class-validator';
 import { User } from './user.entity';
 import { Listing } from './listing.entity';
 import { ServiceProvidedStatus } from '../common/enums/service-provider';
+import { Service } from './services.entity';
 
 @Entity()
 @ObjectType()
@@ -27,6 +28,14 @@ export class ServiceRequested extends BaseEntity {
   @Column()
   @Field()
   userId: string;
+
+  @Column()
+  @Field()
+  listingId: string;
+
+  @Column({ nullable: true })
+  @Field()
+  serviceId: string;
 
   @Field(() => User)
   @JoinColumn({ name: 'userId' })
@@ -36,9 +45,16 @@ export class ServiceRequested extends BaseEntity {
   @Column()
   @Field()
   serviceProvidedId: string;
-  @Field(() => [Listing])
-  @OneToMany(() => Listing, (listing) => listing.serviceRequested)
-  listing: Listing[];
+
+  @Field(() => Listing)
+  @JoinColumn({ name: 'listingId' })
+  @ManyToOne(() => Listing, (listing) => listing.serviceRequested)
+  listing: Listing;
+
+  @Field(() => Service)
+  @JoinColumn({ name: 'serviceId' })
+  @ManyToOne(() => Service, (service) => service, { nullable: true })
+  service: Service;
 
   @Column({ default: ServiceProvidedStatus.PENDING })
   @Field()
