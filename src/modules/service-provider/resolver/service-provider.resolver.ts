@@ -236,6 +236,7 @@ export class ServiceAndProviderResolver {
       ctx.req.user,
     );
   }
+
   @UseGuards(AccessTokenGuard)
   @Query(() => RequestedServiceResponse, { name: 'ViewServiceRequest' })
   async ViewServiceRequest(

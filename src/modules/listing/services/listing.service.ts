@@ -165,7 +165,10 @@ export class ListingService {
             attributeId: attribute.id,
             attribute,
             name: attribute.englishName,
-            value: element.value,
+            value:
+              typeof element.value === 'string'
+                ? element.value.replace(/\b\w/g, (char) => char.toUpperCase())
+                : element.value,
           });
         }),
       );

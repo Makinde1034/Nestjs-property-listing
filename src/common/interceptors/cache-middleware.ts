@@ -2,6 +2,7 @@ import { Injectable, ExecutionContext, CallHandler } from '@nestjs/common';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { Observable, of } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
 @Injectable()
 export class GqlCacheInterceptor extends CacheInterceptor {
@@ -10,6 +11,9 @@ export class GqlCacheInterceptor extends CacheInterceptor {
     const info = gqlCtx.getInfo();
     const args = gqlCtx.getArgs();
 
+    // Cache only queries, not mutations or subscriptions
+    if (info.operation.operation !== 'query') return;
+
     return `${info.fieldName}:${JSON.stringify(args)}`;
   }
 
@@ -17,27 +21,38 @@ export class GqlCacheInterceptor extends CacheInterceptor {
     context: ExecutionContext,
     next: CallHandler,
   ): Promise<Observable<any>> {
-    const key = this.trackBy(context);
+    const gqlCtx = GqlExecutionContext.create(context);
+    const info = gqlCtx.getInfo();
+    const operationType = info.operation.operation; // 'query', 'mutation', 'subscription'
 
+    // If it's a mutation, clear the entire cache AFTER it executes
+    if (operationType === 'mutation') {
+      return next.handle().pipe(
+        tap(async () => {
+          console.log('Mutation detected: Clearing cache...');
+          await this.cacheManager.reset(); // Clears all cache
+        }),
+      );
+    }
+
+    // Handle queries with caching
+    const key = this.trackBy(context);
     if (key) {
       const cachedValue = await this.cacheManager.get(key);
       if (cachedValue) {
         // Parse stringified dates back to Date objects
-        const parsedData = this.parseDates(cachedValue);
-        return of(parsedData);
+        return of(this.parseDates(cachedValue));
       }
     }
 
-    const result$ = next.handle();
-    result$.subscribe({
-      next: async (result) => {
+    // Store the query result in cache
+    return next.handle().pipe(
+      tap(async (result) => {
         if (key && result) {
           await this.cacheManager.set(key, result);
         }
-      },
-    });
-
-    return result$;
+      }),
+    );
   }
 
   private parseDates(data: any): any {

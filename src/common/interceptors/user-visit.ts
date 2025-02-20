@@ -49,20 +49,9 @@ export class TrackingMiddleware implements NestMiddleware {
   // }
 
   async use(req: Request, res: Response, next: NextFunction) {
-    // Extract the real IP (removing IPv6-mapped IPv4 if present)
-    // let clientIp =
-    //   requestIp.getClientIp(req) ||
-    //   req.headers['x-forwarded-for'] ||
-    //   req.socket.remoteAddress;
-    // clientIp = clientIp ? cleanIp(clientIp.toString()) : null;
-    // const clientIp = requestIp.getClientIp(req); // This extracts the correct IP
-    // console.log('Client IP:', clientIp); // Will return correct IP
-
     let type;
-
     const pageVisited = req.originalUrl;
-    const clientIp = req.ip;
-
+    const clientIp = requestIp.getClientIp(req) || req.socket.remoteAddress; // Correct IP extraction
     const userAgent = req.headers['user-agent'];
 
     // Extract token from Authorization header
@@ -80,7 +69,6 @@ export class TrackingMiddleware implements NestMiddleware {
           await this.locationService.updateUserCity(userId, clientIp);
         }
       } catch (error) {
-        console.log(error);
         console.warn('Invalid token:', error.message);
         type = 'guest';
       }

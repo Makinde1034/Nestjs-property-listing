@@ -98,6 +98,9 @@ export class ServiceAndProviderService {
 
       const serviceProvider = this.serviceProviderRepository.create({
         ...rest,
+        coverageArea: rest.coverageArea.replace(/\b\w/g, (char) =>
+          char.toUpperCase(),
+        ),
         user,
       });
 
@@ -514,38 +517,21 @@ export class ServiceAndProviderService {
 
   async ViewServiceRequest(paginateAndSort: PaginateAndSort, user: User) {
     try {
-      const [request, total] = await this.serviceRequestedRepository
+      const serviceprovider = await this.serviceProviderRepository.findOne({
+        where: { userId: user.id },
+      });
+
+      console.log(serviceprovider);
+
+      const query = this.serviceRequestedRepository
         .createQueryBuilder('serviceRequested')
         .leftJoin('serviceRequested.user', 'user')
         .leftJoin('serviceRequested.listing', 'listing')
         .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
         .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
         .leftJoinAndSelect('listing.listingType', 'listingType')
-        .where('serviceRequested.userId = :userId', { userId: user.id })
         .take(paginateAndSort.take)
-        .skip(paginateAndSort.skip)
-        .getManyAndCount();
-
-      return { request, total };
-    } catch (error) {
-      this.logger.log(error);
-      throw new BadRequestException(error);
-    }
-  }
-
-  async ViewServiceRequested(paginateAndSort: PaginateAndSort, user: User) {
-    try {
-      const serviceprovider = await this.serviceProviderRepository.findOne({
-        where: { userId: user.id },
-      });
-
-      const query = this.serviceRequestedRepository
-        .createQueryBuilder('serviceRequested')
-        .leftJoin('serviceRequested.user', 'user')
-        .leftJoinAndSelect('serviceRequested.listing', 'listing')
-        .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
-        .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
-        .leftJoinAndSelect('listing.listingType', 'listingType');
+        .skip(paginateAndSort.skip);
 
       if (serviceprovider?.coverageArea) {
         query.where(
@@ -556,6 +542,26 @@ export class ServiceAndProviderService {
           },
         );
       }
+
+      const [request, total] = await query.getManyAndCount();
+
+      return { request, total };
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async ViewServiceRequested(paginateAndSort: PaginateAndSort, user: User) {
+    try {
+      const query = this.serviceRequestedRepository
+        .createQueryBuilder('serviceRequested')
+        .leftJoin('serviceRequested.user', 'user')
+        .leftJoinAndSelect('serviceRequested.listing', 'listing')
+        .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
+        .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
+        .leftJoinAndSelect('listing.listingType', 'listingType')
+        .where('serviceRequested.userId = :userId', { userId: user.id });
 
       const [request, total] = await query
         .take(paginateAndSort.take)
