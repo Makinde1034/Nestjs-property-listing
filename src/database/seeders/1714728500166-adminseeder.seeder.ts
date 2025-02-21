@@ -40,11 +40,7 @@ export class Adminseeder1714728650166 implements Seeder {
 
     try {
       if (!hasAdmin) {
-        const role = await roleRepository.find({
-          where: { slug: 'super_admin' },
-        });
-
-        const user = await repository.save({ ...SuperAdminData, roles: role });
+        const user = await repository.save({ ...SuperAdminData });
 
         const data: DeepPartial<UserNotificationPreference>[] = scopes.map(
           (scope) => ({

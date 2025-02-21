@@ -238,6 +238,7 @@ export class ServiceAndProviderResolver {
   }
 
   @UseGuards(AccessTokenGuard)
+  @UseGuards(ServiceProviderGuard)
   @Query(() => RequestedServiceResponse, { name: 'ViewServiceRequest' })
   async ViewServiceRequest(
     @Args('paginateAndSort') paginateAndSort: PaginateAndSort,
@@ -250,7 +251,6 @@ export class ServiceAndProviderResolver {
   }
 
   @UseGuards(AccessTokenGuard)
-  @UseGuards(ServiceProviderGuard)
   @Query(() => RequestedServiceResponse, { name: 'ViewServiceRequested' })
   async ViewServiceRequested(
     @Args('paginateAndSort') paginateAndSort: PaginateAndSort,

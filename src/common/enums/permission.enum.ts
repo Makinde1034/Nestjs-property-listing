@@ -159,4 +159,6 @@ export enum PermissionsEnum {
   WORKFLOW_EXPORT = 'workflow-export',
   WORKFLOW_VIEW_AUDIT_TRAIL = 'workflow-view-audit-trail',
   WORKFLOW_STATUS_DEACTIVATE_REACTIVATE = 'workflow-status-deactivate-reactivate',
+
+  FINALIZE_REQUEST = 'platform-request-finalizer',
 }

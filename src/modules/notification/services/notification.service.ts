@@ -669,10 +669,11 @@ export class NotificationService implements OnModuleInit {
     try {
       const { affected } = await this.notificationRepository
         .createQueryBuilder('notification')
+        .leftJoinAndSelect('notification.recipient', 'recipient')
 
         .update(Notification)
         .set({ read: true })
-        .where('notification.recipientId= :id', { id: user.id })
+        .where('recipient.id = :id', { id: user.id })
         .execute();
 
       if (affected) {

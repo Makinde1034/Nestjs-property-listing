@@ -1663,11 +1663,11 @@ export class ListingService {
 
       const stringifiedImages = JSON.stringify(existingImages);
 
-      await this.listingRepository.update(query.listingId, {
-        publishable: true,
-        images: stringifiedImages,
-        isListingVerified: verified,
-      });
+      // await this.listingRepository.update(query.listingId, {
+      //   publishable: true,
+      //   images: stringifiedImages,
+      //   isListingVerified: verified,
+      // });
 
       if (!listing.images) {
         const notificationPreference =
@@ -1688,7 +1688,6 @@ export class ListingService {
           },
           relations: ['permissions', 'user'], // Ensures the relationship is loaded if not already eager
         });
-        console.log(role);
 
         const users = role
           .flatMap((element) => element.user)

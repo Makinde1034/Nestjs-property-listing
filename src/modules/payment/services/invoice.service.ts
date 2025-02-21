@@ -95,4 +95,42 @@ export class InvoiceService {
       throw new BadRequestException('Unable to fetch invoices');
     }
   }
+
+  async fetchInvoiceForUser(findOption: PaginateAndSort, user: User) {
+    try {
+      // Validate and set default where option
+      const whereOption =
+        findOption?.where?.fieldToChose && findOption?.where?.whereParam
+          ? { [findOption.where.fieldToChose]: findOption.where.whereParam }
+          : {};
+
+      // Validate and set default order options
+      const orderOptions =
+        findOption.sortField && findOption.directionToSort
+          ? {
+              [findOption.sortField]: findOption.directionToSort as
+                | 'ASC'
+                | 'DESC',
+            }
+          : { createdAt: 'DESC' as 'ASC' | 'DESC' }; // Default sorting by createdAt in descending order
+
+      // Set take and skip with reasonable defaults
+      const take =
+        findOption.take && findOption.take > 0 ? findOption.take : 20;
+      const skip =
+        findOption.skip && findOption.skip >= 0 ? findOption.skip : 0;
+
+      // Fetch invoices and total count
+      const [invoices, total] = await this.invoiceRepository.findAndCount({
+        where: { ...whereOption, userId: user.id },
+        order: orderOptions,
+        take,
+        skip,
+      });
+      return { invoices, total };
+    } catch (error) {
+      this.logger.error('Error fetching invoice:', error);
+      throw new BadRequestException('Unable to fetch invoices');
+    }
+  }
 }

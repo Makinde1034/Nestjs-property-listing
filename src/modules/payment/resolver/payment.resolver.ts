@@ -65,4 +65,13 @@ export class PaymentResolver {
   async fetchInvoice(@Args('findOption') findOption: PaginateAndSort) {
     return await this.invoiceService.fetchInvoice(findOption);
   }
+
+  @Query(() => InvoiceResponse)
+  @UseGuards(AccessTokenGuard)
+  async fetchInvoiceForUser(
+    @Args('findOption') findOption: PaginateAndSort,
+    @CurrentUser() user: User,
+  ) {
+    return await this.invoiceService.fetchInvoiceForUser(findOption, user);
+  }
 }

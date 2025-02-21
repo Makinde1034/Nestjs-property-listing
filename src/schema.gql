@@ -1249,6 +1249,7 @@ type Query {
   adPackages: [AdPackage!]!
   adPackage(id: String!): AdPackage!
   fetchInvoice(findOption: PaginateAndSort!): InvoiceResponse!
+  fetchInvoiceForUser(findOption: PaginateAndSort!): InvoiceResponse!
   fetchIssues(placement: String): [ParentIssue!]!
   fetchChildIssues(parentId: String!): [ChildIssue!]!
   getTicket(ticketId: String!): Ticket!
