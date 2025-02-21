@@ -24,6 +24,6 @@ export class AdminNotificationPreference extends BaseEntity {
   desktop: boolean;
 
   @ManyToOne(() => NotificationScope, { cascade: true, eager: true })
-  @Field(() => NotificationScope)
+  @Field(() => NotificationScope, { nullable: true })
   scope: NotificationScope;
 }

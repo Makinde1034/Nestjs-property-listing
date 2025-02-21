@@ -67,7 +67,7 @@ export class Notification extends BaseEntity {
   @Field({ nullable: true })
   directToMobile: boolean;
 
-  @Field(() => User)
+  @Field(() => User, { nullable: true })
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   recipient: User;
 

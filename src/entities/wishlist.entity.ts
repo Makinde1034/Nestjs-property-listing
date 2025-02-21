@@ -24,7 +24,7 @@ export class Wishlist extends BaseEntity {
   @ManyToOne(() => Listing, (listing) => listing.wishlist)
   listing: Listing;
 
-  @Field(() => User)
+  @Field(() => User, { nullable: true })
   @JoinColumn({ name: 'userId' })
   @ManyToOne(() => User, (user) => user.wishlist)
   user: User;

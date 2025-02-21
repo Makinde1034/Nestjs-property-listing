@@ -25,7 +25,7 @@ export class GpsCoordinate extends BaseEntity {
   @Field({ nullable: true })
   placeId: string;
 
-  @Field(() => GpsCoordinate)
+  @Field(() => GpsCoordinate, { nullable: true })
   @JoinColumn({ name: 'listingId' })
   @OneToOne(() => Listing, (listing) => listing.gpsCoordinate)
   listing: Listing;

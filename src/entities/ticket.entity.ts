@@ -27,7 +27,7 @@ import { ActivityLog } from './activity-log.entity';
 @ObjectType()
 @Entity()
 export class Ticket extends BaseEntity {
-  @Field(() => User)
+  @Field(() => User, { nullable: true })
   @Index()
   @ManyToOne(() => User, { cascade: true })
   reporter: User;

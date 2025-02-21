@@ -67,14 +67,13 @@ export class Offer extends BaseEntity {
   @Column({ nullable: true })
   couponCode: string;
 
-  @Field(() => User)
+  @Field(() => User, { nullable: true })
   @ManyToOne(() => User, (user) => user.offer)
   @Index()
   user: User;
 
-  @Field(() => Listing)
+  @Field(() => Listing, { nullable: true })
   @JoinColumn({ name: 'listingId' })
-  @Index()
   @ManyToOne(() => Listing, (listing) => listing.offer)
   @Index()
   listing: Listing;

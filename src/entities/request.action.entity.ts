@@ -41,7 +41,7 @@ export class ActionRequest {
   status: string;
 
   @ManyToOne(() => User, (user) => user.requests)
-  @Field(() => User)
+  @Field(() => User, { nullable: true })
   user: User;
 
   @ManyToOne(() => User, { nullable: true })

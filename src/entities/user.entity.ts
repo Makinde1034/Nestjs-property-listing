@@ -232,7 +232,7 @@ export class User extends BaseEntity {
   })
   company?: Company;
 
-  @Field(() => User)
+  @Field(() => User, { nullable: true })
   @OneToOne(() => Compare, (compare) => compare.user)
   compare: Compare;
 

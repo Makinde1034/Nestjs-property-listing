@@ -31,7 +31,7 @@ export class Promotion {
   @Column({ nullable: true })
   expiredAt: Date;
 
-  @Field(() => AdPackage)
+  @Field(() => AdPackage, { nullable: true })
   @ManyToOne(() => AdPackage, (adPackage) => adPackage.promotion)
   @JoinColumn()
   adPackage: AdPackage;

@@ -24,11 +24,11 @@ export class Bids {
   id: string;
 
   @Column()
-  @Field()
+  @Field({ nullable: true })
   userId: string;
 
   @Column()
-  @Field()
+  @Field({ nullable: true })
   bidNumber: number;
 
   @Column('decimal', { precision: 12, scale: 2 })
@@ -36,10 +36,10 @@ export class Bids {
   price: number;
 
   @Column()
-  @Field()
+  @Field({ nullable: true })
   auctionId: string;
 
-  @Field(() => Listing)
+  @Field(() => Listing, { nullable: true })
   @JoinColumn({ name: 'auctionParticipantId' })
   @ManyToOne(
     () => AuctionParticipant,
@@ -48,15 +48,15 @@ export class Bids {
   auctionParticipant: AuctionParticipant;
 
   @Column({ nullable: true })
-  @Field()
+  @Field({ nullable: true })
   auctionParticipantId: string;
 
   @Column()
-  @Field()
+  @Field({ nullable: true })
   listingId: string;
 
   @Column({ default: false })
-  @Field()
+  @Field({ nullable: true })
   autoBid: boolean;
 
   @Field(() => GraphQLISODateTime)

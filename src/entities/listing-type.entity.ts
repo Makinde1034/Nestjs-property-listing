@@ -40,9 +40,10 @@ export class ListingType extends BaseEntity {
   @Field({ nullable: true })
   icon: string;
 
-  @Field(() => Listing)
+  @Field(() => Listing, { nullable: true })
   @OneToMany(() => Listing, (listing) => listing.listingType)
   listing: Listing;
+
   @Field(() => [AttributeSet], { nullable: true })
   @ManyToMany(() => AttributeSet, (attribute) => attribute.listingTypes, {
     cascade: true,
@@ -53,6 +54,7 @@ export class ListingType extends BaseEntity {
   @Field(() => GraphQLISODateTime, { nullable: true })
   @CreateDateColumn()
   createdAt: Date;
+
   @Field(() => Invoice, { nullable: true })
   @OneToMany(() => Invoice, (invoice) => invoice.listingType)
   invoice: Invoice;

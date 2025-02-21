@@ -71,18 +71,19 @@ export class IssueService {
 
       // If a workflow is configured, submit the action for approval
       if (actionConfig) {
+        const issue = this.issueRepository.create(payload);
         await this.actionService.createActionRequest(
           {
             document: this.issueRepository.metadata.name,
             actionType: 'create',
             targetEntityId: null, // No specific entity yet for a new parent issue
             user: admin,
-            payload: JSON.stringify(payload),
+            payload: JSON.stringify(issue),
           },
           admin,
         );
 
-        return new SuccessResponse('Action is awaiting approval');
+        return new SuccessResponse('Action is awaiting approval', issue);
       }
 
       // Calculate the final sequential ID

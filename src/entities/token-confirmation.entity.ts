@@ -17,7 +17,7 @@ import { User } from './user.entity';
 @Entity()
 @ObjectType()
 export class TokenConfirmation extends BaseEntity {
-  @Field(() => User)
+  @Field(() => User, { nullable: true })
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   user: User;
 

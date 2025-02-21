@@ -18,11 +18,11 @@ import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
 @ObjectType()
 export class Messages extends BaseEntity {
   @ManyToOne(() => Chat, (chat) => chat.message)
-  @Field(() => Chat)
+  @Field(() => Chat, { nullable: true })
   chat: Chat;
 
   @ManyToOne(() => User, (user) => user.messages)
-  @Field(() => User)
+  @Field(() => User, { nullable: true })
   user: User;
 
   @Column()

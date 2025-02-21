@@ -24,13 +24,13 @@ export class UserNotificationPreference extends BaseEntity {
   @Field({ nullable: true, defaultValue: true })
   desktop: boolean;
 
-  @Field(() => User)
+  @Field(() => User, { nullable: true })
   @ManyToOne(() => User, (user) => user.notificationPreference, {
     onDelete: 'CASCADE',
   })
   user: User;
 
   @ManyToOne(() => NotificationScope, { cascade: true, eager: true })
-  @Field(() => NotificationScope)
+  @Field(() => NotificationScope, { nullable: true })
   scope: NotificationScope;
 }

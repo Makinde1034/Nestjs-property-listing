@@ -28,7 +28,7 @@ export class NationalIdentity extends BaseEntity {
   @Field(() => GraphQLISODateTime, { nullable: true })
   dateOfExpiry: Date;
 
-  @Field(() => User)
+  @Field(() => User, { nullable: true })
   @OneToOne(() => User, (user) => user.nationalIdentity, {
     onDelete: 'CASCADE',
   })

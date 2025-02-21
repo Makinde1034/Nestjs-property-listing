@@ -19,7 +19,7 @@ type NationalIdentity {
   type: String
   identityNumber: String
   dateOfExpiry: DateTime
-  user: User!
+  user: User
 }
 
 """
@@ -100,8 +100,8 @@ type Offer {
   coupon: Boolean!
   isPaid: Boolean!
   couponCode: String
-  user: User!
-  listing: Listing!
+  user: User
+  listing: Listing
   userId: String!
   listingId: String!
   createdAt: DateTime
@@ -128,7 +128,7 @@ type Promotion {
   id: String!
   listingId: String!
   expiredAt: DateTime
-  adPackage: AdPackage!
+  adPackage: AdPackage
   listing: Listing!
   createdAt: DateTime
   updatedAt: DateTime
@@ -150,8 +150,8 @@ type ParentIssue {
 
 type Messages {
   id: ID!
-  chat: Chat!
-  user: User!
+  chat: Chat
+  user: User
   message: String!
   attachment: String
   createdAt: DateTime!
@@ -165,7 +165,7 @@ type Chat {
 
 type Ticket {
   id: ID!
-  reporter: User!
+  reporter: User
   support: User
   ticketActivityLog: [ActivityLog!]
   parentIssue: ParentIssue
@@ -185,10 +185,10 @@ type Ticket {
 
 type ChildIssue {
   id: ID!
-  parentIssue: ParentIssue!
+  parentIssue: ParentIssue
   parentIssueId: String
-  ticket: Ticket!
-  flagListing: Ticket!
+  ticket: Ticket
+  flagListing: Ticket
   englishName: String
   arabicName: String
   sequentialId: Float
@@ -201,7 +201,7 @@ type FlagListing {
   id: ID!
   userId: String!
   reporter: User
-  parentIssue: ParentIssue!
+  parentIssue: ParentIssue
   childIssue: ChildIssue
   listingId: String!
   listing: Listing
@@ -216,7 +216,7 @@ type Feature {
   endDate: DateTime
   startDate: DateTime
   adPackage: AdPackage
-  listing: Listing!
+  listing: Listing
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -224,7 +224,7 @@ type Feature {
 type Wishlist {
   id: ID!
   listing: Listing!
-  user: User!
+  user: User
   userId: String!
   createdAt: DateTime!
   deletedAt: DateTime
@@ -236,7 +236,7 @@ type GpsCoordinate {
   lat: Float!
   lng: Float!
   placeId: String
-  listing: GpsCoordinate!
+  listing: GpsCoordinate
 }
 
 type Auction {
@@ -261,14 +261,14 @@ type Auction {
 
 type Bids {
   id: String
-  userId: String!
-  bidNumber: Float!
+  userId: String
+  bidNumber: Float
   price: Float
-  auctionId: String!
-  auctionParticipant: Listing!
-  auctionParticipantId: String!
-  listingId: String!
-  autoBid: Boolean!
+  auctionId: String
+  auctionParticipant: Listing
+  auctionParticipantId: String
+  listingId: String
+  autoBid: Boolean
   createdAt: DateTime!
   deletedAt: DateTime!
   updatedAt: DateTime!
@@ -283,7 +283,7 @@ type AuctionParticipant {
   listing: Listing
   startingPrice: Float!
   minimumPrice: Float!
-  auction: Auction!
+  auction: Auction
   bid: [Bids!]
   createdAt: DateTime!
   deletedAt: DateTime!
@@ -340,7 +340,7 @@ type ServiceRequested {
   userId: String!
   listingId: String!
   serviceId: String!
-  user: User!
+  user: User
   serviceProvidedId: String!
   listing: Listing!
   service: Service!
@@ -367,7 +367,7 @@ type Listing {
   poaNumber: String
   rentingOption: String
   serviceRequested: [ServiceRequested!]!
-  auctionParticipant: AuctionParticipant!
+  auctionParticipant: AuctionParticipant
   invoice: Invoice
   listingType: ListingType
   listingTypeId: String
@@ -417,7 +417,7 @@ type Listing {
 
 type ListingAttributes {
   id: ID!
-  listing: Listing!
+  listing: Listing
   attribute: Attribute
   name: String
   attributeId: String
@@ -466,7 +466,7 @@ type ListingType {
   englishName: String
   arabicName: String
   icon: String
-  listing: Listing!
+  listing: Listing
   attributeSets: [AttributeSet!]
   createdAt: DateTime
   invoice: Invoice
@@ -588,7 +588,7 @@ type Company {
   name: String!
   vatNumber: String!
   crNumber: String!
-  user: User!
+  user: User
 }
 
 type NotificationScope {
@@ -603,15 +603,15 @@ type UserNotificationPreference {
   email: Boolean
   mobile: Boolean
   desktop: Boolean
-  user: User!
-  scope: NotificationScope!
+  user: User
+  scope: NotificationScope
 }
 
 type Review {
   id: ID!
   rating: Float!
   comment: String!
-  user: User!
+  user: User
   userId: String!
   providerId: String
   reviewType: String!
@@ -622,7 +622,7 @@ type Review {
 type SearchHistory {
   id: ID!
   userId: String
-  user: [User!]!
+  user: User
   minPrice: Float
   purpose: String
   maxPrice: Float
@@ -640,7 +640,7 @@ type SearchHistory {
 
 type Compare {
   id: ID!
-  user: User!
+  user: User
   userId: String!
   listings: [String!]!
   createdAt: DateTime!
@@ -652,7 +652,7 @@ type ActionRequest {
   id: Float!
   payload: String!
   status: String!
-  user: User!
+  user: User
   admin: User!
   event: String
   createdAt: DateTime
@@ -707,7 +707,7 @@ type User {
   article: [Article!]!
   nationalIdentity: NationalIdentity
   company: Company
-  compare: User!
+  compare: User
   notificationPreference: [UserNotificationPreference!]
   searchHistory: SearchHistory!
   twoFactorAuthenticationSecret: String
@@ -737,7 +737,7 @@ type Notification {
   expiredAt: DateTime
   directToWeb: Boolean
   directToMobile: Boolean
-  recipient: User!
+  recipient: User
   deletedAt: DateTime
   createdAt: DateTime
   updatedAt: DateTime

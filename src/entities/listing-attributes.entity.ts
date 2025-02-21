@@ -12,7 +12,7 @@ import { Attribute } from './attribute.entity';
 @Entity()
 @ObjectType()
 export class ListingAttributes extends BaseEntity {
-  @Field(() => Listing)
+  @Field(() => Listing, { nullable: true })
   @ManyToOne(() => Listing, (listing) => listing.listingAttributes)
   listing: Listing;
 

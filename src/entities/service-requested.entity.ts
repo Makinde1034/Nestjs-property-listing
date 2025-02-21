@@ -37,7 +37,7 @@ export class ServiceRequested extends BaseEntity {
   @Field()
   serviceId: string;
 
-  @Field(() => User)
+  @Field(() => User, { nullable: true })
   @JoinColumn({ name: 'userId' })
   @ManyToOne(() => User, (user) => user)
   user: User;

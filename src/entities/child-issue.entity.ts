@@ -22,7 +22,7 @@ import { FlagListing } from './flag-listing.entity';
 @Entity()
 @ObjectType()
 export class ChildIssue extends BaseEntity {
-  @Field(() => ParentIssue)
+  @Field(() => ParentIssue, { nullable: true })
   @JoinColumn({ name: 'parentIssueId' })
   @ManyToOne(() => ParentIssue, (parent) => parent.childIssue, { eager: true })
   parentIssue: ParentIssue;
@@ -31,11 +31,11 @@ export class ChildIssue extends BaseEntity {
   @Field({ nullable: true })
   parentIssueId: string;
 
-  @Field(() => Ticket)
+  @Field(() => Ticket, { nullable: true })
   @OneToMany(() => Ticket, (ticket) => ticket.childIssue)
   ticket: Ticket;
 
-  @Field(() => Ticket)
+  @Field(() => Ticket, { nullable: true })
   @OneToMany(() => FlagListing, (flaggedListing) => flaggedListing.childIssue)
   flagListing: FlagListing;
 

@@ -40,7 +40,7 @@ export class Feature {
   @JoinColumn()
   adPackage: AdPackage;
 
-  @Field(() => Listing)
+  @Field(() => Listing, { nullable: true })
   @ManyToOne(() => Listing, (listing) => listing.feature)
   listing: Listing;
 

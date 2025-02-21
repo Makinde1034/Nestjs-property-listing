@@ -24,7 +24,7 @@ export class SearchHistory extends BaseEntity {
   @Field({ nullable: true })
   userId: string;
 
-  @Field(() => [User])
+  @Field(() => User, { nullable: true })
   @JoinColumn({ name: 'userId' })
   @ManyToOne(() => User, (user) => user.searchHistory)
   user: User;

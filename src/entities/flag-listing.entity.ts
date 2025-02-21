@@ -30,7 +30,7 @@ export class FlagListing extends BaseEntity {
   @ManyToOne(() => User, (reporter) => reporter.flagListing, { eager: true })
   reporter: User;
 
-  @Field(() => ParentIssue)
+  @Field(() => ParentIssue, { nullable: true })
   @JoinColumn({ name: 'parentIssueId' })
   @ManyToOne(() => ParentIssue, (parentIssue) => parentIssue.flagListing, {
     cascade: true,

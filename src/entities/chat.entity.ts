@@ -28,7 +28,7 @@ export class Chat extends BaseEntity {
   @ManyToOne(() => User, (user) => user.chat)
   user: User;
 
-  @OneToOne(() => Ticket, (ticket) => ticket.chat)
+  @OneToOne(() => Ticket, (ticket) => ticket.chat, { nullable: true })
   @JoinColumn({ name: 'ticketId' })
   ticket: Ticket;
 

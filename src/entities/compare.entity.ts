@@ -19,7 +19,7 @@ import { User } from './user.entity';
 @Entity()
 @ObjectType()
 export class Compare extends BaseEntity {
-  @Field(() => User)
+  @Field(() => User, { nullable: true })
   @JoinColumn({ name: 'userId' })
   @OneToOne(() => User, (user) => user.compare)
   user: User;

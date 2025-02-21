@@ -209,6 +209,7 @@ export class NotificationService implements OnModuleInit {
         );
       }
     } catch (error) {
+      console.log(error);
       this.logger.debug('Error sending notification:', error);
       throw error; // Re-throw for caller to handle
     }
@@ -230,7 +231,6 @@ export class NotificationService implements OnModuleInit {
     img?: string,
   ) {
     try {
-      console.log('ownere', owner.id, 'recipient', recipient.id);
       /************************
        * Email Notification
        ************************/
@@ -373,6 +373,7 @@ export class NotificationService implements OnModuleInit {
         );
       }
     } catch (error) {
+      console.log(error);
       this.logger.error('Error sending notifications', error);
       throw new BadRequestException(error);
     }

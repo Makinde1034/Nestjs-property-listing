@@ -77,7 +77,7 @@ export class Listing extends BaseEntity {
   )
   serviceRequested: ServiceRequested[];
 
-  @Field(() => AuctionParticipant)
+  @Field(() => AuctionParticipant, { nullable: true })
   @OneToOne(() => AuctionParticipant, (listing) => listing.listing)
   auctionParticipant: AuctionParticipant;
 

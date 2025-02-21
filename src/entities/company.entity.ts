@@ -23,7 +23,7 @@ export class Company extends BaseEntity {
   @Field()
   crNumber: string;
 
-  @Field(() => User)
+  @Field(() => User, { nullable: true })
   @OneToOne(() => User, (user) => user.company, { onDelete: 'CASCADE' })
   @JoinColumn()
   user: User;

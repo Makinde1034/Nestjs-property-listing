@@ -16,11 +16,11 @@ import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
 @Entity()
 @ObjectType()
 export class AcceptedTerms extends BaseEntity {
-  @Field()
+  @Field({ nullable: true })
   @Column()
   version: string;
 
-  @Field()
+  @Field({ nullable: true })
   @Column()
   userId: string;
 
