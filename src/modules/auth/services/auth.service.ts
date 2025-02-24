@@ -419,7 +419,6 @@ export class AuthService {
         expiresIn: this.configService.get<string>('JWT_REFRESH_TTL'),
       }),
     ]);
-
     // Return the tokens
     return {
       accessToken: `Bearer ${accessToken}`,
@@ -506,11 +505,11 @@ export class AuthService {
 
   /**
    * Request password reset
-   *
    * @async
    * @param {PasswordResetRequestDto} phone
    * @returns {Promise<SuccessResponse>}
    */
+
   async requestPasswordReset({
     email,
   }: PasswordResetRequestDto): Promise<SuccessResponse> {

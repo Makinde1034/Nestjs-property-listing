@@ -230,7 +230,12 @@ export class OfferService {
       return offerPayload;
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error?.data || error?.message || error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new BadRequestException(error);
+      }
     }
   }
   async updateFinalilization(updateRequest: OfferFinalizationInput) {

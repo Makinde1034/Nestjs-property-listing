@@ -339,7 +339,6 @@ type ServiceRequested {
   id: ID!
   userId: String!
   listingId: String!
-  serviceId: String!
   user: User
   serviceProvidedId: String!
   listing: Listing!
@@ -2550,5 +2549,4 @@ input DeleteServiceProvider {
 input RequestForService {
   serviceProvidedId: String!
   listingId: String!
-  serviceId: String!
 }

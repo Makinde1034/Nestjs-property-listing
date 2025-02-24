@@ -33,16 +33,12 @@ export class ServiceRequested extends BaseEntity {
   @Field()
   listingId: string;
 
-  @Column({ nullable: true })
-  @Field()
-  serviceId: string;
-
   @Field(() => User, { nullable: true })
   @JoinColumn({ name: 'userId' })
   @ManyToOne(() => User, (user) => user)
   user: User;
 
-  @Column()
+  @Column({ nullable: true })
   @Field()
   serviceProvidedId: string;
 
@@ -52,7 +48,7 @@ export class ServiceRequested extends BaseEntity {
   listing: Listing;
 
   @Field(() => Service)
-  @JoinColumn({ name: 'serviceId' })
+  @JoinColumn({ name: 'serviceProvidedId' })
   @ManyToOne(() => Service, (service) => service, { nullable: true })
   service: Service;
 

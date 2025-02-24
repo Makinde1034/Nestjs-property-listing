@@ -193,25 +193,19 @@ export class AdminService {
   }
 
   async averageSupportTime(): Promise<number> {
-    // Fetch the relevant data from the database
-    const tickets = await this.ticketsRepository
+    const result = await this.ticketsRepository
       .createQueryBuilder('ticket')
-      .select(['ticket.assignedAt', 'ticket.closedAt'])
+      .select(
+        'AVG(EXTRACT(EPOCH FROM (ticket.closedAt - ticket.assignedAt)))',
+        'avgTime',
+      )
       .where('ticket.assignedAt IS NOT NULL AND ticket.closedAt IS NOT NULL')
-      .getMany();
+      .getRawOne();
 
-    // Calculate the total time difference in seconds
-    const totalTimeDifference = tickets.reduce((total, ticket) => {
-      const assignedAt = ticket.assignedAt.getTime(); // Convert to milliseconds
-      const closedAt = ticket.closedAt.getTime(); // Convert to milliseconds
-      return total + (closedAt - assignedAt) / 1000; // Add the time difference in seconds
-    }, 0);
+    const avgTimeInSeconds = result?.avgTime || 0;
+    console.log(`Average support time: ${avgTimeInSeconds} seconds`);
 
-    // Calculate the average time difference
-    const avgTimeDifference =
-      tickets.length > 0 ? totalTimeDifference / tickets.length : 0;
-
-    return avgTimeDifference;
+    return avgTimeInSeconds / 60; // Convert to minutes
   }
 
   async ticket(findOption: AdminDashboardSort) {
@@ -268,25 +262,19 @@ export class AdminService {
     }
   }
   async averageCloseTime(): Promise<number> {
-    // Fetch the relevant data from the database
-    const tickets = await this.ticketsRepository
+    const result = await this.ticketsRepository
       .createQueryBuilder('ticket')
-      .select(['ticket.createdAt', 'ticket.closedAt'])
+      .select(
+        'AVG(EXTRACT(EPOCH FROM (ticket.closedAt - ticket.createdAt)))',
+        'avgTime',
+      )
       .where('ticket.createdAt IS NOT NULL AND ticket.closedAt IS NOT NULL')
-      .getMany();
+      .getRawOne();
 
-    // Calculate the total time difference in seconds
-    const totalTimeDifference = tickets.reduce((total, ticket) => {
-      const createdAt = ticket.createdAt.getTime(); // Convert to milliseconds
-      const closedAt = ticket.closedAt.getTime(); // Convert to milliseconds
-      return total + (closedAt - createdAt) / 1000; // Add the time difference in seconds
-    }, 0);
+    const avgTimeInSeconds = result?.avgTime || 0;
+    console.log(`Average close time: ${avgTimeInSeconds} seconds`);
 
-    // Calculate the average time difference
-    const avgTimeDifference =
-      tickets.length > 0 ? totalTimeDifference / tickets.length : 0;
-
-    return avgTimeDifference;
+    return avgTimeInSeconds / 60; // Convert to minutes
   }
 
   //TODO implement when payment gateway is completed

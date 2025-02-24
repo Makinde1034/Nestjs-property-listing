@@ -155,9 +155,4 @@ export class RequestForService {
   @Field()
   @IsString()
   listingId: string;
-
-  @Field()
-  @IsOptional()
-  @IsString()
-  serviceId: string;
 }

@@ -61,7 +61,6 @@ export class ServiceAndProviderService {
    *
    * Service Provider
    */
-
   async findOneService(id: string) {
     try {
       return await this.serviceRepository.findOneBy({ id });
@@ -441,6 +440,12 @@ export class ServiceAndProviderService {
     user: User,
   ) {
     try {
+      const service = await this.serviceRepository.findOneBy({
+        id: requestForServiceInput.serviceProvidedId,
+      });
+      if (!service) {
+        throw new BadRequestException('Service not found');
+      }
       const listing = await this.listingRepository.findOneBy({
         id: requestForServiceInput.listingId,
       });
@@ -449,6 +454,8 @@ export class ServiceAndProviderService {
       }
       const data = await this.serviceRequestedRepository.save({
         ...requestForServiceInput,
+        serviceId: requestForServiceInput.serviceProvidedId,
+
         listing,
 
         userId: user.id,
