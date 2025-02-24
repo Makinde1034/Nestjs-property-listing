@@ -351,7 +351,7 @@ export class AuthService {
     if (user.userType === 'admin') {
       user = await this.userRepository.findOneOrFail({
         where: { id: user.id },
-        relations: ['roles'],
+        relations: ['roles', 'serviceProvider'],
       });
     }
 
@@ -404,6 +404,7 @@ export class AuthService {
       sub: {
         userId: user.id,
         level: user.userLevel,
+        isProvider: user.serviceProvider ? true : false,
       },
     };
 

@@ -8,5 +8,6 @@ export interface JWTPayload {
   sub: {
     userId: string;
     level: string;
+    isProvider: boolean;
   };
 }
