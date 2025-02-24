@@ -888,7 +888,7 @@ type Coupon {
   code: String!
   name: String
   appliedTo: String
-  maxUse: Float!
+  maxUse: Float
   usage: String!
   currentUse: Float!
   discountType: String!
@@ -1429,6 +1429,8 @@ input AdminFilterAndSort {
   isListingSold: Boolean
   isListingFlagged: Boolean
   isListingRented: Boolean
+  active: Boolean
+  deactivated: Boolean
 }
 
 input FindOfferInput {
@@ -1517,6 +1519,8 @@ input CouponFilter {
   isListingSold: Boolean
   isListingFlagged: Boolean
   isListingRented: Boolean
+  active: Boolean
+  deactivated: Boolean
 }
 
 input ValidataCouponInput {
@@ -2330,7 +2334,7 @@ input CreateReviewDto {
 input CreateCouponInput {
   name: String!
   code: String!
-  maxUse: Float!
+  maxUse: Float
   isActive: Boolean!
   appliedTo: String!
   usage: String!

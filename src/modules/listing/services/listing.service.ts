@@ -1019,6 +1019,19 @@ export class ListingService {
     }
 
     if (
+      paginateAndSort.deactivated !== undefined &&
+      paginateAndSort.deactivated !== null
+    ) {
+      whereCondition.isListingDisabled = paginateAndSort.deactivated;
+    }
+    if (
+      paginateAndSort.active !== undefined &&
+      paginateAndSort.active !== null
+    ) {
+      whereCondition.isListingDisabled = paginateAndSort.active;
+    }
+
+    if (
       paginateAndSort.isListingPromoted !== undefined &&
       paginateAndSort.isListingPromoted !== null
     ) {

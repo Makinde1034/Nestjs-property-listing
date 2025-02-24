@@ -183,6 +183,15 @@ export class UserFilterAndSort extends PaginateAndSort {
   @IsOptional()
   @IsBoolean()
   isListingRented: boolean;
+  @Field()
+  @IsOptional()
+  @IsBoolean()
+  active: boolean;
+
+  @Field()
+  @IsOptional()
+  @IsBoolean()
+  deactivated: boolean;
 }
 
 @InputType()

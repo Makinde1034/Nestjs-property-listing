@@ -10,6 +10,7 @@ import {
   IsDate,
   IsEnum,
   IsNumber,
+  IsOptional,
   IsPositive,
   IsString,
   ValidateIf,
@@ -28,10 +29,10 @@ export class CreateCouponInput {
   @IsString()
   code: string;
 
-  @Field()
-  @IsNumber()
-  maxUse: number;
-
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsNumber({}, { message: 'maxUse must be a number' }) // Ensure correct validation
+  maxUse?: number; // Mark it as optional to align with `nullable: true`
   @Field()
   @IsBoolean()
   isActive: boolean;

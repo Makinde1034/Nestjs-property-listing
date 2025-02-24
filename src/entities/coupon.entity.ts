@@ -4,6 +4,7 @@
  */
 
 import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
+import { run } from 'node:test';
 import {
   Column,
   CreateDateColumn,
@@ -32,14 +33,13 @@ export class Coupon {
   @Column({ nullable: true })
   appliedTo: string;
 
-  @Field()
-  @Column()
+  @Field({ nullable: true })
+  @Column({ nullable: true })
   maxUse: number;
 
   @Field()
   @Column()
   usage: string;
-
   @Field()
   @Column({ default: 0 })
   currentUse: number;

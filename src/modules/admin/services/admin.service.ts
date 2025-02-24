@@ -1006,13 +1006,13 @@ export class AdminService {
   async adminDefault() {
     try {
       const result = await this.adminRepository.find({ take: 1 });
-
       return result[0];
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException('Failed to fetch');
     }
   }
+
   async findOne(id: string) {
     try {
       return await this.couponRepository.findOneBy({ id });
@@ -1169,6 +1169,33 @@ export class AdminService {
         };
         return result;
       }
+
+      if (
+        coupon.endDate > new Date() &&
+        !coupon.deactived &&
+        coupon.maxUse == null
+      ) {
+        let amount = validataCouponInput.price;
+        switch (coupon.discountType) {
+          case CouponEnum.NUMBER:
+            amount = coupon.discountValue;
+            break;
+
+          case CouponEnum.PERCENT:
+            amount = (coupon.discountValue / 100) * validataCouponInput.price;
+            break;
+
+          default:
+            break;
+        }
+
+        result = {
+          valid: true,
+          amount,
+        };
+        return result;
+      }
+
       result = {
         valid: false,
         amount: validataCouponInput.price,
