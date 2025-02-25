@@ -57,7 +57,11 @@ import { NotificationService } from '../../notification/services';
 import { AttributeService } from './attribute.service';
 import { ListingAttributeRepository } from '../repositories/listing-attributes.repository';
 import { ListingTypeService } from './listing-type.service';
-import { FurnishingStatusEnum, NotificationEvent } from '../../../common/enums';
+import {
+  FurnishingStatusEnum,
+  NotificationEvent,
+  UserProfileTypeEnum,
+} from '../../../common/enums';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { GpsCoordinateRepository } from '../repositories/gps-coordinate.repository';
 import { AttributeRepository } from '../repositories';
@@ -1367,10 +1371,15 @@ export class ListingService {
       });
 
       // Check permission
-      if (listing.userId !== user.id) {
-        throw new ForbiddenError(
-          'This user does not have permission to update the record',
-        );
+      if (
+        user.userType == UserProfileTypeEnum.INDIVIDUAL ||
+        user.userType == UserProfileTypeEnum.COMPANY
+      ) {
+        if (listing.userId !== user.id) {
+          throw new ForbiddenError(
+            'This user does not have permission to update the record',
+          );
+        }
       }
       if (listing.status == ListingStatus.PENDING) {
         let update;
