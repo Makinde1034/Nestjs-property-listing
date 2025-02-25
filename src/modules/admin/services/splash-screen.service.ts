@@ -70,10 +70,11 @@ export class SplashScreenService {
       const overlappingSplashScreens = await this.splashScreenRepository
         .createQueryBuilder('splashScreen')
         .where(
-          '(splashScreen.startDate BETWEEN :start AND :end OR splashScreen.endDate BETWEEN :start AND :end OR :start BETWEEN splashScreen.startDate AND splashScreen.endDate)',
+          '(splashScreen.startDate BETWEEN :start AND :end OR splashScreen.endDate BETWEEN :start AND :end OR :start BETWEEN splashScreen.startDate AND splashScreen.endDate  AND :placement = splashScreen.placement)',
           {
             start: createSplashScreen.startDate,
             end: createSplashScreen.endDate,
+            placement: createSplashScreen.placement,
           },
         )
         .getCount();
@@ -129,6 +130,9 @@ export class SplashScreenService {
         'Error during splash screen creation',
         error.message || error,
       );
+      if (error instanceof HttpException) {
+        throw error;
+      }
       throw new BadGatewayException('Failed to create splash screen');
     }
   }
