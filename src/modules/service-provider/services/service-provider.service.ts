@@ -133,7 +133,6 @@ export class ServiceAndProviderService {
         .createQueryBuilder('serviceProvider')
         .leftJoinAndSelect('serviceProvider.user', 'user')
         .leftJoinAndSelect('serviceProvider.servicesOffered', 'servicesOffered')
-
         .leftJoinAndSelect('servicesOffered.service', 'service');
       if (paginateAndSort.status) {
         baseQuery.andWhere(`serviceProvider.providerStatus = :status`, {
@@ -569,15 +568,16 @@ export class ServiceAndProviderService {
   }
   async ViewServiceRequested(paginateAndSort: PaginateAndSort, user: User) {
     try {
+      console.log(user.id);
       const query = this.serviceRequestedRepository
         .createQueryBuilder('serviceRequested')
-        .leftJoin('serviceRequested.user', 'user')
+        .leftJoinAndSelect('serviceRequested.user', 'user')
         .leftJoinAndSelect('serviceRequested.listing', 'listing')
+        .leftJoinAndSelect('serviceRequested.service', 'service')
         .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
         .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
         .leftJoinAndSelect('listing.listingType', 'listingType')
-        .where('serviceRequested.userId = :userId', { userId: user.id });
-
+        .where('user.id = :userId::uuid', { userId: user.id });
       const [request, total] = await query
         .take(paginateAndSort.take)
         .skip(paginateAndSort.skip)
@@ -585,6 +585,7 @@ export class ServiceAndProviderService {
 
       return { request, total };
     } catch (error) {
+      console.log(error);
       this.logger.log(error);
       throw new BadRequestException(error);
     }

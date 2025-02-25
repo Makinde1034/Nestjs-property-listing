@@ -39,33 +39,28 @@ export class PdfService {
 
   async generatePdf(html: string): Promise<Buffer> {
     try {
-      // Launch Puppeteer
       const browser = await puppeteer.launch({
-        product: 'firefox',
         headless: true,
         protocol: 'webDriverBiDi',
+        executablePath: '/usr/bin/firefox',
       });
+
       const page = await browser.newPage();
+      await page.setContent(html, { waitUntil: 'domcontentloaded' });
 
-      // Set the content of the page
-      await page.setContent(html, {
-        waitUntil: 'domcontentloaded',
-      });
-
-      // Generate the PDF with the specified format
+      // Generate PDF
       const pdfBuffer = await page.pdf({
         format: 'A4',
         printBackground: true,
       });
 
-      // Close the browser
       await browser.close();
 
-      this.logger.log('PDF generated successfully');
-      return pdfBuffer;
+      // 🔥 Convert Uint8Array to Buffer
+      return Buffer.from(pdfBuffer);
     } catch (error) {
       this.logger.error('Error generating PDF', error);
-      throw new Error('Error generating PDF'); // Throwing an error to handle it properly in the caller
+      throw new Error('Error generating PDF');
     }
   }
 }

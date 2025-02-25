@@ -340,7 +340,7 @@ type ServiceRequested {
   userId: String!
   listingId: String!
   user: User
-  serviceProvidedId: String!
+  serviceId: String!
   listing: Listing!
   service: Service!
   status: String!

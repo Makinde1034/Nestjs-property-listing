@@ -40,15 +40,16 @@ export class ServiceRequested extends BaseEntity {
 
   @Column({ nullable: true })
   @Field()
-  serviceProvidedId: string;
+  serviceId: string;
 
   @Field(() => Listing)
   @JoinColumn({ name: 'listingId' })
-  @ManyToOne(() => Listing, (listing) => listing.serviceRequested)
+  @ManyToOne(() => Listing, (listing) => listing.serviceRequested, {
+    nullable: true,
+  })
   listing: Listing;
-
   @Field(() => Service)
-  @JoinColumn({ name: 'serviceProvidedId' })
+  @JoinColumn({ name: 'serviceId' })
   @ManyToOne(() => Service, (service) => service, { nullable: true })
   service: Service;
 

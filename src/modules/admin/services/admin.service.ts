@@ -203,7 +203,6 @@ export class AdminService {
       .getRawOne();
 
     const avgTimeInSeconds = result?.avgTime || 0;
-    console.log(`Average support time: ${avgTimeInSeconds} seconds`);
 
     return avgTimeInSeconds / 60; // Convert to minutes
   }
@@ -272,7 +271,6 @@ export class AdminService {
       .getRawOne();
 
     const avgTimeInSeconds = result?.avgTime || 0;
-    console.log(`Average close time: ${avgTimeInSeconds} seconds`);
 
     return avgTimeInSeconds / 60; // Convert to minutes
   }
@@ -587,61 +585,109 @@ export class AdminService {
   }
 
   async userFunneling(findOption: AdminDashboardSort): Promise<UserFunneling> {
-    // Calculate the start and end dates for the given number of months
-    const endDate = new Date();
-    const startDate = subMonths(endDate, findOption.value - 1);
+    try {
+      const currentDate = moment();
+      const date = new Date(); // Use moment to handle the current date
+      let startDate: Date, endDate: Date;
 
-    // Adjust to the start of the month for startDate and end of the month for endDate
-    const startOfRange = startOfMonth(startDate);
-    const endOfRange = endOfMonth(endDate);
+      // Determine date range based on time period
+      switch (findOption.timePeriod) {
+        case TimePeriod.Today:
+          startDate = currentDate.startOf('day').toDate();
+          endDate = date;
+          break;
+        case TimePeriod.Week:
+          startDate = currentDate
+            .subtract(findOption.value ?? 1, 'weeks')
+            .startOf('week')
+            .toDate();
+          endDate = date;
+          break;
+        case TimePeriod.Month:
+          startDate = currentDate
+            .subtract(findOption.value ?? 1, 'months')
+            .startOf('month')
+            .toDate();
+          endDate = date;
+          break;
+        case TimePeriod.Year:
+          startDate = currentDate
+            .subtract(findOption.value ?? 1, 'years')
+            .startOf('year')
+            .toDate();
+          endDate = date;
+          break;
+        default:
+          break;
+      }
 
-    // Use raw SQL to count users by type and levels
-    const [guestCount, levelOneCount, levelTwoCount] = await Promise.all([
-      this.userTracking
-        .createQueryBuilder('userTracking')
-        .select('COUNT(*)', 'count')
-        .where('userTracking.type = :type', { type: 'guest' })
-        .andWhere('userTracking.createdAt BETWEEN :start AND :end', {
-          start: startOfRange,
-          end: endOfRange,
-        })
-        .getRawOne(),
+      console.log(startDate, endDate);
 
-      this.userRepository
-        .createQueryBuilder('user')
-        .select('COUNT(*)', 'count')
-        .where('user.userLevel = :level', { level: UserLevelEnum.LEVEL_1 })
-        .andWhere('user.createdAt BETWEEN :start AND :end', {
-          start: startOfRange,
-          end: endOfRange,
-        })
-        .getRawOne(),
+      // Use raw SQL to count users by type and levels
+      const [guestCount, levelOneCount, levelTwoCount, converged] =
+        await Promise.all([
+          this.userTracking
+            .createQueryBuilder('userTracking')
+            .select('COUNT(*)', 'count')
+            .where('userTracking.type = :type', { type: 'guest' })
+            .andWhere('userTracking.createdAt IS NOT NULL') // Ensure no NULL timestamps
+            .andWhere('userTracking.createdAt BETWEEN :start AND :end', {
+              start: startDate,
+              end: endDate,
+            })
+            .getRawOne(),
 
-      this.userRepository
-        .createQueryBuilder('user')
-        .select('COUNT(*)', 'count')
-        .where('user.userLevel = :level', { level: UserLevelEnum.LEVEL_2 })
-        .andWhere('user.createdAt BETWEEN :start AND :end', {
-          start: startOfRange,
-          end: endOfRange,
-        })
-        .getRawOne(),
-    ]);
+          this.userRepository
+            .createQueryBuilder('user')
+            .select('COUNT(*)', 'count')
+            .where('user.userLevel = :level', { level: UserLevelEnum.LEVEL_1 })
+            .andWhere('user.createdAt IS NOT NULL')
+            .andWhere('user.createdAt BETWEEN :start AND :end', {
+              start: startDate,
+              end: endDate,
+            })
+            .getRawOne(),
 
-    // Extract counts from raw query results
-    const guest = parseInt(guestCount.count, 10) || 0;
-    const levelOne = parseInt(levelOneCount.count, 10) || 0;
-    const levelTwo = parseInt(levelTwoCount.count, 10) || 0;
+          this.userRepository
+            .createQueryBuilder('user')
+            .select('COUNT(*)', 'count')
+            .where('user.userLevel = :level', { level: UserLevelEnum.LEVEL_2 })
+            .andWhere('user.createdAt IS NOT NULL')
+            .andWhere('user.createdAt BETWEEN :start AND :end', {
+              start: startDate,
+              end: endDate,
+            })
+            .getRawOne(),
 
-    // Construct the funneling result
-    const userFunneling: UserFunneling = {
-      guest,
-      levelOne,
-      levelTwo,
-      converged: levelOne + levelTwo,
-    };
+          this.invoiceRepository
+            .createQueryBuilder('invoice')
+            .select('COUNT(DISTINCT invoice.userId)', 'count')
+            .where('invoice.createdAt IS NOT NULL') // Add condition to prevent NaN
+            .andWhere('invoice.createdAt BETWEEN :start AND :end', {
+              start: startDate,
+              end: endDate,
+            })
+            .getRawOne(),
+        ]);
+      console.log(guestCount, levelOneCount, levelTwoCount, converged);
 
-    return userFunneling;
+      // Extract counts from raw query results
+      const guest = parseInt(guestCount?.count || '0', 10);
+      const levelOne = parseInt(levelOneCount?.count || '0', 10);
+      const levelTwo = parseInt(levelTwoCount?.count || '0', 10);
+      const convergedCount = parseInt(converged?.count || '0', 10);
+
+      return {
+        guest,
+        levelOne,
+        levelTwo,
+        converged: convergedCount,
+      };
+    } catch (error) {
+      console.log(error);
+      console.error('Error in userFunneling:', error);
+      throw new Error('Failed to fetch user funneling data.');
+    }
   }
 
   async userDashBoard(findOption: AdminDashboardSort) {
