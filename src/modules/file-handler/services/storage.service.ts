@@ -5,6 +5,7 @@
 
 import { Storage, UploadResponse } from '@google-cloud/storage';
 import { Injectable, Logger } from '@nestjs/common';
+import * as sharp from 'sharp';
 
 import { generatereference } from '../../../common/utils/functions';
 import StorageConfig from '../../../config/serviceAccount/storage-config';
@@ -59,6 +60,25 @@ export class StorageService {
       });
       stream.end(fileData.buffer);
     });
+  }
+
+  async compressImage(file: Express.Multer.File) {
+    if (!file) {
+      throw new Error('No file provided');
+    }
+
+    console.log(`Original file size: ${file.buffer.length} bytes`);
+
+    const compressedBuffer = await sharp(file.buffer)
+      .jpeg({ quality: 70 }) // Adjust quality (70% recommended)
+      .toBuffer();
+
+    console.log(`Compressed file size: ${compressedBuffer.length} bytes`);
+
+    return {
+      ...file,
+      buffer: compressedBuffer, // Replace original buffer with compressed buffer
+    };
   }
 
   async delete(path: string) {

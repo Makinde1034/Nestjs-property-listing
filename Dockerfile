@@ -22,6 +22,9 @@ COPY . .
 RUN npm run build && \
     chmod -R 777 /usr/src/app/dist
 
+
+
+
 # Install Firefox and required fonts
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -34,6 +37,14 @@ RUN apt-get update && \
     fonts-kacst \
     fonts-freefont-ttf && \
     rm -rf /var/lib/apt/lists/*
+
+RUN npm install --platform=linux --arch=x64 sharp
+
+
+
+RUN apt-get update && apt-get install -y \
+    libvips libvips-dev
+
 
 # Install Puppeteer without triggering Firefox download
 RUN npm install puppeteer
