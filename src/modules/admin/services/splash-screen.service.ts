@@ -390,14 +390,16 @@ export class SplashScreenService {
   async fetchDefaultForBanner() {
     let splashScreen: SplashScreen;
     try {
+      // Fetch currently active banner
       splashScreen = await this.splashScreenRepository.findOne({
         where: {
           placement: SplashScreenPlacement.MAIN_BANNER,
-          startDate: MoreThan(new Date()),
-          endDate: LessThanOrEqual(new Date()),
+          startDate: LessThanOrEqual(new Date()), // Started in the past or today
+          endDate: MoreThan(new Date()), // Ends in the future
         },
       });
 
+      // If no active banner is found, fetch the default
       if (!splashScreen) {
         splashScreen = await this.splashScreenRepository.findOne({
           where: {
@@ -412,6 +414,7 @@ export class SplashScreenService {
       throw new NotFoundException(AppStrings.NOT_FOUND);
     }
   }
+
   async searchForSplashScreen(searchParam: string) {
     try {
       return await this.splashScreenRepository

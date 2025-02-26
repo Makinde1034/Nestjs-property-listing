@@ -784,10 +784,23 @@ export class ListingService {
           query.leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate');
         }
 
-        if (minPrice !== undefined && maxPrice !== undefined) {
+        const parsedMinPrice =
+          minPrice !== undefined ? Number(minPrice) : undefined;
+        const parsedMaxPrice =
+          maxPrice !== undefined ? Number(maxPrice) : undefined;
+
+        if (parsedMinPrice !== undefined && parsedMaxPrice !== undefined) {
           query.andWhere('listing.price BETWEEN :minPrice AND :maxPrice', {
-            minPrice,
-            maxPrice,
+            minPrice: parsedMinPrice,
+            maxPrice: parsedMaxPrice,
+          });
+        } else if (parsedMinPrice !== undefined) {
+          query.andWhere('listing.price >= :minPrice', {
+            minPrice: parsedMinPrice,
+          });
+        } else if (parsedMaxPrice !== undefined) {
+          query.andWhere('listing.price <= :maxPrice', {
+            maxPrice: parsedMaxPrice,
           });
         }
 
@@ -838,7 +851,7 @@ export class ListingService {
 
           if (sortDirections.includes(direction)) {
             // Add condition to sort where the date is not null
-            // Query.andWhere(`listing.${sortField}`);
+            // query.andWhere(`listing.${sortField}`);
 
             // Apply sorting to the query
 

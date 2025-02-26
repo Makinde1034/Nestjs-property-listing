@@ -140,8 +140,6 @@ export class NotificationService implements OnModuleInit {
         img,
       } = notificationInput;
 
-      console.log(recipientId);
-
       const specificEvent = notificationInput.event ?? event;
 
       // Fetch buyer and seller notification preferences for the given scope
@@ -440,12 +438,13 @@ export class NotificationService implements OnModuleInit {
 
           await this.saveNotificationLog({
             title: subject,
+            arabicTitle: messageData?.arabicTitle,
             category: messageData.scope,
             subCategory: messageData.event,
             metadata: metadata,
-
             recipient: user,
             message: text,
+            arabicMessage: messageData?.arabicBody,
             type: NotificationType.SYSTEM_NOTIFICATION,
             img,
           });

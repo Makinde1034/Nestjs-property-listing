@@ -25,7 +25,15 @@ export class Notification extends BaseEntity {
 
   @Column()
   @Field()
+  arabicTitle: string;
+
+  @Column()
+  @Field()
   message: string;
+
+  @Column()
+  @Field()
+  arabicMessage: string;
 
   @Column({ nullable: true })
   @Field({ nullable: true })

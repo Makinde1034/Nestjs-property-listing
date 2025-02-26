@@ -726,7 +726,9 @@ type User {
 type Notification {
   id: String
   title: String!
+  arabicTitle: String!
   message: String!
+  arabicMessage: String!
   metadata: String
   category: String
   img: String
@@ -2534,7 +2536,7 @@ input UpdateServiceInput {
   pricing: [Pricing!]
   providerServiceStatus: String
   id: String!
-  reason: String!
+  reason: String
   isActive: Boolean
 }
 

@@ -103,7 +103,6 @@ export class ServiceAndProviderResolver {
   async findOneService(@Args('id') id: string) {
     return await this.serviceProviderService.findOneService(id);
   }
-
   @UseGuards(AccessTokenGuard)
   @Mutation(() => ServiceProvider)
   async updateServiceProvider(

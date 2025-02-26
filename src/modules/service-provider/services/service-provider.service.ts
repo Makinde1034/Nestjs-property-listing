@@ -435,14 +435,28 @@ export class ServiceAndProviderService {
   }
   async updateService(updateServiceInput: UpdateServiceInput) {
     try {
-      const { id, providerServiceStatus, ...rest } = updateServiceInput;
+      let { id, providerServiceStatus, isActive, pricing, ...rest } =
+        updateServiceInput;
+      if (pricing) {
+        const { affected } = await this.serviceRepository.update(id, {
+          ...rest,
+          pricing: JSON.stringify(pricing),
+        });
 
-      const { affected } = await this.serviceProvidedRepository.update(id, {
-        ...rest,
-      });
+        const data = await this.serviceRepository.findOneBy({ id });
 
-      if (affected > 0) {
-        return new SuccessResponse(AppStrings.SUCCESSFULL);
+        if (affected > 0) {
+          return new SuccessResponse(AppStrings.SUCCESSFULL, data);
+        }
+      } else {
+        const { affected } = await this.serviceRepository.update(id, {
+          ...rest,
+        });
+        const data = await this.serviceRepository.findOneBy({ id });
+
+        if (affected > 0) {
+          return new SuccessResponse(AppStrings.SUCCESSFULL, data);
+        }
       }
     } catch (error) {
       this.logger.log(error);
