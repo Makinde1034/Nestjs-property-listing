@@ -707,10 +707,10 @@ export class OfferService {
             offerId: updateOfferInput.id,
           });
 
-          // await this.paymentService.capturePayment({
-          //   amount: JSON.stringify(invoice.price),
-          //   paymentId: invoice.checkoutId,
-          // });
+          await this.paymentService.capturePayment({
+            amount: JSON.stringify(invoice.price),
+            paymentId: invoice.checkoutId,
+          });
           // Update offer status and return updated offer immediately using RETURNING (if supported by your DB)
           const updateResult = await entityManager
             .createQueryBuilder()
@@ -736,7 +736,6 @@ export class OfferService {
               }
             },
           );
-          console.log(offer.listing);
           const images = JSON.parse(offer?.listing?.images);
           this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
             creatorId: user.id,
@@ -769,7 +768,6 @@ export class OfferService {
           // Return the updated offer
           return updateResult.raw[0]; // Returning the updated offer from the query result
         } catch (error) {
-          console.log(error);
           if (error instanceof HttpException) {
             throw error;
           } else {

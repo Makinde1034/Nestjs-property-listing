@@ -67,6 +67,7 @@ import { SseService } from '../../sse/client.service';
 import { ServerSentEvents } from '../../../common/enums';
 import { BidRegistrationRepository } from '../repositories/bid-registration.repository';
 import { Auction } from '../../../entities/auction-table.entity';
+import { InvoiceRepository } from '../../payment/repositories/invoice.repository';
 
 @Injectable()
 export class AuctionService {
@@ -84,6 +85,7 @@ export class AuctionService {
     private readonly bidRegistrationRepository: BidRegistrationRepository,
 
     private readonly sseService: SseService,
+    private readonly invoiceRepository: InvoiceRepository,
   ) {}
   logger = new Logger(AuctionService.name);
   async create(auctionInput: CreateAuctionInput) {
@@ -683,24 +685,38 @@ export class AuctionService {
     try {
       // Fetch necessary details concurrently
 
-      const [auctionParticipant, auctionBidRanges, highestBid] =
-        await Promise.all([
-          this.auctionParticipantRepository.findOne({
-            where: { listingId: bidInput.listingId },
-          }),
+      const [
+        auctionParticipant,
+        auctionBidRanges,
+        highestBid,
+        bidRegistrationRepository,
+      ] = await Promise.all([
+        this.auctionParticipantRepository.findOne({
+          where: { listingId: bidInput.listingId },
+        }),
 
-          this.auctionBidRangeRepository.find(),
-          this.bidRepository.findOne({
-            where: {
-              listingId: bidInput.listingId,
-              auctionId: bidInput.auctionId,
-            },
-            order: { price: 'DESC' },
-          }),
-        ]);
+        this.auctionBidRangeRepository.find(),
+        this.bidRepository.findOne({
+          where: {
+            listingId: bidInput.listingId,
+            auctionId: bidInput.auctionId,
+          },
+          order: { price: 'DESC' },
+        }),
+
+        this.bidRegistrationRepository.findOne({
+          where: { userId: user.id, auctionId: bidInput.auctionId },
+        }),
+      ]);
 
       if (!auctionParticipant) {
         throw new NotFoundException('Listing not registered in auction');
+      }
+
+      if (!bidRegistrationRepository) {
+        throw new NotFoundException(
+          'you have not registered  to bid for this auction',
+        );
       }
 
       if (auctionParticipant.startingPrice > bidInput.price) {
@@ -938,15 +954,23 @@ export class AuctionService {
 
   async registerToBid(data: BidRegistrationInput, user: User) {
     try {
-      const [auction, listing, adminDefault] = await Promise.all([
+      const [auction, listing, adminDefault, invoice] = await Promise.all([
         this.auctionRepository.findOneBy({ id: data.auctionId }),
         this.listingRepository.findOneBy({ id: data.listingId }),
         this.adminService.adminDefault(),
+        this.invoiceRepository.findOne({
+          where: { reference: data.reference },
+        }),
       ]);
+
       const now = new Date();
 
       if (!auction) {
         throw new BadRequestException('Auction not Found');
+      }
+
+      if (!invoice) {
+        throw new BadRequestException('Invalid invoice reference');
       }
 
       if (!listing) {

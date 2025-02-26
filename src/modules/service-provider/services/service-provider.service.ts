@@ -433,6 +433,22 @@ export class ServiceAndProviderService {
       throw new BadRequestException(error);
     }
   }
+  async updateService(updateServiceInput: UpdateServiceInput) {
+    try {
+      const { id, providerServiceStatus, ...rest } = updateServiceInput;
+
+      const { affected } = await this.serviceProvidedRepository.update(id, {
+        ...rest,
+      });
+
+      if (affected > 0) {
+        return new SuccessResponse(AppStrings.SUCCESSFULL);
+      }
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
 
   async requestForService(
     requestForServiceInput: RequestForService,

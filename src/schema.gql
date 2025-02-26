@@ -1302,7 +1302,7 @@ type Query {
   findOneServiceProvider(id: String!): OneServiceProviderResponse!
   checkServiceProviderstatus: ServiceProvider!
   findAllService(paginateAndSort: PaginateAndSort!): ServiceResponse!
-  findOneService(id: String!): ServiceProvider!
+  findOneService(id: String!): Service!
   ViewServiceRequest(paginateAndSort: PaginateAndSort!): RequestedServiceResponse!
   ViewServiceRequested(paginateAndSort: PaginateAndSort!): RequestedServiceResponse!
 }
@@ -1716,6 +1716,7 @@ type Mutation {
   acceptServiceProvider(serviceProviderInput: ServiceProviderInput!): SuccessResponse!
   rejectServiceProvider(serviceProviderInput: ServiceProviderInput!): SuccessResponse!
   updateServiceStatus(updateServiceStatus: UpdateServiceInput!): SuccessResponse!
+  updateService(updateServiceStatus: UpdateServiceInput!): SuccessResponse!
   updateProviderServiceCoverageArea(updateProviderServiceCoverageArea: UpdateServiceProviderInput!): SuccessResponse!
   acceptRequestAndStopRequest(updateServiceStatus: UpdateServiceInput!): SuccessResponse!
   provideService(provideService: ProvideNewService!): ServiceProvided!

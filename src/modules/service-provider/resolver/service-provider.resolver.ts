@@ -66,6 +66,7 @@ export class ServiceAndProviderResolver {
       ctx.req.user,
     );
   }
+
   @UseGuards(AccessTokenGuard)
   @Query(() => ServiceProviderResponse, { name: 'findAllServiceProviders' })
   async findAll(@Args('paginateAndSort') paginateAndSort: AdminFilterAndSort) {
@@ -98,7 +99,7 @@ export class ServiceAndProviderResolver {
   }
 
   @UseGuards(AccessTokenGuard)
-  @Query(() => ServiceProvider, { name: 'findOneService' })
+  @Query(() => Service, { name: 'findOneService' })
   async findOneService(@Args('id') id: string) {
     return await this.serviceProviderService.findOneService(id);
   }
@@ -148,6 +149,19 @@ export class ServiceAndProviderResolver {
     @Context() ctx: any,
   ) {
     return await this.serviceProviderService.updateServiceStatus(
+      serviceProviderInput,
+    );
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @UseGuards(ServiceProviderGuard)
+  @Mutation(() => SuccessResponse)
+  async updateService(
+    @Args('updateServiceStatus')
+    serviceProviderInput: UpdateServiceInput,
+    @Context() ctx: any,
+  ) {
+    return await this.serviceProviderService.updateService(
       serviceProviderInput,
     );
   }
