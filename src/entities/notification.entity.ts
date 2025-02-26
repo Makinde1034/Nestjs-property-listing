@@ -23,16 +23,16 @@ export class Notification extends BaseEntity {
   @Field()
   title: string;
 
-  @Column()
-  @Field()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   arabicTitle: string;
 
   @Column()
   @Field()
   message: string;
 
-  @Column()
-  @Field()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   arabicMessage: string;
 
   @Column({ nullable: true })

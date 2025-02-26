@@ -61,6 +61,7 @@ type Invoice {
   offerId: String
   reference: String
   listing: Listing
+  user: User
   listingType: ListingType
   offer: Offer
   type: String!
@@ -726,9 +727,9 @@ type User {
 type Notification {
   id: String
   title: String!
-  arabicTitle: String!
+  arabicTitle: String
   message: String!
-  arabicMessage: String!
+  arabicMessage: String
   metadata: String
   category: String
   img: String

@@ -19,6 +19,7 @@ import { PaymentStatus } from '../common/enums/status.enum';
 import { Listing } from './listing.entity';
 import { ListingType } from './listing-type.entity';
 import { Offer } from './offer.entity';
+import { User } from './user.entity';
 
 @Entity()
 @ObjectType()
@@ -55,6 +56,11 @@ export class Invoice {
   @JoinColumn({ name: 'listingId' })
   @Field(() => Listing, { nullable: true })
   listing?: Listing;
+
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: 'userId' })
+  @Field(() => User, { nullable: true })
+  user: User;
 
   @ManyToOne(() => ListingType, (listingType) => listingType.invoice, {
     nullable: true,
