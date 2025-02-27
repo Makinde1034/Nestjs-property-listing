@@ -537,8 +537,12 @@ export class ServiceAndProviderService {
 
   async acceptService(id: string, user: User) {
     try {
+      const provider = await this.serviceProviderRepository.findOne({
+        where: { userId: user.id },
+      });
       const data = await this.serviceRequestedRepository.update(id, {
         status: ServiceProvidedStatus.ACCEPTED,
+        provider,
       });
       return data;
     } catch (error) {
@@ -602,6 +606,7 @@ export class ServiceAndProviderService {
       const query = this.serviceRequestedRepository
         .createQueryBuilder('serviceRequested')
         .leftJoinAndSelect('serviceRequested.user', 'user')
+        .leftJoinAndSelect('serviceRequested.provider', 'provider')
         .leftJoinAndSelect('serviceRequested.listing', 'listing')
         .leftJoinAndSelect('serviceRequested.service', 'service')
         .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')

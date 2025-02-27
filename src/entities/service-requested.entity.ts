@@ -21,6 +21,7 @@ import { User } from './user.entity';
 import { Listing } from './listing.entity';
 import { ServiceProvidedStatus } from '../common/enums/service-provider';
 import { Service } from './services.entity';
+import { ServiceProvider } from './service-provider.entity';
 
 @Entity()
 @ObjectType()
@@ -32,6 +33,9 @@ export class ServiceRequested extends BaseEntity {
   @Column()
   @Field()
   listingId: string;
+  @Column({ nullable: true })
+  @Field()
+  serviceProviderId: string;
 
   @Field(() => User, { nullable: true })
   @JoinColumn({ name: 'userId' })
@@ -41,7 +45,6 @@ export class ServiceRequested extends BaseEntity {
   @Column({ nullable: true })
   @Field()
   serviceId: string;
-
   @Field(() => Listing)
   @JoinColumn({ name: 'listingId' })
   @ManyToOne(() => Listing, (listing) => listing.serviceRequested, {
@@ -52,6 +55,11 @@ export class ServiceRequested extends BaseEntity {
   @JoinColumn({ name: 'serviceId' })
   @ManyToOne(() => Service, (service) => service, { nullable: true })
   service: Service;
+
+  @Field(() => ServiceProvider, { nullable: true })
+  @JoinColumn({ name: 'serviceProviderId' })
+  @ManyToOne(() => ServiceProvider, (service) => service, { nullable: true })
+  provider: ServiceProvider;
 
   @Column({ default: ServiceProvidedStatus.PENDING })
   @Field()

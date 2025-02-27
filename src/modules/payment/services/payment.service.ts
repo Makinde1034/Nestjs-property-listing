@@ -212,8 +212,8 @@ export class PaymentService {
       }
 
       const payload: CreateInvoiceInput = {
-        capturedPrice: 10,
-        vat: 10,
+        capturedPrice: invoice.capturedPrice,
+        vat: invoice.vat,
         expiredAt: addDays(new Date(), 4),
         userId: user.id,
         listingid: listing.id,

@@ -7,6 +7,7 @@ export enum ServiceProvidedStatus {
   PENDING = 'pending',
   ACCEPTED = 'accepted',
   REJECTED = 'rejected',
+  DONE = 'done',
   APPEALED = 'appealed',
   CANCELED = 'canceled',
   COMPLETED = 'confirmed',
