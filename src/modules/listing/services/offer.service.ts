@@ -441,6 +441,7 @@ export class OfferService {
           .leftJoinAndSelect('offer.listing', 'listing')
           .leftJoinAndSelect('offer.user', 'user')
           .leftJoinAndSelect('listing.listingType', 'listingType')
+          .leftJoinAndSelect('listing.user', 'owner')
           .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
           .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
           .where('offer.userId = :userId', {

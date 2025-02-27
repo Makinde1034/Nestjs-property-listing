@@ -1384,16 +1384,18 @@ export class ListingService {
       });
 
       // Check permission
-      if (
-        user.userType == UserProfileTypeEnum.INDIVIDUAL ||
-        user.userType == UserProfileTypeEnum.COMPANY
-      ) {
-        if (listing.userId !== user.id) {
-          throw new ForbiddenError(
-            'This user does not have permission to update the record',
-          );
-        }
-      }
+      // if (
+      //   !(
+      //     user.userType == UserProfileTypeEnum.INDIVIDUAL ||
+      //     user.userType == UserProfileTypeEnum.COMPANY
+      //   )
+      // ) {
+      //   if (listing.userId !== user.id) {
+      //     throw new ForbiddenError(
+      //       'This user does not have permission to update the record',
+      //     );
+      //   }
+      // }
       if (listing.status == ListingStatus.PENDING) {
         let update;
         // Update listing details
@@ -1698,11 +1700,11 @@ export class ListingService {
 
       const stringifiedImages = JSON.stringify(existingImages);
 
-      // await this.listingRepository.update(query.listingId, {
-      //   publishable: true,
-      //   images: stringifiedImages,
-      //   isListingVerified: verified,
-      // });
+      await this.listingRepository.update(query.listingId, {
+        publishable: true,
+        images: stringifiedImages,
+        isListingVerified: verified,
+      });
 
       if (!listing.images) {
         const notificationPreference =

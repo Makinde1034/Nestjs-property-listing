@@ -239,7 +239,7 @@ export class ListingResolver {
   }
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)
-  @Permissions(PermissionsEnum.LISTINGS_EDIT)
+  // @Permissions(PermissionsEnum.LISTINGS_EDIT)
   @Mutation(() => Listing, { name: 'updateListing' })
   async updateListing(
     @Args('updateListingDto') updateListingDto: UpdateListingDto,
