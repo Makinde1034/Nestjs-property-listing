@@ -18,7 +18,7 @@ export class ServiceResponse {
 }
 @ObjectType()
 export class RequestedServiceResponse {
-  @Field(() => [ServiceRequested])
+  @Field(() => [ServiceRequested], { nullable: true })
   request: ServiceRequested[];
 
   @Field()

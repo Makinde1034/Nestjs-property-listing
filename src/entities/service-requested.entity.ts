@@ -51,7 +51,7 @@ export class ServiceRequested extends BaseEntity {
     nullable: true,
   })
   listing: Listing;
-  @Field(() => Service)
+  @Field(() => Service, { nullable: true })
   @JoinColumn({ name: 'serviceId' })
   @ManyToOne(() => Service, (service) => service, { nullable: true })
   service: Service;

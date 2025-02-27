@@ -344,7 +344,7 @@ type ServiceRequested {
   user: User
   serviceId: String!
   listing: Listing!
-  service: Service!
+  service: Service
   provider: ServiceProvider
   status: String!
   createdAt: DateTime
@@ -500,7 +500,9 @@ type Category {
 }
 
 type Article {
-  """id"""
+  """
+  id
+  """
   id: Int!
   content: String!
   image: String
@@ -1169,7 +1171,7 @@ type ServiceResponse {
 }
 
 type RequestedServiceResponse {
-  request: [ServiceRequested!]!
+  request: [ServiceRequested!]
   total: Float!
 }
 
@@ -1185,7 +1187,9 @@ type OneServiceProviderResponse {
 
 type Query {
   app: String!
-  findAllSplashScreen(findOption: SplashScreenFilterInput): SplashScreenResponse!
+  findAllSplashScreen(
+    findOption: SplashScreenFilterInput
+  ): SplashScreenResponse!
   findOneSplashScreen(id: Float!): SplashScreen!
   findDefaultSplashScreen: SplashScreen
   findDefaultBanner: SplashScreen
@@ -1218,16 +1222,22 @@ type Query {
   fetchOneAttribute(id: String!): Attribute!
   searchForAttribute(searchParam: String!): [Attribute!]!
   searchForAttributeSets(searchParam: String!): [AttributeSet!]!
-  findAllListingForBuyerUnauthenticated(findManyOptions: CreateSearchHistoryInput): ListingResponse!
+  findAllListingForBuyerUnauthenticated(
+    findManyOptions: CreateSearchHistoryInput
+  ): ListingResponse!
   findListingsForOwner(findManyOptions: AttributeDto): ListingResponse!
   compareListing(compareListingInput: CompareListingInput!): [Listing!]!
   findCompare: Compare
   findOneListingForOwner(id: String!): Listing!
-  findListingsForAdmin(paginateAndSort: AdminFilterAndSort): AdminListingResponse!
+  findListingsForAdmin(
+    paginateAndSort: AdminFilterAndSort
+  ): AdminListingResponse!
   findOneListingForAdmin(id: String!): Listing!
   findOneListingForAuthenticatedBuyer(id: String!): Listing!
   findOneForUnauthenticatedBuyer(id: String!): Listing!
-  findListingForBuyerAuthenticated(findManyOptions: CreateSearchHistoryInput): ListingResponse!
+  findListingForBuyerAuthenticated(
+    findManyOptions: CreateSearchHistoryInput
+  ): ListingResponse!
   fetchListingAttribute(listingId: String!): [ListingAttributes!]!
   viewFlaggedListings(findManyOptions: PaginateAndSort): FlaggedListingResponse
   flaggedListing(id: String!): FlagListing
@@ -1241,11 +1251,15 @@ type Query {
   getWishlist: [Wishlist!]!
   findOneListingsForAdmin(listingId: String!): Listing!
   getAuction(id: String!): Auction!
-  findOneAuctionWithParticipant(fetchAuctionParticipantInput: FetchAuctionParticipantInput!): AuctionParticipantResponse!
+  findOneAuctionWithParticipant(
+    fetchAuctionParticipantInput: FetchAuctionParticipantInput!
+  ): AuctionParticipantResponse!
   getAllRunningAuction(findManyOption: PaginateAndSort!): AuctionResponse!
   getAllUpcomingAuction(findManyOption: PaginateAndSort!): AuctionResponse!
   getAllAuction(findManyOption: AdminAuctionFilter!): AuctionResponse!
-  getListingsAuction(findManyOption: PaginateAndSort!): AuctionParticipantResponse!
+  getListingsAuction(
+    findManyOption: PaginateAndSort!
+  ): AuctionParticipantResponse!
   findNewestBid(findBidInput: FindBidInput!): [Bids!]!
   bidRange: [AuctionBidRange!]!
   searchForListing(searchParam: String!): [Listing!]!
@@ -1259,7 +1273,9 @@ type Query {
   getTicket(ticketId: String!): Ticket!
   listTickets(findOptions: ListTicketInput): [Ticket!]!
   listTicketsForAdminAndStaff(findOptions: ListTicketInput): TicketResponse!
-  listTicketsForAdminDashboard(findOptions: AdminDashboardSort!): TicketResponse!
+  listTicketsForAdminDashboard(
+    findOptions: AdminDashboardSort!
+  ): TicketResponse!
   fetchOneResponseTemplate(id: String!): ResponseTemplate!
   fetchResponseTemplate(findOption: PaginateAndSort): ResponseTemplateResponse!
   searchForTickets(searchParam: String!): [Ticket!]!
@@ -1281,7 +1297,9 @@ type Query {
   saiiFees(findOptions: AdminDashboardSort): SaiiFees!
   financialVsOrder(findOptions: AdminDashboardSort!): [GroupTransactions!]!
   fetchCoupons(couponFilterInput: CouponFilter!): CouponResponse!
-  validataCoupon(couponFilterInput: ValidataCouponInput!): IsCouponValidResponse!
+  validataCoupon(
+    couponFilterInput: ValidataCouponInput!
+  ): IsCouponValidResponse!
   findOneCoupon(id: String!): Coupon!
   findAllFeatures: [SystemFeatureSetting!]!
   searchForCoupon(searchParam: String!): [Coupon!]!
@@ -1295,21 +1313,31 @@ type Query {
   findOneCategory(id: Int!): Category!
   findManyArticles(findOption: ArticleFilterInput!): ArticleResponse!
   findManyArticlesCustomer(findOption: ArticleFilterInput!): ArticleResponse!
-  findManyArticlesKnowledgeBase(findOption: ArticleFilterInput!): ArticleResponse!
+  findManyArticlesKnowledgeBase(
+    findOption: ArticleFilterInput!
+  ): ArticleResponse!
   findOneArticle(id: Int!): Article!
   findOneArticleCustomer(id: Int!): Article!
   searchForCategory(searchParam: String!): [Category!]!
   searchForArticles(searchParam: String!): [Article!]!
   searchForArticlesKnowledgeBase(searchParam: String!): [Article!]!
   getActivityLogs(activityLogInput: ActivityLogInput!): ActivityLogsResponse!
-  getAllActivityLogs(paginateAndSort: AuditLogTrailsInput): ActivityLogsResponse!
-  findAllServiceProviders(paginateAndSort: AdminFilterAndSort!): ServiceProviderResponse!
+  getAllActivityLogs(
+    paginateAndSort: AuditLogTrailsInput
+  ): ActivityLogsResponse!
+  findAllServiceProviders(
+    paginateAndSort: AdminFilterAndSort!
+  ): ServiceProviderResponse!
   findOneServiceProvider(id: String!): OneServiceProviderResponse!
   checkServiceProviderstatus: ServiceProvider!
   findAllService(paginateAndSort: PaginateAndSort!): ServiceResponse!
   findOneService(id: String!): Service!
-  ViewServiceRequest(paginateAndSort: PaginateAndSort!): RequestedServiceResponse!
-  ViewServiceRequested(paginateAndSort: PaginateAndSort!): RequestedServiceResponse!
+  ViewServiceRequest(
+    paginateAndSort: PaginateAndSort!
+  ): RequestedServiceResponse!
+  ViewServiceRequested(
+    paginateAndSort: PaginateAndSort!
+  ): RequestedServiceResponse!
 }
 
 input SplashScreenFilterInput {
@@ -1592,9 +1620,15 @@ input AuditLogTrailsInput {
 }
 
 type Mutation {
-  createSplashScreen(createSplashScreenInput: CreateSplashScreenInput!): SuccessResponse!
-  updateSplashScreen(updateSplashScreenInput: UpdateSplashScreenInput!): SuccessResponse!
-  deleteSplashScreen(deleteSplashScreenInput: DeleteSplashScreenInput!): SuccessResponse!
+  createSplashScreen(
+    createSplashScreenInput: CreateSplashScreenInput!
+  ): SuccessResponse!
+  updateSplashScreen(
+    updateSplashScreenInput: UpdateSplashScreenInput!
+  ): SuccessResponse!
+  deleteSplashScreen(
+    deleteSplashScreenInput: DeleteSplashScreenInput!
+  ): SuccessResponse!
   register(RegisterInput: RegisterInput!): User!
   resetPasswordAdmin(ResetInput: UserActionInput!): SuccessResponse!
   registerConfirm(RegisterConfirmInput: AuthRegisterConfirmDto!): String!
@@ -1610,15 +1644,21 @@ type Mutation {
   forceUpdate(version: String!): SuccessResponse!
   createStaff(RequestInput: CreateStaffInput!): SuccessResponse!
   staffConfirmation(RequestInput: StaffConfirmDto!): String!
-  upgradeUser(userUpgradeInput: UserUpgradeInput!): NafathAuthenticationResponseToUser!
-  setUpNotification(pushNotificationPayload: PushNotificationinput!): SuccessResponse!
+  upgradeUser(
+    userUpgradeInput: UserUpgradeInput!
+  ): NafathAuthenticationResponseToUser!
+  setUpNotification(
+    pushNotificationPayload: PushNotificationinput!
+  ): SuccessResponse!
   blockUser(RequestInput: UserActionInput!): SuccessResponse!
   deleteUser(RequestInput: DeleteUserInput!): SuccessResponse!
   deleteMyAccount: SuccessResponse!
   updateNotificationPreference(RequestInput: NotificationPrefenceInput!): User!
   changePassword(RequestInput: PasswordInput!): User!
   updateUserData(updateUserInput: UpdateUserData!): User!
-  switchUserInterface(switchInterfaceInput: SwitchInterfaceInput!): SuccessResponse!
+  switchUserInterface(
+    switchInterfaceInput: SwitchInterfaceInput!
+  ): SuccessResponse!
   assignRoleToUser(assignRoleInput: AssignRoleInput!): User!
   createRole(RequestInput: RoleInputDto!): Role!
   updateRole(RequestInput: RoleUpdateInputDto!): Role!
@@ -1628,12 +1668,24 @@ type Mutation {
   markNotificationAsRead(id: String!): Notification!
   markAllAsRead: SuccessResponse!
   sendNotification(requestInput: NotificationInput!): String!
-  updateNotificationScope(requestInput: UpdateAdminNotificationScope!): SuccessResponse!
-  createAdminNotificationScope(requestInput: CreateNotificationScopeInput!): NotificationScope!
-  updateAdminNotificationPreference(requestInput: UpdateAdminNotificationPreferenceScope!): SuccessResponse!
-  updateNotificationMessage(updateNotificationMessageInput: UpdateNotificationMessage!): SuccessResponse!
-  createNotificationMessage(updateNotificationMessage: CreateNotificationMessage!): SuccessResponse!
-  updateNotificationMessageScope(updateNotificationMessage: UpdateNotificationMessageScope!): SuccessResponse!
+  updateNotificationScope(
+    requestInput: UpdateAdminNotificationScope!
+  ): SuccessResponse!
+  createAdminNotificationScope(
+    requestInput: CreateNotificationScopeInput!
+  ): NotificationScope!
+  updateAdminNotificationPreference(
+    requestInput: UpdateAdminNotificationPreferenceScope!
+  ): SuccessResponse!
+  updateNotificationMessage(
+    updateNotificationMessageInput: UpdateNotificationMessage!
+  ): SuccessResponse!
+  createNotificationMessage(
+    updateNotificationMessage: CreateNotificationMessage!
+  ): SuccessResponse!
+  updateNotificationMessageScope(
+    updateNotificationMessage: UpdateNotificationMessageScope!
+  ): SuccessResponse!
   createListingType(RequestInput: ListingTypeInput!): ListingType!
   updateListingType(RequestInput: ListingTypeUpdateInput!): ListingType!
   deleteListingType(RequestInput: ListingTypeDeleteInput!): String!
@@ -1648,8 +1700,12 @@ type Mutation {
   updateListing(updateListingDto: UpdateListingDto!): Listing!
   flagListing(flagListingInput: FlagListingInput!): SuccessResponse!
   deleteListing(listingId: String!): SuccessResponse!
-  approveListing(listingActionInput: ListingActionApprovalInput!): SuccessResponse!
-  rejectListing(listingActionInput: ListingActionApprovalInput!): SuccessResponse!
+  approveListing(
+    listingActionInput: ListingActionApprovalInput!
+  ): SuccessResponse!
+  rejectListing(
+    listingActionInput: ListingActionApprovalInput!
+  ): SuccessResponse!
   createOffer(createOfferDto: CreateOfferDto!): Offer
   updateOffer(updateOfferInput: UpdateOfferInput!): Offer
   updateFinalilization(finalizationInput: OfferFinalizationInput!): Offer!
@@ -1668,7 +1724,9 @@ type Mutation {
   deleteAuction(auctionActionInput: AuctionActionInput!): SuccessResponse!
   reactivateAuction(auctionActionInput: AuctionActionInput!): SuccessResponse!
   cancleAuction(auctionActionInput: AuctionActionInput!): SuccessResponse!
-  addAuctionParticipant(createAuctionParticipantInput: CreateAuctionParticipantInput!): AuctionParticipant!
+  addAuctionParticipant(
+    createAuctionParticipantInput: CreateAuctionParticipantInput!
+  ): AuctionParticipant!
   deleteSavedHistory(id: String!): SuccessResponse!
   unpublishAListing(id: String!): SuccessResponse!
   publishAListing(id: String!): SuccessResponse!
@@ -1679,8 +1737,12 @@ type Mutation {
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
   removeAdPackage(id: Int!): AdPackage!
-  initializePayment(paymentInput: InitiatePaymentInput!): InitiatePaymentResponse!
-  initializePaymentForPA(paymentInput: InitiatePaymentInput!): InitiatePaymentResponse!
+  initializePayment(
+    paymentInput: InitiatePaymentInput!
+  ): InitiatePaymentResponse!
+  initializePaymentForPA(
+    paymentInput: InitiatePaymentInput!
+  ): InitiatePaymentResponse!
   verifyPayment(verifyPaymentInput: VerifyPaymentInput!): verifyPaymentResponse!
   createIssue(input: CreateIssueInput!): SuccessResponse!
   updateIssue(RequestInput: UpdateIssueInput!): SuccessResponse!
@@ -1690,21 +1752,35 @@ type Mutation {
   deleteChildIssue(id: String!): SuccessResponse!
   createTicket(RequestInput: CreateTicketInput!): Ticket!
   manageTicket(RequestInput: UpdateTicketInput!): [Ticket!]!
-  createResponseTemplate(createResponseTemplateInput: CreateResponseTemplateInput!): ResponseTemplate!
-  deleteResponseTemplate(deleteResponseTemplate: DeleteResponsetemplate!): SuccessResponse!
-  updateResponseTemplate(updateResponseTemplateInput: UpdateResponseTemplateInput!): ResponseTemplate!
+  createResponseTemplate(
+    createResponseTemplateInput: CreateResponseTemplateInput!
+  ): ResponseTemplate!
+  deleteResponseTemplate(
+    deleteResponseTemplate: DeleteResponsetemplate!
+  ): SuccessResponse!
+  updateResponseTemplate(
+    updateResponseTemplateInput: UpdateResponseTemplateInput!
+  ): ResponseTemplate!
   createReview(createReviewDto: CreateReviewDto!): Review!
   createCoupon(createCouponsInput: CreateCouponInput!): SuccessResponse!
-  updateAdminDefault(updateAdminDefaultInput: UpdateAdminDefaultInput!): AdminDefault!
-  updateAuctionBidRangeSetting(updateAuctionBidRangeSettingInput: UpdateAdminDefaultInput!): SuccessResponse!
+  updateAdminDefault(
+    updateAdminDefaultInput: UpdateAdminDefaultInput!
+  ): AdminDefault!
+  updateAuctionBidRangeSetting(
+    updateAuctionBidRangeSettingInput: UpdateAdminDefaultInput!
+  ): SuccessResponse!
   updateCoupon(updateCouponsInput: UpdateCouponInput!): SuccessResponse!
   deleteCoupons(deleteCouponsInput: DeleteCouponInput!): SuccessResponse!
   deactivateCoupons(deactivateCoupons: DeactivateCouponInput!): SuccessResponse!
   reactivateCoupon(deactivateCoupons: DeactivateCouponInput!): SuccessResponse!
-  systemFeatureSetting(systemFeatureSetting: SystemFeatureSettingInput!): SuccessResponse!
+  systemFeatureSetting(
+    systemFeatureSetting: SystemFeatureSettingInput!
+  ): SuccessResponse!
   createWorkFlow(createWorkflowInput: CreateWorkflowInput!): WorkFlow!
   updateWorkFlow(updateWorkFlowInput: UpdateWorkflowInput!): SuccessResponse!
-  activateAndDeactivateWorkflow(updateWorkFlowInput: WorkflowActionInput!): SuccessResponse!
+  activateAndDeactivateWorkflow(
+    updateWorkFlowInput: WorkflowActionInput!
+  ): SuccessResponse!
   approveAction(action: Actions!): SuccessResponse!
   deleteWorkFlow(actionInput: ActionsInput!): SuccessResponse!
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
@@ -1715,22 +1791,38 @@ type Mutation {
   unpublishArticle(articlePublishInput: ArticlePublishInput!): SuccessResponse!
   deleteArticle(articleDeleteInput: ArticleDeleteInput!): SuccessResponse!
   updateArticle(updateArticleInput: UpdateArticleInput!): Article!
-  createServiceProvider(createServiceProviderInput: CreateServiceProviderInput!): ServiceProvider!
+  createServiceProvider(
+    createServiceProviderInput: CreateServiceProviderInput!
+  ): ServiceProvider!
   createService(createServiceInput: CreateServiceInput!): Service!
-  updateServiceProvider(updateServiceProviderInput: UpdateServiceProviderInput!): ServiceProvider!
-  acceptServiceProvider(serviceProviderInput: ServiceProviderInput!): SuccessResponse!
-  rejectServiceProvider(serviceProviderInput: ServiceProviderInput!): SuccessResponse!
-  updateServiceStatus(updateServiceStatus: UpdateServiceInput!): SuccessResponse!
+  updateServiceProvider(
+    updateServiceProviderInput: UpdateServiceProviderInput!
+  ): ServiceProvider!
+  acceptServiceProvider(
+    serviceProviderInput: ServiceProviderInput!
+  ): SuccessResponse!
+  rejectServiceProvider(
+    serviceProviderInput: ServiceProviderInput!
+  ): SuccessResponse!
+  updateServiceStatus(
+    updateServiceStatus: UpdateServiceInput!
+  ): SuccessResponse!
   updateService(updateServiceStatus: UpdateServiceInput!): SuccessResponse!
-  updateProviderServiceCoverageArea(updateProviderServiceCoverageArea: UpdateServiceProviderInput!): SuccessResponse!
-  acceptRequestAndStopRequest(updateServiceStatus: UpdateServiceInput!): SuccessResponse!
+  updateProviderServiceCoverageArea(
+    updateProviderServiceCoverageArea: UpdateServiceProviderInput!
+  ): SuccessResponse!
+  acceptRequestAndStopRequest(
+    updateServiceStatus: UpdateServiceInput!
+  ): SuccessResponse!
   provideService(provideService: ProvideNewService!): ServiceProvided!
   cancleService(id: String!): SuccessResponse!
   appealService(id: String!): SuccessResponse!
   confirmService(id: String!): SuccessResponse!
   acceptService(id: String!): SuccessResponse!
   rejectService(id: String!): SuccessResponse!
-  removeServiceProvider(deleteServiceProvider: DeleteServiceProvider!): SuccessResponse!
+  removeServiceProvider(
+    deleteServiceProvider: DeleteServiceProvider!
+  ): SuccessResponse!
   requestForService(requestForService: RequestForService!): ServiceRequested!
 }
 

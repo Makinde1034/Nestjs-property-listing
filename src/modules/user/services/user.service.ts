@@ -298,6 +298,7 @@ export class UserService {
       .createQueryBuilder('user')
       .where('user.email = :username', { username })
       .orWhere('user.phone = :username', { username })
+
       .getOne();
     return data;
   }

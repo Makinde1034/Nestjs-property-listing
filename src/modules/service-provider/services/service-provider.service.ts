@@ -566,24 +566,31 @@ export class ServiceAndProviderService {
 
   async ViewServiceRequest(paginateAndSort: PaginateAndSort, user: User) {
     try {
+      // Fetch the service provider details
       const serviceprovider = await this.serviceProviderRepository.findOne({
         where: { userId: user.id },
       });
 
-      console.log(serviceprovider);
+      if (!serviceprovider) {
+        throw new BadRequestException('Service provider not found');
+      }
 
+      // Initialize query builder
       const query = this.serviceRequestedRepository
         .createQueryBuilder('serviceRequested')
-        .leftJoin('serviceRequested.user', 'user')
-        .leftJoin('serviceRequested.listing', 'listing')
+        .leftJoinAndSelect('serviceRequested.user', 'user')
+        .leftJoinAndSelect('serviceRequested.provider', 'provider')
+        .leftJoinAndSelect('serviceRequested.listing', 'listing')
+        .leftJoinAndSelect('serviceRequested.service', 'service')
         .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
         .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
         .leftJoinAndSelect('listing.listingType', 'listingType')
         .take(paginateAndSort.take)
         .skip(paginateAndSort.skip);
 
-      if (serviceprovider?.coverageArea) {
-        query.where(
+      // Apply coverage area filter if available
+      if (serviceprovider.coverageArea) {
+        query.andWhere(
           'listingAttributes.name = :city AND listingAttributes.value = :coverageArea',
           {
             city: 'City',
@@ -592,14 +599,18 @@ export class ServiceAndProviderService {
         );
       }
 
+      // Execute query
       const [request, total] = await query.getManyAndCount();
 
       return { request, total };
     } catch (error) {
-      this.logger.log(error);
-      throw new BadRequestException(error);
+      this.logger.error('Error fetching service requests', error);
+      throw new BadRequestException(
+        error.message || 'An error occurred while fetching service requests',
+      );
     }
   }
+
   async ViewServiceRequested(paginateAndSort: PaginateAndSort, user: User) {
     try {
       console.log(user.id);
