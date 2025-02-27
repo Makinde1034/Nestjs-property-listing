@@ -26,4 +26,7 @@ export class CreateInvoiceInput {
 
   @Field()
   listingid: string;
+
+  @Field()
+  offerId: string;
 }

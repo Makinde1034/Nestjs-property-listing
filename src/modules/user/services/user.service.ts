@@ -503,6 +503,7 @@ export class UserService {
             userData.nationalIdentity.id,
             { ...nationalIdentity },
           );
+          console.log(nationalIdentity);
         } else {
           await this.nationalIdentityRepository.save({
             ...nationalIdentity,

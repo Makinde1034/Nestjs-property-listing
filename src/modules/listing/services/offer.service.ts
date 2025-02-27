@@ -706,6 +706,7 @@ export class OfferService {
           const invoice = await this.invoiceRepository.findOneBy({
             offerId: updateOfferInput.id,
           });
+          console.log(invoice);
 
           await this.paymentService.capturePayment({
             amount: JSON.stringify(invoice.price),
@@ -768,6 +769,7 @@ export class OfferService {
           // Return the updated offer
           return updateResult.raw[0]; // Returning the updated offer from the query result
         } catch (error) {
+          console.log(error);
           if (error instanceof HttpException) {
             throw error;
           } else {

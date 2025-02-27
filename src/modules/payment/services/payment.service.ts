@@ -205,23 +205,31 @@ export class PaymentService {
     offer?: Offer,
   ) {
     try {
+      if (!data || !user || !listing || !offer) {
+        throw new BadRequestException(
+          'Missing required data for invoice finalization',
+        );
+      }
+
       const payload: CreateInvoiceInput = {
-        capturedPrice: data.sumTotalWithVat,
-        vat: data.sumTotalVat,
+        capturedPrice: 10,
+        vat: 10,
         expiredAt: addDays(new Date(), 4),
         userId: user.id,
         listingid: listing.id,
+        offerId: offer.id,
       };
 
       const updatedInvoice = await this.invoiceRepository.save({
-        ...invoice, // Merge the existing entity to ensure it updates.
+        ...invoice,
         ...payload,
-        listingType: listing.listingType,
+        listingTypeId: listing.listingTypeId,
         listing,
+        offerId: offer.id,
       });
 
       const qrcode = await this.qrcodeService.generateQrCode(
-        `${this.appDefaultConfig.customerFrontEndUrl}?${invoice.id}`,
+        `${this.appDefaultConfig.customerFrontEndUrl}?invoiceId=${invoice.id}`,
       );
 
       data.qrcode = qrcode;
@@ -229,12 +237,15 @@ export class PaymentService {
 
       const invoicePdf =
         await this.pdfGeneratorService.generatePdfForInvoice(data);
+      if (!invoicePdf || !(invoicePdf instanceof Buffer)) {
+        throw new BadRequestException('Failed to generate invoice PDF');
+      }
 
       const multerFile: Express.Multer.File = {
         fieldname: invoice.id.toString(),
         originalname: invoice.id.toString(),
         encoding: '7bit',
-        mimetype: 'image/jpeg',
+        mimetype: 'application/pdf',
         buffer: invoicePdf,
         size: invoicePdf.length,
         stream: Readable.from(invoicePdf),
@@ -242,12 +253,19 @@ export class PaymentService {
         filename: invoice.id.toString(),
         path: '',
       };
+
       const url = await this.storageService.upload(multerFile);
-      await this.invoiceRepository.update(invoice.id, { file: url });
+      await this.invoiceRepository.update(invoice.id, {
+        file: url,
+        offerId: offer.id,
+      });
+
       await this.mailService.sendEmailInvoice(user, invoicePdf);
       return invoice;
     } catch (error) {
-      this.logger.log(error);
+      console.log(error);
+      this.logger.error('Error finalizing invoice:', error);
+      throw new BadRequestException('Failed to finalize invoice');
     }
   }
 
