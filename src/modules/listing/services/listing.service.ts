@@ -1123,6 +1123,7 @@ export class ListingService {
           ])
           .where(whereCondition)
           .andWhere('listing.published = true')
+          .andWhere('listing.publishable = true')
           .andWhere('listingType.deletedAt IS NULL')
 
           .orderBy(sortField, directionToSort, 'NULLS LAST')
@@ -1700,11 +1701,11 @@ export class ListingService {
 
       const stringifiedImages = JSON.stringify(existingImages);
 
-      // await this.listingRepository.update(query.listingId, {
-      //   publishable: true,
-      //   images: stringifiedImages,
-      //   isListingVerified: verified,
-      // });
+      await this.listingRepository.update(query.listingId, {
+        publishable: true,
+        images: stringifiedImages,
+        isListingVerified: verified,
+      });
 
       if (!listing.images) {
         const notificationPreference =
@@ -2211,7 +2212,13 @@ export class ListingService {
       });
       // Send notifications
       data.forEach((element) => {
-        const image = JSON.parse(element.images);
+        // Ensure images is parsed correctly
+        const image =
+          typeof element.images === 'string'
+            ? JSON.parse(element.images)
+            : element.images;
+        const imageUrl =
+          Array.isArray(image) && image.length > 0 ? image[0].url : null;
 
         this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
           creatorId: element.user.id,
@@ -2220,7 +2227,7 @@ export class ListingService {
           metadata: JSON.stringify(listing),
           event: 'Approved',
           recipientFormat: ['Owner', null],
-          img: image[0]?.url,
+          img: imageUrl,
         });
       });
 
