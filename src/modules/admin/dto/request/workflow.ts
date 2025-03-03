@@ -2,7 +2,6 @@
  * Copyright (c) 2024, Waseet LLC. All rights reserved.
  * For license. See license.txt
  */
-
 import { Field, InputType, PartialType } from '@nestjs/graphql';
 import {
   IsArray,
@@ -11,8 +10,10 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+
 import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
 import { Optional } from '@nestjs/common';
+
 @InputType()
 export class CreateWorkflowInput {
   @Field()
@@ -65,7 +66,6 @@ export class Actions {
   @IsArray()
   id: number[];
 }
-
 @InputType()
 export class WorkflowActionInput {
   @Field(() => [String])

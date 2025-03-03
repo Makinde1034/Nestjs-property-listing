@@ -979,7 +979,7 @@ export class AuctionService {
 
       const differenceInDays = differenceInCalendarDays(auction.startDate, now);
 
-      if (differenceInDays < adminDefault.daysToAuctionRegistrationStart) {
+      if (differenceInDays < adminDefault.daysToAuctionRegistrationEnd) {
         throw new BadRequestException('Bid registration has ended');
       }
 

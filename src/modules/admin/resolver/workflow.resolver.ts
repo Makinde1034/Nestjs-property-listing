@@ -21,6 +21,8 @@ import { PermissionsEnum } from '../../../common/enums/permission.enum';
 import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
 import { ActionService } from '../services/action.service';
 import { SuccessResponse } from '../../../common/utils/success.response';
+import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import { User } from '../../../entities';
 
 @Resolver()
 export class WorkFlowResolver {
@@ -72,6 +74,7 @@ export class WorkFlowResolver {
   ) {
     return await this.workFlowService.update(updateWorkFlowInput, ctx.req.user);
   }
+
   @UseGuards(PermissionsGuard)
   @Permissions(PermissionsEnum.WORKFLOW_EDIT)
   @Mutation(() => SuccessResponse)
@@ -82,11 +85,15 @@ export class WorkFlowResolver {
       workflowActionInput,
     );
   }
+
   @UseGuards(PermissionsGuard)
   @Permissions(PermissionsEnum.WORKFLOW_EDIT)
   @Mutation(() => SuccessResponse)
-  async approveAction(@Args('action') actions: Actions) {
-    return await this.actionService.applyApprovedRequest(actions);
+  async approveAction(
+    @CurrentUser() user: User,
+    @Args('action') actions: Actions,
+  ) {
+    return await this.actionService.applyApprovedRequest(actions, user);
   }
 
   @UseGuards(PermissionsGuard)
@@ -102,7 +109,6 @@ export class WorkFlowResolver {
   @Permissions(PermissionsEnum.KNOWLEDGE_BASE_READ)
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Query(() => [WorkFlow], { name: 'searchForworkflow' })
-  @UseGuards(AccessTokenGuard)
   async searchForworkflow(@Args('searchParam') searchParam: string) {
     return await this.workFlowService.searchForWorkflow(searchParam);
   }

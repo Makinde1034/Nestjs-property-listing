@@ -68,6 +68,7 @@ export class IssueService {
         actionConfigPromise,
         totalIssuesPromise,
       ]);
+      const approval = actionConfig?.approvalTwoRole.length > 0 ? 2 : 1; //if approval role 2 has an id the it requires  two approvals
 
       // If a workflow is configured, submit the action for approval
       if (actionConfig) {
@@ -81,6 +82,7 @@ export class IssueService {
             payload: JSON.stringify(issue),
           },
           admin,
+          approval,
         );
 
         return new SuccessResponse('Action is awaiting approval', issue);
@@ -170,6 +172,7 @@ export class IssueService {
       if (!parentIssue) {
         throw new BadRequestException('Parent Issue not found');
       }
+      const approval = actionConfig?.approvalTwoRole.length > 0 ? 2 : 1; //if approval role 2 has an id the it requires  two approvals
 
       // Handle workflow-based approval
       if (actionConfig) {
@@ -182,6 +185,7 @@ export class IssueService {
             payload: JSON.stringify(updateParentIssueInput),
           },
           admin,
+          approval,
         );
 
         return new SuccessResponse('Action is awaiting approval');
@@ -328,7 +332,7 @@ export class IssueService {
         await this.workflowService.findOneWorkflowByDocumentname(
           this.childIssueRepository.metadata.name,
         );
-
+      const approval = actionConfig?.approvalTwoRole.length > 0 ? 2 : 1; //if approval role 2 has an id the it requires  two approvals
       // If a workflow is configured, submit the action for approval
       if (actionConfig) {
         await this.actionService.createActionRequest(
@@ -340,6 +344,7 @@ export class IssueService {
             payload: JSON.stringify(payload),
           },
           admin,
+          approval,
         );
 
         return new SuccessResponse('Action is awaiting approval');
@@ -411,6 +416,8 @@ export class IssueService {
         await this.workflowService.findOneWorkflowByDocumentname(
           this.childIssueRepository.metadata.name,
         );
+      console.log(actionConfig);
+      const approval = actionConfig?.approvalTwoRole.length > 0 ? 2 : 1; //if approval role 2 has an id the it requires  two approvals
 
       if (actionConfig) {
         // Submit action for approval
@@ -423,6 +430,7 @@ export class IssueService {
             payload: JSON.stringify(updateChildIssueInput),
           },
           admin,
+          approval,
         );
 
         return new SuccessResponse('Action is awaiting approval');

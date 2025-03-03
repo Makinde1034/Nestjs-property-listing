@@ -87,6 +87,7 @@ export class SplashScreenService {
 
       // Await workflow configuration result
       const actionConfig = await actionConfigPromise;
+      const approval = actionConfig?.approvalTwoRole.length > 0 ? 2 : 1; //if approval role 2 has an id the it requires  two approvals
 
       if (actionConfig) {
         // Offload action request creation to avoid blocking save operation
@@ -100,6 +101,7 @@ export class SplashScreenService {
               payload: JSON.stringify(splashScreen),
             },
             admin,
+            approval,
           )
           .catch((err) =>
             this.logger.error('Action Request Creation Failed', err),
@@ -220,6 +222,7 @@ export class SplashScreenService {
       if (!splashScreen) {
         throw new BadRequestException(AppStrings.NOT_FOUND);
       }
+      const approval = actionConfig?.approvalTwoRole.length > 0 ? 2 : 1; //if approval role 2 has an id the it requires  two approvals
 
       // Handle workflow-based action if applicable
       if (actionConfig) {
@@ -232,6 +235,7 @@ export class SplashScreenService {
             payload: JSON.stringify(rest),
           },
           admin,
+          approval,
         );
         return new SuccessResponse('Action is awaiting approval');
       }
@@ -286,6 +290,7 @@ export class SplashScreenService {
       if (splashScreens.length === 0) {
         throw new BadRequestException(AppStrings.NOT_FOUND);
       }
+      const approval = actionConfig?.approvalTwoRole.length > 0 ? 2 : 1; //if approval role 2 has an id the it requires  two approvals
 
       if (actionConfig) {
         for (const element of splashScreens) {
@@ -299,6 +304,7 @@ export class SplashScreenService {
               payload: JSON.stringify(element),
             },
             admin,
+            approval,
           );
         }
 

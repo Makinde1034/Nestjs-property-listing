@@ -14,7 +14,7 @@ services:
       - ./node_modules:/usr/src/app/node_modules
     command: sh -c "npm run start:dev"
     env_file:
-      - .envdev
+      - .env
 
     ports:
       - ${PORT}:3000 # <host port> : <container port>
@@ -22,7 +22,6 @@ services:
       - app-network
     depends_on:
       - postgres
-
   # PostGIS-enabled Postgres DB
   postgres:
     image: postgis/postgis:14-3.3-alpine

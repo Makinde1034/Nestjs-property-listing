@@ -1045,7 +1045,8 @@ export class ListingService {
       paginateAndSort.active !== undefined &&
       paginateAndSort.active !== null
     ) {
-      whereCondition.isListingDisabled = paginateAndSort.active;
+      if (paginateAndSort.active)
+        whereCondition.isListingDisabled = !paginateAndSort.active;
     }
 
     if (

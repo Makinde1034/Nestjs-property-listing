@@ -36,6 +36,14 @@ export class ActionRequest {
   @Field(() => String)
   payload: string;
 
+  @Column()
+  @Field(() => Number)
+  approval: number;
+
+  @Column({ default: 0 })
+  @Field(() => Number)
+  currentApproval: number;
+
   @Column({ default: WorkflowActionStatus.PENDING })
   @Field()
   status: string;

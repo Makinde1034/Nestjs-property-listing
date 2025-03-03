@@ -227,7 +227,7 @@ export class OfferService {
         recipientFormat: ['Seller', 'Offer Creator'],
         img: images[0]?.url,
       });
-      return offerPayload;
+      return await this.offerRepository.findOneBy({ id: offerPayload.id });
     } catch (error) {
       this.logger.log(error);
 

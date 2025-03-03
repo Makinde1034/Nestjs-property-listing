@@ -996,6 +996,7 @@ export class UserService {
         userType: 'staff',
         twoFaRequired: true,
       };
+      const approval = actionConfig?.approvalTwoRole.length > 0 ? 2 : 1; //if approval role 2 has an id the it requires  two approvals
 
       // Create the user entity
       const staff = this.usersRepository.create(staffData);
@@ -1015,6 +1016,7 @@ export class UserService {
             ]),
           },
           admin,
+          approval,
         );
 
         // Log the activity
@@ -1058,6 +1060,7 @@ export class UserService {
           status: WorkflowActionStatus.ACCEPTED,
         },
         admin,
+        approval,
       );
 
       // Return success response
@@ -1256,6 +1259,7 @@ export class UserService {
     users.forEach((user) => {
       usersToUpdate.push({ id: user.id, isBlocked: action, disabledAt });
     });
+    const approval = actionConfig?.approvalTwoRole.length > 0 ? 2 : 1; //if approval role 2 has an id the it requires  two approvals
 
     if (actionConfig) {
       await this.actionService.createActionRequest(
@@ -1267,6 +1271,7 @@ export class UserService {
           payload: JSON.stringify(usersToUpdate),
         },
         admin,
+        approval,
       );
 
       const activityToSave = users.map((element) => {
@@ -1313,6 +1318,7 @@ export class UserService {
         status: WorkflowActionStatus.ACCEPTED,
       },
       admin,
+      approval,
     );
 
     return new SuccessResponse(
@@ -1371,6 +1377,8 @@ export class UserService {
       usersToUpdate.push({ id: user.id, status, deletedAt });
     });
 
+    const approval = actionConfig?.approvalTwoRole.length > 0 ? 2 : 1; //if approval role 2 has an id the it requires  two approvals
+
     if (actionConfig) {
       await this.actionService.createActionRequest(
         {
@@ -1380,7 +1388,9 @@ export class UserService {
           user: admin,
           payload: JSON.stringify(usersToUpdate),
         },
+
         admin,
+        approval,
       );
 
       const activityToSave = users.map((element) => {

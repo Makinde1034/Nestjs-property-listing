@@ -275,12 +275,17 @@ export class AdminService {
     return avgTimeInSeconds / 60; // Convert to minutes
   }
 
+  private safeNumber(value: any): number {
+    const num = Number(value);
+    return isNaN(num) ? 0 : num;
+  }
+
   //TODO implement when payment gateway is completed
-  async saiiFees(findOptions: AdminDashboardSort) {
+  async saiiFees(findOptions: AdminDashboardSort): Promise<SaiiFees> {
     try {
-      // Fetch all listing types and invoices
-      const [listingTypes, invoice] = await Promise.all([
-        this.listingTypeRepository.queryBuilder('listingType').getMany(),
+      // Fetch listing types and invoices in parallel
+      const [listingTypes, invoices] = await Promise.all([
+        this.listingTypeRepository.findAll(),
         this.invoiceRepository
           .createQueryBuilder('invoice')
           .leftJoinAndSelect('invoice.listingType', 'listingType')
@@ -288,16 +293,21 @@ export class AdminService {
           .getMany(),
       ]);
 
-      // Calculate total sum of all invoices
-      const totalSum = invoice.reduce((acc, element) => acc + element.price, 0);
+      // Calculate total sum of all invoices (ensuring price is a number)
+      const totalSum = invoices.reduce(
+        (acc, element) => acc + this.safeNumber(element.price),
+        0,
+      );
 
       // Group invoices by listingType and calculate fees for each type
-      const feesByType = invoice.reduce((acc, element) => {
-        console.log(element);
-        const type = element.listingType.englishName;
-        acc[type] = (acc[type] || 0) + element.price;
-        return acc;
-      }, {});
+      const feesByType = invoices.reduce(
+        (acc, element) => {
+          const type = element.listingType?.englishName || 'Unknown';
+          acc[type] = (acc[type] || 0) + this.safeNumber(element.price);
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
 
       // Prepare grouped fees for each listing type
       const group = listingTypes.map((value) => ({
@@ -305,13 +315,10 @@ export class AdminService {
         fees: feesByType[value.englishName] || 0,
       }));
 
-      // Create the final result object
-      const saiiFees: SaiiFees = {
+      return {
         total: totalSum,
         group: group,
       };
-
-      return saiiFees;
     } catch (error) {
       throw new BadRequestException(error);
     }
@@ -1063,6 +1070,8 @@ export class AdminService {
           this.userRepository.metadata.tableName,
         );
 
+      const approval = actionConfig?.approvalTwoRole.length > 0 ? 2 : 1; //if approval role 2 has an id the it requires  two approvals
+
       const data = this.couponRepository.create({
         ...createCouponInput,
       });
@@ -1077,6 +1086,7 @@ export class AdminService {
             payload: JSON.stringify(data),
           },
           admin,
+          approval,
         );
         return new SuccessResponse('Action awaiting aproval');
       }
@@ -1259,7 +1269,10 @@ export class AdminService {
         maxUse: updateCouponInput.maxUse ?? coupons.maxUse,
         discountType: updateCouponInput.discountType ?? coupons.discountType,
         discountValue: updateCouponInput.discountValue ?? coupons.discountValue,
+        usage: updateCouponInput.usage,
       };
+
+      const approval = actionConfig?.approvalTwoRole.length > 0 ? 2 : 1; //if approval role 2 has an id the it requires  two approvals
 
       if (actionConfig) {
         await this.actionService.createActionRequest(
@@ -1271,6 +1284,7 @@ export class AdminService {
             payload: JSON.stringify(updatedCoupons),
           },
           admin,
+          approval,
         );
         return new SuccessResponse('Awaiting action approval');
       }
@@ -1317,6 +1331,8 @@ export class AdminService {
         return { ...element, ...coupon };
       });
 
+      const approval = actionConfig?.approvalTwoRole.length > 0 ? 2 : 1; //if approval role 2 has an id the it requires  two approvals
+
       if (actionConfig) {
         await this.actionService.createActionRequest(
           {
@@ -1327,6 +1343,7 @@ export class AdminService {
             payload: JSON.stringify(deletedCoupons),
           },
           admin,
+          approval,
         );
 
         return new SuccessResponse('Awaiting action approval');
@@ -1359,6 +1376,7 @@ export class AdminService {
         };
         return { ...element, ...coupon };
       });
+      const approval = actionConfig?.approvalTwoRole.length > 0 ? 2 : 1; //if approval role 2 has an id the it requires  two approvals
 
       if (actionConfig) {
         await this.actionService.createActionRequest(
@@ -1370,6 +1388,7 @@ export class AdminService {
             payload: JSON.stringify(deactivateCoupon),
           },
           admin,
+          approval,
         );
 
         return new SuccessResponse('Awaiting action approval');
@@ -1403,6 +1422,8 @@ export class AdminService {
         return { ...element, ...coupon };
       });
 
+      const approval = actionConfig?.approvalTwoRole.length > 0 ? 2 : 1; //if approval role 2 has an id the it requires  two approvals
+
       if (actionConfig) {
         await this.actionService.createActionRequest(
           {
@@ -1413,6 +1434,7 @@ export class AdminService {
             payload: JSON.stringify(deactivateCoupon),
           },
           admin,
+          approval,
         );
 
         return new SuccessResponse('Awaiting action approval');
