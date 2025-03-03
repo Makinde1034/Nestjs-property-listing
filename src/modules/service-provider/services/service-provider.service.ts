@@ -29,7 +29,7 @@ import { ActivityLogService } from '../../../modules/activity-log/services/activ
 import { In } from 'typeorm';
 import { ServiceProviderStatus } from '../../../common/enums/status.enum';
 import { ServiceProvidedRepository } from '../repository/service-provided.repository';
-import { User } from '../../../entities';
+import { NotificationScope, User } from '../../../entities';
 import { ActivityEnum } from '../../../common/enums/activitys';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { AppStrings } from '../../../common/messages/app.strings';
@@ -42,6 +42,10 @@ import {
 import { AdminFilterAndSort } from '../../listing/dtos/request';
 import { StorageService } from '../../file-handler/services/storage.service';
 import { ListingRepository } from '../../listing/repositories/listing.repository';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { NotificationScopeEnum } from '../../../common/enums/notification-scope.enum';
+import { NotificationScopeRepository } from '../../user/repositories';
+import { NotificationEvent } from '../../../common/enums';
 
 @Injectable()
 export class ServiceAndProviderService {
@@ -53,6 +57,8 @@ export class ServiceAndProviderService {
     private readonly storageService: StorageService,
     private readonly serviceRequestedRepository: ServiceRequestedRepository,
     private readonly listingRepository: ListingRepository,
+    private readonly eventEmitter: EventEmitter2,
+    private readonly notificationScopeRepository: NotificationScopeRepository,
   ) {}
 
   logger = new Logger(ServiceAndProviderService.name);
@@ -197,6 +203,11 @@ export class ServiceAndProviderService {
         where: { id: In(serviceProviderId) },
       });
 
+      const notificationPreference =
+        await this.notificationScopeRepository.find({
+          where: { scopeGroup: NotificationScopeEnum.OFFERS },
+        });
+
       if (serviceProvider.length == 0) {
         throw new BadRequestException(AppStrings.NOT_FOUND);
       }
@@ -216,6 +227,23 @@ export class ServiceAndProviderService {
       const updatedServiceProvider =
         await this.serviceProviderRepository.save(resultToUpdate);
       const activityToSave = serviceProvider.map((element) => {
+        const scope: NotificationScope = notificationPreference.find(
+          (element) => {
+            if (element.scopeGroup == NotificationScopeEnum.OFFERS) {
+              return element;
+            }
+          },
+        );
+        this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+          creatorId: user.id,
+          receiverId: element?.userId,
+          scope: scope,
+          event: 'Response',
+          metadata: JSON.stringify(serviceProvider),
+          recipientFormat: [null, 'Service Provider'],
+          img: element?.user?.profilePhoto,
+        });
+
         return {
           adminId: user.id,
           action: ActivityEnum.UPDATED,

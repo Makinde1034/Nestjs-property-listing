@@ -750,12 +750,23 @@ export class OfferService {
             recipientFormat: ['Seller', null],
             img: images[0]?.url,
           });
+
           this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
             creatorId: user.id,
             receiverId: offer.listing.user.id,
             scope: notificationPreference,
-            event: 'Accepted',
-            recipientFormat: [null, 'Buyer'],
+            event: 'Response',
+            recipientFormat: ['Offer Creator', null],
+            img: images[0]?.url,
+          });
+
+          this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+            creatorId: user.id,
+            receiverId: offer.listing.user.id,
+            scope: scope,
+            event: 'Response',
+            metadata: JSON.stringify(offer),
+            recipientFormat: [null, 'Seller'],
             img: images[0]?.url,
           });
 
@@ -851,12 +862,20 @@ export class OfferService {
           this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
             creatorId: user.id,
             receiverId: offer.listing.user.id,
-            scope: scope,
-            event: 'Update',
-            metadata: JSON.stringify(offer),
+            scope: notificationPreference,
+            event: 'Response',
+            recipientFormat: ['Offer Creator', null],
             img: images[0]?.url,
+          });
 
-            recipientFormat: ['Seller', 'Offer Creator'],
+          this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+            creatorId: user.id,
+            receiverId: offer.listing.user.id,
+            scope: scope,
+            event: 'Response',
+            metadata: JSON.stringify(offer),
+            recipientFormat: [null, 'Seller'],
+            img: images[0]?.url,
           });
 
           // Return the updated offer

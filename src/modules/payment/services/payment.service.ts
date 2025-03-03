@@ -173,7 +173,7 @@ export class PaymentService {
         timeStamp: checkout.timestamp,
       };
     } catch (error) {
-      this.logger.log(error);
+      this.logger.debug(error);
     }
   }
   async refundPayment(createPaymentInput: RefundPaymentData) {
