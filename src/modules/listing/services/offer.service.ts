@@ -134,7 +134,6 @@ export class OfferService {
       ) {
         throw new BadRequestException(AppStrings.LISTING_IS_NOT_NEGOTIABLE);
       }
-
       if (offerExpiry <= new Date()) {
         throw new BadRequestException('Expiry Date is in the past');
       }

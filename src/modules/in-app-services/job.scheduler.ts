@@ -398,7 +398,7 @@ export class JobService {
       if (oneDayNotification.length) {
         this.notificationService.prepareNotification({
           creatorId: null,
-          recipientId: element.listing.userId,
+          receiverId: element.listing.userId,
           scope: scope,
           event: scope.name,
           metadata: JSON.stringify(element),

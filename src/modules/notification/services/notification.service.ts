@@ -130,7 +130,7 @@ export class NotificationService implements OnModuleInit {
     try {
       const {
         creatorId,
-        recipientId,
+        receiverId,
         scope,
         recipientFormat,
         event = scope.name,
@@ -156,7 +156,7 @@ export class NotificationService implements OnModuleInit {
         .queryBuilder('pref')
         .leftJoinAndSelect('pref.user', 'user')
         .leftJoinAndSelect('pref.scope', 'scope')
-        .where('user.id = :recipientId', { recipientId })
+        .where('user.id = :receiverId', { receiverId })
         .andWhere('scope.id = :scopeId', { scopeId: scope.id })
         .getOne();
 
@@ -165,7 +165,7 @@ export class NotificationService implements OnModuleInit {
         buyerPrefQuery,
       ]);
 
-      console.log(creatorId, recipientId);
+      console.log(creatorId, receiverId);
 
       //If neither buyer nor seller has preferences for this scope, skip
       if (!sellerPref && !buyerPref) {
