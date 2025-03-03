@@ -227,7 +227,10 @@ export class OfferService {
         recipientFormat: ['Seller', 'Offer Creator'],
         img: images[0]?.url,
       });
-      return await this.offerRepository.findOneBy({ id: offerPayload.id });
+      return await this.offerRepository.findOne({
+        where: { id: offerPayload.id },
+        relations: ['listing', 'listing.user'],
+      });
     } catch (error) {
       this.logger.log(error);
 

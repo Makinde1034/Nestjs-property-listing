@@ -24,10 +24,7 @@ RUN npm run build && \
 
 
 
-
-# Install Firefox and required fonts
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
+    RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     gnupg \
     firefox-esr \
@@ -55,6 +52,7 @@ EXPOSE 3000
 # Set environment variables
 ENV NODE_ENV=development \ PUPPETEER_PRODUCT=firefox \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/firefox
+
 
 # Run the application
 
