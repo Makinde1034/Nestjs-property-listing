@@ -73,8 +73,8 @@ export class HyperPayService {
 
       const payload: PaymentRequest = {
         entityId: this.hyperPayConfig.entityIdForDb,
-        amount: initiatePaymentInput.amount,
         currency: 'SAR',
+        amount: parseFloat(initiatePaymentInput.amount.toFixed(2)),
         paymentType: 'DB',
         integrity: true,
         merchantInvoiceId: reference,
@@ -116,7 +116,7 @@ export class HyperPayService {
 
       const payload: PaymentRequest = {
         entityId: this.hyperPayConfig.entityIdForPA,
-        amount: initiatePaymentInput.amount,
+        amount: parseFloat(initiatePaymentInput.amount.toFixed(2)), // Ensures 2 decimal places as a number
         currency: 'SAR',
         paymentType: 'PA',
         testMode: 'EXTERNAL',

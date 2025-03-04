@@ -97,7 +97,6 @@ export class PaymentService {
       referenceId: reference,
       timeStamp: checkout.timestamp,
     };
-
     await this.invoiceRepository.save({
       checkkoutId: checkout.id,
       price: createPaymentInput.amount,
@@ -119,8 +118,8 @@ export class PaymentService {
             code: createPaymentInput.coupon,
             price: createPaymentInput.amount,
           });
-        createPaymentInput.amount = coupon.amount;
       }
+
       const reference = generateRandomString();
 
       const checkout = await this.hyperPayService.createCheckoutForPA(
@@ -172,14 +171,11 @@ export class PaymentService {
   }
 
   async capturePayment(createPaymentInput: CapturePaymentData) {
-    // if (createPaymentInput.coupon) {
-    //   const coupon: IsCouponValidResponse = await this.adminService.isCouponValid(
-    //     createPaymentInput.amount,
-    //   );
-    //   createPaymentInput.amount = coupon.amount;
-    // }
-
     try {
+      const verify = await this.verifyPayment({
+        checkoutId: createPaymentInput.paymentId,
+      });
+
       const checkout =
         await this.hyperPayService.capturePayment(createPaymentInput);
 
@@ -235,16 +231,6 @@ export class PaymentService {
         listingid: listing.id,
         offerId: offer.id,
       };
-
-      const alreadyAccepted = await this.invoiceRepository.find({
-        where: { listingId: listing.id },
-      });
-
-      if (alreadyAccepted.length > 0) {
-        throw new BadRequestException(
-          'you have already accepted an offfer on this listing',
-        );
-      }
 
       const updatedInvoice = await this.invoiceRepository.save({
         ...invoice,

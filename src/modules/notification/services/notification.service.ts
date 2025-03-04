@@ -45,6 +45,8 @@ import {
   NotificationEvent,
   NotificationType,
   ServerSentEvents,
+  UserInterfaceType,
+  UserProfileTypeEnum,
 } from 'src/common/enums';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { NotificationScopeEnum } from '../../../common/enums/notification-scope.enum';
@@ -160,12 +162,22 @@ export class NotificationService implements OnModuleInit {
         .andWhere('scope.id = :scopeId', { scopeId: scope.id })
         .getOne();
 
-      const [sellerPref, buyerPref] = await Promise.all([
+      const owner = this.userRepository
+        .createQueryBuilder('user')
+        .where('user.id = :creatorId', { creatorId })
+        .getOne();
+
+      const recipient = this.userRepository
+        .createQueryBuilder('user')
+        .where('user.id = :receiverId', { receiverId })
+        .getOne();
+
+      const [sellerPref, buyerPref, creator, receiver] = await Promise.all([
         sellerPrefQuery,
         buyerPrefQuery,
+        owner,
+        recipient,
       ]);
-
-      console.log(creatorId, receiverId);
 
       //If neither buyer nor seller has preferences for this scope, skip
       if (!sellerPref && !buyerPref) {
@@ -194,8 +206,8 @@ export class NotificationService implements OnModuleInit {
         await this.SendNotificationBasedOnPreference(
           buyerPref,
           sellerPref,
-          sellerPref?.user,
-          buyerPref?.user,
+          creator,
+          receiver,
           specificEvent,
           scope.scopeGroup,
           recipientFormat,
@@ -232,8 +244,15 @@ export class NotificationService implements OnModuleInit {
       /************************
        * Email Notification
        ************************/
+      console.log('ownere', owner);
 
-      if (userPrefRecipients?.email) {
+      console.log('notOwner', recipient);
+
+      if (
+        userPrefRecipients?.email ||
+        owner?.userType == UserProfileTypeEnum.ADMIN ||
+        UserProfileTypeEnum.STAFF
+      ) {
         this.logger.log('Sending  email notifications');
         this.sendEmailToUser(
           recipient,
@@ -248,7 +267,11 @@ export class NotificationService implements OnModuleInit {
         );
       }
 
-      if (userPrefOwner?.email) {
+      if (
+        userPrefOwner?.email ||
+        owner?.userType == UserProfileTypeEnum.ADMIN ||
+        UserProfileTypeEnum.STAFF
+      ) {
         this.logger.log('Sending  email notifications');
         this.sendEmailToUser(
           owner,
@@ -266,7 +289,11 @@ export class NotificationService implements OnModuleInit {
       /************************
        * Push Notification
        ************************/
-      if (userPrefRecipients?.mobile) {
+      if (
+        userPrefRecipients?.mobile ||
+        owner?.userType == UserProfileTypeEnum.ADMIN ||
+        UserProfileTypeEnum.STAFF
+      ) {
         this.logger.log('Sending  push notifications');
         const recipientNotificationToken =
           await this.notificationTokenRepository.findOne({
@@ -288,7 +315,11 @@ export class NotificationService implements OnModuleInit {
         }
       }
 
-      if (userPrefOwner?.mobile) {
+      if (
+        userPrefOwner?.mobile ||
+        owner?.userType == UserProfileTypeEnum.ADMIN ||
+        UserProfileTypeEnum.STAFF
+      ) {
         this.logger.log('Sending push notifications');
         const ownerNotificationToken =
           await this.notificationTokenRepository.findOne({
@@ -313,7 +344,12 @@ export class NotificationService implements OnModuleInit {
       /*********************
        * Web Notification
        ********************/
-      if (userPrefRecipients?.desktop) {
+
+      if (
+        userPrefRecipients?.desktop ||
+        owner?.userType == UserProfileTypeEnum.ADMIN ||
+        UserProfileTypeEnum.STAFF
+      ) {
         this.logger.log('Sending  system notifications');
         this.sendDesktopNotificationToUser(
           recipient,
@@ -327,6 +363,10 @@ export class NotificationService implements OnModuleInit {
           true,
         );
       }
+
+      //**********************************************/
+      // this logs notification log notification regardls of scope
+      //**********************************************/
       if (userPrefRecipients?.desktop == false) {
         this.logger.log('Sending  system notifications');
         this.sendDesktopNotificationToUser(
@@ -342,7 +382,11 @@ export class NotificationService implements OnModuleInit {
         );
       }
 
-      if (userPrefOwner?.desktop) {
+      if (
+        userPrefOwner?.desktop ||
+        owner?.userType == UserProfileTypeEnum.ADMIN ||
+        UserProfileTypeEnum.STAFF
+      ) {
         this.logger.log('Sending system notifications');
         this.sendDesktopNotificationToUser(
           owner,
@@ -356,6 +400,10 @@ export class NotificationService implements OnModuleInit {
           true,
         );
       }
+
+      //**********************************************/
+      // this logs notification log notification regardless of scope
+      //**********************************************/
       if (userPrefOwner?.desktop == false) {
         this.logger.log('Sending system notifications');
         this.sendDesktopNotificationToUser(

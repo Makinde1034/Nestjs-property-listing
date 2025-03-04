@@ -82,7 +82,6 @@ import { BidRegistration } from '../../../entities/bid-registration.entity';
 import { AuctionBidRange } from '../../../entities/auction-bid-range.entity';
 import { FinalizationInput } from '../dtos/request/finalizationOffer';
 import { GqlCacheInterceptor } from '../../../common/interceptors/cache-middleware';
-import { FinalizationResponse } from '../dtos/response/finilization.response';
 import { Finalization } from '../../../entities/finalization.entity';
 
 @Resolver()

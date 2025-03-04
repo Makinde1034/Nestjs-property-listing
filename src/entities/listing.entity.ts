@@ -82,7 +82,7 @@ export class Listing extends BaseEntity {
   auctionParticipant: AuctionParticipant;
 
   @Field(() => Invoice, { nullable: true })
-  @OneToOne(() => Invoice, (invoice) => invoice.listing, { nullable: true })
+  @OneToMany(() => Invoice, (invoice) => invoice.listing, { nullable: true })
   invoice: Invoice;
 
   @Field(() => ListingType, { nullable: true })

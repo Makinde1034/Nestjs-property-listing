@@ -41,8 +41,7 @@ export class PdfService {
     try {
       const browser = await puppeteer.launch({
         headless: true,
-        protocol: 'webDriverBiDi',
-        executablePath: '/usr/bin/firefox',
+        args: ['--no-sandbox', '--disable-gpu', '--disable-setuid-sandbox'],
       });
 
       const page = await browser.newPage();
@@ -59,6 +58,7 @@ export class PdfService {
       // 🔥 Convert Uint8Array to Buffer
       return Buffer.from(pdfBuffer);
     } catch (error) {
+      console.log(error);
       this.logger.error('Error generating PDF', error);
       throw new Error('Error generating PDF');
     }

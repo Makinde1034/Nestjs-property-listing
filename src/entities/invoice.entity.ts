@@ -52,7 +52,7 @@ export class Invoice {
   @Field({ nullable: true })
   reference?: string;
 
-  @OneToOne(() => Listing, { nullable: true })
+  @ManyToOne(() => Listing, { nullable: true })
   @JoinColumn({ name: 'listingId' })
   @Field(() => Listing, { nullable: true })
   listing?: Listing;

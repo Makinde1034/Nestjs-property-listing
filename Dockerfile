@@ -23,24 +23,31 @@ RUN npm run build && \
     chmod -R 777 /usr/src/app/dist
 
 
+# Install Chromium dependencies
+RUN apt update && apt install -y \
+  chromium \
+  libatk1.0-0 \
+  libx11-xcb1 \
+  libxcomposite1 \
+  libxcursor1 \
+  libxdamage1 \
+  libxfixes3 \
+  libxi6 \
+  libxrandr2 \
+  libxrender1 \
+  libxss1 \
+  libxtst6 \
+  libnss3 \
+  libpango-1.0-0 \
+  libpangocairo-1.0-0 \
+  libgdk-pixbuf2.0-0 \
+  libglib2.0-0 
 
-    RUN apt-get update && apt-get install -y --no-install-recommends \
-    wget \
-    gnupg \
-    firefox-esr \
-    fonts-ipafont-gothic \
-    fonts-wqy-zenhei \
-    fonts-thai-tlwg \
-    fonts-kacst \
-    fonts-freefont-ttf && \
-    rm -rf /var/lib/apt/lists/*
-
-RUN npm install --platform=linux --arch=x64 sharp
 
 
 
-RUN apt-get update && apt-get install -y \
-    libvips libvips-dev
+
+
 
 
 # Install Puppeteer without triggering Firefox download
@@ -50,8 +57,7 @@ RUN npm install puppeteer
 EXPOSE 3000
 
 # Set environment variables
-ENV NODE_ENV=development \ PUPPETEER_PRODUCT=firefox \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/firefox
+ENV NODE_ENV=development 
 
 
 # Run the application

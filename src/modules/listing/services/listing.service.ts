@@ -1701,7 +1701,6 @@ export class ListingService {
       }
 
       const stringifiedImages = JSON.stringify(existingImages);
-
       await this.listingRepository.update(query.listingId, {
         publishable: true,
         images: stringifiedImages,
@@ -1739,7 +1738,7 @@ export class ListingService {
         users.forEach((user) => {
           console.log(user.id);
           this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
-            recipientId: user.id,
+            receiverId: user.id,
             scope: scope,
             event: 'Create',
             metadata: JSON.stringify(listing),

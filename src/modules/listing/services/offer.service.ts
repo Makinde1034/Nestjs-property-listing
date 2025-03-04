@@ -834,15 +834,6 @@ export class OfferService {
             recipientFormat: ['Offer Creator', 'Seller'],
             img: images[0]?.url,
           });
-          // this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
-          //   creatorId: user.id,
-          //   receiverId:
-          //   scope: scope,
-          //   event: 'Response',
-          //   metadata: JSON.stringify(offer),
-          //   recipientFormat: [null, 'Seller'],
-          //   img: images[0]?.url,
-          // });
 
           const listing = await entityManager
             .createQueryBuilder()
@@ -930,7 +921,7 @@ export class OfferService {
           this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
             creatorId: user.id,
             receiverId: offer.listing.user.id,
-            scope: notificationPreference,
+            scope: scope,
             event: 'Response',
             recipientFormat: ['Offer Creator', null],
             img: images[0]?.url,
