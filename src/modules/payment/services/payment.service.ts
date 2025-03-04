@@ -252,6 +252,7 @@ export class PaymentService {
         listingTypeId: listing.listingTypeId,
         listing,
         offerId: offer.id,
+        vat: data.sumTotalVat,
       });
 
       const qrcode = await this.qrcodeService.generateQrCode(
@@ -281,7 +282,7 @@ export class PaymentService {
       };
 
       const url = await this.storageService.upload(multerFile);
-      await this.invoiceRepository.update(invoice.id, {
+      await this.invoiceRepository.update(updatedInvoice.id, {
         file: url,
         offerId: offer.id,
       });

@@ -25,46 +25,46 @@ export class InvoiceService {
     private readonly mailService: MailgunEmailService,
   ) {}
   logger = new Logger(InvoiceService.name);
-  async invoice(
-    createInvoiceInput: CreateInvoiceInput,
-    data?: PdfInput,
-    user?: User,
-  ) {
-    try {
-      createInvoiceInput.expiredAt = addDays(new Date(), 4);
-      createInvoiceInput.userId = user.id;
+  // async invoice(
+  //   createInvoiceInput: CreateInvoiceInput,
+  //   data?: PdfInput,
+  //   user?: User,
+  // ) {
+  //   try {
+  //     createInvoiceInput.expiredAt = addDays(new Date(), 4);
+  //     createInvoiceInput.userId = user.id;
 
-      const invoice = await this.invoiceRepository.create(createInvoiceInput);
-      data.invoiceNumber = invoice.id;
+  //     const invoice = await this.invoiceRepository.create(createInvoiceInput);
+  //     data.invoiceNumber = invoice.id;
 
-      const invoicePdf =
-        await this.pdfGeneratorService.generatePdfForInvoice(data);
-      const multerFile: Express.Multer.File = {
-        fieldname: invoice.id.toString(),
-        originalname: invoice.id.toString(),
-        encoding: '7bit',
-        mimetype: 'image/jpeg',
-        buffer: invoicePdf,
-        size: invoicePdf.length,
-        stream: Readable.from(invoicePdf),
-        destination: '',
-        filename: invoice.id.toString(),
-        path: '',
-      };
+  //     const invoicePdf =
+  //       await this.pdfGeneratorService.generatePdfForInvoice(data);
+  //     const multerFile: Express.Multer.File = {
+  //       fieldname: invoice.id.toString(),
+  //       originalname: invoice.id.toString(),
+  //       encoding: '7bit',
+  //       mimetype: 'image/jpeg',
+  //       buffer: invoicePdf,
+  //       size: invoicePdf.length,
+  //       stream: Readable.from(invoicePdf),
+  //       destination: '',
+  //       filename: invoice.id.toString(),
+  //       path: '',
+  //     };
 
-      const file = await this.storageService.upload(multerFile);
-      await this.mailService.sendEmailInvoice(user, invoicePdf);
+  //     const file = await this.storageService.upload(multerFile);
+  //     await this.mailService.sendEmailInvoice(user, invoicePdf);
 
-      const savedInvoice = await this.invoiceRepository.save({
-        ...createInvoiceInput,
-        file: file,
-      });
+  //     const savedInvoice = await this.invoiceRepository.save({
+  //       ...createInvoiceInput,
+  //       file: file,
+  //     });
 
-      return savedInvoice;
-    } catch (error) {
-      this.logger.log(error);
-    }
-  }
+  //     return savedInvoice;
+  //   } catch (error) {
+  //     this.logger.log(error);
+  //   }
+  // }
 
   async fetchInvoice(findOption: PaginateAndSort) {
     try {
