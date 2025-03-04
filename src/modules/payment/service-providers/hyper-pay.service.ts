@@ -16,6 +16,7 @@ import {
   BadRequestException,
   HttpException,
   Injectable,
+  InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
 import { lastValueFrom } from 'rxjs';
@@ -97,11 +98,11 @@ export class HyperPayService {
       if (error instanceof HttpException) {
         throw error;
       } else if (error.isAxiosError) {
-        throw new BadRequestException(
+        throw new InternalServerErrorException(
           error.response?.data?.message || 'Payment service error',
         );
       } else {
-        throw new BadRequestException(error.message);
+        throw new InternalServerErrorException(error.message);
       }
     }
   }
@@ -144,11 +145,11 @@ export class HyperPayService {
       if (error instanceof HttpException) {
         throw error;
       } else if (error.isAxiosError) {
-        throw new BadRequestException(
+        throw new InternalServerErrorException(
           error.response?.data?.message || 'Payment service error',
         );
       } else {
-        throw new BadRequestException(error.message);
+        throw new InternalServerErrorException(error.message);
       }
     }
   }

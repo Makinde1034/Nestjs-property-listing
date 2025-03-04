@@ -6,31 +6,32 @@ import { Offer } from './offer.entity';
 @Entity()
 @ObjectType()
 export class Finalization extends BaseEntity {
-  @Column()
-  @Field()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   sellerZatca: string;
 
-  @Column()
-  @Field()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   sellerIban: string;
 
-  @Column()
-  @Field()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   sellerBirthDate: string;
 
-  @Column()
-  @Field()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   ownershipAmmount: number;
-  @Column()
-  @Field()
-  zatca: string;
 
-  @Column()
-  @Field()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  buyerZatca: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   buyerIban: string;
 
-  @Column()
-  @Field()
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   buyerBirthDate: string;
 
   @Field(() => Offer, { nullable: true })

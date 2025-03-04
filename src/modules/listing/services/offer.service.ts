@@ -29,6 +29,7 @@ import { addDaysToDate } from '../../../common/utils/helper';
 import { PdfInput } from '../../file-handler/dto/pdf.dto';
 import {
   NotificationScopeRepository,
+  RoleRepository,
   UserRepository,
 } from '../../user/repositories';
 import { NotificationScopeEnum } from '../../../common/enums/notification-scope.enum';
@@ -51,6 +52,8 @@ import { FinalizationRepository } from '../repositories/finalization.repository'
 import { FinalizationInput } from '../dtos/request/finalizationOffer';
 import { AdminFilterAndSort } from '../dtos/request';
 import { FinalizationEnum } from '../../../common/enums/finalization.enum';
+import { PermissionsEnum } from '../../../common/enums/permission.enum';
+import { of } from 'rxjs';
 
 @Injectable()
 export class OfferService {
@@ -67,6 +70,7 @@ export class OfferService {
     private readonly invoiceRepository: InvoiceRepository,
 
     private readonly finalizationRepository: FinalizationRepository,
+    private roleRepository: RoleRepository,
   ) {}
   logger = new Logger(OfferService.name);
 
@@ -195,7 +199,7 @@ export class OfferService {
       };
 
       //TODO: switch to event emitter
-      this.paymentService.finalizeInvoice(
+      await this.paymentService.finalizeInvoice(
         invoice,
         data,
         user,
@@ -240,7 +244,7 @@ export class OfferService {
       }
     }
   }
-  async updateFinalilization(updateRequest: OfferFinalizationInput) {
+  async updateFinalization(updateRequest: OfferFinalizationInput) {
     try {
       // Extract listing IDs from input
       const listingIds = updateRequest.finalizationInput.map((item) => item.id);
@@ -308,8 +312,10 @@ export class OfferService {
         .createQueryBuilder('finalization')
         .leftJoinAndSelect('finalization.offer', 'offer')
         .leftJoinAndSelect('offer.user', 'buyer')
+        .leftJoinAndSelect('buyer.nationalIdentity', 'nationalIdentity')
         .leftJoinAndSelect('offer.listing', 'listing')
         .leftJoinAndSelect('listing.user', 'creator')
+        .leftJoinAndSelect('creator.nationalIdentity', 'sellerNationalIdentity')
 
         .where('finalization.offer = :offerId', { offerId: id })
         .getOne();
@@ -329,7 +335,10 @@ export class OfferService {
   async finalizeOffer(finalizationInput: FinalizationInput) {
     try {
       const { id, ...rest } = finalizationInput;
-      const offer = await this.offerRepository.findOneBy({ id });
+      const offer = await this.offerRepository.findOne({
+        where: { id },
+        relations: ['listing'],
+      });
       if (!offer) {
         throw new NotFoundException(AppStrings.NOT_FOUND);
       }
@@ -341,10 +350,71 @@ export class OfferService {
       const data = await this.finalizationRepository.save({
         offer,
         ...finilization,
+
         status: FinalizationEnum.PENDING,
         ...rest,
       });
+
       if (data) {
+        if (data.buyerBirthDate || data.sellerBirthDate) {
+          const role = await this.roleRepository.find({
+            where: {
+              permissions: {
+                slug: PermissionsEnum.FINALIZE_REQUEST,
+              },
+            },
+            relations: ['permissions', 'user'], // Ensures the relationship is loaded if not already eager
+          });
+
+          const users = role
+            .flatMap((element) => element.user)
+            .filter(
+              (user, index, self) =>
+                self.findIndex((u) => u.id === user.id) === index,
+            );
+
+          // Fetch notification preference only if offer update is successful
+          const notificationPreference =
+            await this.notificationScopeRepository.find({
+              where: { scopeGroup: NotificationScopeEnum.OFFERS },
+            });
+
+          const scope: NotificationScope = notificationPreference.find(
+            (element) => {
+              if (element.scopeGroup == NotificationScopeEnum.OFFERS) {
+                return element;
+              }
+            },
+          );
+          const images = JSON.parse(offer?.listing?.images);
+
+          users.map((element) => {
+            if (offer.listing.purpose == Purpose.SALE) {
+              this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+                creatorId: element.id,
+                receiverId: null,
+                scope: scope,
+                event: 'Seller and buyer sent request info',
+                metadata: JSON.stringify(offer),
+                recipientFormat: ['Admin Deal Finalizer', null],
+                img: images[0]?.url,
+              });
+            }
+
+            if (offer.listing.purpose == Purpose.RENT) {
+              this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+                creatorId: element.id,
+                receiverId: null,
+                scope: scope,
+                event: 'Rental request sent from both parties',
+                metadata: JSON.stringify(offer),
+                recipientFormat: ['Admin Deal Finalizer', null],
+                img: images[0]?.url,
+              });
+            }
+          });
+        }
+
         return new SuccessResponse();
       }
     } catch (error) {
@@ -690,7 +760,12 @@ export class OfferService {
             relations: ['listing', 'listing.user'],
             select: {
               id: true,
-              listing: { id: true, images: true, user: { id: true } },
+              listing: {
+                id: true,
+                purpose: true,
+                images: true,
+                user: { id: true },
+              },
             },
           });
 
@@ -709,7 +784,6 @@ export class OfferService {
           const invoice = await this.invoiceRepository.findOneBy({
             offerId: updateOfferInput.id,
           });
-          console.log(invoice);
 
           await this.paymentService.capturePayment({
             amount: JSON.stringify(invoice.price),
@@ -740,10 +814,11 @@ export class OfferService {
               }
             },
           );
+
           const images = JSON.parse(offer?.listing?.images);
           this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
             creatorId: user.id,
-            receiverId: offer.listing.user.id,
+            receiverId: null,
             scope: scope,
             event: 'If Accepted Offer',
             metadata: JSON.stringify(offer),
@@ -752,23 +827,22 @@ export class OfferService {
           });
 
           this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
-            creatorId: user.id,
-            receiverId: offer.listing.user.id,
+            creatorId: offerPayload.userId,
+            receiverId: user.id,
             scope: notificationPreference,
             event: 'Response',
-            recipientFormat: ['Offer Creator', null],
+            recipientFormat: ['Offer Creator', 'Seller'],
             img: images[0]?.url,
           });
-
-          this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
-            creatorId: user.id,
-            receiverId: offer.listing.user.id,
-            scope: scope,
-            event: 'Response',
-            metadata: JSON.stringify(offer),
-            recipientFormat: [null, 'Seller'],
-            img: images[0]?.url,
-          });
+          // this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+          //   creatorId: user.id,
+          //   receiverId:
+          //   scope: scope,
+          //   event: 'Response',
+          //   metadata: JSON.stringify(offer),
+          //   recipientFormat: [null, 'Seller'],
+          //   img: images[0]?.url,
+          // });
 
           const listing = await entityManager
             .createQueryBuilder()
@@ -783,11 +857,10 @@ export class OfferService {
           // Return the updated offer
           return updateResult.raw[0]; // Returning the updated offer from the query result
         } catch (error) {
-          console.log(error);
+          this.logger.error('Error accepting offer');
           if (error instanceof HttpException) {
             throw error;
           } else {
-            this.logger.error('Error accepting offer:', error);
             throw new BadRequestException('Failed to accept offer');
           }
         }
@@ -835,11 +908,6 @@ export class OfferService {
           const invoice = await this.invoiceRepository.findOneBy({
             offerId: updateOfferInput.id,
           });
-
-          // await this.paymentService.refundPayment({
-          //   amount: JSON.stringify(invoice.price),
-          //   paymentId: invoice.checkoutId,
-          // });
 
           // Fetch notification preference only if offer update is successful
           const notificationPreference = await entityManager.find(

@@ -391,7 +391,7 @@ export class ListingResolver {
   async updateFinalization(
     @Args('finalizationInput') finalizationInput: OfferFinalizationInput,
   ) {
-    return await this.offerService.updateFinalilization(finalizationInput);
+    return await this.offerService.updateFinalization(finalizationInput);
   }
 
   @UseGuards(AccessTokenGuard, PermissionsGuard)

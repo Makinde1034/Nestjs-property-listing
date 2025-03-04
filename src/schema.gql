@@ -77,13 +77,13 @@ type Invoice {
 
 type Finalization {
   id: ID!
-  sellerZatca: String!
-  sellerIban: String!
-  sellerBirthDate: String!
-  ownershipAmmount: Float!
-  zatca: String!
-  buyerIban: String!
-  buyerBirthDate: String!
+  sellerZatca: String
+  sellerIban: String
+  sellerBirthDate: String
+  ownershipAmmount: Float
+  buyerZatca: String
+  buyerIban: String
+  buyerBirthDate: String
   offer: Offer
   offerId: String!
   status: String!
@@ -2171,7 +2171,7 @@ input FinalizationInput {
   sellerIban: String
   sellerBirthDate: String
   ownershipAmmount: Float
-  zatca: String
+  buyerZatca: String
   buyerIban: String
   buyerBirthDate: String
 }

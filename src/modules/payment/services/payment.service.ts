@@ -3,7 +3,13 @@
  * For license. See license.txt
  */
 
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 
 import { addDays } from 'date-fns';
 
@@ -106,37 +112,47 @@ export class PaymentService {
     createPaymentInput: InitiatePaymentInput,
     user: User,
   ) {
-    if (createPaymentInput.coupon) {
-      const coupon: IsCouponValidResponse =
-        await this.adminService.isCouponValid({
-          code: createPaymentInput.coupon,
-          price: createPaymentInput.amount,
-        });
-      createPaymentInput.amount = coupon.amount;
+    try {
+      if (createPaymentInput.coupon) {
+        const coupon: IsCouponValidResponse =
+          await this.adminService.isCouponValid({
+            code: createPaymentInput.coupon,
+            price: createPaymentInput.amount,
+          });
+        createPaymentInput.amount = coupon.amount;
+      }
+      const reference = generateRandomString();
+
+      const checkout = await this.hyperPayService.createCheckoutForPA(
+        createPaymentInput,
+        user,
+        reference,
+      );
+
+      await this.invoiceRepository.save({
+        checkoutId: checkout.id,
+        price: createPaymentInput.amount,
+        userId: user.id,
+        status: PaymentStatus.PENDING,
+        reference: reference,
+      });
+
+      const data = {
+        checkoutId: checkout.id,
+        referenceId: reference,
+        timeStamp: checkout.timestamp,
+      };
+
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error.message;
+      }
+
+      throw new InternalServerErrorException(
+        'Unable to process payment Please try after some minuites',
+      );
     }
-    const reference = generateRandomString();
-
-    const checkout = await this.hyperPayService.createCheckoutForPA(
-      createPaymentInput,
-      user,
-      reference,
-    );
-
-    await this.invoiceRepository.save({
-      checkoutId: checkout.id,
-      price: createPaymentInput.amount,
-      userId: user.id,
-      status: PaymentStatus.PENDING,
-      reference: reference,
-    });
-
-    const data = {
-      checkoutId: checkout.id,
-      referenceId: reference,
-      timeStamp: checkout.timestamp,
-    };
-
-    return data;
   }
 
   async successNotification(userId: string, referencedId: string) {
@@ -220,6 +236,16 @@ export class PaymentService {
         offerId: offer.id,
       };
 
+      const alreadyAccepted = await this.invoiceRepository.find({
+        where: { listingId: listing.id },
+      });
+
+      if (alreadyAccepted.length > 0) {
+        throw new BadRequestException(
+          'you have already accepted an offfer on this listing',
+        );
+      }
+
       const updatedInvoice = await this.invoiceRepository.save({
         ...invoice,
         ...payload,
@@ -263,7 +289,12 @@ export class PaymentService {
       await this.mailService.sendEmailInvoice(user, invoicePdf);
       return invoice;
     } catch (error) {
-      console.log(error);
+      this.logger.error('Error finalizing invoice:', error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
       this.logger.error('Error finalizing invoice:', error);
       throw new BadRequestException('Failed to finalize invoice');
     }

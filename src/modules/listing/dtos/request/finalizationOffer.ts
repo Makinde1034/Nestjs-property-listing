@@ -37,7 +37,7 @@ export class FinalizationInput {
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
-  zatca: string;
+  buyerZatca: string;
 
   @Field({ nullable: true })
   @IsOptional()

@@ -34,8 +34,9 @@ export class InvoiceService {
       createInvoiceInput.expiredAt = addDays(new Date(), 4);
       createInvoiceInput.userId = user.id;
 
-      const invoice = await this.invoiceRepository.save(createInvoiceInput);
+      const invoice = await this.invoiceRepository.create(createInvoiceInput);
       data.invoiceNumber = invoice.id;
+
       const invoicePdf =
         await this.pdfGeneratorService.generatePdfForInvoice(data);
       const multerFile: Express.Multer.File = {
@@ -50,9 +51,16 @@ export class InvoiceService {
         filename: invoice.id.toString(),
         path: '',
       };
-      await this.storageService.uploadFile(multerFile);
+
+      const file = await this.storageService.upload(multerFile);
       await this.mailService.sendEmailInvoice(user, invoicePdf);
-      return invoice;
+
+      const savedInvoice = await this.invoiceRepository.save({
+        ...createInvoiceInput,
+        file: file,
+      });
+
+      return savedInvoice;
     } catch (error) {
       this.logger.log(error);
     }

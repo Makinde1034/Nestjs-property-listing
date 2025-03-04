@@ -329,7 +329,7 @@ export class UserService {
         relations,
       });
 
-      // this.createDefaultNotifications(user);
+      this.createDefaultNotifications(user);
 
       return user;
     } catch (error) {
