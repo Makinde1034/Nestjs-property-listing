@@ -28,6 +28,7 @@ import {
   In,
   LessThan,
   Not,
+  UpdateResult,
 } from 'typeorm';
 import { PostgresError } from 'pg-error-enum';
 import { addHours, isPast } from 'date-fns';
@@ -168,16 +169,30 @@ export class UserService {
       //TODO: remove before going live
       if (result.test) {
         let updatedUser;
-        const { affected } = await this.usersRepository.update(user.id, {
-          userLevel: UserLevelEnum.LEVEL_2,
-          isDataVerified: true,
-          dateOfBirth: '1924-12-01 00:00:00.000',
-          arabicFirstName: user.firstName,
-          arabicLastName: user.lastName,
-          middleName: user.lastName,
-          nationality: 'Saudi Arabia',
-          phone: userUpgradeInput.phoneNumber,
-        });
+        let affected: UpdateResult;
+
+        if (!userUpgradeInput.phoneNumber) {
+          affected = await this.usersRepository.update(user.id, {
+            userLevel: UserLevelEnum.LEVEL_2,
+            isDataVerified: true,
+            dateOfBirth: '1924-12-01 00:00:00.000',
+            arabicFirstName: user.firstName,
+            arabicLastName: user.lastName,
+            middleName: user.lastName,
+            nationality: 'Saudi Arabia',
+          });
+        } else {
+          affected = await this.usersRepository.update(user.id, {
+            userLevel: UserLevelEnum.LEVEL_2,
+            isDataVerified: true,
+            dateOfBirth: '1924-12-01 00:00:00.000',
+            arabicFirstName: user.firstName,
+            arabicLastName: user.lastName,
+            middleName: user.lastName,
+            nationality: 'Saudi Arabia',
+            phone: userUpgradeInput.phoneNumber,
+          });
+        }
 
         if (!user.nationalIdentity) {
           await this.nationalIdentityRepository.save({
@@ -196,7 +211,7 @@ export class UserService {
             },
           );
         }
-        if (affected > 0) {
+        if (affected.affected > 0) {
           updatedUser = await this.usersRepository.findOneBy({
             id: user.id,
           });

@@ -39,6 +39,7 @@ import {
   CapturePaymentResponse,
   PreAuthorisedPaymentResponse,
 } from '../dto/response/payment.response';
+import Decimal from 'decimal.js';
 
 @Injectable()
 export class HyperPayService {
@@ -71,14 +72,15 @@ export class HyperPayService {
     try {
       const adminDefault = await this.adminService.adminDefault();
 
+      const amount = new Decimal(initiatePaymentInput.amount).toFixed(2);
+
       const payload: PaymentRequest = {
         entityId: this.hyperPayConfig.entityIdForDb,
         currency: 'SAR',
-        amount: parseFloat(initiatePaymentInput.amount.toFixed(2)),
+        amount: amount,
         paymentType: 'DB',
         integrity: true,
         merchantInvoiceId: reference,
-
         merchantTransactionId: adminDefault?.merchantTransactionId,
       };
 
@@ -106,6 +108,7 @@ export class HyperPayService {
       }
     }
   }
+
   async createCheckoutForPA(
     initiatePaymentInput: InitiatePaymentInput,
     user: User,
@@ -114,18 +117,18 @@ export class HyperPayService {
     try {
       const adminDefault = await this.adminService.adminDefault();
 
+      const amount = new Decimal(initiatePaymentInput.amount).toFixed(2);
+
       const payload: PaymentRequest = {
         entityId: this.hyperPayConfig.entityIdForPA,
-        amount: parseFloat(initiatePaymentInput.amount.toFixed(2)), // Ensures 2 decimal places as a number
+        amount: amount,
         currency: 'SAR',
         paymentType: 'PA',
         testMode: 'EXTERNAL',
         integrity: true,
         merchantInvoiceId: reference,
-
         'customParameters[3DS2_enrolled]': true,
         'customParameters[3DS2_flow]': 'challenge',
-
         merchantTransactionId: adminDefault?.merchantTransactionId,
       };
 

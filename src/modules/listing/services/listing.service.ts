@@ -1103,6 +1103,7 @@ export class ListingService {
             'listing.isListingSold',
             'listing.isListingRented',
             'listing.isListingPromoted',
+            'listing.published',
             'listing.price',
             'listing.status',
             'listing.stage',

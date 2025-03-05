@@ -43,7 +43,7 @@ export class PerformCopyAndPayInput {
 }
 export class PaymentRequest {
   entityId: string;
-  amount: number;
+  amount: string;
   currency: string;
   paymentType: string;
   integrity: boolean;
