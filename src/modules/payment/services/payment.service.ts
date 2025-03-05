@@ -272,10 +272,10 @@ export class PaymentService {
         file: url,
         offerId: offer.id,
       });
-
       await this.mailService.sendEmailInvoice(user, invoicePdf);
       return invoice;
     } catch (error) {
+      console.log(error);
       this.logger.error('Error finalizing invoice:', error);
 
       if (error instanceof HttpException) {

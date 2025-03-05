@@ -131,18 +131,22 @@ export class OfferService {
           listing.price,
           listing.purpose,
         );
+      //TODO: fix offer for nogatiable
+      // if (!listing.negotiable) {
+      //   if (listing.price < createOfferDto.price) {
+      //     throw new BadRequestException(AppStrings.LISTING_IS_NOT_NEGOTIABLE);
+      //   }
 
-      if (
-        (!listing.negotiable && listing.price < createOfferDto.price) ||
-        createOfferDto.price < listing.price
-      ) {
-        throw new BadRequestException(AppStrings.LISTING_IS_NOT_NEGOTIABLE);
-      }
+      //   if (listing.price > createOfferDto.price) {
+      //     throw new BadRequestException(AppStrings.LISTING_IS_NOT_NEGOTIABLE);
+      //   }
+      // }
+
       if (offerExpiry <= new Date()) {
         throw new BadRequestException('Expiry Date is in the past');
       }
 
-      if (createOfferDto.price < minimumPrice) {
+      if (listing.negotiable && createOfferDto.price < minimumPrice) {
         throw new BadRequestException(
           `Minimum Offer must be greater than  ${minimumPrice}`,
         );
@@ -190,12 +194,12 @@ export class OfferService {
             : `${user.arabicFirstName} ${user.arabicLastName}`,
         customerAddress: user.address,
         customerZatcaNumber: user.zatcaNuber,
-        totalWithVat: [offerPayload.price],
+        totalWithVat: [offerPayload.price + vat],
         itemVat: [{ vat: adminDefault.vat, vatValue: vat }],
         product: offerPayload,
-        sumTotalWithoutVat: offerPayload.price - vat,
+        sumTotalWithoutVat: offerPayload.price,
         sumTotalVat: vat,
-        sumTotalWithVat: offerPayload.price,
+        sumTotalWithVat: offerPayload.price + vat,
       };
 
       //TODO: switch to event emitter
@@ -227,7 +231,7 @@ export class OfferService {
         scope: scope,
         event: 'Create',
         metadata: JSON.stringify(offerPayload),
-        recipientFormat: ['Seller', 'Offer Creator'],
+        recipientFormat: ['Offer Creator', 'Seller'],
         img: images[0]?.url,
       });
       return await this.offerRepository.findOne({

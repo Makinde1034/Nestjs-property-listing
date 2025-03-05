@@ -176,6 +176,7 @@ export class UserService {
           arabicLastName: user.lastName,
           middleName: user.lastName,
           nationality: 'Saudi Arabia',
+          phone: userUpgradeInput.phoneNumber,
         });
 
         if (!user.nationalIdentity) {
