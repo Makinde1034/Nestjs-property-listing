@@ -1039,14 +1039,15 @@ export class ListingService {
       paginateAndSort.deactivated !== undefined &&
       paginateAndSort.deactivated !== null
     ) {
-      whereCondition.isListingDisabled = paginateAndSort.deactivated;
-    }
-    if (
-      paginateAndSort.active !== undefined &&
-      paginateAndSort.active !== null
-    ) {
-      if (paginateAndSort.active)
-        whereCondition.isListingDisabled = !paginateAndSort.active;
+      if (paginateAndSort.deactivated == false) {
+        whereCondition.isListingDisabled = false;
+        (whereCondition.isListingSold = false),
+          (whereCondition.isListingRented = false);
+        (whereCondition.published = true), whereCondition.listingType != null;
+        whereCondition.status = ListingStatus.ACCEPTED;
+      } else if (paginateAndSort.deactivated == true) {
+        whereCondition.isListingDisabled = true;
+      }
     }
 
     if (
