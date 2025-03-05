@@ -324,10 +324,150 @@ export class AdminService {
     }
   }
 
+  // async financialVsOrder(findOptions: AdminDashboardSort) {
+  //   try {
+  //     const currentDate = new Date();
+  //     let startDate, endDate, groupByInterval, duration;
+
+  //     if (!findOptions || !findOptions.timePeriod) {
+  //       throw new Error('Time period is required');
+  //     }
+
+  //     // Determine date range and grouping
+  //     switch (findOptions.timePeriod) {
+  //       case TimePeriod.Today:
+  //         startDate = startOfDay(currentDate);
+  //         endDate = endOfDay(currentDate);
+  //         groupByInterval = 'hour';
+  //         break;
+
+  //       case TimePeriod.Week:
+  //         const baseDate = subWeeks(currentDate, findOptions.value || 0);
+  //         startDate = startOfWeek(baseDate);
+  //         endDate = endOfWeek(baseDate);
+  //         groupByInterval = 'day';
+  //         break;
+
+  //       case TimePeriod.Month:
+  //         if (findOptions.value === 6) {
+  //           const sixMonthsAgo = subMonths(currentDate, 5);
+  //           startDate = startOfMonth(sixMonthsAgo);
+  //           endDate = endOfMonth(currentDate);
+  //           groupByInterval = 'month';
+  //           duration = 6; // Last 6 months
+  //         } else {
+  //           const monthDate = subMonths(currentDate, findOptions.value || 0);
+  //           startDate = startOfMonth(monthDate);
+  //           endDate = endOfMonth(monthDate);
+  //           groupByInterval = 'week'; // Weeks within the month
+  //         }
+  //         break;
+
+  //       case TimePeriod.Year:
+  //         const yearDate = subYears(currentDate, findOptions.value || 0);
+  //         startDate = startOfYear(yearDate);
+  //         endDate = endOfYear(yearDate);
+  //         groupByInterval = 'month';
+  //         break;
+
+  //       default:
+  //         throw new Error('Invalid time period');
+  //     }
+
+  //     // Query based on groupByInterval
+  //     const groupIntervalSQL =
+  //       groupByInterval === 'week'
+  //         ? `FLOOR((EXTRACT(DAY FROM invoice.createdAt) - 1) / 7) + 1`
+  //         : `EXTRACT(${groupByInterval.toUpperCase()} FROM invoice.createdAt)`;
+
+  //     const transactions = await this.invoiceRepository
+  //       .createQueryBuilder('invoice')
+  //       .select(`${groupIntervalSQL}::int`, groupByInterval)
+  //       .addSelect('invoice.type', 'fee')
+  //       .addSelect('COALESCE(SUM(invoice.price), 0)::float', 'totalAmount')
+  //       .addSelect('COALESCE(COUNT(invoice.id), 0)::int', 'totalOrder')
+  //       .where('invoice.createdAt BETWEEN :startDate AND :endDate', {
+  //         startDate,
+  //         endDate,
+  //       })
+  //       .groupBy(`${groupIntervalSQL}, invoice.type`)
+  //       .orderBy(groupByInterval, 'ASC')
+  //       .getRawMany();
+
+  //     console.log(transactions);
+
+  //     // Log to debug interval keys
+
+  //     // Generate all intervals based on groupByInterval
+  //     const allIntervals = (() => {
+  //       switch (groupByInterval) {
+  //         case 'day':
+  //           return Array.from({ length: 7 }, (_, i) =>
+  //             format(addDays(startOfWeek(startDate), i), 'EEEE'),
+  //           );
+  //         case 'week':
+  //           return Array.from(
+  //             { length: Math.ceil(differenceInDays(endDate, startDate) / 7) },
+  //             (_, i) => `Week ${i + 1}`,
+  //           );
+  //         case 'month':
+  //           if (duration === 6) {
+  //             return Array.from({ length: 6 }, (_, i) =>
+  //               format(addMonths(startDate, i), 'MMMM'),
+  //             );
+  //           }
+  //           return Array.from({ length: 12 }, (_, i) =>
+  //             format(addMonths(startOfYear(currentDate), i), 'MMMM'),
+  //           );
+  //         case 'hour':
+  //           return Array.from({ length: 24 }, (_, i) => `${i}:00`);
+  //         default:
+  //           return [];
+  //       }
+  //     })();
+
+  //     // Group transactions by interval
+  //     const groupedTransactions = transactions.reduce(
+  //       (acc, transaction) => {
+  //         const interval = parseInt(transaction[groupByInterval]);
+  //         acc[interval] = acc[interval] || [];
+  //         acc[interval].push({
+  //           fee: transaction.fee,
+  //           totalAmount: parseFloat(transaction.totalAmount),
+  //           totalOrder: parseInt(transaction.totalOrder),
+  //         });
+  //         return acc;
+  //       },
+  //       {} as { [key: number]: FinancialVsOrderResponse[] },
+  //     );
+
+  //     const payload = allIntervals.map((interval, idx) => {
+  //       let difference, month;
+
+  //       if (duration == 6) {
+  //         month = getMonth(startDate) + 1;
+  //         difference = true;
+  //       }
+  //       // Match transactions to the exact interval key
+  //       const intervalKey = (idx + 1 + month).toString(); // Adjust for 1-based month indices
+  //       const dataForInterval = groupedTransactions[intervalKey] || [];
+  //       return {
+  //         key: interval, // Human-readable interval (e.g., "October")
+  //         data: dataForInterval, // Corresponding transaction data
+  //       };
+  //     });
+
+  //     return payload;
+  //   } catch (error) {
+  //     this.logger.log(error);
+  //     throw new BadRequestException(error.message || 'An error occurred');
+  //   }
+  // }
+
   async financialVsOrder(findOptions: AdminDashboardSort) {
     try {
       const currentDate = new Date();
-      let startDate, endDate, groupByInterval, duration;
+      let startDate, endDate, groupByInterval;
 
       if (!findOptions || !findOptions.timePeriod) {
         throw new Error('Time period is required');
@@ -354,7 +494,6 @@ export class AdminService {
             startDate = startOfMonth(sixMonthsAgo);
             endDate = endOfMonth(currentDate);
             groupByInterval = 'month';
-            duration = 6; // Last 6 months
           } else {
             const monthDate = subMonths(currentDate, findOptions.value || 0);
             startDate = startOfMonth(monthDate);
@@ -394,8 +533,6 @@ export class AdminService {
         .orderBy(groupByInterval, 'ASC')
         .getRawMany();
 
-      // Log to debug interval keys
-
       // Generate all intervals based on groupByInterval
       const allIntervals = (() => {
         switch (groupByInterval) {
@@ -409,7 +546,7 @@ export class AdminService {
               (_, i) => `Week ${i + 1}`,
             );
           case 'month':
-            if (duration === 6) {
+            if (findOptions.value === 6) {
               return Array.from({ length: 6 }, (_, i) =>
                 format(addMonths(startDate, i), 'MMMM'),
               );
@@ -440,14 +577,8 @@ export class AdminService {
       );
 
       const payload = allIntervals.map((interval, idx) => {
-        let difference, month;
-
-        if (duration == 6) {
-          month = getMonth(startDate) + 1;
-          difference = true;
-        }
         // Match transactions to the exact interval key
-        const intervalKey = (idx + 1 + month).toString(); // Adjust for 1-based month indices
+        const intervalKey = idx + 1; // Adjust for 1-based month indices
         const dataForInterval = groupedTransactions[intervalKey] || [];
         return {
           key: interval, // Human-readable interval (e.g., "October")
@@ -457,7 +588,7 @@ export class AdminService {
 
       return payload;
     } catch (error) {
-      this.logger.log(error);
+      this.logger.error('Error in financialVsOrder:', error);
       throw new BadRequestException(error.message || 'An error occurred');
     }
   }
