@@ -61,7 +61,7 @@ export class Auction extends BaseEntity {
   @Field()
   maxListing: number;
 
-  @Field()
+  @Field({ nullable: true })
   auctionParticipantCount: number;
 
   @Field(() => [AuctionParticipant])
@@ -75,6 +75,9 @@ export class Auction extends BaseEntity {
   @Field({ defaultValue: false })
   @IsEnum(AuctionEnum)
   status: string;
+
+  @Field(() => [String])
+  listingRegistered: string[];
 
   @Field()
   @DeleteDateColumn()

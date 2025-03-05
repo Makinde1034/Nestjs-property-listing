@@ -16,7 +16,7 @@ import {
   UpdateListingDto,
 } from '../dtos/request/';
 
-import { Listing } from '../../../entities';
+import { Listing, User } from '../../../entities';
 import { UseGuards, UseInterceptors } from '@nestjs/common';
 import { AccessTokenGuard, PermissionsGuard } from '../../auth/guards';
 
@@ -83,6 +83,7 @@ import { AuctionBidRange } from '../../../entities/auction-bid-range.entity';
 import { FinalizationInput } from '../dtos/request/finalizationOffer';
 import { GqlCacheInterceptor } from '../../../common/interceptors/cache-middleware';
 import { Finalization } from '../../../entities/finalization.entity';
+import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 
 @Resolver()
 export class ListingResolver {
@@ -574,6 +575,7 @@ export class ListingResolver {
   async findOneAuction(
     @Args('id')
     id: string,
+    @CurrentUser() user: User,
   ) {
     return await this.auctionService.findOne(id);
   }

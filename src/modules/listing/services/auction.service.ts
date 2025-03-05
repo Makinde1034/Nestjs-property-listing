@@ -68,6 +68,7 @@ import { ServerSentEvents } from '../../../common/enums';
 import { BidRegistrationRepository } from '../repositories/bid-registration.repository';
 import { Auction } from '../../../entities/auction-table.entity';
 import { InvoiceRepository } from '../../payment/repositories/invoice.repository';
+import { Action } from 'rxjs/internal/scheduler/Action';
 
 @Injectable()
 export class AuctionService {
@@ -127,6 +128,7 @@ export class AuctionService {
       const result = await this.auctionRepository.findOneOrFail({
         where: { id },
       });
+
       return result;
     } catch (error) {
       this.logger.log(error);
@@ -134,20 +136,80 @@ export class AuctionService {
     }
   }
 
+  // async findOneAuctionWithParticipants(
+  //   paginateAndSort: FetchAuctionParticipantInput,
+  //   user?: User,
+  // ): Promise<AuctionParticipantResponse> {
+  //   try {
+  //     const { id, skip = 0, take = 20 } = paginateAndSort;
+  //     //Default pagination if not provided
+
+  //     const [auction, registration, [participants, total]] = await Promise.all([
+  //       // Fetch the auction details
+  //       this.auctionRepository.findOneOrFail({
+  //         where: { id },
+  //       }),
+
+  //       this.bidRegistrationRepository.find({
+  //         where: { userId: user.id, auctionId: id },
+  //       }),
+
+  //       // Fetch participants with their bids, including userId for each bid
+  //       this.auctionParticipantRepository
+  //         .createQueryBuilder('auctionParticipant')
+  //         .leftJoinAndSelect(
+  //           'auctionParticipant.bid',
+  //           'bids',
+  //           'bids.price = (SELECT MAX(b.price) FROM Bids b WHERE b."auctionParticipantId" = auctionParticipant.id)',
+  //         )
+  //         .leftJoinAndSelect('auctionParticipant.listing', 'listing')
+  //         .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
+  //         .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
+  //         .leftJoinAndSelect('listing.listingType', 'listingType')
+  //         .leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate')
+  //         .where('auctionParticipant.auctionId = :id', { id })
+  //         .skip(skip)
+  //         .take(take)
+  //         .getManyAndCount(),
+  //     ]);
+
+  //     const registeredId = registration.map((element) => {
+  //       return element.id;
+  //     });
+
+  //     // Transform the data to include userId array within the participant object
+  //     const transformedParticipants = participants.map((participant) => ({
+  //       ...participant,
+  //       userId: participant.bid // Collect userId from bids
+  //         .map((bid) => bid.userId)
+  //         .filter((userId) => userId), // Exclude null/undefined values
+  //     }));
+
+  //     return { auctions: auction, participant: transformedParticipants, total };
+  //   } catch (error) {
+  //     this.logger.error('Error fetching auction with participants:', error);
+  //     if (error.name === 'EntityNotFound') {
+  //       throw new BadRequestException(AppStrings.AUCTION_NOT_FOUND);
+  //     }
+  //     throw new BadRequestException(
+  //       error.message || 'Error fetching auction data',
+  //     );
+  //   }
+  // }
+
   async findOneAuctionWithParticipants(
     paginateAndSort: FetchAuctionParticipantInput,
+    user?: User,
   ): Promise<AuctionParticipantResponse> {
     try {
       const { id, skip = 0, take = 20 } = paginateAndSort;
-      //Default pagination if not provided
 
-      const [auction, [participants, total]] = await Promise.all([
-        // Fetch the auction details
-        this.auctionRepository.findOneOrFail({
-          where: { id },
+      // Fetch auction details, registration, and participants concurrently
+      const [auction, registration, [participants, total]] = await Promise.all([
+        this.auctionRepository.findOneOrFail({ where: { id } }),
+        this.bidRegistrationRepository.find({
+          where: { userId: user?.id, auctionId: id },
         }),
-
-        // Fetch participants with their bids, including userId for each bid
         this.auctionParticipantRepository
           .createQueryBuilder('auctionParticipant')
           .leftJoinAndSelect(
@@ -166,10 +228,16 @@ export class AuctionService {
           .getManyAndCount(),
       ]);
 
+      // Remove duplicates from registeredId
+      const registeredId = Array.from(
+        new Set(registration.map((element) => element.listingId)),
+      );
+      auction.listingRegistered = registeredId;
+
       // Transform the data to include userId array within the participant object
       const transformedParticipants = participants.map((participant) => ({
         ...participant,
-        userId: participant.bid // Collect userId from bids
+        userId: participant.bid
           .map((bid) => bid.userId)
           .filter((userId) => userId), // Exclude null/undefined values
       }));
