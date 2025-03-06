@@ -202,6 +202,7 @@ export class AuctionService {
     user?: User,
   ): Promise<AuctionParticipantResponse> {
     try {
+      console.log(user);
       const { id, skip = 0, take = 20 } = paginateAndSort;
 
       // Fetch auction details, registration, and participants concurrently
@@ -228,9 +229,18 @@ export class AuctionService {
           .getManyAndCount(),
       ]);
 
+      console.log(registration);
+
       // Remove duplicates from registeredId
       const registeredId = Array.from(
-        new Set(registration.map((element) => element.listingId)),
+        new Set(
+          registration.map((element) => {
+            return {
+              listingId: element.listingId,
+              autoBid: element.autoBid,
+            };
+          }),
+        ),
       );
       auction.listingRegistered = registeredId;
 

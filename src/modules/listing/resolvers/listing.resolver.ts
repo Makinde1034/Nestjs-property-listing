@@ -587,9 +587,11 @@ export class ListingResolver {
   async findOneAuctionWithParticipant(
     @Args('fetchAuctionParticipantInput')
     fetchAuctionParticipantInput: FetchAuctionParticipantInput,
+    @CurrentUser() user: User,
   ) {
     return await this.auctionService.findOneAuctionWithParticipants(
       fetchAuctionParticipantInput,
+      user,
     );
   }
 

@@ -76,8 +76,8 @@ export class Auction extends BaseEntity {
   @IsEnum(AuctionEnum)
   status: string;
 
-  @Field(() => [String])
-  listingRegistered: string[];
+  @Field(() => [ListingRegistered])
+  listingRegistered: ListingRegistered[];
 
   @Field()
   @DeleteDateColumn()
@@ -96,4 +96,12 @@ export class Auction extends BaseEntity {
   @Field(() => GraphQLISODateTime)
   @UpdateDateColumn()
   updatedAt: Date;
+}
+@ObjectType()
+export class ListingRegistered {
+  @Field()
+  listingId: string;
+
+  @Field()
+  autoBid: boolean;
 }

@@ -616,16 +616,21 @@ export class ServiceAndProviderService {
         .take(paginateAndSort.take)
         .skip(paginateAndSort.skip);
 
+      /**************************************************
+       * Uncomment to enable  filter by coverage area
+       *
+       **************************************************/
+
       // Apply coverage area filter if available
-      if (serviceprovider.coverageArea) {
-        query.andWhere(
-          'listingAttributes.name = :city AND listingAttributes.value = :coverageArea',
-          {
-            city: 'City',
-            coverageArea: serviceprovider.coverageArea,
-          },
-        );
-      }
+      // if (serviceprovider.coverageArea) {
+      //   query.andWhere(
+      //     'listingAttributes.name = :city AND listingAttributes.value = :coverageArea',
+      //     {
+      //       city: 'City',
+      //       coverageArea: serviceprovider.coverageArea,
+      //     },
+      //   );
+      // }
 
       // Execute query
       const [request, total] = await query.getManyAndCount();

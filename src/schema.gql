@@ -254,11 +254,16 @@ type Auction {
   auctionParticipantCount: Float
   auctionParticipant: [AuctionParticipant!]!
   status: String!
-  listingRegistered: [String!]!
+  listingRegistered: [ListingRegistered!]!
   deletedAt: DateTime!
   createdAt: DateTime!
   expireAt: DateTime
   updatedAt: DateTime!
+}
+
+type ListingRegistered {
+  listingId: String!
+  autoBid: Boolean!
 }
 
 type Bids {
