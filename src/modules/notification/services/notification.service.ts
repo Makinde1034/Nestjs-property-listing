@@ -404,7 +404,7 @@ export class NotificationService implements OnModuleInit {
       //**********************************************/
       // this logs notification log notification regardless of scope
       //**********************************************/
-      if (userPrefOwner?.desktop == false) {
+      if (userPrefOwner?.desktop == false || userPrefOwner?.desktop) {
         this.logger.log('Sending system notifications');
         this.sendDesktopNotificationToUser(
           owner,

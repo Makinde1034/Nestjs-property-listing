@@ -43,7 +43,7 @@ import { AuctionBidRange } from '../../../entities/auction-bid-range.entity';
 import { StorageService } from '../../file-handler/services/storage.service';
 import { ActivityEnum } from '../../../common/enums/activitys';
 import { ActivityLogService } from '../../activity-log/services/activity-log.service';
-import { AuctionEnum } from '../../../common/enums/status.enum';
+import { AuctionEnum, PaymentStatus } from '../../../common/enums/status.enum';
 import { AdminAuctionFilter } from '../dtos/request';
 import {
   startOfDay,
@@ -69,6 +69,9 @@ import { BidRegistrationRepository } from '../repositories/bid-registration.repo
 import { Auction } from '../../../entities/auction-table.entity';
 import { InvoiceRepository } from '../../payment/repositories/invoice.repository';
 import { Action } from 'rxjs/internal/scheduler/Action';
+import { PaymentService } from '../../payment/services/payment.service';
+import { BidRegistration } from '../../../entities/bid-registration.entity';
+import { Invoice } from '../../../entities/invoice.entity';
 
 @Injectable()
 export class AuctionService {
@@ -860,10 +863,30 @@ export class AuctionService {
   ) {
     try {
       const { reference, ...rest } = createAutoBidInput;
-      //TODO: add payment check
+
+      let invoice: Invoice, registered: BidRegistration;
+      if (reference) {
+        invoice = await this.invoiceRepository.findOneBy({ reference });
+      } else {
+        registered = await this.bidRegistrationRepository.findOne({
+          where: {
+            userId: user.id,
+            auctionId: createAutoBidInput.auctionId,
+            listingId: createAutoBidInput.listingId,
+          },
+        });
+      }
+      if (invoice?.status !== PaymentStatus.PAID || !registered.autoBid) {
+        throw new BadRequestException(AppStrings.INVALID_PAYMENT_REFERENCE);
+      }
+
       const [auction, listing] = await Promise.all([
-        this.auctionRepository.findOneBy({ id: createAutoBidInput.auctionId }),
-        this.listingRepository.findOneBy({ id: createAutoBidInput.listingId }),
+        this.auctionRepository.findOneBy({
+          id: createAutoBidInput.auctionId,
+        }),
+        this.listingRepository.findOneBy({
+          id: createAutoBidInput.listingId,
+        }),
       ]);
 
       if (!listing) {

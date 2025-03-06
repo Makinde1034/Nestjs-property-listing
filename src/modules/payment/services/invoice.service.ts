@@ -92,6 +92,7 @@ export class InvoiceService {
 
       // Fetch invoices and total count
       const [invoices, total] = await this.invoiceRepository.findAndCount({
+        relations: ['listingType'],
         where: whereOption,
         order: orderOptions,
         take,
@@ -130,6 +131,7 @@ export class InvoiceService {
 
       // Fetch invoices and total count
       const [invoices, total] = await this.invoiceRepository.findAndCount({
+        relations: ['listingType'],
         where: { ...whereOption, userId: user.id },
         order: orderOptions,
         take,

@@ -119,5 +119,5 @@ export const AppStrings = {
 
   YOU_ARE_NOT_A_SERVICE_PROVIDER: 'You are not a service provider',
 
-  INVALID_PAYMENT_REFERENCE: 'Invalid Payment reference',
+  INVALID_PAYMENT_REFERENCE: 'Invalid Payment. Please contact customer support',
 };
