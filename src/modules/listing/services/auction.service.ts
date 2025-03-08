@@ -876,9 +876,9 @@ export class AuctionService {
           },
         });
       }
-      if (invoice?.status !== PaymentStatus.PAID || !registered.autoBid) {
-        throw new BadRequestException(AppStrings.INVALID_PAYMENT_REFERENCE);
-      }
+      // if (invoice?.status !== PaymentStatus.PAID || !registered.autoBid) {
+      //   throw new BadRequestException(AppStrings.INVALID_PAYMENT_REFERENCE);
+      // }
 
       const [auction, listing] = await Promise.all([
         this.auctionRepository.findOneBy({

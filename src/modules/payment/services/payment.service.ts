@@ -289,6 +289,7 @@ export class PaymentService {
 
   async finalizeTransaction(webHookPaymentResponse: WebHookPaymentResponse) {
     try {
+      console.log(webHookPaymentResponse.payload.merchantInvoiceId);
       const invoice = await this.invoiceRepository.findOne({
         where: {
           reference: webHookPaymentResponse.payload.merchantInvoiceId,
@@ -297,22 +298,27 @@ export class PaymentService {
       });
 
       if (!invoice) {
+        this.logger.log(
+          `invoice for reference ${webHookPaymentResponse.payload.merchantInvoiceId}`,
+        );
         throw new BadRequestException('No invoice found');
       }
 
       const payload = {
         description: webHookPaymentResponse.payload.result.description,
         amount: parseFloat(webHookPaymentResponse.payload.amount),
-        transactionType: TransactionType.DEBIT,
+        transactionType: TransactionType.CREDIT,
         referenceId: webHookPaymentResponse.payload.id,
         needAdminReview: false,
       };
 
-      await this.transactionRepository.save(payload);
       await this.invoiceRepository.update(invoice.id, {
         status: PaymentStatus.PAID,
         capturedPrice: parseFloat(webHookPaymentResponse.payload.amount),
       });
+
+      await this.transactionRepository.save(payload);
+
       this.successNotification(invoice.userId, invoice.reference);
       return new SuccessResponse();
     } catch (error) {

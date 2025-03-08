@@ -75,6 +75,7 @@ export class WebhookService {
         decipher.update(cipherText),
         decipher.final(),
       ]).toString('utf8');
+      console.log(payload);
 
       const data: WebHookPaymentResponse = JSON.parse(decrypted);
 
