@@ -40,7 +40,7 @@ export class WebHookController {
   payment(
     @Headers('x-initialization-vector') initializationVector: string, // Extract the IV from the headers
     @Headers('x-authentication-tag') authenticationTag: string,
-    @Body() hyperPayWebHookResponse: WebHookResponse,
+    @Body() hyperPayWebHookResponse: any,
   ) {
     this.webhookService.handleWebHookForHyperpay(
       hyperPayWebHookResponse,
@@ -48,6 +48,7 @@ export class WebHookController {
       initializationVector,
       authenticationTag,
     );
+    console.log(hyperPayWebHookResponse);
     return HttpStatus.OK;
   }
 
