@@ -2090,7 +2090,7 @@ export class ListingService {
       return new SuccessResponse(AppStrings.LISTING_UNPUBLISHED_SUCCESSFULLY);
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error?.messages | error.data);
+      throw new BadRequestException(error?.messages || error.data);
     }
   }
 
