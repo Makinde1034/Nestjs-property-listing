@@ -400,12 +400,15 @@ export class IssueService {
   ): Promise<SuccessResponse> {
     try {
       const { id, sequentialId, ...rest } = updateChildIssueInput;
-
       // Find the existing child issue with only required fields
-      const childIssue = await this.childIssueRepository.findOne({
-        where: { id },
-        select: ['id', 'sequentialId', 'parentIssueId'], // Fetch only necessary fields
-      });
+      const childIssue = await this.childIssueRepository
+        .createQueryBuilder('childIssue')
+        .where('id = :id', { id })
+        .getOne();
+
+      // select: ['id', 'sequentialId', 'parentIssueId'], // Fetch only necessary fields
+
+      console.log(childIssue);
 
       if (!childIssue) {
         throw new BadRequestException('Child Issue not found');
@@ -416,7 +419,6 @@ export class IssueService {
         await this.workflowService.findOneWorkflowByDocumentname(
           this.childIssueRepository.metadata.name,
         );
-      console.log(actionConfig);
       const approval = actionConfig?.approvalTwoRole.length > 0 ? 2 : 1; //if approval role 2 has an id the it requires  two approvals
 
       if (actionConfig) {
@@ -425,7 +427,7 @@ export class IssueService {
           {
             document: this.childIssueRepository.metadata.name,
             actionType: 'update',
-            targetEntityId: id.toString(),
+            targetEntityId: id,
             user: admin,
             payload: JSON.stringify(updateChildIssueInput),
           },
@@ -492,18 +494,13 @@ export class IssueService {
 
         return new SuccessResponse(AppStrings.SUCCESSFULL, updatedIssue);
       }
-
-      throw new UnprocessableEntityException('Update operation failed');
     } catch (error) {
-      this.logger.error('Failed to update child issue', error.stack);
+      this.logger.error('Failed to update child issue', error);
 
       if (error instanceof HttpException) {
         throw error;
       }
-
-      throw new UnprocessableEntityException(
-        'An error occurred while updating the child issue',
-      );
+      throw new BadRequestException(error);
     }
   }
 
@@ -526,6 +523,7 @@ export class IssueService {
         where: { id },
         relations: ['parentIssue'],
       });
+
       if (!issue) {
         throw new BadRequestException(AppStrings.NOT_FOUND);
       }

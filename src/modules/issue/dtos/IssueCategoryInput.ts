@@ -69,7 +69,7 @@ export class CreateChildIssueInput {
 @InputType()
 export class UpdateChildIssueInput extends PartialType(CreateChildIssueInput) {
   @Field()
-  @IsNumber()
+  @IsString()
   @IsOptional()
   id: string;
 }

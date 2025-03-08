@@ -229,7 +229,10 @@ export class ServiceAndProviderService {
       const activityToSave = serviceProvider.map((element) => {
         const scope: NotificationScope = notificationPreference.find(
           (element) => {
-            if (element.scopeGroup == NotificationScopeEnum.OFFERS) {
+            if (
+              element.scopeGroup ==
+              NotificationScopeEnum.SERVICE_PROVIDER_APPLICATION
+            ) {
               return element;
             }
           },
@@ -449,6 +452,14 @@ export class ServiceAndProviderService {
     try {
       const { id, providerServiceStatus } = updateServiceInput;
 
+      const serviceProvided = await this.serviceProvidedRepository.findOneBy({
+        id,
+      });
+
+      if (!serviceProvided) {
+        throw new NotFoundException();
+      }
+
       const { affected } = await this.serviceProvidedRepository.update(id, {
         status: providerServiceStatus,
       });
@@ -541,6 +552,44 @@ export class ServiceAndProviderService {
     try {
       const data = await this.serviceRequestedRepository.update(id, {
         status: ServiceProvidedStatus.APPEALED,
+      });
+
+      return data;
+    } catch (error) {
+      this.logger.log(error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async markAsDone(id: string, user: User) {
+    try {
+      const serviceRequested = await this.serviceRequestedRepository.findOneBy({
+        id,
+      });
+      const data = await this.serviceRequestedRepository.update(id, {
+        status: ServiceProvidedStatus.DONE,
+      });
+
+      const notificationPreference =
+        await this.notificationScopeRepository.find({
+          where: { scopeGroup: NotificationScopeEnum.OFFERS },
+        });
+
+      const scope: NotificationScope = notificationPreference.find(
+        (element) => {
+          if (element.scopeGroup == NotificationScopeEnum.SERVICE) {
+            return element;
+          }
+        },
+      );
+      this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+        creatorId: serviceRequested.userId,
+        receiverId: serviceRequested.userId,
+        scope: scope,
+        event: 'Response',
+        metadata: JSON.stringify(data),
+        recipientFormat: [null, 'Service ProviderListing Owner'],
+        img: user?.profilePhoto,
       });
 
       return data;

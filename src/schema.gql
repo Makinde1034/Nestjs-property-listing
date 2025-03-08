@@ -1735,6 +1735,7 @@ type Mutation {
   provideService(provideService: ProvideNewService!): ServiceProvided!
   cancleService(id: String!): SuccessResponse!
   appealService(id: String!): SuccessResponse!
+  markServiceAsDone(id: String!): SuccessResponse!
   confirmService(id: String!): SuccessResponse!
   acceptService(id: String!): SuccessResponse!
   rejectService(id: String!): SuccessResponse!

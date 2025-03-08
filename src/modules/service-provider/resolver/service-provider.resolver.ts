@@ -208,6 +208,11 @@ export class ServiceAndProviderResolver {
   async appealService(@Args('id') id: string, @Context() ctx: any) {
     return await this.serviceProviderService.appealService(id, ctx.req.user);
   }
+  @UseGuards(AccessTokenGuard)
+  @Mutation(() => SuccessResponse)
+  async markServiceAsDone(@Args('id') id: string, @Context() ctx: any) {
+    return await this.serviceProviderService.markAsDone(id, ctx.req.user);
+  }
 
   @UseGuards(AccessTokenGuard)
   @Mutation(() => SuccessResponse)

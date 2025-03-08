@@ -2059,6 +2059,7 @@ export class ListingService {
         { id: In(listingActionInput.listingId) },
         {
           isListingDisabled: true,
+          status: ListingStatus.REJECTED,
         },
       );
 
