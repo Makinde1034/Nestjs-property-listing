@@ -921,7 +921,6 @@ export class AuctionService {
     try {
       const valueInRange = Math.floor(price / 1000000);
       const adminDefault = await this.adminService.adminDefault();
-
       const [autoBids, auctionBidRange] = await Promise.all([
         this.autoBidRepository.find({
           where: {
@@ -938,9 +937,10 @@ export class AuctionService {
           )
           .getOne(),
       ]);
+      let i = 1;
 
       const bidsToMake = autoBids.map((element) => {
-        return {
+        const bids = {
           auctionparticipantId: auctionParticipant,
 
           listingId: bidInput.listingId,
@@ -949,9 +949,11 @@ export class AuctionService {
           userId: element.userId,
           autoBid: true,
           price:
-            this.calculatebidPrice(price, auctionBidRange) ??
+            this.calculatebidPrice(price, auctionBidRange, i) ??
             adminDefault.fallBackDefaultBidIncrement,
         };
+        i = i + 1;
+        return bids;
       });
 
       await this.bidRepository.save(bidsToMake);
@@ -971,8 +973,12 @@ export class AuctionService {
    * Calculate the new price to bid based on system's default increment
    */
 
-  calculatebidPrice(bidPrice: number, auctionBidRange: AuctionBidRange) {
-    const newBidPrice = bidPrice + auctionBidRange.increment * 1000;
+  calculatebidPrice(
+    bidPrice: number,
+    auctionBidRange: AuctionBidRange,
+    count: number,
+  ) {
+    const newBidPrice = bidPrice + auctionBidRange.increment * 1000 * count;
     return newBidPrice;
   }
 

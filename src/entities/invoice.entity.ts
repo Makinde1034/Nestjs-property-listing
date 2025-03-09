@@ -28,11 +28,11 @@ export class Invoice {
   @Field()
   id: int;
 
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column('decimal', { precision: 17, scale: 2 })
   @Field()
   price: number;
 
-  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  @Column('decimal', { precision: 17, scale: 2, nullable: true })
   @Field({ nullable: true })
   capturedPrice: number;
 
