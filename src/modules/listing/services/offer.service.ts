@@ -838,8 +838,8 @@ export class OfferService {
           });
 
           this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
-            creatorId: offerPayload.userId,
-            receiverId: user.id,
+            creatorId: null,
+            receiverId: offerPayload.id,
             scope: notificationPreference,
             event: 'Response',
             recipientFormat: ['Offer Creator', 'Seller'],
