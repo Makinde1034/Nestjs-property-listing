@@ -120,4 +120,5 @@ export const AppStrings = {
   YOU_ARE_NOT_A_SERVICE_PROVIDER: 'You are not a service provider',
 
   INVALID_PAYMENT_REFERENCE: 'Invalid Payment. Please contact customer support',
+  INVALID_PAYMENT: 'There is an issue  with your payment. Cannot accept',
 };

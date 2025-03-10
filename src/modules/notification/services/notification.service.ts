@@ -747,7 +747,7 @@ export class NotificationService implements OnModuleInit {
       this.notificationRepository.findAndCount({
         where: { recipient: { id: user.id } },
         relations: ['recipient'],
-        order: { createdAt: 'DESC' },
+        order: { read: 'ASC', createdAt: 'DESC' },
         take: paginateAndSort.take ?? 20,
         skip: paginateAndSort.skip ?? 0,
       }),

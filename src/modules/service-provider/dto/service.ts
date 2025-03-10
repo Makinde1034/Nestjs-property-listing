@@ -130,6 +130,10 @@ export class ProvideNewService {
   @Field()
   @IsString()
   serviceId: string;
+
+  @Field()
+  @IsString()
+  coverageArea: string;
 }
 
 export class UploadWorkDocument {

@@ -796,6 +796,10 @@ export class OfferService {
             offerId: updateOfferInput.id,
           });
 
+          if (!invoice) {
+            throw new NotFoundException(AppStrings.INVALID_PAYMENT);
+          }
+
           await this.paymentService.capturePayment({
             amount: JSON.stringify(invoice.price),
             paymentId: invoice.checkoutId,
@@ -838,7 +842,17 @@ export class OfferService {
           });
 
           this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
-            creatorId: null,
+            creatorId: offerPayload.userId,
+            receiverId: null,
+            scope: scope,
+            event: 'Accepted',
+            metadata: JSON.stringify(offer),
+            recipientFormat: ['Buyer', null],
+            img: images[0]?.url,
+          });
+
+          this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+            creatorId: user.id,
             receiverId: offerPayload.id,
             scope: notificationPreference,
             event: 'Response',

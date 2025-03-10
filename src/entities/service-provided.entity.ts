@@ -53,6 +53,10 @@ export class ServiceProvided extends BaseEntity {
   @Field({ nullable: true })
   status: string;
 
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  coverageArea: string;
+
   @Field(() => GraphQLISODateTime, { nullable: true })
   @DeleteDateColumn()
   deletedAt: Date;
