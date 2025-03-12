@@ -61,7 +61,6 @@ export class AdminDefault extends BaseEntity {
   @Field({ nullable: true })
   @Column({ default: 1000 })
   fallBackDefaultBidIncrement: number;
-
   @Field({ nullable: true })
   @Column()
   state: string;
@@ -90,6 +89,10 @@ export class AdminDefault extends BaseEntity {
   @Field({ nullable: true })
   @Column()
   daysToAuctionRegistrationStart: number;
+
+  @Field({ nullable: true })
+  @Column({ default: 5000 })
+  rentalFee: number;
 
   @Field(() => GraphQLISODateTime)
   @CreateDateColumn()

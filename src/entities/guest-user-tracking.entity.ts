@@ -2,7 +2,6 @@
  * Copyright (c) 2024, Waseet LLC. All rights reserved.
  * For license. See license.txt
  */
-
 import { Entity, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import BaseEntity from './base.entity';
 
@@ -26,7 +25,7 @@ export class UserTracking extends BaseEntity {
   @Column()
   ipAddress: string;
 
-  @Column()
+  @Column({ nullable: true })
   userAgent: string;
 
   @CreateDateColumn()

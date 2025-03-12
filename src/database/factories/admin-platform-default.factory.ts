@@ -18,8 +18,10 @@ export const AdminPlatformDefaultFactory: Partial<AdminDefault> = {
   ticketAging: 24,
   promptRatingTime: 10,
   vat: 15,
-  daysToAuctionRegistrationStart: 7,
-  daysToAuctionRegistrationEnd: 7,
+  daysToAuctionRegistrationStart: 3,
+  daysToAuctionRegistrationEnd: 0,
   postcode: '4240111',
   merchantTransactionId: 'WASEET-2024-PI',
+
+  rentalFee: 5000,
 };

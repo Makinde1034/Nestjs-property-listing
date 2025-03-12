@@ -901,6 +901,10 @@ export class AuctionService {
         userId: user.id,
       });
 
+      await this.bidRegistrationRepository.update(registered.id, {
+        autoBid: true,
+      });
+
       return autoBid;
     } catch (error) {
       this.logger.error(error);

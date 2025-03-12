@@ -160,4 +160,9 @@ export class RequestForService {
   @Field()
   @IsString()
   listingId: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  reference: string;
 }
