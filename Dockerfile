@@ -44,12 +44,6 @@ RUN apt update && apt install -y \
   libglib2.0-0 
 
 
-
-
-
-
-
-
 # Install Puppeteer without triggering Firefox download
 RUN npm install puppeteer
 

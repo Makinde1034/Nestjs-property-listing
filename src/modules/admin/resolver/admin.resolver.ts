@@ -117,8 +117,10 @@ export class AdminResolver {
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.DASHBOARD_SUPPORT_RESPONSE_CARD)
   @Query(() => ResponseTime, { name: 'averageResponse' })
-  async averageResponse() {
-    return await this.adminService.responseTime();
+  async averageResponse(
+    @Args('findOptions', { nullable: true }) findOption: AdminDashboardSort,
+  ) {
+    return await this.adminService.responseTime(findOption);
   }
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.DASHBOARD_SAII_CARD)

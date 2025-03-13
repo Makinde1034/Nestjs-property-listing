@@ -327,7 +327,7 @@ export class ServiceAndProviderService {
   ) {
     try {
       const { id, coverageArea } = updateServiceInput;
-      const { affected } = await this.serviceProviderRepository.update(id, {
+      const { affected } = await this.serviceProvidedRepository.update(id, {
         coverageArea: coverageArea,
       });
       if (affected > 0) {

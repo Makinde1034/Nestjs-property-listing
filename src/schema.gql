@@ -1287,7 +1287,7 @@ type Query {
   userAgeCount(findOptions: AdminDashboardSort!): [UserAgeRange!]!
   userFunnel(findOptions: AdminDashboardSort): UserFunneling!
   getTicketForAdmin(findOptions: AdminDashboardSort): TicketResponse!
-  averageResponse: ResponseTime!
+  averageResponse(findOptions: AdminDashboardSort): ResponseTime!
   saiiFees(findOptions: AdminDashboardSort): SaiiFees!
   financialVsOrder(findOptions: AdminDashboardSort!): [GroupTransactions!]!
   fetchCoupons(couponFilterInput: CouponFilter!): CouponResponse!
