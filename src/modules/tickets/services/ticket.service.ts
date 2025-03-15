@@ -19,7 +19,7 @@ import {
   UpdateResponseTemplateInput,
   UpdateTicketInput,
 } from '../dtos';
-import { AppStrings } from 'src/common/messages/app.strings';
+import { AppStrings, messagesKeys } from 'src/common/messages/app.strings';
 import { Ticket, User } from 'src/entities';
 import { IssueRepository } from '../../issue/repositories';
 import { TicketStatus } from 'src/common/enums';
@@ -42,10 +42,8 @@ import {
   startOfYear,
   endOfYear,
 } from 'date-fns';
-import {
-  generateRandomNumbers,
-  randomNumbers,
-} from '../../../common/utils/helper';
+import { generateRandomNumbers } from '../../../common/utils/helper';
+import { I18nService } from 'nestjs-i18n';
 @Injectable()
 export class TicketService {
   constructor(
@@ -54,7 +52,7 @@ export class TicketService {
 
     private childIssueRepository: ChildIssueRepository,
     private readonly issueRepository: IssueRepository,
-
+    private readonly i18n: I18nService,
     private readonly activityLogService: ActivityLogService,
   ) {}
   logger = new Logger(TicketService.name);
@@ -105,7 +103,9 @@ export class TicketService {
       });
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
   /**
@@ -128,7 +128,9 @@ export class TicketService {
         return tickets;
       }
     } catch (error) {
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -198,7 +200,7 @@ export class TicketService {
         error.stack,
       );
       throw new BadRequestException(
-        'Failed to fetch tickets. Please try again later.',
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
       );
     }
   }
@@ -258,7 +260,7 @@ export class TicketService {
         error.stack,
       );
       throw new BadRequestException(
-        'Failed to fetch tickets. Please try again later.',
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
       );
     }
   }
@@ -291,7 +293,9 @@ export class TicketService {
       });
 
       if (tickets.length === 0) {
-        throw new NotFoundException('Tickets not found');
+        throw new NotFoundException(
+          this.i18n.t(`messages.${messagesKeys.NOT_FOUND}`),
+        );
       }
 
       // Prepare tickets for update
@@ -327,7 +331,7 @@ export class TicketService {
       }
       this.logger.error('Error updating tickets', error.stack);
       throw new BadRequestException(
-        'An error occurred while updating tickets',
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
         error,
       );
     }
@@ -380,7 +384,9 @@ export class TicketService {
       return { responseTemplate, total };
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -401,7 +407,9 @@ export class TicketService {
       });
 
       if (!template) {
-        throw new BadRequestException(AppStrings.NOT_FOUND);
+        throw new NotFoundException(
+          this.i18n.t(`messages.${messagesKeys.NOT_FOUND}`),
+        );
       }
 
       const { affected } =
@@ -419,11 +427,16 @@ export class TicketService {
       await this.activityLogService.logActivity(activityToSave);
 
       if (affected > 0) {
-        return new SuccessResponse(AppStrings.DELETED_SUCCESSFULLY);
+        return new SuccessResponse(
+          this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+        );
       }
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(AppStrings.NOT_FOUND, error.error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+        error.error,
+      );
     }
   }
 
@@ -436,7 +449,9 @@ export class TicketService {
         id: updateResponseTemplate.id,
       });
       if (!template) {
-        throw new BadRequestException(AppStrings.NOT_FOUND);
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+        );
       }
       const { affected } = await this.responseTemplateRepostiory.update(
         template.id,
@@ -463,7 +478,10 @@ export class TicketService {
     } catch (error) {
       this.logger.log(error);
 
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+        error,
+      );
     }
   }
 
@@ -477,7 +495,10 @@ export class TicketService {
       return true;
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+        error,
+      );
     }
   }
 
@@ -512,7 +533,10 @@ export class TicketService {
         .getMany();
     } catch (error) {
       this.logger.error('Error searching tickets', error);
-      throw new BadRequestException(error.message);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+        error,
+      );
     }
   }
 
@@ -540,7 +564,10 @@ export class TicketService {
         .getMany();
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+        error,
+      );
     }
   }
 }

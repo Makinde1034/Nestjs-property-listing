@@ -27,11 +27,12 @@ import {
 } from '../dtos/request';
 import { DeepPartial, In } from 'typeorm';
 import slugify from 'slugify';
-import { AppStrings } from '../../../common/messages/app.strings';
+import { AppStrings, messagesKeys } from '../../../common/messages/app.strings';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { ActivityLogService } from '../../activity-log/services/activity-log.service';
 import { ActivityEnum } from '../../../common/enums/activitys';
+import { I18nService } from 'nestjs-i18n';
 
 @Injectable()
 export class RoleService {
@@ -41,6 +42,8 @@ export class RoleService {
     private readonly staffRepository: UserRepository,
     private readonly rolePermissionRepository: RolePermissionRepository,
     private readonly activityLogsService: ActivityLogService,
+
+    private readonly i18n: I18nService,
   ) {}
 
   logger = new Logger(RoleService.name);
@@ -57,7 +60,9 @@ export class RoleService {
       return result;
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -85,7 +90,9 @@ export class RoleService {
       await this.activityLogsService.logActivity(activityToSave);
 
       if (affected > 0) {
-        return new SuccessResponse(AppStrings.ROLE_DELETED_SUCCESSFULLY);
+        return new SuccessResponse(
+          this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+        );
       }
     } catch (error) {
       throw new BadRequestException(error);
@@ -160,7 +167,9 @@ export class RoleService {
         ])
         .getOne();
       if (!role) {
-        throw new NotFoundException(AppStrings.NOT_FOUND);
+        throw new NotFoundException(
+          this.i18n.t(`messages.${messagesKeys.NOT_FOUND}`),
+        );
       }
 
       return role;
@@ -171,7 +180,9 @@ export class RoleService {
         throw error;
       }
 
-      throw new BadRequestException(AppStrings.NOT_FOUND);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -318,7 +329,7 @@ export class RoleService {
           roleId: role.id,
         },
       ]);
-      return AppStrings.SUCCESSFULLY_DISABLED;
+      return this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`);
     }
   }
 
@@ -352,7 +363,9 @@ export class RoleService {
       return roles;
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -393,7 +406,9 @@ export class RoleService {
         .getMany();
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 }

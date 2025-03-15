@@ -51,6 +51,7 @@ export class TrackingMiddleware implements NestMiddleware {
   async use(req: Request, res: Response, next: NextFunction) {
     let type;
     const pageVisited = req.originalUrl;
+
     const clientIp = requestIp.getClientIp(req) || req.socket.remoteAddress; // Correct IP extraction
     const userAgent = req.headers['user-agent'];
 

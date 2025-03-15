@@ -7,6 +7,7 @@ import {
   BadRequestException,
   HttpException,
   Injectable,
+  InternalServerErrorException,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
@@ -26,13 +27,13 @@ import { ServiceProviderRepository } from '../repository/service-provider.reposi
 import { ServiceRepository } from '../repository/services.repository';
 import { PaginateAndSort } from '../../../modules/core/dto/pagination-and-sort.dto';
 import { ActivityLogService } from '../../../modules/activity-log/services/activity-log.service';
-import { In } from 'typeorm';
+import { In, Not } from 'typeorm';
 import { ServiceProviderStatus } from '../../../common/enums/status.enum';
 import { ServiceProvidedRepository } from '../repository/service-provided.repository';
 import { NotificationScope, User } from '../../../entities';
 import { ActivityEnum } from '../../../common/enums/activitys';
 import { SuccessResponse } from '../../../common/utils/success.response';
-import { AppStrings } from '../../../common/messages/app.strings';
+import { AppStrings, messagesKeys } from '../../../common/messages/app.strings';
 import { ServiceProvided } from '../../../entities/service-provided.entity';
 import { ServiceRequestedRepository } from '../repository/requested-service.repository';
 import {
@@ -46,6 +47,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { NotificationScopeEnum } from '../../../common/enums/notification-scope.enum';
 import { NotificationScopeRepository } from '../../user/repositories';
 import { NotificationEvent } from '../../../common/enums';
+import { I18nService } from 'nestjs-i18n';
 
 @Injectable()
 export class ServiceAndProviderService {
@@ -59,6 +61,7 @@ export class ServiceAndProviderService {
     private readonly listingRepository: ListingRepository,
     private readonly eventEmitter: EventEmitter2,
     private readonly notificationScopeRepository: NotificationScopeRepository,
+    private readonly i18n: I18nService,
   ) {}
 
   logger = new Logger(ServiceAndProviderService.name);
@@ -72,7 +75,9 @@ export class ServiceAndProviderService {
       return await this.serviceRepository.findOneBy({ id });
     } catch (error) {
       this.logger.error(error);
-      throw new BadRequestException(error);
+      throw new NotFoundException(
+        this.i18n.t(`messages.${messagesKeys.NOT_FOUND}`),
+      );
     }
   }
 
@@ -92,7 +97,9 @@ export class ServiceAndProviderService {
       });
 
       if (alreadyExisting) {
-        throw new BadRequestException(AppStrings.RESOURCE_ALREADY_EXISTS);
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.RESOURCE_ALREADY_EXISTS}`),
+        );
       }
 
       const service = await this.serviceRepository.findOne({
@@ -100,7 +107,9 @@ export class ServiceAndProviderService {
       });
 
       if (!service) {
-        throw new BadRequestException(AppStrings.NOT_FOUND);
+        throw new NotFoundException(
+          this.i18n.t(`messages.${messagesKeys.NOT_FOUND}`),
+        );
       }
 
       const serviceProvider = this.serviceProviderRepository.create({
@@ -126,7 +135,9 @@ export class ServiceAndProviderService {
         throw error;
       }
       this.logger.error(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -153,7 +164,9 @@ export class ServiceAndProviderService {
     } catch (error) {
       console.log(error);
       this.logger.error(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -169,7 +182,9 @@ export class ServiceAndProviderService {
       return { serviceProvided, provider };
     } catch (error) {
       this.logger.error(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
   async serviceProviderStatus(user: User) {
@@ -179,7 +194,9 @@ export class ServiceAndProviderService {
       });
 
       if (!provider) {
-        throw new NotFoundException(AppStrings.NOT_FOUND);
+        throw new NotFoundException(
+          this.i18n.t(`messages.${messagesKeys.NOT_FOUND}`),
+        );
       }
 
       return provider;
@@ -189,7 +206,9 @@ export class ServiceAndProviderService {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -209,7 +228,9 @@ export class ServiceAndProviderService {
         });
 
       if (serviceProvider.length == 0) {
-        throw new BadRequestException(AppStrings.NOT_FOUND);
+        throw new NotFoundException(
+          this.i18n.t(`messages.${messagesKeys.NOT_FOUND}`),
+        );
       }
 
       const resultToUpdate = serviceProvider.map((element) => {
@@ -260,7 +281,9 @@ export class ServiceAndProviderService {
       await this.activityLogService.logActivity(activityToSave);
 
       if (updatedServiceProvider) {
-        return new SuccessResponse(AppStrings.SUCCESSFULL);
+        return new SuccessResponse(
+          this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+        );
       }
     } catch (error) {
       this.logger.log(error);
@@ -311,14 +334,18 @@ export class ServiceAndProviderService {
       await this.activityLogService.logActivity(activityToSave);
 
       if (updatedServiceProvider) {
-        return new SuccessResponse(AppStrings.SUCCESSFULL);
+        return new SuccessResponse(
+          this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+        );
       }
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
       }
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -331,11 +358,15 @@ export class ServiceAndProviderService {
         coverageArea: coverageArea,
       });
       if (affected > 0) {
-        return new SuccessResponse(AppStrings.SUCCESSFULL);
+        return new SuccessResponse(
+          this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+        );
       }
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -346,7 +377,9 @@ export class ServiceAndProviderService {
       return await this.serviceProvidedRepository.save(proideServiceInput);
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -356,11 +389,15 @@ export class ServiceAndProviderService {
         proideServiceInput.id,
       );
       if (affected > 0) {
-        throw new SuccessResponse(AppStrings.SUCCESSFULL);
+        throw new SuccessResponse(
+          this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+        );
       }
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -371,11 +408,15 @@ export class ServiceAndProviderService {
       );
 
       if (affected > 0) {
-        return new SuccessResponse(AppStrings.SUCCESSFULL);
+        return new SuccessResponse(
+          this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+        );
       }
     } catch (error) {
       this.logger.error(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -391,7 +432,9 @@ export class ServiceAndProviderService {
         .getMany();
     } catch (error) {
       this.logger.error('Error searching tickets', error);
-      throw new BadRequestException(error.message);
+      throw new InternalServerErrorException(
+        this.i18n.t(`messages.${messagesKeys.INTERNAL_SERVER_EXCEPTION}`),
+      );
     }
   }
 
@@ -421,7 +464,9 @@ export class ServiceAndProviderService {
       return data;
     } catch (error) {
       this.logger.error(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -444,7 +489,9 @@ export class ServiceAndProviderService {
       return { service, count };
     } catch (error) {
       this.logger.error(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -457,7 +504,9 @@ export class ServiceAndProviderService {
       });
 
       if (!serviceProvided) {
-        throw new NotFoundException();
+        throw new NotFoundException(
+          this.i18n.t(`messages.${messagesKeys.NOT_FOUND}`),
+        );
       }
 
       const { affected } = await this.serviceProvidedRepository.update(id, {
@@ -465,11 +514,15 @@ export class ServiceAndProviderService {
       });
 
       if (affected > 0) {
-        return new SuccessResponse(AppStrings.SUCCESSFULL);
+        return new SuccessResponse(
+          this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+        );
       }
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
   async updateService(updateServiceInput: UpdateServiceInput) {
@@ -485,7 +538,10 @@ export class ServiceAndProviderService {
         const data = await this.serviceRepository.findOneBy({ id });
 
         if (affected > 0) {
-          return new SuccessResponse(AppStrings.SUCCESSFULL, data);
+          return new SuccessResponse(
+            this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+            data,
+          );
         }
       } else {
         const { affected } = await this.serviceRepository.update(id, {
@@ -494,12 +550,17 @@ export class ServiceAndProviderService {
         const data = await this.serviceRepository.findOneBy({ id });
 
         if (affected > 0) {
-          return new SuccessResponse(AppStrings.SUCCESSFULL, data);
+          return new SuccessResponse(
+            this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+            data,
+          );
         }
       }
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -512,13 +573,17 @@ export class ServiceAndProviderService {
         id: requestForServiceInput.serviceProvidedId,
       });
       if (!service) {
-        throw new BadRequestException('Service not found');
+        throw new NotFoundException(
+          this.i18n.t(`messages.${messagesKeys.NOT_FOUND}`),
+        );
       }
       const listing = await this.listingRepository.findOneBy({
         id: requestForServiceInput.listingId,
       });
       if (!listing) {
-        throw new BadRequestException('Listing not found');
+        throw new NotFoundException(
+          this.i18n.t(`messages.${messagesKeys.LISTING_NOT_FOUND}`),
+        );
       }
       const data = await this.serviceRequestedRepository.save({
         ...requestForServiceInput,
@@ -531,7 +596,9 @@ export class ServiceAndProviderService {
       return data;
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -544,7 +611,9 @@ export class ServiceAndProviderService {
       return data;
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -557,7 +626,9 @@ export class ServiceAndProviderService {
       return data;
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -595,7 +666,9 @@ export class ServiceAndProviderService {
       return data;
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -608,7 +681,9 @@ export class ServiceAndProviderService {
       return data;
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -624,7 +699,9 @@ export class ServiceAndProviderService {
       return data;
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -637,7 +714,9 @@ export class ServiceAndProviderService {
       return new SuccessResponse(AppStrings.SUCCESSFULL);
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -688,7 +767,7 @@ export class ServiceAndProviderService {
     } catch (error) {
       this.logger.error('Error fetching service requests', error);
       throw new BadRequestException(
-        error.message || 'An error occurred while fetching service requests',
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
       );
     }
   }
@@ -715,7 +794,9 @@ export class ServiceAndProviderService {
     } catch (error) {
       console.log(error);
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -727,11 +808,15 @@ export class ServiceAndProviderService {
       });
 
       if (affected > 0) {
-        return new SuccessResponse(AppStrings.SUCCESSFULL);
+        return new SuccessResponse(
+          this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+        );
       }
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -742,11 +827,15 @@ export class ServiceAndProviderService {
       );
 
       if (affected > 0) {
-        return new SuccessResponse(AppStrings.SUCCESSFULL);
+        return new SuccessResponse(
+          this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+        );
       }
     } catch (error) {
       this.logger.error(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -764,7 +853,9 @@ export class ServiceAndProviderService {
         .getMany();
     } catch (error) {
       this.logger.error('Error searching tickets', error);
-      throw new BadRequestException(error.message);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -780,7 +871,9 @@ export class ServiceAndProviderService {
       });
 
       if (!serviceProvider) {
-        throw new BadRequestException(AppStrings.NOT_FOUND);
+        throw new NotFoundException(
+          this.i18n.t(`messages.${messagesKeys.NOT_FOUND}`),
+        );
       }
 
       if (icon) {
@@ -830,9 +923,9 @@ export class ServiceAndProviderService {
         }
       }
     } catch (error) {
-      this.logger.error('Error uploading attribute icon:', error);
+      this.logger.error('Error uploading  icon:', error);
       throw new BadRequestException(
-        error.message || 'Failed to upload attribute icon',
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
       );
     }
   }

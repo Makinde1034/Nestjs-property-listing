@@ -7,7 +7,9 @@ import {
   BadRequestException,
   HttpException,
   Injectable,
+  InternalServerErrorException,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { WorkflowRepository } from '../repositories/workflow.repository';
 import {
@@ -19,17 +21,20 @@ import {
 } from '../dto/request/workflow';
 import { DataSource, In } from 'typeorm';
 import { SuccessResponse } from '../../../common/utils/success.response';
-import { AppStrings } from '../../../common/messages/app.strings';
+import { AppStrings, messagesKeys } from '../../../common/messages/app.strings';
 import { WorkFlowResponse } from '../dto/response/workflow';
 import { ActivityLogService } from '../../activity-log/services/activity-log.service';
 import { User } from '../../../entities';
 import { ActivityEnum } from '../../../common/enums/activitys';
+import { I18nService } from 'nestjs-i18n';
+import { Int } from '@nestjs/graphql';
 @Injectable()
 export class AdminWorkflowService {
   constructor(
     private readonly workflowRepository: WorkflowRepository,
     private readonly dataSource: DataSource,
     private readonly activityLogService: ActivityLogService,
+    private readonly i18n: I18nService,
   ) {}
   logger = new Logger(AdminWorkflowService.name);
   async createWorkFlow(createWorkFlowInput: CreateWorkflowInput, admin: User) {
@@ -40,7 +45,7 @@ export class AdminWorkflowService {
 
       if (workflow && workflow?.action == createWorkFlowInput.action) {
         throw new BadRequestException(
-          'A workFlow with this name already exist',
+          this.i18n.t(`messages.${messagesKeys.WORKFLOW_EXIST}`),
         );
       }
       const data = await this.workflowRepository.save(createWorkFlowInput);
@@ -59,7 +64,9 @@ export class AdminWorkflowService {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -87,8 +94,8 @@ export class AdminWorkflowService {
       return { workflow, total };
     } catch (error) {
       this.logger.error('Error fetching workflows', error);
-      throw new BadRequestException(
-        'Failed to retrieve workflows. Please try again.',
+      throw new InternalServerErrorException(
+        this.i18n.t(`messages.${messagesKeys.INTERNAL_SERVER_EXCEPTION}`),
       );
     }
   }
@@ -125,7 +132,9 @@ export class AdminWorkflowService {
       return new SuccessResponse(AppStrings.SUCCESSFULL, payload);
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new InternalServerErrorException(
+        this.i18n.t(`messages.${messagesKeys.INTERNAL_SERVER_EXCEPTION}`),
+      );
     }
   }
 
@@ -134,7 +143,9 @@ export class AdminWorkflowService {
       return await this.workflowRepository.findOneBy({ id });
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new NotFoundException(
+        this.i18n.t(`messages.${messagesKeys.NOT_FOUND}`),
+      );
     }
   }
 
@@ -145,7 +156,9 @@ export class AdminWorkflowService {
       });
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new NotFoundException(
+        this.i18n.t(`messages.${messagesKeys.NOT_FOUND}`),
+      );
     }
   }
 
@@ -181,7 +194,7 @@ export class AdminWorkflowService {
       // Log and throw the error
       this.logger.error('Error deleting workflows:', error);
       throw new BadRequestException(
-        error.message || 'Failed to delete workflows.',
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
       );
     }
   }
@@ -204,10 +217,14 @@ export class AdminWorkflowService {
         return new SuccessResponse(AppStrings.SUCCESSFULL);
       }
 
-      return new BadRequestException('Unable to update workflow');
+      return new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.UNABLE_TO_UPDATE}`),
+      );
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -232,7 +249,9 @@ export class AdminWorkflowService {
       return new SuccessResponse(AppStrings.SUCCESSFULL, data);
     } catch (error) {
       this.logger.error('Error updating workflow status:', error);
-      throw new BadRequestException('Failed to update workflow status');
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.UNABLE_TO_UPDATE}`),
+      );
     }
   }
 
@@ -248,7 +267,9 @@ export class AdminWorkflowService {
         .getMany();
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 }

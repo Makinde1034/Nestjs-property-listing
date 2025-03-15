@@ -1688,7 +1688,7 @@ type Mutation {
   registerToBid(bidRegistrationInput: BidRegistrationInput!): BidRegistration!
   createAdPackage(createAdPackageInput: CreateAdPackageInput!): AdPackage!
   updateAdPackage(updateAdPackageInput: UpdateAdPackageInput!): AdPackage!
-  removeAdPackage(id: Int!): AdPackage!
+  removeAdPackage(id: String!): AdPackage!
   initializePayment(paymentInput: InitiatePaymentInput!): InitiatePaymentResponse!
   initializePaymentForPA(paymentInput: InitiatePaymentInput!): InitiatePaymentResponse!
   verifyPayment(verifyPaymentInput: VerifyPaymentInput!): verifyPaymentResponse!
@@ -2238,6 +2238,7 @@ input CreateAuctionParticipantInput {
   startingPrice: Float!
   auctionId: String!
   listingId: String!
+  reference: String!
 }
 
 input CreateBidInput {

@@ -29,19 +29,7 @@ import {
   DeleteSplashScreenInput,
   SplashScreenFilterInput,
 } from '../dto/request/admin-request';
-import {
-  startOfDay,
-  endOfDay,
-  startOfWeek,
-  endOfWeek,
-  startOfMonth,
-  endOfMonth,
-  startOfYear,
-  endOfYear,
-  subMonths,
-  subWeeks,
-  subYears,
-} from 'date-fns';
+import { startOfDay, endOfDay, subMonths, subWeeks, subYears } from 'date-fns';
 import { AdminWorkflowService } from './admin-workflow.service';
 import { ActionService } from './action.service';
 import { SplashScreenPlacement } from '../../../common/enums/splashScreen';

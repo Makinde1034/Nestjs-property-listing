@@ -26,7 +26,6 @@ import {
 } from '../dtos/request/listing.dto';
 import { Attribute, Listing, NotificationScope, User } from '../../../entities';
 
-import { ForbiddenError } from '@nestjs/apollo';
 import { StorageService } from '../../file-handler/services/storage.service';
 
 import { AttributeDto } from '../dtos/request/attributes.dto';
@@ -34,7 +33,7 @@ import { CreatePromotionInput } from '../dtos/request/promotion-input';
 import { PromotionRepository } from '../repositories/promotion.repository';
 
 import { AdPackageService } from '../../ad-package/services/ad-package.service';
-import { Between, In, LessThan, MoreThan } from 'typeorm';
+import { Between, In, LessThan, MoreThan, Not } from 'typeorm';
 
 import {
   addDaysToDate,
@@ -44,7 +43,7 @@ import {
   isJsonString,
 } from '../../../common/utils/helper';
 import { FlagListingRepository } from '../repositories/flag-listing.repository';
-import { AppStrings } from '../../../common/messages/app.strings';
+import { AppStrings, messagesKeys } from '../../../common/messages/app.strings';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { I18nService } from 'nestjs-i18n';
 import { SearchHistoryRepository } from '../repositories/search-history.repository';
@@ -94,7 +93,7 @@ export class ListingService {
     private readonly i18n: I18nService,
     private readonly attributeService: AttributeService,
     private searchHistoryRepository: SearchHistoryRepository,
-    private pushNotification: NotificationService,
+    private notification: NotificationService,
     private listingTypeService: ListingTypeService,
     private readonly listingAttributesRepository: ListingAttributeRepository,
     private gpsCoordinateRepository: GpsCoordinateRepository,
@@ -120,7 +119,9 @@ export class ListingService {
       );
 
       if (!listingType) {
-        throw new BadRequestException(AppStrings.LISTING_TYPE_NOT_FOUND);
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.LISTING_TYPE_NOT_FOUND}`),
+        );
       }
 
       // Flatten all attributes from attribute sets into a single array
@@ -160,7 +161,8 @@ export class ListingService {
 
           if (!attribute) {
             throw new BadRequestException(
-              `${element.attributeId} is ` + AppStrings.N0T_AN_ATTRIBUTE,
+              `${element.attributeId} is ` +
+                this.i18n.t(`messages.${messagesKeys.NOT_AN_ATTRIBUTE}`),
             );
           }
           return this.listingAttributesRepository.create({
@@ -218,7 +220,9 @@ export class ListingService {
       if (error instanceof HttpException) {
         throw error;
       } else {
-        throw new BadRequestException(error.message);
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+        );
       }
     }
   }
@@ -276,7 +280,9 @@ export class ListingService {
       if (error instanceof HttpException) {
         throw error;
       } else {
-        throw new BadRequestException(error.messages || error.data);
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+        );
       }
     }
   }
@@ -650,7 +656,9 @@ export class ListingService {
       this.logger.error('Error finding listings:', error);
       throw error instanceof HttpException
         ? error
-        : new BadRequestException(error.message);
+        : new BadRequestException(
+            this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+          );
     }
   }
 
@@ -998,7 +1006,9 @@ export class ListingService {
       this.logger.error('Error in findListingForBuyerAuthenticated:', error);
       throw error instanceof HttpException
         ? error
-        : new BadRequestException(error.message);
+        : new BadRequestException(
+            this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+          );
     }
   }
 
@@ -1172,7 +1182,9 @@ export class ListingService {
       };
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -1223,7 +1235,9 @@ export class ListingService {
       });
 
       if (!listing) {
-        throw new BadRequestException('Listing not found');
+        throw new NotFoundException(
+          this.i18n.t(`messages.${messagesKeys.NOT_FOUND}`),
+        );
       }
 
       // Batch update impressions and return the listing in one go
@@ -1244,7 +1258,9 @@ export class ListingService {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new BadRequestException(error.message || error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -1290,7 +1306,9 @@ export class ListingService {
         },
       });
       if (!listing) {
-        throw new BadRequestException(AppStrings.LISTING_NOT_FOUND);
+        throw new NotFoundException(
+          this.i18n.t(`messages.${messagesKeys.NOT_FOUND}`),
+        );
       }
 
       const newImpression = listing.impressions + 1;
@@ -1312,7 +1330,9 @@ export class ListingService {
 
         throw error;
       } else
-        throw new BadRequestException(error.messages || error.data || error);
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+        );
     }
   }
 
@@ -1349,7 +1369,9 @@ export class ListingService {
         },
       });
       if (!listing) {
-        throw new BadRequestException(AppStrings.LISTING_NOT_FOUND);
+        throw new NotFoundException(
+          this.i18n.t(`messages.${messagesKeys.NOT_FOUND}`),
+        );
       }
 
       const newImpression = listing.impressions + 1;
@@ -1386,8 +1408,9 @@ export class ListingService {
         where: { id },
         relations: ['listingAttributes', 'wishlist', 'gpsCoordinate'],
       });
-
-      // Check permission
+      /*************************************************************
+       * Un comment if you want to enable Checking for permission
+       **************************************************************/
       // if (
       //   !(
       //     user.userType == UserProfileTypeEnum.INDIVIDUAL ||
@@ -1400,6 +1423,7 @@ export class ListingService {
       //     );
       //   }
       // }
+
       if (listing.status == ListingStatus.PENDING) {
         let update;
         // Update listing details
@@ -1570,11 +1594,11 @@ export class ListingService {
           (wishlist) => wishlist.userId,
         );
         const notificationPromises = [];
-
+        //TODO: make dynamic
         if (partialUpdatePayload.price != undefined) {
           for (const userId of wishlistUserIds) {
             notificationPromises.push(
-              this.pushNotification.sendUsersNotification({
+              this.notification.sendUsersNotification({
                 title: 'New listing',
                 message: `Hi ${user.name}, Heads up! The price of an item in your wishlist has been updated. Check out the new price now.`,
                 isEmail: true,
@@ -1673,7 +1697,9 @@ export class ListingService {
         }
 
         if (!uploadedUrls.length) {
-          throw new BadRequestException('File upload failed');
+          throw new BadRequestException(
+            this.i18n.t(`messages.${messagesKeys.FILE_UPLOAD_FAILED}`),
+          );
         }
 
         const imageIndex = existingImages.findIndex(
@@ -1688,7 +1714,9 @@ export class ListingService {
 
           existingImages[imageIndex].isDeleted = false;
         } else {
-          throw new BadRequestException('Image ID not found');
+          throw new NotFoundException(
+            this.i18n.t(`messages.${messagesKeys.NOT_FOUND}`),
+          );
         }
       } else {
         const newImages = uploadedUrls.map((url, index) => ({
@@ -1756,7 +1784,7 @@ export class ListingService {
         throw error;
       }
       throw new BadRequestException(
-        error.message || 'Unexpected error occurred',
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
       );
     }
   }
@@ -1774,7 +1802,9 @@ export class ListingService {
       const listing = await this.listingRepository.findOne({ where: { id } });
 
       if (!listing) {
-        throw new BadRequestException('Listing not found');
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.LISTING_NOT_FOUND}`),
+        );
       }
 
       const existingImages: any[] = listing.images
@@ -1850,7 +1880,7 @@ export class ListingService {
         throw error;
       } else {
         throw new BadRequestException(
-          error.message || 'An unexpected error occurred during image upload',
+          this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
         );
       }
     }
@@ -1877,7 +1907,9 @@ export class ListingService {
         throw new BadRequestException('Invalid listing ');
       }
       if (currentPromotion.length > 0) {
-        throw new BadRequestException('A promotion is currently running');
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.PROMOTION_ALREADY_RUNNING}`),
+        );
       }
 
       if (adPackage && listing) {
@@ -1905,7 +1937,9 @@ export class ListingService {
       if (error instanceof HttpException) {
         throw error;
       } else {
-        throw new BadRequestException(error);
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+        );
       }
     }
   }
@@ -1933,15 +1967,21 @@ export class ListingService {
       });
 
       if (affected > 0) {
-        return new SuccessResponse();
+        return new SuccessResponse(
+          this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+        );
       }
-      throw new UnprocessableEntityException();
+      throw new InternalServerErrorException(
+        this.i18n.t(`messages.${messagesKeys.INTERNAL_SERVER_EXCEPTION}`),
+      );
     } catch (error) {
       this.logger.log(error);
       if (error instanceof HttpException) {
         throw error;
       } else {
-        throw new BadRequestException(error);
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+        );
       }
     }
   }
@@ -1984,7 +2024,9 @@ export class ListingService {
           flaggedDate: date,
         });
 
-        return new SuccessResponse(AppStrings.LISTING_FLAG_SUCCESSFULL);
+        return new SuccessResponse(
+          this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+        );
       }
     } catch (error) {
       this.logger.log(error);
@@ -1992,7 +2034,7 @@ export class ListingService {
         throw error;
       } else {
         throw new InternalServerErrorException(
-          AppStrings.INTERNAL_SERVER_EXCEPTION,
+          this.i18n.t(`messages.${messagesKeys.INTERNAL_SERVER_EXCEPTION}`),
         );
       }
     }
@@ -2027,7 +2069,9 @@ export class ListingService {
       return { flaggedListing, total };
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error?.messages | error.data);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -2040,7 +2084,9 @@ export class ListingService {
         relations: ['reporter', 'childIssue'],
       });
       if (!flaggedListing) {
-        throw new NotFoundException(AppStrings.NOT_FOUND);
+        throw new NotFoundException(
+          this.i18n.t(`messages.${messagesKeys.NOT_FOUND}`),
+        );
       }
       return flaggedListing;
     } catch (error) {
@@ -2048,7 +2094,9 @@ export class ListingService {
       if (error instanceof HttpException) {
         throw error;
       } else {
-        throw new BadRequestException(error?.messages || error.data);
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+        );
       }
     }
   }
@@ -2063,10 +2111,14 @@ export class ListingService {
         },
       );
 
-      return new SuccessResponse(AppStrings.LISTING_DISABLE_SUCCESSFULLY);
+      return new SuccessResponse(
+        this.i18n.t(`messages.${messagesKeys.SUCCESSFULLY_DISABLED}`),
+      );
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error?.messages | error.data);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+      );
     }
   }
 
@@ -2080,17 +2132,25 @@ export class ListingService {
       }
 
       if (!listing) {
-        throw new BadRequestException(AppStrings.LISTING_NOT_FOUND);
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.LISTING_NOT_FOUND}`),
+        );
       }
 
       await this.listingRepository.update(listing.id, {
         published: false,
       });
 
-      return new SuccessResponse(AppStrings.LISTING_UNPUBLISHED_SUCCESSFULLY);
+      return new SuccessResponse(
+        this.i18n.t(
+          `messages.${messagesKeys.LISTING_UNPUBLISHED_SUCCESSFULLY}`,
+        ),
+      );
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error?.messages || error.data);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -2106,21 +2166,29 @@ export class ListingService {
         listing.status == ListingStatus.PENDING ||
         listing.status == ListingStatus.REJECTED
       ) {
-        throw new BadRequestException(' Listing is not approved by Admin');
+        throw new BadRequestException('Listing is not approved by Admin');
       }
 
       if (!listing) {
-        throw new BadRequestException(AppStrings.LISTING_NOT_FOUND);
+        throw new NotFoundException(
+          this.i18n.t(`messages.${messagesKeys.LISTING_NOT_FOUND}`),
+        );
       }
 
       await this.listingRepository.update(listing.id, {
         published: true,
       });
 
-      return new SuccessResponse(AppStrings.LISTING_UNPUBLISHED_SUCCESSFULLY);
+      return new SuccessResponse(
+        this.i18n.t(
+          `messages.${messagesKeys.LISTING_UNPUBLISHED_SUCCESSFULLY}`,
+        ),
+      );
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error?.messages | error.data);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -2148,10 +2216,14 @@ export class ListingService {
 
       await this.activityLogsService.logActivity(activityToSave);
 
-      return new SuccessResponse(AppStrings.LISTING_ENABLED_SUCCESSFULLY);
+      return new SuccessResponse(
+        this.i18n.t(`messages.${messagesKeys.LISTING_ENABLED_SUCCESSFULLY}`),
+      );
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error?.messages | error.data);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -2171,13 +2243,17 @@ export class ListingService {
       });
 
       if (!listings || listings.length === 0) {
-        throw new BadRequestException('No matching listings found.');
+        throw new NotFoundException(
+          this.i18n.t(`messages.${messagesKeys.LISTING_NOT_FOUND}`),
+        );
       }
 
       // Prepare updates for listings
       const updatedListings = listings.map((listing) => {
         if (!listing || !listing.id) {
-          throw new BadRequestException('Invalid listing data.');
+          throw new NotFoundException(
+            this.i18n.t(`messages.${messagesKeys.LISTING_NOT_FOUND}`),
+          );
         }
 
         const approvalData = listingActionInput.listingApproval.find(
@@ -2244,11 +2320,13 @@ export class ListingService {
 
       await this.activityLogsService.logActivity(activities);
 
-      return new SuccessResponse(AppStrings.LISTING_APPROVED_SUCCESSFULLY);
+      return new SuccessResponse(
+        this.i18n.t(`messages.${messagesKeys.LISTING_APPROVED_SUCCESSFULLY}`),
+      );
     } catch (error) {
       this.logger.error('Error approving listings:', error.stack);
       throw new BadRequestException(
-        error?.message || 'An error occurred during approval.',
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
       );
     }
   }
@@ -2315,7 +2393,9 @@ export class ListingService {
 
       await this.activityLogsService.logActivity(activityToSave);
 
-      return new SuccessResponse(AppStrings.LISTING_REJECTED_SUCCESSFULLY);
+      return new SuccessResponse(
+        this.i18n.t(`messages.${messagesKeys.LISTING_REJECTED_SUCCESSFULLY}`),
+      );
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error?.messages | error.data);
@@ -2333,10 +2413,14 @@ export class ListingService {
       }
       await this.listingRepository.softDelete(id);
 
-      return new SuccessResponse(AppStrings.LISTING_DELETED_SUCCESSFULLY);
+      return new SuccessResponse(
+        this.i18n.t(`messages.${messagesKeys.DELETED_SUCCESSFULLY}`),
+      );
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error?.messages | error.data);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -2395,7 +2479,9 @@ export class ListingService {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -2414,7 +2500,9 @@ export class ListingService {
       }
 
       if (!listing) {
-        throw new BadRequestException('Invalid listing ');
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.LISTING_NOT_FOUND}`),
+        );
       }
 
       if (adPackage && listing) {
@@ -2425,7 +2513,9 @@ export class ListingService {
         });
 
         if (currentPromotion.length > 0) {
-          throw new BadRequestException('A promotion is currently running');
+          throw new BadRequestException(
+            this.i18n.t(`messages.${messagesKeys.PROMOTION_ALREADY_RUNNING}`),
+          );
         }
         featured = await this.featureRepository.save({
           ...createFeatureInput,
@@ -2458,7 +2548,9 @@ export class ListingService {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -2469,11 +2561,15 @@ export class ListingService {
       });
 
       if (!listing.isListingFeatured) {
-        throw new BadRequestException('Listing is not Featured');
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.LISTING_NOT_FEATURED}`),
+        );
       }
 
       if (!listing) {
-        throw new NotFoundException(AppStrings.NOT_FOUND);
+        throw new NotFoundException(
+          this.i18n.t(`messages.${messagesKeys.LISTING_NOT_FOUND}`),
+        );
       }
 
       const { affected } = await this.listingRepository.update(listing.id, {
@@ -2492,14 +2588,18 @@ export class ListingService {
       ]);
 
       if (affected > 0) {
-        return new SuccessResponse(AppStrings.SUCCESSFULL);
+        return new SuccessResponse(
+          this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+        );
       }
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
       }
 
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -2584,7 +2684,9 @@ export class ListingService {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
   async deleteListingImage(listingId: string, imageIds: string[]) {
@@ -2594,7 +2696,9 @@ export class ListingService {
       });
 
       if (!listing) {
-        throw new BadRequestException('Listing not found');
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.LISTING_NOT_FOUND}`),
+        );
       }
 
       let existingImages: any[];
@@ -2630,7 +2734,9 @@ export class ListingService {
         throw error;
       }
 
-      throw new BadRequestException(error.message || 'An error occurred');
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -2655,7 +2761,9 @@ export class ListingService {
         .getMany();
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -2717,7 +2825,9 @@ export class ListingService {
       ]);
 
       if (listings.length == 0) {
-        throw new BadRequestException(AppStrings.LISTING_NOT_FOUND);
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.LISTING_NOT_FOUND}`),
+        );
       }
 
       const transformListing = listings.map((listing) => {
@@ -2753,7 +2863,9 @@ export class ListingService {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -2764,7 +2876,9 @@ export class ListingService {
       });
     } catch (error) {
       this.logger.error(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 }

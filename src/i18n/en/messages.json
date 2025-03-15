@@ -74,5 +74,23 @@
   "CANNOT_ACCEPT_AN_OFFER_WHILE_LISTING_IS_BEING_AUCTIONED": "Cannot accept an offer while listing is being auctioned",
   "THIS_IS_ONLY_FOR_LEVEL_TWO_USER": "Only for level two users",
   "YOU_ARE_NOT_A_SERVICE_PROVIDER": "You are not a service provider",
-  "INVALID_PAYMENT_REFERENCE": "Invalid payment. Please contact customer support"
+  "INVALID_PAYMENT_REFERENCE": "Invalid payment. Please contact customer support",
+
+  "FAILED_TO_RETRIVE_ACTION_REQUEST": "Failed to retrieve action request. Please try again",
+  "EXPIRY_DATE_CANNOT_BE_LESS_THAN_CURRENT": "Expiry date cannot be less than current date",
+  "FILE_UPLOAD_FAILED": "File upload failed",
+  "PROMOTION_ALREADY_RUNNING": "A promotion is currently running",
+  "LISTING_NOT_FEATURED": "Listing is not Featured",
+  "MINIMUM_OFFER": "Minimum Offer must be greater than {{minimumPrice}}",
+
+  "WORKFLOW_EXIST": "Workflow exist",
+  "WORKFLOW_NOT_FOUND": "Workflow not found",
+  "UNABLE_TO_UPDATE": "Unable to update Workflow",
+  "UNABLE_TO_CREATE": "Unable to create Workflow",
+  "BAD_REQUEST": "invalid Input ",
+  "UNAUTHORIZED": "Unauthorized",
+  "FORBIDDEN": "Forbidden request",
+  "OFFER_EXPIRED": "Offer is not has expired",
+  "CANNOT_PROCESS_PAYMENT": "cannot process payment",
+  "AWAITING_APPROVAL": "Awaiting approval"
 }

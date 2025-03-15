@@ -10,11 +10,18 @@ import { PdfInput } from '../../file-handler/dto/pdf.dto';
 import { CreateInvoiceInput } from '../dto/invoice';
 import { InvoiceRepository } from '../repositories/invoice.repository';
 import { PdfService } from '../../file-handler/services/pdf.service';
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { StorageService } from '../../file-handler/services/storage.service';
 import { MailgunEmailService } from '../../mail/services/implementations/mailgun.services';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { User } from '../../../entities';
+import { messagesKeys } from '../../../common/messages/app.strings';
+import { I18nService } from 'nestjs-i18n';
 
 @Injectable()
 export class InvoiceService {
@@ -23,6 +30,7 @@ export class InvoiceService {
     private readonly pdfGeneratorService: PdfService,
     private readonly storageService: StorageService,
     private readonly mailService: MailgunEmailService,
+    private readonly i18n: I18nService,
   ) {}
   logger = new Logger(InvoiceService.name);
   // async invoice(
@@ -101,7 +109,9 @@ export class InvoiceService {
       return { invoices, total };
     } catch (error) {
       this.logger.error('Error fetching invoice:', error);
-      throw new BadRequestException('Unable to fetch invoices');
+      throw new InternalServerErrorException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -140,7 +150,9 @@ export class InvoiceService {
       return { invoices, total };
     } catch (error) {
       this.logger.error('Error fetching invoice:', error);
-      throw new BadRequestException('Unable to fetch invoices');
+      throw new InternalServerErrorException(
+        this.i18n.t(`messages.${messagesKeys.INTERNAL_SERVER_EXCEPTION}`),
+      );
     }
   }
 }

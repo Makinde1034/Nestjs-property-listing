@@ -20,7 +20,7 @@ import {
 } from '../dtos/request/auction-input';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { AuctionParticipantRepository } from '../repositories/auction-participant.repository';
-import { AppStrings } from '../../../common/messages/app.strings';
+import { AppStrings, messagesKeys } from '../../../common/messages/app.strings';
 
 import { removeDaysFromDate } from '../../../common/utils/helper';
 import { BidsRepository } from '../repositories/bids.repository';
@@ -72,6 +72,7 @@ import { Action } from 'rxjs/internal/scheduler/Action';
 import { PaymentService } from '../../payment/services/payment.service';
 import { BidRegistration } from '../../../entities/bid-registration.entity';
 import { Invoice } from '../../../entities/invoice.entity';
+import { I18nService } from 'nestjs-i18n';
 
 @Injectable()
 export class AuctionService {
@@ -85,6 +86,7 @@ export class AuctionService {
     private readonly autoBidRepository: AutoBidRepository,
     private readonly storageService: StorageService,
     private readonly activityLogsService: ActivityLogService,
+    private readonly i18n: I18nService,
 
     private readonly bidRegistrationRepository: BidRegistrationRepository,
 
@@ -97,7 +99,7 @@ export class AuctionService {
       // Ensure start date is not in the past
       if (auctionInput.startDate < new Date()) {
         throw new BadRequestException(
-          AppStrings.START_DATE_CANNOT_BE_LESS_THAN_DATE_0F_CREATION,
+          AppStrings.START_DATE_CANNOT_BE_LESS_THAN_DATE_OF_CREATION,
         );
       }
 
@@ -138,67 +140,6 @@ export class AuctionService {
       throw new BadRequestException(AppStrings.AUCTION_NOT_FOUND);
     }
   }
-
-  // async findOneAuctionWithParticipants(
-  //   paginateAndSort: FetchAuctionParticipantInput,
-  //   user?: User,
-  // ): Promise<AuctionParticipantResponse> {
-  //   try {
-  //     const { id, skip = 0, take = 20 } = paginateAndSort;
-  //     //Default pagination if not provided
-
-  //     const [auction, registration, [participants, total]] = await Promise.all([
-  //       // Fetch the auction details
-  //       this.auctionRepository.findOneOrFail({
-  //         where: { id },
-  //       }),
-
-  //       this.bidRegistrationRepository.find({
-  //         where: { userId: user.id, auctionId: id },
-  //       }),
-
-  //       // Fetch participants with their bids, including userId for each bid
-  //       this.auctionParticipantRepository
-  //         .createQueryBuilder('auctionParticipant')
-  //         .leftJoinAndSelect(
-  //           'auctionParticipant.bid',
-  //           'bids',
-  //           'bids.price = (SELECT MAX(b.price) FROM Bids b WHERE b."auctionParticipantId" = auctionParticipant.id)',
-  //         )
-  //         .leftJoinAndSelect('auctionParticipant.listing', 'listing')
-  //         .leftJoinAndSelect('listing.listingAttributes', 'listingAttributes')
-  //         .leftJoinAndSelect('listingAttributes.attribute', 'attribute')
-  //         .leftJoinAndSelect('listing.listingType', 'listingType')
-  //         .leftJoinAndSelect('listing.gpsCoordinate', 'gpsCoordinate')
-  //         .where('auctionParticipant.auctionId = :id', { id })
-  //         .skip(skip)
-  //         .take(take)
-  //         .getManyAndCount(),
-  //     ]);
-
-  //     const registeredId = registration.map((element) => {
-  //       return element.id;
-  //     });
-
-  //     // Transform the data to include userId array within the participant object
-  //     const transformedParticipants = participants.map((participant) => ({
-  //       ...participant,
-  //       userId: participant.bid // Collect userId from bids
-  //         .map((bid) => bid.userId)
-  //         .filter((userId) => userId), // Exclude null/undefined values
-  //     }));
-
-  //     return { auctions: auction, participant: transformedParticipants, total };
-  //   } catch (error) {
-  //     this.logger.error('Error fetching auction with participants:', error);
-  //     if (error.name === 'EntityNotFound') {
-  //       throw new BadRequestException(AppStrings.AUCTION_NOT_FOUND);
-  //     }
-  //     throw new BadRequestException(
-  //       error.message || 'Error fetching auction data',
-  //     );
-  //   }
-  // }
 
   async findOneAuctionWithParticipants(
     paginateAndSort: FetchAuctionParticipantInput,
@@ -447,7 +388,7 @@ export class AuctionService {
 
       if (updateAuctionInput.startDate < new Date()) {
         throw new BadRequestException(
-          AppStrings.START_DATE_CANNOT_BE_LESS_THAN_DATE_0F_CREATION,
+          AppStrings.START_DATE_CANNOT_BE_LESS_THAN_DATE_OF_CREATION,
         );
       }
 
@@ -592,6 +533,16 @@ export class AuctionService {
     try {
       const { auctionId, listingId, ...listingData } = data;
 
+      const invoice = await this.invoiceRepository.findOne({
+        where: { reference: data.reference },
+      });
+
+      if (!invoice) {
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.INVALID_PAYMENT}`),
+        );
+      }
+
       const [adminDefault, auction, participantCount, listing] =
         await Promise.all([
           this.adminService.adminDefault(),
@@ -657,7 +608,9 @@ export class AuctionService {
       }
 
       if (new Date(registrationEnd) >= auction.startDate) {
-        throw new BadRequestException(AppStrings.AUCTION_REGISTATION_HAS_ENDED);
+        throw new BadRequestException(
+          AppStrings.AUCTION_REGISTRATION_HAS_ENDED,
+        );
       }
 
       // Save the participant
@@ -876,6 +829,7 @@ export class AuctionService {
           },
         });
       }
+
       // if (invoice?.status !== PaymentStatus.PAID || !registered.autoBid) {
       //   throw new BadRequestException(AppStrings.INVALID_PAYMENT_REFERENCE);
       // }

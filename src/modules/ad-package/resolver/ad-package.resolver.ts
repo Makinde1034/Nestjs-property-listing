@@ -48,7 +48,7 @@ export class AdPackageResolver {
   @UseGuards(AccessTokenGuard)
   @UseGuards(AdminGuard)
   @Mutation(() => AdPackage)
-  async removeAdPackage(@Args('id', { type: () => Int }) id: number) {
+  async removeAdPackage(@Args('id', { type: () => String }) id: string) {
     return await this.adPackageService.remove(id);
   }
 }

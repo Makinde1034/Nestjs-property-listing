@@ -43,6 +43,8 @@ import {
 } from 'date-fns';
 import { TimePeriod } from '../../../common/enums/sort.enum';
 import { AdminDashboardSort } from '../dto/request/admin-request';
+import { messagesKeys } from '../../../common/messages/app.strings';
+import { I18nService } from 'nestjs-i18n';
 
 @Injectable()
 export class ActionService {
@@ -55,6 +57,7 @@ export class ActionService {
 
     private readonly notificationScopeRepository: NotificationScopeRepository,
     private readonly workflowRepository: WorkflowRepository,
+    private i18n: I18nService,
 
     private readonly userRepository: UserRepository,
   ) {}
@@ -188,7 +191,9 @@ export class ActionService {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -198,13 +203,19 @@ export class ActionService {
         where: { id },
       });
       if (!action) {
-        throw new NotFoundException('Action request not found');
+        throw new NotFoundException(
+          this.i18n.t(
+            `messages.${messagesKeys.FAILED_TO_RETRIVE_ACTION_REQUEST}`,
+          ),
+        );
       }
       return action;
     } catch (error) {
       this.logger.error('Error fetching action request', error);
       throw new BadRequestException(
-        'Failed to retrieve action request. Please try again.',
+        this.i18n.t(
+          `messages.${messagesKeys.FAILED_TO_RETRIVE_ACTION_REQUEST}`,
+        ),
       );
     }
   }
@@ -277,7 +288,9 @@ export class ActionService {
     } catch (error) {
       this.logger.error('Error fetching action request', error);
       throw new BadRequestException(
-        'Failed to retrieve action request. Please try again.',
+        this.i18n.t(
+          `messages.${messagesKeys.FAILED_TO_RETRIVE_ACTION_REQUEST}`,
+        ),
       );
     }
   }

@@ -22,7 +22,7 @@ import { Listing, NotificationScope, User } from '../../../entities';
 import { PaymentService } from '../../payment/services/payment.service';
 import { EntityManager, In, MoreThanOrEqual } from 'typeorm';
 import { ListingService } from './listing.service';
-import { AppStrings } from '../../../common/messages/app.strings';
+import { AppStrings, messagesKeys } from '../../../common/messages/app.strings';
 
 import { addDaysToDate } from '../../../common/utils/helper';
 
@@ -54,6 +54,7 @@ import { AdminFilterAndSort } from '../dtos/request';
 import { FinalizationEnum } from '../../../common/enums/finalization.enum';
 import { PermissionsEnum } from '../../../common/enums/permission.enum';
 import { of } from 'rxjs';
+import { I18nService } from 'nestjs-i18n';
 
 @Injectable()
 export class OfferService {
@@ -68,7 +69,7 @@ export class OfferService {
     private readonly auctionParticipantRepository: AuctionParticipantRepository,
     private readonly eventEmitter: EventEmitter2,
     private readonly invoiceRepository: InvoiceRepository,
-
+    private readonly i18n: I18nService,
     private readonly finalizationRepository: FinalizationRepository,
     private roleRepository: RoleRepository,
   ) {}
@@ -143,15 +144,20 @@ export class OfferService {
       // }
 
       if (offerExpiry <= new Date()) {
-        throw new BadRequestException('Expiry Date is in the past');
+        throw new BadRequestException(
+          this.i18n.t(
+            `messages.${messagesKeys.EXPIRY_DATE_CANNOT_BE_LESS_THAN_CURRENT}`,
+          ),
+        );
       }
 
       if (listing.negotiable && createOfferDto.price < minimumPrice) {
         throw new BadRequestException(
-          `Minimum Offer must be greater than  ${minimumPrice}`,
+          this.i18n.t(`messages.${messagesKeys.MINIMUM_OFFER}`, {
+            args: { minimumPrice },
+          }),
         );
       }
-
       if (user.id == listing.user.id) {
         throw new BadRequestException(
           'The creator of a listing cannot create an offer on  that listing',
@@ -160,7 +166,9 @@ export class OfferService {
 
       if (listing.negotiable && offer.length > 0) {
         throw new BadRequestException(
-          `Minimum Offer must be greater than ${offer[0].price}`,
+          this.i18n.t(`messages.${messagesKeys.MINIMUM_OFFER}`, {
+            args: { minimumPrice },
+          }),
         );
       }
 
@@ -244,7 +252,9 @@ export class OfferService {
       if (error instanceof HttpException) {
         throw error;
       } else {
-        throw new BadRequestException(error);
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+        );
       }
     }
   }
@@ -273,7 +283,9 @@ export class OfferService {
         );
 
         if (!approvalData) {
-          throw new BadRequestException(finalization);
+          throw new BadRequestException(
+            this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+          );
         }
 
         return {
@@ -303,7 +315,9 @@ export class OfferService {
           rentDate: new Date(),
           stage: ListingStage.OWNERSHIPS_TRANSFER,
         });
-        return new SuccessResponse();
+        return new SuccessResponse(
+          this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+        );
       }
     } catch (error) {
       this.logger.log(error);
@@ -325,14 +339,18 @@ export class OfferService {
         .getOne();
 
       if (!data) {
-        throw new NotFoundException(AppStrings.NOT_FOUND);
+        throw new NotFoundException(
+          this.i18n.t(`messages.${messagesKeys.NOT_FOUND}`),
+        );
       }
       return data;
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -419,7 +437,9 @@ export class OfferService {
           });
         }
 
-        return new SuccessResponse();
+        return new SuccessResponse(
+          this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+        );
       }
     } catch (error) {
       this.logger.log(error);
@@ -427,7 +447,9 @@ export class OfferService {
       if (error instanceof HttpException) {
         throw error;
       } else {
-        throw new BadRequestException(error);
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+        );
       }
     }
   }
@@ -461,7 +483,9 @@ export class OfferService {
       return [minimumListingPrice, saii, vat];
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -473,7 +497,9 @@ export class OfferService {
       });
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException();
+      throw new NotFoundException(
+        this.i18n.t(`messages.${messagesKeys.NOT_FOUND}`),
+      );
     }
   }
   async findMany(findOfferInput: FindOfferInput) {
@@ -502,7 +528,9 @@ export class OfferService {
         throw error;
       } else {
         this.logger.log(error);
-        throw new BadRequestException(error);
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+        );
       }
     }
   }
@@ -545,7 +573,9 @@ export class OfferService {
       return { offer, total, totalOfferOnlisting };
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -610,10 +640,14 @@ export class OfferService {
 
       // Validate if offer exists
       if (!offer) {
-        throw new BadRequestException(AppStrings.NOT_FOUND);
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.NOT_FOUND}`),
+        );
       }
       if (offer.status == OfferListEnum.EXPIRED) {
-        throw new BadRequestException('offer already expired');
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.OFFER_EXPIRED}`),
+        );
       }
 
       const offerExpiry = new Date(updateOfferInput.expireAt);
@@ -637,7 +671,9 @@ export class OfferService {
         );
       }
       if (currentOffer.status == OfferListEnum.EXPIRED) {
-        throw new BadRequestException(`Offer expired`);
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.OFFER_EXPIRED}`),
+        );
       }
 
       // Validate minimum price requirement
@@ -738,7 +774,9 @@ export class OfferService {
       if (error instanceof HttpException) {
         throw error;
       } else {
-        throw new BadRequestException('Offer update failed', error);
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+        );
       }
     }
   }
@@ -782,7 +820,9 @@ export class OfferService {
 
           // Validate if offer exists
           if (!offer) {
-            throw new NotFoundException('Offer not found');
+            throw new NotFoundException(
+              this.i18n.t(`messages.${messagesKeys.NOT_FOUND}`),
+            );
           }
 
           // Validate if user is the creator of the listing
@@ -797,7 +837,9 @@ export class OfferService {
           });
 
           if (!invoice) {
-            throw new NotFoundException(AppStrings.INVALID_PAYMENT);
+            throw new NotFoundException(
+              this.i18n.t(`messages.${messagesKeys.INVALID_PAYMENT}`),
+            );
           }
 
           await this.paymentService.capturePayment({
@@ -921,10 +963,6 @@ export class OfferService {
             .returning(['id', 'status']) // Fetch updated fields right after the update
             .execute();
 
-          const invoice = await this.invoiceRepository.findOneBy({
-            offerId: updateOfferInput.id,
-          });
-
           // Fetch notification preference only if offer update is successful
           const notificationPreference = await entityManager.find(
             NotificationScope,
@@ -983,7 +1021,9 @@ export class OfferService {
       const offer = await this.offerRepository.findOneBy({ id });
 
       if (!offer) {
-        throw new NotFoundException(AppStrings.NOT_FOUND);
+        throw new NotFoundException(
+          this.i18n.t(`messages.${messagesKeys.NOT_FOUND}`),
+        );
       }
 
       const { affected } = await this.offerRepository.softDelete({ id });

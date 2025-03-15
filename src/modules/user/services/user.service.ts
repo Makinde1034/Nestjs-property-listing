@@ -67,7 +67,7 @@ import {
   generateOtp,
   generateRandomToken,
 } from '../../../common/utils/functions';
-import { AppStrings } from '../../../common/messages/app.strings';
+import { AppStrings, messagesKeys } from '../../../common/messages/app.strings';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { SwitchInterfaceInput, UserFilter } from '../dtos/request/user';
 
@@ -92,6 +92,7 @@ import { PushNotificationinput } from '../../../common/interface';
 import { TimePeriod } from '../../../common/enums/sort.enum';
 import * as moment from 'moment';
 import { getRandomValues } from 'crypto';
+import { I18nService } from 'nestjs-i18n';
 
 @Injectable()
 export class UserService {
@@ -114,6 +115,7 @@ export class UserService {
     private readonly actionService: ActionService,
     private readonly workflowService: AdminWorkflowService,
     private readonly pushNotificationService: PushNotificationService,
+    private i18n: I18nService,
   ) {
     this.frontEndUrl = this.configService.get('ADMIN_FRONTEND_URL');
   }
@@ -136,7 +138,10 @@ export class UserService {
       return user;
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+        error,
+      );
     }
   }
 
@@ -149,7 +154,10 @@ export class UserService {
     } catch (error) {
       this.logger.log(error);
 
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+        error,
+      );
     }
   }
 
@@ -227,7 +235,10 @@ export class UserService {
       if (error instanceof HttpException) {
         throw error;
       } else {
-        throw new BadRequestException(error);
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+          error,
+        );
       }
     }
   }
@@ -297,7 +308,10 @@ export class UserService {
       if (error instanceof HttpException) {
         throw error;
       } else {
-        throw new BadRequestException(error);
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+          error,
+        );
       }
     }
   }
@@ -350,7 +364,10 @@ export class UserService {
       return user;
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error.message);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+        error.message,
+      );
     }
   }
 
@@ -680,7 +697,9 @@ export class UserService {
       .set({ currentTermOfservice: version })
       .execute();
 
-    return new SuccessResponse(AppStrings.SUCCESSFULL);
+    return new SuccessResponse(
+      this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+    );
   }
 
   async assignRoleToUser(assignRoleInput: AssignRoleInput) {
@@ -713,7 +732,10 @@ export class UserService {
       });
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+        error,
+      );
     }
   }
 
@@ -780,7 +802,9 @@ export class UserService {
       this.logger.error('Failed to fetch users', error.stack);
       throw error instanceof HttpException
         ? error
-        : new BadRequestException('An error occurred while fetching users');
+        : new BadRequestException(
+            this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+          );
     }
   }
 
@@ -866,7 +890,9 @@ export class UserService {
       return { users, total: count };
     } catch (error) {
       this.logger.error('Failed to get customers', error);
-      throw new BadRequestException('Failed to retrieve customers');
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -908,7 +934,9 @@ export class UserService {
         .getMany();
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -954,7 +982,10 @@ export class UserService {
         .getMany();
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+        error,
+      );
     }
   }
 
@@ -1086,7 +1117,8 @@ export class UserService {
         throw error;
       }
       throw new BadRequestException(
-        error.message || 'An unexpected error occurred',
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+        error,
       );
     }
   }
@@ -1119,7 +1151,10 @@ export class UserService {
 
       return user;
     } catch (error) {
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+        error,
+      );
     }
   }
 
@@ -1182,7 +1217,8 @@ export class UserService {
         throw error;
       } else {
         throw new BadRequestException(
-          'An error occurred while fetching employees',
+          this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+          error,
         );
       }
     }
@@ -1237,7 +1273,9 @@ export class UserService {
         return AppStrings.ACCOUNT_CONFIRMED_SUCCESSFULLY;
       }
     }
-    throw new BadRequestException(AppStrings.WRONG_CONFIRM_CODE);
+    throw new BadRequestException(
+      this.i18n.t(`messages.${messagesKeys.WRONG_CONFIRM_CODE}`),
+    );
   }
 
   /**
@@ -1302,14 +1340,18 @@ export class UserService {
       await this.activityLogsService.logActivity(activityToSave);
 
       // Respond with pending approval message
-      return new SuccessResponse('Action is awaiting approval', usersToUpdate);
+      return new SuccessResponse(
+        this.i18n.t(`messages.${messagesKeys.AWAITING_APPROVAL}`),
+
+        usersToUpdate,
+      );
     }
 
     const updatedUsers = await this.usersRepository.save(usersToUpdate);
 
     if (notFoundIds.length > 0) {
       throw new BadRequestException(
-        'There was a problem performing this action on some users',
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
       );
     }
 
@@ -1356,7 +1398,9 @@ export class UserService {
         email: `deleted${generateRandomToken()}@deleted.com`,
         deletedAt: new Date(),
       });
-      return new SuccessResponse('You have successfully deleted');
+      return new SuccessResponse(
+        this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+      );
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException('failed to delete');
@@ -1463,7 +1507,9 @@ export class UserService {
       });
 
       if (data.affected > 0) {
-        return new SuccessResponse(AppStrings.SUCCESSFULL);
+        return new SuccessResponse(
+          this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+        );
       }
     } catch (error) {
       this.logger.log(error);

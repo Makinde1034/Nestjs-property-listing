@@ -7,6 +7,7 @@ import {
   BadRequestException,
   HttpException,
   Injectable,
+  InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
 import { ListingRepository } from '../../listing/repositories/listing.repository';
@@ -75,7 +76,7 @@ import {
 import { Coupon } from '../../../entities/coupon.entity';
 
 import { SuccessResponse } from '../../../common/utils/success.response';
-import { AppStrings } from '../../../common/messages/app.strings';
+import { AppStrings, messagesKeys } from '../../../common/messages/app.strings';
 import { CouponEnum } from '../../../common/enums/coupons.enum';
 import { AuctionBidRangeRepository } from '../../listing/repositories/auction-bid-range.repository';
 import { User } from '../../../entities';
@@ -92,6 +93,7 @@ import { AdminFilterAndSort } from '../../listing/dtos/request';
 import { TicketStatus, UserLevelEnum } from '../../../common/enums';
 
 import * as moment from 'moment';
+import { I18nService } from 'nestjs-i18n';
 
 @Injectable()
 export class AdminService {
@@ -104,6 +106,7 @@ export class AdminService {
     private readonly adminRepository: AdminRepository,
     private readonly couponRepository: CouponRepository,
     private readonly auctionBidRangeRepository: AuctionBidRangeRepository,
+    private readonly i18n: I18nService,
 
     private readonly workflowService: AdminWorkflowService,
     private readonly actionService: ActionService,
@@ -123,15 +126,20 @@ export class AdminService {
         adminDefault.id,
         adminDefaultInput,
       );
+
+      const result = await this.adminDefault();
+
       if (affected > 0) {
-        return await this.adminDefault();
+        return result;
       }
     } catch (error) {
       this.logger.error(error);
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.UNABLE_TO_UPDATE}`),
+      );
     }
   }
 
@@ -177,7 +185,9 @@ export class AdminService {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.UNABLE_TO_UPDATE}`),
+      );
     }
   }
 
@@ -259,7 +269,9 @@ export class AdminService {
 
       return avgTimeInSeconds / 60; // Convert to minutes
     } catch (error) {
-      throw new BadRequestException(error);
+      throw new InternalServerErrorException(
+        this.i18n.t(`messages.${messagesKeys.INTERNAL_SERVER_EXCEPTION}`),
+      );
     }
   }
 
@@ -312,7 +324,7 @@ export class AdminService {
     } catch (error) {
       this.logger.error(error.message, error.stack);
       throw new BadRequestException(
-        'An error occurred while fetching tickets.',
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
       );
     }
   }
@@ -378,7 +390,9 @@ export class AdminService {
 
       return avgTimeInSeconds / 60; // Convert to minutes
     } catch (error) {
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -387,7 +401,6 @@ export class AdminService {
     return isNaN(num) ? 0 : num;
   }
 
-  //TODO implement when payment gateway is completed
   async saiiFees(findOptions: AdminDashboardSort): Promise<SaiiFees> {
     try {
       // Fetch listing types and invoices in parallel
@@ -427,7 +440,9 @@ export class AdminService {
         group: group,
       };
     } catch (error) {
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -567,7 +582,9 @@ export class AdminService {
       return payload;
     } catch (error) {
       this.logger.error('Error in financialVsOrder:', error);
-      throw new BadRequestException(error.message || 'An error occurred');
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -668,7 +685,9 @@ export class AdminService {
       };
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -696,7 +715,9 @@ export class AdminService {
       return analysis;
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException('Failed to fetch user statistics');
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -736,8 +757,6 @@ export class AdminService {
         default:
           break;
       }
-
-      console.log(startDate, endDate);
 
       // Use raw SQL to count users by type and levels
       const [guestCount, levelOneCount, levelTwoCount, converged] =
@@ -785,7 +804,6 @@ export class AdminService {
             })
             .getRawOne(),
         ]);
-      console.log(guestCount, levelOneCount, levelTwoCount, converged);
 
       // Extract counts from raw query results
       const guest = parseInt(guestCount?.count || '0', 10);
@@ -802,7 +820,9 @@ export class AdminService {
     } catch (error) {
       console.log(error);
       console.error('Error in userFunneling:', error);
-      throw new Error('Failed to fetch user funneling data.');
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -873,7 +893,6 @@ export class AdminService {
         })
         .groupBy('user.city');
 
-      // ✅ Apply date filter only if `startDate` is provided
       if (startDate && endDate) {
         query.where('user.createdAt BETWEEN :startDate AND :endDate', {
           startDate,
@@ -907,7 +926,9 @@ export class AdminService {
     } catch (error) {
       console.log(error);
       this.logger.log(error);
-      throw new BadRequestException('Failed to fetch user demography');
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -967,7 +988,9 @@ export class AdminService {
       return country;
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException('Failed to fetch user country count');
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
   async saudiVsNonSaudi(
@@ -1012,7 +1035,9 @@ export class AdminService {
     } catch (error) {
       // Log the error for debugging
       this.logger.error('Error in saudiVsNonSaudi:', error);
-      throw new BadRequestException('Failed to fetch user country count');
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -1080,7 +1105,9 @@ export class AdminService {
       return genderCounts;
     } catch (error) {
       this.logger.error('Error fetching user gender count:', error);
-      throw new BadRequestException('Failed to fetch user gender count');
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -1159,7 +1186,7 @@ export class AdminService {
       return result[0];
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException('Failed to fetch');
+      throw new BadRequestException();
     }
   }
 
@@ -1197,13 +1224,17 @@ export class AdminService {
           admin,
           approval,
         );
-        return new SuccessResponse('Action awaiting aproval');
+        return new SuccessResponse(
+          this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+        );
       }
       const coupon = await this.couponRepository.save({
         ...createCouponInput,
       });
       if (coupon) {
-        return new SuccessResponse(AppStrings.SUCCESSFULL);
+        return new SuccessResponse(
+          this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+        );
       }
 
       // Log activity
@@ -1217,7 +1248,9 @@ export class AdminService {
       ]);
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.UNABLE_TO_CREATE}`),
+      );
     }
   }
 
@@ -1274,7 +1307,9 @@ export class AdminService {
       return { coupon, total };
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error.message);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -1356,8 +1391,8 @@ export class AdminService {
       return result;
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(
-        error.message || 'Failed to validate coupon',
+      throw new InternalServerErrorException(
+        this.i18n.t(`messages.${messagesKeys.INTERNAL_SERVER_EXCEPTION}`),
       );
     }
   }
@@ -1395,7 +1430,9 @@ export class AdminService {
           admin,
           approval,
         );
-        return new SuccessResponse('Awaiting action approval');
+        return new SuccessResponse(
+          this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+        );
       }
 
       const { affected } = await this.couponRepository.update(
@@ -1415,11 +1452,16 @@ export class AdminService {
           },
         ]);
 
-        return new SuccessResponse(AppStrings.SUCCESSFULL, data);
+        return new SuccessResponse(
+          this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+          data,
+        );
       }
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -1455,14 +1497,20 @@ export class AdminService {
           approval,
         );
 
-        return new SuccessResponse('Awaiting action approval');
+        return new SuccessResponse(
+          this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+        );
       }
 
       await this.couponRepository.save(deletedCoupons);
-      return new SuccessResponse(AppStrings.DELETED_SUCCESSFULLY);
+      return new SuccessResponse(
+        this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+      );
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -1500,14 +1548,20 @@ export class AdminService {
           approval,
         );
 
-        return new SuccessResponse('Awaiting action approval');
+        return new SuccessResponse(
+          this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+        );
       }
       await this.couponRepository.save(deactivateCoupon);
 
-      return new SuccessResponse(AppStrings.SUCCESSFULL);
+      return new SuccessResponse(
+        this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+      );
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -1546,14 +1600,20 @@ export class AdminService {
           approval,
         );
 
-        return new SuccessResponse('Awaiting action approval');
+        return new SuccessResponse(
+          this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+        );
       }
       await this.couponRepository.save(deactivateCoupon);
 
-      return new SuccessResponse(AppStrings.SUCCESSFULL);
+      return new SuccessResponse(
+        this.i18n.t(`messages.${messagesKeys.SUCCESSFULL}`),
+      );
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -1594,7 +1654,9 @@ export class AdminService {
       return new SuccessResponse(AppStrings.SUCCESSFULL, updated);
     } catch (error) {
       this.logger.error(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -1605,7 +1667,9 @@ export class AdminService {
       return feature;
     } catch (error) {
       this.logger.error(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 
@@ -1624,7 +1688,9 @@ export class AdminService {
         .getMany();
     } catch (error) {
       this.logger.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 }

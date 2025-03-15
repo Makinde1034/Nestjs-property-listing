@@ -3,7 +3,12 @@
  * For license. See license.txt
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { ActivityLogRepository } from '../repositories/activity-log.repository';
 import { CreateActivityLog } from '../dto/activity-log';
 import { isUUID } from 'class-validator';
@@ -12,11 +17,17 @@ import {
   AuditLogTrailsInput,
 } from '../dto/request/activity-log';
 import { Brackets } from 'typeorm';
+import { I18nService } from 'nestjs-i18n';
+import { messagesKeys } from '../../../common/messages/app.strings';
 
 @Injectable()
 export class ActivityLogService {
   logger = new Logger(ActivityLogService.name);
-  constructor(private readonly activityLogRepository: ActivityLogRepository) {}
+  constructor(
+    private readonly activityLogRepository: ActivityLogRepository,
+
+    private readonly i18n: I18nService,
+  ) {}
   async logActivity(createActivityLog: CreateActivityLog[]) {
     try {
       return await this.activityLogRepository.insert(createActivityLog);
@@ -67,7 +78,9 @@ export class ActivityLogService {
       return { logs, total };
     } catch (error) {
       this.logger.error(`Error fetching logs: ${error.message}`, error.stack);
-      throw error;
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.NOT_FOUND}`),
+      );
     }
   }
 
@@ -122,9 +135,10 @@ export class ActivityLogService {
       const [logs, total] = await query.getManyAndCount();
       return { logs, total };
     } catch (error) {
-      console.error(error);
       this.logger.error('Failed to fetch logs', error.stack);
-      throw new Error('Failed to fetch logs');
+      throw new InternalServerErrorException(
+        this.i18n.t(`messages.${messagesKeys.INTERNAL_SERVER_EXCEPTION}`),
+      );
     }
   }
 }

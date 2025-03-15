@@ -49,6 +49,8 @@ import { PaymentStatus } from '../../../common/enums/status.enum';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { Invoice } from '../../../entities/invoice.entity';
 import { Offer } from '../../../entities/offer.entity';
+import { I18nService } from 'nestjs-i18n';
+import { messagesKeys } from '../../../common/messages/app.strings';
 
 @Injectable()
 export class PaymentService {
@@ -64,6 +66,7 @@ export class PaymentService {
     private readonly adminService: AdminService,
     private readonly transactionRepository: TransactionRepository,
     private readonly sseService: SseService,
+    private readonly i18n: I18nService,
   ) {
     this.appDefaultConfig = this.configService.get<AppDefaultConfig>(
       getAappDefaultConfigName(),
@@ -76,35 +79,45 @@ export class PaymentService {
     createPaymentInput: InitiatePaymentInput,
     user: User,
   ) {
-    if (createPaymentInput.coupon) {
-      const coupon: IsCouponValidResponse =
-        await this.adminService.isCouponValid({
-          code: createPaymentInput.coupon,
-          price: createPaymentInput.amount,
-        });
-      createPaymentInput.amount = coupon.amount;
+    try {
+      if (createPaymentInput.coupon) {
+        const coupon: IsCouponValidResponse =
+          await this.adminService.isCouponValid({
+            code: createPaymentInput.coupon,
+            price: createPaymentInput.amount,
+          });
+        createPaymentInput.amount = coupon.amount;
+      }
+      const reference = generateRandomString();
+
+      const checkout = await this.hyperPayService.createCheckout(
+        createPaymentInput,
+        user,
+        reference,
+      );
+
+      const data = {
+        checkoutId: checkout.id,
+        referenceId: reference,
+        timeStamp: checkout.timestamp,
+      };
+      await this.invoiceRepository.save({
+        checkkoutId: checkout.id,
+        price: createPaymentInput.amount,
+        userId: user.id,
+        status: PaymentStatus.PENDING,
+        reference: reference,
+      });
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error.message;
+      }
+
+      throw new InternalServerErrorException(
+        this.i18n.t(`messages.${messagesKeys.CANNOT_PROCESS_PAYMENT}`),
+      );
     }
-    const reference = generateRandomString();
-
-    const checkout = await this.hyperPayService.createCheckout(
-      createPaymentInput,
-      user,
-      reference,
-    );
-
-    const data = {
-      checkoutId: checkout.id,
-      referenceId: reference,
-      timeStamp: checkout.timestamp,
-    };
-    await this.invoiceRepository.save({
-      checkkoutId: checkout.id,
-      price: createPaymentInput.amount,
-      userId: user.id,
-      status: PaymentStatus.PENDING,
-      reference: reference,
-    });
-    return data;
   }
 
   async initializePaymentForPA(
@@ -149,7 +162,7 @@ export class PaymentService {
       }
 
       throw new InternalServerErrorException(
-        'Unable to process payment Please try after some minuites',
+        this.i18n.t(`messages.${messagesKeys.CANNOT_PROCESS_PAYMENT}`),
       );
     }
   }
@@ -301,7 +314,9 @@ export class PaymentService {
         this.logger.log(
           `invoice for reference ${webHookPaymentResponse.payload.merchantInvoiceId}`,
         );
-        throw new BadRequestException('No invoice found');
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.INVALID_PAYMENT}`),
+        );
       }
 
       const payload = {
@@ -322,7 +337,9 @@ export class PaymentService {
       this.successNotification(invoice.userId, invoice.reference);
       return new SuccessResponse();
     } catch (error) {
-      throw new BadRequestException(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
+      );
     }
   }
 }
