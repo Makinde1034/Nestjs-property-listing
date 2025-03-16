@@ -73,6 +73,7 @@ import { PaymentService } from '../../payment/services/payment.service';
 import { BidRegistration } from '../../../entities/bid-registration.entity';
 import { Invoice } from '../../../entities/invoice.entity';
 import { I18nService } from 'nestjs-i18n';
+import * as moment from 'moment';
 
 @Injectable()
 export class AuctionService {
@@ -110,17 +111,16 @@ export class AuctionService {
         );
       }
 
-      // Convert start date to UTC format
-      const parsedStartDate = auctionInput.startDate;
-
       // Calculate expire date
-      const expireAt = addHours(parsedStartDate, auctionInput.liveFor);
+      const expireAt = addHours(auctionInput.startDate, auctionInput.liveFor);
+
+      const utcStartDate = moment(auctionInput.startDate);
 
       // Save auction to the database
       return await this.auctionRepository.save({
         ...auctionInput,
-        startDate: parsedStartDate,
-        expireAt: expireAt,
+        startDate: utcStartDate,
+        expireAt: moment(expireAt),
       });
     } catch (error) {
       this.logger.log(error);
@@ -173,8 +173,6 @@ export class AuctionService {
           .getManyAndCount(),
       ]);
 
-      console.log(registration);
-
       // Remove duplicates from registeredId
       const registeredId = Array.from(
         new Set(
@@ -207,28 +205,30 @@ export class AuctionService {
       );
     }
   }
+
   async findAllRunning(paginateAndSort: PaginateAndSort) {
     try {
       const { sortField, directionToSort } = paginateAndSort;
       const sortDirection: 'ASC' | 'DESC' = directionToSort as 'ASC' | 'DESC';
 
-      // Default pagination if not provided
-      if (!paginateAndSort.take || !paginateAndSort.skip) {
-        paginateAndSort.skip = 0;
-        paginateAndSort.take = 20;
-      }
-      const nowUTC = new Date().toISOString();
+      // Ensure default pagination if values are missing
+      paginateAndSort.skip = paginateAndSort.skip ?? 0;
+      paginateAndSort.take = paginateAndSort.take ?? 20;
+
+      // Ensure UTC timestamp for filtering
+      const nowUTC = moment().utc().toISOString();
+
       const [auctions, total] = await this.auctionRepository
         .createQueryBuilder('auction')
-        .where('auction.startDate <= :date') // Running auctions
-        .andWhere('auction.expireAt > :date') // Not expired
+        .where('auction.startDate <= :date')
+        .andWhere('auction.expireAt > :date')
         .andWhere('auction.status = :statusOne', {
           statusOne: AuctionEnum.ACTIVE,
           date: nowUTC,
         })
         .loadRelationCountAndMap(
           'auction.auctionParticipantCount',
-          'auction.auctionParticipant', // Relation to count
+          'auction.auctionParticipant',
           'auctionParticipant',
         )
         .take(paginateAndSort.take)
@@ -242,7 +242,7 @@ export class AuctionService {
 
       return { auctions, total };
     } catch (error) {
-      this.logger.log(error);
+      this.logger.error(error.message);
       throw new BadRequestException(error.message || 'Error fetching auctions');
     }
   }
@@ -309,19 +309,11 @@ export class AuctionService {
       const { sortField, directionToSort } = paginateAndSort;
       const sortDirection: 'ASC' | 'DESC' = directionToSort as 'ASC' | 'DESC';
 
-      const adminDefault = await this.adminService.adminDefault();
-
       // Default pagination if not provided
-      if (!paginateAndSort.take || !paginateAndSort.skip) {
-        paginateAndSort.skip = 0;
-        paginateAndSort.take = 20;
-      }
+      paginateAndSort.skip = paginateAndSort.skip ?? 0;
+      paginateAndSort.take = paginateAndSort.take ?? 20;
 
-      const startDateThreshold = new Date();
-      startDateThreshold.setDate(
-        startDateThreshold.getDate() -
-          adminDefault.daysToAuctionRegistrationStart,
-      );
+      const utcDate = moment().utc().toISOString();
 
       const [auctions, total] = await this.auctionRepository
         .createQueryBuilder('auction')
@@ -348,19 +340,18 @@ export class AuctionService {
           'auction.auctionParticipantCount',
           'auction.auctionParticipant', // Relation to count
         )
-
         .where(
-          `CURRENT_DATE < auction.startDate 
+          `auction.startDate > :date 
            AND auction.status = :status`,
           {
+            date: utcDate, // ✅ Correctly using the variable
             status: AuctionEnum.ACTIVE,
-            startDateThreshold,
           },
         )
         .take(paginateAndSort.take)
         .skip(paginateAndSort.skip)
         .orderBy(
-          sortField ? `auction.${sortField}` : 'auction.createdAt',
+          sortField ? `auction.${sortField}` : 'auction.startDate',
           sortDirection || 'DESC',
           'NULLS LAST',
         )
@@ -368,10 +359,11 @@ export class AuctionService {
 
       return { auctions, total };
     } catch (error) {
-      this.logger.log(error);
+      this.logger.error(error);
       throw new BadRequestException(error.message || 'Error fetching auctions');
     }
   }
+
   async update(updateAuctionInput: UpdateAuctionInput, user: User) {
     try {
       const { id, ...rest } = updateAuctionInput;

@@ -17,6 +17,7 @@ import { TimeoutMiddleware } from './common/interceptors/timeout.middleware';
 import { AppModule } from './app.module';
 import * as compression from 'compression';
 import { LocationService } from './modules/location/services';
+import * as moment from 'moment-timezone';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -28,6 +29,8 @@ async function bootstrap() {
   const HOST = configService.get('HOST');
   app.enableCors({ origin: '*' });
   app.use(I18nMiddleware);
+
+  moment.tz.setDefault('UTC+3');
 
   app.useGlobalPipes(
     new ValidationPipe({
