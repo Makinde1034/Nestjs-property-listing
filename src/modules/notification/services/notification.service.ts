@@ -8,6 +8,7 @@ import {
   HttpException,
   Injectable,
   Logger,
+  NotFoundException,
   OnModuleInit,
   UnprocessableEntityException,
 } from '@nestjs/common';
@@ -57,11 +58,12 @@ import { ConfigService } from '@nestjs/config';
 import { MessageEvent } from '../../sse/request/app';
 import { NotificationMessagesRepository } from '../repositories/notification-message.repository';
 import { NotificationMessages } from '../../../entities/notification-message.entity';
-import { In } from 'typeorm';
+import { In, Not } from 'typeorm';
 import { StorageService } from '../../file-handler/services/storage.service';
 import { NotificationTokenRepository } from '../repositories/notification-token.repository';
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { NotificationResponse } from '../dtos/response/notification';
+import { I18nService } from 'nestjs-i18n';
 
 @Injectable()
 export class NotificationService implements OnModuleInit {
@@ -80,7 +82,7 @@ export class NotificationService implements OnModuleInit {
     private readonly configService: ConfigService,
     private readonly notificationScope: NotificationScopeRepository,
     private readonly sseService: SseService,
-
+    private readonly i18: I18nService,
     private readonly notificationMesageRepository: NotificationMessagesRepository,
     private readonly notificationTokenRepository: NotificationTokenRepository,
 
@@ -653,13 +655,14 @@ export class NotificationService implements OnModuleInit {
 
   replacePlaceholders(
     text: string,
-    placeholders: { username: string; count?: number },
+    placeholders: { username?: string; count?: number },
   ): string {
     if (!text) return '';
+
     return text.replace(/{{(.*?)}}/g, (_, key: keyof typeof placeholders) => {
-      return placeholders[key] !== undefined
-        ? String(placeholders[key])
-        : `{{${key}}}`;
+      return placeholders[key] != null
+        ? String(placeholders[key]) // Replace with the value if it exists
+        : ''; // Remove the placeholder if it's null or undefined
     });
   }
 
@@ -771,11 +774,12 @@ export class NotificationService implements OnModuleInit {
         .createQueryBuilder()
         .update(Notification)
         .set({ deletedAt: new Date() })
-        // Assuming you're using TypeORM's soft delete
         .where('recipientId = :userId', { userId: user.id })
         .execute();
 
-      return new SuccessResponse(AppStrings.SUCCESSFULL);
+      return new SuccessResponse(
+        this.i18.t(`messages.${AppStrings.SUCCESSFULL}`),
+      );
     } catch (error) {
       this.logger.error('Error deleting notifications', error.stack);
       throw new BadRequestException('Failed to delete notifications');
@@ -788,7 +792,9 @@ export class NotificationService implements OnModuleInit {
       const result = await this.notificationRepository.softDelete({ id });
 
       // Return the result of the delete operation
-      return new SuccessResponse(AppStrings.SUCCESSFULL);
+      return new SuccessResponse(
+        this.i18.t(`messages.${AppStrings.SUCCESSFULL}`),
+      );
     } catch (error) {
       this.logger.error('Error deleting notifications', error.stack);
       throw new BadRequestException('Failed to delete notifications');
@@ -833,7 +839,10 @@ export class NotificationService implements OnModuleInit {
           await this.notificationScopeRepository.findOne({
             where: { id },
           });
-        return new SuccessResponse(AppStrings.SUCCESSFULL, notificationScope);
+        return new SuccessResponse(
+          this.i18.t(`messages.${AppStrings.SUCCESSFULL}`),
+          notificationScope,
+        );
       }
     } catch (error) {
       this.logger.log(error);
@@ -861,7 +870,10 @@ export class NotificationService implements OnModuleInit {
           await this.adminNotificationPreferenceRepository.findOne({
             where: { id },
           });
-        return new SuccessResponse(AppStrings.SUCCESSFULL, notificationScope);
+        return new SuccessResponse(
+          this.i18.t(`messages.${AppStrings.SUCCESSFULL}`),
+          notificationScope,
+        );
       }
     } catch (error) {
       this.logger.log(error);
@@ -936,7 +948,10 @@ export class NotificationService implements OnModuleInit {
       const { id, ...rest } = updateNotificationMessage;
       const data = await this.notificationMesageRepository.update(id, rest);
 
-      return new SuccessResponse(AppStrings.SUCCESSFULL, data);
+      return new SuccessResponse(
+        this.i18.t(`messages.${AppStrings.SUCCESSFULL}`),
+        data,
+      );
     } catch (error) {
       this.logger.error(error);
 
@@ -952,7 +967,9 @@ export class NotificationService implements OnModuleInit {
         });
 
       if (!notificationControl) {
-        throw new BadRequestException(AppStrings.NOT_FOUND);
+        throw new NotFoundException(
+          this.i18.t(`messages.${AppStrings.NOT_FOUND}`),
+        );
       }
       const url = await this.storageService.upload(file[0]);
 

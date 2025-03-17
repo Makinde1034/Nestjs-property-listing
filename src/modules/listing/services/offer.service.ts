@@ -109,11 +109,15 @@ export class OfferService {
       ]);
 
       if (!invoice) {
-        throw new BadRequestException(AppStrings.INVALID_PAYMENT_REFERENCE);
+        throw new BadRequestException(
+          `messages.${messagesKeys.INVALID_PAYMENT}`,
+        );
       }
 
       if (!listing) {
-        throw new NotFoundException(AppStrings.LISTING_NOT_FOUND);
+        throw new NotFoundException(
+          `messages.${messagesKeys.LISTING_NOT_FOUND}`,
+        );
       }
 
       const offerExpiry = new Date(createOfferDto.expireAt);
@@ -378,7 +382,7 @@ export class OfferService {
       });
 
       if (data) {
-        if (data.buyerBirthDate || data.sellerBirthDate) {
+        if (data.buyerBirthDate && data.sellerBirthDate) {
           const role = await this.roleRepository.find({
             where: {
               permissions: {
@@ -403,7 +407,7 @@ export class OfferService {
 
           const scope: NotificationScope = notificationPreference.find(
             (element) => {
-              if (element.scopeGroup == NotificationScopeEnum.OFFERS) {
+              if (element.scopeGroup == NotificationScopeEnum.REQUEST_CREATED) {
                 return element;
               }
             },
@@ -622,6 +626,7 @@ export class OfferService {
         this.notificationScopeRepository.find({
           where: { scopeGroup: NotificationScopeEnum.OFFERS },
         }),
+
         this.offerRepository.findOneBy({ id }),
         this.invoiceRepository.findOne({
           where: { reference: updateOfferInput.reference },

@@ -352,7 +352,7 @@ export class AuctionService {
         .skip(paginateAndSort.skip)
         .orderBy(
           sortField ? `auction.${sortField}` : 'auction.startDate',
-          sortDirection || 'DESC',
+          sortDirection || 'ASC',
           'NULLS LAST',
         )
         .getManyAndCount();

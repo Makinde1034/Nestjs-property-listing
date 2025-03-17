@@ -43,7 +43,7 @@ export class JobService {
     private readonly offerRepository: OfferRepository,
     private readonly notificationScopeRepository: NotificationScopeRepository,
     private readonly auctionParticipantRepository: AuctionParticipantRepository,
-    private readonly eventEmiter: EventEmitter2,
+    private readonly eventEmitter: EventEmitter2,
     private readonly auctionRepository: AuctionRepository,
   ) {}
   logger = new Logger(JobService.name);
@@ -135,7 +135,7 @@ export class JobService {
 
       // Send notifications for each user
       for (const notification of userNotifications) {
-        this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
+        this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
           receiverId: notification.id,
           scope: scope,
           event: 'Created',
@@ -334,7 +334,7 @@ export class JobService {
 
           // Emit notifications immediately
           for (const notification of userNotifications) {
-            this.eventEmiter.emit(
+            this.eventEmitter.emit(
               NotificationEvent.SEND_NOTIFICATION,
               notification,
             );
@@ -455,7 +455,7 @@ export class JobService {
 
     auctions.forEach((element) => {
       if (oneDayNotification.length) {
-        this.eventEmiter.emit(NotificationEvent.SEND_NOTIFICATION, {
+        this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
           receiverId: element.listing.userId,
           scope: scope,
           event: '12- Hour before',
