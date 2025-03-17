@@ -246,9 +246,6 @@ export class NotificationService implements OnModuleInit {
       /************************
        * Email Notification
        ************************/
-      console.log('ownere', owner);
-
-      console.log('notOwner', recipient);
 
       if (
         userPrefRecipients?.email ||
@@ -482,22 +479,24 @@ export class NotificationService implements OnModuleInit {
               text: text,
             },
           };
-          if (sse) {
+          if (sse == true) {
             this.sseService.sendEvent(user.id, payload);
           }
 
-          await this.saveNotificationLog({
-            title: subject,
-            arabicTitle: messageData?.arabicTitle,
-            category: messageData.scope,
-            subCategory: messageData.event,
-            metadata: metadata,
-            recipient: user,
-            message: text,
-            arabicMessage: messageData?.arabicBody,
-            type: NotificationType.SYSTEM_NOTIFICATION,
-            img,
-          });
+          if (sse == false) {
+            await this.saveNotificationLog({
+              title: subject,
+              arabicTitle: messageData?.arabicTitle,
+              category: messageData.scope,
+              subCategory: messageData.event,
+              metadata: metadata,
+              recipient: user,
+              message: text,
+              arabicMessage: messageData?.arabicBody,
+              type: NotificationType.SYSTEM_NOTIFICATION,
+              img,
+            });
+          }
         }
       }
     } catch (error) {
