@@ -96,6 +96,10 @@ export class Invoice {
   @Field({ nullable: true })
   listingId: string;
 
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  paymentType: string;
+
   @Column('decimal', { precision: 10, scale: 2, default: 0 })
   @Field()
   vat: number;

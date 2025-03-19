@@ -69,6 +69,7 @@ type Invoice {
   file: String
   listingTypeId: String
   listingId: String
+  paymentType: String
   vat: Float!
   expireAt: DateTime
   createdAt: DateTime

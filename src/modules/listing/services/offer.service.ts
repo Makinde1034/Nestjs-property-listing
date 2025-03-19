@@ -136,6 +136,7 @@ export class OfferService {
           listing.price,
           listing.purpose,
         );
+
       //TODO: fix offer for nogatiable
       // if (!listing.negotiable) {
       //   if (listing.price < createOfferDto.price) {

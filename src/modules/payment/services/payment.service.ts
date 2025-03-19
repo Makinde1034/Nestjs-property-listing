@@ -67,6 +67,7 @@ export class PaymentService {
     private readonly transactionRepository: TransactionRepository,
     private readonly sseService: SseService,
     private readonly i18n: I18nService,
+    private readonly adminDefaultService: AdminService,
   ) {
     this.appDefaultConfig = this.configService.get<AppDefaultConfig>(
       getAappDefaultConfigName(),
@@ -107,6 +108,7 @@ export class PaymentService {
         userId: user.id,
         status: PaymentStatus.PENDING,
         reference: reference,
+        paymentType: 'DB',
       });
       return data;
     } catch (error) {
@@ -147,6 +149,7 @@ export class PaymentService {
         userId: user.id,
         status: PaymentStatus.PENDING,
         reference: reference,
+        paymentType: 'PA',
       });
 
       const data = {
@@ -238,34 +241,27 @@ export class PaymentService {
 
       const payload: CreateInvoiceInput = {
         capturedPrice: invoice.capturedPrice,
-        vat: invoice.vat,
         expiredAt: addDays(new Date(), 4),
         userId: user.id,
         listingid: listing.id,
         offerId: offer.id,
       };
 
-      const updatedInvoice = await this.invoiceRepository.save({
-        ...invoice,
-        ...payload,
-        listingTypeId: listing.listingTypeId,
-        listing,
-        offerId: offer.id,
-        vat: data.sumTotalVat,
-      });
-
       const qrcode = await this.qrcodeService.generateQrCode(
         `${this.appDefaultConfig.customerFrontEndUrl}?invoiceId=${invoice.id}`,
       );
 
       data.qrcode = qrcode;
-      data.invoiceNumber = updatedInvoice.id;
+      data.invoiceNumber = invoice.id;
 
       const invoicePdf =
         await this.pdfGeneratorService.generatePdfForInvoice(data);
       if (!invoicePdf || !(invoicePdf instanceof Buffer)) {
         throw new BadRequestException('Failed to generate invoice PDF');
       }
+      const adminDefault = await this.adminDefaultService.adminDefault();
+
+      const vat = (adminDefault.vat / 100) * invoice.price;
 
       const multerFile: Express.Multer.File = {
         fieldname: invoice.id.toString(),
@@ -281,12 +277,19 @@ export class PaymentService {
       };
 
       const url = await this.storageService.upload(multerFile);
-      await this.invoiceRepository.update(updatedInvoice.id, {
-        file: url,
+
+      const updatedInvoice = await this.invoiceRepository.save({
+        ...invoice,
+        ...payload,
+        listingTypeId: listing.listingTypeId,
+        listing,
         offerId: offer.id,
+        vat: vat,
+        file: url,
       });
+
       await this.mailService.sendEmailInvoice(user, invoicePdf);
-      return invoice;
+      return updatedInvoice;
     } catch (error) {
       console.log(error);
       this.logger.error('Error finalizing invoice:', error);
@@ -302,7 +305,6 @@ export class PaymentService {
 
   async finalizeTransaction(webHookPaymentResponse: WebHookPaymentResponse) {
     try {
-      console.log(webHookPaymentResponse.payload.merchantInvoiceId);
       const invoice = await this.invoiceRepository.findOne({
         where: {
           reference: webHookPaymentResponse.payload.merchantInvoiceId,
