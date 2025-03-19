@@ -27,7 +27,7 @@ import { ServiceProviderRepository } from '../repository/service-provider.reposi
 import { ServiceRepository } from '../repository/services.repository';
 import { PaginateAndSort } from '../../../modules/core/dto/pagination-and-sort.dto';
 import { ActivityLogService } from '../../../modules/activity-log/services/activity-log.service';
-import { In, Not } from 'typeorm';
+import { In } from 'typeorm';
 import { ServiceProviderStatus } from '../../../common/enums/status.enum';
 import { ServiceProvidedRepository } from '../repository/service-provided.repository';
 import { NotificationScope, User } from '../../../entities';
@@ -63,7 +63,6 @@ export class ServiceAndProviderService {
     private readonly notificationScopeRepository: NotificationScopeRepository,
     private readonly i18n: I18nService,
   ) {}
-
   logger = new Logger(ServiceAndProviderService.name);
 
   /**
@@ -80,7 +79,6 @@ export class ServiceAndProviderService {
       );
     }
   }
-
   /**********************************
    * Create Service Provider
    **********************************/

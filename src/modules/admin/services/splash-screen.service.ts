@@ -20,7 +20,7 @@ import {
 import { AppStrings } from '../../../common/messages/app.strings';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { StorageService } from '../../file-handler/services/storage.service';
-import { Between, In, LessThanOrEqual, MoreThan } from 'typeorm';
+import { Between, Brackets, In, LessThanOrEqual, MoreThan } from 'typeorm';
 import { SplashScreen } from '../../../entities/splash-screen.entity';
 import { User } from '../../../entities';
 import { ActivityLogService } from '../../activity-log/services/activity-log.service';
@@ -55,19 +55,20 @@ export class SplashScreenService {
       const splashScreen =
         this.splashScreenRepository.create(createSplashScreen);
 
-      const overlappingSplashScreens = await this.splashScreenRepository
+      const latestSplashScreen = await this.splashScreenRepository
         .createQueryBuilder('splashScreen')
-        .where(
-          '(splashScreen.startDate BETWEEN :start AND :end OR splashScreen.endDate BETWEEN :start AND :end OR :start BETWEEN splashScreen.startDate AND splashScreen.endDate  AND :placement = splashScreen.placement)',
-          {
-            start: createSplashScreen.startDate,
-            end: createSplashScreen.endDate,
-            placement: createSplashScreen.placement,
-          },
-        )
-        .getCount();
+        .where('splashScreen.placement = :placement')
+        .andWhere('splashScreen.endDate >= :startDate')
+        .setParameters({
+          placement: splashScreen.placement,
+          startDate: splashScreen.startDate,
+        })
 
-      if (overlappingSplashScreens > 0) {
+        .getOne(); // More efficient than getCount()
+
+      console.log(latestSplashScreen);
+
+      if (latestSplashScreen) {
         throw new BadRequestException(
           'A schedule matching this date range already exists',
         );

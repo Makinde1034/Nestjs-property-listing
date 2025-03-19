@@ -97,7 +97,7 @@ export class User extends BaseEntity {
   @Field()
   email: string;
 
-  @Column({ unique: true, nullable: true })
+  @Column({ nullable: true })
   @Field({ nullable: true })
   phone: string;
 
