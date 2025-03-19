@@ -667,9 +667,11 @@ export class ListingResolver {
   async createAuctionParticipant(
     @Args('createAuctionParticipantInput')
     addParticipantToAuctionInput: CreateAuctionParticipantInput,
+    @Context() ctx: any,
   ) {
     return await this.auctionService.addListingToAuction(
       addParticipantToAuctionInput,
+      ctx.req.user,
     );
   }
 

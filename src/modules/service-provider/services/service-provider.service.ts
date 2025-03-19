@@ -48,6 +48,9 @@ import { NotificationScopeEnum } from '../../../common/enums/notification-scope.
 import { NotificationScopeRepository } from '../../user/repositories';
 import { NotificationEvent } from '../../../common/enums';
 import { I18nService } from 'nestjs-i18n';
+import { PdfInput } from '../../file-handler/dto/pdf.dto';
+import { PaymentService } from '../../payment/services/payment.service';
+import { InvoiceRepository } from '../../payment/repositories/invoice.repository';
 
 @Injectable()
 export class ServiceAndProviderService {
@@ -62,6 +65,8 @@ export class ServiceAndProviderService {
     private readonly eventEmitter: EventEmitter2,
     private readonly notificationScopeRepository: NotificationScopeRepository,
     private readonly i18n: I18nService,
+    private readonly paymentService: PaymentService,
+    private readonly invoiceRepository: InvoiceRepository,
   ) {}
   logger = new Logger(ServiceAndProviderService.name);
 
@@ -591,6 +596,37 @@ export class ServiceAndProviderService {
 
         userId: user.id,
       });
+
+      const invoice = await this.invoiceRepository.findOne({
+        where: { reference: requestForServiceInput.reference },
+      });
+
+      const pdf: PdfInput = {
+        // createdDate: `${offerPayload.createdAt.getDate()}-${offerPayload.createdAt.getMonth() + 1}-${offerPayload.createdAt.getFullYear()}`,
+        // sellerCRNumber: seller.crNumber,
+        // sellerzatcaNumber: seller.zatcaNuber,
+        // sellerAddress: seller.address,
+        // sellerName:
+        //   seller.language === 'en'
+        //     ? `${seller.firstName} ${seller.lastName}`
+        //     : `${seller.arabicFirstName} ${seller.arabicLastName}`,
+        // customerCRNumber: user.crNumber,
+        // customerName:
+        //   user.language === 'en'
+        //     ? `${user.firstName} ${user.lastName}`
+        //     : `${user.arabicFirstName} ${user.arabicLastName}`,
+        // customerAddress: user.address,
+        // customerZatcaNumber: user.zatcaNuber,
+        // totalWithVat: [offerPayload.price + vat],
+        // itemVat: [{ vat: adminDefault.vat, vatValue: vat }],
+        // product: offerPayload,
+        // sumTotalWithoutVat: offerPayload.price,
+        // sumTotalVat: vat,
+        // sumTotalWithVat: offerPayload.price + vat,
+      };
+
+      await this.paymentService.finalizeInvoice(invoice, pdf, user);
+
       return data;
     } catch (error) {
       this.logger.log(error);

@@ -40,7 +40,7 @@ export class Invoice {
   @Field()
   userId: string;
 
-  @Column({ default: '' })
+  @Column({ nullable: true })
   @Field()
   checkoutId: string;
 

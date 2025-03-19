@@ -74,6 +74,7 @@ import { BidRegistration } from '../../../entities/bid-registration.entity';
 import { Invoice } from '../../../entities/invoice.entity';
 import { I18nService } from 'nestjs-i18n';
 import * as moment from 'moment';
+import { PdfInput } from '../../file-handler/dto/pdf.dto';
 
 @Injectable()
 export class AuctionService {
@@ -93,6 +94,7 @@ export class AuctionService {
 
     private readonly sseService: SseService,
     private readonly invoiceRepository: InvoiceRepository,
+    private readonly paymentService: PaymentService,
   ) {}
   logger = new Logger(AuctionService.name);
   async create(auctionInput: CreateAuctionInput) {
@@ -521,13 +523,39 @@ export class AuctionService {
     }
   }
 
-  async addListingToAuction(data: CreateAuctionParticipantInput) {
+  async addListingToAuction(data: CreateAuctionParticipantInput, user: User) {
     try {
       const { auctionId, listingId, ...listingData } = data;
 
       const invoice = await this.invoiceRepository.findOne({
         where: { reference: data.reference },
       });
+
+      const pdf: PdfInput = {
+        // createdDate: `${offerPayload.createdAt.getDate()}-${offerPayload.createdAt.getMonth() + 1}-${offerPayload.createdAt.getFullYear()}`,
+        // sellerCRNumber: seller.crNumber,
+        // sellerzatcaNumber: seller.zatcaNuber,
+        // sellerAddress: seller.address,
+        // sellerName:
+        //   seller.language === 'en'
+        //     ? `${seller.firstName} ${seller.lastName}`
+        //     : `${seller.arabicFirstName} ${seller.arabicLastName}`,
+        // customerCRNumber: user.crNumber,
+        // customerName:
+        //   user.language === 'en'
+        //     ? `${user.firstName} ${user.lastName}`
+        //     : `${user.arabicFirstName} ${user.arabicLastName}`,
+        // customerAddress: user.address,
+        // customerZatcaNumber: user.zatcaNuber,
+        // totalWithVat: [offerPayload.price + vat],
+        // itemVat: [{ vat: adminDefault.vat, vatValue: vat }],
+        // product: offerPayload,
+        // sumTotalWithoutVat: offerPayload.price,
+        // sumTotalVat: vat,
+        // sumTotalWithVat: offerPayload.price + vat,
+      };
+
+      await this.paymentService.finalizeInvoice(invoice, pdf, user);
 
       if (!invoice) {
         throw new BadRequestException(
@@ -716,6 +744,7 @@ export class AuctionService {
         auctionBidRanges,
         highestBid,
         bidRegistrationRepository,
+        invoice,
       ] = await Promise.all([
         this.auctionParticipantRepository.findOne({
           where: { listingId: bidInput.listingId },
@@ -732,6 +761,9 @@ export class AuctionService {
 
         this.bidRegistrationRepository.findOne({
           where: { userId: user.id, auctionId: bidInput.auctionId },
+        }),
+        this.invoiceRepository.findOne({
+          where: { reference: bidInput.reference },
         }),
       ]);
 
@@ -794,6 +826,32 @@ export class AuctionService {
 
       this.sseService.sendEvent(user.id, payload, auctionParticipant.id);
 
+      const data: PdfInput = {
+        // createdDate: `${offerPayload.createdAt.getDate()}-${offerPayload.createdAt.getMonth() + 1}-${offerPayload.createdAt.getFullYear()}`,
+        // sellerCRNumber: seller.crNumber,
+        // sellerzatcaNumber: seller.zatcaNuber,
+        // sellerAddress: seller.address,
+        // sellerName:
+        //   seller.language === 'en'
+        //     ? `${seller.firstName} ${seller.lastName}`
+        //     : `${seller.arabicFirstName} ${seller.arabicLastName}`,
+        // customerCRNumber: user.crNumber,
+        // customerName:
+        //   user.language === 'en'
+        //     ? `${user.firstName} ${user.lastName}`
+        //     : `${user.arabicFirstName} ${user.arabicLastName}`,
+        // customerAddress: user.address,
+        // customerZatcaNumber: user.zatcaNuber,
+        // totalWithVat: [offerPayload.price + vat],
+        // itemVat: [{ vat: adminDefault.vat, vatValue: vat }],
+        // product: offerPayload,
+        // sumTotalWithoutVat: offerPayload.price,
+        // sumTotalVat: vat,
+        // sumTotalWithVat: offerPayload.price + vat,
+      };
+
+      await this.paymentService.finalizeInvoice(invoice, data, user);
+
       return bid;
     } catch (error) {
       this.logger.debug(error);
@@ -850,6 +908,32 @@ export class AuctionService {
       await this.bidRegistrationRepository.update(registered.id, {
         autoBid: true,
       });
+
+      const data: PdfInput = {
+        // createdDate: `${offerPayload.createdAt.getDate()}-${offerPayload.createdAt.getMonth() + 1}-${offerPayload.createdAt.getFullYear()}`,
+        // sellerCRNumber: seller.crNumber,
+        // sellerzatcaNumber: seller.zatcaNuber,
+        // sellerAddress: seller.address,
+        // sellerName:
+        //   seller.language === 'en'
+        //     ? `${seller.firstName} ${seller.lastName}`
+        //     : `${seller.arabicFirstName} ${seller.arabicLastName}`,
+        // customerCRNumber: user.crNumber,
+        // customerName:
+        //   user.language === 'en'
+        //     ? `${user.firstName} ${user.lastName}`
+        //     : `${user.arabicFirstName} ${user.arabicLastName}`,
+        // customerAddress: user.address,
+        // customerZatcaNumber: user.zatcaNuber,
+        // totalWithVat: [offerPayload.price + vat],
+        // itemVat: [{ vat: adminDefault.vat, vatValue: vat }],
+        // product: offerPayload,
+        // sumTotalWithoutVat: offerPayload.price,
+        // sumTotalVat: vat,
+        // sumTotalWithVat: offerPayload.price + vat,
+      };
+
+      await this.paymentService.finalizeInvoice(invoice, data, user);
 
       return autoBid;
     } catch (error) {
@@ -1039,6 +1123,32 @@ export class AuctionService {
       if (differenceInDays < adminDefault.daysToAuctionRegistrationEnd) {
         throw new BadRequestException('Bid registration has ended');
       }
+
+      const pdf: PdfInput = {
+        // createdDate: `${offerPayload.createdAt.getDate()}-${offerPayload.createdAt.getMonth() + 1}-${offerPayload.createdAt.getFullYear()}`,
+        // sellerCRNumber: seller.crNumber,
+        // sellerzatcaNumber: seller.zatcaNuber,
+        // sellerAddress: seller.address,
+        // sellerName:
+        //   seller.language === 'en'
+        //     ? `${seller.firstName} ${seller.lastName}`
+        //     : `${seller.arabicFirstName} ${seller.arabicLastName}`,
+        // customerCRNumber: user.crNumber,
+        // customerName:
+        //   user.language === 'en'
+        //     ? `${user.firstName} ${user.lastName}`
+        //     : `${user.arabicFirstName} ${user.arabicLastName}`,
+        // customerAddress: user.address,
+        // customerZatcaNumber: user.zatcaNuber,
+        // totalWithVat: [offerPayload.price + vat],
+        // itemVat: [{ vat: adminDefault.vat, vatValue: vat }],
+        // product: offerPayload,
+        // sumTotalWithoutVat: offerPayload.price,
+        // sumTotalVat: vat,
+        // sumTotalWithVat: offerPayload.price + vat,
+      };
+
+      await this.paymentService.finalizeInvoice(invoice, pdf, user);
 
       return await this.bidRegistrationRepository.save({
         ...data,

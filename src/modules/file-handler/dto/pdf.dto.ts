@@ -5,22 +5,22 @@
 
 export class PdfInput {
   invoiceNumber?: number;
-  createdDate: string;
+  createdDate?: string;
   qrcode?: string;
-  sellerCRNumber: string;
-  sellerzatcaNumber: string;
-  sellerAddress: string;
-  sellerName: string;
-  customerCRNumber: string;
-  customerName: string;
-  customerAddress: string;
-  customerZatcaNumber: string;
-  totalWithVat: [number];
-  itemVat: [VatItem];
-  product: unknown;
-  sumTotalWithoutVat: number;
-  sumTotalVat: number;
-  sumTotalWithVat: number;
+  sellerCRNumber?: string;
+  sellerzatcaNumber?: string;
+  sellerAddress?: string;
+  sellerName?: string;
+  customerCRNumber?: string;
+  customerName?: string;
+  customerAddress?: string;
+  customerZatcaNumber?: string;
+  totalWithVat?: [number];
+  itemVat?: [VatItem];
+  product?: unknown;
+  sumTotalWithoutVat?: number;
+  sumTotalVat?: number;
+  sumTotalWithVat?: number;
 }
 
 export interface VatItem {

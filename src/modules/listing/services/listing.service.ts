@@ -249,8 +249,15 @@ export class ListingService {
         .leftJoinAndSelect('listing.listingType', 'listingType')
         .loadRelationCountAndMap('listing.offers', 'listing.offer')
         .where('listing.userId = :id', { id: user.id })
-        .andWhere('status = :status', { status: ListingStatus.ACCEPTED });
-
+        .where(
+          'listing.isListingDisabled = :isListingDisabled AND listing.isListingSold = :isListingSold AND listing.isListingRented = :isListingRented AND listing.published IS true AND listingType.deletedAt IS NULL AND  status = :status',
+          {
+            isListingDisabled: false,
+            isListingSold: false,
+            isListingRented: false,
+            status: ListingStatus.ACCEPTED,
+          },
+        );
       // ✅ Apply additional `where` conditions correctly
       if (where?.fieldToChose && where?.whereParam !== undefined) {
         query.andWhere(`listing.${where.fieldToChose} = :whereParam`, {
