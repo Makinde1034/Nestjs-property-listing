@@ -34,6 +34,13 @@ export class CreateServiceProviderInput {
   @IsString()
   iban: string;
 
+  @Field({ nullable: true })
+  @IsString()
+  firstName: string;
+  @Field({ nullable: true })
+  @IsString()
+  lastName: string;
+
   @Field()
   @IsString()
   serviceOffered: string;

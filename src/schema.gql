@@ -300,6 +300,8 @@ type AuctionParticipant {
 
 type ServiceProvider {
   id: ID!
+  firstName: String
+  lastName: String
   user: User
   userId: String!
   ibanCertificate: String
@@ -2510,6 +2512,8 @@ input UpdateArticleInput {
 
 input CreateServiceProviderInput {
   iban: String
+  firstName: String
+  lastName: String
   serviceOffered: String!
   coverageArea: String!
 }
@@ -2530,6 +2534,8 @@ input Pricing {
 
 input UpdateServiceProviderInput {
   iban: String
+  firstName: String
+  lastName: String
   serviceOffered: String
   coverageArea: String
   id: String!
