@@ -35,11 +35,24 @@ export class CreateServiceProviderInput {
   iban: string;
 
   @Field({ nullable: true })
+  @IsOptional()
   @IsString()
   firstName: string;
+
   @Field({ nullable: true })
+  @IsOptional()
   @IsString()
   lastName: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  arabicFirstName: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  arabicLastName: string;
 
   @Field()
   @IsString()

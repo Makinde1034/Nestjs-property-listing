@@ -302,6 +302,8 @@ type ServiceProvider {
   id: ID!
   firstName: String
   lastName: String
+  arabicFirstName: String
+  arabicLastName: String
   user: User
   userId: String!
   ibanCertificate: String
@@ -2514,6 +2516,8 @@ input CreateServiceProviderInput {
   iban: String
   firstName: String
   lastName: String
+  arabicFirstName: String
+  arabicLastName: String
   serviceOffered: String!
   coverageArea: String!
 }
@@ -2536,6 +2540,8 @@ input UpdateServiceProviderInput {
   iban: String
   firstName: String
   lastName: String
+  arabicFirstName: String
+  arabicLastName: String
   serviceOffered: String
   coverageArea: String
   id: String!

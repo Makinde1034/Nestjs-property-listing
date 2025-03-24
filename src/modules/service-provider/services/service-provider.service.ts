@@ -795,6 +795,14 @@ export class ServiceAndProviderService {
       // }
 
       // Execute query
+      query.where('serviceRequested.status = :status', {
+        status: ServiceProviderStatus.PENDING,
+      });
+
+      query.orWhere('provider.id = :providerId::uuid', {
+        providerId: serviceprovider.id,
+      });
+
       const [request, total] = await query.getManyAndCount();
 
       return { request, total };

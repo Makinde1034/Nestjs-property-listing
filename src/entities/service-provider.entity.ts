@@ -25,12 +25,21 @@ import { User } from './user.entity';
 @Entity()
 export class ServiceProvider extends BaseEntity {
   @Field({ nullable: true })
-  @Column()
+  @Column({ nullable: true })
   firstName: string;
 
   @Field({ nullable: true })
-  @Column()
+  @Column({ nullable: true })
   lastName: string;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  arabicFirstName: string;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  arabicLastName: string;
+
   @Index()
   @OneToOne(() => User, (user) => user.serviceProvider, { eager: true })
   @JoinColumn({ name: 'userId' })
