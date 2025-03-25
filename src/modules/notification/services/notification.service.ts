@@ -704,7 +704,6 @@ export class NotificationService {
       this.logger.log('Messages array is empty or undefined');
       return null;
     }
-    console.log('2', recipient);
 
     const filteredMessages = messages.filter(
       (message) =>
@@ -712,7 +711,6 @@ export class NotificationService {
         message.event === event &&
         message?.recipients === recipient,
     );
-    console.log('1', filteredMessages);
 
     if (filteredMessages.length < 1) {
       this.logger.log('No matching message found');

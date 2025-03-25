@@ -366,7 +366,8 @@ export class SplashScreenService {
         where: {
           placement: SplashScreenPlacement.SPLASH_SCREEN,
 
-          startDate: MoreThan(new Date()),
+          startDate: LessThanOrEqual(new Date()), // Already started
+          endDate: MoreThan(new Date()),
         },
       });
 
@@ -391,7 +392,8 @@ export class SplashScreenService {
       splashScreen = await this.splashScreenRepository.findOne({
         where: {
           placement: SplashScreenPlacement.MAIN_BANNER,
-          startDate: MoreThan(new Date()), // Started in the past or today
+          startDate: LessThanOrEqual(new Date()), // Already started
+          endDate: MoreThan(new Date()), // Started in the past or today
         },
       });
 

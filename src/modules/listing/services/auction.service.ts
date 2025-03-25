@@ -75,6 +75,7 @@ import { Invoice } from '../../../entities/invoice.entity';
 import { I18nService } from 'nestjs-i18n';
 import * as moment from 'moment';
 import { PdfInput } from '../../file-handler/dto/pdf.dto';
+import { AuctionQueue } from '../../../in-app-services/jobs/queue/auction.queue';
 
 @Injectable()
 export class AuctionService {
@@ -95,6 +96,7 @@ export class AuctionService {
     private readonly sseService: SseService,
     private readonly invoiceRepository: InvoiceRepository,
     private readonly paymentService: PaymentService,
+    private auctionQueue: AuctionQueue,
   ) {}
   logger = new Logger(AuctionService.name);
   async create(auctionInput: CreateAuctionInput) {
@@ -119,11 +121,17 @@ export class AuctionService {
       const utcStartDate = moment(auctionInput.startDate);
 
       // Save auction to the database
-      return await this.auctionRepository.save({
+      const data = await this.auctionRepository.save({
         ...auctionInput,
         startDate: utcStartDate,
         expireAt: moment(expireAt),
       });
+
+      await this.auctionQueue.auctionEnd({
+        id: data.id,
+      });
+
+      return data;
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);
