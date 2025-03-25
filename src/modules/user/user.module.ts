@@ -36,10 +36,14 @@ import { NafathLogsRepository } from './repositories/nafath-log.repository';
 import { HttpModule } from '@nestjs/axios';
 import { ActivityLogRepository } from '../activity-log/repositories/activity-log.repository';
 import { ActivityLogService } from '../activity-log/services/activity-log.service';
+import { NotificationModule } from '../notification/notification.module';
+import { PushNotificationService } from '../notification/services';
 
 @Global()
 @Module({
   imports: [
+    NotificationModule,
+
     HttpModule,
     TypeOrmModule.forFeature([
       User,
@@ -54,6 +58,7 @@ import { ActivityLogService } from '../activity-log/services/activity-log.servic
   ],
   controllers: [UserController],
   providers: [
+    PushNotificationService,
     UserTrackingRepository,
     UserTrackingService,
     UserService,

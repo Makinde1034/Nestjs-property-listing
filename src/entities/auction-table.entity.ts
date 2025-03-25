@@ -97,6 +97,7 @@ export class Auction extends BaseEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 }
+
 @ObjectType()
 export class ListingRegistered {
   @Field()

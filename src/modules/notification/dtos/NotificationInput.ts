@@ -13,6 +13,8 @@ import {
   IsString,
 } from 'class-validator';
 import { NotificationEventInput } from 'src/common/interface';
+import { User } from '../../../entities';
+import { NotificationMessages } from '../../../entities/notification-message.entity';
 
 @InputType()
 export class NotificationInput {
@@ -200,4 +202,17 @@ export class UpdateNotificationMessageScope extends PartialType(
   @Field(() => [NotificationMessageScope])
   @IsArray()
   notificationMessageScope: NotificationMessageScope[];
+}
+
+export interface SendNotificationEventInput {
+  user: User;
+  notificationToken?: string;
+  event: string;
+  scope: string;
+  format: string;
+  count: number;
+  messages?: NotificationMessages[];
+  metadata?: string;
+  img?: string;
+  sse?: boolean;
 }

@@ -4,33 +4,33 @@
  */
 
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { SearchHistoryRepository } from '../listing/repositories/search-history.repository';
-import { ListingRepository } from '../listing/repositories/listing.repository';
+import { SearchHistoryRepository } from '../../../modules/listing/repositories/search-history.repository';
+import { ListingRepository } from '../../../modules/listing/repositories/listing.repository';
 
-import { NotificationService } from '../notification/services';
-import { MailgunEmailService } from '../mail/services/implementations';
-import { OfferRepository } from '../listing/repositories';
+import { NotificationService } from '../../../modules/notification/services';
+import { MailgunEmailService } from '../../../modules/mail/services/implementations';
+import { OfferRepository } from '../../../modules/listing/repositories';
 
 import {
   NotificationScopeRepository,
   UserRepository,
-} from '../user/repositories';
+} from '../../../modules/user/repositories';
 import { formatDate } from 'date-fns';
 import { Between, LessThan, LessThanOrEqual } from 'typeorm';
-import { OfferListEnum } from '../../common/enums/status.enum';
+import { OfferListEnum } from '../../../common/enums/status.enum';
 import { Injectable, Logger } from '@nestjs/common';
-import { AuctionRepository } from '../listing/repositories/auction.repository';
+import { AuctionRepository } from '../../../modules/listing/repositories/auction.repository';
 import {
   addDaysToDate,
   calculateDaysDifference,
   removeDaysFromDate,
-} from '../../common/utils/helper';
-import { NotificationScopeEnum } from '../../common/enums/notification-scope.enum';
-import { Listing, NotificationScope } from '../../entities';
-import { AuctionParticipantRepository } from '../listing/repositories/auction-participant.repository';
+} from '../../../common/utils/helper';
+import { NotificationScopeEnum } from '../../../common/enums/notification-scope.enum';
+import { Listing, NotificationScope } from '../../../entities';
+import { AuctionParticipantRepository } from '../../../modules/listing/repositories/auction-participant.repository';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { NotificationEvent } from '../../common/enums';
-import { SearchHistory } from '../../entities/search-history.entity';
+import { NotificationEvent } from '../../../common/enums';
+import { SearchHistory } from '../../../entities/search-history.entity';
 
 @Injectable()
 export class JobService {

@@ -5,7 +5,9 @@
 
 import {
   BadRequestException,
+  forwardRef,
   HttpException,
+  Inject,
   Injectable,
   Logger,
   NotFoundException,
@@ -18,6 +20,7 @@ import {
   CreateNotificationScopeInput,
   NotificationEventDto,
   NotificationInput,
+  SendNotificationEventInput,
   UpdateAdminNotificationPreferenceScope,
   UpdateAdminNotificationScope,
   UpdateNotificationMessage,
@@ -64,14 +67,17 @@ import { NotificationTokenRepository } from '../repositories/notification-token.
 import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { NotificationResponse } from '../dtos/response/notification';
 import { I18nService } from 'nestjs-i18n';
+import { NotificationQueue } from '../../../in-app-services/jobs/queue/messaging.queue';
 
 @Injectable()
-export class NotificationService implements OnModuleInit {
+export class NotificationService {
   static isEventTriggered = false;
   private readonly logger = new Logger(NotificationService.name);
   private readonly frontEndUrl: string;
 
   constructor(
+    @Inject(forwardRef(() => NotificationQueue))
+    private readonly notificationQueue: NotificationQueue,
     private readonly notificationRepository: NotificationRepository,
     private readonly userRepository: UserRepository,
     private readonly notificationScopeRepository: NotificationScopeRepository,
@@ -85,21 +91,12 @@ export class NotificationService implements OnModuleInit {
     private readonly i18: I18nService,
     private readonly notificationMesageRepository: NotificationMessagesRepository,
     private readonly notificationTokenRepository: NotificationTokenRepository,
-
     private readonly userNotificationPreference: UserNotificationRepository,
     private readonly storageService: StorageService,
+    // @Inject(forwardRef(() => InAppService))
+    // private readonly inAppService: InAppService,
   ) {
     this.frontEndUrl = this.configService.get('FRONT_END_URL');
-  }
-
-  onModuleInit() {
-    this.eventEmitter.on('customEvent', () => {
-      NotificationService.isEventTriggered = true;
-    });
-  }
-
-  static getEventTriggered(): boolean {
-    return this.isEventTriggered;
   }
 
   /**
@@ -137,7 +134,7 @@ export class NotificationService implements OnModuleInit {
         receiverId,
         scope,
         recipientFormat,
-        event = scope.name,
+        event,
         count,
         attachment,
         metadata,
@@ -145,9 +142,7 @@ export class NotificationService implements OnModuleInit {
       } = notificationInput;
 
       const specificEvent = notificationInput.event ?? event;
-
       // Fetch buyer and seller notification preferences for the given scope
-
       const sellerPrefQuery = this.userNotificationPreference
         .queryBuilder('pref')
         .leftJoinAndSelect('pref.user', 'user')
@@ -188,7 +183,6 @@ export class NotificationService implements OnModuleInit {
         );
         return;
       }
-
       // Define scopes triggering notifications
       const notificationScopes = new Set(Object.values(NotificationScopeEnum));
 
@@ -227,7 +221,6 @@ export class NotificationService implements OnModuleInit {
     }
   }
 
-  //TODO: use Event emmiter
   async SendNotificationBasedOnPreference(
     userPrefRecipients?: UserNotificationPreference,
     userPrefOwner?: UserNotificationPreference,
@@ -253,17 +246,40 @@ export class NotificationService implements OnModuleInit {
         UserProfileTypeEnum.STAFF
       ) {
         this.logger.log('Sending  email notifications');
-        this.sendEmailToUser(
-          recipient,
+
+        const data: SendNotificationEventInput = {
+          user: owner,
           event,
           scope,
-          recipientFormat[1],
+          format: recipientFormat[1],
           count,
-          attachment,
           messages,
           metadata,
           img,
-        );
+        };
+
+        await this.notificationQueue.sendEmailNotification(data);
+        //   owner,
+        //   event,
+        //   scope,
+        //   recipientFormat[1],
+        //   count,
+        //   attachment,
+        //   messages,
+        //   metadata,
+        //   img,
+        // );
+        // this.sendEmailToUser(
+        //   recipient,
+        //   event,
+        //   scope,
+        //   recipientFormat[1],
+        //   count,
+        //   attachment,
+        //   messages,
+        //   metadata,
+        //   img,
+        // );
       }
 
       if (
@@ -272,17 +288,39 @@ export class NotificationService implements OnModuleInit {
         UserProfileTypeEnum.STAFF
       ) {
         this.logger.log('Sending  email notifications');
-        this.sendEmailToUser(
-          owner,
+        const data: SendNotificationEventInput = {
+          user: owner,
           event,
+
           scope,
-          recipientFormat[0],
+          format: recipientFormat[0],
           count,
-          null,
           messages,
           metadata,
           img,
-        );
+        };
+        await this.notificationQueue.sendEmailNotification(data);
+        //   owner,
+        //   event,
+        //   scope,
+        //   recipientFormat[0],
+        //   count,
+        //   null,
+        //   messages,
+        //   metadata,
+        //   img,
+        // );
+        // this.sendEmailToUser(
+        //   owner,
+        //   event,
+        //   scope,
+        //   recipientFormat[0],
+        //   count,
+        //   null,
+        //   messages,
+        //   metadata,
+        //   img,
+        // );
       }
 
       /************************
@@ -299,18 +337,20 @@ export class NotificationService implements OnModuleInit {
             where: { userId: recipient?.id },
           });
 
+        const data: SendNotificationEventInput = {
+          user: recipient,
+          event,
+          notificationToken: recipientNotificationToken?.token,
+          scope,
+          format: recipientFormat[1],
+          count,
+          messages,
+          metadata,
+          img,
+        };
+
         if (recipientNotificationToken) {
-          this.sendPushNotificationToUser(
-            recipient,
-            recipientNotificationToken.token,
-            event,
-            scope,
-            recipientFormat[1],
-            count,
-            messages,
-            metadata,
-            img,
-          );
+          this.notificationQueue.sendPushNotificationToUser(data);
         }
       }
 
@@ -324,19 +364,20 @@ export class NotificationService implements OnModuleInit {
           await this.notificationTokenRepository.findOne({
             where: { userId: owner?.id },
           });
+        const data: SendNotificationEventInput = {
+          user: owner,
+          notificationToken: ownerNotificationToken?.token,
+          event,
+          scope,
+          format: recipientFormat[0],
+          count,
+          messages,
+          metadata,
+          img,
+        };
 
         if (ownerNotificationToken) {
-          this.sendPushNotificationToUser(
-            owner,
-            ownerNotificationToken?.token,
-            event,
-            scope,
-            recipientFormat[0],
-            count,
-            messages,
-            metadata,
-            img,
-          );
+          this.notificationQueue.sendPushNotificationToUser(data);
         }
       }
 
@@ -346,21 +387,25 @@ export class NotificationService implements OnModuleInit {
 
       if (
         userPrefRecipients?.desktop ||
-        owner?.userType == UserProfileTypeEnum.ADMIN ||
+        recipient?.userType == UserProfileTypeEnum.ADMIN ||
         UserProfileTypeEnum.STAFF
       ) {
         this.logger.log('Sending  system notifications');
-        this.sendDesktopNotificationToUser(
-          recipient,
+
+        const data: SendNotificationEventInput = {
+          user: recipient,
           event,
+
+          // notificationToken: recipientNotificationToken?.token,
           scope,
-          recipientFormat[1],
+          format: recipientFormat[1],
           count,
           messages,
           metadata,
           img,
-          true,
-        );
+          sse: true,
+        };
+        this.notificationQueue.sendDesktopNotificationToUser(data);
       }
 
       //**********************************************/
@@ -368,17 +413,33 @@ export class NotificationService implements OnModuleInit {
       //**********************************************/
       if (userPrefRecipients?.desktop == false) {
         this.logger.log('Sending  system notifications');
-        this.sendDesktopNotificationToUser(
-          recipient,
+        const data: SendNotificationEventInput = {
+          user: recipient,
           event,
+
+          // notificationToken: recipientNotificationToken?.token,
           scope,
-          recipientFormat[1],
+          format: recipientFormat[1],
           count,
           messages,
           metadata,
           img,
-          false,
-        );
+          sse: true,
+        };
+
+        this.notificationQueue.sendDesktopNotificationToUser(data);
+        // {
+
+        //   user: recipient,
+        //   event,
+        //   scope,
+        //   format: recipientFormat[0],
+        //   count,
+        //   messages,
+        //   metadata,
+        //   img,
+        //   sse: true,
+        // });
       }
 
       if (
@@ -387,17 +448,21 @@ export class NotificationService implements OnModuleInit {
         UserProfileTypeEnum.STAFF
       ) {
         this.logger.log('Sending system notifications');
-        this.sendDesktopNotificationToUser(
-          owner,
+
+        const data: SendNotificationEventInput = {
+          user: owner,
           event,
+
+          // notificationToken: recipientNotificationToken?.token,
           scope,
-          recipientFormat[0],
+          format: recipientFormat[0],
           count,
           messages,
           metadata,
           img,
-          true,
-        );
+          sse: true,
+        };
+        this.notificationQueue.sendDesktopNotificationToUser(data);
       }
 
       //**********************************************/
@@ -405,17 +470,20 @@ export class NotificationService implements OnModuleInit {
       //**********************************************/
       if (userPrefOwner?.desktop == false || userPrefOwner?.desktop) {
         this.logger.log('Sending system notifications');
-        this.sendDesktopNotificationToUser(
-          owner,
+
+        const data: SendNotificationEventInput = {
+          user: owner,
           event,
+
           scope,
-          recipientFormat[0],
+          format: recipientFormat[0],
           count,
           messages,
           metadata,
           img,
-          false,
-        );
+          sse: false,
+        };
+        this.notificationQueue.sendDesktopNotificationToUser(data);
       }
     } catch (error) {
       console.log(error);
@@ -432,174 +500,141 @@ export class NotificationService implements OnModuleInit {
    * @param {EmailNotificationPayload} data
    * @returns {Promise<void>}
    */
-  async sendPushNotification(data: PushNotificationPayload): Promise<void> {
-    try {
-      await this.pushNotificationService.sendPushNotification(data);
-    } catch (error) {
-      this.logger.log(error);
-    }
-  }
-  private async sendDesktopNotificationToUser(
-    user: User,
-    event: string,
-    scope: string,
-    format: string,
-    count: number,
-    messages?: NotificationMessages[],
-    metadata?: string,
-    img?: string,
-    sse?: boolean,
-  ) {
-    try {
-      if (user) {
-        const messageData = this.getMessage(
-          user.firstName,
-          user.arabicFirstName,
-          event,
-          scope,
-          format,
-          count,
-          messages,
-        );
 
-        if (messageData) {
-          const subject: string =
-            user.language === 'en'
-              ? messageData?.title
-              : messageData?.arabicTitle;
-          const text =
-            user.language === 'en'
-              ? messageData?.body
-              : messageData?.arabicBody;
+  // private async sendDesktopNotificationToUser(
+  //   user: User,
+  //   event: string,
+  //   scope: string,
+  //   format: string,
+  //   count: number,
+  //   messages?: NotificationMessages[],
+  //   metadata?: string,
+  //   img?: string,
+  //   sse?: boolean,
+  // ) {
+  //   try {
+  //     if (user) {
+  //       const messageData = this.getMessage(
+  //         user.firstName,
+  //         user.arabicFirstName,
+  //         event,
+  //         scope,
+  //         format,
+  //         count,
+  //         messages,
+  //       );
 
-          const payload: MessageEvent = {
-            type: ServerSentEvents.SUCCESS,
-            data: {
-              subject: subject,
-              text: text,
-            },
-          };
-          if (sse == true) {
-            this.sseService.sendEvent(user.id, payload);
-          }
-
-          if (sse == false) {
-            await this.saveNotificationLog({
-              title: subject,
-              arabicTitle: messageData?.arabicTitle,
-              category: messageData.scope,
-              subCategory: messageData.event,
-              metadata: metadata,
-              recipient: user,
-              message: text,
-              arabicMessage: messageData?.arabicBody,
-              type: NotificationType.SYSTEM_NOTIFICATION,
-              img,
-            });
-          }
-        }
-      }
-    } catch (error) {
-      this.logger.log(error);
-    }
-  }
+  //       if (messageData) {
+  //         const subject: string =
+  //           user.language === 'en'
+  //             ? messageData?.title
+  //             : messageData?.arabicTitle;
+  //         const text =
+  //           user.language === 'en'
+  //             ? messageData?.body
+  //             : messageData?.arabicBody;
+  //       }
+  //     }
+  //   } catch (error) {
+  //     this.logger.log(error);
+  //   }
+  // }
 
   /**
    * Helper method to send email notification.
    */
-  private async sendEmailToUser(
-    user: User,
-    event: string,
-    scope: string,
-    format: string,
-    count?: number,
-    attachment?: Buffer,
-    message?: NotificationMessages[],
-    metadata?: string,
-    img?: string,
-  ) {
-    try {
-      if (user) {
-        const messageData = this.getMessage(
-          user.firstName,
-          user.arabicFirstName,
-          event,
-          scope,
-          format,
-          count,
-          message,
-        );
-        if (messageData) {
-          const subject: string =
-            user.language === 'en'
-              ? messageData?.title
-              : messageData?.arabicTitle;
-          const text =
-            user.language === 'en'
-              ? messageData?.body
-              : messageData?.arabicBody;
+  // private async sendEmailToUser(
+  //   user: User,
+  //   event: string,
+  //   scope: string,
+  //   format: string,
+  //   count?: number,
+  //   attachment?: Buffer,
+  //   message?: NotificationMessages[],
+  //   metadata?: string,
+  //   img?: string,
+  // ) {
+  //   // try {
+  //   //   if (user) {
+  //   //     const messageData = this.getMessage(
+  //   //       user.firstName,
+  //   //       user.arabicFirstName,
+  //   //       event,
+  //   //       scope,
+  //   //       format,
+  //   //       count,
+  //   //       message,
+  //   //     );
+  //   //     if (messageData) {
+  //   //       const subject: string =
+  //   //         user.language === 'en'
+  //   //           ? messageData?.title
+  //   //           : messageData?.arabicTitle;
+  //   //       const text =
+  //   //         user.language === 'en'
+  //   //           ? messageData?.body
+  //   //           : messageData?.arabicBody;
+  //   //       //Send mail
+  //   //       this.sendEmailNotification(
+  //   //         user,
+  //   //         {
+  //   //           title: subject,
+  //   //           message: text,
+  //   //         },
+  //   //         attachment,
+  //   //       );
+  //   //     }
+  //   //   }
+  //   // } catch (error) {
+  //   //   this.logger.log(error);
+  //   // }
+  // }
 
-          //Send mail
-          this.sendEmailNotification(
-            user,
-            {
-              title: subject,
-              message: text,
-            },
-            attachment,
-          );
-        }
-      }
-    } catch (error) {
-      this.logger.log(error);
-    }
-  }
+  // private async sendPushNotificationToUser(
+  //   user: User,
+  //   notificationToken: string,
+  //   event: string,
+  //   scope: string,
+  //   format: string,
+  //   count: number,
+  //   messages?: NotificationMessages[],
+  //   metadata?: string,
+  //   img?: string,
+  // ) {
+  //   try {
+  //     const messageData = this.getMessage(
+  //       user.firstName,
+  //       user.arabicFirstName,
+  //       event,
+  //       scope,
+  //       format,
+  //       count,
+  //       messages,
+  //     );
 
-  private async sendPushNotificationToUser(
-    user: User,
-    notificationToken: string,
-    event: string,
-    scope: string,
-    format: string,
-    count: number,
-    messages?: NotificationMessages[],
-    metadata?: string,
-    img?: string,
-  ) {
-    try {
-      const messageData = this.getMessage(
-        user.firstName,
-        user.arabicFirstName,
-        event,
-        scope,
-        format,
-        count,
-        messages,
-      );
+  //     if (messageData) {
+  //       const title =
+  //         user.language === 'en'
+  //           ? messageData?.title
+  //           : messageData?.arabicTitle;
+  //       const message =
+  //         user.language === 'en' ? messageData?.body : messageData?.arabicBody;
 
-      if (messageData) {
-        const title =
-          user.language === 'en'
-            ? messageData?.title
-            : messageData?.arabicTitle;
-        const message =
-          user.language === 'en' ? messageData?.body : messageData?.arabicBody;
+  //       await this.sendPushNotification({
+  //         title,
+  //         message,
+  //         deviceType: '',
+  //         img,
 
-        await this.sendPushNotification({
-          title,
-          message,
-          deviceType: '',
-          img,
-
-          notificationToken: notificationToken,
-          userId: user.id,
-          redirectLink: this.frontEndUrl,
-        });
-      }
-    } catch (error) {
-      this.logger.log(error);
-    }
-  }
+  //         notificationToken: notificationToken,
+  //         userId: user.id,
+  //         redirectLink: this.frontEndUrl,
+  //       });
+  //     }
+  //   } catch (error) {
+  //     this.logger.log(error);
+  //   }
+  // }
 
   async sendEmailNotification(
     user?: User,
@@ -610,6 +645,48 @@ export class NotificationService implements OnModuleInit {
     try {
       await this.mailService.sendEmailNotification(user, data, attachment);
     } catch (error) {
+      this.logger.log(error);
+    }
+  }
+
+  async sendPushNotification(data: PushNotificationPayload): Promise<void> {
+    try {
+      await this.pushNotificationService.sendPushNotification(data);
+    } catch (error) {
+      console.log(error);
+      this.logger.log(error);
+    }
+  }
+
+  async sendSystemNotification(data: any): Promise<void> {
+    try {
+      const payload: MessageEvent = {
+        type: ServerSentEvents.SUCCESS,
+        data: {
+          subject: data.subject,
+          text: data.text,
+        },
+      };
+      if (data.sse == true) {
+        this.sseService.sendEvent(data.user.id, payload);
+      }
+      console.log(data);
+
+      const result = await this.saveNotificationLog({
+        title: data.message.title,
+        arabicTitle: data.message.arabicTitle,
+        category: data.scope,
+        subCategory: data.event,
+        metadata: data.metadata,
+        recipient: data.user,
+        message: data.message.body,
+        arabicMessage: data.message.arabicBody,
+        type: NotificationType.SYSTEM_NOTIFICATION,
+        img: data.img,
+      });
+      console.log(result);
+    } catch (error) {
+      console.log(error);
       this.logger.log(error);
     }
   }
@@ -627,13 +704,15 @@ export class NotificationService implements OnModuleInit {
       this.logger.log('Messages array is empty or undefined');
       return null;
     }
+    console.log('2', recipient);
 
     const filteredMessages = messages.filter(
       (message) =>
-        message.scope == scope &&
-        message.event == event &&
-        message?.recipients == recipient,
+        message.scope === scope &&
+        message.event === event &&
+        message?.recipients === recipient,
     );
+    console.log('1', filteredMessages);
 
     if (filteredMessages.length < 1) {
       this.logger.log('No matching message found');

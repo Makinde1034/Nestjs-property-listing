@@ -38,7 +38,7 @@ import { AdminModule } from './modules/admin/admin.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { SplashScreenResolver } from './modules/admin/resolver/splash-screen.resolver';
 import { KnowledgeBaseAndHelpModule } from './modules/knowledge-base-and-help/knowledge-base-and-help.module';
-import { InAppModule } from './modules/in-app-services/in-app.module';
+import { InAppModule } from './in-app-services/in-app.module';
 import { GlobalPermissionsGuard } from './modules/auth/guards/global-permission-guard';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AppResolver } from './modules/sse/app.resolver';
@@ -54,10 +54,18 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-store';
 import configuration from './config/configuration';
 import { getRedisConfigName } from './config/serviceAccount/redis.config';
+import { BullModule } from '@nestjs/bullmq';
 
 @Module({
   imports: [
     SseModule,
+    //TODO:switch to config Service
+    BullModule.forRoot({
+      connection: {
+        host: 'redis',
+        port: 6379,
+      },
+    }),
     ConfigModule.forRoot({
       envFilePath:
         process.env.NODE_ENV === 'production' ? '.env' : '.env.local',
@@ -114,7 +122,6 @@ import { getRedisConfigName } from './config/serviceAccount/redis.config';
         };
       },
     }),
-
     ScheduleModule.forRoot(),
     AuthModule,
     UserModule,

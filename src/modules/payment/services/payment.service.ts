@@ -233,11 +233,11 @@ export class PaymentService {
     offer?: Offer,
   ) {
     try {
-      if (!data || !user || !listing || !offer) {
-        throw new BadRequestException(
-          'Missing required data for invoice finalization',
-        );
-      }
+      // if (!data || !user || !listing || !offer) {
+      //   throw new BadRequestException(
+      //     'Missing required data for invoice finalization',
+      //   );
+      // }
 
       const payload: CreateInvoiceInput = {
         capturedPrice: invoice.capturedPrice,
