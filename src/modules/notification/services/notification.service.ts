@@ -699,6 +699,7 @@ export class NotificationService {
     recipient: string,
     count?: number,
     messages?: NotificationMessages[],
+    itemName?: string,
   ) {
     if (!messages || messages.length === 0) {
       this.logger.log('Messages array is empty or undefined');
@@ -720,10 +721,16 @@ export class NotificationService {
     const message = filteredMessages[0]; // Take the first matching message
 
     // Replace placeholders in the desired message's body
-    message.body = this.replacePlaceholders(message?.body, { username, count });
+    message.body = this.replacePlaceholders(message?.body, {
+      username,
+      count,
+      itemName,
+    });
     message.arabicBody = this.replacePlaceholders(message?.arabicBody, {
       username: arabicUsername,
       count,
+
+      itemName,
     });
 
     return message;
@@ -731,12 +738,12 @@ export class NotificationService {
 
   replacePlaceholders(
     text: string,
-    placeholders: { username?: string; count?: number },
+    placeholders: { username?: string; count?: number; itemName?: string },
   ): string {
     if (!text) return '';
 
     return text.replace(/{{(.*?)}}/g, (_, key: keyof typeof placeholders) => {
-      return placeholders[key] != null
+      return placeholders[key] != null && placeholders[key] !== undefined
         ? String(placeholders[key]) // Replace with the value if it exists
         : ''; // Remove the placeholder if it's null or undefined
     });

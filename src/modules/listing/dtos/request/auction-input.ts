@@ -85,7 +85,7 @@ export class CreateAuctionParticipantInput {
   listingId: string;
 
   @Field()
-  @IsUUID()
+  @IsString()
   reference: string;
 }
 

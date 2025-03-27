@@ -43,13 +43,13 @@ export class AuctionQueue {
   async auctionEndInOneMinute(auction: Auction, data: any) {
     try {
       // const bidRegistration = await this.bidRegistrationRepository.count({
-      //   where: { auctionId: auction.id },
+      //   where: { id: auction.id },
       // });
 
       const notifyTime = subMinutes(auction.expireAt, 1);
       const delay = this.getDelay(notifyTime);
 
-      const job = await this.auctionQueue.add(
+      await this.auctionQueue.add(
         JobEnum.AUCTION_NOTIFICATION_ABOUT_TO_END,
         { id: data.id },
         {
@@ -74,7 +74,7 @@ export class AuctionQueue {
       await this.auctionQueue.add(
         JobEnum.AUCTION_WINNER,
         {
-          auctionId: auction.id,
+          id: auction.id,
         },
         {
           delay: delay,
@@ -84,7 +84,7 @@ export class AuctionQueue {
       await this.auctionQueue.add(
         JobEnum.NO_BID,
         {
-          auctionId: auction.id,
+          id: auction.id,
         },
         {
           delay: delay,
@@ -94,7 +94,7 @@ export class AuctionQueue {
       await this.auctionQueue.add(
         JobEnum.AUCTION_LOOSER,
         {
-          auctionId: auction.id,
+          id: auction.id,
         },
         {
           delay: delay,
@@ -103,7 +103,8 @@ export class AuctionQueue {
       await this.auctionQueue.add(
         JobEnum.LAST_MINUTES,
         {
-          auctionId: auction.id,
+          id: auction.id,
+          listingId: data.listingId,
         },
         {
           delay: this.getDelay(lastMinute),
@@ -112,7 +113,8 @@ export class AuctionQueue {
       await this.auctionQueue.add(
         JobEnum.AUCTION_NOTIFICATION_ABOUT_TO_END,
         {
-          auctionId: auction.id,
+          id: auction.id,
+          listingId: data.listingId,
         },
         {
           delay: this.getDelay(aboutToEnd),
@@ -120,6 +122,18 @@ export class AuctionQueue {
       );
     } catch (error) {
       throw new UnprocessableEntityException(error);
+    }
+  }
+
+  async deleteJobsByDataId(targetIds: string[]) {
+    const jobs = await this.auctionQueue.getJobs([
+      'delayed', // Jobs that are scheduled for later
+    ]);
+    for (const job of jobs) {
+      if (targetIds.includes(job.data.id)) {
+        await job.remove();
+        console.log(`Deleted job with ID: ${job.id} (Data ID: ${job.data.id})`);
+      }
     }
   }
 

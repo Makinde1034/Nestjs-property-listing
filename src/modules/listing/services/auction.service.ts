@@ -400,6 +400,15 @@ export class AuctionService {
         );
       }
       const update = await this.auctionRepository.update(id, rest);
+
+      if (updateAuctionInput.startDate) {
+        await this.auctionQueue.deleteJobsByDataId([id]);
+
+        await this.auctionQueue.auctionEnd({
+          id: id,
+        });
+      }
+
       if (update.affected > 0) {
         const result = await this.auctionRepository.findOne({
           where: {
@@ -416,6 +425,7 @@ export class AuctionService {
             auctionId: result.id,
           },
         ]);
+
         return result;
       }
     } catch (error) {

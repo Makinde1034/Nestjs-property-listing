@@ -14,7 +14,7 @@ export class JobController {
   @Public()
   async addToQueue(@Body() data: any) {
     const auction = await this.auctionrepository.findOne({
-      where: { id: data.auctionId },
+      where: { id: data.id },
     });
 
     await this.auctionQueue.auctionEnd(data);
