@@ -408,8 +408,6 @@ export class IssueService {
 
       // select: ['id', 'sequentialId', 'parentIssueId'], // Fetch only necessary fields
 
-      console.log(childIssue);
-
       if (!childIssue) {
         throw new BadRequestException('Child Issue not found');
       }

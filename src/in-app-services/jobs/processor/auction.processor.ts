@@ -14,7 +14,7 @@ import { NotificationScopeEnum } from '../../../common/enums/notification-scope.
 import { In, Not } from 'typeorm';
 import { PaginateAndSort } from '../../../modules/core/dto/pagination-and-sort.dto';
 
-// @Processor('auction')
+@Processor('auction')
 export class AuctionProcessor extends WorkerHost {
   constructor(
     private readonly auctionRepository: AuctionRepository,
@@ -30,99 +30,10 @@ export class AuctionProcessor extends WorkerHost {
   async process(job: Job) {
     try {
       switch (job.name) {
-        case JobEnum.LAST_MINUTES: {
-          const [auction, registration] = await Promise.all([
-            this.auctionRepository.findOneOrFail({
-              where: { id: job.data.id },
-            }),
-
-            //Bidders
-            this.bidRegistrationRepository.find({
-              where: { listingId: job.data.listingId },
-            }),
-          ]);
-
-          const notificationPreference =
-            await this.notificationScopeRepository.find();
-
-          const scope: NotificationScope = notificationPreference.find(
-            (element) =>
-              element.scopeGroup === NotificationScopeEnum.LIVE_AUCTION,
-          );
-
-          const listing = await this.listingRepository.findOneOrFail({
-            where: { id: job.data.listingId },
-            relations: ['user'],
-          });
-          this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
-            creatorId: listing.userId,
-            scope: scope,
-            event: 'Last minute',
-            recipientFormat: ['Listing Bidder and Seller', null],
-            img: auction.imageLink,
-            metadata: JSON.stringify(auction),
-          });
-
-          registration.forEach(async (element) => {
-            this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
-              receiverId: element.userId,
-              scope: scope,
-              event: 'Last minute',
-              recipientFormat: [
-                'Listing Bidder and Seller',
-                'Listing Bidder and Seller',
-              ],
-              img: auction.imageLink,
-              metadata: JSON.stringify(auction),
-            });
-          });
-        }
-        case JobEnum.NEW_BID:
-          {
-            const [auction, bid] = await Promise.all([
-              this.auctionRepository.findOneOrFail({
-                where: { id: job.data.id },
-              }),
-
-              //Bidders
-              this.bidRepository.findOne({
-                where: { listingId: job.data.listingId },
-              }),
-            ]);
-
-            const notificationPreference =
-              await this.notificationScopeRepository.find();
-
-            const scope: NotificationScope = notificationPreference.find(
-              (element) =>
-                element.scopeGroup === NotificationScopeEnum.LIVE_AUCTION,
-            );
-
-            const listing = await this.listingRepository.findOneOrFail({
-              where: { id: job.data.listingId },
-            });
-
-            this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
-              creatorId: listing.userId,
-              receiverId: bid.userId,
-
-              scope: scope,
-              event: 'Bids',
-              recipientFormat: [
-                'Listing Bidder and Seller',
-                'Listing Bidder and Seller',
-              ],
-              img: auction.imageLink,
-              metadata: JSON.stringify(auction),
-            });
-          }
-
-          break;
-
-        case JobEnum.AUCTION_NOTIFICATION_ABOUT_TO_END:
+        case JobEnum.LAST_MINUTES:
           {
             const [auction, registration] = await Promise.all([
-              this.auctionRepository.findOneOrFail({
+              this.auctionRepository.findOne({
                 where: { id: job.data.id },
               }),
 
@@ -140,24 +51,27 @@ export class AuctionProcessor extends WorkerHost {
                 element.scopeGroup === NotificationScopeEnum.LIVE_AUCTION,
             );
 
-            const listing = await this.listingRepository.findOneOrFail({
+            const listing = await this.listingRepository.findOne({
               where: { id: job.data.listingId },
               relations: ['user'],
             });
+
             this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
               creatorId: listing.userId,
               scope: scope,
-              event: '15 minutes to end',
+              event: 'Last minute',
               recipientFormat: ['Listing Bidder and Seller', null],
               img: auction.imageLink,
               metadata: JSON.stringify(auction),
             });
 
-            registration.forEach(async (element) => {
+            const uniqueUserIds = new Set(registration.map((r) => r.userId));
+
+            uniqueUserIds.forEach(async (element) => {
               this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
-                receiverId: element.userId,
+                receiverId: element,
                 scope: scope,
-                event: '15 minutes to end',
+                event: 'Last minute',
                 recipientFormat: [
                   'Listing Bidder and Seller',
                   'Listing Bidder and Seller',
@@ -167,19 +81,122 @@ export class AuctionProcessor extends WorkerHost {
               });
             });
           }
-
           break;
+
+        case JobEnum.NEW_BID:
+          {
+            const [auction, registration] = await Promise.all([
+              this.auctionRepository.findOne({
+                where: { id: job.data.id },
+              }),
+
+              //Bidders
+
+              this.bidRegistrationRepository.find({
+                where: { listingId: job.data.listingId },
+              }),
+            ]);
+
+            const notificationPreference =
+              await this.notificationScopeRepository.find();
+
+            const scope: NotificationScope = notificationPreference.find(
+              (element) =>
+                element.scopeGroup === NotificationScopeEnum.LIVE_AUCTION,
+            );
+
+            const listing = await this.listingRepository.findOne({
+              where: { id: job.data.listingId },
+            });
+
+            this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+              creatorId: listing.userId,
+
+              scope: scope,
+              event: 'Bids',
+              recipientFormat: ['Listing Bidder and Seller', null],
+              img: auction.imageLink,
+              metadata: JSON.stringify(auction),
+            });
+
+            const uniqueUserIds = new Set(registration.map((r) => r.userId));
+
+            uniqueUserIds.forEach(async (element) => {
+              this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+                receiverId: element,
+                scope: scope,
+                event: 'Bids',
+                recipientFormat: [
+                  'Listing Bidder and Seller',
+                  'Listing Bidder and Seller',
+                ],
+                img: auction.imageLink,
+                metadata: JSON.stringify(auction),
+              });
+            });
+          }
+          break;
+
+        case JobEnum.AUCTION_NOTIFICATION_ABOUT_TO_END: {
+          const [auction, registration] = await Promise.all([
+            this.auctionRepository.findOne({
+              where: { id: job.data.id },
+            }),
+
+            //Bidders
+            this.bidRegistrationRepository.find({
+              where: { listingId: job.data.listingId },
+            }),
+          ]);
+
+          const notificationPreference =
+            await this.notificationScopeRepository.find();
+
+          const scope: NotificationScope = notificationPreference.find(
+            (element) =>
+              element.scopeGroup === NotificationScopeEnum.LIVE_AUCTION,
+          );
+
+          const listing = await this.listingRepository.findOne({
+            where: { id: job.data.listingId },
+            relations: ['user'],
+          });
+          this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+            creatorId: listing.userId,
+            scope: scope,
+            event: '15 minutes to end',
+            recipientFormat: ['Listing Bidder and Seller', null],
+            img: auction.imageLink,
+            metadata: JSON.stringify(auction),
+          });
+
+          registration.forEach(async (element) => {
+            this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+              receiverId: element.userId,
+              scope: scope,
+              event: '15 minutes to end',
+              recipientFormat: [
+                'Listing Bidder and Seller',
+                'Listing Bidder and Seller',
+              ],
+              img: auction.imageLink,
+              metadata: JSON.stringify(auction),
+            });
+          });
+        }
+
+        //   break;
 
         case JobEnum.AUCTION_WINNER:
           {
-            console.log('processing auction winner');
             const [auction, bids, notificationPreference] = await Promise.all([
-              this.auctionRepository.findOneOrFail({
+              this.auctionRepository.findOne({
                 where: { id: job.data.id },
               }),
               this.bidRepository
                 .createQueryBuilder('bids')
                 .select('bids."listingId"', 'listingId')
+                .addSelect('bids.id', 'id')
                 .addSelect('bids.userId', 'userId')
                 .addSelect('bids.price', 'highestPrice')
                 .where('bids.auctionId = :id', { id: job.data.id })
@@ -201,7 +218,7 @@ export class AuctionProcessor extends WorkerHost {
             );
 
             bids.forEach(async (element) => {
-              const listing = await this.listingRepository.findOneOrFail({
+              const listing = await this.listingRepository.findOne({
                 where: { id: element.listingId },
                 relations: ['user'],
               });
@@ -213,19 +230,46 @@ export class AuctionProcessor extends WorkerHost {
                 img: auction.imageLink,
                 metadata: JSON.stringify(listing),
               });
+
+              this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+                receiverId: element.userId,
+                scope: scope,
+                event: 'If Win',
+                recipientFormat: [null, 'Buyer'],
+                img: auction.imageLink,
+                metadata: JSON.stringify({ bid: bids, listing: listing }),
+              });
+
+              //Seller
+              this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+                creatorId: listing.userId,
+                scope: scope,
+                event: 'Purchase Result',
+                recipientFormat: ['Seller', null],
+                img: auction.imageLink,
+                metadata: JSON.stringify(listing),
+                itemName: listing.title,
+              });
+
+              this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+                creatorId: listing.userId,
+                scope: scope,
+                event: 'If Sold',
+                recipientFormat: ['Seller', null],
+                img: auction.imageLink,
+                metadata: JSON.stringify({ bid: bids, listing: listing }),
+              });
             });
           }
           break;
 
         case JobEnum.AUCTION_LOOSER:
           {
-            console.log('processing auction looser');
-
             let bidIds: number[] = [];
 
             const [auction, winners, notificationPreference] =
               await Promise.all([
-                this.auctionRepository.findOneOrFail({
+                this.auctionRepository.findOne({
                   where: { id: job.data.id },
                 }),
                 this.bidRepository
@@ -246,13 +290,20 @@ export class AuctionProcessor extends WorkerHost {
             // Store winning bid IDs
             bidIds = winners.map((element) => element.bidId);
 
-            // Fetch losing bids in one query
-            const losingBids = await this.bidRepository
+            // Avoid empty IN() clause error
+            const losingBidsQuery = this.bidRepository
               .createQueryBuilder('bids')
-              .select('DISTINCT ON (bids.userId, bids.listingId) bids.*') // Ensure uniqueness
-              .where('bids.id NOT IN (:...bidIds)', { bidIds })
-              .orderBy('bids.userId, bids.listingId, bids.createdAt', 'DESC') // Get latest bid per user/listing
-              .getRawMany();
+              .select('DISTINCT ON (bids.userId, bids.listingId) bids.*')
+              .where('bids.auctionId = :id', { id: job.data.id })
+              .orderBy('bids.userId, bids.listingId, bids.createdAt', 'DESC'); // Match DISTINCT fields
+
+            if (bidIds.length > 0) {
+              losingBidsQuery.andWhere('bids.id NOT IN (:...bidIds)', {
+                bidIds,
+              });
+            }
+
+            const losingBids = await losingBidsQuery.getRawMany();
 
             // Find notification scope
             const scope: NotificationScope = notificationPreference.find(
@@ -260,30 +311,36 @@ export class AuctionProcessor extends WorkerHost {
                 element.scopeGroup === NotificationScopeEnum.LIVE_AUCTION,
             );
 
+            const uniqueUserListings = new Set<string>();
+
             // Process notifications in bulk using Promise.all
             await Promise.all(
               losingBids.map(async (element) => {
-                const listing = await this.listingRepository.findOneOrFail({
-                  where: { id: element.listingId },
-                  relations: ['user'],
-                });
+                const key = `${element.userId}-${element.listingId}`;
+                if (!uniqueUserListings.has(key)) {
+                  uniqueUserListings.add(key);
 
-                this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
-                  receiverId: element.userId,
-                  scope: scope,
-                  event: 'Looser Result',
-                  recipientFormat: [null, 'Bidder'],
-                  img: auction.imageLink,
-                  metadata: JSON.stringify(listing),
-                });
+                  const listing = await this.listingRepository.findOne({
+                    where: { id: element.listingId },
+                    relations: ['user'],
+                  });
+
+                  this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+                    receiverId: element.userId, // Fix here
+                    scope: scope,
+                    event: 'Looser Result',
+                    recipientFormat: [null, 'Bidder'],
+                    img: auction.imageLink,
+                    metadata: JSON.stringify(listing),
+                  });
+                }
               }),
             );
           }
+
           break;
         case JobEnum.NO_BID:
           {
-            console.log('processing auction bid');
-
             let bidIds: number[] = [];
 
             const bids = await this.bidRepository
@@ -305,7 +362,7 @@ export class AuctionProcessor extends WorkerHost {
               );
 
               // Process notifications in bulk using Promise.all
-              const listing = await this.listingRepository.findOneOrFail({
+              const listing = await this.listingRepository.findOne({
                 where: { id: job.data.id },
                 relations: ['user'],
               });
@@ -326,7 +383,6 @@ export class AuctionProcessor extends WorkerHost {
           break;
       }
     } catch (error) {
-      console.log(error);
       throw error;
     }
   }

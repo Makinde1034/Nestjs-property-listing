@@ -552,7 +552,6 @@ export class AdminService {
             return [];
         }
       })();
-      console.log(transactions);
 
       // Group transactions by interval
       const groupedTransactions = transactions.reduce(
@@ -818,7 +817,6 @@ export class AdminService {
         converged: convergedCount,
       };
     } catch (error) {
-      console.log(error);
       console.error('Error in userFunneling:', error);
       throw new BadRequestException(
         this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
@@ -924,7 +922,6 @@ export class AdminService {
 
       return data;
     } catch (error) {
-      console.log(error);
       this.logger.log(error);
       throw new BadRequestException(
         this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),

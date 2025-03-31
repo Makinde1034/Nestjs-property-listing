@@ -48,7 +48,6 @@ export class WebHookController {
       initializationVector,
       authenticationTag,
     );
-    console.log(hyperPayWebHookResponse);
     return HttpStatus.OK;
   }
 

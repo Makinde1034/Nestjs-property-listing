@@ -13,10 +13,6 @@ export class JobController {
   @Post('queue')
   @Public()
   async addToQueue(@Body() data: any) {
-    const auction = await this.auctionrepository.findOne({
-      where: { id: data.id },
-    });
-
     await this.auctionQueue.auctionEnd(data);
   }
 }

@@ -243,14 +243,13 @@ export class PaymentService {
         capturedPrice: invoice.capturedPrice,
         expiredAt: addDays(new Date(), 4),
         userId: user.id,
-        listingid: listing.id,
-        offerId: offer.id,
+        listingid: listing?.id,
+        offerId: offer?.id,
       };
 
       const qrcode = await this.qrcodeService.generateQrCode(
         `${this.appDefaultConfig.customerFrontEndUrl}?invoiceId=${invoice.id}`,
       );
-
       data.qrcode = qrcode;
       data.invoiceNumber = invoice.id;
 
@@ -281,9 +280,9 @@ export class PaymentService {
       const updatedInvoice = await this.invoiceRepository.save({
         ...invoice,
         ...payload,
-        listingTypeId: listing.listingTypeId,
+        listingTypeId: listing?.listingTypeId,
         listing,
-        offerId: offer.id,
+        offerId: offer?.id,
         vat: vat,
         file: url,
       });
@@ -291,8 +290,8 @@ export class PaymentService {
       await this.mailService.sendEmailInvoice(user, invoicePdf);
       return updatedInvoice;
     } catch (error) {
-      console.log(error);
       this.logger.error('Error finalizing invoice:', error);
+      console.log(error);
 
       if (error instanceof HttpException) {
         throw error;

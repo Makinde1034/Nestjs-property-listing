@@ -67,13 +67,9 @@ export class StorageService {
       throw new Error('No file provided');
     }
 
-    console.log(`Original file size: ${file.buffer.length} bytes`);
-
     const compressedBuffer = await sharp(file.buffer)
       .jpeg({ quality: 70 }) // Adjust quality (70% recommended)
       .toBuffer();
-
-    console.log(`Compressed file size: ${compressedBuffer.length} bytes`);
 
     return {
       ...file,

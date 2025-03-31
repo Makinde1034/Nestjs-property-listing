@@ -21,8 +21,8 @@ export class NotificationQueue {
     try {
       if (payload.user) {
         const messageData = this.notificationService.getMessage(
-          payload.user.firstName,
-          payload.user.arabicFirstName,
+          payload.user?.firstName,
+          payload.user?.arabicFirstName,
           payload.event,
           payload.scope,
           payload.format,
@@ -31,11 +31,11 @@ export class NotificationQueue {
         );
         if (messageData) {
           const subject: string =
-            payload.user.language === 'en'
+            payload.user?.language === 'en'
               ? messageData?.title
               : messageData?.arabicTitle;
           const text =
-            payload.user.language === 'en'
+            payload.user?.language === 'en'
               ? messageData?.body
               : messageData?.arabicBody;
 
@@ -57,22 +57,23 @@ export class NotificationQueue {
   async sendPushNotificationToUser(payload: SendNotificationEventInput) {
     try {
       const messageData = this.notificationService.getMessage(
-        payload.user.firstName,
-        payload.user.arabicFirstName,
+        payload.user?.firstName,
+        payload.user?.arabicFirstName,
         payload.event,
         payload.scope,
         payload.format,
         payload.count,
         payload.messages,
+        payload.itemName,
       );
 
       if (messageData) {
         const title =
-          payload.user.language === 'en'
+          payload.user?.language === 'en'
             ? messageData?.title
             : messageData?.arabicTitle;
         const message =
-          payload.user.language === 'en'
+          payload.user?.language === 'en'
             ? messageData?.body
             : messageData?.arabicBody;
 
@@ -93,11 +94,10 @@ export class NotificationQueue {
 
   async sendDesktopNotificationToUser(payload: SendNotificationEventInput) {
     try {
-      console.log('payload', payload);
       if (payload.user) {
         const messageData = this.notificationService.getMessage(
-          payload.user.firstName,
-          payload.user.arabicFirstName,
+          payload.user?.firstName,
+          payload.user?.arabicFirstName,
           payload.event,
           payload.scope,
           payload.format,

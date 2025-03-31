@@ -75,7 +75,6 @@ export class PushNotificationService {
       await this.messaging.send(message);
       this.logger.log('Push notification sent');
     } catch (error) {
-      console.log(error);
       this.logger.log(error);
       throw new BadRequestException('Failed to send push notification');
     }

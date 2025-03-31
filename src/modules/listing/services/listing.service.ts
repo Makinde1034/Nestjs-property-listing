@@ -1773,7 +1773,7 @@ export class ListingService {
 
         const images = JSON.parse(stringifiedImages);
         users.forEach((user) => {
-          console.log(user.id);
+
           this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
             receiverId: user.id,
             scope: scope,

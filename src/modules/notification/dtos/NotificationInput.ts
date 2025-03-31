@@ -215,4 +215,5 @@ export interface SendNotificationEventInput {
   metadata?: string;
   img?: string;
   sse?: boolean;
+  itemName?: string;
 }

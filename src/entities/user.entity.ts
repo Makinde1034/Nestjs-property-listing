@@ -41,6 +41,7 @@ import { ActivityLog } from './activity-log.entity';
 import { Compare } from './compare.entity';
 import { ServiceProvider } from './service-provider.entity';
 import { ActionRequest } from './request.action.entity';
+import { Bids } from './bids.entity';
 
 @Entity()
 @ObjectType()
@@ -235,6 +236,9 @@ export class User extends BaseEntity {
   @Field(() => User, { nullable: true })
   @OneToOne(() => Compare, (compare) => compare.user)
   compare: Compare;
+
+  @OneToMany(() => Bids, (bids) => bids.user)
+  bids: Bids[];
 
   @Field(() => [UserNotificationPreference], { nullable: true })
   @OneToMany(

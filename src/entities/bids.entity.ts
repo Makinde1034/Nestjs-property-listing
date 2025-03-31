@@ -16,6 +16,7 @@ import {
 } from 'typeorm';
 import { Listing } from './listing.entity';
 import { AuctionParticipant } from './auction-participant.entity';
+import { User } from './user.entity';
 @Entity()
 @ObjectType()
 export class Bids {
@@ -23,13 +24,22 @@ export class Bids {
   @Field({ nullable: true })
   id: string;
 
-  @Column()
+  @Column({ nullable: true })
   @Field({ nullable: true })
   userId: string;
 
-  @Column()
+  @Column({ nullable: true })
   @Field({ nullable: true })
   bidNumber: number;
+
+  @Field(() => User, { nullable: true })
+  @JoinColumn({ name: 'userId' })
+  @ManyToOne(() => User, (user) => user.bids)
+  user: User;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  bidderNumber: string;
 
   @Column('decimal', { precision: 12, scale: 2 })
   @Field({ nullable: true })

@@ -3,7 +3,7 @@
  * For license. See license.txt
  */
 
-import { Module } from '@nestjs/common';
+import { Inject, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AcceptLanguageResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
 import * as path from 'path';
@@ -60,11 +60,17 @@ import { BullModule } from '@nestjs/bullmq';
   imports: [
     SseModule,
     //TODO:switch to config Service
-    BullModule.forRoot({
-      connection: {
-        host: 'redis',
-        port: 6379,
+    BullModule.forRootAsync({
+      useFactory: (configService: ConfigService) => {
+        const redisConfig = configService.get(getRedisConfigName());
+        return {
+          connection: {
+            host: redisConfig.host,
+            port: redisConfig.port,
+          },
+        };
       },
+      inject: [ConfigService],
     }),
     ConfigModule.forRoot({
       envFilePath:

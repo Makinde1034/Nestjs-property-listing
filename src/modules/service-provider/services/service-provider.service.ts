@@ -165,7 +165,6 @@ export class ServiceAndProviderService {
         .getManyAndCount();
       return { serviceProvider, count };
     } catch (error) {
-      console.log(error);
       this.logger.error(error);
       throw new BadRequestException(
         this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),
@@ -816,7 +815,6 @@ export class ServiceAndProviderService {
 
   async ViewServiceRequested(paginateAndSort: PaginateAndSort, user: User) {
     try {
-      console.log(user.id);
       const query = this.serviceRequestedRepository
         .createQueryBuilder('serviceRequested')
         .leftJoinAndSelect('serviceRequested.user', 'user')
@@ -834,7 +832,6 @@ export class ServiceAndProviderService {
 
       return { request, total };
     } catch (error) {
-      console.log(error);
       this.logger.log(error);
       throw new BadRequestException(
         this.i18n.t(`messages.${messagesKeys.BAD_REQUEST}`),

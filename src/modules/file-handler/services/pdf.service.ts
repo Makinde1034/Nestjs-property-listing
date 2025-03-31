@@ -58,7 +58,6 @@ export class PdfService {
       // 🔥 Convert Uint8Array to Buffer
       return Buffer.from(pdfBuffer);
     } catch (error) {
-      console.log(error);
       this.logger.error('Error generating PDF', error);
       throw new Error('Error generating PDF');
     }

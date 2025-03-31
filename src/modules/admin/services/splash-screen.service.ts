@@ -66,8 +66,6 @@ export class SplashScreenService {
 
         .getOne(); // More efficient than getCount()
 
-      console.log(latestSplashScreen);
-
       if (latestSplashScreen) {
         throw new BadRequestException(
           'A schedule matching this date range already exists',

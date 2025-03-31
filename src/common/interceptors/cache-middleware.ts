@@ -29,7 +29,6 @@ export class GqlCacheInterceptor extends CacheInterceptor {
     if (operationType === 'mutation') {
       return next.handle().pipe(
         tap(async () => {
-          console.log('Mutation detected: Clearing cache...');
           await this.cacheManager.reset(); // Clears all cache
         }),
       );

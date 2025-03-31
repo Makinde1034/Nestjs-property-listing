@@ -271,6 +271,8 @@ type Bids {
   id: String
   userId: String
   bidNumber: Float
+  user: User
+  bidderNumber: String
   price: Float
   auctionId: String
   auctionParticipant: Listing
@@ -293,6 +295,7 @@ type AuctionParticipant {
   minimumPrice: Float!
   auction: Auction
   bid: [Bids!]
+  status: String!
   createdAt: DateTime!
   deletedAt: DateTime!
   updatedAt: DateTime!
@@ -1017,6 +1020,20 @@ type SearchHistoryResponse {
   total: Int!
 }
 
+type AuctionDetailsResponse {
+  auction: Auction!
+  auctionDetails: [AuctionDetail!]!
+  total: Float!
+}
+
+type AuctionDetail {
+  listing: Listing
+  bidders: [String!]
+  winner: String
+  totalBids: Float
+  status: String
+}
+
 type InitiatePaymentResponse {
   checkoutId: String
   referenceId: String
@@ -1258,6 +1275,7 @@ type Query {
   getAuction(id: String!): Auction!
   findOneAuctionWithParticipant(fetchAuctionParticipantInput: FetchAuctionParticipantInput!): AuctionParticipantResponse!
   getAllRunningAuction(findManyOption: PaginateAndSort!): AuctionResponse!
+  fetchAuctionDetail(findManyOption: PaginateAndSort, id: String!): AuctionDetailsResponse!
   getAllUpcomingAuction(findManyOption: PaginateAndSort!): AuctionResponse!
   getAllAuction(findManyOption: AdminAuctionFilter!): AuctionResponse!
   getListingsAuction(findManyOption: PaginateAndSort!): AuctionParticipantResponse!

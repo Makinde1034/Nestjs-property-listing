@@ -1,6 +1,8 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import {
+  BadRequestException,
   Injectable,
+  InternalServerErrorException,
   Logger,
   UnprocessableEntityException,
 } from '@nestjs/common';
@@ -20,32 +22,9 @@ export class AuctionQueue {
     private readonly bidRegistrationRepository: BidRegistrationRepository,
   ) {}
   logger = new Logger();
-  // async auctionEndInFifteenMinutes(auction: AuctionParticipant) {
-  //   try {
-  //     const notifyTime = subMinutes(auction.expireAt, 15);
-  //     const delay = this.getDelay(notifyTime);
-
-  //     const job = await this.auctionQueue.add(
-  //       JobEnum.AUCTION_NOTIFICATION_ABOUT_TO_END,
-  //       {
-  //         id: auction.id,
-  //         listingId:
-  //        },
-  //       {
-  //         delay: delay,
-  //       },
-  //     );
-  //   } catch (error) {
-  //     throw new UnprocessableEntityException(error);
-  //   }
-  // }
 
   async auctionEndInOneMinute(auction: Auction, data: any) {
     try {
-      // const bidRegistration = await this.bidRegistrationRepository.count({
-      //   where: { id: auction.id },
-      // });
-
       const notifyTime = subMinutes(auction.expireAt, 1);
       const delay = this.getDelay(notifyTime);
 
@@ -58,6 +37,16 @@ export class AuctionQueue {
       );
     } catch (error) {
       throw new UnprocessableEntityException(error);
+    }
+  }
+
+  async liveAuction(data) {
+    try {
+      await this.auctionQueue.add(JobEnum.NEW_BID, {
+        id: data.id,
+      });
+    } catch (error) {
+      throw new InternalServerErrorException();
     }
   }
 
@@ -74,7 +63,7 @@ export class AuctionQueue {
       await this.auctionQueue.add(
         JobEnum.AUCTION_WINNER,
         {
-          id: auction.id,
+          id: data.id,
         },
         {
           delay: delay,
@@ -84,7 +73,7 @@ export class AuctionQueue {
       await this.auctionQueue.add(
         JobEnum.NO_BID,
         {
-          id: auction.id,
+          id: data.id,
         },
         {
           delay: delay,
@@ -94,7 +83,7 @@ export class AuctionQueue {
       await this.auctionQueue.add(
         JobEnum.AUCTION_LOOSER,
         {
-          id: auction.id,
+          id: data.id,
         },
         {
           delay: delay,
@@ -103,7 +92,7 @@ export class AuctionQueue {
       await this.auctionQueue.add(
         JobEnum.LAST_MINUTES,
         {
-          id: auction.id,
+          id: data.id,
           listingId: data.listingId,
         },
         {
@@ -113,7 +102,7 @@ export class AuctionQueue {
       await this.auctionQueue.add(
         JobEnum.AUCTION_NOTIFICATION_ABOUT_TO_END,
         {
-          id: auction.id,
+          id: data.id,
           listingId: data.listingId,
         },
         {
@@ -132,7 +121,6 @@ export class AuctionQueue {
     for (const job of jobs) {
       if (targetIds.includes(job.data.id)) {
         await job.remove();
-        console.log(`Deleted job with ID: ${job.id} (Data ID: ${job.data.id})`);
       }
     }
   }

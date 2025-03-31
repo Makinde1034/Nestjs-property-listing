@@ -537,7 +537,6 @@ export class UserService {
             userData.nationalIdentity.id,
             { ...nationalIdentity },
           );
-          console.log(nationalIdentity);
         } else {
           await this.nationalIdentityRepository.save({
             ...nationalIdentity,
@@ -768,7 +767,6 @@ export class UserService {
       // Start building the query
       const query = this.usersRepository.createQueryBuilder('user');
 
-      console.log(startDate, endDate);
       query
         .where('user.createdAt BETWEEN :startDate AND :endDate', {
           startDate: moment(startDate).format('YYYY-MM-DD HH:mm:ss'),

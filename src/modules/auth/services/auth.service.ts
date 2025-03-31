@@ -354,7 +354,6 @@ export class AuthService {
         relations: ['roles', 'serviceProvider'],
       });
     }
-    console.log(user.serviceProvider);
 
     // Issue tokens and return user details
     const token = await this.issueTokens(user);

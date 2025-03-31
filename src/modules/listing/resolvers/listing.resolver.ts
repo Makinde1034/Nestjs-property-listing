@@ -84,6 +84,8 @@ import { FinalizationInput } from '../dtos/request/finalizationOffer';
 import { GqlCacheInterceptor } from '../../../common/interceptors/cache-middleware';
 import { Finalization } from '../../../entities/finalization.entity';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import { AuctionDetailsResponse } from '../dtos/response/auctions';
+import { AdminGuard } from '../../auth/guards/admin.guard';
 
 @Resolver()
 export class ListingResolver {
@@ -602,7 +604,15 @@ export class ListingResolver {
   ) {
     return await this.auctionService.findAllRunning(paginateAndSort);
   }
-
+  @UseGuards(AccessTokenGuard, PermissionsGuard, AdminGuard)
+  @Query(() => AuctionDetailsResponse, { name: 'fetchAuctionDetail' })
+  async fetchAuctionDetail(
+    @Args('findManyOption', { nullable: true })
+    paginateAndSort: PaginateAndSort,
+    @Args('id') id: string,
+  ) {
+    return await this.auctionService.fetchAuctionDetail(id, paginateAndSort);
+  }
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @UseInterceptors(GqlCacheInterceptor)
   @Query(() => AuctionResponse, { name: 'getAllUpcomingAuction' })

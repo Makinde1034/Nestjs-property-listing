@@ -68,6 +68,7 @@ import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { NotificationResponse } from '../dtos/response/notification';
 import { I18nService } from 'nestjs-i18n';
 import { NotificationQueue } from '../../../in-app-services/jobs/queue/messaging.queue';
+import { sleep } from '../../../common/utils/helper';
 
 @Injectable()
 export class NotificationService {
@@ -141,7 +142,7 @@ export class NotificationService {
         img,
       } = notificationInput;
 
-      const specificEvent = notificationInput.event ?? event;
+      const specificEvent = event;
       // Fetch buyer and seller notification preferences for the given scope
       const sellerPrefQuery = this.userNotificationPreference
         .queryBuilder('pref')
@@ -175,6 +176,8 @@ export class NotificationService {
         owner,
         recipient,
       ]);
+
+      console.log(creator);
 
       //If neither buyer nor seller has preferences for this scope, skip
       if (!sellerPref && !buyerPref) {
@@ -215,7 +218,6 @@ export class NotificationService {
         );
       }
     } catch (error) {
-      console.log(error);
       this.logger.debug('Error sending notification:', error);
       throw error; // Re-throw for caller to handle
     }
@@ -234,6 +236,7 @@ export class NotificationService {
     messages?: NotificationMessages[],
     metadata?: string,
     img?: string,
+    itemName?: string,
   ) {
     try {
       /************************
@@ -242,13 +245,13 @@ export class NotificationService {
 
       if (
         userPrefRecipients?.email ||
-        owner?.userType == UserProfileTypeEnum.ADMIN ||
+        recipient?.userType == UserProfileTypeEnum.ADMIN ||
         UserProfileTypeEnum.STAFF
       ) {
         this.logger.log('Sending  email notifications');
 
         const data: SendNotificationEventInput = {
-          user: owner,
+          user: recipient,
           event,
           scope,
           format: recipientFormat[1],
@@ -256,6 +259,7 @@ export class NotificationService {
           messages,
           metadata,
           img,
+          itemName,
         };
 
         await this.notificationQueue.sendEmailNotification(data);
@@ -298,6 +302,7 @@ export class NotificationService {
           messages,
           metadata,
           img,
+          itemName,
         };
         await this.notificationQueue.sendEmailNotification(data);
         //   owner,
@@ -347,6 +352,7 @@ export class NotificationService {
           messages,
           metadata,
           img,
+          itemName,
         };
 
         if (recipientNotificationToken) {
@@ -374,29 +380,29 @@ export class NotificationService {
           messages,
           metadata,
           img,
+          itemName,
         };
 
         if (ownerNotificationToken) {
           this.notificationQueue.sendPushNotificationToUser(data);
         }
       }
-
       /*********************
        * Web Notification
        ********************/
+      console.log('here', scope, event);
 
-      if (
+      const shouldNotifyRecipient =
         userPrefRecipients?.desktop ||
-        recipient?.userType == UserProfileTypeEnum.ADMIN ||
-        UserProfileTypeEnum.STAFF
-      ) {
-        this.logger.log('Sending  system notifications');
+        recipient?.userType === UserProfileTypeEnum.ADMIN ||
+        recipient?.userType === UserProfileTypeEnum.STAFF;
+
+      if (shouldNotifyRecipient) {
+        this.logger.log('Sending system notifications to recipient');
 
         const data: SendNotificationEventInput = {
           user: recipient,
           event,
-
-          // notificationToken: recipientNotificationToken?.token,
           scope,
           format: recipientFormat[1],
           count,
@@ -404,20 +410,22 @@ export class NotificationService {
           metadata,
           img,
           sse: true,
+          itemName,
         };
         this.notificationQueue.sendDesktopNotificationToUser(data);
       }
 
       //**********************************************/
-      // this logs notification log notification regardls of scope
+      // Log notifications regardless of scope, but only if desktop is explicitly disabled
       //**********************************************/
-      if (userPrefRecipients?.desktop == false) {
-        this.logger.log('Sending  system notifications');
+      if (userPrefRecipients?.desktop === false) {
+        this.logger.log(
+          'Sending system notifications to recipient (regardless of scope)',
+        );
+
         const data: SendNotificationEventInput = {
           user: recipient,
           event,
-
-          // notificationToken: recipientNotificationToken?.token,
           scope,
           format: recipientFormat[1],
           count,
@@ -425,35 +433,27 @@ export class NotificationService {
           metadata,
           img,
           sse: true,
+          itemName,
         };
 
         this.notificationQueue.sendDesktopNotificationToUser(data);
-        // {
-
-        //   user: recipient,
-        //   event,
-        //   scope,
-        //   format: recipientFormat[0],
-        //   count,
-        //   messages,
-        //   metadata,
-        //   img,
-        //   sse: true,
-        // });
       }
 
-      if (
+      /*********************
+       * Owner Notification
+       ********************/
+
+      const shouldNotifyOwner =
         userPrefOwner?.desktop ||
-        owner?.userType == UserProfileTypeEnum.ADMIN ||
-        UserProfileTypeEnum.STAFF
-      ) {
-        this.logger.log('Sending system notifications');
+        owner?.userType === UserProfileTypeEnum.ADMIN ||
+        owner?.userType === UserProfileTypeEnum.STAFF;
+
+      if (shouldNotifyOwner) {
+        this.logger.log('Sending system notifications to owner');
 
         const data: SendNotificationEventInput = {
           user: owner,
           event,
-
-          // notificationToken: recipientNotificationToken?.token,
           scope,
           format: recipientFormat[0],
           count,
@@ -461,32 +461,34 @@ export class NotificationService {
           metadata,
           img,
           sse: true,
+          itemName,
         };
         this.notificationQueue.sendDesktopNotificationToUser(data);
       }
 
       //**********************************************/
-      // this logs notification log notification regardless of scope
+      // Log notifications regardless of scope only if explicitly disabled
       //**********************************************/
-      if (userPrefOwner?.desktop == false || userPrefOwner?.desktop) {
-        this.logger.log('Sending system notifications');
+      if (userPrefOwner?.desktop === false) {
+        this.logger.log(
+          'Sending system notifications to owner (regardless of scope)',
+        );
 
         const data: SendNotificationEventInput = {
           user: owner,
           event,
-
           scope,
           format: recipientFormat[0],
           count,
           messages,
           metadata,
           img,
-          sse: false,
+          sse: false, // SSE disabled explicitly here
+          itemName,
         };
         this.notificationQueue.sendDesktopNotificationToUser(data);
       }
     } catch (error) {
-      console.log(error);
       this.logger.error('Error sending notifications', error);
       throw new BadRequestException(error);
     }
@@ -652,8 +654,8 @@ export class NotificationService {
   async sendPushNotification(data: PushNotificationPayload): Promise<void> {
     try {
       await this.pushNotificationService.sendPushNotification(data);
+      this.logger.log('sent');
     } catch (error) {
-      console.log(error);
       this.logger.log(error);
     }
   }
@@ -670,7 +672,6 @@ export class NotificationService {
       if (data.sse == true) {
         this.sseService.sendEvent(data.user.id, payload);
       }
-      console.log(data);
 
       const result = await this.saveNotificationLog({
         title: data.message.title,
@@ -684,9 +685,8 @@ export class NotificationService {
         type: NotificationType.SYSTEM_NOTIFICATION,
         img: data.img,
       });
-      console.log(result);
+      this.logger.log('sent');
     } catch (error) {
-      console.log(error);
       this.logger.log(error);
     }
   }
@@ -706,15 +706,16 @@ export class NotificationService {
       return null;
     }
 
-    const filteredMessages = messages.filter(
-      (message) =>
+    const filteredMessages = messages.filter((message) => {
+      return (
         message.scope === scope &&
         message.event === event &&
-        message?.recipients === recipient,
-    );
+        message?.recipients === recipient
+      );
+    });
 
-    if (filteredMessages.length < 1) {
-      this.logger.log('No matching message found');
+    if (filteredMessages.length === 0) {
+      this.logger.log('No matching message found ');
       return null; // Early return to avoid accessing undefined
     }
 
