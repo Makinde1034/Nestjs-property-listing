@@ -32,29 +32,30 @@ export const NotificationScopeFactory: NotificationScope[] = [
   },
   {
     id: 5,
-    scopeGroup: 'Auctions',
+    scopeGroup: ' Live Auctions',
     name: 'Bids',
     description: 'Receive notification for a new bid in live auctions',
   },
   {
     id: 6,
-    scopeGroup: 'Auctions',
+    scopeGroup: 'Live Auctions',
     name: 'Results',
     description: 'Receive notification for auction results',
   },
   {
     id: 7,
-    scopeGroup: 'Auctions',
+    scopeGroup: 'Live Auctions',
     name: 'Last minute',
     description: 'Receive notification for the last minute of live auctions',
   },
   {
     id: 8,
-    scopeGroup: 'Auctions',
+    scopeGroup: 'Live Auctions',
     name: '15 minutes to end',
     description:
       'Receive notification for the last 15 minutes of live auctions',
   },
+
   {
     id: 9,
     scopeGroup: 'Listings',
@@ -166,5 +167,19 @@ export const NotificationScopeFactory: NotificationScope[] = [
     scopeGroup: 'Listings in Saved searches',
     name: 'Created',
     description: 'Receive notification when search is available',
+  },
+
+  {
+    id: 27,
+    scopeGroup: 'Auctions',
+    name: 'If Win',
+    description: 'Receive notification when user win auctions',
+  },
+
+  {
+    id: 28,
+    scopeGroup: 'Auctions',
+    name: 'If Sold',
+    description: 'Receive notification when user win auctions',
   },
 ];

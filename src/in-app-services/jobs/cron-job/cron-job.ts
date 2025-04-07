@@ -17,7 +17,10 @@ import {
 } from '../../../modules/user/repositories';
 import { formatDate } from 'date-fns';
 import { Between, LessThan, LessThanOrEqual } from 'typeorm';
-import { OfferListEnum } from '../../../common/enums/status.enum';
+import {
+  OfferListEnum,
+  PaymentStatus,
+} from '../../../common/enums/status.enum';
 import { Injectable, Logger } from '@nestjs/common';
 import { AuctionRepository } from '../../../modules/listing/repositories/auction.repository';
 import {
@@ -31,6 +34,9 @@ import { AuctionParticipantRepository } from '../../../modules/listing/repositor
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { NotificationEvent } from '../../../common/enums';
 import { SearchHistory } from '../../../entities/search-history.entity';
+import { InvoiceRepository } from '../../../modules/payment/repositories/invoice.repository';
+import { PaymentEnum } from '../../../common/enums/payment.enum';
+import { weekdays } from 'moment';
 
 @Injectable()
 export class JobService {
@@ -45,6 +51,7 @@ export class JobService {
     private readonly auctionParticipantRepository: AuctionParticipantRepository,
     private readonly eventEmitter: EventEmitter2,
     private readonly auctionRepository: AuctionRepository,
+    private readonly invoiceRepository: InvoiceRepository,
   ) {}
   logger = new Logger(JobService.name);
 
@@ -59,15 +66,15 @@ export class JobService {
   /***************************
    * Uncomment to test       *
    ***************************/
-  // @Cron(CronExpression.EVERY_30_SECONDS)
-  // Async test() {
-  //   Console.log('now', new Date());
-  //   // await this.sendAlertOnIncompleteOffers();
-  //   // await this.sendNotificationForNewListingBasedOnSearchHistory();
-  //   // await this.updateListingFeatureStatus();
-  //   // await this.updateListingPromotionStatus();
-  //   // await this.notifyUsersAboutUpcomingAuctions();
-  // }
+  @Cron(CronExpression.EVERY_30_SECONDS)
+  async test() {
+    // this.logger.log('now', new Date());
+    //   // await this.sendAlertOnIncompleteOffers();
+    //   // await this.sendNotificationForNewListingBasedOnSearchHistory();
+    //   // await this.updateListingFeatureStatus();
+    //   // await this.updateListingPromotionStatus();
+    // await this.notifyUsersAboutUpcomingAuctions();
+  }
 
   @Cron(CronExpression.EVERY_12_HOURS, { timeZone: 'Africa/Cairo' })
   async handleDailyCron() {
@@ -167,6 +174,7 @@ export class JobService {
         .createQueryBuilder('offer')
         .leftJoinAndSelect('offer.user', 'user')
         .leftJoinAndSelect('offer.listing', 'listing')
+
         .where('offer.createdAt = :targetDate', {
           targetDate: targetDate.toISOString(),
         })
@@ -213,6 +221,23 @@ export class JobService {
       this.logger.error('Update Offer Status', error);
     }
   }
+  async updatePaymentStatus() {
+    try {
+      await this.invoiceRepository.update(
+        {
+          expireAt: LessThan(new Date()),
+
+          status: PaymentStatus.PENDING,
+        },
+        {
+          status: PaymentStatus.FAILED,
+        },
+      );
+    } catch (error) {
+      this.logger.error('Update Offer Status', error);
+    }
+  }
+
   async updateListingPromotionStatus() {
     try {
       await this.listingRepository.update(
@@ -240,71 +265,78 @@ export class JobService {
       this.logger.error('update Listing Feature Status', error);
     }
   }
-
   async notifyUsersAboutUpcomingAuctions() {
     try {
       const currentDate = new Date();
 
       const notificationPreference =
         await this.notificationScopeRepository.find();
-
       const scope = notificationPreference.find(
         (element) =>
           element.scopeGroup === NotificationScopeEnum.UPCOMING_AUCTIONS,
       );
 
+      // Fetch auctions that start in exactly 7, 14, 21, or 28 days
+      const daysAhead = [7, 14, 21, 28];
+      const targetDates = daysAhead.map((days) =>
+        addDaysToDate(currentDate, days),
+      );
+
+      const auctionsByWeek = await this.auctionRepository
+        .createQueryBuilder('auction')
+        .select(['auction.id', 'auction.startDate'])
+        .where(`DATE("auction"."startDate") IN (:...targetDates)`, {
+          targetDates,
+        })
+        .getMany();
+
+      // Handle empty results
+      if (!auctionsByWeek || auctionsByWeek.length === 0) {
+        this.logger.log('No auctions found for 7-day intervals.');
+        return;
+      }
+
+      this.logger.log('Auctions grouped by week:', auctionsByWeek);
+
+      // Categorize auctions
+      const oneMonthAuctions = [];
+      const weeklyAuctionsMap: Record<number, any[]> = {};
+
+      for (const auction of auctionsByWeek) {
+        const weeksAway = Math.round(
+          (new Date(auction.startDate).getTime() - currentDate.getTime()) /
+            (1000 * 60 * 60 * 24 * 7),
+        );
+
+        if (weeksAway === 4) {
+          oneMonthAuctions.push(auction);
+        } else if (weeksAway >= 1 && weeksAway <= 3) {
+          if (!weeklyAuctionsMap[weeksAway]) {
+            weeklyAuctionsMap[weeksAway] = [];
+          }
+          weeklyAuctionsMap[weeksAway].push(auction);
+        }
+      }
+
+      // Find the smallest week with auctions
+      const smallestWeek = Math.min(
+        ...Object.keys(weeklyAuctionsMap).map(Number),
+        Infinity,
+      );
+      const smallestWeekAuctions = weeklyAuctionsMap[smallestWeek] || [];
+
       const batchSize = 100;
       let offset = 0;
-      let usersBatch = []; // Declare usersBatch outside of the loop
+      let usersBatch = [];
 
       do {
-        // Fetch users in batches
         usersBatch = await this.userRepository.find({
           select: ['id'],
           skip: offset,
           take: batchSize,
         });
 
-        // Fetch auctions in batches
-        let auctionOffset = 0;
-        const auctionBatchSize = 100;
-        let auctions = [];
-        let auctionBatch;
-
-        do {
-          auctionBatch = await this.auctionRepository.find({
-            order: { startDate: 'DESC' },
-            where: {
-              startDate: Between(
-                currentDate,
-                new Date(addDaysToDate(currentDate, 31)),
-              ),
-            },
-            skip: auctionOffset,
-            take: auctionBatchSize,
-          });
-          auctions = auctions.concat(auctionBatch);
-          auctionOffset += auctionBatchSize;
-        } while (auctionBatch.length > 0);
-
-        // Filter auctions directly during query (alternative optimization)
-        const oneMonthAuctions = auctions.filter(
-          (auction) =>
-            calculateDaysDifference(
-              currentDate,
-              new Date(auction.startDate),
-            ) === 30,
-        );
-
-        const weeklyAuctions = auctions.filter(
-          (auction) =>
-            calculateDaysDifference(currentDate, new Date(auction.startDate)) %
-              7 ===
-            0,
-        );
-
-        // Process notifications for each user
-        for await (const user of usersBatch) {
+        usersBatch.forEach((user) => {
           const userNotifications = [];
 
           if (oneMonthAuctions.length > 0) {
@@ -314,32 +346,29 @@ export class JobService {
               event: 'A month before',
               recipientFormat: [null, 'All platform'],
               type: null,
-              img: auctions[0]?.imageLink,
+              img: oneMonthAuctions[0]?.imageLink || null,
             });
           }
 
-          if (weeklyAuctions.length > 0) {
-            weeklyAuctions.forEach((auction) => {
-              userNotifications.push({
-                receiverId: user.id,
-                scope,
-                event: 'Weekly',
-                recipientFormat: [null, 'All platform'],
-                type: null,
-                count: calculateDaysDifference(currentDate, auction.startDate),
-                img: auctions[0]?.imageLink,
-              });
+          if (smallestWeekAuctions.length > 0) {
+            userNotifications.push({
+              receiverId: user.id,
+              scope,
+              event: 'Weekly',
+              recipientFormat: [null, 'All platform'],
+              type: null,
+              count: smallestWeek,
+              img: smallestWeekAuctions[0]?.imageLink || null,
             });
           }
 
-          // Emit notifications immediately
-          for (const notification of userNotifications) {
+          userNotifications.forEach((notification) =>
             this.eventEmitter.emit(
               NotificationEvent.SEND_NOTIFICATION,
               notification,
-            );
-          }
-        }
+            ),
+          );
+        });
 
         offset += batchSize;
       } while (usersBatch.length > 0);
@@ -458,7 +487,7 @@ export class JobService {
         this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
           receiverId: element.listing.userId,
           scope: scope,
-          event: '12- Hour before',
+          event: '12-Hour Reminder',
           recipientFormat: [null, 'Users enlisted to bid and sellers'],
           type: null,
           img: element?.auction?.imageLink,

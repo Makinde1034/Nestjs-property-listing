@@ -113,8 +113,7 @@ export function getDayName(date: Date): string {
 
 export function calculateDaysDifference(date1: Date, date2: Date): number {
   const diffTime = Math.abs(date2.getTime() - date1.getTime());
-
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return Math.floor(diffTime / (1000 * 60 * 60 * 24));
 }
 
 export function removeDaysFromDate(
@@ -281,4 +280,19 @@ export async function getLocationFromImage(fileBuffer: Buffer) {
     this.logger.error('Error extracting location from image:', error);
     throw error;
   }
+}
+
+export function generateFiveDigitNumberFromUUID(uuid: string): number {
+  let hash = 0;
+
+  for (let i = 0; i < uuid.length; i++) {
+    const char = uuid.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash |= 0; // Convert to 32bit integer
+  }
+
+  // Ensure it's positive and within 5-digit range
+  const fiveDigit = (Math.abs(hash) % 90000) + 10000;
+
+  return fiveDigit;
 }

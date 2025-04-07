@@ -1,6 +1,5 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import {
-  BadRequestException,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -9,7 +8,7 @@ import {
 import { Queue } from 'bullmq';
 import { Auction } from '../../../entities/auction-table.entity';
 import { JobEnum } from '../../../common/enums/jobs';
-import { subMinutes } from 'date-fns';
+import { subMinutes, subSeconds } from 'date-fns';
 import { AuctionRepository } from '../../../modules/listing/repositories/auction.repository';
 import { BidRegistrationRepository } from '../../../modules/listing/repositories/bid-registration.repository';
 
@@ -17,19 +16,26 @@ import { BidRegistrationRepository } from '../../../modules/listing/repositories
 export class AuctionQueue {
   constructor(
     @InjectQueue('auction')
-    private auctionQueue: Queue,
+    private readonly auctionQueue: Queue,
     private readonly auctionRepository: AuctionRepository,
     private readonly bidRegistrationRepository: BidRegistrationRepository,
   ) {}
   logger = new Logger();
 
-  async auctionEndInOneMinute(auction: Auction, data: any) {
+  async auctionEndInOneMinute(auction: Auction, data: any, existing?: any) {
     try {
-      const notifyTime = subMinutes(auction.expireAt, 1);
+      let increment;
+
+      if (existing == 0) {
+        increment = 1;
+      } else if (existing > 0) {
+        increment = existing;
+      }
+      const notifyTime = subMinutes(auction.expireAt, 5 * increment);
       const delay = this.getDelay(notifyTime);
 
       await this.auctionQueue.add(
-        JobEnum.AUCTION_NOTIFICATION_ABOUT_TO_END,
+        JobEnum.LAST_MINUTES,
         { id: data.id },
         {
           delay: delay,
@@ -37,6 +43,33 @@ export class AuctionQueue {
       );
     } catch (error) {
       throw new UnprocessableEntityException(error);
+    }
+  }
+
+  async auctionEndInHalfHour(auction: Auction, data: any, existing?: any) {
+    try {
+      let increment;
+
+      if (existing == 0) {
+        increment = 1;
+      } else if (existing > 0) {
+        increment = existing;
+      }
+      const aboutToEnd = subMinutes(auction.expireAt, 5 * increment);
+      const delay = this.getDelay(aboutToEnd);
+
+      await this.auctionQueue.add(
+        JobEnum.AUCTION_NOTIFICATION_ABOUT_TO_END,
+        {
+          id: data.id,
+          listingId: data.listingId,
+        },
+        {
+          delay: delay,
+        },
+      );
+    } catch (error) {
+      throw new InternalServerErrorException();
     }
   }
 
@@ -50,14 +83,41 @@ export class AuctionQueue {
     }
   }
 
+  async bid(data) {
+    try {
+      const currentDate = new Date();
+      const auction = await this.auctionRepository.findOne({
+        where: { id: data.auctionId },
+      });
+      const time = subSeconds(currentDate, 3);
+      const delay = this.getDelay(time);
+
+      await this.auctionQueue.add(
+        JobEnum.AUTO_BID,
+        {
+          id: data.id,
+          auctionId: data.auctionId,
+          listingId: data.listingId,
+          userId: data.userId,
+          price: data.price,
+          reference: data.reference,
+        },
+        {
+          delay: delay,
+        },
+      );
+    } catch (error) {
+      throw new UnprocessableEntityException(error);
+    }
+  }
+
   async auctionEnd(data) {
     try {
       const auction = await this.auctionRepository.findOne({
         where: { id: data.id },
       });
       const notifyTime = auction.expireAt;
-      const lastMinute = subMinutes(auction.expireAt, 1);
-      const aboutToEnd = subMinutes(auction.expireAt, 15);
+
       const delay = this.getDelay(notifyTime);
 
       await this.auctionQueue.add(
@@ -89,26 +149,26 @@ export class AuctionQueue {
           delay: delay,
         },
       );
-      await this.auctionQueue.add(
-        JobEnum.LAST_MINUTES,
-        {
-          id: data.id,
-          listingId: data.listingId,
-        },
-        {
-          delay: this.getDelay(lastMinute),
-        },
-      );
-      await this.auctionQueue.add(
-        JobEnum.AUCTION_NOTIFICATION_ABOUT_TO_END,
-        {
-          id: data.id,
-          listingId: data.listingId,
-        },
-        {
-          delay: this.getDelay(aboutToEnd),
-        },
-      );
+      // await this.auctionQueue.add(
+      //   JobEnum.LAST_MINUTES,
+      //   {
+      //     id: data.id,
+      //     listingId: data.listingId,
+      //   },
+      //   {
+      //     delay: this.getDelay(lastMinute),
+      //   },
+      // );
+      // await this.auctionQueue.add(
+      //   JobEnum.AUCTION_NOTIFICATION_ABOUT_TO_END,
+      //   {
+      //     id: data.id,
+      //     listingId: data.listingId,
+      //   },
+      //   {
+      //     delay: this.getDelay(aboutToEnd),
+      //   },
+      // );
     } catch (error) {
       throw new UnprocessableEntityException(error);
     }

@@ -86,7 +86,7 @@ export enum NotificationScopeEnum {
   UPCOMING_AUCTIONS = 'Upcoming Auctions',
   INVOICES = 'Invoices',
   REGISTRATION = 'Registration',
-  AUCTION = 'Auction',
+  AUCTION = 'Auctions',
   SERVICE_PROVIDER_APPLICATION = 'Service Provider Application',
   SERVICE = 'Service',
   WORKFLOW_EVENTS = 'Workflow events',

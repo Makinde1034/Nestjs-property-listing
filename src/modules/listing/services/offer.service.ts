@@ -34,7 +34,11 @@ import {
 } from '../../user/repositories';
 import { NotificationScopeEnum } from '../../../common/enums/notification-scope.enum';
 
-import { AuctionEnum, OfferListEnum } from '../../../common/enums/status.enum';
+import {
+  AuctionEnum,
+  OfferListEnum,
+  PaymentStatus,
+} from '../../../common/enums/status.enum';
 import { AdminService } from '../../admin/services/admin.service';
 import { ListingRepository } from '../repositories/listing.repository';
 import { SuccessResponse } from '../../../common/utils/success.response';
@@ -110,7 +114,7 @@ export class OfferService {
 
       if (!invoice) {
         throw new BadRequestException(
-          `messages.${messagesKeys.INVALID_PAYMENT}`,
+          `messages.${messagesKeys.INVALID_PAYMENT_REFERENCE}`,
         );
       }
 
@@ -842,9 +846,15 @@ export class OfferService {
             offerId: updateOfferInput.id,
           });
 
+          if (invoice?.status != PaymentStatus.PAID) {
+            throw new BadRequestException(
+              this.i18n.t(`messages.${messagesKeys.INVALID_PAYMENT_REFERENCE}`),
+            );
+          }
+
           if (!invoice) {
             throw new NotFoundException(
-              this.i18n.t(`messages.${messagesKeys.INVALID_PAYMENT}`),
+              this.i18n.t(`messages.${messagesKeys.INVALID_PAYMENT_REFERENCE}`),
             );
           }
 

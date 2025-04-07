@@ -28,7 +28,7 @@ import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 
 import { JWTPayload } from 'src/common/interface';
-import { AppStrings } from 'src/common/messages/app.strings';
+import { AppStrings, messagesKeys } from 'src/common/messages/app.strings';
 
 import {
   RegisterEventDto,
@@ -292,22 +292,16 @@ export class AuthService {
       // FE: need to redirect to /login
       if (user.verifiedAt) {
         throw new BadRequestException(
-          this.i18n.t('messages.register.REGISTRATION_ALREADY_COMPLETED'),
+          this.i18n.t(`messages.${messagesKeys.ACCOUNT_ALREADY_CONFIRMED}`),
         );
       }
-      if (this.userService.validateUserConfirmation(userConfirmation, token)) {
-        await this.userService.updateUser(user.id, {
-          verifiedAt: new Date(),
-          status: UserStatus.VERIFIED,
-        });
-        await this.userService.removeUserConfirmation(userConfirmation.id);
-        return this.i18n.translate(
-          'messages.register.ACCOUNT_CONFIRMED_SUCCESSFULLY',
-        );
-      }
+
+      await this.userService.removeUserConfirmation(userConfirmation.id);
+      this.i18n.t(`messages.${messagesKeys.ACCOUNT_CONFIRMED_SUCCESSFULLY}`);
     }
+
     throw new BadRequestException(
-      this.i18n.t('messages.register.WRONG_CONFIRM_CODE'),
+      this.i18n.t(`messages.${messagesKeys.WRONG_CONFIRM_CODE}`),
     );
   }
 

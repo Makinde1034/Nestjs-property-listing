@@ -3,23 +3,13 @@
  * For license. See license.txt
  */
 
-import { forwardRef, Global, Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { OfferRepository } from '../modules/listing/repositories';
 import { ListingRepository } from '../modules/listing/repositories/listing.repository';
-import {
-  NotificationScopeRepository,
-  UserRepository,
-} from '../modules/user/repositories';
+import { UserRepository } from '../modules/user/repositories';
 import { SearchHistoryRepository } from '../modules/listing/repositories/search-history.repository';
-import {
-  NotificationService,
-  PushNotificationService,
-} from '../modules/notification/services';
-import { MailgunEmailService } from '../modules/mail/services/implementations';
+import { NotificationService } from '../modules/notification/services';
 import { JobService } from './jobs/cron-job/cron-job';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Notification, NotificationScope } from '../entities';
-import { NotificationRepository } from '../modules/notification/repositories';
 import { TicketRepository } from '../modules/tickets/repositories';
 import { AuctionRepository } from '../modules/listing/repositories/auction.repository';
 import { AuctionParticipantRepository } from '../modules/listing/repositories/auction-participant.repository';
@@ -32,6 +22,7 @@ import { BidRegistrationRepository } from '../modules/listing/repositories/bid-r
 import { BidsRepository } from '../modules/listing/repositories/bids.repository';
 import { NotificationQueue } from './jobs/queue/messaging.queue';
 import { NotificationProcessor } from './jobs/processor/notification.processor';
+import { InvoiceRepository } from '../modules/payment/repositories/invoice.repository';
 
 // import { InAppService } from './in-app.service';
 
@@ -44,6 +35,9 @@ import { NotificationProcessor } from './jobs/processor/notification.processor';
     }),
     BullModule.registerQueue({
       name: 'notification',
+    }),
+    BullModule.registerQueue({
+      name: 'bids',
     }),
   ],
   controllers: [JobController],
@@ -69,6 +63,7 @@ import { NotificationProcessor } from './jobs/processor/notification.processor';
     AuctionParticipantRepository,
     BidRegistrationRepository,
     BidsRepository,
+    InvoiceRepository,
   ],
   exports: [AuctionQueue, NotificationQueue],
 })

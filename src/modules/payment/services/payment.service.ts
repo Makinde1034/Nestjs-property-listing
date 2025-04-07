@@ -291,7 +291,6 @@ export class PaymentService {
       return updatedInvoice;
     } catch (error) {
       this.logger.error('Error finalizing invoice:', error);
-      console.log(error);
 
       if (error instanceof HttpException) {
         throw error;
@@ -315,8 +314,9 @@ export class PaymentService {
         this.logger.log(
           `invoice for reference ${webHookPaymentResponse.payload.merchantInvoiceId}`,
         );
+
         throw new BadRequestException(
-          this.i18n.t(`messages.${messagesKeys.INVALID_PAYMENT}`),
+          this.i18n.t(`messages.${messagesKeys.INVALID_PAYMENT_REFERENCE}`),
         );
       }
 

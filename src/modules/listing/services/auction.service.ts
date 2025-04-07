@@ -22,7 +22,10 @@ import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { AuctionParticipantRepository } from '../repositories/auction-participant.repository';
 import { AppStrings, messagesKeys } from '../../../common/messages/app.strings';
 
-import { removeDaysFromDate } from '../../../common/utils/helper';
+import {
+  generateFiveDigitNumberFromUUID,
+  removeDaysFromDate,
+} from '../../../common/utils/helper';
 import { BidsRepository } from '../repositories/bids.repository';
 import {
   BidRegistrationInput,
@@ -82,7 +85,6 @@ import {
   AuctionDetail,
   AuctionDetailsResponse,
 } from '../dtos/response/auctions';
-import { UserRepository } from '../../user/repositories';
 
 @Injectable()
 export class AuctionService {
@@ -552,6 +554,11 @@ export class AuctionService {
       const invoice = await this.invoiceRepository.findOne({
         where: { reference: data.reference },
       });
+      if (invoice?.status != PaymentStatus.PENDING) {
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.INVALID_PAYMENT_REFERENCE}`),
+        );
+      }
 
       const pdf: PdfInput = {
         // createdDate: `${offerPayload.createdAt.getDate()}-${offerPayload.createdAt.getMonth() + 1}-${offerPayload.createdAt.getFullYear()}`,
@@ -579,11 +586,11 @@ export class AuctionService {
 
       if (!invoice) {
         throw new BadRequestException(
-          this.i18n.t(`messages.${messagesKeys.INVALID_PAYMENT}`),
+          this.i18n.t(`messages.${messagesKeys.INVALID_PAYMENT_REFERENCE}`),
         );
       }
 
-      const [adminDefault, auction, participantCount, listing] =
+      const [adminDefault, auction, participantCount, listing, participant] =
         await Promise.all([
           this.adminService.adminDefault(),
           this.auctionRepository.findOneBy({ id: auctionId }),
@@ -596,6 +603,14 @@ export class AuctionService {
             .getCount(),
 
           this.listingRepository.findOneBy({ id: listingId }),
+
+          this.auctionParticipantRepository
+            .createQueryBuilder('auctionParticipant')
+            .where(
+              'auctionParticipant.listingId = :listingId AND auctionParticipant.auctionId = :auctionId',
+              { auctionId },
+            )
+            .getCount(),
         ]);
       if (!listing) {
         throw new NotFoundException(AppStrings.LISTING_NOT_FOUND);
@@ -663,6 +678,19 @@ export class AuctionService {
           AppStrings.AUCTION_REGISTRATION_HAS_ENDED,
         );
       }
+      await this.auctionQueue.auctionEndInHalfHour(
+        auction,
+        { id: listing.id },
+        participant,
+      );
+
+      await this.auctionQueue.auctionEndInOneMinute(
+        auction,
+        {
+          id: listing.id,
+        },
+        participant,
+      );
 
       // Save the participant
       return await this.auctionParticipantRepository.save({
@@ -820,9 +848,9 @@ export class AuctionService {
           bidInput.price / 1000000 <= range.upperBound,
       )?.increment;
 
-      const incrementValue =
-        increment * 1000 ||
-        (await this.adminService.adminDefault()).fallBackDefaultBidIncrement;
+      const incrementValue = increment * 1000;
+      // ||
+      // (await this.adminService.adminDefault()).fallBackDefaultBidIncrement;
 
       // Validate minimum bid price
       if (highestBid && bidInput?.price < highestBid?.price) {
@@ -837,7 +865,7 @@ export class AuctionService {
       }
 
       // Prepare and save the new bid
-      bidInput.bidNumber = generateOtp();
+      bidInput.bidNumber = generateFiveDigitNumberFromUUID(user.id);
       bidInput.userId = user.id;
 
       const bid = await this.bidRepository.save({
@@ -895,6 +923,19 @@ export class AuctionService {
         : new BadRequestException(error);
     }
   }
+
+  async handleBids() {
+    try {
+    } catch (error) {
+      this.logger.error(error);
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        this.logger.log(error);
+        throw new BadRequestException(error);
+      }
+    }
+  }
   async createAutoBidOnAuction(
     createAutoBidInput: CreateAutoBidInput,
     user: User,
@@ -915,9 +956,11 @@ export class AuctionService {
         });
       }
 
-      // if (invoice?.status !== PaymentStatus.PAID || !registered.autoBid) {
-      //   throw new BadRequestException(AppStrings.INVALID_PAYMENT_REFERENCE);
-      // }
+      if (invoice?.status != PaymentStatus.PENDING) {
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.INVALID_PAYMENT_REFERENCE}`),
+        );
+      }
 
       const [auction, listing] = await Promise.all([
         this.auctionRepository.findOneBy({
@@ -1230,7 +1273,10 @@ export class AuctionService {
             'user.firstName AS "firstName"',
             'user.lastName AS "lastName"',
           ])
-          .where('bids.listingId = :id', { id: participant.listingId })
+          .where('bids.listingId = :bidId  AND bids.auctionId =:auctionId', {
+            bidId: participant.listingId,
+            auctionId: auction.id,
+          })
           .orderBy('bids.price', 'DESC')
           .limit(1)
           .getRawOne();
@@ -1238,19 +1284,6 @@ export class AuctionService {
         const winnerName = winner?.firstName
           ? `${winner.firstName} ${winner.lastName}`
           : null;
-
-        // const [bids, bidCount] = await this.bidRepository
-        //   .createQueryBuilder('bids')
-        //   .leftJoin('bids.user', 'user') // Keep LEFT JOIN if some bids may lack users
-        //   .select([
-        //     'bids.listingId AS "listingId"',
-        //     'user.firstName AS "firstName"',
-        //     'user.lastName AS "lastName"',
-        //   ])
-        //   // .where('bids.listingId = :id', { id: participant.listingId })
-        //   .orderBy('bids.price', 'DESC')
-        //   .getManyAndCount();
-        // console.log(bids);
 
         for (const participant of participants) {
           const [bids, bidCount] = await this.bidRepository
@@ -1272,9 +1305,7 @@ export class AuctionService {
             .getManyAndCount();
 
           bids.forEach((bid) => {
-            console.log(bid);
             if (bid.user) {
-              console.log(bid.user);
               bidder.push(`${bid?.user?.firstName} ${bid?.user?.lastName}`);
             }
           });

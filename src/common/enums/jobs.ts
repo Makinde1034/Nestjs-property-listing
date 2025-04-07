@@ -5,6 +5,8 @@ export enum JobEnum {
   AUCTION_LOOSER = 'auction-looser',
   NO_BID = 'no-bid',
   NEW_BID = 'new-bid',
+  AUTO_BID = 'auto-bid',
+  BID = 'bid',
 
   EMAIL_NOTIFICATION = 'email-notification',
   SYSTEM_NOTIFICATION = 'system-notification',

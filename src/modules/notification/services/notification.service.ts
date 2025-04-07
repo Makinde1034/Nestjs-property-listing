@@ -177,8 +177,6 @@ export class NotificationService {
         recipient,
       ]);
 
-      console.log(creator);
-
       //If neither buyer nor seller has preferences for this scope, skip
       if (!sellerPref && !buyerPref) {
         this.logger.warn(
@@ -390,7 +388,6 @@ export class NotificationService {
       /*********************
        * Web Notification
        ********************/
-      console.log('here', scope, event);
 
       const shouldNotifyRecipient =
         userPrefRecipients?.desktop ||
@@ -641,6 +638,7 @@ export class NotificationService {
   async sendEmailNotification(
     user?: User,
     data?: EmailNotificationPayload,
+    metadata?: any,
     attachment?: Buffer,
     messages?: NotificationMessages[],
   ): Promise<void> {
@@ -727,6 +725,7 @@ export class NotificationService {
       count,
       itemName,
     });
+
     message.arabicBody = this.replacePlaceholders(message?.arabicBody, {
       username: arabicUsername,
       count,

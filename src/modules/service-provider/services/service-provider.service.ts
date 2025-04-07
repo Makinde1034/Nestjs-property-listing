@@ -28,7 +28,10 @@ import { ServiceRepository } from '../repository/services.repository';
 import { PaginateAndSort } from '../../../modules/core/dto/pagination-and-sort.dto';
 import { ActivityLogService } from '../../../modules/activity-log/services/activity-log.service';
 import { In } from 'typeorm';
-import { ServiceProviderStatus } from '../../../common/enums/status.enum';
+import {
+  PaymentStatus,
+  ServiceProviderStatus,
+} from '../../../common/enums/status.enum';
 import { ServiceProvidedRepository } from '../repository/service-provided.repository';
 import { NotificationScope, User } from '../../../entities';
 import { ActivityEnum } from '../../../common/enums/activitys';
@@ -51,6 +54,7 @@ import { I18nService } from 'nestjs-i18n';
 import { PdfInput } from '../../file-handler/dto/pdf.dto';
 import { PaymentService } from '../../payment/services/payment.service';
 import { InvoiceRepository } from '../../payment/repositories/invoice.repository';
+import { PaymentEnum } from '../../../common/enums/payment.enum';
 
 @Injectable()
 export class ServiceAndProviderService {
@@ -599,6 +603,12 @@ export class ServiceAndProviderService {
       const invoice = await this.invoiceRepository.findOne({
         where: { reference: requestForServiceInput.reference },
       });
+
+      if (invoice?.status != PaymentStatus.PENDING) {
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.INVALID_PAYMENT_REFERENCE}`),
+        );
+      }
 
       const pdf: PdfInput = {
         // createdDate: `${offerPayload.createdAt.getDate()}-${offerPayload.createdAt.getMonth() + 1}-${offerPayload.createdAt.getFullYear()}`,

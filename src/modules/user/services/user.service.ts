@@ -358,7 +358,6 @@ export class UserService {
         where: { id },
         relations,
       });
-
       // this.createDefaultNotifications(user);
 
       return user;
