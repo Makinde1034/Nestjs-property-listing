@@ -29,6 +29,30 @@ export class CreateBidInput {
   reference: string;
 }
 @InputType()
+export class HandleBidInput {
+  userId: string;
+
+  bidNumber: number;
+
+  @Field()
+  @IsNumber()
+  @IsPositive()
+  price: number;
+
+  @Field()
+  @IsString()
+  auctionId: string;
+
+  @Field()
+  @IsString()
+  listingId: string;
+
+  @Field()
+  @IsString()
+  auctionParticipantId: string;
+}
+
+@InputType()
 export class BidRegistrationInput {
   @Field()
   @IsString()

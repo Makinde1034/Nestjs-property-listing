@@ -133,7 +133,7 @@ export class MailgunEmailService implements MailSendService {
         from: this.MAIL_FROM,
         subject: title,
         to: user.email,
-        attachment: attachment,
+        ...(attachment && { attachment }),
         template: EMAIL_NOTIFICATION_TEMPLATE_NAME,
         'h:X-Mailgun-Variables': JSON.stringify({
           user_name: loadUserName(user),

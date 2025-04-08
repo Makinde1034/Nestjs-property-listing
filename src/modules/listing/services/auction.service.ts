@@ -31,6 +31,7 @@ import {
   BidRegistrationInput,
   CreateBidInput,
   FindBidInput,
+  HandleBidInput,
 } from '../dtos/request/bids';
 import { generateOtp } from '../../../common/utils/functions';
 import { User } from '../../../entities';
@@ -85,6 +86,7 @@ import {
   AuctionDetail,
   AuctionDetailsResponse,
 } from '../dtos/response/auctions';
+import { BidQueue } from '../../../in-app-services/jobs/queue/bid.queue';
 
 @Injectable()
 export class AuctionService {
@@ -104,6 +106,7 @@ export class AuctionService {
     private readonly invoiceRepository: InvoiceRepository,
     private readonly paymentService: PaymentService,
     private readonly auctionQueue: AuctionQueue,
+    private readonly bidQueue: BidQueue,
   ) {}
   logger = new Logger(AuctionService.name);
   async create(auctionInput: CreateAuctionInput) {
@@ -554,6 +557,7 @@ export class AuctionService {
       const invoice = await this.invoiceRepository.findOne({
         where: { reference: data.reference },
       });
+
       if (invoice?.status != PaymentStatus.PENDING) {
         throw new BadRequestException(
           this.i18n.t(`messages.${messagesKeys.INVALID_PAYMENT_REFERENCE}`),
@@ -608,7 +612,7 @@ export class AuctionService {
             .createQueryBuilder('auctionParticipant')
             .where(
               'auctionParticipant.listingId = :listingId AND auctionParticipant.auctionId = :auctionId',
-              { auctionId },
+              { auctionId, listingId },
             )
             .getCount(),
         ]);
@@ -868,7 +872,7 @@ export class AuctionService {
       bidInput.bidNumber = generateFiveDigitNumberFromUUID(user.id);
       bidInput.userId = user.id;
 
-      const bid = await this.bidRepository.save({
+      const bid = await this.bidQueue.bid({
         ...bidInput,
         auctionParticipant,
       });
@@ -879,7 +883,7 @@ export class AuctionService {
 
       // Trigger autobid if bid was successfully placed
       if (bid) {
-        await this.autobid(bid.price, auctionParticipant, bidInput);
+        await this.autobid(bid.data.price, auctionParticipant, bidInput);
       }
 
       const payload: MessageEvent = {
@@ -924,18 +928,6 @@ export class AuctionService {
     }
   }
 
-  async handleBids() {
-    try {
-    } catch (error) {
-      this.logger.error(error);
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        this.logger.log(error);
-        throw new BadRequestException(error);
-      }
-    }
-  }
   async createAutoBidOnAuction(
     createAutoBidInput: CreateAutoBidInput,
     user: User,
@@ -1051,8 +1043,8 @@ export class AuctionService {
       ]);
       let i = 1;
 
-      const bidsToMake = autoBids.map((element) => {
-        const bids = {
+      autoBids.forEach(async (element) => {
+        const bids = await this.bidQueue.bid({
           auctionparticipantId: auctionParticipant,
 
           listingId: bidInput.listingId,
@@ -1063,12 +1055,11 @@ export class AuctionService {
           price:
             this.calculatebidPrice(price, auctionBidRange, i) ??
             adminDefault.fallBackDefaultBidIncrement,
-        };
+        });
         i = i + 1;
         return bids;
       });
 
-      await this.bidRepository.save(bidsToMake);
       return new SuccessResponse(AppStrings.SUCCESSFULL);
     } catch (error) {
       this.logger.error(error);
@@ -1096,15 +1087,22 @@ export class AuctionService {
 
   async fetchBidsOnAuction(findBidInput: FindBidInput) {
     try {
-      return await this.bidRepository.find({
-        where: {
-          auctionId: findBidInput.auctionId,
-          listingId: findBidInput.listingId,
-        },
-        order: { createdAt: 'DESC' },
-        take: 10,
-        skip: 0,
-      });
+      let bids;
+      bids = await this.bidQueue.latestBidInQueue(findBidInput);
+
+      if (bids.length < 10) {
+        bids = await this.bidRepository.find({
+          where: {
+            auctionId: findBidInput.auctionId,
+            listingId: findBidInput.listingId,
+          },
+          order: { createdAt: 'DESC' },
+          take: 10,
+          skip: 0,
+        });
+      }
+
+      return bids;
     } catch (error) {
       this.logger.log(error);
       throw new BadRequestException(error);

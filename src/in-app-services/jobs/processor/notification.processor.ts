@@ -21,8 +21,8 @@ export class NotificationProcessor extends WorkerHost {
           await this.notificationService.sendEmailNotification(
             job.data.user,
             job.data.data,
-            job.data.metadata,
             job.data.attachment,
+            job.data.metadata,
           );
           break;
 

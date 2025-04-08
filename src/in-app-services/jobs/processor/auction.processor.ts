@@ -14,6 +14,7 @@ import { NotificationScopeEnum } from '../../../common/enums/notification-scope.
 import { In, Not } from 'typeorm';
 import { PaginateAndSort } from '../../../modules/core/dto/pagination-and-sort.dto';
 import { Logger } from '@nestjs/common';
+import { AuctionEnum } from '../../../common/enums/status.enum';
 
 @Processor('auction')
 export class AuctionProcessor extends WorkerHost {
@@ -41,7 +42,10 @@ export class AuctionProcessor extends WorkerHost {
 
               //Bidders
               this.bidRegistrationRepository.find({
-                where: { listingId: job.data.listingId },
+                where: {
+                  auctionId: job.data.id,
+                  listingId: job.data.listingId,
+                },
               }),
             ]);
 
@@ -95,7 +99,10 @@ export class AuctionProcessor extends WorkerHost {
               //Bidders
 
               this.bidRegistrationRepository.find({
-                where: { listingId: job.data.listingId },
+                where: {
+                  auctionId: job.data.id,
+                  listingId: job.data.listingId,
+                },
               }),
             ]);
 
@@ -148,7 +155,10 @@ export class AuctionProcessor extends WorkerHost {
 
               //Bidders
               this.bidRegistrationRepository.find({
-                where: { listingId: job.data.listingId },
+                where: {
+                  auctionId: job.data.id,
+                  listingId: job.data.listingId,
+                },
               }),
             ]);
 
@@ -290,6 +300,9 @@ export class AuctionProcessor extends WorkerHost {
                 metadata: JSON.stringify({ bid: bids, listing: listing }),
               });
             });
+            await this.auctionRepository.update(auction.id, {
+              status: AuctionEnum.COMPLETED,
+            });
           }
           break;
 
@@ -367,12 +380,19 @@ export class AuctionProcessor extends WorkerHost {
                 }
               }),
             );
+            await this.auctionRepository.update(auction.id, {
+              status: AuctionEnum.COMPLETED,
+            });
           }
 
           break;
         case JobEnum.NO_BID:
           {
             let bidIds: number[] = [];
+
+            const auction = await this.auctionRepository.findOne({
+              where: { id: job.data.id },
+            });
 
             const bids = await this.bidRepository
               .createQueryBuilder('bids')
@@ -407,6 +427,10 @@ export class AuctionProcessor extends WorkerHost {
                 metadata: JSON.stringify(listing),
               });
             }
+
+            await this.auctionRepository.update(auction.id, {
+              status: AuctionEnum.COMPLETED,
+            });
           }
           break;
 

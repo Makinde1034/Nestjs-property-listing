@@ -14,7 +14,7 @@ export enum OfferListEnum {
 export enum AuctionEnum {
   INACTIVE = 'inactive',
   ACTIVE = 'active',
-  ACCEPTED = 'completed',
+  COMPLETED = 'completed',
   CANCELED = 'cancled',
 }
 

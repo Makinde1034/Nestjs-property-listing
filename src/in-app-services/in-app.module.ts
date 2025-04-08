@@ -23,6 +23,7 @@ import { BidsRepository } from '../modules/listing/repositories/bids.repository'
 import { NotificationQueue } from './jobs/queue/messaging.queue';
 import { NotificationProcessor } from './jobs/processor/notification.processor';
 import { InvoiceRepository } from '../modules/payment/repositories/invoice.repository';
+import { BidQueue } from './jobs/queue/bid.queue';
 
 // import { InAppService } from './in-app.service';
 
@@ -47,24 +48,20 @@ import { InvoiceRepository } from '../modules/payment/repositories/invoice.repos
     JobService,
     AuctionQueue,
     NotificationQueue,
+    BidQueue,
     AuctionProcessor,
     NotificationProcessor,
-
     OfferRepository,
     ListingRepository,
     UserRepository,
     SearchHistoryRepository,
-    // MailgunEmailService,
-    // NotificationRepository,
-    // PushNotificationService,
     TicketRepository,
     AuctionRepository,
-    // NotificationScopeRepository,
     AuctionParticipantRepository,
     BidRegistrationRepository,
     BidsRepository,
     InvoiceRepository,
   ],
-  exports: [AuctionQueue, NotificationQueue],
+  exports: [AuctionQueue, NotificationQueue, BidQueue],
 })
 export class InAppModule {}

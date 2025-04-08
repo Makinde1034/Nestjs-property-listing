@@ -39,6 +39,18 @@ export class ActivityLogService {
   async getLogs(activityLogInput: ActivityLogInput) {
     try {
       const { id, take, skip, fieldToFilter } = activityLogInput;
+
+      let sortField, directionToSort;
+      if (activityLogInput.sortField && activityLogInput.directionToSort) {
+        sortField = activityLogInput.sortField;
+        directionToSort = activityLogInput.directionToSort.toUpperCase() as
+          | 'ASC'
+          | 'DESC';
+
+        if (!['ASC', 'DESC'].includes(directionToSort)) {
+          throw new Error(`Invalid sort direction: ${directionToSort}`);
+        }
+      }
       const query = this.activityLogRepository
         .createQueryBuilder('activityLog')
         .leftJoinAndSelect('activityLog.admin', 'admin');
@@ -67,6 +79,10 @@ export class ActivityLogService {
         }
       }
 
+      if (directionToSort) {
+        query.orderBy(`activityLogs.${sortField}`, directionToSort);
+      }
+
       const [logs, total] = await query
 
         .take(take)
@@ -89,6 +105,18 @@ export class ActivityLogService {
       const skip = paginateAndSort.skip ?? 0;
       const take = paginateAndSort.take ?? 20;
       const { where, minDate, maxDate, userName } = paginateAndSort;
+
+      let sortField, directionToSort;
+      if (paginateAndSort.sortField && paginateAndSort.directionToSort) {
+        sortField = paginateAndSort.sortField;
+        directionToSort = paginateAndSort.directionToSort.toUpperCase() as
+          | 'ASC'
+          | 'DESC';
+
+        if (!['ASC', 'DESC'].includes(directionToSort)) {
+          throw new Error(`Invalid sort direction: ${directionToSort}`);
+        }
+      }
 
       let whereOption = {};
       if (where) {
@@ -130,6 +158,9 @@ export class ActivityLogService {
             });
           }),
         );
+      }
+      if (directionToSort) {
+        query.orderBy(`activityLogs.${sortField}`, directionToSort);
       }
 
       const [logs, total] = await query.getManyAndCount();

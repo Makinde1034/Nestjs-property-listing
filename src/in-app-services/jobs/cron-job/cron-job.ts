@@ -16,7 +16,7 @@ import {
   UserRepository,
 } from '../../../modules/user/repositories';
 import { formatDate } from 'date-fns';
-import { Between, LessThan, LessThanOrEqual } from 'typeorm';
+import { Between, In, LessThan, LessThanOrEqual } from 'typeorm';
 import {
   OfferListEnum,
   PaymentStatus,
@@ -32,7 +32,7 @@ import { NotificationScopeEnum } from '../../../common/enums/notification-scope.
 import { Listing, NotificationScope } from '../../../entities';
 import { AuctionParticipantRepository } from '../../../modules/listing/repositories/auction-participant.repository';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { NotificationEvent } from '../../../common/enums';
+import { NotificationEvent, UserProfileTypeEnum } from '../../../common/enums';
 import { SearchHistory } from '../../../entities/search-history.entity';
 import { InvoiceRepository } from '../../../modules/payment/repositories/invoice.repository';
 import { PaymentEnum } from '../../../common/enums/payment.enum';
@@ -66,15 +66,15 @@ export class JobService {
   /***************************
    * Uncomment to test       *
    ***************************/
-  @Cron(CronExpression.EVERY_30_SECONDS)
-  async test() {
-    // this.logger.log('now', new Date());
-    //   // await this.sendAlertOnIncompleteOffers();
-    //   // await this.sendNotificationForNewListingBasedOnSearchHistory();
-    //   // await this.updateListingFeatureStatus();
-    //   // await this.updateListingPromotionStatus();
-    // await this.notifyUsersAboutUpcomingAuctions();
-  }
+  // @Cron(CronExpression.EVERY_30_SECONDS)
+  // async test() {
+  // this.logger.log('now', new Date());
+  //   // await this.sendAlertOnIncompleteOffers();
+  //   // await this.sendNotificationForNewListingBasedOnSearchHistory();
+  //   // await this.updateListingFeatureStatus();
+  //   // await this.updateListingPromotionStatus();
+  // await this.notifyUsersAboutUpcomingAuctions();
+  // }
 
   @Cron(CronExpression.EVERY_12_HOURS, { timeZone: 'Africa/Cairo' })
   async handleDailyCron() {
@@ -331,6 +331,10 @@ export class JobService {
 
       do {
         usersBatch = await this.userRepository.find({
+          where: {
+            userType:
+              In[(UserProfileTypeEnum.INDIVIDUAL, UserProfileTypeEnum.COMPANY)],
+          },
           select: ['id'],
           skip: offset,
           take: batchSize,
