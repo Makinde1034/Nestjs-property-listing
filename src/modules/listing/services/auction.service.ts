@@ -61,6 +61,7 @@ import {
   differenceInCalendarDays,
   addHours,
   parseISO,
+  subMinutes,
 } from 'date-fns';
 
 import { MessageEvent } from '../../sse/request/app';
@@ -236,15 +237,20 @@ export class AuctionService {
 
       // Ensure UTC timestamp for filtering
       const nowUTC = moment().utc().toISOString();
-
       const [auctions, total] = await this.auctionRepository
         .createQueryBuilder('auction')
+        .leftJoinAndSelect('auction.auctionParticipant', 'auctionParticipant')
         .where('auction.startDate <= :date')
-        .andWhere('auction.expireAt > :date')
+        .andWhere('auctionParticipant.id IS NOT NULL')
+
+        .andWhere(
+          `auction.expireAt + (auction.expireOffset || ' minutes')::interval > :date`,
+        )
         .andWhere('auction.status = :statusOne', {
           statusOne: AuctionEnum.ACTIVE,
           date: nowUTC,
         })
+
         .loadRelationCountAndMap(
           'auction.auctionParticipantCount',
           'auction.auctionParticipant',
@@ -803,12 +809,16 @@ export class AuctionService {
       // Fetch necessary details concurrently
 
       const [
+        auction,
         auctionParticipant,
         auctionBidRanges,
         highestBid,
         bidRegistrationRepository,
         invoice,
       ] = await Promise.all([
+        this.auctionRepository.findOneBy({
+          id: bidInput.auctionId,
+        }),
         this.auctionParticipantRepository.findOne({
           where: { listingId: bidInput.listingId },
         }),
@@ -876,6 +886,14 @@ export class AuctionService {
         ...bidInput,
         auctionParticipant,
       });
+
+      const timeBeforeAuctionEndIncrement = subMinutes(auction.expireAt, 1);
+
+      if (timeBeforeAuctionEndIncrement > new Date()) {
+        await this.auctionRepository.update(auction.id, {
+          expireOffset: auction.expireOffset + 5,
+        });
+      }
 
       await this.auctionQueue.liveAuction({
         id: bidInput.auctionId,

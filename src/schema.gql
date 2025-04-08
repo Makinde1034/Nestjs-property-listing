@@ -253,9 +253,10 @@ type Auction {
   actionActivityLog: [ActivityLog!]
   maxListing: Float!
   auctionParticipantCount: Float
-  auctionParticipant: [AuctionParticipant!]!
+  auctionParticipant: [AuctionParticipant!]
   status: String!
   listingRegistered: [ListingRegistered!]!
+  expireOffset: Float
   deletedAt: DateTime!
   createdAt: DateTime!
   expireAt: DateTime

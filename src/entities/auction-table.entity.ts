@@ -64,7 +64,7 @@ export class Auction extends BaseEntity {
   @Field({ nullable: true })
   auctionParticipantCount: number;
 
-  @Field(() => [AuctionParticipant])
+  @Field(() => [AuctionParticipant], { nullable: true })
   @OneToMany(
     () => AuctionParticipant,
     (auctionParticipant) => auctionParticipant.auction,
@@ -78,6 +78,11 @@ export class Auction extends BaseEntity {
 
   @Field(() => [ListingRegistered])
   listingRegistered: ListingRegistered[];
+
+  @Field({ nullable: true })
+  @Column({ default: 0 })
+  @Index()
+  expireOffset: number;
 
   @Field()
   @DeleteDateColumn()
