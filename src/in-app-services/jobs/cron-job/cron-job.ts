@@ -332,10 +332,12 @@ export class JobService {
       do {
         usersBatch = await this.userRepository.find({
           where: {
-            userType:
-              In[(UserProfileTypeEnum.INDIVIDUAL, UserProfileTypeEnum.COMPANY)],
+            userType: In([
+              UserProfileTypeEnum.INDIVIDUAL,
+              UserProfileTypeEnum.COMPANY,
+            ]),
           },
-          select: ['id'],
+          select: ['id', 'userType'],
           skip: offset,
           take: batchSize,
         });

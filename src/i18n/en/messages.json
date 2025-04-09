@@ -92,5 +92,6 @@
   "FORBIDDEN": "Forbidden request",
   "OFFER_EXPIRED": "Offer is not has expired",
   "CANNOT_PROCESS_PAYMENT": "cannot process payment",
-  "AWAITING_APPROVAL": "Awaiting approval"
+  "AWAITING_APPROVAL": "Awaiting approval",
+  "USER_HAS_NOT_REGISTERED_TO_BID": "User has not registered to bid"
 }

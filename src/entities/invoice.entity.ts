@@ -100,6 +100,10 @@ export class Invoice {
   @Field({ nullable: true })
   paymentType: string;
 
+  @Column({ default: false })
+  @Field({ nullable: true })
+  isUsed: boolean;
+
   @Column('decimal', { precision: 10, scale: 2, default: 0 })
   @Field()
   vat: number;

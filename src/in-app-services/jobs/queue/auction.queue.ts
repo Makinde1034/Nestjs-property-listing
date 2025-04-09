@@ -77,6 +77,7 @@ export class AuctionQueue {
     try {
       await this.auctionQueue.add(JobEnum.NEW_BID, {
         id: data.id,
+        listingId: data.listingId,
       });
     } catch (error) {
       throw new InternalServerErrorException();
@@ -86,9 +87,7 @@ export class AuctionQueue {
   async bid(data) {
     try {
       const currentDate = new Date();
-      const auction = await this.auctionRepository.findOne({
-        where: { id: data.auctionId },
-      });
+
       const time = subSeconds(currentDate, 3);
       const delay = this.getDelay(time);
 

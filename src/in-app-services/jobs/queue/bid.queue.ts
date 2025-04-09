@@ -2,16 +2,26 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import { FindBidInput } from '../../../modules/listing/dtos/request/bids';
+import { JobEnum } from '../../../common/enums/jobs';
 
 @Injectable()
 export class BidQueue {
   constructor(@InjectQueue('bids') private readonly bidQueue: Queue) {}
   logger = new Logger();
-  async bid(data: any) {
+  async bid(data) {
     try {
-      return await this.bidQueue.add('bid', data);
+      const bid = await this.bidQueue.add(JobEnum.BID, {
+        price: data.price,
+        auctionId: data.auctionId,
+        listingId: data.listingId,
+        bidNumber: data.bidNumber,
+        bidderNumber: data.bidderNumber,
+        userId: data.userId,
+        auctionParticipantId: data.auctionParticipantId,
+      });
+      return bid.data;
     } catch (error) {
-      this.logger.log(error);
+      this.logger.error(error);
     }
   }
 
@@ -22,7 +32,6 @@ export class BidQueue {
         'waiting',
         'completed',
       ]);
-
       const latestBids = allJobs
         .filter(
           (job) =>
@@ -34,7 +43,7 @@ export class BidQueue {
 
       return latestBids;
     } catch (error) {
-      this.logger.log(error);
+      this.logger.error(error);
     }
   }
 }

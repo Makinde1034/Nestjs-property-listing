@@ -70,6 +70,7 @@ type Invoice {
   listingTypeId: String
   listingId: String
   paymentType: String
+  isUsed: Boolean
   vat: Float!
   expireAt: DateTime
   createdAt: DateTime

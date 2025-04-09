@@ -88,6 +88,7 @@ import {
   AuctionDetailsResponse,
 } from '../dtos/response/auctions';
 import { BidQueue } from '../../../in-app-services/jobs/queue/bid.queue';
+import { instanceToPlain } from 'class-transformer';
 
 @Injectable()
 export class AuctionService {
@@ -397,7 +398,7 @@ export class AuctionService {
         where: { id: id },
       });
 
-      if (auction.startDate >= new Date()) {
+      if (auction.startDate <= new Date()) {
         throw new BadRequestException(
           AppStrings.CANNOT_EDIT_AUCTION_ONCE_IT_HAS_STARTED,
         );
@@ -564,7 +565,7 @@ export class AuctionService {
         where: { reference: data.reference },
       });
 
-      if (invoice?.status != PaymentStatus.PENDING) {
+      if (invoice?.status != PaymentStatus.PAID && invoice?.isUsed) {
         throw new BadRequestException(
           this.i18n.t(`messages.${messagesKeys.INVALID_PAYMENT_REFERENCE}`),
         );
@@ -653,7 +654,7 @@ export class AuctionService {
         );
       }
 
-      if (!auction.imageLink) {
+      if (!auction?.imageLink) {
         throw new BadRequestException(
           AppStrings.AUCTION_IS_NOT_COMPLETELY_SET_UP,
         );
@@ -707,6 +708,7 @@ export class AuctionService {
         ...listingData,
         auctionId,
         listing,
+        status: AuctionEnum.ACTIVE, // ✅ Make sure this is always set
       });
     } catch (error) {
       this.logger.error('Failed to add listing to auction', error.stack);
@@ -872,7 +874,6 @@ export class AuctionService {
           `MInimum bid must be more ${Math.floor(highestBid.price + incrementValue)}`,
         );
       }
-
       // Check minimum increment requirement if a previous highest bid exists
       if (highestBid && bidInput.price < highestBid.price + incrementValue) {
         throw new BadRequestException(`Minimum increment is ${incrementValue}`);
@@ -882,10 +883,19 @@ export class AuctionService {
       bidInput.bidNumber = generateFiveDigitNumberFromUUID(user.id);
       bidInput.userId = user.id;
 
-      const bid = await this.bidQueue.bid({
-        ...bidInput,
-        auctionParticipant,
-      });
+      const bid = await this.bidQueue.bid(
+        JSON.parse(
+          JSON.stringify({
+            price: bidInput?.price,
+            auctionId: bidInput.auctionId,
+            listingId: bidInput.listingId,
+            bidNumber: generateOtp(),
+            bidderNumber: generateFiveDigitNumberFromUUID(user.id),
+            userId: user.id,
+            auctionParticipantId: auctionParticipant.id,
+          }),
+        ),
+      );
 
       const timeBeforeAuctionEndIncrement = subMinutes(auction.expireAt, 1);
 
@@ -901,7 +911,7 @@ export class AuctionService {
 
       // Trigger autobid if bid was successfully placed
       if (bid) {
-        await this.autobid(bid.data.price, auctionParticipant, bidInput);
+        this.autobid(bid.price, auctionParticipant, bidInput);
       }
 
       const payload: MessageEvent = {
@@ -953,20 +963,24 @@ export class AuctionService {
     try {
       const { reference, ...rest } = createAutoBidInput;
 
-      let invoice: Invoice, registered: BidRegistration;
-      if (reference) {
-        invoice = await this.invoiceRepository.findOneBy({ reference });
-      } else {
-        registered = await this.bidRegistrationRepository.findOne({
-          where: {
-            userId: user.id,
-            auctionId: createAutoBidInput.auctionId,
-            listingId: createAutoBidInput.listingId,
-          },
-        });
+      const invoice = await this.invoiceRepository.findOneBy({ reference });
+      const registered = await this.bidRegistrationRepository.findOne({
+        where: {
+          userId: user.id,
+          auctionId: createAutoBidInput.auctionId,
+          listingId: createAutoBidInput.listingId,
+        },
+      });
+
+      if (!registered) {
+        throw new BadRequestException(
+          this.i18n.t(
+            `messages.${messagesKeys.USER_HAS_NOT_REGISTERED_TO_BID}`,
+          ),
+        );
       }
 
-      if (invoice?.status != PaymentStatus.PENDING) {
+      if (invoice?.status != PaymentStatus.PAID && invoice?.isUsed) {
         throw new BadRequestException(
           this.i18n.t(`messages.${messagesKeys.INVALID_PAYMENT_REFERENCE}`),
         );
@@ -982,7 +996,7 @@ export class AuctionService {
       ]);
 
       if (!listing) {
-        throw new NotFoundException(AppStrings.NOT_FOUND);
+        throw new NotFoundException(AppStrings.LISTING_NOT_FOUND);
       }
       if (!auction) {
         throw new NotFoundException(AppStrings.NOT_FOUND);
@@ -1061,22 +1075,23 @@ export class AuctionService {
       ]);
       let i = 1;
 
-      autoBids.forEach(async (element) => {
+      for (const element of autoBids) {
         const bids = await this.bidQueue.bid({
-          auctionparticipantId: auctionParticipant,
-
+          auctionparticipantId: auctionParticipant.id,
           listingId: bidInput.listingId,
           auctionId: bidInput.auctionId,
           bidNumber: generateOtp(),
+          bidderNumber: generateFiveDigitNumberFromUUID(element.userId),
           userId: element.userId,
           autoBid: true,
           price:
             this.calculatebidPrice(price, auctionBidRange, i) ??
             adminDefault.fallBackDefaultBidIncrement,
         });
-        i = i + 1;
-        return bids;
-      });
+
+        i++;
+        return bids; // now increments correctly
+      }
 
       return new SuccessResponse(AppStrings.SUCCESSFULL);
     } catch (error) {

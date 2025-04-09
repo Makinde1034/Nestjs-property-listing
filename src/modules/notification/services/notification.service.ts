@@ -149,7 +149,7 @@ export class NotificationService {
         .leftJoinAndSelect('pref.user', 'user')
         .leftJoinAndSelect('pref.scope', 'scope')
         .where('user.id = :creatorId', { creatorId })
-        .andWhere('scope.id = :scopeId', { scopeId: scope.id })
+        .andWhere('scope.id = :scopeId', { scopeId: scope?.id })
         .getOne();
 
       const buyerPrefQuery = this.userNotificationPreference
@@ -157,7 +157,7 @@ export class NotificationService {
         .leftJoinAndSelect('pref.user', 'user')
         .leftJoinAndSelect('pref.scope', 'scope')
         .where('user.id = :receiverId', { receiverId })
-        .andWhere('scope.id = :scopeId', { scopeId: scope.id })
+        .andWhere('scope.id = :scopeId', { scopeId: scope?.id })
         .getOne();
 
       const owner = this.userRepository
@@ -216,8 +216,12 @@ export class NotificationService {
         );
       }
     } catch (error) {
-      this.logger.debug('Error sending notification:', error);
-      throw error; // Re-throw for caller to handle
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        this.logger.debug('Error preparing notification:', error);
+        throw new BadRequestException(error); // Re-throw for caller to handle
+      }
     }
   }
 

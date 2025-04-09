@@ -285,6 +285,7 @@ export class PaymentService {
         offerId: offer?.id,
         vat: vat,
         file: url,
+        isUsed: true,
       });
 
       await this.mailService.sendEmailInvoice(user, invoicePdf);

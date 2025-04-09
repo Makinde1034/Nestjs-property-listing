@@ -604,7 +604,7 @@ export class ServiceAndProviderService {
         where: { reference: requestForServiceInput.reference },
       });
 
-      if (invoice?.status != PaymentStatus.PENDING) {
+      if (invoice?.status != PaymentStatus.PAID && invoice?.isUsed) {
         throw new BadRequestException(
           this.i18n.t(`messages.${messagesKeys.INVALID_PAYMENT_REFERENCE}`),
         );

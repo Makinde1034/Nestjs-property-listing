@@ -846,7 +846,7 @@ export class OfferService {
             offerId: updateOfferInput.id,
           });
 
-          if (invoice?.status != PaymentStatus.PAID) {
+          if (invoice?.status != PaymentStatus.PAID && invoice?.isUsed) {
             throw new BadRequestException(
               this.i18n.t(`messages.${messagesKeys.INVALID_PAYMENT_REFERENCE}`),
             );

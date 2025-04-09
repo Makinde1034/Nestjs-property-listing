@@ -24,8 +24,7 @@ import { NotificationQueue } from './jobs/queue/messaging.queue';
 import { NotificationProcessor } from './jobs/processor/notification.processor';
 import { InvoiceRepository } from '../modules/payment/repositories/invoice.repository';
 import { BidQueue } from './jobs/queue/bid.queue';
-
-// import { InAppService } from './in-app.service';
+import { BidProcessor } from './jobs/processor/bid.processor';
 
 @Global()
 @Module({
@@ -44,13 +43,15 @@ import { BidQueue } from './jobs/queue/bid.queue';
   controllers: [JobController],
   providers: [
     NotificationService,
-    // InAppService,
     JobService,
     AuctionQueue,
     NotificationQueue,
     BidQueue,
+
     AuctionProcessor,
     NotificationProcessor,
+    BidProcessor,
+
     OfferRepository,
     ListingRepository,
     UserRepository,

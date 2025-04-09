@@ -67,7 +67,7 @@ export class AuctionProcessor extends WorkerHost {
               scope: scope,
               event: 'Last minute',
               recipientFormat: ['Listing Bidder and Seller', null],
-              img: auction.imageLink,
+              img: auction?.imageLink,
               metadata: JSON.stringify(auction),
             });
 
@@ -82,7 +82,7 @@ export class AuctionProcessor extends WorkerHost {
                   'Listing Bidder and Seller',
                   'Listing Bidder and Seller',
                 ],
-                img: auction.imageLink,
+                img: auction?.imageLink,
                 metadata: JSON.stringify(auction),
               });
             });
@@ -124,7 +124,7 @@ export class AuctionProcessor extends WorkerHost {
               scope: scope,
               event: 'Bids',
               recipientFormat: ['Listing Bidder and Seller', null],
-              img: auction.imageLink,
+              img: auction?.imageLink,
               metadata: JSON.stringify(auction),
             });
 
@@ -135,11 +135,8 @@ export class AuctionProcessor extends WorkerHost {
                 receiverId: element,
                 scope: scope,
                 event: 'Bids',
-                recipientFormat: [
-                  'Listing Bidder and Seller',
-                  'Listing Bidder and Seller',
-                ],
-                img: auction.imageLink,
+                recipientFormat: [null, 'Listing Bidder and Seller'],
+                img: auction?.imageLink,
                 metadata: JSON.stringify(auction),
               });
             });
@@ -179,7 +176,7 @@ export class AuctionProcessor extends WorkerHost {
               scope: scope,
               event: '15 minutes to end',
               recipientFormat: ['Listing Bidder and Seller', null],
-              img: auction.imageLink,
+              img: auction?.imageLink,
               metadata: JSON.stringify(auction),
             });
             const uniqueUserIds = new Set(registration.map((r) => r.userId));
@@ -196,25 +193,25 @@ export class AuctionProcessor extends WorkerHost {
                     'Listing Bidder and Seller',
                     'Listing Bidder and Seller',
                   ],
-                  img: auction.imageLink,
+                  img: auction?.imageLink,
                   metadata: JSON.stringify(auction),
                 },
               );
             }
 
-            registration.forEach(async (element) => {
-              this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
-                receiverId: element.userId,
-                scope: scope,
-                event: '15 minutes to end',
-                recipientFormat: [
-                  'Listing Bidder and Seller',
-                  'Listing Bidder and Seller',
-                ],
-                img: auction.imageLink,
-                metadata: JSON.stringify(auction),
-              });
-            });
+            // registration.forEach(async (element) => {
+            //   this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+            //     receiverId: element.userId,
+            //     scope: scope,
+            //     event: '15 minutes to end',
+            //     recipientFormat: [
+            //       'Listing Bidder and Seller',
+            //       'Listing Bidder and Seller',
+            //     ],
+            //     img: auction?.imageLink,
+            //     metadata: JSON.stringify(auction),
+            //   });
+            // });
           }
           break;
 
@@ -267,7 +264,7 @@ export class AuctionProcessor extends WorkerHost {
                 scope: scope,
                 event: 'Winner Result',
                 recipientFormat: [null, 'Bidder'],
-                img: auction.imageLink,
+                img: auction?.imageLink,
                 metadata: JSON.stringify(listing),
               });
 
@@ -276,7 +273,7 @@ export class AuctionProcessor extends WorkerHost {
                 scope: scopeTwo,
                 event: 'If Win',
                 recipientFormat: [null, 'Buyer'],
-                img: auction.imageLink,
+                img: auction?.imageLink,
                 metadata: JSON.stringify({ bid: bids, listing: listing }),
               });
 
@@ -286,7 +283,7 @@ export class AuctionProcessor extends WorkerHost {
                 scope: scope,
                 event: 'Purchase Result',
                 recipientFormat: ['Seller', null],
-                img: auction.imageLink,
+                img: auction?.imageLink,
                 metadata: JSON.stringify(listing),
                 itemName: listing.title,
               });
@@ -296,7 +293,7 @@ export class AuctionProcessor extends WorkerHost {
                 scope: scopeTwo,
                 event: 'If Sold',
                 recipientFormat: ['Seller', null],
-                img: auction.imageLink,
+                img: auction?.imageLink,
                 metadata: JSON.stringify({ bid: bids, listing: listing }),
               });
             });
@@ -374,7 +371,7 @@ export class AuctionProcessor extends WorkerHost {
                     scope: scope,
                     event: 'Looser Result',
                     recipientFormat: [null, 'Bidder'],
-                    img: auction.imageLink,
+                    img: auction?.imageLink,
                     metadata: JSON.stringify(listing),
                   });
                 }
