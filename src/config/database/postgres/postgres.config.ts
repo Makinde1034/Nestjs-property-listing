@@ -16,6 +16,7 @@ export const typeOrmPostgresOptions = <TypeOrmModuleOptions>{
   logging: false,
   autoLoadEntities: true,
   namingStrategy: new CamelCaseNamingStrategy(),
+ 
 };
 
 export default registerAs(

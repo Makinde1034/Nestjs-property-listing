@@ -58,7 +58,7 @@ import {
 } from '../../../common/enums';
 import { MailgunEmailService } from '../../mail/services/implementations';
 import { ConfigService } from '@nestjs/config';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import {
   NotificationScopeRepository,
   UserNotificationRepository,

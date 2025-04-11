@@ -23,7 +23,7 @@ import { AppDetail, RegisterEventAction, UserStatus } from 'src/common/enums';
 
 import { I18nService } from 'nestjs-i18n';
 
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 import * as crypto from 'crypto';
 
@@ -293,6 +293,17 @@ export class AuthService {
       if (user.verifiedAt) {
         throw new BadRequestException(
           this.i18n.t(`messages.${messagesKeys.ACCOUNT_ALREADY_CONFIRMED}`),
+        );
+      }
+
+      if (this.userService.validateUserConfirmation(userConfirmation, token)) {
+        await this.userService.updateUser(user.id, {
+          verifiedAt: new Date(),
+          status: UserStatus.VERIFIED,
+        });
+        await this.userService.removeUserConfirmation(userConfirmation.id);
+        return this.i18n.translate(
+          'messages.register.ACCOUNT_CONFIRMED_SUCCESSFULLY',
         );
       }
 

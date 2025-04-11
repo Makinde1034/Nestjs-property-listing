@@ -4,7 +4,7 @@
  */
 
 import type { User, Role } from 'src/entities';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { UserStatus } from '../../common/enums';
 
 export const SuperAdminData: Partial<User> = {

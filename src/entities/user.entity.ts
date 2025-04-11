@@ -20,7 +20,7 @@ import {
 import BaseEntity from './base.entity';
 import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
 import { UserLevel, UserProfileType } from '../common/types';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { Gender, MaritalStatus, UserStatus } from '../common/enums';
 import { NationalIdentity } from './identity.entity';
 import { Exclude } from 'class-transformer';
