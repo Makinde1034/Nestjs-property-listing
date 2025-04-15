@@ -64,7 +64,7 @@ export class AuctionParticipant extends BaseEntity {
   @OneToMany(() => Bids, (bid) => bid.auctionParticipant)
   bid: Bids[];
 
-  @Column()
+  @Column({nullable:true})
   @Field({ defaultValue: 'active' })
   @IsEnum(AuctionEnum)
   status: string;
