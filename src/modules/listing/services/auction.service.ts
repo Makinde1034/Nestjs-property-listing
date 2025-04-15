@@ -462,8 +462,12 @@ export class AuctionService {
         where: { id: In(auctionActionInput.id) },
       });
 
+
       auction.forEach((element) => {
-        if (element.startDate > new Date()) {
+        if (new Date(element.startDate) > new Date()) {
+          throw new BadRequestException(
+            this.i18n.t(`messages.${messagesKeys.CANNOT_CANCEL_DELETE_AUCTION_BEFORE_IT_HAS_STARTED}`),
+          );
           unableToUpdate.push(element);
         } else {
           update.push(element);
@@ -477,7 +481,7 @@ export class AuctionService {
           ...rest,
         };
       });
-
+  
       const updated = await this.auctionRepository.save(auctionsToUpdate);
 
       const activityToSave = updated.map((element) => {
@@ -776,10 +780,16 @@ export class AuctionService {
       auction.forEach((element) => {
         if (element.startDate > new Date()) {
           unableToUpdate.push(element);
+          throw new BadRequestException(
+            this.i18n.t(`messages.${messagesKeys.CANNOT_CANCEL_DELETE_AUCTION_BEFORE_IT_HAS_STARTED}`),
+          );
+        
         } else {
           update.push(element);
         }
       });
+
+      const updateIds = update.map((item) => item.id)
 
       const deleteAuction = await this.auctionRepository.softDelete(update);
 

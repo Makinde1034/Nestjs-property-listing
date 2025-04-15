@@ -93,5 +93,6 @@
   "OFFER_EXPIRED": "Offer is not has expired",
   "CANNOT_PROCESS_PAYMENT": "cannot process payment",
   "AWAITING_APPROVAL": "Awaiting approval",
-  "USER_HAS_NOT_REGISTERED_TO_BID": "User has not registered to bid"
+  "USER_HAS_NOT_REGISTERED_TO_BID": "User has not registered to bid",
+  "CANNOT_CANCEL_DELETE_AUCTION_BEFORE_IT_HAS_STARTED": "Cannot delete or cancel auction before it has started"
 }

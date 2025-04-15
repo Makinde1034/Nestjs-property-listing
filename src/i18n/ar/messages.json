@@ -95,5 +95,6 @@
   "FORBIDDEN": "طلب مرفوض",
   "OFFER_EXPIRED": "العرض منتهي",
   "CANNOT_PROCESS_PAYMENT": "تعذر معالجة الدفع",
-  "AWAITING_APPROVAL": "في انتظار الموافقة"
+  "AWAITING_APPROVAL": "في انتظار الموافقة",
+  "CANNOT_CANCEL_DELETE_AUCTION_BEFORE_IT_HAS_STARTED": "لا يمكن حذف أو إلغاء المزاد قبل أن يبدأ"
 }
