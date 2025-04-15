@@ -589,7 +589,21 @@ export class OfferService {
   }
 
   async updateOffer(user: User, updateOfferInput: UpdateOfferInput) {
+
+   
+
     try {
+      
+      // check if listing is negotiable
+      const listing = await this.listingRepository.findOne({
+        where: { id: updateOfferInput.listingId },
+      });
+
+      if (!listing.negotiable) {
+        throw new BadRequestException(
+          this.i18n.t(`messages.${messagesKeys.LISTING_IS_NOT_NEGOTIABLE}`),
+        );
+      }
       const { id, listingId, ...rest } = updateOfferInput;
 
       const [
