@@ -60,6 +60,14 @@ export class PaymentResolver {
   ) {
     return await this.paymentService.verifyPayment(verifyDto);
   }
+
+  @Mutation(() => verifyPaymentResponse)
+  @UseGuards(AccessTokenGuard)
+  async verifyPaymentDB(
+    @Args('verifyPaymentInput') verifyDto: VerifyPaymentInput,
+  ) {
+    return await this.paymentService.verifyPaymentDB(verifyDto);
+  }
   @Query(() => InvoiceResponse)
   @UseGuards(AccessTokenGuard)
   async fetchInvoice(@Args('findOption') findOption: PaginateAndSort) {

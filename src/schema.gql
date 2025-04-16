@@ -1044,8 +1044,8 @@ type InitiatePaymentResponse {
 
 type verifyPaymentResponse {
   status: String
-  referenceId: String!
-  message: String!
+  referenceId: String
+  message: String
 }
 
 type InvoiceResponse {
@@ -1717,6 +1717,7 @@ type Mutation {
   initializePayment(paymentInput: InitiatePaymentInput!): InitiatePaymentResponse!
   initializePaymentForPA(paymentInput: InitiatePaymentInput!): InitiatePaymentResponse!
   verifyPayment(verifyPaymentInput: VerifyPaymentInput!): verifyPaymentResponse!
+  verifyPaymentDB(verifyPaymentInput: VerifyPaymentInput!): verifyPaymentResponse!
   createIssue(input: CreateIssueInput!): SuccessResponse!
   updateIssue(RequestInput: UpdateIssueInput!): SuccessResponse!
   deleteIssue(id: String!): SuccessResponse!

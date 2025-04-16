@@ -80,9 +80,9 @@ export class verifyPaymentResponse {
   @Field(() => String, { nullable: true })
   status: string;
 
-  @Field()
+  @Field({nullable:true})
   referenceId: string;
 
-  @Field()
+  @Field({nullable:true})
   message: string;
 }

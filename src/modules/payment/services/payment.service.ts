@@ -225,6 +225,16 @@ export class PaymentService {
     };
   }
 
+  async verifyPaymentDB(data: VerifyPaymentInput) {
+    const response = await this.hyperPayService.verifyPaymentForDb(data.checkoutId);
+
+    return {
+      status: response?.result?.code,
+      referenceId: response?.result?.referencedId,
+      message: response?.result?.description,
+    };
+  }
+
   async finalizeInvoice(
     invoice: Invoice,
     data?: PdfInput,
