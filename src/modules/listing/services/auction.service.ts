@@ -96,6 +96,7 @@ export class AuctionService {
     private readonly auctionRepository: AuctionRepository,
     private readonly auctionParticipantRepository: AuctionParticipantRepository,
     private readonly adminService: AdminService,
+    private readonly adminDefaultService: AdminService,
     private readonly bidRepository: BidsRepository,
     private readonly listingRepository: ListingRepository,
     private readonly auctionBidRangeRepository: AuctionBidRangeRepository,
@@ -109,6 +110,7 @@ export class AuctionService {
     private readonly paymentService: PaymentService,
     private readonly auctionQueue: AuctionQueue,
     private readonly bidQueue: BidQueue,
+  
   ) {}
   logger = new Logger(AuctionService.name);
   async create(auctionInput: CreateAuctionInput) {
@@ -569,36 +571,48 @@ export class AuctionService {
         where: { reference: data.reference },
       });
 
+      const listingOwner = await this.listingRepository.findOne({
+        where: {
+          id:data.listingId
+        },
+        relations:['user']
+      }) 
+      
+      const _adminDefault = await this.adminDefaultService.adminDefault()
+
       if (invoice?.status != PaymentStatus.PAID && invoice?.isUsed) {
         throw new BadRequestException(
           this.i18n.t(`messages.${messagesKeys.INVALID_PAYMENT_REFERENCE}`),
-        );
+        ); 
       }
 
       const pdf: PdfInput = {
-        // createdDate: `${offerPayload.createdAt.getDate()}-${offerPayload.createdAt.getMonth() + 1}-${offerPayload.createdAt.getFullYear()}`,
-        // sellerCRNumber: seller.crNumber,
-        // sellerzatcaNumber: seller.zatcaNuber,
-        // sellerAddress: seller.address,
-        // sellerName:
-        //   seller.language === 'en'
-        //     ? `${seller.firstName} ${seller.lastName}`
-        //     : `${seller.arabicFirstName} ${seller.arabicLastName}`,
-        // customerCRNumber: user.crNumber,
-        // customerName:
-        //   user.language === 'en'
-        //     ? `${user.firstName} ${user.lastName}`
-        //     : `${user.arabicFirstName} ${user.arabicLastName}`,
-        // customerAddress: user.address,
-        // customerZatcaNumber: user.zatcaNuber,
-        // totalWithVat: [offerPayload.price + vat],
-        // itemVat: [{ vat: adminDefault.vat, vatValue: vat }],
-        // product: offerPayload,
-        // sumTotalWithoutVat: offerPayload.price,
-        // sumTotalVat: vat,
-        // sumTotalWithVat: offerPayload.price + vat,
-      };
+        createdDate: `${invoice.createdAt.toDateString()}`,
+        sellerzatcaNumber: listingOwner.user.zatcaNuber,
+        sellerAddress: listingOwner.user.address,
+        sellerName:
+          listingOwner.user.language === 'en'  
+            ? `${ listingOwner.user.firstName} ${ listingOwner.user.lastName}`
+            : `${ listingOwner.user.arabicFirstName} ${ listingOwner.user.arabicLastName}`,
+        customerCRNumber: user.crNumber,
+        customerName:
+          user.language === 'en'
+            ? `${user.firstName} ${user.lastName}` 
+            : `${user.arabicFirstName} ${user.arabicLastName}`,
+        customerAddress: user.address,
+        customerZatcaNumber: user.zatcaNuber,
+        totalWithVat: [data.minimumPrice + _adminDefault.vat],
+        itemVat: [{ vat: _adminDefault.vat, vatValue: _adminDefault.vat }],
+        product: [{ name: "Auction listing payment" }],
+        sumTotalWithoutVat: data.minimumPrice,
+        sumTotalVat: _adminDefault.vat,
+        invoiceNumber:invoice.id,
+        referenceNumber:invoice.reference
+        // sumTotalWithVat: data.minimumPrice + _adminDefault.vat,
+       
+      }; 
 
+  
       if (!invoice) {
         throw new BadRequestException(
           this.i18n.t(`messages.${messagesKeys.INVALID_PAYMENT_REFERENCE}`),
@@ -907,6 +921,8 @@ export class AuctionService {
         ),
       );
 
+      const adminDefault = await this.adminDefaultService.adminDefault()
+
       const timeBeforeAuctionEndIncrement = subMinutes(auction.expireAt, 1);
 
       if (timeBeforeAuctionEndIncrement > new Date()) {
@@ -932,27 +948,27 @@ export class AuctionService {
       this.sseService.sendEvent(user.id, payload, auctionParticipant.id);
 
       const data: PdfInput = {
-        // createdDate: `${offerPayload.createdAt.getDate()}-${offerPayload.createdAt.getMonth() + 1}-${offerPayload.createdAt.getFullYear()}`,
-        // sellerCRNumber: seller.crNumber,
-        // sellerzatcaNumber: seller.zatcaNuber,
-        // sellerAddress: seller.address,
-        // sellerName:
-        //   seller.language === 'en'
-        //     ? `${seller.firstName} ${seller.lastName}`
-        //     : `${seller.arabicFirstName} ${seller.arabicLastName}`,
-        // customerCRNumber: user.crNumber,
-        // customerName:
-        //   user.language === 'en'
-        //     ? `${user.firstName} ${user.lastName}`
-        //     : `${user.arabicFirstName} ${user.arabicLastName}`,
-        // customerAddress: user.address,
-        // customerZatcaNumber: user.zatcaNuber,
-        // totalWithVat: [offerPayload.price + vat],
-        // itemVat: [{ vat: adminDefault.vat, vatValue: vat }],
-        // product: offerPayload,
-        // sumTotalWithoutVat: offerPayload.price,
-        // sumTotalVat: vat,
-        // sumTotalWithVat: offerPayload.price + vat,
+        createdDate: `${invoice.createdAt.toLocaleString()}`,
+        sellerCRNumber: user.crNumber,
+        sellerzatcaNumber: user.zatcaNuber,
+        sellerAddress: user.address,
+        sellerName:
+          user.language === 'en'
+            ? `${user.firstName} ${user.lastName}`
+            : `${user.arabicFirstName} ${user.arabicLastName}`,
+        customerCRNumber: user.crNumber,
+        customerName:
+          user.language === 'en'
+            ? `${user.firstName} ${user.lastName}`
+            : `${user.arabicFirstName} ${user.arabicLastName}`,
+        customerAddress: user.address,
+        customerZatcaNumber: user.zatcaNuber,
+        totalWithVat: [invoice.price + adminDefault.vat],
+        itemVat: [{ vat: adminDefault.vat, vatValue: adminDefault.vat }],
+        product: '',
+        sumTotalWithoutVat: invoice.price,
+        sumTotalVat: adminDefault.vat,
+        sumTotalWithVat: invoice.price + adminDefault.vat,
       };
 
       await this.paymentService.finalizeInvoice(invoice, data, user);
@@ -1021,28 +1037,30 @@ export class AuctionService {
         autoBid: true,
       });
 
+      const adminDefault = await this.adminDefaultService.adminDefault()
+
       const data: PdfInput = {
-        // createdDate: `${offerPayload.createdAt.getDate()}-${offerPayload.createdAt.getMonth() + 1}-${offerPayload.createdAt.getFullYear()}`,
-        // sellerCRNumber: seller.crNumber,
-        // sellerzatcaNumber: seller.zatcaNuber,
-        // sellerAddress: seller.address,
-        // sellerName:
-        //   seller.language === 'en'
-        //     ? `${seller.firstName} ${seller.lastName}`
-        //     : `${seller.arabicFirstName} ${seller.arabicLastName}`,
-        // customerCRNumber: user.crNumber,
-        // customerName:
-        //   user.language === 'en'
-        //     ? `${user.firstName} ${user.lastName}`
-        //     : `${user.arabicFirstName} ${user.arabicLastName}`,
-        // customerAddress: user.address,
-        // customerZatcaNumber: user.zatcaNuber,
-        // totalWithVat: [offerPayload.price + vat],
-        // itemVat: [{ vat: adminDefault.vat, vatValue: vat }],
-        // product: offerPayload,
-        // sumTotalWithoutVat: offerPayload.price,
-        // sumTotalVat: vat,
-        // sumTotalWithVat: offerPayload.price + vat,
+        createdDate: `${invoice.createdAt.toLocaleString()}`,
+        sellerCRNumber: user.crNumber,
+        sellerzatcaNumber: user.zatcaNuber,
+        sellerAddress: user.address,
+        sellerName:
+          user.language === 'en'
+            ? `${user.firstName} ${user.lastName}`
+            : `${user.arabicFirstName} ${user.arabicLastName}`,
+        customerCRNumber: user.crNumber,
+        customerName:
+          user.language === 'en'
+            ? `${user.firstName} ${user.lastName}`
+            : `${user.arabicFirstName} ${user.arabicLastName}`,
+        customerAddress: user.address,
+        customerZatcaNumber: user.zatcaNuber,
+        totalWithVat: [invoice.price + adminDefault.vat],
+        itemVat: [{ vat: adminDefault.vat, vatValue: adminDefault.vat }],
+        product: '',
+        sumTotalWithoutVat: invoice.price,
+        sumTotalVat: adminDefault.vat,
+        sumTotalWithVat: invoice.price + adminDefault.vat,
       };
 
       await this.paymentService.finalizeInvoice(invoice, data, user);
@@ -1244,27 +1262,27 @@ export class AuctionService {
       }
 
       const pdf: PdfInput = {
-        // createdDate: `${offerPayload.createdAt.getDate()}-${offerPayload.createdAt.getMonth() + 1}-${offerPayload.createdAt.getFullYear()}`,
-        // sellerCRNumber: seller.crNumber,
-        // sellerzatcaNumber: seller.zatcaNuber,
-        // sellerAddress: seller.address,
-        // sellerName:
-        //   seller.language === 'en'
-        //     ? `${seller.firstName} ${seller.lastName}`
-        //     : `${seller.arabicFirstName} ${seller.arabicLastName}`,
-        // customerCRNumber: user.crNumber,
-        // customerName:
-        //   user.language === 'en'
-        //     ? `${user.firstName} ${user.lastName}`
-        //     : `${user.arabicFirstName} ${user.arabicLastName}`,
-        // customerAddress: user.address,
-        // customerZatcaNumber: user.zatcaNuber,
-        // totalWithVat: [offerPayload.price + vat],
-        // itemVat: [{ vat: adminDefault.vat, vatValue: vat }],
-        // product: offerPayload,
-        // sumTotalWithoutVat: offerPayload.price,
-        // sumTotalVat: vat,
-        // sumTotalWithVat: offerPayload.price + vat,
+        createdDate: `${invoice.createdAt.toLocaleString()}`,
+        sellerCRNumber: user.crNumber,
+        sellerzatcaNumber: user.zatcaNuber,
+        sellerAddress: user.address,
+        sellerName:
+          user.language === 'en'
+            ? `${user.firstName} ${user.lastName}`
+            : `${user.arabicFirstName} ${user.arabicLastName}`,
+        customerCRNumber: user.crNumber,
+        customerName:
+          user.language === 'en'
+            ? `${user.firstName} ${user.lastName}`
+            : `${user.arabicFirstName} ${user.arabicLastName}`,
+        customerAddress: user.address,
+        customerZatcaNumber: user.zatcaNuber,
+        totalWithVat: [invoice.price + adminDefault.vat],
+        itemVat: [{ vat: adminDefault.vat, vatValue: adminDefault.vat }],
+        product: '',
+        sumTotalWithoutVat: invoice.price,
+        sumTotalVat: adminDefault.vat,
+        sumTotalWithVat: invoice.price + adminDefault.vat,
       };
 
       await this.paymentService.finalizeInvoice(invoice, pdf, user);

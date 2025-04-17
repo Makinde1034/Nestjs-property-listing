@@ -55,6 +55,7 @@ import { PdfInput } from '../../file-handler/dto/pdf.dto';
 import { PaymentService } from '../../payment/services/payment.service';
 import { InvoiceRepository } from '../../payment/repositories/invoice.repository';
 import { PaymentEnum } from '../../../common/enums/payment.enum';
+import { AdminService } from '../../admin/services/admin.service';
 
 @Injectable()
 export class ServiceAndProviderService {
@@ -71,6 +72,7 @@ export class ServiceAndProviderService {
     private readonly i18n: I18nService,
     private readonly paymentService: PaymentService,
     private readonly invoiceRepository: InvoiceRepository,
+    private readonly adminDefaultService: AdminService,
   ) {}
   logger = new Logger(ServiceAndProviderService.name);
 
@@ -604,6 +606,8 @@ export class ServiceAndProviderService {
         where: { reference: requestForServiceInput.reference },
       });
 
+      const adminDefault = await this.adminDefaultService.adminDefault()
+
       if (invoice?.status != PaymentStatus.PAID && invoice?.isUsed) {
         throw new BadRequestException(
           this.i18n.t(`messages.${messagesKeys.INVALID_PAYMENT_REFERENCE}`),
@@ -611,27 +615,27 @@ export class ServiceAndProviderService {
       }
 
       const pdf: PdfInput = {
-        // createdDate: `${offerPayload.createdAt.getDate()}-${offerPayload.createdAt.getMonth() + 1}-${offerPayload.createdAt.getFullYear()}`,
-        // sellerCRNumber: seller.crNumber,
-        // sellerzatcaNumber: seller.zatcaNuber,
-        // sellerAddress: seller.address,
-        // sellerName:
-        //   seller.language === 'en'
-        //     ? `${seller.firstName} ${seller.lastName}`
-        //     : `${seller.arabicFirstName} ${seller.arabicLastName}`,
-        // customerCRNumber: user.crNumber,
-        // customerName:
-        //   user.language === 'en'
-        //     ? `${user.firstName} ${user.lastName}`
-        //     : `${user.arabicFirstName} ${user.arabicLastName}`,
-        // customerAddress: user.address,
-        // customerZatcaNumber: user.zatcaNuber,
-        // totalWithVat: [offerPayload.price + vat],
-        // itemVat: [{ vat: adminDefault.vat, vatValue: vat }],
-        // product: offerPayload,
-        // sumTotalWithoutVat: offerPayload.price,
-        // sumTotalVat: vat,
-        // sumTotalWithVat: offerPayload.price + vat,
+        createdDate: `${invoice.createdAt.toLocaleString()}`,
+        sellerCRNumber: user.crNumber,
+        sellerzatcaNumber: user.zatcaNuber,
+        sellerAddress: user.address,
+        sellerName:
+          user.language === 'en'
+            ? `${user.firstName} ${user.lastName}`
+            : `${user.arabicFirstName} ${user.arabicLastName}`,
+        customerCRNumber: user.crNumber,
+        customerName:
+          user.language === 'en'
+            ? `${user.firstName} ${user.lastName}`
+            : `${user.arabicFirstName} ${user.arabicLastName}`,
+        customerAddress: user.address,
+        customerZatcaNumber: user.zatcaNuber,
+        totalWithVat: [invoice.price + adminDefault.vat],
+        itemVat: [{ vat: adminDefault.vat, vatValue: adminDefault.vat }],
+        product: '',
+        sumTotalWithoutVat: invoice.price,
+        sumTotalVat: adminDefault.vat,
+        sumTotalWithVat: invoice.price + adminDefault.vat,
       };
 
       await this.paymentService.finalizeInvoice(invoice, pdf, user);

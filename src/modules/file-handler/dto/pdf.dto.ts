@@ -4,7 +4,8 @@
  */
 
 export class PdfInput {
-  invoiceNumber?: number;
+  invoiceNumber?: number | string;
+  referenceNumber?: string;
   createdDate?: string;
   qrcode?: string;
   sellerCRNumber?: string;
@@ -21,6 +22,7 @@ export class PdfInput {
   sumTotalWithoutVat?: number;
   sumTotalVat?: number;
   sumTotalWithVat?: number;
+  name?:string
 }
 
 export interface VatItem {
