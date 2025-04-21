@@ -4,246 +4,359 @@
     <meta name='viewport' content='width=device-width, initial-scale=1.0' />
     <title>E-Invoice Template</title>
     <style>
-      body { height: 942px; width: 795px; margin: 30px auto; font-family: Arial,
-      sans-serif; } .container { margin: 0; padding-top: 50px; background-image: linear-gradient(to right, white, white); box-sizing: border-box;
-      position: relative; overflow: hidden; height: 842px; /* Adjusted height */
-      border-left: #e8e8e8 solid 2px; border-right: #ffffff solid 2px;
-      box-shadow: 5px 5px 5px 0px #e8e8e8, inset 4px 4px 15px 0px #fff, 5px 5px
-      15px 5px rgba(0, 0, 0, 0); } .first-section { padding-bottom: 15px;
-      margin-left: 20px; margin-right: 20px; border-bottom: 2px solid rgb(185,
-      182, 182); } .first-section-element { display: flex; justify-items:
-      center; justify-content: space-between; align-items: center; margin: 0
-      20px 0 20px; } .invoice-type { font-size: larger; text-align: center; }
-      .first-section-items { flex-basis: 100%; justify-items: center; }
-      .first-section-items-box { display: flex; justify-content: center;
-      flex-direction: column; margin: 10px; } .first-section-items-box-container
-      { display: flex; justify-content: center; } .first-section-box { display:
-      flex; font-size: small; } .second-section { padding-left: 40px;
-      min-height: 20%; padding-top: 20px;} .second-section-element { display:
-      flex; justify-content: space-around; } .box-1 { flex-basis: 25%; } .box-2
-      { flex-basis: 75%; display: flex; justify-content: right; } .box-2 .box {
-      border-right: none; /* Remove the default border */ background-image:
-      radial-gradient(circle, #6B7280 1px, transparent 1px); background-size:
-      2px 7px; /* Control dot size and spacing */ background-repeat: repeat-y;
-      /* Repeat dots vertically */ padding-right: 15px; padding-left: 10px; }
-      .third-section-box { display: flex; justify-content: space-around; }
-      .third-section { padding-bottom: 50px; min-height: 20%;}
-      .third-section-box .box { border-right: none; /* Remove the default border
-      */ background-image: radial-gradient(circle, #6B7280 1px, transparent
-      1px); background-size: 2px 7px; /* Control dot size and spacing */
-      background-repeat: repeat-y; /* Repeat dots vertically */ padding-right:
-      15px; padding-left: 10px; } .fouth-section { display: flex; padding: 20px;
-      } .fifth-section { padding: 20px; } .last-box { padding: 0; display: flex;
-      justify-content: space-between; margin: 0; } .table { flex-basis: 100%; }
-      table { border-collapse: collapse; width: 100%; margin-bottom: 20px;
-      font-size: 14px; } tr{ margin: 0; padding: 0; } th, td { color: #707070;
-      border-right: 1px dotted #999; padding: 6px; word-wrap: break-word;
-      max-width: 150px; font-size: small; text-align: center; } th {
-      font-weight: 500; font-size: small; border-bottom: 1px dotted #999; } p {
-      margin: 10px 20px 0 20px; font-size: small; color: #707070; }
-      .buyer-information, .seller-information { display: block; padding: 20px;
-      text-align: end; } h2 { color: #707070; font-size: medium; font-weight:
-      200; padding: 0; margin: 3px; } h1 { color: #707070; } .box-left {
-      padding-left: 30px; } /* SVG as bottom border */ .svg-border { position:
-      absolute; width: 795px; height: 85px; overflow: hidden; }
+      :root {
+        --primary-color: #4f46e5;
+        --secondary-color: #f3f4f6;
+        --text-color: #4b5563;
+        --border-color: #e5e7eb;
+        --heading-color: #1f2937;
+      }
+      
+      body {
+        height: 942px;
+        width: 795px;
+        margin: 30px auto;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        color: var(--text-color);
+        background-color: #f9fafb;
+      }
+      
+      .container {
+        margin: 0;
+        padding: 30px;
+        background-color: white;
+        box-sizing: border-box;
+        position: relative;
+        overflow: hidden;
+        height: 842px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 15px rgba(0, 0, 0, 0.03);
+        border-radius: 8px;
+      }
+      
+      /* Header Section */
+      .invoice-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 20px;
+        border-bottom: 2px solid var(--border-color);
+        margin-bottom: 25px;
+      }
+      
+      .invoice-title-section {
+        text-align: center;
+        flex-grow: 1;
+      }
+      
+      .invoice-type {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--heading-color);
+        margin: 0;
+        letter-spacing: 0.5px;
+      }
+      
+      .invoice-meta {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        margin-top: 10px;
+      }
+      
+      .meta-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .meta-label {
+        font-size: 12px;
+        text-transform: uppercase;
+        color: var(--text-color);
+        margin-bottom: 4px;
+        font-weight: 600;
+      }
+      
+      .meta-value {
+        font-size: 14px;
+        font-weight: 500;
+      }
+      
+      /* Party Information Sections */
+      .party-section {
+        padding: 20px 0;
+        margin-bottom: 15px;
+      }
+      
+      .party-heading {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--heading-color);
+        margin-bottom: 15px;
+        padding-bottom: 5px;
+        border-bottom: 1px solid var(--border-color);
+      }
+      
+      .party-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 20px;
+      }
+      
+      .info-item {
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .info-label {
+        font-size: 12px;
+        color: var(--text-color);
+        margin-bottom: 4px;
+        font-weight: 500;
+      }
+      
+      .info-value {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--heading-color);
+      }
+      
+      /* Tables Section */
+      .tables-section {
+        margin: 25px 0;
+      }
+      
+      .tables-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 15px;
+      }
+      
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        background-color: white;
+        border-radius: 6px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+      }
+      
+      th {
+        background-color: var(--secondary-color);
+        color: var(--heading-color);
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+      }
+      
+      td {
+        padding: 10px;
+        font-size: 13px;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-color);
+      }
+      
+      tr:last-child td {
+        border-bottom: none;
+      }
+      
+      /* Totals Section */
+      .totals-section {
+        margin-top: 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+      }
+      
+      .total-row {
+        display: flex;
+        justify-content: space-between;
+        width: 300px;
+        padding: 8px 0;
+        font-size: 14px;
+      }
+      
+      .total-row:last-child {
+        border-top: 1px solid var(--border-color);
+        margin-top: 5px;
+        padding-top: 10px;
+        font-weight: 700;
+        color: var(--heading-color);
+        font-size: 16px;
+      }
+      
+      .total-label {
+        color: var(--text-color);
+      }
+      
+      /* Footer Section */
+      .invoice-footer {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background-color: var(--secondary-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        color: var(--text-color);
+        border-top: 1px solid var(--border-color);
+      }
     </style>
   </head>
   <body>
     <div class='container'>
-      <div class='first-section'>
-        <div class='first-section-element'>
-          {{!-- <img
-            id='qrcode-img'
-            src='data:image'
-            png;base64,
-            {{qrcode}}
-            alt='QR Code'
-          /> --}}
-
-          <div class='first-section-items'>
-            <h1 class='invoice-type'>Invoice Type</h1>
-
-            <div class='first-section-items-box-container'>
-              <div class='first-section-items-box'>
-                <div><p>Date</p></div>
-                <div><p>{{createdDate}}</p></div>
-              </div>
-
-              <div class='first-section-items-box'>
-                <div class='first-section-box'>
-                  <p>Invoice reference number</p>
-                </div>
-                <div class='first-section-box'><p>{{referenceNumber}}</p></div>
-              </div>
+      <!-- Header Section -->
+      <div class='invoice-header'>
+        <div class='qr-code'>
+          <!-- QR code placeholder -->
+        </div>
+        
+        <div class='invoice-title-section'>
+          <h1 class='invoice-type'>Invoice</h1>
+          <div class='invoice-meta'>
+            <div class='meta-item'>
+              <span class='meta-label'>Date</span>
+              <span class='meta-value'>{{createdDate}}</span>
+            </div>
+            <div class='meta-item'>
+              <span class='meta-label'>Reference</span>
+              <span class='meta-value'>{{referenceNumber}}</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div class='second-section'>
-        <h2 class='seller-information'>Seller information</h2>
-
-        <div class='second-section-element'>
-          <div class='box'>
-            <p>CR Number</p>
-            <p>{{sellerCRNumber}}</p>
+      <!-- Seller Section -->
+      <div class='party-section'>
+        <h2 class='party-heading'>Seller Information</h2>
+        <div class='party-info-grid'>
+          <div class='info-item'>
+            <span class='info-label'>Name</span>
+            <span class='info-value'>{{sellerName}}</span>
           </div>
-          <div class='box-2'>
-            <div class='box'>
-              <p>Zatca Number</p>
-              <p>{{sellerZatcaNumber}}</p>
-            </div>
-
-            <div class='box'>
-              <p>Seller Address</p>
-              <p>{{sellerAddress}}</p>
-            </div>
-
-            <div class='box'>
-              <p>Seller Name</p>
-              <p>{{sellerName}}</p>
-            </div>
+          <div class='info-item'>
+            <span class='info-label'>CR Number</span>
+            <span class='info-value'>{{sellerCRNumber}}</span>
+          </div>
+          <div class='info-item'>
+            <span class='info-label'>Zatca Number</span>
+            <span class='info-value'>{{sellerZatcaNumber}}</span>
+          </div>
+          <div class='info-item'>
+            <span class='info-label'>Address</span>
+            <span class='info-value'>{{sellerAddress}}</span>
           </div>
         </div>
       </div>
 
-      <div class='third-section'>
-        <h2 class='buyer-information'>Buyer Information</h2>
-        <div class='third-section-box'>
-          <div class='box'>
-            <p>Zatca Number</p>
-            <p>{{customerZatcaNumber}}</p>
+      <!-- Buyer Section -->
+      <div class='party-section'>
+        <h2 class='party-heading'>Buyer Information</h2>
+        <div class='party-info-grid'>
+          <div class='info-item'>
+            <span class='info-label'>Name</span>
+            <span class='info-value'>{{customerName}}</span>
           </div>
-          <div class='box'>
-            <p>CR Number</p>
-            <p>{{customerCRNumber}}</p>
+          <div class='info-item'>
+            <span class='info-label'>CR Number</span>
+            <span class='info-value'>{{customerCRNumber}}</span>
           </div>
-          <div class='box'>
-            <p>Customer Address</p>
-            <p>{{customerAddress}}</p>
+          <div class='info-item'>
+            <span class='info-label'>Zatca Number</span>
+            <span class='info-value'>{{customerZatcaNumber}}</span>
           </div>
-          <div class='box'>
-            <p>Customer Name</p>
-            <p>{{customerName}}</p>
+          <div class='info-item'>
+            <span class='info-label'>Address</span>
+            <span class='info-value'>{{customerAddress}}</span>
           </div>
         </div>
       </div>
 
-      <div class='fouth-section'>
-        <table class='table'>
-          <thead>
-            <tr>
-              <th>Total With Vat</th>
-            </tr>
-          </thead>
-          <tbody>
-            {{#each totalWithVat}}
+      <!-- Tables Section -->
+      <div class='tables-section'>
+        <div class='tables-grid'>
+          <!-- Products Table -->
+          <table>
+            <thead>
               <tr>
-                <td>{{totalWithVat}}</td>
+                <th>Product</th>
+               
               </tr>
-            {{/each}}
-            <!-- Close the each loop -->
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {{#each product}}
+                <tr>
+                  <td>{{name}}</td>
+                
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
 
-        <!-- Table 2 with role "grid" -->
-        <table class='table'>
-          <thead>
-            <tr>
-              <th>Vat</th>
-              <th>Vat %</th>
-            </tr>
-          </thead>
-          <tbody>
-            {{#each itemVat}}
+          <!-- VAT Table -->
+          <table>
+            <thead>
               <tr>
-                <td>{{vat}}</td>
-                <td>{{percent}}</td>
+                <th>VAT</th>
+                <th>VAT %</th>
               </tr>
-            {{/each}}
-            <!-- Close the each loop -->
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {{#each itemVat}}
+                <tr>
+                  <td>{{vat}}</td>
+                  <td>{{vatValue}}</td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
 
-        <table class='table'>
-          <thead>
-            <tr>
-              <th>Item 1</th>
-              <th>Item 2</th>
-              <th>Product</th>
-            </tr>
-          </thead>
-          <tbody>
-            {{#each product}}
+          <!-- Total with VAT Table -->
+          <table>
+            <thead>
               <tr>
-                <td>{{23}}</td>
-                <td>{{23}}</td>
-                <td>{{name}}</td>
+                <th>Total With VAT</th>
               </tr>
-            {{/each}}
-            <!-- Close the each loop -->
-          </tbody>
-        </table>
-      </div>
-
-      <div class='fifth-section'>
-        <div class='last-box'>
-          <p class='box-left'>{{sumTotalWithoutVat}}</p>
-          <p class='invoice-reference'>Total without VAT</p>
-        </div>
-
-        <div class='last-box'>
-          <p class='box-left'>{{sumTotalVat}}</p>
-          <p class='box-right'>VAT</p>
-        </div>
-        <div class='last-box'>
-          <p class='box-left'>{{sumTotalWithVat}}</p>
-          <p class='box-right'>Total with VAT</p>
+            </thead>
+            <tbody>
+              {{!-- {{#each totalWithVat}} --}}
+                <tr>
+                  <td>{{totalWithVat}}</td>
+                </tr>
+              {{!-- {{/each}} --}}
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <!-- SVG as bottom border line -->
-    </div>
-    <div class='svg-border'>
-      <svg
-        class='svg'
-        width='100%'
-        height='100'
-        xmlns='http://www.w3.org/2000/svg'
-      >
-        <defs>
-          <linearGradient id='waveGradient' x1='0%' y1='0%' x2='100%' y2='0%'>
-            <stop offset='100%' style='stop-color: #f3f3f3; stop-opacity: 1' />
-            <stop offset='100%' style='stop-color: #e8e8e8; stop-opacity: 1' />
-          </linearGradient>
-        </defs>
-        <path
-          d='M 0 0 
-             Q 20 25, 40 10
-             T 80 10 
-             T 120 10 
-             T 160 10 
-             T 200 10 
-             T 240 10 
-             T 280 10 
-             T 320 10 
-             T 360 10 
-             T 400 10 
-             T 440 10 
-             T 480 10 
-             T 520 10 
-             T 560 10 
-             T 600 10 
-             T 640 10
-             T 680 10
-             T 720 10
-             T 760 10
-             T 800 10
-             T 840 0'
-          fill='url(#waveGradient)'
-          stroke-width='1'
-        />
-      </svg>
+      <!-- Totals Section -->
+      <div class='totals-section'>
+        <div class='total-row'>
+          <span class='total-label'>Total without VAT:</span>
+          <span class='total-value'>{{sumTotalWithoutVat}}</span>
+        </div>
+        <div class='total-row'>
+          <span class='total-label'>VAT:</span>
+          <span class='total-value'>{{sumTotalVat}}</span>
+        </div>
+        <div class='total-row'>
+          <span class='total-label'>Total with VAT:</span>
+          <span class='total-value'>{{sumTotalWithVat}}</span>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class='invoice-footer'>
+        <p>Thank you for your business</p>
+      </div>
     </div>
   </body>
 </html>

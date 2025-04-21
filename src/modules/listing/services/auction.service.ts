@@ -88,7 +88,7 @@ import {
   AuctionDetailsResponse,
 } from '../dtos/response/auctions';
 import { BidQueue } from '../../../in-app-services/jobs/queue/bid.queue';
-import { instanceToPlain } from 'class-transformer';
+import { PaymentTypeEnum } from '../../../common/enums/payment.enum';
 
 @Injectable()
 export class AuctionService {
@@ -121,7 +121,6 @@ export class AuctionService {
           AppStrings.START_DATE_CANNOT_BE_LESS_THAN_DATE_OF_CREATION,
         );
       }
-
       // Ensure auction live time is between 4 and 24 hours
       if (auctionInput.liveFor > 24 || auctionInput.liveFor < 4) {
         throw new BadRequestException(
@@ -140,7 +139,6 @@ export class AuctionService {
         startDate: utcStartDate,
         expireAt: moment(expireAt),
       });
-
       await this.auctionQueue.auctionEnd({
         id: data.id,
       });
@@ -228,7 +226,6 @@ export class AuctionService {
       );
     }
   }
-
   async findAllRunning(paginateAndSort: PaginateAndSort) {
     try {
       const { sortField, directionToSort } = paginateAndSort;
@@ -602,13 +599,13 @@ export class AuctionService {
         customerAddress: user.address,
         customerZatcaNumber: user.zatcaNuber,
         totalWithVat: [data.minimumPrice + _adminDefault.vat],
-        itemVat: [{ vat: _adminDefault.vat, vatValue: _adminDefault.vat }],
+        itemVat: [{ vat: _adminDefault.vat, vatValue: _adminDefault.vat * (_adminDefault.vat / 100) }],
         product: [{ name: "Auction listing payment" }],
         sumTotalWithoutVat: data.minimumPrice,
         sumTotalVat: _adminDefault.vat,
         invoiceNumber:invoice.id,
-        referenceNumber:invoice.reference
-        // sumTotalWithVat: data.minimumPrice + _adminDefault.vat,
+        referenceNumber:invoice.reference,
+        sumTotalWithVat: data.minimumPrice + _adminDefault.vat,
        
       }; 
 
@@ -646,6 +643,7 @@ export class AuctionService {
       }
 
       await this.paymentService.finalizeInvoice(
+        PaymentTypeEnum.AUCTION_ENTRY,
         invoice,
         pdf,
         user,
@@ -971,7 +969,7 @@ export class AuctionService {
         sumTotalWithVat: invoice.price + adminDefault.vat,
       };
 
-      await this.paymentService.finalizeInvoice(invoice, data, user);
+      await this.paymentService.finalizeInvoice(PaymentTypeEnum.AUTO_BIDDING,invoice, data, user);
 
       return bid;
     } catch (error) {
@@ -1063,7 +1061,7 @@ export class AuctionService {
         sumTotalWithVat: invoice.price + adminDefault.vat,
       };
 
-      await this.paymentService.finalizeInvoice(invoice, data, user);
+      await this.paymentService.finalizeInvoice(PaymentTypeEnum.AUTO_BIDDING,invoice, data, user);
 
       return autoBid;
     } catch (error) {
@@ -1285,7 +1283,7 @@ export class AuctionService {
         sumTotalWithVat: invoice.price + adminDefault.vat,
       };
 
-      await this.paymentService.finalizeInvoice(invoice, pdf, user);
+      await this.paymentService.finalizeInvoice(PaymentTypeEnum.SAII_FEE,invoice, pdf, user);
 
       return await this.bidRegistrationRepository.save({
         ...data,

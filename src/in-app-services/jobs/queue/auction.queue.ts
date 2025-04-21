@@ -22,6 +22,26 @@ export class AuctionQueue {
   ) {}
   logger = new Logger();
 
+  async auctionStart(auction: Auction, data: any) {
+    try {
+      const notifyTime = subMinutes(auction.startDate, 720);
+
+      const delay = this.getDelay(notifyTime);
+
+      await this.auctionQueue.add(
+        JobEnum.AUCTION_START,
+        {
+          id: data.id,
+        },
+        {
+          delay: delay,
+        },
+      );
+    } catch (error) {
+      throw new UnprocessableEntityException(error);
+    }
+  }
+
   async auctionEndInOneMinute(auction: Auction, data: any, existing?: any) {
     try {
       let increment;

@@ -15,8 +15,8 @@ import {
   NotificationScopeRepository,
   UserRepository,
 } from '../../../modules/user/repositories';
-import { formatDate } from 'date-fns';
-import { Between, In, LessThan, LessThanOrEqual } from 'typeorm';
+import { formatDate, subDays } from 'date-fns';
+import { Between, In, LessThan, LessThanOrEqual, MoreThan } from 'typeorm';
 import {
   OfferListEnum,
   PaymentStatus,
@@ -74,6 +74,7 @@ export class JobService {
   //   // await this.updateListingFeatureStatus();
   //   // await this.updateListingPromotionStatus();
   // await this.notifyUsersAboutUpcomingAuctions();
+  // await this.notifyUsersAboutUpcomingAuctionsDailyCounter();
   // }
 
   @Cron(CronExpression.EVERY_12_HOURS, { timeZone: 'Africa/Cairo' })
@@ -82,6 +83,8 @@ export class JobService {
     await this.updateListingFeatureStatus();
     await this.updateListingPromotionStatus();
     await this.deleteUnsuccessfulListing();
+    await this.updatePaymentStatus();
+    await this.notifyUsersAboutUpcomingAuctionsDailyCounter();
   }
 
   async sendNotificationForNewListingBasedOnSearchHistory() {
@@ -225,7 +228,7 @@ export class JobService {
     try {
       await this.invoiceRepository.update(
         {
-          expireAt: LessThan(new Date()),
+          expireAt: MoreThan(new Date()),
 
           status: PaymentStatus.PENDING,
         },
@@ -265,6 +268,7 @@ export class JobService {
       this.logger.error('update Listing Feature Status', error);
     }
   }
+
   async notifyUsersAboutUpcomingAuctions() {
     try {
       const currentDate = new Date();
@@ -355,6 +359,7 @@ export class JobService {
               img: oneMonthAuctions[0]?.imageLink || null,
             });
           }
+          // sends notification for the auction of the smallest week startdate
 
           if (smallestWeekAuctions.length > 0) {
             userNotifications.push({
@@ -386,120 +391,119 @@ export class JobService {
     }
   }
 
-  async notifyUsersAboutStartOfAuctionsTheySubscribedTo() {
-    const oneDayNotification = [];
+  async notifyUsersAboutUpcomingAuctionsDailyCounter() {
+    try {
+      const notificationPreference =
+        await this.notificationScopeRepository.find();
+      const scope = notificationPreference.find(
+        (element) =>
+          element.scopeGroup === NotificationScopeEnum.UPCOMING_AUCTIONS,
+      );
 
-    const auctions = await this.auctionParticipantRepository.find({
-      where: {
-        auction: {
-          startDate: Between(
-            new Date(),
-            new Date(removeDaysFromDate(new Date(), 1)),
-          ),
-        },
-        createdAt: LessThanOrEqual(new Date()),
-      },
-      relations: ['listing', 'listing.user', 'auction'],
-      select: {
-        id: true,
-        listing: {
-          userId: true,
-          user: {
-            id: true,
-            email: true,
+      const currentDate = new Date();
+      const targetDate = addDaysToDate(currentDate, 7);
+
+      // Start of the 7th day (00:00:00)
+      const auctionStartDateWeekStart = new Date(targetDate);
+      auctionStartDateWeekStart.setHours(0, 0, 0, 0);
+
+      // End of the 7th day (23:59:59)
+      const auctionEndDateWeekEnd = new Date(targetDate);
+      auctionEndDateWeekEnd.setHours(23, 59, 59, 999);
+
+      const auctionEndDateWeekStart = subDays(targetDate, 7);
+
+      const auctionsIn7Days = await this.auctionRepository
+        .createQueryBuilder('auction')
+        .select(['auction.id', 'auction.startDate', 'auction.imageLink'])
+        .leftJoinAndSelect('auction.auctionParticipant', 'auctionParticipant')
+        .leftJoinAndSelect('auctionParticipant.listing', 'listing')
+        .leftJoinAndSelect('listing.user', 'user')
+        .where(
+          `auction.startDate < :targetDates  AND auction.startDate > :auctionEndDateWeekStart`,
+          {
+            targetDates: targetDate,
+
+            auctionEndDateWeekStart,
           },
-        },
-      },
-    });
+        )
+        .getMany();
 
-    const notificationPreference =
-      await this.notificationScopeRepository.find();
-    //Filter out the correct scope
-    const scope: NotificationScope = notificationPreference.find((element) => {
-      if (element.name == NotificationScopeEnum.UPCOMING_AUCTIONS) {
-        return element;
+      if (!auctionsIn7Days || auctionsIn7Days.length === 0) {
+        this.logger.log('No auctions found for 7-day interval.');
+        return;
       }
-    });
 
-    auctions.forEach((element) => {
-      if (
-        element.auction.startDate == new Date(removeDaysFromDate(new Date(), 1))
-      ) {
-        oneDayNotification.push(element);
-      }
-    });
+      this.logger.log('Auctions starting in 7 days:', auctionsIn7Days);
 
-    auctions.forEach((element) => {
-      if (oneDayNotification.length) {
-        this.notificationService.prepareNotification({
-          creatorId: null,
-          receiverId: element.listing.userId,
-          scope: scope,
-          event: scope.name,
-          metadata: JSON.stringify(element),
-          img: element.auction?.imageLink,
+      // Notify all platform users
+      const batchSize = 100;
+      let offset = 0;
+      let usersBatch = [];
 
-          recipientFormat: [null, 'Users enlisted to bid and sellers'],
-        });
-      }
-    });
-  }
-
-  async notifyUsersAboutStartOfAuctionsTheySubscribedTo12HoursBefore() {
-    const oneDayNotification = [];
-
-    const auctions = await this.auctionParticipantRepository.find({
-      where: {
-        auction: {
-          startDate: Between(
-            new Date(),
-            new Date(removeDaysFromDate(new Date(), 0.5)),
-          ),
-        },
-        createdAt: LessThanOrEqual(new Date()),
-      },
-      relations: ['listing', 'listing.user'],
-      select: {
-        id: true,
-        listing: {
-          userId: true,
-          user: {
-            id: true,
-            email: true,
+      do {
+        usersBatch = await this.userRepository.find({
+          where: {
+            userType: In([
+              UserProfileTypeEnum.INDIVIDUAL,
+              UserProfileTypeEnum.COMPANY,
+            ]),
           },
-        },
-      },
-    });
-
-    const notificationPreference =
-      await this.notificationScopeRepository.find();
-    //Filter out the correct scope
-    const scope: NotificationScope = notificationPreference.find((element) => {
-      if (element.name == NotificationScopeEnum.UPCOMING_AUCTIONS) {
-        return element;
-      }
-    });
-
-    auctions.forEach((element) => {
-      if (
-        element.auction.startDate == new Date(removeDaysFromDate(new Date(), 1))
-      ) {
-        oneDayNotification.push(element);
-      }
-    });
-
-    auctions.forEach((element) => {
-      if (oneDayNotification.length) {
-        this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
-          receiverId: element.listing.userId,
-          scope: scope,
-          event: '12-Hour Reminder',
-          recipientFormat: [null, 'Users enlisted to bid and sellers'],
-          type: null,
-          img: element?.auction?.imageLink,
+          select: ['id', 'userType'],
+          skip: offset,
+          take: batchSize,
         });
-      }
-    });
+
+        usersBatch.forEach((user) => {
+          auctionsIn7Days.forEach((auction) => {
+            const daysTo = calculateDaysDifference(
+              currentDate,
+              new Date(auction.startDate),
+            );
+
+            this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+              receiverId: user.id,
+              scope,
+              event: 'Daily',
+              recipientFormat: [null, 'Users enlisted to bid and sellers'],
+              type: null,
+              count: daysTo,
+              img: auction.imageLink || null,
+            });
+          });
+        });
+
+        offset += batchSize;
+      } while (usersBatch.length > 0);
+
+      // Notify participants only for the auction they’re involved in
+      auctionsIn7Days.forEach((auction) => {
+        const daysTo = calculateDaysDifference(
+          currentDate,
+          new Date(auction.startDate),
+        );
+
+        auction.auctionParticipant.forEach((participant) => {
+          const userId = participant.listing?.user?.id;
+          if (userId) {
+            this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+              creatorId: userId,
+              scope,
+              event: 'Daily',
+              recipientFormat: ['Users enlisted to bid and sellers', null],
+              type: null,
+              count: daysTo,
+              img: auction.imageLink || null,
+            });
+          }
+        });
+      });
+    } catch (error) {
+      this.logger.error(
+        'Failed to notify users about upcoming auctions',
+        error,
+      );
+    }
   }
 
   async deleteUnsuccessfulListing() {

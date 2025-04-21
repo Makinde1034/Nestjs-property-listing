@@ -12,3 +12,10 @@ export enum TransactionType {
   DEBIT = 'debit',
   CREDIT = 'credit',
 }
+
+export enum PaymentTypeEnum {
+  AUCTION_ENTRY = 'Auction Entry Fee',
+  PROMOTION_FEE = 'Promotion Fee' ,
+  AUTO_BIDDING = 'Auto Bidding Fee',
+  SAII_FEE = 'Saii Fee'
+}

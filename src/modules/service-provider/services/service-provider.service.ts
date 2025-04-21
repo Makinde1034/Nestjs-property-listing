@@ -54,7 +54,7 @@ import { I18nService } from 'nestjs-i18n';
 import { PdfInput } from '../../file-handler/dto/pdf.dto';
 import { PaymentService } from '../../payment/services/payment.service';
 import { InvoiceRepository } from '../../payment/repositories/invoice.repository';
-import { PaymentEnum } from '../../../common/enums/payment.enum';
+import { PaymentEnum, PaymentTypeEnum } from '../../../common/enums/payment.enum';
 import { AdminService } from '../../admin/services/admin.service';
 
 @Injectable()
@@ -638,7 +638,7 @@ export class ServiceAndProviderService {
         sumTotalWithVat: invoice.price + adminDefault.vat,
       };
 
-      await this.paymentService.finalizeInvoice(invoice, pdf, user);
+      await this.paymentService.finalizeInvoice(PaymentTypeEnum.SAII_FEE,invoice, pdf, user);
 
       return data;
     } catch (error) {

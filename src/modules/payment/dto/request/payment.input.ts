@@ -11,6 +11,7 @@ import {
   IsOptional,
   IsPositive,
   IsString,
+  isString,
 } from 'class-validator';
 
 @InputType()
@@ -143,9 +144,14 @@ export interface Result {
 }
 @InputType()
 export class CapturePaymentData {
+
+  @IsString()
   @Field()
   amount: string;
+
+  @IsString()
   @Field()
+  
   paymentId: string;
 }
 

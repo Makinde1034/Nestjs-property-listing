@@ -44,7 +44,7 @@ import { SseService } from '../../sse/client.service';
 import { MessageEvent } from '../../sse/request/app';
 import { TransactionRepository } from '../repository/transaction.repository';
 import { WebHookPaymentResponse } from '../../webhook/dto/wehook.response';
-import { TransactionType } from '../../../common/enums/payment.enum';
+import { PaymentTypeEnum, TransactionType } from '../../../common/enums/payment.enum';
 import { PaymentStatus } from '../../../common/enums/status.enum';
 import { SuccessResponse } from '../../../common/utils/success.response';
 import { Invoice } from '../../../entities/invoice.entity';
@@ -187,6 +187,7 @@ export class PaymentService {
   }
 
   async capturePayment(createPaymentInput: CapturePaymentData) {
+  
     try {
       const verify = await this.verifyPayment({
         checkoutId: createPaymentInput.paymentId,
@@ -236,6 +237,7 @@ export class PaymentService {
   }
 
   async finalizeInvoice(
+    type:PaymentTypeEnum,
     invoice: Invoice,
     data?: PdfInput,
     user?: User,
@@ -296,6 +298,7 @@ export class PaymentService {
         vat: vat,
         file: url,
         isUsed: true,
+        type
       });
 
       await this.mailService.sendEmailInvoice(user, invoicePdf);

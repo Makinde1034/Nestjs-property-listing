@@ -2,7 +2,6 @@
  * Copyright (c) 2024, Waseet LLC. All rights reserved.
  * For license. See license.txt
  */
-
 import {
   BadRequestException,
   HttpException,
@@ -59,6 +58,7 @@ import { FinalizationEnum } from '../../../common/enums/finalization.enum';
 import { PermissionsEnum } from '../../../common/enums/permission.enum';
 import { of } from 'rxjs';
 import { I18nService } from 'nestjs-i18n';
+import { PaymentEnum, PaymentTypeEnum } from '../../../common/enums/payment.enum';
 
 @Injectable()
 export class OfferService {
@@ -221,11 +221,13 @@ export class OfferService {
 
       //TODO: switch to event emitter
       await this.paymentService.finalizeInvoice(
+        PaymentTypeEnum.SAII_FEE,
         invoice,
         data,
         user,
         listing,
         offerPayload,
+        
       );
 
       // Find the Scope available for application
@@ -589,11 +591,7 @@ export class OfferService {
   }
 
   async updateOffer(user: User, updateOfferInput: UpdateOfferInput) {
-
-   
-
     try {
-      
       // check if listing is negotiable
       const listing = await this.listingRepository.findOne({
         where: { id: updateOfferInput.listingId },
@@ -788,7 +786,7 @@ export class OfferService {
         });
 
         //TODO: switch to event emitter
-        this.paymentService.finalizeInvoice(invoice, data, user, offer.listing);
+        this.paymentService.finalizeInvoice(PaymentTypeEnum.SAII_FEE,invoice, data, user, offer.listing);
       }
 
       // Return the updated offer only if it was affected
@@ -930,7 +928,10 @@ export class OfferService {
             event: 'Response',
             recipientFormat: ['Offer Creator', 'Seller'],
             img: images[0]?.url,
+            metadata: JSON.stringify(offer),
           });
+
+
 
           const listing = await entityManager
             .createQueryBuilder()
@@ -941,9 +942,20 @@ export class OfferService {
             .where({ id })
             .returning(['id', 'status']) // Fetch updated fields right after the update
             .execute();
+          
+          if (updateResult.affected > 0) {
+            return await this.offerRepository.findOne({
+              where: {
+                id: offer.id,
+              },
+              relations:['listing']
+              
+            }
+            )
+          }
 
-          // Return the updated offer
-          return updateResult.raw[0]; // Returning the updated offer from the query result
+          throw new BadRequestException('Failed to accept offer');
+
         } catch (error) {
           this.logger.error('Error accepting offer');
           if (error instanceof HttpException) {

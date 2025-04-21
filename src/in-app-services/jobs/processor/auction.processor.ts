@@ -431,6 +431,55 @@ export class AuctionProcessor extends WorkerHost {
           }
           break;
 
+        case JobEnum.AUCTION_START: {
+          const [auction, registration] = await Promise.all([
+            this.auctionRepository.findOne({
+              where: { id: job.data.id },
+            }),
+
+            //Bidders
+            this.bidRegistrationRepository.find({
+              where: {
+                auctionId: job.data.id,
+              },
+            }),
+          ]);
+
+          const notificationPreference =
+            await this.notificationScopeRepository.find();
+
+          const scope: NotificationScope = notificationPreference.find(
+            (element) =>
+              element.scopeGroup === NotificationScopeEnum.UPCOMING_AUCTIONS,
+          );
+
+          const listing = await this.listingRepository.findOne({
+            where: { id: job.data.listingId },
+            relations: ['user'],
+          });
+          this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+            creatorId: listing.userId,
+            scope: scope,
+            event: '12-Hour Reminder',
+            recipientFormat: ['Users enlisted to bid and sellers', null],
+            img: auction?.imageLink,
+            metadata: JSON.stringify(auction),
+          });
+          const uniqueUserIds = new Set(registration.map((r) => r.userId));
+
+          for (const userId of uniqueUserIds) {
+            await this.eventEmitter.emit(NotificationEvent.SEND_NOTIFICATION, {
+              receiverId: userId,
+              scope,
+              event: '12-Hour Reminder',
+
+              recipientFormat: [null, 'Users enlisted to bid and sellers'],
+              img: auction?.imageLink,
+              metadata: JSON.stringify(auction),
+            });
+          }
+        }
+
         default:
           break;
       }

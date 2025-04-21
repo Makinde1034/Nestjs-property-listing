@@ -8,14 +8,17 @@ import {
   IsArray,
   IsBoolean,
   IsDate,
+  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsPositive,
   IsString,
   IsUUID,
   ValidateIf,
+  isEnum,
 } from 'class-validator';
 import { PaginateAndSort } from '../../../core/dto/pagination-and-sort.dto';
+import { FinalizationEnum } from '../../../../common/enums/finalization.enum';
 
 @InputType()
 export class FinalizationStatus {
@@ -25,6 +28,7 @@ export class FinalizationStatus {
 
   @Field()
   @IsString()
+  @IsEnum(FinalizationEnum)
   status: string;
 }
 

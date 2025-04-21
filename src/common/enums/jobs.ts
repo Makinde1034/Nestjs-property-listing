@@ -1,4 +1,6 @@
 export enum JobEnum {
+  AUCTION_END = 'auction-end',
+  AUCTION_START = 'auction-start',
   LAST_MINUTES = 'last-minutes',
   AUCTION_NOTIFICATION_ABOUT_TO_END = 'auction-notification-about-to-end',
   AUCTION_WINNER = 'auction-winner',
