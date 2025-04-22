@@ -82,4 +82,12 @@ export class PaymentResolver {
   ) {
     return await this.invoiceService.fetchInvoiceForUser(findOption, user);
   }
+
+  @Mutation(() => verifyPaymentResponse)
+  @UseGuards(AccessTokenGuard)
+  async capturePayment(
+    @Args('input') captureDto: CapturePaymentData,
+  ) {
+    return await this.paymentService.capturePayment(captureDto);
+  }
 }

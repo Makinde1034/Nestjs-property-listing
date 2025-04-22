@@ -124,12 +124,11 @@ export class HyperPayService {
         amount: amount,
         currency: 'SAR',
         paymentType: 'PA',
-        testMode: 'EXTERNAL',
         integrity: true,
-        merchantInvoiceId: reference,
-        'customParameters[3DS2_enrolled]': true,
-        'customParameters[3DS2_flow]': 'challenge',
-        merchantTransactionId: adminDefault?.merchantTransactionId,
+        // merchantInvoiceId: reference,
+        // 'customParameters[3DS2_enrolled]': true,
+        // 'customParameters[3DS2_flow]': 'challenge',
+        // merchantTransactionId: adminDefault?.merchantTransactionId,
       };
 
       const requestPayload = querystring.stringify(payload as any);
@@ -206,7 +205,7 @@ export class HyperPayService {
     }
   }
 
-  async capturePayment(capturePayment: CapturePaymentData) {
+  async capturePayment(capturePayment: CapturePaymentData,paymentId:string) {
     try {
       const payload = querystring.stringify({
         entityId: this.hyperPayConfig.entityIdForPA,
@@ -217,7 +216,7 @@ export class HyperPayService {
 
       const response = await lastValueFrom(
         this.httpService.post<CapturePaymentResponse>(
-          this.hyperPayConfig.baseUrl + `/payments/${capturePayment.paymentId}`,
+          this.hyperPayConfig.baseUrl + `/v1/payments/${paymentId}`,
           payload,
           this.options,
         ),

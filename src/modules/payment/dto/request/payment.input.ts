@@ -51,7 +51,7 @@ export class PaymentRequest {
   testMode?: string;
   merchantInvoiceId?: string;
 
-  merchantTransactionId: string;
+  merchantTransactionId?: string;
   'customParameters[3DS2_enrolled]'?: boolean;
   'customParameters[3DS2_flow]'?: string;
 }

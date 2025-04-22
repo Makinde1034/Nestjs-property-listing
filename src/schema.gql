@@ -1718,6 +1718,7 @@ type Mutation {
   initializePaymentForPA(paymentInput: InitiatePaymentInput!): InitiatePaymentResponse!
   verifyPayment(verifyPaymentInput: VerifyPaymentInput!): verifyPaymentResponse!
   verifyPaymentDB(verifyPaymentInput: VerifyPaymentInput!): verifyPaymentResponse!
+  capturePayment(input: CapturePaymentData!): verifyPaymentResponse!
   createIssue(input: CreateIssueInput!): SuccessResponse!
   updateIssue(RequestInput: UpdateIssueInput!): SuccessResponse!
   deleteIssue(id: String!): SuccessResponse!
@@ -2314,6 +2315,11 @@ input InitiatePaymentInput {
 
 input VerifyPaymentInput {
   checkoutId: String
+}
+
+input CapturePaymentData {
+  amount: String!
+  paymentId: String!
 }
 
 input CreateIssueInput {

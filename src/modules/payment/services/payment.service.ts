@@ -189,12 +189,13 @@ export class PaymentService {
   async capturePayment(createPaymentInput: CapturePaymentData) {
   
     try {
-      const verify = await this.verifyPayment({
+      const verificationResponse = await this.verifyPayment({
         checkoutId: createPaymentInput.paymentId,
       });
 
+
       const checkout =
-        await this.hyperPayService.capturePayment(createPaymentInput);
+        await this.hyperPayService.capturePayment(createPaymentInput,verificationResponse.id);
 
       return {
         checkoutId: checkout.id,
@@ -223,6 +224,7 @@ export class PaymentService {
       status: response.result.code,
       referenceId: response.result?.referencedId,
       message: response.result.description,
+      id:response.id
     };
   }
 
