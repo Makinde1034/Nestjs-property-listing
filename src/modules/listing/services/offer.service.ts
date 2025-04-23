@@ -227,7 +227,7 @@ export class OfferService {
         user,
         listing,
         offerPayload,
-        
+        false
       );
 
       // Find the Scope available for application
@@ -874,6 +874,13 @@ export class OfferService {
             amount: JSON.stringify(invoice.price),
             paymentId: invoice.checkoutId,
           });
+
+          // Update isUsed to true after capturing payment
+          this.invoiceRepository.update(invoice.id, {
+            isUsed : true
+          })
+
+
           // Update offer status and return updated offer immediately using RETURNING (if supported by your DB)
           const updateResult = await entityManager
             .createQueryBuilder()

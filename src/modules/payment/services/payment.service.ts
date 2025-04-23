@@ -204,6 +204,9 @@ export class PaymentService {
       };
     } catch (error) {
       this.logger.debug(error);
+      throw new BadRequestException(
+        this.i18n.t(`messages.${messagesKeys.FAILED_TO_CAPTURE_PAYMENT}`),
+      );
     }
   }
   async refundPayment(createPaymentInput: RefundPaymentData) {
@@ -245,6 +248,7 @@ export class PaymentService {
     user?: User,
     listing?: Listing,
     offer?: Offer,
+    isInvoiceUsed:boolean = true
   ) {
     try {
       // if (!data || !user || !listing || !offer) {
@@ -299,7 +303,7 @@ export class PaymentService {
         offerId: offer?.id,
         vat: vat,
         file: url,
-        isUsed: true,
+        isUsed: isInvoiceUsed,
         type
       });
 
