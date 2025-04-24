@@ -70,6 +70,8 @@ import {
   UserRepository,
 } from '../user/repositories';
 import { FinalizationRepository } from './repositories/finalization.repository';
+import { SystemFeatureRepository } from './repositories/system-feature-settings.repository';
+import { SystemfeatureService } from '../admin/services/system-feature-service';
 
 @Module({
   imports: [
@@ -134,6 +136,8 @@ import { FinalizationRepository } from './repositories/finalization.repository';
     RoleRepository,
     UserRepository,
     FinalizationRepository,
+    SystemFeatureRepository,
+    SystemfeatureService
   ],
   exports: [ListingTypeService],
 })

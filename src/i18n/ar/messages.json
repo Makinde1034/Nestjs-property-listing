@@ -97,5 +97,7 @@
   "CANNOT_PROCESS_PAYMENT": "تعذر معالجة الدفع",
   "AWAITING_APPROVAL": "في انتظار الموافقة",
   "CANNOT_CANCEL_DELETE_AUCTION_BEFORE_IT_HAS_STARTED": "لا يمكن حذف أو إلغاء المزاد قبل أن يبدأ",
-  "FAILED_TO_CAPTURE_PAYMENT":"فشل في تحصيل الدفعة"
+  "FAILED_TO_CAPTURE_PAYMENT":"فشل في تحصيل الدفعة",
+  "FEATURE_IS_TURNED_OFF": "م تعطيل الميزة"
+
 }

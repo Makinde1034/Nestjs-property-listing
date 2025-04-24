@@ -12,6 +12,8 @@ import {
 } from 'typeorm';
 import BaseEntity from './base.entity';
 import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
+import { IsEnum, IsString } from 'class-validator';
+import { SystemFeatureSlug } from '../common/enums/system-features';
 
 @Entity()
 @ObjectType()
@@ -26,6 +28,8 @@ export class SystemFeatureSetting extends BaseEntity {
 
   @Field()
   @Column()
+  @IsString()
+  @IsEnum(SystemFeatureSlug)
   slug: string;
 
   @Field()

@@ -56,6 +56,8 @@ import { PaymentService } from '../../payment/services/payment.service';
 import { InvoiceRepository } from '../../payment/repositories/invoice.repository';
 import { PaymentEnum, PaymentTypeEnum } from '../../../common/enums/payment.enum';
 import { AdminService } from '../../admin/services/admin.service';
+import { SystemfeatureService } from '../../admin/services/system-feature-service';
+import { SystemFeatureSlug } from '../../../common/enums/system-features';
 
 @Injectable()
 export class ServiceAndProviderService {
@@ -73,6 +75,7 @@ export class ServiceAndProviderService {
     private readonly paymentService: PaymentService,
     private readonly invoiceRepository: InvoiceRepository,
     private readonly adminDefaultService: AdminService,
+    private readonly systemFeatureService: SystemfeatureService
   ) {}
   logger = new Logger(ServiceAndProviderService.name);
 
@@ -99,6 +102,9 @@ export class ServiceAndProviderService {
     user: User,
   ) {
     try {
+      
+      await this.systemFeatureService.isFeatureEnabled(SystemFeatureSlug.SERVICE_PROVIDER_REGISTRATIONS)
+
       const { serviceOffered, ...rest } = createServiceProviderInput;
 
       const alreadyExisting = await this.serviceProviderRepository.findOne({
@@ -577,6 +583,10 @@ export class ServiceAndProviderService {
     user: User,
   ) {
     try {
+
+      await this.systemFeatureService.isFeatureEnabled(SystemFeatureSlug.SERVICES_REQUESTS)
+
+
       const service = await this.serviceRepository.findOneBy({
         id: requestForServiceInput.serviceProvidedId,
       });

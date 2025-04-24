@@ -89,6 +89,10 @@ import {
 } from '../dtos/response/auctions';
 import { BidQueue } from '../../../in-app-services/jobs/queue/bid.queue';
 import { PaymentTypeEnum } from '../../../common/enums/payment.enum';
+import { SystemFeature } from '../../admin/dto/request/workflow';
+import { SystemFeatureRepository } from '../repositories/system-feature-settings.repository';
+import { SystemfeatureService } from '../../admin/services/system-feature-service';
+import { SystemFeatureSlug } from '../../../common/enums/system-features';
 
 @Injectable()
 export class AuctionService {
@@ -110,11 +114,15 @@ export class AuctionService {
     private readonly paymentService: PaymentService,
     private readonly auctionQueue: AuctionQueue,
     private readonly bidQueue: BidQueue,
+    private readonly systemFeatureService: SystemfeatureService
   
   ) {}
   logger = new Logger(AuctionService.name);
   async create(auctionInput: CreateAuctionInput) {
     try {
+
+      await this.systemFeatureService.isFeatureEnabled(SystemFeatureSlug.AUCTIONS_CREATION)
+
       // Ensure start date is not in the past
       if (auctionInput.startDate < new Date()) {
         throw new BadRequestException(

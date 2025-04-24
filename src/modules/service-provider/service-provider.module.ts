@@ -17,6 +17,8 @@ import { PaymentService } from '../payment/services/payment.service';
 import { InvoiceRepository } from '../payment/repositories/invoice.repository';
 import { HyperPayService } from '../payment/service-providers/hyper-pay.service';
 import { PaymentModule } from '../payment/payment.module';
+import { SystemfeatureService } from '../admin/services/system-feature-service';
+import { SystemFeatureRepository } from '../listing/repositories/system-feature-settings.repository';
 
 @Module({
   imports: [PaymentModule],
@@ -28,7 +30,8 @@ import { PaymentModule } from '../payment/payment.module';
     ServiceRepository,
     ServiceProvidedRepository,
     ServiceRequestedRepository,
-
+    SystemfeatureService,
+    SystemFeatureRepository,
     InvoiceRepository,
   ],
 })

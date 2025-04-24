@@ -41,6 +41,7 @@ import { ActionRequestRepository } from './repositories/action.repository';
 import { ActionService } from './services/action.service';
 import { InvoiceRepository } from '../payment/repositories/invoice.repository';
 import { SettingFeatureRepository } from './repositories/feature-setting.repository';
+import { I18nService } from 'nestjs-i18n';
 @Global()
 @Module({
   imports: [
