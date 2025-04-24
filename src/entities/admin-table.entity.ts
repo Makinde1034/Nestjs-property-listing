@@ -101,4 +101,12 @@ export class AdminDefault extends BaseEntity {
   @Field(() => GraphQLISODateTime)
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  minimumAppVersionIos: string;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  minimumAppVersionAndroid: string;
 }

@@ -905,6 +905,8 @@ type AdminDefault {
   rentalFee: Float
   createdAt: DateTime!
   updatedAt: DateTime!
+  minimumAppVersionIos: String
+  minimumAppVersionAndroid: String
 }
 
 type Coupon {
@@ -2411,6 +2413,8 @@ input UpdateAdminDefaultInput {
   state: String
   country: String
   countryISOCode: String
+  minimumAppVersionIos: String
+  minimumAppVersionAndroid: String
   bidRange: [BidRange!]
 }
 

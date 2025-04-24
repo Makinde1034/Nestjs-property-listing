@@ -14,7 +14,7 @@ export const AdminPlatformDefaultFactory: Partial<AdminDefault> = {
   countryISOCode: 'SAR',
   paymentType: 'DB',
   saiiForRent: 2.5,
-  saiiForSale: 2.5,
+  saiiForSale: 2.5, 
   ticketAging: 24,
   promptRatingTime: 10,
   vat: 15,
@@ -24,4 +24,7 @@ export const AdminPlatformDefaultFactory: Partial<AdminDefault> = {
   merchantTransactionId: 'WASEET-2024-PI',
 
   rentalFee: 5000,
+  minimumAppVersionAndroid: "0.0.0",
+  minimumAppVersionIos: "0.0.0"
+
 };

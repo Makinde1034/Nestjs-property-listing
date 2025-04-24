@@ -112,6 +112,14 @@ export class AdminDefaultInput {
   @Field()
   @IsString()
   countryISOCode: string;
+
+  @Field()
+  @IsString()
+  minimumAppVersionIos: string
+
+  @Field()
+  @IsString()
+  minimumAppVersionAndroid: string
 }
 
 @InputType()
