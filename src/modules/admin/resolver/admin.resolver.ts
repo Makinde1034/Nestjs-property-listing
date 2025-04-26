@@ -46,9 +46,10 @@ import { SystemFeatureSetting } from '../../../entities/system-features.entity';
 import { AdminFilterAndSort } from '../../listing/dtos/request';
 import { TicketResponse } from '../../tickets/dtos/response/ticket-response';
 import { CouponResponse } from '../dto/response/coupons';
+import { Public } from '../../auth/decorators/permision.decorator';
 
 @Resolver()
-@UseGuards(AccessTokenGuard)
+
 export class AdminResolver {
   constructor(private readonly adminService: AdminService) {}
   @UseGuards(AccessTokenGuard, PermissionsGuard)
@@ -61,10 +62,12 @@ export class AdminResolver {
     return await this.adminService.listingStats(findOption);
   }
 
+  @Public()
   @Query(() => AdminDefault, { name: 'adminDefault' })
   async adminDefault() {
     return await this.adminService.adminDefault();
   }
+
   @UseGuards(AccessTokenGuard, PermissionsGuard)
   @Permissions(PermissionsEnum.DASHBOARD_USERS_DEMOGRAPHICS)
   @Query(() => UserDemography, { name: 'totalUser' })
