@@ -22,7 +22,9 @@ import {
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { InvoiceResponse } from '../dto/response/invoice.response';
 import { InvoiceService } from '../services/invoice.service';
-import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
+import { FetchSingleInvoice, PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
+import { Invoice } from '../../../entities/invoice.entity';
+import { Public } from '../../auth/decorators/permision.decorator';
 
 @Resolver('payment')
 export class PaymentResolver {
@@ -83,11 +85,19 @@ export class PaymentResolver {
     return await this.invoiceService.fetchInvoiceForUser(findOption, user);
   }
 
-  @Mutation(() => verifyPaymentResponse)
+  @Mutation(() => verifyPaymentResponse) 
   @UseGuards(AccessTokenGuard)
   async capturePayment(
     @Args('input') captureDto: CapturePaymentData,
   ) {
     return await this.paymentService.capturePayment(captureDto);
+  }
+
+  @Query(() => Invoice)
+  @UseGuards(AccessTokenGuard)
+  async fetchSingleInvoice(
+    @Args('input') fetchInvoiceDto: FetchSingleInvoice,
+  ) {
+    return await this.invoiceService.fetchSingleInvoice(fetchInvoiceDto);
   }
 }

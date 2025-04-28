@@ -43,3 +43,11 @@ export class PaginateAndSort {
   @ValidateNested()
   where: WhereOption;
 }
+
+@InputType()
+export class FetchSingleInvoice {
+  @IsString()
+  @Field()
+  checkoutId: string;
+
+}

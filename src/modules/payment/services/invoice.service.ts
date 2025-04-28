@@ -18,7 +18,7 @@ import {
 } from '@nestjs/common';
 import { StorageService } from '../../file-handler/services/storage.service';
 import { MailgunEmailService } from '../../mail/services/implementations/mailgun.services';
-import { PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
+import { FetchSingleInvoice, PaginateAndSort } from '../../core/dto/pagination-and-sort.dto';
 import { User } from '../../../entities';
 import { messagesKeys } from '../../../common/messages/app.strings';
 import { I18nService } from 'nestjs-i18n';
@@ -154,5 +154,28 @@ export class InvoiceService {
         this.i18n.t(`messages.${messagesKeys.INTERNAL_SERVER_EXCEPTION}`),
       );
     }
+  }
+
+  async fetchSingleInvoice(data: FetchSingleInvoice) { 
+    try {
+      const invoice = await this.invoiceRepository.findOne({
+        where: {
+          checkoutId : data.checkoutId
+        }
+      })
+
+      if (!invoice) {
+        throw new BadRequestException(
+          'Invoice not found',
+        );
+      }
+      return invoice
+    } catch (error) {
+      this.logger.error('Error fetching invoice:', error);
+      throw new InternalServerErrorException(
+        this.i18n.t(`messages.${messagesKeys.INTERNAL_SERVER_EXCEPTION}`),
+      );
+    }
+
   }
 }

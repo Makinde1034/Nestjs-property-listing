@@ -1291,6 +1291,7 @@ type Query {
   adPackage(id: String!): AdPackage!
   fetchInvoice(findOption: PaginateAndSort!): InvoiceResponse!
   fetchInvoiceForUser(findOption: PaginateAndSort!): InvoiceResponse!
+  fetchSingleInvoice(input: FetchSingleInvoice!): Invoice!
   fetchIssues(placement: String): [ParentIssue!]!
   fetchChildIssues(parentId: String!): [ChildIssue!]!
   getTicket(ticketId: String!): Ticket!
@@ -1504,6 +1505,10 @@ input AdminAuctionFilter {
 input FindBidInput {
   auctionId: String!
   listingId: String!
+}
+
+input FetchSingleInvoice {
+  checkoutId: String!
 }
 
 input ListTicketInput {
