@@ -15,6 +15,7 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { StorageService } from '../../file-handler/services/storage.service';
 import { MailgunEmailService } from '../../mail/services/implementations/mailgun.services';
@@ -165,12 +166,16 @@ export class InvoiceService {
       })
 
       if (!invoice) {
-        throw new BadRequestException(
+        throw new NotFoundException(
           'Invoice not found',
         );
       }
       return invoice
+
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       this.logger.error('Error fetching invoice:', error);
       throw new InternalServerErrorException(
         this.i18n.t(`messages.${messagesKeys.INTERNAL_SERVER_EXCEPTION}`),
